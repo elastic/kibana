@@ -41,6 +41,10 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { StreamProcessing } from './stream_processing';
+import {
+  useCanvasEvents,
+  useCanvasUrlRef,
+} from '../stream_management/data_management/stream_detail_canvas/state_management';
 
 const TABS = [
   {
@@ -78,6 +82,10 @@ const TABS = [
 export type StreamFlyoutTabId = (typeof TABS)[number]['id'];
 
 const DEFAULT_TAB: StreamFlyoutTabId = 'overview';
+
+const isStreamFlyoutTabId = (tab: string | null): tab is StreamFlyoutTabId => {
+  return TABS.some(({ id }) => id === tab);
+};
 
 interface StreamFlyoutPageProps extends StreamFlyoutProps {
   loading: boolean;
@@ -130,12 +138,14 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
 };
 
-function StreamFlyoutContent({ name, onClose, initialTab = DEFAULT_TAB }: StreamFlyoutProps) {
+function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const { flyoutTab } = useCanvasUrlRef();
+  const { selectTab } = useCanvasEvents();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
-  const [selectedTab, selectTab] = useState<StreamFlyoutTabId>(initialTab);
+  const selectedTab = isStreamFlyoutTabId(flyoutTab) ? flyoutTab : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const headerId = useGeneratedHtmlId();
   const abortController = useAbortController();
@@ -172,19 +182,19 @@ function StreamFlyoutContent({ name, onClose, initialTab = DEFAULT_TAB }: Stream
       TABS.map(({ id, label }) => (
         <EuiTab
           isSelected={id === selectedTab}
-          onClick={() => selectTab(id)}
           key={id}
+          onClick={() => selectTab(id)}
           data-test-subj={`streamsCanvasFlyoutTab-${id}`}
         >
           {label}
         </EuiTab>
       )),
-    [selectedTab]
+    [selectTab, selectedTab]
   );
 
   const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose, initialTab, loading }),
-    [initialTab, loading, name, selectedTab, onClose]
+    () => TAB_PAGES[selectedTab]({ name, onClose, loading }),
+    [loading, name, selectedTab, onClose]
   );
   const badges = [];
 
@@ -334,10 +344,9 @@ function StreamFlyoutContent({ name, onClose, initialTab = DEFAULT_TAB }: Stream
 export interface StreamFlyoutProps {
   name: string;
   onClose: () => void;
-  initialTab?: StreamFlyoutTabId;
 }
 
-export function StreamFlyout({ name, onClose, initialTab }: StreamFlyoutProps) {
+export function StreamFlyout({ name, onClose }: StreamFlyoutProps) {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
   return (
@@ -345,7 +354,7 @@ export function StreamFlyout({ name, onClose, initialTab }: StreamFlyoutProps) {
       name={name}
       streamsRepositoryClient={streamsRepositoryClient}
     >
-      <StreamFlyoutContent name={name} onClose={onClose} initialTab={initialTab} />
+      <StreamFlyoutContent name={name} onClose={onClose} />
     </StreamFlyoutDetailContextProvider>
   );
 }

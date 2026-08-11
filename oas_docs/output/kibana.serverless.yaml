@@ -102876,6 +102876,14 @@ components:
       description: Area-specific rendering settings
       type: object
       properties:
+        fill:
+          default: solid
+          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          enum:
+            - solid
+            - gradient
+          type: string
+          x-state: ''
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)

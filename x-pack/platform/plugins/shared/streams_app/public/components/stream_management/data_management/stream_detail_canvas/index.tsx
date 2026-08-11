@@ -36,6 +36,8 @@ import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
 import { DESTINATION_NODE_TYPE, type ClassicCanvasGraph, type ClassicCanvasNode } from './types';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
+import { CanvasStateContextProvider, useCanvasEvents, useCanvasUrlRef } from './state_management';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 
@@ -44,17 +46,23 @@ interface CanvasContextMenuState {
   target: CanvasContextMenuTarget;
 }
 
-interface FlyoutState {
-  name: string;
-  initialTab: StreamFlyoutTabId;
-}
-
 /**
  * Renders every classic stream as an inferred source -> destination pair. Wired
  * streams are not represented yet and will join the graph once their topology is
  * wired to real data.
  */
 export function StreamsCanvas() {
+  const { core } = useKibana();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
+  return (
+    <CanvasStateContextProvider core={core} urlStateStorageContainer={urlStateStorageContainer}>
+      <StreamsCanvasInner />
+    </CanvasStateContextProvider>
+  );
+}
+
+function StreamsCanvasInner() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -63,16 +71,21 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
-  const [flyout, setFlyout] = useState<FlyoutState | null>(null);
+  const { flyoutName } = useCanvasUrlRef();
+  const { openFlyout, closeFlyout, selectTab } = useCanvasEvents();
 
   const { value, loading } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
     [streamsRepositoryClient]
   );
 
-  const openFlyout = useCallback((name: string, initialTab: StreamFlyoutTabId = 'overview') => {
-    setFlyout({ name, initialTab });
-  }, []);
+  const openFlyoutTab = useCallback(
+    (name: string, initialTab: StreamFlyoutTabId = 'overview') => {
+      openFlyout(name);
+      selectTab(initialTab);
+    },
+    [openFlyout, selectTab]
+  );
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
     const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
@@ -85,13 +98,14 @@ export function StreamsCanvas() {
                 ...node,
                 data: {
                   ...node.data,
-                  onProcessingClick: (streamName: string) => openFlyout(streamName, 'processing'),
+                  onProcessingClick: (streamName: string) =>
+                    openFlyoutTab(streamName, 'processing'),
                 },
               }
             : node
       ),
     };
-  }, [openFlyout, value]);
+  }, [openFlyoutTab, value]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Positions reset to the inferred layout whenever the fetched streams change.
@@ -185,13 +199,11 @@ export function StreamsCanvas() {
     (event, node) => {
       if (node.type === 'destination' && !event.shiftKey) {
         event.preventDefault();
-        openFlyout(node.data.streamName);
+        openFlyoutTab(node.data.streamName);
       }
     },
-    [openFlyout]
+    [openFlyoutTab]
   );
-
-  const onCloseFlyout = useCallback(() => setFlyout(null), []);
 
   const reopenContextMenu = useCallback(
     (position: ContextMenuPosition) => setContextMenu({ position, target: 'pane' }),
@@ -247,10 +259,10 @@ export function StreamsCanvas() {
     if (selected.length === 1) {
       const selectedNode = selected[0];
       if (selectedNode.type === 'destination') {
-        openFlyout(selectedNode.data.streamName);
+        openFlyoutTab(selectedNode.data.streamName);
       }
     }
-  }, [nodes, openFlyout]);
+  }, [nodes, openFlyoutTab]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -315,9 +327,7 @@ export function StreamsCanvas() {
           })}
         />
       )}
-      {flyout && (
-        <StreamFlyout name={flyout.name} initialTab={flyout.initialTab} onClose={onCloseFlyout} />
-      )}
+      {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
       <EuiScreenReaderOnly>
         <p id={KEYBOARD_INSTRUCTIONS_ID}>
           {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
