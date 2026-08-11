@@ -109,7 +109,6 @@ describe('ThreatsDetectedMetric', () => {
         inspectTitle: 'Real threats detected',
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
           VisualizationContextMenuActions.inspect,
         ],
       }),

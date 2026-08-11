@@ -105,12 +105,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     }));
   }, [ecsRowData]);
 
-  const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
+  const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
     nonEcsData: flattenedEcsData,
     onMenuItemClick,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-    useNestedCaseActions: true,
     refetch,
   });
 
@@ -287,7 +286,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const panels = useMemo(
     () => [
-      ...addToCaseActionPanels,
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
@@ -295,7 +293,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...runDocumentWorkflowPanels,
     ],
     [
-      addToCaseActionPanels,
       alertTagsPanels,
       alertAssigneesPanels,
       statusActionPanels,

@@ -33,7 +33,6 @@ const ID = 'TimeSavedMetricQuery';
 
 const VISUALIZATION_ACTIONS = [
   VisualizationContextMenuActions.addToExistingCase,
-  VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.inspect,
 ];
 

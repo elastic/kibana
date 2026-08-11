@@ -5,27 +5,12 @@
  * 2.0.
  */
 export const VISUALIZATION_CONTEXT_MENU_TRIGGER = 'VISUALIZATION_CONTEXT_MENU_TRIGGER';
-export const DEFAULT_ACTIONS = [
-  'inspect',
-  'addToNewCase',
-  'addToExistingCase',
-  'saveToLibrary',
-  'openInLens',
-];
+export const DEFAULT_ACTIONS = ['inspect', 'addToExistingCase', 'saveToLibrary', 'openInLens'];
 export const MOCK_ACTIONS = [
   {
     id: 'inspect',
     getDisplayName: () => 'Inspect',
     getIconType: () => 'inspect',
-    type: 'actionButton',
-    order: 4,
-    isCompatible: () => true,
-    execute: jest.fn(),
-  },
-  {
-    id: 'addToNewCase',
-    getDisplayName: () => 'Add to new case',
-    getIconType: () => 'casesApp',
     type: 'actionButton',
     order: 3,
     isCompatible: () => true,
@@ -33,7 +18,7 @@ export const MOCK_ACTIONS = [
   },
   {
     id: 'addToExistingCase',
-    getDisplayName: () => 'Add to existing case',
+    getDisplayName: () => 'Add to case',
     getIconType: () => 'casesApp',
     type: 'actionButton',
     order: 2,
