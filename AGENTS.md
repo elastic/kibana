@@ -78,12 +78,12 @@ Follow existing patterns in the target area first; below are common defaults.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
-### React / UI Conventions
-- Reach for components in this order, configuring supported props and composition before building anything new: existing components in the owning platform or solution area, then `@kbn/ui-*` under `src/platform/kbn-ui`, then `@elastic/eui`.
-- New UI belongs in its owning area by default. `@kbn/ui-*` is only for low-dependency UI shared across areas.
-- For complex UI shared across areas, prefer a static package with tests and Storybook when available over expanding a plugin.
-- When a requirement cannot be met through the supported props or composition of existing `@kbn/ui-*` or EUI components, flag the gap to the user and recommend discussing it with product and design before implementing a workaround.
-- Style with Emotion (`@emotion/react`) and EUI design tokens. CSS overrides are a last resort; inline styles are only for dynamic runtime values such as animation or positioning.
+### UI Component Selection and Styling
+- Before building a UI component, look for an existing one in this order: the target module, its owning platform or solution area, the shared `@kbn/ui-*` packages under `src/platform/kbn-ui`, then `@elastic/eui`. Use the first suitable match.
+- Add new UI to the module that owns the feature. Do not create or modify `@kbn/ui-*` packages unless the user explicitly asks you to.
+- If no existing component or pattern fits the use case, build it locally in the owning module.
+- If an existing `@kbn/ui-*` or `@elastic/eui` component matches the required pattern but cannot provide the required behavior through supported props or composition, call out the gap and recommend involving product and design before recreating the pattern with lower-level primitives, overriding the component's internals with CSS, or implementing another workaround.
+- Style components with Emotion (`@emotion/react`) and EUI design tokens. Use inline styles only for values that must be computed at runtime, such as animation progress or measured coordinates.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
