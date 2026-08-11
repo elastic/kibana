@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export enum McpClientFormMode {
+  CREATE = 'create',
+  EDIT = 'edit',
+}
+
 export enum McpLogoPickerTab {
   SELECT = 'select',
   UPLOAD = 'upload',

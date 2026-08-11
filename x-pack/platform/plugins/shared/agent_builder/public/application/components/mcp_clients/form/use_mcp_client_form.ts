@@ -120,9 +120,9 @@ export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
   isConfidential: false,
 };
 
-export const useMcpClientForm = () => {
+export const useMcpClientForm = (initialValues?: McpClientFormData) => {
   const form = useForm<McpClientFormData>({
-    defaultValues: DEFAULT_MCP_CLIENT_FORM_VALUES,
+    defaultValues: initialValues ?? DEFAULT_MCP_CLIENT_FORM_VALUES,
     resolver: zodResolver<McpClientFormData>(mcpClientFormSchema),
     mode: 'onBlur',
   });

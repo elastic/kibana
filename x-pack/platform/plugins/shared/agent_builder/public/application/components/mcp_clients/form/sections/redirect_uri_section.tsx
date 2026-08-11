@@ -108,9 +108,9 @@ export const RedirectUriSection = () => {
 
       const restored = redirectUrisByTypeRef.current[id];
       if (id === RedirectUriType.REMOTE) {
-        replace(restored?.[0] ? [restored[0]] : [{ value: '' }]);
+        replace(restored[0] ? [restored[0]] : [{ value: '' }]);
       } else {
-        replace(restored ?? []);
+        replace(restored.length > 0 ? restored : [{ value: '' }]);
       }
     },
     [getValues, replace]
@@ -177,7 +177,7 @@ export const RedirectUriSection = () => {
                   inputRef={ref}
                   isInvalid={invalid}
                   placeholder={placeholder}
-                  data-test-subj={`${testSubjPrefix}-${field.id}`}
+                  data-test-subj={`${testSubjPrefix}-${index}`}
                   append={
                     !isRemote && fields.length > 1 ? (
                       <EuiToolTip
@@ -189,7 +189,7 @@ export const RedirectUriSection = () => {
                           iconType="trash"
                           aria-label={labels.tools.mcpClients.form.removeUriAriaLabel}
                           onClick={() => remove(index)}
-                          data-test-subj={`mcpClientRemoveUri-${field.id}`}
+                          data-test-subj={`mcpClientRemoveUri-${index}`}
                         />
                       </EuiToolTip>
                     ) : undefined
