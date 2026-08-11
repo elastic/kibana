@@ -55,10 +55,18 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
   });
 
   apiTest(
-    'tags: should return tags wrapped in { tags } response shape',
+    'tags: should return the unique union of tags across rules, sorted by usage',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-a', tags: ['cpu'] } })
+        buildCreateRuleData({
+          metadata: { name: 'rule-a', tags: ['cpu', 'memory', 'production'] },
+        })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-b', tags: ['cpu', 'memory'] } })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-c', tags: ['cpu'] } })
       );
 
       const response = await apiClient.get(TAGS_URL, {
@@ -66,7 +74,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.tags)).toBe(true);
+      expect(response.body).toStrictEqual({ tags: ['cpu', 'memory', 'production'] });
     }
   );
 
@@ -250,7 +258,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -261,6 +269,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('path: old /_tags path should return 404', async ({ apiClient }) => {
