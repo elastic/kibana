@@ -61,11 +61,11 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(rule.id);
         expect(item.spaceId).toBe('default');
-        expect(Date.parse(item.startedAt)).toBeGreaterThan(0);
-        expect(Date.parse(item.endedAt)).toBeGreaterThan(0);
+        expect(Date.parse(item.started_at)).toBeGreaterThan(0);
+        expect(Date.parse(item.ended_at)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
         expect(Number.isInteger(item.timings.duration)).toBe(true);
-        expect(Number.isInteger(item.timings.scheduledDelay)).toBe(true);
+        expect(Number.isInteger(item.timings.scheduled_delay)).toBe(true);
       }
 
       const successful = response.body.items.find(
