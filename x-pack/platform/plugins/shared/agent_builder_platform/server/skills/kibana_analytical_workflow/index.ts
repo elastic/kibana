@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getMatchPrebuiltRuleNode } from './match_prebuilt_rule';
+export { kibanaAnalyticalWorkflowSkill } from './kibana_analytical_workflow_skill';
