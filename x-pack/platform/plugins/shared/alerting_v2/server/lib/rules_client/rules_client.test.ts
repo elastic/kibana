@@ -2013,7 +2013,7 @@ describe('RulesClient', () => {
       ]);
 
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-        { id: 'rule-1', spaceId: 'space-1' },
+        { ruleId: 'rule-1', spaceId: 'space-1' },
       ]);
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
