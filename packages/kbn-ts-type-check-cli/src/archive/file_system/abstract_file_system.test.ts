@@ -13,6 +13,19 @@ import { TMP_DIR } from '../constants';
 import type { ArchiveMetadata } from './types';
 import { AbstractFileSystem } from './abstract_file_system';
 
+// Isolate TMP_DIR to a unique per-suite path so parallel Jest workers can't clobber the sibling
+// kbn-ts-type-check-oblt-cli suite, which otherwise shares the identical hardcoded temp path.
+jest.mock('../constants', () => {
+  const actual = jest.requireActual('../constants');
+  const os = jest.requireActual('os');
+  const path = jest.requireActual('path');
+  const fs = jest.requireActual('fs');
+  return {
+    ...actual,
+    TMP_DIR: fs.mkdtempSync(path.join(os.tmpdir(), 'kbn-ts-typecheck-platform-test-')),
+  };
+});
+
 jest.mock('../utils', () => ({
   cleanTypeCheckArtifacts: jest.fn(),
   calculateFileHashes: jest.fn().mockResolvedValue({
