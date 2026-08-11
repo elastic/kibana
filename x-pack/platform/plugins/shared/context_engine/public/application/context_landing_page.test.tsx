@@ -110,6 +110,7 @@ describe('ContextLandingPage', () => {
 
     expect(screen.getAllByTestId('contextAiIndexCardSkeleton')).toHaveLength(3);
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
   it('renders a card per AI index returned by the list API and links to its detail page', async () => {
@@ -170,6 +171,7 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsError')).toBeInTheDocument();
     expect(screen.getByText('Boom')).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
   it('marks managed AI indexes as owned by Elastic instead of showing a modified date', async () => {
@@ -266,7 +268,7 @@ describe('ContextLandingPage', () => {
       await renderWithAiIndexes();
 
       fireEvent.change(screen.getByTestId('contextAiIndexList-searchBox'), {
-        target: { value: 'custom' },
+        target: { value: 'logs-custom-index' },
       });
 
       await waitFor(() => expect(cardTitles()).toHaveLength(1));
@@ -315,10 +317,11 @@ describe('ContextLandingPage', () => {
       await waitFor(() => expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(1));
     });
 
-    it('hides the pagination when everything fits on one page', async () => {
+    it('shows the content list footer when everything fits on one page', async () => {
       await renderPagedAiIndexes(AI_INDICES_PER_PAGE);
 
-      expect(screen.queryByTestId('contextAiIndexListPagination')).not.toBeInTheDocument();
+      expect(screen.getByTestId('contextAiIndexListFooter')).toBeInTheDocument();
+      expect(screen.getByTestId('contentListFooter-pagination')).toBeInTheDocument();
     });
   });
 });

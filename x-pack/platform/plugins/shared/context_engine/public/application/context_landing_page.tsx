@@ -7,18 +7,13 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ContentList, ContentListToolbar } from '@kbn/content-list';
+import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
 import { useContentListItems } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import {
-  AiIndexCardGrid,
-  AiIndexListEmpty,
-  AiIndexListError,
-  AiIndexListPagination,
-} from './components/ai_index_list';
+import { AiIndexCardGrid, AiIndexListEmpty, AiIndexListError } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
 import { useAiIndexFindItems } from './hooks/use_list_ai_indices';
 import { useKibana } from './hooks/use_kibana';
@@ -39,8 +34,8 @@ const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
 
 const ContextLandingPageContent = () => {
   const { euiTheme } = useEuiTheme();
-  const { isLoading, error, hasNoItems } = useContentListItems();
-  const showHeaderCreateButton = !isLoading && !error && !hasNoItems;
+  const { error, hasNoItems } = useContentListItems();
+  const showHeaderCreateButton = !hasNoItems;
 
   return (
     <KibanaPageTemplate data-test-subj="contextLandingPage">
@@ -72,7 +67,7 @@ const ContextLandingPageContent = () => {
               </ContentListToolbar.Filters>
             </ContentListToolbar>
             <AiIndexCardGrid />
-            <AiIndexListPagination />
+            <ContentListFooter data-test-subj="contextAiIndexListFooter" />
           </ContentList>
         )}
       </KibanaPageTemplate.Section>

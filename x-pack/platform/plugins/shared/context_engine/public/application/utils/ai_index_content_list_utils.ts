@@ -39,6 +39,10 @@ export const AI_INDEX_LIST_LABELS = {
   }),
 };
 
+// We need this because for now, we onl do client-side search and ContentList forwards EUI-parsed search text.
+const normalizeSearchQuery = (searchQuery: string): string =>
+  searchQuery.trim().replace(/\\-/g, '-').replace(/ -/g, '-');
+
 const matchesQuery = (aiIndex: AiIndexHttpItem, query: string): boolean => {
   const haystack = [aiIndex.id, aiIndex.description, aiIndex.dest.value];
   return haystack.some((field) => field?.toLowerCase().includes(query));
@@ -70,7 +74,7 @@ export const filterAiIndicesBySearch = (
   aiIndices: AiIndexHttpItem[],
   searchQuery: string
 ): AiIndexHttpItem[] => {
-  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const normalizedQuery = normalizeSearchQuery(searchQuery).toLowerCase();
 
   if (normalizedQuery === '') {
     return aiIndices;

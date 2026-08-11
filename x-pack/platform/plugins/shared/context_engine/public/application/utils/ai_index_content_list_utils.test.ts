@@ -59,6 +59,23 @@ describe('filterAiIndicesBySearch', () => {
   it('treats a whitespace-only query as no filter', () => {
     expect(filterAiIndicesBySearch(aiIndices, '   ')).toHaveLength(2);
   });
+
+  it('normalizes ContentList search text before matching hyphenated destination values', () => {
+    const aiIndex = buildAiIndex({
+      id: 'logs-index',
+      dest: { type: 'index', value: 'logs-custom-index' },
+    });
+
+    expect(filterAiIndicesBySearch([aiIndex], 'logs-custom-index').map(({ id }) => id)).toEqual([
+      'logs-index',
+    ]);
+    expect(filterAiIndicesBySearch([aiIndex], 'logs-custom -index').map(({ id }) => id)).toEqual([
+      'logs-index',
+    ]);
+    expect(filterAiIndicesBySearch([aiIndex], 'logs\\-custom\\-index').map(({ id }) => id)).toEqual(
+      ['logs-index']
+    );
+  });
 });
 
 describe('createFindAiIndices', () => {
