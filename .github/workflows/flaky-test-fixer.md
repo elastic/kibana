@@ -305,7 +305,6 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 - **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
 - **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
-- **Run the whole directory once** (`node scripts/jest <directory-containing-the-test>`) so siblings share a worker with it. State leaking between tests never reproduces while the file runs alone.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
 ## PR format
