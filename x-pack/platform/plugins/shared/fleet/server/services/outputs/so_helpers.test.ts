@@ -48,7 +48,7 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
         },
       },
     },
-  } as unknown as Output;
+  } as Output;
 
   const ORIGINAL_KAFKA_OUTPUT = {
     type: 'kafka',

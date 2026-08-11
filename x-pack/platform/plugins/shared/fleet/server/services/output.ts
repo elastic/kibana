@@ -372,7 +372,7 @@ function validateOutputNotUsedInPolicy(
 async function validateTypeChanges(
   esClient: ElasticsearchClient,
   id: string,
-  data: NewOutput | UpdateTypedOutput,
+  data: Nullable<Partial<OutputSOAttributes>>,
   originalOutput: Output,
   defaultDataOutputId: string | null,
   fromPreconfiguration: boolean
@@ -419,7 +419,7 @@ async function validateTypeChanges(
 async function updateAgentPoliciesDataOutputId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  data: NewOutput | UpdateTypedOutput,
+  data: Nullable<Partial<OutputSOAttributes>>,
   isDefault: boolean,
   defaultDataOutputId: string | null,
   agentPolicies: AgentPolicy[],
@@ -706,8 +706,8 @@ class OutputService {
     await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
-      output,
-      output.is_default,
+      data,
+      data.is_default,
       defaultDataOutputId,
       _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
       options?.fromPreconfiguration ?? false
@@ -849,11 +849,14 @@ class OutputService {
         });
       }
 
-      if (output.type === outputType.Kafka) {
+      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
-          (data as OutputSoKafkaAttributes).password = output.secrets.password as string;
+          data.password = output.secrets?.password as string;
         }
-      } else if (output.type === outputType.RemoteElasticsearch) {
+      } else if (
+        output.type === outputType.RemoteElasticsearch &&
+        data.type === outputType.RemoteElasticsearch
+      ) {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets.service_token as string;
         }
@@ -1160,11 +1163,6 @@ class OutputService {
       );
     }
 
-    // Domain validation complete; transition to SO persistence shape.
-    const updateSoData = updateData as unknown as Nullable<Partial<OutputSOAttributes>> & {
-      type: ValueOf<OutputType>;
-    };
-
     const removeKafkaFields = (target: Nullable<Partial<OutputSoKafkaAttributes>>) => {
       target.version = null;
       target.key = null;
@@ -1203,32 +1201,32 @@ class OutputService {
     };
 
     if (isTypeChanged) {
-      if (updateSoData.type === outputType.Elasticsearch) {
-        (updateSoData as unknown as Nullable<BeatsSoBaseAttributes>).preset = null;
+      if (updateData.type === outputType.Elasticsearch) {
+        updateData.preset = null;
       }
 
-      if (updateSoData.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
-        removeKafkaFields(updateSoData as unknown as Nullable<OutputSoKafkaAttributes>);
+      if (updateData.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
+        removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
       if (originalOutput.type === outputType.RemoteElasticsearch) {
-        (updateSoData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
-        (updateSoData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
       }
 
       if (
         originalOutput.type === outputType.Elasticsearch ||
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
-        (updateSoData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
-        (updateSoData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
-        (updateSoData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
-      if (updateSoData.type === outputType.Logstash) {
+      if (updateData.type === outputType.Logstash) {
         // remove ES specific field
-        (updateSoData as BeatsSoBaseAttributes).ca_trusted_fingerprint = null;
-        (updateSoData as BeatsSoBaseAttributes).ca_sha256 = null;
+        (updateData as BeatsSoBaseAttributes).ca_trusted_fingerprint = null;
+        (updateData as BeatsSoBaseAttributes).ca_sha256 = null;
       }
 
       if (updateData.type === outputType.Kafka) {
@@ -1301,12 +1299,12 @@ class OutputService {
 
       if (isOtlpOutput(originalOutput)) {
         // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
-        (updateSoData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
       }
 
-      if (isOtlpOutput(updateSoData)) {
+      if (isOtlpOutput(updateData)) {
         // clear beats-only fields when switching to OTLP
-        removeBeatsFields(updateSoData as Nullable<BeatsSoBaseAttributes>);
+        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
       }
     }
 
@@ -1315,13 +1313,13 @@ class OutputService {
     // explicitly set to null here. null is written into the doc (unlike undefined, which is omitted
     // from the payload and leaves the old value intact).
     const isOtlpProtocolChange =
-      isOtlpOutput(updateSoData) &&
+      isOtlpOutput(updateData) &&
       isOtlpOutput(originalOutput) &&
-      updateSoData.otlp_exporter?.protocol !== undefined &&
-      updateSoData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
+      updateData.otlp_exporter?.protocol !== undefined &&
+      updateData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
 
     if (isOtlpProtocolChange) {
-      const exporterUpdate = (updateSoData as OutputSoOtlpAttributes).otlp_exporter;
+      const exporterUpdate = (updateData as OutputSoOtlpAttributes).otlp_exporter;
       if (exporterUpdate.protocol === otlpProtocol.Grpc) {
         // Switching to gRPC — null out HTTP-exclusive fields left over in the stored SO
         Object.assign(exporterUpdate, {
