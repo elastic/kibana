@@ -462,12 +462,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DROPDOWN,
-        label: translate(
-          'searchConnectors.nativeConnectors.confluenceDataCenter.authMethodLabel',
-          {
-            defaultMessage: 'Confluence Data Center authentication method',
-          }
-        ),
+        label: translate('searchConnectors.nativeConnectors.confluenceDataCenter.authMethodLabel', {
+          defaultMessage: 'Confluence Data Center authentication method',
+        }),
         options: [
           {
             label: translate(
