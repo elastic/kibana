@@ -101,12 +101,15 @@ export const waitForViewToBeLoaded = () => {
   recurse(
     () => {
       return cy.get('body').then(($body) => {
+        if ($body.find(INDICATORS_TABLE).length > 0) {
+          return true;
+        }
         if ($body.find(REFRESH_BUTTON).length === 0) {
           cy.reload();
         } else {
           cy.get(REFRESH_BUTTON).click();
         }
-        return $body.find(INDICATORS_TABLE).length > 0;
+        return false;
       });
     },
     (isTableVisible) => isTableVisible === true,
