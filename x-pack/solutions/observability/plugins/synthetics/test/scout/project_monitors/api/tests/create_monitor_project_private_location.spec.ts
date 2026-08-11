@@ -50,7 +50,8 @@ type ProjectMonitor = Record<string, any>;
 
 const MONITOR_SO_TYPES = [syntheticsMonitorSavedObjectType, 'synthetics-monitor'];
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/284369
+apiTest.describe.skip(
   'AddProjectMonitorsPrivateLocations',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {

@@ -24,6 +24,9 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "execution_control": Object {
+          "poll_interval": 5000,
+        },
         "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
@@ -88,6 +91,9 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "execution_control": Object {
+          "poll_interval": 5000,
+        },
         "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {
           "interval": "5m",
@@ -149,6 +155,9 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "execution_control": Object {
+          "poll_interval": 5000,
         },
         "grant_uiam_api_keys": false,
         "invalidate_api_key_task": Object {

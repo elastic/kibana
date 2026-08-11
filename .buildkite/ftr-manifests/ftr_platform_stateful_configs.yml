@@ -263,7 +263,6 @@ enabled:
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
-  - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
