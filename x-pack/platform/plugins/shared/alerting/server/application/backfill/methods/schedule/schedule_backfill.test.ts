@@ -11,6 +11,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { asyncForEach } from '@kbn/std';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RulesClient } from '../../../../rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import type { ScheduleBackfillParam } from './types';
@@ -29,6 +30,7 @@ const {
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
   authorization,
+  actionsAuthorization,
   auditLogger,
   backfillClient,
   internalSavedObjectsRepository,
@@ -621,6 +623,106 @@ describe('scheduleBackfill()', () => {
       expect(authorization.getFindAuthorizationFilter).toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
       expect(backfillClient.bulkQueue).toHaveBeenCalled();
+    });
+
+    describe('connector-execute authorization', () => {
+      const mockActionsClient = actionsClientMock.create();
+
+      const ruleWithActions = {
+        ...existingDecryptedRule1,
+        attributes: {
+          ...existingDecryptedRule1.attributes,
+          enabled: true,
+          actions: [
+            {
+              uuid: 'action-uuid-1',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: '.index',
+              params: { documents: [{ fired: true }] },
+            },
+          ],
+        },
+        references: [{ name: 'action_0', type: 'action', id: 'connector-1' }],
+      } as typeof existingDecryptedRule1;
+
+      test('should check connector-execute authorization when rule has actions and runActions is true', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+          operation: 'execute',
+        });
+      });
+
+      test('should check connector-execute authorization when rule has actions and runActions is undefined (defaults to true)', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [getMockData({ ruleId: '1', runActions: undefined })];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+          operation: 'execute',
+        });
+      });
+
+      test('should NOT check connector-execute authorization when runActions is explicitly false', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [getMockData({ ruleId: '1', runActions: false })];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+      });
+
+      test('should NOT check connector-execute authorization when rule has no actions', async () => {
+        rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+        rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+        const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+        await rulesClient.scheduleBackfill(mockData);
+
+        expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+      });
+
+      test('should throw and audit log when caller lacks connector-execute privilege', async () => {
+        mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
+        actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
+          new Error('Unauthorized to execute actions')
+        );
+
+        const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+        await expect(
+          rulesClient.scheduleBackfill(mockData)
+        ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to execute actions"`);
+
+        expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
+          operation: 'execute',
+        });
+        expect(auditLogger?.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: { code: 'Error', message: 'Unauthorized to execute actions' },
+            event: expect.objectContaining({
+              action: 'rule_schedule_backfill',
+              outcome: 'failure',
+            }),
+          })
+        );
+        expect(backfillClient.bulkQueue).not.toHaveBeenCalled();
+      });
     });
   });
 
