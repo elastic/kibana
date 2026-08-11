@@ -12,7 +12,6 @@ import { filterWithLabelSchema } from './filter';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
   LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE,
-  LENS_HISTOGRAM_GRANULARITY_MAX,
   LENS_HISTOGRAM_GRANULARITY_MIN,
   LENS_TERMS_LIMIT_DEFAULT,
   LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT,
@@ -75,97 +74,85 @@ export const bucketDateHistogramOperationSchema = lazySchema(() =>
     })
     .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram })
 );
+const bucketTermsRankByCustomSharedSchema = z
+  .object({
+    type: z.literal('custom'),
+    /**
+     * Field to be used for the custom operation
+     */
+    field: z.string().meta({
+      description: 'Numeric field to be used for the custom operation.',
+    }),
+    /**
+     * Direction of the custom operation
+     */
+    direction: directionSchema.meta({
+      id: 'termsRankByCustomDirection',
+      description: 'Sort direction for custom ranking.',
+    }),
+  })
+  .strip();
 
-const bucketTermsRankByCustomSharedSchema = lazySchema(() =>
-  z
-    .object({
-      type: z.literal('custom'),
-      /**
-       * Field to be used for the custom operation
-       */
-      field: z.string().meta({
-        description: 'Numeric field to be used for the custom operation.',
-      }),
-      /**
-       * Direction of the custom operation
-       */
-      direction: directionSchema.meta({
-        id: 'termsRankByCustomDirection',
-        description: 'Sort direction for custom ranking.',
-      }),
-    })
-    .strip()
-);
+const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.enum([
+      'min',
+      'max',
+      'average',
+      'median',
+      'standard_deviation',
+      'unique_count',
+      'sum',
+      'last_value',
+    ]),
+  })
+  .meta({
+    id: 'termsRankByCustomOperation',
+    title: 'Terms Rank By Custom Operation',
+    description: 'Terms ranked by custom operation.',
+  });
 
-const bucketTermsRankByCustomOperationSchema = lazySchema(() =>
-  bucketTermsRankByCustomSharedSchema
-    .extend({
-      operation: z.enum([
-        'min',
-        'max',
-        'average',
-        'median',
-        'standard_deviation',
-        'unique_count',
-        'sum',
-        'last_value',
-      ]),
-    })
-    .meta({
-      id: 'termsRankByCustomOperation',
-      title: 'Terms Rank By Custom Operation',
-      description: 'Terms ranked by custom operation.',
-    })
-);
+const bucketTermsRankByCustomCountOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.literal('count'),
+    field: z.string().optional().meta({
+      description: 'Numeric field to be used for the custom operation.',
+    }),
+  })
+  .meta({
+    id: 'termsRankByCustomCountOperation',
+    title: 'Terms Rank By Custom Count Operation',
+    description: 'Terms ranked by count, either of all documents or of a specific field.',
+  });
 
-const bucketTermsRankByCustomCountOperationSchema = lazySchema(() =>
-  bucketTermsRankByCustomSharedSchema
-    .extend({
-      operation: z.literal('count'),
-      field: z.string().optional().meta({
-        description: 'Numeric field to be used for the custom operation.',
-      }),
-    })
-    .meta({
-      id: 'termsRankByCustomCountOperation',
-      title: 'Terms Rank By Custom Count Operation',
-      description: 'Terms ranked by count, either of all documents or of a specific field.',
-    })
-);
-
-const bucketTermsRankByPercentileOperationSchema = lazySchema(() =>
-  bucketTermsRankByCustomSharedSchema
-    .extend({
-      operation: z.literal('percentile'),
-      percentile: z.number().default(LENS_PERCENTILE_DEFAULT_VALUE).meta({
-        description:
-          'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
-      }),
-    })
-    .meta({
-      id: 'termsRankByPercentileOperation',
-      title: 'Terms Rank By Percentile Operation',
+const bucketTermsRankByPercentileOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.literal('percentile'),
+    percentile: z.number().default(LENS_PERCENTILE_DEFAULT_VALUE).meta({
       description:
-        'Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.',
-    })
-);
-
-const bucketTermsRankByPercentileRankOperationSchema = lazySchema(() =>
-  bucketTermsRankByCustomSharedSchema
-    .extend({
-      operation: z.literal('percentile_rank'),
-      rank: z.number().default(LENS_PERCENTILE_RANK_DEFAULT_VALUE).meta({
-        description:
-          'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
-      }),
-    })
-    .meta({
-      id: 'termsRankByPercentileRankOperation',
-      title: 'Terms Rank By Percentile Rank Operation',
+        'The percentile threshold (0–100) at which to compute the field value used for ranking terms.',
+    }),
+  })
+  .meta({
+    id: 'termsRankByPercentileOperation',
+    title: 'Terms Rank By Percentile Operation',
+    description:
+      'Terms ranked by a percentile of a numeric field, for example the 95th percentile of response time.',
+  });
+const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSharedSchema
+  .extend({
+    operation: z.literal('percentile_rank'),
+    rank: z.number().default(LENS_PERCENTILE_RANK_DEFAULT_VALUE).meta({
       description:
-        'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
-    })
-);
+        'The numeric value for which to compute the percentile rank (the percentage of field values at or below this value).',
+    }),
+  })
+  .meta({
+    id: 'termsRankByPercentileRankOperation',
+    title: 'Terms Rank By Percentile Rank Operation',
+    description:
+      'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
+  });
 
 export const bucketTermsOperationSchema = lazySchema(() =>
   z
@@ -202,13 +189,11 @@ export const bucketTermsOperationSchema = lazySchema(() =>
        */
       includes: z
         .object({
+          // A terms field is either string- or number-typed, so the values are homogeneous: an array of
+          // strings or an array of numbers, never mixed.
           values: z
-            .array(
-              z.string().meta({
-                description: 'Values to include.',
-              })
-            )
-            .max(100),
+            .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+            .meta({ description: 'Values to include.' }),
           as_regex: z.boolean().optional().meta({
             description: 'When `true`, treats the values as regular expressions.',
           }),
@@ -221,12 +206,8 @@ export const bucketTermsOperationSchema = lazySchema(() =>
       excludes: z
         .object({
           values: z
-            .array(
-              z.string().meta({
-                description: 'Values to exclude.',
-              })
-            )
-            .max(100),
+            .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+            .meta({ description: 'Values to exclude.' }),
           as_regex: z.boolean().optional().meta({
             description: 'When `true`, treats the values as regular expressions.',
           }),
@@ -353,12 +334,19 @@ export const bucketHistogramOperationSchema = lazySchema(() =>
         description: 'Field to be used for the histogram.',
       }),
       /**
-       * Granularity of the histogram
+       * Granularity of the histogram: the target number of buckets (bars). This maps directly to the
+       * Lens `maxBars` value and controls how finely the field is divided into evenly spaced,
+       * "nice"-valued intervals. It is a target, not a guarantee: the effective ceiling is the
+       * `histogram:maxBars` advanced setting (default 1000), which is deployment-configurable and can
+       * be raised or lowered by an admin. Because that ceiling is only known at render time, no upper
+       * bound is enforced here — values above the configured ceiling are clamped when the chart runs.
+       * Use `'auto'` (the default) to let Lens pick the granularity.
        */
       granularity: z
         .union([
-          z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).max(LENS_HISTOGRAM_GRANULARITY_MAX).meta({
-            description: 'Granularity of the histogram.',
+          z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).meta({
+            description:
+              'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
           }),
           z.literal('auto'),
         ])

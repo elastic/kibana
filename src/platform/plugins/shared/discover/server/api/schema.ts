@@ -11,8 +11,9 @@ import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeIdSchema,
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestSchema,
+  getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { optionsListESQLControlSchema } from '@kbn/controls-schemas';
@@ -35,42 +36,39 @@ export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 
-const visContextSchema = lazySchema(() =>
-  z
-    .object({
-      suggestion_type: z
-        .union([
-          z.literal(UnifiedHistogramSuggestionType.lensSuggestion),
-          z.literal(UnifiedHistogramSuggestionType.histogramForESQL),
-          z.literal(UnifiedHistogramSuggestionType.histogramForDataView),
-        ])
-        .meta({
-          description:
-            'Chart suggestion type used by Discover to generate this histogram configuration.',
-        }),
-      attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
-        description: 'Chart configuration payload for the selected `suggestion_type`.',
+const visContextSchema = z
+  .object({
+    suggestion_type: z
+      .union([
+        z.literal(UnifiedHistogramSuggestionType.lensSuggestion),
+        z.literal(UnifiedHistogramSuggestionType.histogramForESQL),
+        z.literal(UnifiedHistogramSuggestionType.histogramForDataView),
+      ])
+      .meta({
+        description:
+          'Chart suggestion type used by Discover to generate this histogram configuration.',
       }),
-    })
-    .strict()
-);
+    attributes: z.record(z.string().max(MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH), z.any()).meta({
+      description: 'Chart configuration payload for the selected `suggestion_type`.',
+    }),
+  })
+  .strict();
 
-const discoverSessionControlWidthSchema = lazySchema(() =>
-  z
-    .union([
-      z.literal(CONTROL_WIDTH_SMALL),
-      z.literal(CONTROL_WIDTH_MEDIUM),
-      z.literal(CONTROL_WIDTH_LARGE),
-    ])
-    .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
-    .meta({
-      description: 'Minimum width of the control panel.',
-    })
-);
+const discoverSessionControlWidthSchema = z
+  .union([
+    z.literal(CONTROL_WIDTH_SMALL),
+    z.literal(CONTROL_WIDTH_MEDIUM),
+    z.literal(CONTROL_WIDTH_LARGE),
+  ])
+  .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
+  .meta({
+    description: 'Minimum width of the control panel.',
+  });
 
-const discoverSessionControlPanelSchema = lazySchema(() =>
+export const discoverSessionControlPanelSchema = lazySchema(() =>
   z
     .object({
       id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
@@ -109,86 +107,79 @@ export const discoverSessionControlPanelsSchema = lazySchema(() =>
     })
 );
 
-const discoverSessionTabPresentationSchema = lazySchema(() =>
-  z
-    .object({
-      hide_chart: z
-        .boolean()
-        .default(false)
-        .meta({ description: 'When `true`, the chart is hidden.' }),
-      hide_table: z
-        .boolean()
-        .default(false)
-        .meta({ description: 'When `true`, the data table is hidden.' }),
-      hide_aggregated_preview: z
-        .boolean()
-        .optional()
-        .meta({ description: 'When `true`, aggregated preview panels are hidden.' }),
-      breakdown_field: z
-        .string()
-        .max(MAX_BREAKDOWN_FIELD_LENGTH)
-        .optional()
-        .meta({ description: 'Field name used to split chart data into series.' }),
-      chart_interval: z
-        .union([
-          z.literal('auto'),
-          z.literal('ms'),
-          z.literal('s'),
-          z.literal('m'),
-          z.literal('h'),
-          z.literal('d'),
-          z.literal('w'),
-          z.literal('M'),
-          z.literal('y'),
-        ])
-        .optional()
-        .meta({
-          description: 'Time interval for the chart histogram on this tab.',
-        }),
-      time_restore: z.boolean().default(false).meta({
-        description:
-          "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
+const discoverSessionTabPresentationSchema = z
+  .object({
+    hide_chart: z
+      .boolean()
+      .default(false)
+      .meta({ description: 'When `true`, the chart is hidden.' }),
+    hide_table: z
+      .boolean()
+      .default(false)
+      .meta({ description: 'When `true`, the data table is hidden.' }),
+    hide_aggregated_preview: z
+      .boolean()
+      .optional()
+      .meta({ description: 'When `true`, aggregated preview panels are hidden.' }),
+    breakdown_field: z
+      .string()
+      .max(MAX_BREAKDOWN_FIELD_LENGTH)
+      .optional()
+      .meta({ description: 'Field name used to split chart data into series.' }),
+    chart_interval: z
+      .union([
+        z.literal('auto'),
+        z.literal('ms'),
+        z.literal('s'),
+        z.literal('m'),
+        z.literal('h'),
+        z.literal('d'),
+        z.literal('w'),
+        z.literal('M'),
+        z.literal('y'),
+      ])
+      .optional()
+      .meta({
+        description: 'Time interval for the chart histogram on this tab.',
       }),
-      time_range: timeRangeSchema.optional(),
-      refresh_interval: refreshIntervalSchema.optional(),
-      vis_context: visContextSchema.optional(),
-      control_panels: discoverSessionControlPanelsSchema.optional(),
-    })
-    .strict()
-);
+    time_restore: z.boolean().default(false).meta({
+      description:
+        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
+    }),
+    time_range: timeRangeSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional(),
+    vis_context: visContextSchema.optional(),
+    control_panels: discoverSessionControlPanelsSchema.optional(),
+  })
+  .strict();
 
-const discoverSessionTabIdentitySchema = lazySchema(() =>
-  z
-    .object({
-      id: asCodeIdSchema,
-      label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'Tab label.' }),
-    })
-    .strict()
-);
+const discoverSessionTabIdentitySchema = z
+  .object({
+    id: asCodeIdSchema,
+    label: z.string().max(MAX_TAB_LABEL_LENGTH).meta({ description: 'Tab label.' }),
+  })
+  .strict();
 
-const discoverSessionClassicTabSchema = lazySchema(() =>
-  z
-    .object({
-      ...discoverSessionTabIdentitySchema.shape,
-      ...classicTabSchema.shape,
-      ...discoverSessionTabPresentationSchema.shape,
-    })
-    .strict()
-);
+const discoverSessionClassicTabSchema = z
+  .object({
+    ...discoverSessionTabIdentitySchema.shape,
+    ...classicTabSchema.shape,
+    ...discoverSessionTabPresentationSchema.shape,
+  })
+  .strict();
 
-const discoverSessionEsqlTabSchema = lazySchema(() =>
-  z
-    .object({
-      ...discoverSessionTabIdentitySchema.shape,
-      ...esqlTabSchema.shape,
-      ...discoverSessionTabPresentationSchema.shape,
-    })
-    .strict()
-);
+const discoverSessionEsqlTabSchema = z
+  .object({
+    ...discoverSessionTabIdentitySchema.shape,
+    ...esqlTabSchema.shape,
+    ...discoverSessionTabPresentationSchema.shape,
+  })
+  .strict();
 
-const discoverSessionApiTabSchema = lazySchema(() =>
-  z.union([discoverSessionClassicTabSchema, discoverSessionEsqlTabSchema])
-);
+const discoverSessionApiTabSchema = z.union([
+  discoverSessionClassicTabSchema,
+  discoverSessionEsqlTabSchema,
+]);
 
 export const discoverSessionApiDataSchema = lazySchema(() =>
   z
@@ -203,6 +194,10 @@ export const discoverSessionApiDataSchema = lazySchema(() =>
         .max(MAX_SESSION_DESCRIPTION_LENGTH)
         .default('')
         .meta({ description: 'Discover session description.' }),
+      tags: getAsCodeTagsSchema(
+        'Tag IDs to associate with this Discover session.',
+        MAX_DISCOVER_SESSION_TAGS
+      ).optional(),
       tabs: z
         .array(discoverSessionApiTabSchema)
         .min(1)
@@ -234,8 +229,51 @@ export const discoverSessionApiResponseSchema = lazySchema(() =>
     .strict()
 );
 
+/* Shared context for warnings produced while transforming a Discover session tab. */
+const discoverSessionWarningBaseSchema = z.object({
+  message: z.string().meta({ description: 'Why stored content was omitted from the response.' }),
+  tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
+});
+
+/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
+const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_panel'),
+    panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+  })
+  .strict();
+
+/* Reports a tab property that could not be returned as a whole. */
+const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
+  .extend({
+    type: z.literal('dropped_property'),
+    key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+  })
+  .strict();
+
+/* Allows GET responses to preserve valid session data while reporting what was dropped. */
+export const discoverSessionWarningsSchema = lazySchema(() =>
+  z
+    .array(
+      z.union([
+        discoverSessionDroppedPanelWarningSchema,
+        discoverSessionDroppedPropertyWarningSchema,
+      ])
+    )
+    .meta({
+      description:
+        'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
+    })
+);
+
+export const discoverSessionGetResponseSchema = lazySchema(() =>
+  discoverSessionApiResponseSchema.extend({
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+);
+
 export const discoverSessionSearchParamsSchema = lazySchema(() =>
-  asCodePaginationParamsSchema.extend({
+  asCodeSearchRequestSchema.extend({
     query: z
       .string()
       .max(MAX_SEARCH_QUERY_LENGTH)
@@ -247,20 +285,22 @@ export const discoverSessionSearchParamsSchema = lazySchema(() =>
   })
 );
 
-const discoverSessionSearchItemSchema = lazySchema(() =>
-  z
-    .object({
-      id: z.string().meta({ description: 'The Discover session ID.' }),
-      data: z
-        .object({
-          title: z.string().meta({ description: 'Discover session title.' }),
-          description: z.string().optional().meta({ description: 'Discover session description.' }),
-        })
-        .strict(),
-      meta: asCodeMetaSchema,
-    })
-    .strict()
-);
+const discoverSessionSearchItemSchema = z
+  .object({
+    id: z.string().meta({ description: 'The Discover session ID.' }),
+    data: z
+      .object({
+        title: z.string().meta({ description: 'Discover session title.' }),
+        description: z.string().optional().meta({ description: 'Discover session description.' }),
+        tags: getAsCodeTagsSchema(
+          'Tag IDs associated with this Discover session.',
+          MAX_DISCOVER_SESSION_TAGS
+        ).optional(),
+      })
+      .strict(),
+    meta: asCodeMetaSchema,
+  })
+  .strict();
 
 export const discoverSessionSearchResponseSchema = lazySchema(() =>
   z
@@ -280,6 +320,8 @@ export const discoverSessionSearchResponseSchema = lazySchema(() =>
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
+export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;

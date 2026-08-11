@@ -19,7 +19,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
 import type { ChangePointType } from '../../significant_events/detections';
-import type { SignificantEvent } from '../../significant_events/events';
+import type { SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -79,7 +79,7 @@ interface LifecycleDetection {
 
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
-  events: SignificantEvent[];
+  events: SignificantEventResponse[];
 }
 
 export type {
