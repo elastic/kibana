@@ -81,4 +81,5 @@ export interface AgentBuilderStartDependencies {
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   agentBuilderSml: AgentBuilderSmlPluginStart;
+  files: FilesStart;
 }

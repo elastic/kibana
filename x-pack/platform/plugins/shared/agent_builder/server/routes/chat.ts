@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { Readable } from 'node:stream';
 import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
@@ -21,6 +22,7 @@ import {
   ConversationAccessControlMode,
   ConversationOriginType,
 } from '@kbn/agent-builder-common';
+import { AttachmentType, AGENT_BUILDER_IMAGE_FILE_KIND } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
   ExecutionConversationOrigin,
@@ -420,6 +422,45 @@ export function registerChatRoutes({
     }
   };
 
+  // POC: API consumers can send base64 `content` instead of a pre-uploaded `file_id`.
+  // Server uploads to Files plugin and replaces content with file_id before the agent loop starts.
+  const resolveImageAttachments = async (
+    attachments: ChatRequestBodyPayload['attachments']
+  ): Promise<ChatRequestBodyPayload['attachments']> => {
+    if (!attachments?.length) return attachments;
+
+    const needsUpload = attachments.some(
+      (a) => a.type === AttachmentType.image && (a.data as Record<string, unknown>)?.content && !(a.data as Record<string, unknown>)?.file_id
+    );
+    if (!needsUpload) return attachments;
+
+    const [, startDeps] = await coreSetup.getStartServices();
+    const fileService = startDeps.files.fileServiceFactory.asInternal();
+
+    return Promise.all(
+      attachments.map(async (attachment) => {
+        const data = attachment.data as Record<string, unknown>;
+        if (attachment.type !== AttachmentType.image || !data?.content || data?.file_id) {
+          return attachment;
+        }
+
+        const { content, name, mime_type } = data as { content: string; name: string; mime_type: string };
+        const buffer = Buffer.from(content, 'base64');
+        const file = await fileService.create({
+          name: name ?? 'image',
+          fileKind: AGENT_BUILDER_IMAGE_FILE_KIND,
+          mime: mime_type,
+        });
+        const uploaded = await file.uploadContent(Readable.from(buffer));
+        const { content: _dropped, ...dataWithoutContent } = data;
+        return {
+          ...attachment,
+          data: { ...dataWithoutContent, file_id: uploaded.toJSON().id },
+        };
+      })
+    );
+  };
+
   /**
    * Derives execution options for callback converse requests, which always use
    * Task Manager and carry the callback and origin. The execution id is the
@@ -540,7 +581,8 @@ export function registerChatRoutes({
           since: '9.2.0',
         },
         body: {
-          maxBytes: 4 * 1024 * 1024,
+          // POC: raised from 4MB to 6MB to accommodate base64-encoded images (~33% overhead on 2MB max)
+          maxBytes: 6 * 1024 * 1024,
         },
       },
     })
@@ -560,6 +602,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        payload.attachments = await resolveImageAttachments(payload.attachments);
 
         const { events$: chatEvents$ } = await executeAgent({
           payload,
@@ -592,7 +635,8 @@ export function registerChatRoutes({
           since: '9.2.0',
         },
         body: {
-          maxBytes: 4 * 1024 * 1024,
+          // POC: raised from 4MB to 6MB to accommodate base64-encoded images (~33% overhead on 2MB max)
+          maxBytes: 6 * 1024 * 1024,
         },
       },
     })
@@ -613,6 +657,7 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
+        payload.attachments = await resolveImageAttachments(payload.attachments);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {

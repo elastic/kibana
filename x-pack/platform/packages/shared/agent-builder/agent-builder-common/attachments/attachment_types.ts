@@ -133,9 +133,12 @@ export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number]
 export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
 
 export const imageAttachmentDataSchema = z.object({
-  file_id: z.string(),
+  // POC: file_id is optional when content (base64) is provided — server uploads and fills it in
+  file_id: z.string().optional(),
   name: z.string(),
   mime_type: z.string(),
+  // POC: API consumers can send base64 directly; server uploads to Files plugin and strips this
+  content: z.string().optional(),
 });
 
 /**
@@ -143,9 +146,11 @@ export const imageAttachmentDataSchema = z.object({
  */
 export interface ImageAttachmentData {
   /** Kibana files plugin file ID — used for storage and history rendering */
-  file_id: string;
+  file_id?: string;
   /** Original filename */
   name: string;
   /** MIME type of the image */
   mime_type: string;
+  /** POC: base64 image content for API consumers; server uploads and strips before persistence */
+  content?: string;
 }
