@@ -1758,7 +1758,8 @@ module.exports = {
         'playwright/expect-expect': [
           'warn',
           {
-            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
           },
         ],
         'playwright/no-commented-out-tests': 'error',
