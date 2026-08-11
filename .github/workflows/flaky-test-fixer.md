@@ -291,7 +291,7 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
-mkdir -p /tmp/gh-aw/agent && : > /tmp/gh-aw/agent/jest-durations
+: > /tmp/gh-aw/agent/jest-durations
 fails=0
 for i in $(seq 1 25); do
   node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
