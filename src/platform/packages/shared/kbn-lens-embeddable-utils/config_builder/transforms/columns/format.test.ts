@@ -105,9 +105,29 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'milliseconds',
             toUnit: 'asSeconds',
+          },
+        });
+      });
+
+      it('should preserve explicit decimals and compact', () => {
+        const input = {
+          type: 'duration',
+          from: 'ms',
+          to: 'auto',
+          decimals: 3,
+          compact: false,
+        } satisfies ApiFormat;
+        expect(fromFormatAPIToLensState(input)).toEqual({
+          id: 'duration',
+          params: {
+            decimals: 3,
+            fromUnit: 'milliseconds',
+            toUnit: 'humanizePrecise',
+            compact: false,
           },
         });
       });
@@ -122,7 +142,8 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'milliseconds',
             toUnit: 'asSeconds',
             suffix: ' elapsed',
@@ -130,16 +151,19 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should transform `auto-approximate` to humanize Lens state', () => {
+      it('should transform `auto-approximate` to humanize, ignoring input decimals/compact', () => {
         const input = {
           type: 'duration',
           from: 's',
           to: 'auto-approximate',
+          decimals: 7,
+          compact: true,
         } satisfies ApiFormat;
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            // ValueFormatConfig requires decimals; use shared default (ignored at render).
+            decimals: 0,
             fromUnit: 'seconds',
             toUnit: 'humanize',
           },
@@ -155,7 +179,8 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'milliseconds',
             toUnit: 'humanizePrecise',
           },
@@ -171,7 +196,7 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
             fromUnit: 'minutes',
             toUnit: 'humanize',
           },
@@ -187,7 +212,8 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'microseconds',
             toUnit: 'asMilliseconds',
           },
@@ -205,7 +231,7 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
             fromUnit: 'minutes',
             toUnit: 'humanize',
           },
@@ -221,7 +247,8 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'milliseconds',
             toUnit: 'humanizePrecise',
           },
@@ -237,7 +264,8 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'duration',
           params: {
-            decimals: 2,
+            decimals: 0,
+            compact: true,
             fromUnit: 'milliseconds',
             toUnit: 'asMinutes',
           },
@@ -254,7 +282,7 @@ describe('Format Transforms', () => {
         expect(fromFormatAPIToLensState(input)).toEqual({
           id: 'custom',
           params: {
-            decimals: 2,
+            decimals: 0,
             pattern: '$0,0.00',
           },
         });
@@ -333,11 +361,32 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'ms',
           to: 's',
+          decimals: 2,
+          compact: true,
           suffix: ' elapsed',
         });
       });
 
-      it('should apply defaults when duration units are missing', () => {
+      it('should preserve decimals and compact for precise output units', () => {
+        const input = {
+          id: 'duration',
+          params: {
+            decimals: 0,
+            compact: true,
+            fromUnit: 'milliseconds',
+            toUnit: 'humanizePrecise',
+          },
+        } satisfies ValueFormatConfig;
+        expect(fromFormatLensStateToAPI(input)).toEqual({
+          type: 'duration',
+          from: 'ms',
+          to: 'auto',
+          decimals: 0,
+          compact: true,
+        });
+      });
+
+      it('should omit decimals/compact when output defaults to approximate', () => {
         const input = {
           id: 'duration',
           params: {
@@ -352,7 +401,7 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should convert Lens `humanize` state to `auto-approximate`', () => {
+      it('should convert Lens `humanize` state to `auto-approximate` without decimals/compact', () => {
         const input = {
           id: 'duration',
           params: {
@@ -369,7 +418,7 @@ describe('Format Transforms', () => {
         });
       });
 
-      it('should convert Lens `humanizePrecise` state to `auto`', () => {
+      it('should convert Lens `humanizePrecise` state to `auto` with complete-out compact', () => {
         const input = {
           id: 'duration',
           params: {
@@ -382,6 +431,8 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'ms',
           to: 'auto',
+          decimals: 2,
+          compact: true,
         });
       });
 
@@ -398,6 +449,8 @@ describe('Format Transforms', () => {
           type: 'duration',
           from: 'min',
           to: 'min',
+          decimals: 2,
+          compact: true,
         });
       });
 
@@ -409,45 +462,41 @@ describe('Format Transforms', () => {
             toUnit: 'humanizePrecise',
           },
         } satisfies ValueFormatConfig;
+        // Explicit decimals:0 preserved; missing compact → editor default true.
         expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
           from: 's',
           to: 'auto',
+          decimals: 0,
+          compact: true,
         });
       });
 
-      it('should round-trip GA duration formats', () => {
-        const apiFormat = {
+      it('should preserve editor-persisted decimals 0 and compact true', () => {
+        const input = {
+          id: 'duration',
+          params: {
+            decimals: 0,
+            compact: true,
+            fromUnit: 'milliseconds',
+            toUnit: 'humanizePrecise',
+          },
+        } satisfies ValueFormatConfig;
+        expect(fromFormatLensStateToAPI(input)).toEqual({
           type: 'duration',
-          from: 's',
+          from: 'ms',
           to: 'auto',
-        } satisfies ApiFormat;
-        const lensFormat = fromFormatAPIToLensState(apiFormat);
-        expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
-      });
-
-      it('should normalize legacy input to GA output on round-trip', () => {
-        // Legacy input uses pre-GA names; output always uses GA enum names
-        const legacyApiFormat = {
-          type: 'duration',
-          from: 'm',
-          to: 'humanize',
-        } satisfies ApiFormat;
-        const lensFormat = fromFormatAPIToLensState(legacyApiFormat);
-        expect(fromFormatLensStateToAPI(lensFormat)).toEqual({
-          type: 'duration',
-          from: 'min',
-          to: 'auto-approximate',
+          decimals: 0,
+          compact: true,
         });
       });
     });
-
     describe('custom format', () => {
       it('should transform custom format', () => {
         const input = {
           id: 'custom',
           params: {
-            decimals: 2,
+            decimals: 0,
             pattern: '$0,0.00',
           },
         } satisfies ValueFormatConfig;
@@ -455,6 +504,45 @@ describe('Format Transforms', () => {
           type: 'custom',
           pattern: '$0,0.00',
         });
+      });
+    });
+  });
+
+  describe('roundtrip', () => {
+    it('should round-trip GA duration formats including decimals and compact', () => {
+      const apiFormat = {
+        type: 'duration',
+        from: 's',
+        to: 'auto',
+        decimals: 3,
+        compact: true,
+      } satisfies ApiFormat;
+      const lensFormat = fromFormatAPIToLensState(apiFormat);
+      expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
+    });
+
+    it('should round-trip approximate without decimals/compact', () => {
+      const apiFormat = {
+        type: 'duration',
+        from: 's',
+        to: 'auto-approximate',
+      } satisfies ApiFormat;
+      const lensFormat = fromFormatAPIToLensState(apiFormat);
+      expect(fromFormatLensStateToAPI(lensFormat)).toEqual(apiFormat);
+    });
+
+    it('should normalize legacy input to GA output on round-trip', () => {
+      // Legacy input uses pre-GA names; output always uses GA enum names
+      const legacyApiFormat = {
+        type: 'duration',
+        from: 'm',
+        to: 'humanize',
+      } satisfies ApiFormat;
+      const lensFormat = fromFormatAPIToLensState(legacyApiFormat);
+      expect(fromFormatLensStateToAPI(lensFormat)).toEqual({
+        type: 'duration',
+        from: 'min',
+        to: 'auto-approximate',
       });
     });
   });

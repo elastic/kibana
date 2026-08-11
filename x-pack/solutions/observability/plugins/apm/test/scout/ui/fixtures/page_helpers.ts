@@ -9,12 +9,13 @@ import { EuiToastWrapper, type ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
- * Waits for the APM settings header link to be visible.
- * This is commonly used to ensure the APM page has fully loaded.
+ * Waits for a stable app-menu signal so the APM page is considered loaded.
+ * Prefer Add data (primary action) — same role Settings played before it moved into More.
+ * Alerts is privilege-gated and is not a reliable ready signal for all roles.
  */
-export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<void> {
+export async function waitForApmAppMenuReady(page: ScoutPage): Promise<void> {
   await page
-    .getByTestId('apmSettingsHeaderLink')
+    .getByTestId('apmAddDataHeaderLink')
     .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
