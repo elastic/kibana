@@ -88,6 +88,16 @@ export const ConversationsPage: React.FC = () => {
   }, [filteredQueueItems]);
 
   return (
+    <PndPageSection
+      restrictWidth
+      css={css`
+        align-self: center;
+        @media (min-width: 1920px) {
+          max-width: 1300px;
+        }
+        max-width: 960px;
+      `}
+    >
       <PndPageHeader
         title={
           <>
