@@ -313,7 +313,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       output = {
         type: 'json',
         content: {
-          ode: 'ra_memory-dump_success_done',
+          code: 'ra_memory-dump_success_done',
           file_size: 2322000,
           path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
           disk_free_space: 123045678009,
