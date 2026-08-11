@@ -581,6 +581,14 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
+  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
+  const isComingFromDashboardView = Boolean(
+    incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+
   const topNavConfig = useMemo(() => {
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
@@ -590,14 +598,8 @@ export const LensTopNavMenu = ({
     const showReplaceInCanvas =
       initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
-    const isComingFromDashboardView =
-      incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/');
-
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) && Boolean(isComingFromDashboardView);
+      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -868,6 +870,7 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput?.ref_id,
     incomingState,
+    isComingFromDashboardView,
     activeData,
     isSaveable,
     application,
@@ -1185,15 +1188,6 @@ export const LensTopNavMenu = ({
 
   const legacyBadges =
     !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined;
-
-  // Same condition as the Cancel menu action: opened from a container view (e.g. Dashboard
-  // "Edit visualization in Lens"), not from a library listing page.
-  const isComingFromDashboardView = Boolean(
-    incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/')
-  );
 
   // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
   // When not coming from a dashboard, omit `back` so chrome can fall back to breadcrumbs.
