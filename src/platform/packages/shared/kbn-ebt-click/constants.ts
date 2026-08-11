@@ -60,6 +60,9 @@ export const EBT_CLICK_ACTIONS = {
   SET_SORT_DIRECTION: 'setSortDirection',
 } as const;
 
+/** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */
+export const CHARTS_TOOLBAR_EBT_ELEMENT = 'chartsToolbar';
+
 /**
  * Sentinel value for `data-ebt-detail` when a field is not found in the ECS fields
  * metadata registry. This covers truly custom fields but also legitimate standard fields
