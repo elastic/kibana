@@ -151,6 +151,7 @@ export const TakeActionButton = memo(
       onMenuItemClick: closePopoverHandler,
       onActionClick: reportAddToCaseAction,
       onSuccess: refetchFlyoutData,
+      useNestedCaseActions: true,
     });
 
     const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
