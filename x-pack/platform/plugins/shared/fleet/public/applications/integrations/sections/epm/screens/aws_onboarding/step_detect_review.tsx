@@ -91,7 +91,7 @@ const DeploymentSummaryCard: React.FunctionComponent<{
       } receiving data`}
     </EuiText>
     <EuiSpacer size="s" />
-    <EuiFlexGrid columns={3} gutterSize="m">
+    <EuiFlexGrid columns={4} gutterSize="m">
       {services.map((service, i) => (
         <EuiFlexItem key={service.id}>
           <EuiPanel hasBorder paddingSize="m">
