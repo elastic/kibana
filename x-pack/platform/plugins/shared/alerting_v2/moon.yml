@@ -140,6 +140,8 @@ dependsOn:
   - '@kbn/security-authorization-core'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/resizable-layout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
