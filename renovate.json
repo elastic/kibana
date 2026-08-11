@@ -7,7 +7,7 @@
   ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
-  "baseBranches": ["main", "9.4", "9.3", "8.19"],
+  "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -148,7 +149,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
@@ -960,7 +961,7 @@
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
-        "eslint-plugin-node",
+        "eslint-plugin-n",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
@@ -1881,15 +1882,6 @@
       "enabled": true
     },
     {
-      "groupName": "@kayahr/text-encoding",
-      "matchDepNames": ["@kayahr/text-encoding"],
-      "reviewers": ["team:kibana-security"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "uuid",
       "matchDepNames": ["uuid"],
       "reviewers": ["team:kibana-security"],
@@ -2113,7 +2105,7 @@
     {
       "groupName": "hdr-histogram-js",
       "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-presentation-team"],
+      "reviewers": ["team:obs-signals-metrics-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2394,8 +2386,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "express",
-      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
+      "groupName": "zod-to-json-schema",
+      "matchDepNames": ["zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],

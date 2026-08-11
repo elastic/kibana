@@ -75,7 +75,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
           button={
             <EuiButtonEmpty
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={() => setIsBulkActionsOpen((open) => !open)}
               data-test-subj="bulkActionsButton"
@@ -109,7 +109,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="disable"
-                icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
+                icon={<EuiIcon type="crossCircle" size="m" aria-hidden={true} />}
                 onClick={handleBulkDisable}
                 data-test-subj="bulkDisableRules"
               >
