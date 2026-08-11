@@ -39,12 +39,6 @@ export type { TagsListProps } from './components/tags_list/tags_list';
 
 export { TagsComboBox } from './components/tags_combo_box/tags_combo_box_lazy';
 export type { TagsComboBoxProps } from './components/tags_combo_box/tags_combo_box';
-export {
-  createTagsPasteHandler,
-  getNewTags,
-  hasTagDelimiter,
-  splitTags,
-} from './components/tags_combo_box/tags_input';
 
 export { TechnicalPreviewBadge } from './components/technical_preview_badge/technical_preview_badge';
 
