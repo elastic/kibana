@@ -52,6 +52,14 @@ export const navigateToNextPage = () => {
   cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
 };
 
+/**
+ * The entity maintainers endpoint is called instead of RISK_ENGINE_STATUS_URL when
+ * the `entityAnalyticsEntityStoreV2` experimental feature flag is enabled (default: true
+ * on main). Both URLs must be mocked so the risk tables resolve out of loading state
+ * regardless of which code path is active.
+ */
+const ENTITY_MAINTAINERS_URL = '/internal/security/entity_store/entity_maintainers*';
+
 export const mockRiskEngineEnabled = () => {
   cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
     statusCode: 200,
@@ -59,6 +67,26 @@ export const mockRiskEngineEnabled = () => {
       risk_engine_status: 'ENABLED',
     },
   }).as('riskEngineStatus');
+
+  cy.intercept('GET', ENTITY_MAINTAINERS_URL, {
+    statusCode: 200,
+    body: {
+      maintainers: [
+        {
+          id: 'risk-score',
+          taskStatus: 'started',
+          interval: '1h',
+          description: null,
+          nextRunAt: null,
+          minLicense: 'platinum',
+          customState: null,
+          runs: 1,
+          lastSuccessTimestamp: null,
+          lastErrorTimestamp: null,
+        },
+      ],
+    },
+  }).as('entityMaintainers');
 };
 
 export const mockRiskEnginePrivileges = () => {
