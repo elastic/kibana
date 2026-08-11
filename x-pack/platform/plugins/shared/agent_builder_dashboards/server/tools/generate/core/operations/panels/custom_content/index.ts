@@ -17,30 +17,33 @@ import {
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
 
-/**
- * Custom content panel logic.
- *
- * Custom content is authored with `source: 'config'` (`type: 'custom_content'`).
- * The agent provides a `prompt` describing what to render and, optionally, a
- * pre-written LiquidJS `template` and an `esqlQuery` for data-backed panels.
- * When no `template` is given the embeddable generates one from the `prompt`
- * on first display. This panel type is a fallback for content that cannot be
- * expressed as a Lens visualization or Vega-Lite chart.
- */
+/** Create schema: no template — the embeddable generates it via the generate route. */
+export const customContentPanelConfigSchema = customContentStateSchema
+  .omit({ template: true })
+  .extend({
+    prompt: z
+      .string()
+      .min(1)
+      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+      .describe(
+        'Natural language description of what to display. The embeddable generates a visually consistent HTML template from this prompt using EUI color tokens for the active theme — do not supply a template yourself on create.'
+      ),
+    esqlQuery: z
+      .string()
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+      .optional()
+      .describe(
+        'ES|QL query whose results are passed to the generated template as row objects. Omit for static content.'
+      ),
+  });
 
-/**
- * By-value custom content panel config. Extends the shared state schema to add
- * agent-facing descriptions and make `prompt` required (so the embeddable always
- * has something to generate from when `template` is omitted).
- */
-export const customContentPanelConfigSchema = customContentStateSchema.extend({
+/** Edit schema: includes template so the agent can modify the existing generated template. */
+const customContentEditConfigSchema = customContentStateSchema.extend({
   prompt: z
     .string()
     .min(1)
     .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-    .describe(
-      'Natural language description of what to display. The embeddable generates an HTML template from this if `template` is omitted.'
-    ),
+    .describe('Updated natural language description of what to display.'),
   template: z
     .string()
     .max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH)
@@ -55,14 +58,14 @@ export const customContentPanelConfigSchema = customContentStateSchema.extend({
     })
     .optional()
     .describe(
-      'LiquidJS HTML template to render directly. No JavaScript (<script> tags are rejected). When `esqlQuery` is set, each row is accessible as `{{ row["field_name"].value }}`.'
+      'The existing LiquidJS HTML template from the panel state, modified to reflect the requested changes. Carry it over from the current panel config and apply targeted edits — do not rewrite from scratch. Omit only if removing the stored template intentionally so the embeddable regenerates from prompt.'
     ),
   esqlQuery: z
     .string()
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
     .optional()
     .describe(
-      'ES|QL query whose results are passed to the template as row objects. Omit for static content.'
+      'ES|QL query. Carry over from the existing panel config unless the request changes the data source.'
     ),
 });
 
@@ -77,18 +80,14 @@ export const customContentPanelConfigInputSchema = z.object({
   config: customContentPanelConfigSchema.describe('Custom content panel config.'),
 });
 
-/**
- * The custom_content variant of an `edit_panels` item: targets an existing
- * custom_content panel by id and replaces its config.
- */
-export const editCustomContentPanelConfigInputSchema = customContentPanelConfigInputSchema
-  .omit({ grid: true })
-  .extend({
-    panelId: z.string().max(256).describe('Existing custom_content panel id to update.'),
-    config: customContentPanelConfigSchema.describe(
-      'New custom content panel config. Fully replaces the existing config.'
-    ),
-  });
+export const editCustomContentPanelConfigInputSchema = z.object({
+  source: z.literal('config'),
+  type: z.literal('custom_content'),
+  panelId: z.string().max(256).describe('Existing custom_content panel id to update.'),
+  config: customContentEditConfigSchema.describe(
+    'Updated config. Carry over prompt, template, and esqlQuery from the existing panel and apply only the requested changes.'
+  ),
+});
 
 /** Registry entry for the `custom_content` panel type. */
 export const customContentPanelDefinition = definePanelType({

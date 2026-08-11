@@ -24,16 +24,25 @@ import {
 describe('customContentPanelConfigSchema parity with the embeddable state schema', () => {
   it.each([
     { prompt: 'Show total error count as a large KPI number' },
-    { prompt: 'Status board', template: '<div>{{ row["status"].value }}</div>' },
+    { prompt: 'Status board' },
     {
       prompt: 'Error rate by service',
-      template: '<div>{{ row["service.name"].value }}</div>',
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
     },
   ])('produces embeddable-valid state for %j', (input) => {
     const parsed = customContentPanelConfigSchema.parse(input);
 
     expect(() => customContentStateSchema.parse(parsed)).not.toThrow();
+  });
+
+  it('strips template on create (template not accepted in create schema)', () => {
+    const result = customContentPanelConfigSchema.safeParse({
+      prompt: 'Show KPI',
+      template: '<div>html</div>',
+    });
+
+    expect(result.success).toBe(true);
+    expect((result.data as Record<string, unknown>).template).toBeUndefined();
   });
 });
 
@@ -42,7 +51,6 @@ describe('customContentPanelDefinition', () => {
     it('maps the config to the custom_content embeddable type', () => {
       const config = {
         prompt: 'Show error rate',
-        template: '<div>{{ row["error_rate"].value }}</div>',
         esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
       };
 
@@ -63,7 +71,18 @@ describe('customContentPanelDefinition', () => {
   });
 
   describe('editCustomContentPanelConfigInputSchema', () => {
-    it('accepts a valid edit payload', () => {
+    it('accepts a valid edit payload with template', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          panelId: 'cc-1',
+          config: { prompt: 'Updated KPI', template: '<div>{{ row["value"].value }}</div>' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts a valid edit payload without template (triggers regeneration)', () => {
       expect(
         editCustomContentPanelConfigInputSchema.safeParse({
           source: 'config',

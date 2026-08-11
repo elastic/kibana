@@ -1934,7 +1934,6 @@ describe('executeDashboardOperations', () => {
               type: 'custom_content',
               config: {
                 prompt: 'Show error rate KPI',
-                template: '<div>{{ row["error_rate"].value }}</div>',
                 esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
               },
               grid: { x: 0, y: 0, w: 24, h: 6 },
@@ -1953,7 +1952,6 @@ describe('executeDashboardOperations', () => {
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
         config: {
           prompt: 'Show error rate KPI',
-          template: '<div>{{ row["error_rate"].value }}</div>',
           esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
         },
         grid: { x: 0, y: 0, w: 24, h: 6 },

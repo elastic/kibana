@@ -58,11 +58,14 @@ Choose the panel type in this priority order:
 - Scatter plots, faceted charts, layered charts, combination charts → use Vega.
 - Plain explanatory text with no data → use markdown.
 
-**How to create a custom content panel:**
-- Always set \`config.prompt\` to a concise description of what to display. The embeddable auto-generates an HTML template from this if \`template\` is omitted.
-- Optionally set \`config.template\` to a LiquidJS HTML template. No JavaScript (\`<script>\` tags are rejected). Providing a template makes the panel immediately renderable without an extra AI call.
-- Optionally set \`config.esqlQuery\` when the panel needs live data. Each row is accessible in the template as \`{{ row["field_name"].value }}\`.
-- Custom content panels support \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) to replace the prompt, template, or ES|QL query in place.
+**Creating a custom content panel:**
+- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` on create — the embeddable generates a visually consistent HTML template using EUI color tokens for the active theme.
+- Optionally set \`config.esqlQuery\` when the panel needs live data.
+
+**Editing a custom content panel:**
+- Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
+- Always carry over \`prompt\`, \`template\`, and \`esqlQuery\` from the existing panel config — only modify the fields the user is changing.
+- Modify \`template\` in place (targeted edits, not a full rewrite) so the changes are consistent with the existing EUI color scheme. Omit \`template\` only if the user wants a full regeneration from the updated prompt.
 
 ## Chart Type Guidance
 
