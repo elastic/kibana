@@ -303,6 +303,8 @@ The A2A (Agent-to-Agent) server provides a standardized interface for external A
 
 Agent cards for agentBuilder agents are exposed on `GET /api/agent_builder/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/agent_builder/a2a/{agentId}`.
 
+For standard A2A discovery, `GET /api/agent_builder/a2a/.well-known/agent-card.json` serves the default agent's card. Point A2A clients at `<kibana-url>/api/agent_builder/a2a` as the server address.
+
 ### Authentication
 
 The A2A endpoint supports two authentication methods, both advertised in the agent card's `securitySchemes`:
