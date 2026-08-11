@@ -79,7 +79,7 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { status, stream, search, ...rest } = params.query;
+    const { status, stream, search, ...rest } = params.query ?? {};
 
     return getEventClient().findLatestPaginated({
       ...rest,

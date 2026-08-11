@@ -875,7 +875,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
@@ -928,7 +928,7 @@ describe('enable()', () => {
         'alert',
         '1',
         expect.objectContaining({
-          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['existing-tag', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
