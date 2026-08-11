@@ -140,13 +140,13 @@ describe('createEsContext', () => {
       indexNameRoot: 'test2',
       elasticsearchClientPromise: Promise.resolve(elasticsearchClient),
     });
-    expect(mockCreateReadySignal).toBeCalledTimes(1);
+    expect(mockCreateReadySignal).toHaveBeenCalledTimes(1);
     elasticsearchClient.indices.existsTemplate.mockResponse(true);
-    expect(signal).toBeCalledTimes(0);
+    expect(signal).toHaveBeenCalledTimes(0);
     context.initialize();
     await context.shutdown();
-    expect(signal).toBeCalledTimes(1);
-    expect(signal).toBeCalledWith(false);
+    expect(signal).toHaveBeenCalledTimes(1);
+    expect(signal).toHaveBeenCalledWith(false);
   });
 
   test('should handled failed initialization', async () => {

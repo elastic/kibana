@@ -131,7 +131,7 @@ describe('isInlineScriptingEnabled', () => {
       mockNonRetryableErrorOnce();
       mockSuccessOnce();
 
-      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrowError(
+      await expect(isInlineScriptingEnabled({ client, maxRetryDelay: 0.1 })).rejects.toThrow(
         'Non-retryable error'
       );
     });
@@ -144,7 +144,7 @@ describe('isInlineScriptingEnabled', () => {
 
       await expect(
         isInlineScriptingEnabled({ client, maxRetryDelay: 0.1, maxRetries: 2 })
-      ).rejects.toThrowError('Connection failed');
+      ).rejects.toThrow('Connection failed');
       expect(client.cluster.getSettings).toHaveBeenCalledTimes(3);
     });
   });

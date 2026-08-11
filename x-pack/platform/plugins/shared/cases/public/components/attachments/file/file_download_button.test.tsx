@@ -28,7 +28,7 @@ describe('FileDownloadButton', () => {
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
-      expect(filesClient.getDownloadHref).toBeCalledTimes(1);
+      expect(filesClient.getDownloadHref).toHaveBeenCalledTimes(1);
       expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
         id: basicFileMock.id,
@@ -49,7 +49,7 @@ describe('FileDownloadButton', () => {
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
 
-      expect(filesClient.getDownloadHref).toBeCalledTimes(1);
+      expect(filesClient.getDownloadHref).toHaveBeenCalledTimes(1);
       expect(filesClient.getDownloadHref).toHaveBeenCalledWith({
         fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
         id: basicFileMock.id,

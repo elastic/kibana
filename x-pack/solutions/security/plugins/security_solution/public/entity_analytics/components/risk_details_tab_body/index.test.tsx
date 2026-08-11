@@ -70,7 +70,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} />
       </TestProviders>
     );
-    expect(mockUseRiskScore).toBeCalledWith({
+    expect(mockUseRiskScore).toHaveBeenCalledWith({
       filterQuery: {
         terms: {
           [`${riskEntity}.name`]: ['testEntity'],
@@ -93,7 +93,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} entityId="entity-123" />
       </TestProviders>
     );
-    expect(mockUseEntityRiskScores).toBeCalledWith(riskEntity, 'entity-123');
+    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(riskEntity, 'entity-123');
     // The legacy read is skipped in V2.
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
   });
@@ -106,7 +106,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
         <RiskDetailsTabBody {...defaultProps} entityId="entity-123" />
       </TestProviders>
     );
-    expect(mockUseEntityRiskScores).toBeCalledWith(riskEntity, undefined);
+    expect(mockUseEntityRiskScores).toHaveBeenCalledWith(riskEntity, undefined);
   });
 
   it("doesn't skip the legacy read when toggleStatus is true", () => {

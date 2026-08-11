@@ -143,7 +143,7 @@ describe('useSubmitCase', () => {
 
       expect(result.current.isSubmitting).toEqual(true);
 
-      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
+      expect(postCase).toHaveBeenCalledWith({ request: sampleDataWithoutTags });
       expect(onSuccess).toHaveBeenCalled();
       expect(afterCaseCreated).toHaveBeenCalled();
     });

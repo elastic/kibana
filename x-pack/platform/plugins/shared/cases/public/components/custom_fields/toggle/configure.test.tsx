@@ -43,7 +43,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           defaultValue: false,
         },
@@ -65,7 +65,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           required: true,
           defaultValue: true,
@@ -87,7 +87,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           required: true,
           defaultValue: false,

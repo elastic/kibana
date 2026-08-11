@@ -613,7 +613,7 @@ describe('UserProfileService', () => {
         const startContract = userProfileService.start(mockStartParams);
         await expect(
           startContract.getCurrent({ request: enrichedFakeRequest })
-        ).rejects.toThrowError(/User profile is not found/);
+        ).rejects.toThrow(/User profile is not found/);
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
@@ -638,7 +638,7 @@ describe('UserProfileService', () => {
         const startContract = userProfileService.start(mockStartParams);
         await expect(
           startContract.getCurrent({ request: enrichedFakeRequest })
-        ).rejects.toThrowError(/boom/);
+        ).rejects.toThrow(/boom/);
 
         expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[fake=true]'));
@@ -740,7 +740,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledTimes(1);
         expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
-        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledWith({
@@ -777,7 +777,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledTimes(1);
         expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
-        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledWith({
@@ -866,7 +866,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledTimes(1);
         expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalled();
-        expect(mockStartParams.clusterClient.asScoped).toBeCalledWith(mockApiKeyRequest);
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(mockApiKeyRequest);
         expect(
           mockStartParams.clusterClient.asScoped().asCurrentUser.security.getApiKey
         ).toHaveBeenCalledWith({

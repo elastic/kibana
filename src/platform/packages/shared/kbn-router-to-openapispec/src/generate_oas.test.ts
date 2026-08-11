@@ -410,7 +410,7 @@ describe('generateOpenApiDocument', () => {
           output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
         });
 
-        await expect(buildOas(base, extended)).rejects.toThrowError(
+        await expect(buildOas(base, extended)).rejects.toThrow(
           /OAS shared schema collision for id "package_policy_status_response"/
         );
       });
@@ -1001,7 +1001,7 @@ describe('generateOpenApiDocument', () => {
           { routers, versionedRouters },
           { title: 'test', baseUrl: 'https://test.oas', version: '99.99.99' }
         )
-      ).rejects.toThrowError(/OAS shared schema collision for id "package_policy_status_response"/);
+      ).rejects.toThrow(/OAS shared schema collision for id "package_policy_status_response"/);
     });
 
     it('does not throw when two routes register the same id with the same shape', async () => {

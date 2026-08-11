@@ -50,7 +50,7 @@ describe('get color', () => {
       colorPaletteMap.getColor('JetBeats');
       colorPaletteMap.getColor('JetBeats');
 
-      expect(paletteDefinition.getCategoricalColor).toBeCalledTimes(1);
+      expect(paletteDefinition.getCategoricalColor).toHaveBeenCalledTimes(1);
     });
 
     it('should order rankAtDepth based on colorIndexMap for each value', () => {

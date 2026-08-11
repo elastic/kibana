@@ -287,7 +287,7 @@ describe('get', () => {
     };
 
     await expect(get(testSavedObject)).resolves.toBeDefined();
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       `Invalid response. [item.attributes.description]: expected value of type [string] but got [null]`
     );
   });
@@ -367,7 +367,7 @@ describe('create', () => {
     };
 
     await expect(create(testSavedObject)).resolves.toBeDefined();
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       `Invalid response. [item.attributes.description]: expected value of type [string] but got [null]`
     );
   });
@@ -447,7 +447,7 @@ describe('update', () => {
     };
 
     await expect(update(testSavedObject)).resolves.toBeDefined();
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       `Invalid response. [item.attributes.description]: expected value of type [string] but got [null]`
     );
   });
@@ -527,7 +527,7 @@ describe('search', () => {
     };
 
     await expect(update(testSavedObject)).resolves.toBeDefined();
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       `Invalid response. [hits.0.attributes.description]: expected value of type [string] but got [null]`
     );
   });
@@ -607,7 +607,7 @@ describe('mSearch', () => {
     };
 
     await expect(mSearch(testSavedObject)).resolves.toBeDefined();
-    expect(logger.warn).toBeCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       'Invalid response. [attributes.description]: expected value of type [string] but got [null]'
     );
   });

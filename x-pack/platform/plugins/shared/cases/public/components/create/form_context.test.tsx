@@ -321,7 +321,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
+      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleDataWithoutTags, tags: sampleTags } });
     });
 
     it('should post a case on submit click with the selected severity', async () => {
@@ -355,7 +355,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           severity: CaseSeverity.HIGH,
@@ -408,7 +408,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleData, category: 'First' } });
+      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleData, category: 'First' } });
     });
 
     it('should toggle sync settings', async () => {
@@ -437,7 +437,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           settings: { syncAlerts: false, extractObservables: false },
@@ -473,7 +473,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           settings: { syncAlerts: false, extractObservables: false },
@@ -559,7 +559,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           customFields: [
@@ -621,7 +621,7 @@ describe('Create case', () => {
 
       await waitFor(() => expect(postCase).toHaveBeenCalled());
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           connector: {
@@ -682,11 +682,11 @@ describe('Create case', () => {
       await user.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalled();
+        expect(postCase).toHaveBeenCalled();
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();
-      expect(postCase).toBeCalledWith({ request: sampleDataWithoutTags });
+      expect(postCase).toHaveBeenCalledWith({ request: sampleDataWithoutTags });
     });
 
     it('should set the category correctly', async () => {
@@ -720,7 +720,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({ request: { ...sampleDataWithoutTags, category } });
+      expect(postCase).toHaveBeenCalledWith({ request: { ...sampleDataWithoutTags, category } });
     });
   });
 
@@ -768,7 +768,7 @@ describe('Create case', () => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
       expect(onFormSubmitSuccess).toHaveBeenCalled();
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           connector: {
@@ -1168,7 +1168,7 @@ describe('Create case', () => {
         expect(postCase).toHaveBeenCalled();
       });
 
-      expect(postCase).toBeCalledWith({
+      expect(postCase).toHaveBeenCalledWith({
         request: {
           ...sampleDataWithoutTags,
           assignees: [{ uid: userProfiles[0].uid }],

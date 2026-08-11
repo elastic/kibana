@@ -226,7 +226,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query'],
       namespaces: ['a-space'],
       perPage: 0,
@@ -298,7 +298,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query'],
       namespaces: ['a-space'],
       perPage: 0,
@@ -391,7 +391,7 @@ describe('GET /internal/spaces/{spaceId}/content_summary', () => {
 
     const response = await routeHandler(routeContext, request, kibanaResponseFactory);
 
-    expect(findMock).toBeCalledWith({
+    expect(findMock).toHaveBeenCalledWith({
       type: ['dashboard', 'query', 'search'],
       namespaces: ['a-space'],
       perPage: 0,

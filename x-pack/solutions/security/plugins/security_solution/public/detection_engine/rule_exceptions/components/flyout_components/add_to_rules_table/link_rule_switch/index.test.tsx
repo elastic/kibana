@@ -48,7 +48,7 @@ describe('LinkRuleSwitch', () => {
     const switchComponent = getByRole('switch');
     expect(switchComponent).not.toBeChecked();
     fireEvent.click(switchComponent);
-    expect(onRuleLinkChangeMock).toBeCalledWith([linkedRules[0]]);
+    expect(onRuleLinkChangeMock).toHaveBeenCalledWith([linkedRules[0]]);
   });
   it('should unlink rule if it was linked before', () => {
     const { getByRole } = render(
@@ -61,6 +61,6 @@ describe('LinkRuleSwitch', () => {
     const switchComponent = getByRole('switch');
     expect(switchComponent).toBeChecked();
     fireEvent.click(switchComponent);
-    expect(onRuleLinkChangeMock).toBeCalledWith([]);
+    expect(onRuleLinkChangeMock).toHaveBeenCalledWith([]);
   });
 });

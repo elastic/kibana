@@ -300,7 +300,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -376,7 +376,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
   });
 
@@ -455,7 +455,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: unFlattenGroups([
@@ -494,7 +494,7 @@ describe('helpers', () => {
             timelineId,
           });
 
-          expect(dispatch).toBeCalledWith({
+          expect(dispatch).toHaveBeenCalledWith({
             payload: {
               id: 'timeline-1',
               providers: unFlattenGroups([
@@ -540,7 +540,7 @@ describe('helpers', () => {
             timelineId,
           });
 
-          expect(dispatch).toBeCalledWith({
+          expect(dispatch).toHaveBeenCalledWith({
             payload: {
               id: 'timeline-1',
               providers: unFlattenGroups([
@@ -586,7 +586,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
 
     test('it does NOT dispatch an action when the destinationGroupIndex is invalid', () => {
@@ -609,7 +609,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
   });
 
@@ -626,7 +626,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -657,7 +657,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+      expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
     });
   });
 
@@ -681,7 +681,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
 
     test('it dispatches the expected action when dragging within the same group', () => {
@@ -703,7 +703,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -784,7 +784,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -868,7 +868,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
 
     test('it does NOT invoke onAddedToTimeline when destination undefined', () => {
@@ -884,7 +884,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).not.toBeCalled();
+      expect(onAddedToTimeline).not.toHaveBeenCalled();
     });
 
     test('it does NOT dispatch an action when destination is invalid', () => {
@@ -903,7 +903,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).not.toBeCalled();
+      expect(dispatch).not.toHaveBeenCalled();
     });
 
     test('it does NOT invoke onAddedToTimeline when destination is invalid', () => {
@@ -922,7 +922,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).not.toBeCalled();
+      expect(onAddedToTimeline).not.toHaveBeenCalled();
     });
 
     test('it dispatches the UPDATE_PROVIDERS action with the expected values', () => {
@@ -938,7 +938,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -979,7 +979,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+      expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
     });
   });
 
@@ -1003,7 +1003,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: [
@@ -1035,7 +1035,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+        expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
       });
     });
 
@@ -1059,7 +1059,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: [
@@ -1100,7 +1100,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+        expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
       });
     });
   });

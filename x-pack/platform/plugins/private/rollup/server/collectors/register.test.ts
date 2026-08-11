@@ -15,8 +15,8 @@ describe('registerRollupUsageCollector', () => {
   it('makes a usage collector and registers it`', () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerRollupUsageCollector(mockCollectorSet, getIndexForType);
-    expect(mockCollectorSet.makeUsageCollector).toBeCalledTimes(1);
-    expect(mockCollectorSet.registerCollector).toBeCalledTimes(1);
+    expect(mockCollectorSet.makeUsageCollector).toHaveBeenCalledTimes(1);
+    expect(mockCollectorSet.registerCollector).toHaveBeenCalledTimes(1);
   });
 
   it('makeUsageCollector configs fit the shape', () => {

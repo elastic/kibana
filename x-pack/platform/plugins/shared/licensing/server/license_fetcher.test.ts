@@ -134,7 +134,7 @@ describe('LicenseFetcher', () => {
     const license = await licensePromise;
 
     expect(license.uid).toEqual('license-1');
-    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(2);
+    expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(2);
   });
 
   it('returns the latest fetched license after an error within the cache duration period', async () => {
@@ -159,7 +159,7 @@ describe('LicenseFetcher', () => {
 
     let license = await fetcher();
     expect(license.uid).toEqual('license-1');
-    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(1);
+    expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
     const licensePromise = fetcher();
     await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
@@ -167,7 +167,7 @@ describe('LicenseFetcher', () => {
     expect(license.uid).toEqual('license-1');
     // should be called once in the successful mock, once in the error mock
     // and then in the retries after 1s, 2s, 4s, 8s and 16s
-    expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(7);
+    expect(clusterClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(7);
   });
 
   it('returns an error license after an error exceeding the cache duration period', async () => {

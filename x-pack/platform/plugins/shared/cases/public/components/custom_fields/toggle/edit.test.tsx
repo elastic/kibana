@@ -58,7 +58,7 @@ describe('Edit ', () => {
     await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({ ...customField, value: false });
+      expect(onSubmit).toHaveBeenCalledWith({ ...customField, value: false });
     });
   });
 
@@ -109,7 +109,7 @@ describe('Edit ', () => {
     await userEvent.click(screen.getByRole('switch'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         key: customFieldConfiguration.key,
         /**

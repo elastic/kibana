@@ -1521,7 +1521,7 @@ describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () 
       ],
     };
 
-    expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrowError(
+    expect(() => storedPackagePolicyToAgentInputs(policy, nonDynamicPackageInfo)).toThrow(
       '[data_stream.type]: unexpected undefined stream type for non-dynamic package'
     );
   });

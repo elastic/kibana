@@ -134,9 +134,9 @@ describe('AddComment ', () => {
 
     await userEvent.click(screen.getByTestId('submit-comment'));
 
-    await waitFor(() => expect(onCommentSaving).toBeCalled());
+    await waitFor(() => expect(onCommentSaving).toHaveBeenCalled());
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith(
+      expect(createAttachmentsMock).toHaveBeenCalledWith(
         {
           caseId: addCommentProps.caseId,
           attachments: [
@@ -164,9 +164,9 @@ describe('AddComment ', () => {
     await userEvent.type(markdown, sampleData.comment);
     await userEvent.click(screen.getByTestId('submit-comment'));
 
-    await waitFor(() => expect(onCommentSaving).toBeCalled());
+    await waitFor(() => expect(onCommentSaving).toHaveBeenCalled());
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith(
+      expect(createAttachmentsMock).toHaveBeenCalledWith(
         {
           caseId: addCommentProps.caseId,
           attachments: [
@@ -311,10 +311,10 @@ describe('draft comment ', () => {
     fireEvent.click(screen.getByTestId('submit-comment'));
 
     await waitFor(() => {
-      expect(onCommentSaving).toBeCalled();
+      expect(onCommentSaving).toHaveBeenCalled();
     });
 
-    expect(createAttachmentsMock).toBeCalledWith(
+    expect(createAttachmentsMock).toHaveBeenCalledWith(
       {
         caseId: addCommentProps.caseId,
         attachments: [
@@ -393,10 +393,10 @@ describe('submit comment by key press', () => {
       });
 
       await waitFor(() => {
-        expect(onCommentSaving).toBeCalled();
+        expect(onCommentSaving).toHaveBeenCalled();
       });
 
-      expect(createAttachmentsMock).toBeCalledWith(
+      expect(createAttachmentsMock).toHaveBeenCalledWith(
         {
           caseId: addCommentProps.caseId,
           attachments: [

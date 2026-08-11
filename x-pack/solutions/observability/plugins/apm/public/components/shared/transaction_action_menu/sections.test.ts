@@ -42,11 +42,11 @@ const mockDiscoverLocator = {
 } as unknown as ReturnType<typeof sharePluginMock.createLocator>;
 
 const expectLogsLocatorToBeCalled = () => {
-  expect(logsLocatorMock.getRedirectUrl).toBeCalledTimes(4);
+  expect(logsLocatorMock.getRedirectUrl).toHaveBeenCalledTimes(4);
 };
 
 const expectUptimeLocatorToBeCalled = () => {
-  expect(uptimeLocator.getRedirectUrl).toBeCalledTimes(1);
+  expect(uptimeLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
 };
 
 describe('Transaction action menu', () => {

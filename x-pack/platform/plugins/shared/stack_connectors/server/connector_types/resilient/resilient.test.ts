@@ -529,7 +529,7 @@ describe('IBM Resilient connector', () => {
 
     it('should call request with correct arguments', async () => {
       await connector.getIncidentTypes(undefined, connectorUsageCollector);
-      expect(requestMock).toBeCalledTimes(1);
+      expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'GET',
@@ -596,7 +596,7 @@ describe('IBM Resilient connector', () => {
 
     it('should call request with correct arguments', async () => {
       await connector.getSeverity(undefined, connectorUsageCollector);
-      expect(requestMock).toBeCalledTimes(1);
+      expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'GET',
@@ -672,7 +672,7 @@ describe('IBM Resilient connector', () => {
     it('should call request with correct arguments', async () => {
       await connector.getFields(undefined, connectorUsageCollector);
 
-      expect(requestMock).toBeCalledTimes(1);
+      expect(requestMock).toHaveBeenCalledTimes(1);
       expect(requestMock).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'GET',

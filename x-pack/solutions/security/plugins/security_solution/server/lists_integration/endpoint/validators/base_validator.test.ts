@@ -487,7 +487,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+        ).rejects.toThrow(itemNotFoundInSpaceErrorMessage);
       });
 
       it('should allow read if per-policy item has at least one policy that is visible in active space', async () => {
@@ -504,7 +504,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
         await expect(
           validator._validateCanReadItemInActiveSpace(savedExceptionItem)
-        ).rejects.toThrowError(itemNotFoundInSpaceErrorMessage);
+        ).rejects.toThrow(itemNotFoundInSpaceErrorMessage);
       });
     });
 

@@ -29,7 +29,7 @@ describe('extractToolReturn', () => {
   it('should throw an error if the message does not contain an artifact and is not an error message', () => {
     const mockMessage = createMessage(undefined);
 
-    expect(() => extractToolReturn(mockMessage)).toThrowError(
+    expect(() => extractToolReturn(mockMessage)).toThrow(
       'No artifact attached to tool message'
     );
   });
@@ -55,7 +55,7 @@ describe('extractToolReturn', () => {
       results: 'not-an-array',
     });
 
-    expect(() => extractToolReturn(mockMessage)).toThrowError(
+    expect(() => extractToolReturn(mockMessage)).toThrow(
       'Artifact is not a structured tool artifact. Received artifact={"results":"not-an-array"}'
     );
   });

@@ -163,7 +163,7 @@ describe('getJourneyScreenshot', () => {
       initialBackoff,
     });
     expect(result).toBeNull();
-    expect(mockFetch).toBeCalledTimes(maxRetry + 1);
+    expect(mockFetch).toHaveBeenCalledTimes(maxRetry + 1);
   });
 });
 

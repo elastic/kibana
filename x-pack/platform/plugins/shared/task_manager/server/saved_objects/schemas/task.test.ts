@@ -45,7 +45,7 @@ test('throws error message for cost > 100 characters', () => {
 
   const longCost = 'a'.repeat(101);
   const task = getTask({ cost: longCost });
-  expect(() => taskSchema?.validate(task)).toThrowError('cost');
+  expect(() => taskSchema?.validate(task)).toThrow('cost');
 });
 
 function getTask(overrides = {}) {

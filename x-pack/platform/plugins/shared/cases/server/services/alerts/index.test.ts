@@ -111,7 +111,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -172,7 +172,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -235,7 +235,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -353,7 +353,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       // id1 should be closed in index 1
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -546,7 +546,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.bulkUpdateCases({ alerts, caseIds });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -555,7 +555,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -564,7 +564,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -589,7 +589,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.removeCaseIdFromAlerts({ alerts, caseId });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -598,7 +598,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -607,7 +607,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -624,7 +624,7 @@ describe('updateAlertsStatus', () => {
 
       await expect(
         alertService.removeCaseIdFromAlerts({ alerts, caseId })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing case test-case from alerts: An error'
@@ -638,7 +638,7 @@ describe('updateAlertsStatus', () => {
     it('remove all case ids from alerts', async () => {
       await alertService.removeCaseIdsFromAllAlerts({ caseIds });
 
-      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toHaveBeenCalledWith({ caseIds });
     });
 
     it('does not call the alerts client with no case ids', async () => {
@@ -654,7 +654,7 @@ describe('updateAlertsStatus', () => {
 
       await expect(
         alertService.removeCaseIdsFromAllAlerts({ caseIds })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'

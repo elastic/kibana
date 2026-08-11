@@ -76,8 +76,8 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = getByTestId('reset-group-by');
     fireEvent.click(resetMenuItem);
 
-    expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
-    expect(setStackByField1).toBeCalledWith('host.name');
+    expect(setStackBy).toHaveBeenCalledWith('kibana.alert.rule.name');
+    expect(setStackByField1).toHaveBeenCalledWith('host.name');
   });
 
   test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
@@ -103,6 +103,6 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = getByTestId('reset-group-by');
     fireEvent.click(resetMenuItem);
 
-    expect(onReset).toBeCalled();
+    expect(onReset).toHaveBeenCalled();
   });
 });

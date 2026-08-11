@@ -27,7 +27,7 @@ describe('bulk_delete', () => {
 
         await expect(
           bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
         );
       });
@@ -53,7 +53,7 @@ describe('bulk_delete', () => {
       const fileNotFound = new FileNotFoundError('not found');
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file id: abc: Error: not found",
@@ -65,7 +65,7 @@ describe('bulk_delete', () => {
       const fileNotFound = new FileNotFoundError('not found');
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc', '123'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file: Error: not found",
@@ -78,10 +78,10 @@ describe('bulk_delete', () => {
 
       expect.assertions(2);
 
-      expect(() => retrieveFilesIgnoringNotFound([otherError], ['abc'], mockLogger)).toThrowError(
+      expect(() => retrieveFilesIgnoringNotFound([otherError], ['abc'], mockLogger)).toThrow(
         otherError
       );
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('throws when encountering an error that is not a file not found after a valid file', async () => {
@@ -92,8 +92,8 @@ describe('bulk_delete', () => {
 
       expect(() =>
         retrieveFilesIgnoringNotFound([fileResult, otherError], ['1', '2'], mockLogger)
-      ).toThrowError(otherError);
-      expect(mockLogger.warn).not.toBeCalled();
+      ).toThrow(otherError);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

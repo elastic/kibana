@@ -94,7 +94,7 @@ describe('TagsClient', () => {
       });
       validateTagMock.mockReturnValue(validation);
 
-      await expect(tagsClient.create(createAttributes())).rejects.toThrowError(TagValidationError);
+      await expect(tagsClient.create(createAttributes())).rejects.toThrow(TagValidationError);
     });
 
     it('does not call `soClient.create` if attributes validation fails', async () => {
@@ -147,7 +147,7 @@ describe('TagsClient', () => {
       });
       validateTagMock.mockReturnValue(validation);
 
-      await expect(tagsClient.update(tagId, createAttributes())).rejects.toThrowError(
+      await expect(tagsClient.update(tagId, createAttributes())).rejects.toThrow(
         TagValidationError
       );
     });
@@ -262,7 +262,7 @@ describe('TagsClient', () => {
     it('does not calls `soClient.delete` if `soClient.removeReferencesTo` throws', async () => {
       soClient.removeReferencesTo.mockRejectedValue(new Error('something went wrong'));
 
-      await expect(tagsClient.delete(tagId)).rejects.toThrowError();
+      await expect(tagsClient.delete(tagId)).rejects.toThrow();
 
       expect(soClient.delete).not.toHaveBeenCalled();
     });

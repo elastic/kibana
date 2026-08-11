@@ -63,7 +63,7 @@ describe('settingsSetup', () => {
 
     await settingsSetup(soClientMock);
 
-    expect(soClientMock.create).toBeCalled();
+    expect(soClientMock.create).toHaveBeenCalled();
   });
 
   it('should do nothing if there is settings', async () => {
@@ -108,7 +108,7 @@ describe('settingsSetup', () => {
 
     await settingsSetup(soClientMock);
 
-    expect(soClientMock.create).not.toBeCalled();
+    expect(soClientMock.create).not.toHaveBeenCalled();
   });
 
   it('should update prerelease_integrations_enabled if settings exist and prereleaseEnabledByDefault is true', async () => {

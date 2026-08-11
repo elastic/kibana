@@ -38,6 +38,6 @@ describe('EventMergingBanner component', () => {
   it('should call `onDismiss` callback when user clicks dismiss', () => {
     renderResult.getByTestId('euiDismissCalloutButton').click();
 
-    expect(formProps.onDismiss).toBeCalled();
+    expect(formProps.onDismiss).toHaveBeenCalled();
   });
 });

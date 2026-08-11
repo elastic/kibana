@@ -15,7 +15,7 @@ describe('getChartLabelFormatter', () => {
 
   it('throws error for invalid date range', () => {
     // Thu, 19 Jul 2001 17:52:59 GMT -> Thu, 19 Jul 2001 17:50:00 GMT
-    expect(() => getChartDateLabel(995565179000, 995565000000)).toThrowError('Invalid date range.');
+    expect(() => getChartDateLabel(995565179000, 995565000000)).toThrow('Invalid date range.');
   });
 
   it('creates a format without day/month/hour for range within an hour', () => {

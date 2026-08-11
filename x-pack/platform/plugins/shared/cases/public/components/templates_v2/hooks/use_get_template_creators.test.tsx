@@ -31,7 +31,7 @@ describe('useGetTemplateCreators', () => {
       ),
     });
 
-    await waitFor(() => expect(spyOnGetTemplateCreators).toBeCalled());
+    await waitFor(() => expect(spyOnGetTemplateCreators).toHaveBeenCalled());
   });
 
   it('returns creators data', async () => {
@@ -60,7 +60,7 @@ describe('useGetTemplateCreators', () => {
       ),
     });
 
-    await waitFor(() => expect(addError).toBeCalled());
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 
   it('does not display error toast for AbortError', async () => {
@@ -79,7 +79,7 @@ describe('useGetTemplateCreators', () => {
       ),
     });
 
-    await waitFor(() => expect(spyOnGetTemplateCreators).toBeCalled());
-    expect(addError).not.toBeCalled();
+    await waitFor(() => expect(spyOnGetTemplateCreators).toHaveBeenCalled());
+    expect(addError).not.toHaveBeenCalled();
   });
 });

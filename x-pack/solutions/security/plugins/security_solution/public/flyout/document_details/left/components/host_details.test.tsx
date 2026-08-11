@@ -245,7 +245,7 @@ describe('<HostDetails />', () => {
 
     it('should render the related user table with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
-      expect(mockUseHostsRelatedUsers).toBeCalledWith({
+      expect(mockUseHostsRelatedUsers).toHaveBeenCalledWith({
         entityId: undefined,
         from: timestamp,
         hostName: defaultProps.hostName,

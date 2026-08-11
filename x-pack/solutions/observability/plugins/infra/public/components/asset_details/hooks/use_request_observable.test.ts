@@ -97,7 +97,7 @@ describe('useRequestObservable', () => {
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
 
-    expect(requestStateMock$.next).toBeCalledTimes(2);
+    expect(requestStateMock$.next).toHaveBeenCalledTimes(2);
     expect(requestStateMock$.next).toHaveBeenCalledWith('done');
 
     unmount();
@@ -118,7 +118,7 @@ describe('useRequestObservable', () => {
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
 
-    expect(requestStateMock$.next).toBeCalledTimes(2);
+    expect(requestStateMock$.next).toHaveBeenCalledTimes(2);
     expect(requestStateMock$.next).toHaveBeenCalledWith('done');
 
     unmount();
@@ -139,7 +139,7 @@ describe('useRequestObservable', () => {
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
 
-    expect(requestStateMock$.next).toBeCalledTimes(8);
+    expect(requestStateMock$.next).toHaveBeenCalledTimes(8);
     expect(requestStateMock$.next).toHaveBeenCalledWith('done');
 
     unmount();
@@ -156,7 +156,7 @@ describe('useRequestObservable', () => {
 
     await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
 
-    expect(requestStateMock$.next).toBeCalledTimes(2);
+    expect(requestStateMock$.next).toHaveBeenCalledTimes(2);
     expect(requestStateMock$.next).toHaveBeenCalledWith('error');
 
     unmount();

@@ -60,7 +60,7 @@ test('registering without version throws', () => {
     registry.register({
       id: 'test',
     } as any);
-  }).toThrowError('Invalid version [undefined]. Must be an integer.');
+  }).toThrow('Invalid version [undefined]. Must be an integer.');
 });
 
 test('registering invalid version throws', () => {
@@ -71,7 +71,7 @@ test('registering invalid version throws', () => {
         latest: 'bad',
       },
     } as any);
-  }).toThrowError('Invalid version [bad]. Must be an integer.');
+  }).toThrow('Invalid version [bad]. Must be an integer.');
 
   expect(() => {
     registry.register({
@@ -80,7 +80,7 @@ test('registering invalid version throws', () => {
         latest: 0,
       },
     });
-  }).toThrowError('Version must be >= 1');
+  }).toThrow('Version must be >= 1');
 });
 
 test('getting non registered content returns undefined', () => {

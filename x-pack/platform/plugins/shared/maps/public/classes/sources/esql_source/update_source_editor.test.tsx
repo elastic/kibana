@@ -38,7 +38,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByMapBoundsSwitch());
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith(
+        expect(onChange).toHaveBeenCalledWith(
           { propName: 'narrowByMapBounds', value: true },
           { propName: 'geoField', value: 'location' }
         )
@@ -62,7 +62,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByMapBoundsSwitch());
       await userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith({ propName: 'narrowByMapBounds', value: true })
+        expect(onChange).toHaveBeenCalledWith({ propName: 'narrowByMapBounds', value: true })
       );
     });
   });
@@ -88,7 +88,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByTimeSwitch());
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith(
+        expect(onChange).toHaveBeenCalledWith(
           { propName: 'narrowByGlobalTime', value: true },
           { propName: 'dateField', value: 'timestamp' }
         )
@@ -112,7 +112,7 @@ describe('UpdateSourceEditor', () => {
       await waitFor(() => getNarrowByTimeSwitch());
       await userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith({ propName: 'narrowByGlobalTime', value: true })
+        expect(onChange).toHaveBeenCalledWith({ propName: 'narrowByGlobalTime', value: true })
       );
     });
   });

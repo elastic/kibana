@@ -40,7 +40,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     // Wait for the error to be reported/committed
     await new Promise((resolve) => setTimeout(resolve, 1.5 * TRANSIENT_NAVIGATION_WINDOW_MS));
 
-    expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
+    expect(reportEventSpy).toHaveBeenCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
       component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
@@ -78,8 +78,8 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     // Wait for the error to be reported/committed
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    expect(reportEventParentSpy).not.toBeCalled();
-    expect(reportEventChildSpy).toBeCalledWith('fatal-error-react', {
+    expect(reportEventParentSpy).not.toHaveBeenCalled();
+    expect(reportEventChildSpy).toHaveBeenCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
       component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',

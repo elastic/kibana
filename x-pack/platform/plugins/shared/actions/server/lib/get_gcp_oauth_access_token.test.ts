@@ -163,7 +163,7 @@ describe('getGoogleOAuthJwtAccessToken', () => {
         credentials: {},
         connectorTokenClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Unable to retrieve access token. Ensure the service account has the right permissions and the Vertex AI endpoint is enabled in the GCP project. Error: Google Auth Error'
     );
 

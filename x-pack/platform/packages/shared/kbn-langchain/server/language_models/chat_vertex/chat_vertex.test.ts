@@ -218,7 +218,7 @@ describe('ActionsClientChatVertexAI', () => {
 
       await expect(
         actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
       expect(onFailedAttempt).toHaveBeenCalled();
     });
 

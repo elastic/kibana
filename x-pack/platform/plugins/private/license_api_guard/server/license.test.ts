@@ -91,7 +91,7 @@ describe('License API guard', () => {
           minimumLicenseType: 'basic',
           licensing: mockLicensingService({ licenseType: 'gold', licenseState: 'valid' }),
         });
-      }).toThrowError(
+      }).toThrow(
         `Basic licenses don't restrict the use of plugins. Please don't use license_api_guard in the ${pluginName} plugin, or provide a more restrictive minimumLicenseType.`
       );
     });

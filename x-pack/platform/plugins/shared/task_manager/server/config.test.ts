@@ -228,7 +228,7 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('the monitored_task_execution_thresholds ensures that the warn_threshold is lte error_threshold on custom thresholds', () => {
@@ -266,7 +266,7 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('any claim strategy is valid and poll interval uses default value', () => {

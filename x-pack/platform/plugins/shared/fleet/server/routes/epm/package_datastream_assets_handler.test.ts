@@ -163,7 +163,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
 
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(new FleetNotFoundError('Version is not installed'));
+    ).rejects.toThrow(new FleetNotFoundError('Version is not installed'));
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
@@ -184,7 +184,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
 
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(new FleetNotFoundError('Version is not installed'));
+    ).rejects.toThrow(new FleetNotFoundError('Version is not installed'));
 
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
@@ -258,7 +258,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     );
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError('Saved object [ingest-package-policies/idontexist] not found');
+    ).rejects.toThrow('Saved object [ingest-package-policies/idontexist] not found');
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
@@ -295,7 +295,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
 
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Datastreams matching custom exist on other packages and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
@@ -341,7 +341,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
 
     await expect(
       deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Datastreams matching custom are in use by other package policies and cannot be removed`
     );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();

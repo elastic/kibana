@@ -54,7 +54,7 @@ describe('form_settings', () => {
             test_foo: 'not valid',
           },
         })
-      ).toThrowError(/Invalid input: expected boolean, received string/);
+      ).toThrow(/Invalid input: expected boolean, received string/);
 
       expect(() =>
         apiSchema.validate({

@@ -29,7 +29,7 @@ describe('schema_utils', () => {
     });
 
     it('throws a DecodeError instance', () => {
-      expect(() => decodeSchema(testSchema, { a: 1 })).toThrowError(
+      expect(() => decodeSchema(testSchema, { a: 1 })).toThrow(
         new DecodeError([`Invalid value \"undefined\" supplied to \"stringField\"`])
       );
     });

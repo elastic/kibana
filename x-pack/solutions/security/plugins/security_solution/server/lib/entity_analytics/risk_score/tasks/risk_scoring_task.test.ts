@@ -132,7 +132,7 @@ describe('Risk Scoring Task', () => {
           taskManager: mockTaskManagerStart,
           riskEngineDataClient: mockRiskEngineDataClient,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
   });
 
@@ -183,7 +183,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           taskManager: mockTaskManagerStart,
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
 
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to remove risk scoring task: whoops');
     });
@@ -729,7 +729,7 @@ describe('Risk Scoring Task', () => {
           logger: mockLogger,
           namespace: 'default',
         })
-      ).rejects.toThrowError('whoops');
+      ).rejects.toThrow('whoops');
     });
   });
 });

@@ -246,7 +246,7 @@ describe('cleanupTransformsStep', () => {
       initialState: 'install_transforms' as any,
     });
 
-    expect(mockCleanupTransforms).toBeCalledWith(installedEs, esClient);
+    expect(mockCleanupTransforms).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {
@@ -273,7 +273,7 @@ describe('cleanupTransformsStep', () => {
       initialState: 'install_transforms' as any,
     });
 
-    expect(mockCleanupTransforms).not.toBeCalled();
+    expect(mockCleanupTransforms).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -298,7 +298,7 @@ describe('cleanupTransformsStep', () => {
       initialState: 'install_transforms' as any,
     });
 
-    expect(mockCleanupTransforms).not.toBeCalled();
+    expect(mockCleanupTransforms).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != install_transforms', async () => {
@@ -324,7 +324,7 @@ describe('cleanupTransformsStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockCleanupTransforms).not.toBeCalled();
+    expect(mockCleanupTransforms).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -345,6 +345,6 @@ describe('cleanupTransformsStep', () => {
       initialState: 'install_transforms' as any,
     });
 
-    expect(mockCleanupTransforms).not.toBeCalled();
+    expect(mockCleanupTransforms).not.toHaveBeenCalled();
   });
 });

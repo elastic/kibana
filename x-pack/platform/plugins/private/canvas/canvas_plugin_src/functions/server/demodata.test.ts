@@ -37,6 +37,6 @@ describe('demodata', () => {
   it('invalid set', () => {
     expect(() => {
       fn(nullFilter, { type: 'foo' }, context);
-    }).toThrowError("Invalid data set: 'foo', use 'ci' or 'shirts'.");
+    }).toThrow("Invalid data set: 'foo', use 'ci' or 'shirts'.");
   });
 });

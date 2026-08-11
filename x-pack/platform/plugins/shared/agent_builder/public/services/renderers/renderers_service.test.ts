@@ -35,7 +35,7 @@ describe('RenderersService', () => {
     const service = new RenderersService();
     service.register(dashboardDefinition);
 
-    expect(() => service.register(dashboardDefinition)).toThrowError(
+    expect(() => service.register(dashboardDefinition)).toThrow(
       'Renderer type "dashboard" is already registered.'
     );
   });

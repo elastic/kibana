@@ -94,7 +94,7 @@ describe('Anomalies network table', () => {
       });
       expect(mockUseAnomaliesTableData.mock.calls[0][0].skip).toEqual(false);
       fireEvent.click(getByTestId('query-toggle-header'));
-      expect(mockSetToggle).toBeCalledWith(false);
+      expect(mockSetToggle).toHaveBeenCalledWith(false);
       expect(mockUseAnomaliesTableData.mock.calls[1][0].skip).toEqual(true);
     });
 

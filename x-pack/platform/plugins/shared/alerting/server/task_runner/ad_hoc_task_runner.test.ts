@@ -588,11 +588,11 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -936,11 +936,11 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule4.runAt}`
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -1071,11 +1071,11 @@ describe('Ad Hoc Task Runner', () => {
       logAlert: 2,
     });
     expect(logger.debug).toHaveBeenCalledTimes(2);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       1,
       `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:rule-id: 'test' has 1 active alerts: [{"instanceId":"1","actionGroup":"default"}]`
     );
@@ -1373,7 +1373,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule1.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
       );
@@ -1453,12 +1453,12 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule5.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(1);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule5.runAt}`
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).nthCalledWith(
+      expect(logger.error).toHaveBeenNthCalledWith(
         1,
         `Failed to cleanup ad_hoc_run_params object [id="abc"]: trouble deleting this`
       );
@@ -1517,27 +1517,27 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule1.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         5,
         `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         6,
         `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
@@ -1603,27 +1603,27 @@ describe('Ad Hoc Task Runner', () => {
         backfillInterval: schedule2.interval,
       });
       expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         5,
         `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         6,
         `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
@@ -1688,15 +1688,15 @@ describe('Ad Hoc Task Runner', () => {
         timeout: true,
       });
       expect(logger.debug).toHaveBeenCalledTimes(3);
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         2,
         `Cancelling execution for ad hoc run with id abc for rule type test with id rule-id - execution exceeded rule type timeout of 3m`
       );
-      expect(logger.debug).nthCalledWith(
+      expect(logger.debug).toHaveBeenNthCalledWith(
         3,
         `Aborting any in-progress ES searches for rule type test with id rule-id`
       );

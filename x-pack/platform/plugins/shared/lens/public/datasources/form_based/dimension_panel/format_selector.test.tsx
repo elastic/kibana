@@ -53,23 +53,23 @@ describe('FormatSelector', () => {
   it('updates the format decimals', async () => {
     renderFormatSelector();
     await user.type(screen.getByLabelText('Decimals'), '{backspace}10');
-    expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 10 } });
+    expect(props.onChange).toHaveBeenCalledWith({ id: 'bytes', params: { decimals: 10 } });
   });
   it('updates the format decimals to upper range when input exceeds the range', async () => {
     renderFormatSelector();
     await user.type(screen.getByLabelText('Decimals'), '{backspace}20');
-    expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 15 } });
+    expect(props.onChange).toHaveBeenCalledWith({ id: 'bytes', params: { decimals: 15 } });
   });
   it('updates the format decimals to lower range when input is smaller than range', async () => {
     renderFormatSelector();
     await user.type(screen.getByLabelText('Decimals'), '{backspace}-2');
-    expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { decimals: 0 } });
+    expect(props.onChange).toHaveBeenCalledWith({ id: 'bytes', params: { decimals: 0 } });
   });
   it('updates the suffix', async () => {
     renderFormatSelector();
     await user.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
     await act(async () => jest.advanceTimersByTime(256));
-    expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
+    expect(props.onChange).toHaveBeenCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 
   describe('Duration', () => {
@@ -89,7 +89,7 @@ describe('FormatSelector', () => {
       await user.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
       await act(async () => jest.advanceTimersByTime(256));
-      expect(props.onChange).toBeCalledWith({
+      expect(props.onChange).toHaveBeenCalledWith({
         id: 'duration',
         params: { toUnit: 'asHours' },
       });
@@ -113,7 +113,7 @@ describe('FormatSelector', () => {
       await user.click(formatInput);
       fireEvent.click(screen.getByText('Duration'));
 
-      expect(props.onChange).toBeCalledWith({
+      expect(props.onChange).toHaveBeenCalledWith({
         id: 'duration',
         params: { decimals: 0, compact: true },
       });

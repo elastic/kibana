@@ -204,7 +204,7 @@ describe('start', () => {
   it('does not add legacy browser warning if browser supports CSP', async () => {
     const { startDeps } = await start();
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('does not add legacy browser warning if warnLegacyBrowsers is disabled', async () => {
@@ -213,7 +213,7 @@ describe('start', () => {
       cspConfigMock: { warnLegacyBrowsers: false },
     });
 
-    expect(startDeps.notifications.toasts.addWarning).not.toBeCalled();
+    expect(startDeps.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 
   it('calls handleSystemColorModeChange() with the correct parameters', async () => {
@@ -635,7 +635,7 @@ describe('start', () => {
 
       service.stop();
 
-      expect(docTitleResetSpy).toBeCalledTimes(1);
+      expect(docTitleResetSpy).toHaveBeenCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
                       Array [
                         Array [

@@ -100,7 +100,7 @@ describe('OpsgenieConnectorFields renders', () => {
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.opsgenie',
             name: 'opsgenie',

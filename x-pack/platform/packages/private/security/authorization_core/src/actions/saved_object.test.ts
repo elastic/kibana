@@ -11,7 +11,7 @@ describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {
       const savedObjectActions = new SavedObjectActions();
-      expect(() => savedObjectActions.get(type, 'foo-action')).toThrowError(
+      expect(() => savedObjectActions.get(type, 'foo-action')).toThrow(
         'type is required and must be a string'
       );
     });
@@ -20,7 +20,7 @@ describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((operation: any) => {
     test(`operation of ${JSON.stringify(operation)} throws error`, () => {
       const savedObjectActions = new SavedObjectActions();
-      expect(() => savedObjectActions.get('foo-type', operation)).toThrowError(
+      expect(() => savedObjectActions.get('foo-type', operation)).toThrow(
         'operation is required and must be a string'
       );
     });

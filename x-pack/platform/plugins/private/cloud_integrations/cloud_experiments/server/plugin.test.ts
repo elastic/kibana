@@ -37,7 +37,7 @@ describe('Cloud Experiments server plugin', () => {
     test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
       const initializerContext = coreMock.createPluginInitializerContext();
       initializerContext.env.mode.dev = false;
-      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrowError(
+      expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
         'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
       );
     });

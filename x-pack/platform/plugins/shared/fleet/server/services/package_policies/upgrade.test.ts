@@ -475,7 +475,7 @@ describe('Upgrade', () => {
         },
       ]);
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'ingest-package-policies',
         'package-policy-id-test-spaceId',
         expect.not.objectContaining({

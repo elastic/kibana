@@ -345,7 +345,7 @@ describe('exportSelectedTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(fetchMock).toBeCalledWith('/api/timeline/_export', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/timeline/_export', {
       body: JSON.stringify({ ids }),
       method: 'POST',
       query: { file_name: 'timelines_export.ndjson' },
@@ -372,7 +372,7 @@ describe('getDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(getMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(getMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       query: timelineType,
       version: '2023-10-31',
     });
@@ -398,7 +398,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });
@@ -413,7 +413,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });

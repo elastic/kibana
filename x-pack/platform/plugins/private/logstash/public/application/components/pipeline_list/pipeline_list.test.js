@@ -64,12 +64,12 @@ describe('PipelineList component', () => {
   it('notifies the user if readonly after pipeline load', async () => {
     props.isReadOnly = true;
     await renderWithProps();
-    expect(addWarning).toBeCalledWith('the license service message');
+    expect(addWarning).toHaveBeenCalledWith('the license service message');
   });
 
   it('does not notify if not readonly', async () => {
     await renderWithProps();
-    expect(addWarning).not.toBeCalled();
+    expect(addWarning).not.toHaveBeenCalled();
   });
 
   it('renders empty prompt for no pipelines', async () => {
@@ -86,7 +86,7 @@ describe('PipelineList component', () => {
     });
     props.isReadOnly = false;
     await renderWithProps();
-    expect(addDanger).toBeCalledWith(`Couldn't load pipeline. Error: "Unauthorized access".`);
+    expect(addDanger).toHaveBeenCalledWith(`Couldn't load pipeline. Error: "Unauthorized access".`);
   });
 
   it('sets state to forbidden if 403 error and not readonly', async () => {

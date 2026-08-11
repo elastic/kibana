@@ -92,7 +92,7 @@ describe(`delete`, () => {
     });
 
     await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_delete',
         type: 'deletion',
@@ -137,7 +137,7 @@ describe(`delete`, () => {
     });
 
     await supertest(server.listener).delete(`/api/dashboards/test-dashboard`);
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_delete',
         type: 'deletion',

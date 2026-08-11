@@ -56,12 +56,12 @@ describe('PercentilesEditor component', () => {
   it('should set valid state to true after adding a unique percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 70];
     mount(<PercentilesEditor {...defaultProps} />);
-    expect(setValidity).lastCalledWith(true);
+    expect(setValidity).toHaveBeenLastCalledWith(true);
   });
 
   it('should set valid state to false after adding a duplicate percentile', () => {
     defaultProps.value = [1, 5, 25, 50, 50];
     mount(<PercentilesEditor {...defaultProps} />);
-    expect(setValidity).lastCalledWith(false);
+    expect(setValidity).toHaveBeenLastCalledWith(false);
   });
 });

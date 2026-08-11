@@ -60,7 +60,7 @@ describe('convertToLastValueColumn', () => {
         visType,
       })
     ).toBeNull();
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return column if field is not present and is not required for the aggregation', () => {
@@ -74,7 +74,7 @@ describe('convertToLastValueColumn', () => {
         visType,
       })
     ).toEqual(expect.objectContaining({ operationType: 'count' }));
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return column if field is present and is required for the aggregation', () => {
@@ -93,6 +93,6 @@ describe('convertToLastValueColumn', () => {
         operationType: 'average',
       })
     );
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 });

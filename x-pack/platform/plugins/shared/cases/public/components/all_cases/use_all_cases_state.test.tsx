@@ -606,7 +606,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(1);
+    expect(lsSpy).toHaveBeenCalledTimes(1);
   });
 
   it('does not update the local storage on the second run', () => {
@@ -626,7 +626,7 @@ describe('useAllCasesQueryParams', () => {
     rerender();
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(2);
+    expect(lsSpy).toHaveBeenCalledTimes(2);
   });
 
   it('does not update the local storage when the URL and the local storage are the same', async () => {
@@ -653,7 +653,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(2);
+    expect(lsSpy).toHaveBeenCalledTimes(2);
   });
 
   it('does not update the local storage when the custom field configuration is loading', async () => {
@@ -676,7 +676,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     // first call is the initial call made by useLocalStorage
-    expect(lsSpy).toBeCalledTimes(1);
+    expect(lsSpy).toHaveBeenCalledTimes(1);
   });
 
   describe('validation', () => {

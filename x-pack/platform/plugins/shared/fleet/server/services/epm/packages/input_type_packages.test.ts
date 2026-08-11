@@ -80,7 +80,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
       packagePolicy: {} as any,
     });
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toBeCalled();
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
   });
 
   const TEST_PKG_INFO_INPUT = {
@@ -121,7 +121,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackageNotFoundError);
+    ).rejects.toThrow(PackageNotFoundError);
   });
 
   it('should skip index template creation when existing data stream is owned by different package with force true', async () => {
@@ -289,7 +289,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -1200,7 +1200,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'custom_dataset',
       {
         es_index_patterns: { custom_dataset: 'logs-my-integration.custom_dataset-*' },
@@ -1231,7 +1231,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should clean up assets for input packages with status = installed', async () => {
@@ -1277,7 +1277,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         es_index_patterns: { test: 'logs-udp.test-*' },
@@ -1335,7 +1335,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         installed_es: [
@@ -1370,7 +1370,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should log error if cleanupAssets failed', async () => {
@@ -1394,7 +1394,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(mockedLogger.error).toBeCalled();
+    expect(mockedLogger.error).toHaveBeenCalled();
   });
 
   describe('isInputPackageDatasetUsedByMultiplePolicies', () => {
@@ -1764,7 +1764,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       });
-      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toBeCalled();
+      expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });
 
     it('should install templates for integration package with custom dataset', async () => {

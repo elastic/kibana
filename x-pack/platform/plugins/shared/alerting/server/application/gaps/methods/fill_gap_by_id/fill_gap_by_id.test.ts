@@ -216,7 +216,7 @@ describe('fillGapById', () => {
         ruleId: '1',
         gapId: 'gap1',
       })
-    ).rejects.toThrowError('Gap not found for ruleId 1 and gapId gap1');
+    ).rejects.toThrow('Gap not found for ruleId 1 and gapId gap1');
   });
 
   it('handles errors from finding gap', async () => {
@@ -228,7 +228,7 @@ describe('fillGapById', () => {
         ruleId: '1',
         gapId: 'gap1',
       })
-    ).rejects.toThrowError('Failed to find gap and schedule manual rule run');
+    ).rejects.toThrow('Failed to find gap and schedule manual rule run');
   });
 
   it('handles errors from scheduling backfill', async () => {
@@ -241,7 +241,7 @@ describe('fillGapById', () => {
         ruleId: '1',
         gapId: 'gap1',
       })
-    ).rejects.toThrowError('Scheduling failed');
+    ).rejects.toThrow('Scheduling failed');
   });
 
   it('throws error when gap has no unfilled intervals', async () => {
@@ -252,7 +252,7 @@ describe('fillGapById', () => {
 
     (findGapsById as jest.Mock).mockResolvedValue([gap]);
 
-    await expect(rulesClient.fillGapById(params)).rejects.toThrowError(
+    await expect(rulesClient.fillGapById(params)).rejects.toThrow(
       'No unfilled intervals found for ruleId 1'
     );
 

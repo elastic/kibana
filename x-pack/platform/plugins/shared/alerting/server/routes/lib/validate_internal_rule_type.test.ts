@@ -31,6 +31,6 @@ describe('validateInternalRuleTypes', () => {
 
     expect(() =>
       validateInternalRuleType({ ruleTypeId, ruleTypes, operationText })
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });

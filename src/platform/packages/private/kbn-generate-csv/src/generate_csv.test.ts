@@ -393,7 +393,7 @@ describe('CsvGenerator', () => {
       expect(content).toMatchSnapshot();
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-      expect(mockDataClient.search).toBeCalledWith(
+      expect(mockDataClient.search).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -759,7 +759,7 @@ describe('CsvGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -847,7 +847,7 @@ describe('CsvGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { max_concurrent_shard_requests: 5 } },
         {
           abortSignal: expect.any(AbortSignal),
@@ -959,7 +959,7 @@ describe('CsvGenerator', () => {
       expect(content).toMatchSnapshot();
 
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-      expect(mockDataClient.search).toBeCalledWith(
+      expect(mockDataClient.search).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
             index: 'logstash-*',
@@ -1552,7 +1552,7 @@ describe('CsvGenerator', () => {
       }
     );
 
-    expect(mockDataClient.search).toBeCalledWith(
+    expect(mockDataClient.search).toHaveBeenCalledWith(
       {
         params: {
           max_concurrent_shard_requests: 5,

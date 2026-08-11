@@ -167,7 +167,7 @@ describe('authorization', () => {
           operation: Operations.createCase,
         });
       } catch (error) {
-        expect(checkRequestReturningHasAllAsTrue).toBeCalledTimes(1);
+        expect(checkRequestReturningHasAllAsTrue).toHaveBeenCalledTimes(1);
         expect(checkRequestReturningHasAllAsTrue.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             Object {

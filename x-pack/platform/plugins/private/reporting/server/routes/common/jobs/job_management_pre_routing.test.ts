@@ -76,7 +76,7 @@ it(`should return 404 if the docId isn't resolve`, async function () {
     handler
   );
 
-  expect(mockResponseFactory.notFound).toBeCalled();
+  expect(mockResponseFactory.notFound).toHaveBeenCalled();
   expect(handlerCalled).toBe(false);
 });
 
@@ -123,7 +123,7 @@ describe('usage counters', () => {
       options: {},
     });
 
-    expect(mockCounters.usageCounter).not.toBeCalled();
+    expect(mockCounters.usageCounter).not.toHaveBeenCalled();
 
     await jobManagementPreRouting(
       mockCore,
@@ -135,7 +135,7 @@ describe('usage counters', () => {
       handler
     );
 
-    expect(mockCounters.usageCounter).toBeCalled();
+    expect(mockCounters.usageCounter).toHaveBeenCalled();
   });
 
   it(`should track error case`, async function () {
@@ -147,7 +147,7 @@ describe('usage counters', () => {
       throw new Error(`this error is a test`);
     };
 
-    expect(mockCounters.errorCounter).not.toBeCalled();
+    expect(mockCounters.errorCounter).not.toHaveBeenCalled();
 
     await jobManagementPreRouting(
       mockCore,
@@ -159,6 +159,6 @@ describe('usage counters', () => {
       handler
     );
 
-    expect(mockCounters.errorCounter).toBeCalled();
+    expect(mockCounters.errorCounter).toHaveBeenCalled();
   });
 });

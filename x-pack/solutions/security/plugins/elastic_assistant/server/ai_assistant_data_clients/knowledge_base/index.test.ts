@@ -524,7 +524,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       });
       await expect(
         assistantKnowledgeBaseDataClient.getRequiredKnowledgeBaseDocumentEntries()
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
       );
     });

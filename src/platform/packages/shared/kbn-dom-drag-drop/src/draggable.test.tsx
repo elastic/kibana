@@ -104,15 +104,15 @@ describe('Draggable', () => {
     global.getSelection = jest.fn(() => ({ removeAllRanges } as unknown as Selection));
     const { draggable } = renderDraggable();
     fireEvent.mouseDown(draggable);
-    expect(global.getSelection).toBeCalled();
-    expect(removeAllRanges).toBeCalled();
+    expect(global.getSelection).toHaveBeenCalled();
+    expect(removeAllRanges).toHaveBeenCalled();
   });
 
   test('on drag start, sets text in dataTransfer', async () => {
     const { startDragging } = renderDraggable();
 
     startDragging();
-    expect(dataTransfer.setData).toBeCalledWith('text', 'drag_this');
+    expect(dataTransfer.setData).toHaveBeenCalledWith('text', 'drag_this');
   });
   test('className is added when draggable is being dragged', async () => {
     const { startDragging, draggable, endDragging } = renderDraggable({
