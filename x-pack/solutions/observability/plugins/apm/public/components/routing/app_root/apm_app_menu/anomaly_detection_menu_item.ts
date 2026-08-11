@@ -10,6 +10,7 @@ import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { AnomalyDetectionSetupState } from '../../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const ANOMALY_DETECTION_LINK_LABEL = i18n.translate('xpack.apm.anomalyDetectionSetup.linkLabel', {
   defaultMessage: 'Anomaly detection',
@@ -42,6 +43,7 @@ export function getAnomalyDetectionMenuItem({
     label: ANOMALY_DETECTION_LINK_LABEL,
     iconType,
     href,
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.VIEW_ANOMALY_DETECTION),
     testId: 'apmAnomalyDetectionHeaderLink',
     tooltipContent,
     isLoading,

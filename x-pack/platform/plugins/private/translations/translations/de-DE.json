@@ -1039,8 +1039,6 @@
     "controls.optionsList.editor.multiSelectLabel": "Mehrfachauswahl zulassen",
     "controls.optionsList.editor.prefixSearchLabel": "Präfix",
     "controls.optionsList.editor.prefixSearchTooltip": "Entspricht Werten, die mit der angegebenen Suchzeichenfolge beginnen.",
-    "controls.optionsList.editor.runPastTimeout": "Timeout für Ergebnisse ignorieren",
-    "controls.optionsList.editor.runPastTimeout.tooltip": "Warten Sie mit der Anzeige der Ergebnisse, bis die Liste vollständig ist. Diese Einstellung ist bei großen Datensätzen nützlich, aber es könnte länger dauern bis die Ergebnisse angezeigt werden.",
     "controls.optionsList.editor.searchOptionsTitle": "Suche",
     "controls.optionsList.editor.selectionOptionsTitle": "Auswahl",
     "controls.optionsList.editor.singleSelectLabel": "Nur eine einzige Auswahl zulassen",
