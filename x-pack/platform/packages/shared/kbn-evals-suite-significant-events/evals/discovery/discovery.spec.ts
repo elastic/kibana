@@ -225,6 +225,11 @@ evaluate.describe(
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
                   }
+
+                  // Each scenario must start with an empty events index. Scenarios that share a
+                  // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
+                  await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
@@ -527,6 +532,11 @@ evaluate.describe(
                         cycles.push({
                           ruleName: detection.rule_name,
                           producedEventIds,
+                          producedEvents: significantEvents.map((event) => ({
+                            event_id: event.event_id,
+                            severity: event.severity,
+                            status: event.status,
+                          })),
                           requestedEventIds: extractRequestedEventIdsFromToolCall(
                             converseResult.steps
                           ),

@@ -193,17 +193,19 @@ export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'
 
 /** Canonical sortable severity used by storage, APIs, and tools. */
 export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
-    Sortable severity keyword. Judge impact from what the evidence shows — confirmed failure rows, whether the affected operation still completes, scope from topology and counts, and confirmation status. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; judge that event only from the row’s error signature and impact.
+    Sortable severity keyword. Assess impact from what the evidence shows — confirmed failure rows, whether the affected operation still completes, scope from topology and counts, and confirmation status. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
     "80-critical" = the most severe. Any ONE qualifies independently:
       - a site-wide/global outage affecting all or most customers;
       - a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path);
+      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation on the affected component end-to-end (no successful completions on that path), even when no downstream customer-facing journey is mapped in topology;
       - multiple current rows directly confirming blocked paths for distinct core operations;
       - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
       A single mandatory service, dependency, or endpoint can establish this when its failure blocks the operation end-to-end; unrelated services do not also need to fail.
-    "60-high" = confirmed and severe but not global: the operation still completes for some users while broadly degraded, intermittent, or partially failing, or the confirmed impact reaches a significant customer subset.
+    "60-high" = confirmed and severe but not global: the operation still completes for some users while broadly degraded, intermittent, or partially failing; the confirmed impact reaches a significant customer subset; or a confirmed severe internal/platform failure (for example resource exhaustion, fatal errors, crash loops, or loss of a component's primary function) broadly degrades that component's work without fully blocking every path.
     "40-medium" = meaningful but bounded: minor confirmed degradation with limited reach, or plausible customer impact that is not yet confirmed (incomplete evidence, telemetry gap, unverified).
     "20-low" = negligible customer impact: recovery, noise, false alarm, or non-issue.
 
+    Set severity from confirmed grounding rows and the impact they show on the affected operation or component. Rule \`severity_score\` may support tier selection when grounding confirms a matching failure class, but cannot override absent, healthy, or contradictory grounding. \`p_value\`, \`change_point_type\`, and alert volume do not set severity — use them for \`confidence\` only. Cautious or partial wording in narratives does not override a confirmed severe outcome; record that uncertainty in \`confidence\` instead.
     When uncertain between two tiers, choose the lower one.
   `);
 
@@ -240,11 +242,11 @@ export const significantEventBaseSchema = z.object({
     .describe(
       dedent`
       Stable incident label. Format: "<Affected scope> — <observed condition>".
-      Choose the most specific stable affected scope supported by evidence or KI context: operation, unique service/entity, flow, then domain. For multi-service findings, stop at flow or domain. Never use a generic stream name.
-      The observed condition names the stable rule-specific behavior, failure, degradation, or exposure — not its current lifecycle state.
-      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, current-cycle details, and state or tense words (e.g. "continues", "detected", "active", "resolved").
-      
-      Example: "Auth service — login endpoint connection refused".
+      Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic stream name.
+      The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
+      Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, and current-cycle-only details.
+
+      Examples: "API gateway — upstream connection refused"; "Order service — database pool exhausted".
     `
     ),
   // hypothesis of the observed failure. helps agents to understand and group signals that share the same symptom class.

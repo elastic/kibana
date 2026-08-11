@@ -20,7 +20,7 @@ const createCalibrationEvaluator = (
 const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'severity_reflects_user_impact',
-    text: 'Severity reflects user-experience impact — blocked user tasks, blast radius, confirmed sensitive-data exposure — not raw signal or anomaly strength.',
+    text: 'Severity reflects operational impact — blocked user tasks, platform-critical work a component can no longer perform, blast radius, and confirmed sensitive-data exposure — not raw signal or anomaly strength.',
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
@@ -30,6 +30,16 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
     id: 'weak_signals_low_severity',
     text: 'Unconfirmed signals — no confirmed failure evidence AND not statistically credible (high p_value) — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
     score: 1,
+  },
+  {
+    id: 'detection_metadata_not_severity',
+    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs may affect `confidence` only. Rule `severity_score` may support a higher applicable tier when grounding confirms a matching failure class, but cannot override absent or contradictory grounding.',
+    score: 2,
+  },
+  {
+    id: 'under_escalation_is_fail',
+    text: 'Under-escalation is a FAIL. When grounding confirms a non-benign failure or material degradation, assign the highest tier the `severity` field contract supports for that confirmed mechanism and blocked or degraded work. Do not assign `40-medium` or `20-low` solely because topology is sparse, the component is internal, narratives use cautious wording, or detection metadata looks weak — unless the known-ongoing cap explicitly applies or impact is genuinely bounded/unconfirmed per the schema. Grade `title`, `symptom_hypothesis`, and `summary` together: the tier must be evident in the narratives.',
+    score: 2,
   },
 ];
 

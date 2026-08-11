@@ -309,6 +309,123 @@ const MISGROUPED_LEDGER_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
+/** Single-service connectivity failure — severity should not depend on cascade topology. */
+const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
+  status: 'open',
+  event_id: 'frontend__balancereader-connection-refused',
+  title: 'Balance reader — account balance lookup connectivity failure',
+  symptom_hypothesis:
+    'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
+  summary:
+    'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
+  severity: '60-high',
+  confidence: 0.68,
+  stream_names: ['logs'],
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
+  blast_radius: [
+    {
+      type: 'dependency',
+      feature_id: 'frontend-balancereader',
+      source: 'frontend',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
+};
+
+/**
+ * Authored cache-error rule refuted; grounding surfaces a concrete connection failure in an
+ * off-topic row that warrants its own high-severity event.
+ */
+const OFF_TOPIC_CONNECTION_EVENT: Partial<SignificantEvent> = {
+  status: 'open',
+  event_id: 'balancereader__off-topic-connection-refused',
+  title: 'Balance reader — connection refused on balance lookups',
+  symptom_hypothesis:
+    'Balance lookups fail because the frontend cannot establish connections to balancereader.',
+  summary:
+    'Grounding surfaced connection-refused errors to balancereader:8080 during balance reads. The authored cache-error rule did not match; the observed connection failure blocks account-balance retrieval for users who hit this path.',
+  severity: '60-high',
+  confidence: 0.62,
+  stream_names: ['logs'],
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: false,
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: off-topic observed error — cache-error rule refuted.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '159d6c01-9b26-5d7f-99c6-a3471e00d97e-det',
+        rule_name: 'Cache Errors in Balance Reader or Transaction History',
+        rule_uuid: '159d6c01-9b26-5d7f-99c6-a3471e00d97e',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
+  blast_radius: [
+    {
+      type: 'dependency',
+      feature_id: 'frontend-balancereader',
+      source: 'frontend',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
+};
+
+/** Same confirmed impact as isolated balancereader failure, but weak detection metadata — severity must still follow grounding. */
+const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-weak-detection',
+  confidence: 0.52,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-weak',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'stationary',
+        p_value: 0.55,
+      },
+    },
+  ],
+};
+
 export const discovery: DatasetConfig['discovery'] = [
   {
     input: {
@@ -417,6 +534,79 @@ export const discovery: DatasetConfig['discovery'] = [
       difficulty: 'hard',
       failure_domain: 'ledger-db',
       failure_mode: 'misgrouped-signal',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-off-topic-severe-error',
+      stream_name: 'logs',
+      detections: toInputDetections([OFF_TOPIC_CONNECTION_EVENT]),
+    },
+    output: {
+      expected_ground_truth:
+        'open 60-high event grounded in the off-topic connection-refused error; authored cache-error rule remains confirmed:false',
+      expected_significant_events: [OFF_TOPIC_CONNECTION_EVENT],
+      criteria: [
+        {
+          id: 'off-topic-open-high',
+          text: 'Creates or keeps an open event at 60-high (or higher) from the off-topic connection-refused row even though the cache-error rule hypothesis is refuted (confirmed:false on that signal).',
+          score: 3,
+        },
+        {
+          id: 'off-topic-narrative-grounding',
+          text: 'Title, symptom_hypothesis, and summary describe the observed connection-refused failure and blocked balance lookups. They do not title or summarize the event as a cache-error incident.',
+          score: 3,
+        },
+        {
+          id: 'off-topic-rule-refuted',
+          text: 'Leaves the cache-error detection signal confirmed:false while still treating the concrete off-topic connection failure as current evidence.',
+          score: 2,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'off_topic_severe_error',
+    },
+    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-balancereader-weak-detection',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_WEAK_DETECTION_EVENT]),
+    },
+    output: {
+      expected_ground_truth:
+        'open 60-high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_WEAK_DETECTION_EVENT],
+      criteria: [
+        {
+          id: 'weak-detection-strong-severity',
+          text: 'Sets severity=60-high (or higher) because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
+          score: 3,
+        },
+        {
+          id: 'weak-detection-confidence-only',
+          text: 'May lower confidence because p_value is weak and change_point_type is stationary, but severity still reflects the confirmed failure impact.',
+          score: 2,
+        },
+        {
+          id: 'weak-detection-narrative-alignment',
+          text: 'Title, symptom_hypothesis, and summary state the confirmed connection failure and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
+          score: 2,
+        },
+      ],
+    },
+    metadata: {
+      difficulty: 'hard',
+      failure_domain: 'balancereader',
+      failure_mode: 'weak_detection_strong_evidence',
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },
