@@ -139,25 +139,25 @@ export const usePaginatedFlyout = ({
   // Register `openDocumentFlyoutImpl` so the in-flyout `EuiPagination` can
   // dispatch back through `openPaginatedFlyout` across the separate React root.
   useEffect(() => {
-    storeRef.current.setState({
+    const store = storeRef.current;
+    store.setState({
       openDocumentFlyoutImpl: (documentIndex: number) => openPaginatedFlyout(documentIndex),
     });
     return () => {
-      storeRef.current.setState({ openDocumentFlyoutImpl: null });
+      store.setState({ openDocumentFlyoutImpl: null });
     };
-    // storeRef.current and openPaginatedFlyout are stable
   }, [openPaginatedFlyout]);
 
   // Close the overlay on unmount (navigation away from the source page).
   useEffect(() => {
+    const store = storeRef.current;
     return () => {
-      storeRef.current.setState(SOFT_RESET);
+      store.setState(SOFT_RESET);
       if (v2OverlayRef.current) {
         v2OverlayRef.current.close();
         v2OverlayRef.current = null;
       }
     };
-    // storeRef.current is stable
   }, []);
 
   const openDocumentFlyout = useCallback(
