@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const summaryToggleLabel = i18n.translate('unifiedDataTable.summaryColumnToggleLabel', {
@@ -30,7 +30,7 @@ export const SummaryColumnToggle = ({
 }) => (
   <EuiSwitch
     compressed={true}
-    label={summaryToggleLabel}
+    label={<EuiText size="xs">{summaryToggleLabel}</EuiText>}
     showLabel={showLabel}
     disabled={disabled}
     checked={checked}

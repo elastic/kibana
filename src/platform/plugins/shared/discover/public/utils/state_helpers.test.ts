@@ -34,9 +34,31 @@ describe('handleSourceColumnState', () => {
     });
   });
 
+  it('does not apply field defaultColumns when collapsing sole Summary', () => {
+    expect(
+      handleSourceColumnState({ columns: [SOURCE_COLUMN] }, createUiSettings(['bytes']))
+    ).toEqual({
+      columns: [],
+    });
+  });
+
   it('falls back to configured default columns when empty', () => {
     expect(handleSourceColumnState({ columns: [] }, createUiSettings(['bytes']))).toEqual({
       columns: ['bytes'],
+    });
+  });
+
+  it('keeps _source in configured default columns when empty', () => {
+    expect(
+      handleSourceColumnState({ columns: [] }, createUiSettings(['bytes', SOURCE_COLUMN]))
+    ).toEqual({
+      columns: ['bytes', SOURCE_COLUMN],
+    });
+  });
+
+  it('treats classic ["_source"] defaults as summary-only empty columns', () => {
+    expect(handleSourceColumnState({ columns: [] }, createUiSettings([SOURCE_COLUMN]))).toEqual({
+      columns: [],
     });
   });
 

@@ -27,7 +27,7 @@ export const useSorting = ({
   isPlainRecord,
   isSortEnabled,
   isInMemorySortEnabled,
-  isSummaryOnlyColumns,
+  isSummaryOnlyColumn,
   onSort,
 }: {
   rows: DataTableRecord[] | undefined;
@@ -38,7 +38,7 @@ export const useSorting = ({
   isPlainRecord: boolean;
   isSortEnabled: boolean;
   isInMemorySortEnabled: boolean;
-  isSummaryOnlyColumns: boolean;
+  isSummaryOnlyColumn: boolean;
   onSort: ((sort: SortOrder[]) => void) | undefined;
 }) => {
   const sortingColumns = useMemo(() => {
@@ -103,7 +103,7 @@ export const useSorting = ({
     // in ES|QL mode, sorting is disabled when in Document view
     // ideally we want the @timestamp column to be sortable server side
     // but it needs discussion before moving forward like this
-    if (isPlainRecord && isSummaryOnlyColumns) {
+    if (isPlainRecord && isSummaryOnlyColumn) {
       return undefined;
     }
 
@@ -113,7 +113,7 @@ export const useSorting = ({
         onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
-  }, [isSortEnabled, isPlainRecord, isSummaryOnlyColumns, sortingColumns, onSort]);
+  }, [isSortEnabled, isPlainRecord, isSummaryOnlyColumn, sortingColumns, onSort]);
 
   return { sortedRows, sorting };
 };

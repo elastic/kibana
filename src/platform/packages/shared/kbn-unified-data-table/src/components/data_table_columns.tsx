@@ -103,7 +103,7 @@ function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
   dataView,
-  isSummaryOnlyColumns,
+  isSummaryOnlyColumn,
   isSortEnabled,
   isPlainRecord,
   toastNotifications,
@@ -130,7 +130,7 @@ function buildEuiGridColumn({
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
-  isSummaryOnlyColumns: boolean;
+  isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
@@ -238,7 +238,7 @@ function buildEuiGridColumn({
     displayAsText: columnDisplayName,
     actions: {
       showHide:
-        isSummaryOnlyColumns || columnName === dataView.timeFieldName
+        isSummaryOnlyColumn || columnName === dataView.timeFieldName
           ? false
           : {
               label: i18n.translate('unifiedDataTable.removeColumnLabel', {
@@ -247,8 +247,8 @@ function buildEuiGridColumn({
               iconType: 'cross',
               'data-test-subj': 'unifiedDataTableRemoveColumn',
             },
-      showMoveLeft: !isSummaryOnlyColumns,
-      showMoveRight: !isSummaryOnlyColumns,
+      showMoveLeft: !isSummaryOnlyColumn,
+      showMoveRight: !isSummaryOnlyColumn,
       additional: [
         ...(resetWidthButton ? [resetWidthButton] : []),
         ...(columnName === SOURCE_COLUMN
@@ -341,7 +341,7 @@ export function getEuiGridColumns({
   rowsCount,
   settings,
   dataView,
-  isSummaryOnlyColumns,
+  isSummaryOnlyColumn,
   isSortEnabled,
   disableCellActions = false,
   isPlainRecord,
@@ -366,7 +366,7 @@ export function getEuiGridColumns({
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
   dataView: DataView;
-  isSummaryOnlyColumns: boolean;
+  isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
@@ -400,7 +400,7 @@ export function getEuiGridColumns({
       cellActionsHandling,
       columnWidth: getColWidth(column),
       dataView,
-      isSummaryOnlyColumns,
+      isSummaryOnlyColumn,
       isSortEnabled,
       isPlainRecord,
       toastNotifications: services.toastNotifications,

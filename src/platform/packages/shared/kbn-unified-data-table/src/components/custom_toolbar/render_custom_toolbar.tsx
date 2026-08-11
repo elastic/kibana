@@ -192,12 +192,9 @@ export const getRenderCustomToolbarWithElements = ({
 
 export const styles = {
   toolbar: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
-        })
-      : // required for unit tests to pass
-        undefined,
+    css({
+      padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+    }),
   controlButton: ({ euiTheme }: UseEuiTheme) =>
     euiTheme
       ? css({
@@ -256,22 +253,20 @@ export const styles = {
         })
       : undefined,
   controlGroupIconButton: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css({
-          '.euiToolTipAnchor .euiButtonIcon': {
-            inlineSize: euiTheme.size.xl,
-            blockSize: euiTheme.size.xl,
-            borderRadius: 'inherit',
+    css({
+      '.euiToolTipAnchor .euiButtonIcon': {
+        inlineSize: euiTheme.size.xl,
+        blockSize: euiTheme.size.xl,
+        borderRadius: 'inherit',
 
-            // cancel default behavior
-            '&:hover, &:active, &:focus': {
-              background: 'transparent',
-              animation: 'none !important',
-              transform: 'none !important',
-            },
-          },
-        })
-      : undefined, // for making unit tests pass
+        // cancel default behavior
+        '&:hover, &:active, &:focus': {
+          background: 'transparent',
+          animation: 'none !important',
+          transform: 'none !important',
+        },
+      },
+    }),
   toolbarBottom: css({
     position: 'relative', // for placing a loading indicator correctly
   }),

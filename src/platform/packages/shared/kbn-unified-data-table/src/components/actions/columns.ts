@@ -13,7 +13,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { omit } from 'lodash';
 import { popularizeField } from '../../utils/popularize_field';
 import type { UnifiedDataTableSettings } from '../../types';
-import { SOURCE_COLUMN } from '../../utils/columns';
 
 export function getStateColumnActions({
   capabilities,
@@ -75,9 +74,8 @@ export function getStateColumnActions({
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
-    // Keep mixed `_source` lists and collapse sole `_source` → []
-    const actualColumns = buildColumns(colsWithoutDisplayTime);
-    // Use normalized columns so orphaned `_source` settings are dropped
+    // Keep `_source` when present (including alone) so a pin survives removing other fields
+    const actualColumns = colsWithoutDisplayTime;
     let nextSettings = cleanColumnSettings(actualColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
@@ -96,30 +94,18 @@ export function getStateColumnActions({
   };
 }
 
-/**
- * Normalizes column state after add/remove/set.
- * Sole `_source` collapses to [] (Summary is injected later by getDisplayedColumns).
- * Mixed lists that include `_source` are kept as-is.
- */
-function buildColumns(columns: string[]) {
-  if (columns.length === 1 && columns[0] === SOURCE_COLUMN) {
-    return [];
-  }
-  return columns;
-}
-
 function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName]);
+  return [...columns, columnName];
 }
 
 function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(columns.filter((col) => col !== columnName));
+  return columns.filter((col) => col !== columnName);
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

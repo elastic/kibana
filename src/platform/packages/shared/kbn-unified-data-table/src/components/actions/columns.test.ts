@@ -186,7 +186,7 @@ describe('Test column actions', () => {
       );
     });
 
-    it('collapses to empty columns when only _source remains', () => {
+    it('keeps sole _source when the last field column is removed', () => {
       const setAppState = jest.fn();
       const actions = getStateColumnAction({ columns: ['message', '_source'] }, setAppState);
 
@@ -194,13 +194,39 @@ describe('Test column actions', () => {
 
       expect(setAppState).toHaveBeenCalledWith(
         expect.objectContaining({
-          columns: [],
+          columns: ['_source'],
           sort: [],
         })
       );
     });
 
-    it('normalizes sole _source through onSetColumns and drops its settings', () => {
+    it('restores field columns alongside pinned _source when adding after summary-only', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: ['_source'] }, setAppState);
+
+      actions.onAddColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['_source', 'message'],
+        })
+      );
+    });
+
+    it('does not add _source when leaving classic empty summary-only', () => {
+      const setAppState = jest.fn();
+      const actions = getStateColumnAction({ columns: [] }, setAppState);
+
+      actions.onAddColumn('message');
+
+      expect(setAppState).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columns: ['message'],
+        })
+      );
+    });
+
+    it('keeps sole _source through onSetColumns and resets its width to auto', () => {
       const setAppState = jest.fn();
       const actions = getStateColumnAction(
         {
@@ -214,7 +240,8 @@ describe('Test column actions', () => {
 
       expect(setAppState).toHaveBeenCalledWith(
         expect.objectContaining({
-          columns: [],
+          columns: ['_source'],
+          // Last remaining absolute-width column is reset to auto width
           settings: { columns: {} },
         })
       );

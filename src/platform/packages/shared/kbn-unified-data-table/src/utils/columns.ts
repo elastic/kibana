@@ -18,7 +18,7 @@ const SOURCE_ONLY = [SOURCE_COLUMN];
 
 export const hasSummaryColumn = (columns: string[]): boolean => columns.includes(SOURCE_COLUMN);
 
-export const isSummaryOnlyColumns = (columns: string[]): boolean =>
+export const isSummaryOnlyColumn = (columns: string[]): boolean =>
   columns.length === 1 && columns[0] === SOURCE_COLUMN;
 
 /**

@@ -25,7 +25,7 @@ const defaultDisplaySettingsProps = {
   sampleSize: 10,
 };
 
-const getSampleSizeNumberInput = () => screen.getByRole('spinbutton');
+const getSampleSizeNumberInput = () => screen.getByRole('spinbutton', { name: 'Sample size' });
 
 const renderDisplaySettings = (
   props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}

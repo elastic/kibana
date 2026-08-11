@@ -15,7 +15,8 @@ import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 /**
  * Normalizes `_source` (Summary) when loading app/URL column state.
  * Preserves mixed field + Summary lists so coexistence survives reload;
- * collapses empty / source-only lists to classic summary-only (`[]` or defaultColumns).
+ * collapses sole `_source` to classic summary-only (`[]`);
+ * fills empty columns from defaultColumns (except the classic `['_source']` sentinel).
  */
 export function handleSourceColumnState<TState extends { columns?: string[] }>(
   state: TState,
@@ -30,16 +31,26 @@ export function handleSourceColumnState<TState extends { columns?: string[] }>(
     return state;
   }
 
-  // No real fields: don't persist sole `_source` - use empty or configured defaults
-  const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING);
-  let cleanedColumns = state.columns.filter((column) => column !== SOURCE_COLUMN);
+  // Sole `_source` from URL/session: collapse to classic summary-only
+  if (state.columns.length > 0) {
+    return {
+      ...state,
+      columns: [],
+    };
+  }
 
-  if (cleanedColumns.length === 0 && !isEqual(defaultColumns, [SOURCE_COLUMN])) {
-    cleanedColumns = defaultColumns.filter((column: string) => column !== SOURCE_COLUMN);
+  // Empty columns: apply configured defaults. Classic Discover uses `['_source']` to mean
+  // summary-only view, not a pinned Summary column — keep that as `[]`.
+  const defaultColumns: string[] = uiSettings.get(DEFAULT_COLUMNS_SETTING);
+  if (isEqual(defaultColumns, [SOURCE_COLUMN])) {
+    return {
+      ...state,
+      columns: [],
+    };
   }
 
   return {
     ...state,
-    columns: cleanedColumns,
+    columns: defaultColumns,
   };
 }
