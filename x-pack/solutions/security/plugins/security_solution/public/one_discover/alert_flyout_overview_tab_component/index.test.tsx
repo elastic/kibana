@@ -12,7 +12,7 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';

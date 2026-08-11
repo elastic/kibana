@@ -310,21 +310,38 @@ describe('RiskScoreDataClient', () => {
   });
 
   describe('getRiskScoreHistory', () => {
-    const mockSearchHits = (
-      hits: Array<{ timestamp: string; entityType: string; risk: Record<string, unknown> }>
+    // Each bucket carries a single `top_hits` hit — the max-scoring document for
+    // that bucket (ES selects it via the `desc` sort in the query).
+    const mockAggResponse = (
+      buckets: Array<{
+        timestamp: string;
+        entityType: string;
+        risk: Record<string, unknown>;
+      } | null>
     ) => ({
-      hits: {
-        hits: hits.map((h) => ({
-          _source: {
-            '@timestamp': h.timestamp,
-            [h.entityType]: {
-              risk: {
-                '@timestamp': h.timestamp,
-                ...h.risk,
+      aggregations: {
+        scores_over_time: {
+          buckets: buckets.map((b) => ({
+            key: b === null ? 0 : new Date(b.timestamp).getTime(),
+            top_score: {
+              hits: {
+                hits:
+                  b === null
+                    ? []
+                    : [
+                        {
+                          _source: {
+                            '@timestamp': b.timestamp,
+                            [b.entityType]: {
+                              risk: { '@timestamp': b.timestamp, ...b.risk },
+                            },
+                          },
+                        },
+                      ],
               },
             },
-          },
-        })),
+          })),
+        },
       },
     });
 
@@ -332,12 +349,12 @@ describe('RiskScoreDataClient', () => {
       entityType: 'host',
       entityId: 'host:test-id',
       range: { gte: 'now-90d', lte: 'now' } as const,
-      pageSize: 100,
+      interval: { value: 1, unit: 'd' } as const,
     };
 
-    it('returns mapped history entries from ES hits', async () => {
+    it('returns mapped history entries from bucket top hits, oldest to newest', async () => {
       esClient.search.mockResolvedValueOnce(
-        mockSearchHits([
+        mockAggResponse([
           {
             timestamp: '2026-01-01T00:00:00.000Z',
             entityType: 'host',
@@ -377,12 +394,14 @@ describe('RiskScoreDataClient', () => {
       ]);
     });
 
-    it('queries the time-series index with correct filters', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+    it('issues an aggregation-only query (size 0) with the correct filters', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
       const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      expect(searchCall.size).toBe(0);
+
       const filters = (searchCall.query as { bool: { filter: Array<Record<string, unknown>> } })
         .bool.filter;
 
@@ -395,8 +414,71 @@ describe('RiskScoreDataClient', () => {
       );
     });
 
+    it('selects the max-scoring document per bucket via a top_hits sub-aggregation', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+      await riskScoreDataClient.getRiskScoreHistory(defaultParams);
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const scoresOverTime = (
+        searchCall.aggs as {
+          scores_over_time: {
+            date_histogram: Record<string, unknown>;
+            aggs: { top_score: { top_hits: Record<string, unknown> } };
+          };
+        }
+      ).scores_over_time;
+
+      expect(scoresOverTime.date_histogram).toEqual({
+        field: '@timestamp',
+        fixed_interval: '1d',
+        min_doc_count: 1,
+      });
+      expect(scoresOverTime.aggs.top_score.top_hits).toEqual({
+        size: 1,
+        sort: [{ 'host.risk.calculated_score_norm': 'desc' }],
+        _source: ['@timestamp', 'host.risk'],
+      });
+    });
+
+    it('uses fixed_interval for sub-day units', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+      await riskScoreDataClient.getRiskScoreHistory({
+        ...defaultParams,
+        interval: { value: 3, unit: 'h' },
+      });
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const dateHistogram = (
+        searchCall.aggs as { scores_over_time: { date_histogram: Record<string, unknown> } }
+      ).scores_over_time.date_histogram;
+
+      expect(dateHistogram).toEqual(expect.objectContaining({ fixed_interval: '3h' }));
+      expect(dateHistogram).not.toHaveProperty('calendar_interval');
+    });
+
+    it('uses calendar_interval for week/month/year units', async () => {
+      for (const unit of ['w', 'M', 'y'] as const) {
+        esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+        await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          interval: { value: 1, unit },
+        });
+
+        const searchCall = esClient.search.mock.lastCall?.[0] as Record<string, unknown>;
+        const dateHistogram = (
+          searchCall.aggs as { scores_over_time: { date_histogram: Record<string, unknown> } }
+        ).scores_over_time.date_histogram;
+
+        expect(dateHistogram).toEqual(expect.objectContaining({ calendar_interval: `1${unit}` }));
+        expect(dateHistogram).not.toHaveProperty('fixed_interval');
+      }
+    });
+
     it('includes score_type filter when provided', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -413,7 +495,7 @@ describe('RiskScoreDataClient', () => {
     });
 
     it('handles base score_type with OR for missing field', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -439,42 +521,16 @@ describe('RiskScoreDataClient', () => {
       );
     });
 
-    it('caps page size at 1000', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
-
-      await riskScoreDataClient.getRiskScoreHistory({
-        ...defaultParams,
-        pageSize: 5000,
-      });
-
-      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
-      expect(searchCall.size).toBe(1000);
-    });
-
-    it('excludes hits with missing _source', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _source: undefined }] },
-      } as never);
+    it('excludes buckets whose top hit has no _source', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([null]) as never);
 
       const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
       expect(result).toEqual([]);
     });
 
-    it('uses shared RISK_SCORE_HISTORY_PAGE_SIZE_MAX constant for cap', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
-
-      await riskScoreDataClient.getRiskScoreHistory({
-        ...defaultParams,
-        pageSize: 500,
-      });
-
-      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
-      expect(searchCall.size).toBe(500);
-    });
-
     it('uses user entity type for field paths', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -492,10 +548,17 @@ describe('RiskScoreDataClient', () => {
           { term: { 'user.risk.id_value': 'user:alice' } },
         ])
       );
+
+      const topHits = (
+        searchCall.aggs as {
+          scores_over_time: { aggs: { top_score: { top_hits: Record<string, unknown> } } };
+        }
+      ).scores_over_time.aggs.top_score.top_hits;
+      expect(topHits.sort).toEqual([{ 'user.risk.calculated_score_norm': 'desc' }]);
     });
 
-    it('returns empty array when no hits', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+    it('returns empty array when there are no buckets', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
@@ -522,7 +585,7 @@ describe('RiskScoreDataClient', () => {
 
       it('excludes contribution fields by default', async () => {
         esClient.search.mockResolvedValueOnce(
-          mockSearchHits([
+          mockAggResponse([
             {
               timestamp: '2026-01-01T00:00:00.000Z',
               entityType: 'host',
@@ -544,7 +607,7 @@ describe('RiskScoreDataClient', () => {
 
       it('includes contribution fields when includeContributions is true', async () => {
         esClient.search.mockResolvedValueOnce(
-          mockSearchHits([
+          mockAggResponse([
             {
               timestamp: '2026-01-01T00:00:00.000Z',
               entityType: 'host',
@@ -568,7 +631,7 @@ describe('RiskScoreDataClient', () => {
 
       it('omits contribution fields absent on the document', async () => {
         esClient.search.mockResolvedValueOnce(
-          mockSearchHits([
+          mockAggResponse([
             {
               timestamp: '2026-01-01T00:00:00.000Z',
               entityType: 'host',

@@ -35,7 +35,7 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
           { maxSize: DEPLOY_AGENT_POLICIES_BATCH_SIZE }
         ),
       }),
-      createTaskRunner: ({ taskInstance, abortController }) => {
+      createTaskRunner: ({ taskInstance, signal }) => {
         return {
           async run() {
             const { agentPolicyIdsWithSpace } = taskInstance.params as {
@@ -65,7 +65,7 @@ export function registerDeployAgentPoliciesTask(taskManagerSetup: TaskManagerSet
               for (const [spaceId, agentPolicyIds] of Object.entries(
                 agentPoliciesIdsIndexedBySpace
               )) {
-                if (abortController.signal.aborted) {
+                if (signal.aborted) {
                   appContextService
                     .getLogger()
                     .warn('Deploy agent policies task was cancelled before completing all spaces');

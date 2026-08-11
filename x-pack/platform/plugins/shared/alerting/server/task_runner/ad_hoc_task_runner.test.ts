@@ -305,7 +305,7 @@ describe('Ad Hoc Task Runner', () => {
         initiator: backfillInitiator.USER,
         rule: {
           name: 'test',
-          tags: [],
+          tags: ['tag-1', 'tag-2'],
           alertTypeId: 'siem.queryRule',
           actions: [],
           params: {
@@ -495,7 +495,7 @@ describe('Ad Hoc Task Runner', () => {
     expect(call.rule).not.toBe(null);
     expect(call.rule.id).toBe(RULE_ID);
     expect(call.rule.name).toBe('test');
-    expect(call.rule.tags).toEqual([]);
+    expect(call.rule.tags).toEqual(['tag-1', 'tag-2']);
     expect(call.rule.consumer).toBe('siem');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toEqual({ interval: '1h' });
@@ -767,6 +767,77 @@ describe('Ad Hoc Task Runner', () => {
         priority: TaskPriority.Low,
         apiKeyId: 'apiKeyId',
       })
+    );
+  });
+
+  test('should authenticate scheduled actions with the UIAM API key when in UIAM mode', async () => {
+    const uiamApiKey = Buffer.from('uiamId:essu_secret').toString('base64');
+    const uiamContext = {
+      ...taskRunnerFactoryInitializerParams,
+      alertsService: mockAlertsService,
+      shouldGrantUiam: true,
+      apiKeyType: ApiKeyType.UIAM,
+    };
+
+    const mockedAdHocRunSOWithActions = {
+      ...mockedAdHocRunSO,
+      attributes: {
+        ...mockedAdHocRunSO.attributes,
+        uiamApiKey,
+        rule: {
+          ...mockedAdHocRunSO.attributes.rule,
+          id: '1',
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'action',
+              params: { foo: true },
+              frequency: {
+                notifyWhen: 'onActiveAlert' as const,
+                summary: true,
+                throttle: null,
+              },
+            },
+          ],
+        },
+      },
+      references: [
+        { type: RULE_SAVED_OBJECT_TYPE, name: 'rule', id: '1' },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+    };
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: { count: 1, data: [mockAAD] },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    mockAlertsService.createAlertsClient.mockImplementation(() => alertsClient);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(
+      mockedAdHocRunSOWithActions
+    );
+
+    const taskRunner = new AdHocTaskRunner({
+      context: uiamContext,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      executionUuid: UUID,
+    });
+
+    await taskRunner.run();
+    await taskRunner.cleanup();
+
+    // The scheduled action must be enqueued with the decoded UIAM secret, not the ES API key.
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledWith([
+      expect.objectContaining({ apiKey: 'essu_secret', apiKeyId: 'apiKeyId' }),
+    ]);
+    // No fallback warning should be logged because the UIAM key is present.
+    expect(logger.warn).not.toHaveBeenCalledWith(
+      'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+      expect.anything()
     );
   });
 
@@ -1693,6 +1764,7 @@ describe('Ad Hoc Task Runner', () => {
         name: mockedAdHocRunSO.attributes.rule.name,
         consumer: mockedAdHocRunSO.attributes.rule.consumer,
         revision: mockedAdHocRunSO.attributes.rule.revision,
+        tags: mockedAdHocRunSO.attributes.rule.tags,
       });
     }
 

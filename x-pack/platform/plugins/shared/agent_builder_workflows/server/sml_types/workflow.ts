@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -78,7 +78,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
     }
   },
 
-  getSmlData: async (originId, context) => {
+  getSmlEntry: async (originId, context) => {
     try {
       const response = await context.esClient.search<WorkflowProperties>({
         index: indexPattern,
@@ -100,13 +100,9 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
       const title = source.name ?? originId;
 
       return {
-        chunks: [
-          {
-            type: WORKFLOW_SML_TYPE,
-            title,
-            content: buildSearchContent(source),
-          },
-        ],
+        type: WORKFLOW_SML_TYPE,
+        title,
+        content: buildSearchContent(source),
       };
     } catch (error) {
       context.logger.warn(
@@ -125,7 +121,6 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
    */
   getPermissions: () => ({
     kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
-    elasticsearch: { indices: [] },
   }),
 
   toAttachment: async (item, context) => {

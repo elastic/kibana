@@ -50,7 +50,7 @@ interface RuleCreateOptionsPanelProps {
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
-  onCreateThresholdAlert?: () => void;
+  onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
 
@@ -173,15 +173,14 @@ export const getCreateWithAgentTooltipText = ({
   }
   return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
 };
-const THRESHOLD_ALERT_TITLE = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle',
-  { defaultMessage: 'Threshold Alert' }
+const THRESHOLD_RULE_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
+  { defaultMessage: 'Threshold rule' }
 );
-const THRESHOLD_ALERT_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
+const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage:
-      'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
+    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
   }
 );
 
@@ -262,7 +261,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
-  onCreateThresholdAlert,
+  onCreateThresholdRule,
 }) => {
   const styles = useMemoCss(listEmptyStateStyles);
 
@@ -292,14 +291,14 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
   const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
     () => ({
-      id: 'create-threshold-alert',
+      id: 'create-threshold-rule',
       iconType: 'chartThreshold',
-      title: THRESHOLD_ALERT_TITLE,
-      description: THRESHOLD_ALERT_DESCRIPTION,
-      onClick: onCreateThresholdAlert ?? noop,
-      'data-test-subj': 'createThresholdAlertCard',
+      title: THRESHOLD_RULE_TITLE,
+      description: THRESHOLD_RULE_DESCRIPTION,
+      onClick: onCreateThresholdRule ?? noop,
+      'data-test-subj': 'createThresholdRuleCard',
     }),
-    [onCreateThresholdAlert]
+    [onCreateThresholdRule]
   );
 
   return (
@@ -397,7 +396,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
-  onCreateThresholdAlert,
+  onCreateThresholdRule,
   legacyRuleTypes,
 }) => {
   const isAgentDisabled = createWithAgentDisabled === true;
@@ -458,9 +457,9 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         titleElement="h3"
         titleSize="xs"
         hasBorder={true}
-        title={THRESHOLD_ALERT_TITLE}
-        description={THRESHOLD_ALERT_DESCRIPTION}
-        onClick={onCreateThresholdAlert ?? noop}
+        title={THRESHOLD_RULE_TITLE}
+        description={THRESHOLD_RULE_DESCRIPTION}
+        onClick={onCreateThresholdRule ?? noop}
         icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
       />
       {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}

@@ -10,12 +10,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
   type ConnectorSetupAttachmentData,
 } from '../../../common/attachments';
-import { supportsAgentBuilder } from './utils';
+import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
 const proposeConnectorSchema = z.object({
   connector_type: z
@@ -46,13 +47,15 @@ export type ProposeConnectorInput = z.infer<typeof proposeConnectorSchema>;
  * The card lets the user create a connector instance via the connector flyout,
  * where configuration and secrets are entered and submitted directly to the
  * Actions API. Secrets never pass through this tool, the conversation, or the
- * model. The handler validates that `connector_type` is a known spec-backed
- * connector and returns the attachment id so the assistant can emit
- * `<render_attachment id="..." />`.
+ * model. The handler validates that `connector_type` is a known connector
+ * registered in the Actions registry with Agent Builder support, and returns
+ * the attachment id so the assistant can emit `<render_attachment id="..." />`.
  */
-export const createProposeConnectorTool = (): BuiltinSkillBoundedTool<
-  typeof proposeConnectorSchema
-> => ({
+export const createProposeConnectorTool = ({
+  getActionsStart,
+}: {
+  getActionsStart: () => Promise<ActionsPluginStart>;
+}): BuiltinSkillBoundedTool<typeof proposeConnectorSchema> => ({
   id: 'propose_connector',
   type: ToolType.builtin,
   description:
@@ -62,8 +65,11 @@ export const createProposeConnectorTool = (): BuiltinSkillBoundedTool<
   handler: async (input, context) => {
     const { attachments } = context;
 
-    const spec = getConnectorSpec(input.connector_type);
-    if (!spec || !supportsAgentBuilder(spec)) {
+    const actionsStart = await getActionsStart();
+    const registeredTypes = actionsStart.listTypes(AgentBuilderConnectorFeatureId);
+    const actionType = registeredTypes.find((t) => t.id === input.connector_type);
+
+    if (!actionType || !isConnectorTypeAvailable(actionType)) {
       return {
         results: [
           createErrorResult({
@@ -75,9 +81,11 @@ export const createProposeConnectorTool = (): BuiltinSkillBoundedTool<
       };
     }
 
+    const displayName = getConnectorTypeDisplayName(actionType);
+
     const data: ConnectorSetupAttachmentData = {
       connector_type: input.connector_type,
-      connector_type_name: spec.metadata.displayName,
+      connector_type_name: displayName,
       suggested_name: input.suggested_name,
       reason: input.reason,
     };
@@ -87,7 +95,7 @@ export const createProposeConnectorTool = (): BuiltinSkillBoundedTool<
         {
           type: CONNECTOR_SETUP_ATTACHMENT_TYPE,
           data,
-          description: input.reason ?? `Set up ${spec.metadata.displayName} connector`,
+          description: input.reason ?? `Set up ${displayName} connector`,
         },
         'agent'
       );

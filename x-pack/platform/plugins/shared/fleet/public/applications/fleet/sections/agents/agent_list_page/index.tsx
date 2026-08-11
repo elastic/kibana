@@ -140,6 +140,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    scheduledActionsCount,
+    scheduledActionsCapped,
     isUsingFilter,
     onTableChange,
     clearFilters: clearFiltersFromSession,
@@ -370,6 +372,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentReassignAgentPolicyModal
             agents={[agentToReassign]}
+            agentCount={1}
             onClose={() => {
               setAgentToReassign(undefined);
               refreshAgents();
@@ -572,6 +575,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        scheduledActionsCount={scheduledActionsCount}
+        scheduledActionsCapped={scheduledActionsCapped}
         sortField={sort.field}
         sortOrder={sort.direction}
         unsupportedMigrateAgents={unsupportedMigrateAgents}

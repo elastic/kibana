@@ -80,6 +80,16 @@ export interface EmbeddableConversationProps {
   attachments?: ConversationAttachment[];
 
   /**
+   * Optional heading shown on the empty "new conversation" screen in place of the
+   * default "How can I help you?" greeting. Use this to surface a page-specific
+   * call to action (e.g. "What do you want to automate?" for the workflow editor).
+   *
+   * The value is rendered as plain text; embedders are expected to pass an
+   * already-translated string.
+   */
+  greetingMessage?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -152,6 +162,15 @@ export interface OpenConversationSidebarReturn {
 export interface AgentBuilderPluginSetup {}
 
 /**
+ * Embeddable chat access signals matching the embeddable access boundary checks
+ * in the agent_builder plugin (license, LLM connector).
+ */
+export interface EmbeddableChatAccess {
+  hasRequiredLicense: boolean;
+  hasLlmConnector: boolean;
+}
+
+/**
  * Public start contract for the browser-side agentBuilder plugin.
  */
 export interface AgentBuilderPluginStart {
@@ -175,6 +194,12 @@ export interface AgentBuilderPluginStart {
    * Events service contract, can be used to listen to chat events.
    */
   events: EventsServiceStartContract;
+  /**
+   * Resolves Agent Builder access (enterprise license, LLM connector). Callers must
+   * also require `application.capabilities.agentBuilder.show === true` before
+   * programmatically opening chat.
+   */
+  getAgentBuilderAccess: () => Promise<EmbeddableChatAccess>;
   /**
    * Opens the conversation sidebar.
    *

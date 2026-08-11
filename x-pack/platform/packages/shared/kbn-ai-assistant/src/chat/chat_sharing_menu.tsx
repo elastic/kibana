@@ -176,6 +176,9 @@ export function ChatSharingMenu({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.popoverAriaLabel', {
+        defaultMessage: 'Sharing options',
+      })}
       button={
         <EuiBadge
           iconType={selectedValue === ConversationAccess.SHARED ? 'users' : 'lock'}

@@ -51,7 +51,15 @@ export {
   ensureSAMLRoleMapping,
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
+  parseSAMLRequest,
   createUiamSessionTokens,
   createUiamOAuthAccessToken,
   projectTypeToAlias,
 } from './utils';
+export type { SAMLRequestInfo } from './utils';
+
+export {
+  seedTestOAuthConnection,
+  updateTestOAuthConnection,
+  deleteTestOAuthConnection,
+} from './cosmos_db_seeder';

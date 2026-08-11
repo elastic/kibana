@@ -28,7 +28,7 @@ interface ActionTemplateCard {
   iconType: string;
 }
 
-export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
+const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
   {
     key: getActionTemplateKey({ source: 'existing' }),
     template: { source: 'existing' },

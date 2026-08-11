@@ -35,10 +35,11 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
-      "evals"
+      "evals",
+      "significantEvents",
+      "significantEventsApp"
     ],
     "requiredBundles": [
-      "agentBuilder",
       "discover",
       "esql",
       "kibanaReact",

@@ -16,7 +16,7 @@ All APIs accept an optional `resourceType` parameter. When omitted, it defaults 
 | Resource Type   | Description                   | Versioning                    |
 | --------------- | ----------------------------- | ----------------------------- |
 | `product_doc`   | Elastic product documentation | Kibana version (e.g., 8.18)   |
-| `security_labs` | Elastic Security Labs content | Date-based (e.g., 2024.12.11) |
+| `security_labs` | Elastic Security Labs content | UTC timestamp (`YYYY.MM.DD-HHMMSS`; legacy `YYYY.MM.DD` still accepted for 9.3/9.4 BWC) |
 | `openapi_spec`  | Elastic open api spec         |                               |
 
 ### To install
@@ -121,7 +121,7 @@ xpack.productDocBase.artifactRepositoryUrl: 'https://kibana-knowledge-base-artif
 Artifact naming conventions:
 
 - Product docs: `kb-product-doc-{product}-{version}.zip`
-- Security Labs: `security-labs-{YYYY.MM.DD}.zip`
+- Security Labs: `security-labs-{YYYY.MM.DD-HHMMSS}.zip`. Publishes also write a same-bytes ELSER alias `security-labs-{YYYY.MM.DD}.zip` for Kibana **9.3 / 9.4** BWC — those releases only parse date-only names from the original Security Labs ship ([#246099](https://github.com/elastic/kibana/pull/246099)). The alias can be dropped once 9.3/9.4 are out of support.
 
 ## Run tests
 

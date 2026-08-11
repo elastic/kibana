@@ -225,12 +225,10 @@ export const InsightsTabCsp = memo(
       panels.left?.params?.hasVulnerabilitiesFindings,
     ]);
 
-    const isSingleOption = insightsButtons.length === 1;
+    const showSubTabs = insightsButtons.length > 1;
 
     const onTabChange = (id: string) => {
-      if (!isSingleOption) {
-        setActiveInsightsId(id);
-      }
+      setActiveInsightsId(id);
     };
 
     if (insightsButtons.length === 0) {
@@ -239,23 +237,26 @@ export const InsightsTabCsp = memo(
 
     return (
       <>
-        <EuiButtonGroup
-          color="primary"
-          legend={i18n.translate(
-            'xpack.securitySolution.flyout.left.insights.optionsButtonGroups',
-            {
-              defaultMessage: 'Insights options',
-            }
-          )}
-          options={insightsButtons}
-          idSelected={activeInsightsId}
-          onChange={onTabChange}
-          buttonSize="compressed"
-          isFullWidth
-          isDisabled={isSingleOption}
-          data-test-subj={'insightButtonGroupsTestId'}
-        />
-        <EuiSpacer size="xl" />
+        {showSubTabs && (
+          <>
+            <EuiButtonGroup
+              color="primary"
+              legend={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.optionsButtonGroups',
+                {
+                  defaultMessage: 'Insights options',
+                }
+              )}
+              options={insightsButtons}
+              idSelected={activeInsightsId}
+              onChange={onTabChange}
+              buttonSize="compressed"
+              isFullWidth
+              data-test-subj={'insightButtonGroupsTestId'}
+            />
+            <EuiSpacer size="xl" />
+          </>
+        )}
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
           <MisconfigurationFindingsDetailsTable
             field={field}
@@ -278,6 +279,7 @@ export const InsightsTabCsp = memo(
             value={value}
             entityId={entityId}
             onShowAlert={onShowAlert}
+            scopeId={scopeId}
           />
         )}
       </>

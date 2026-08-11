@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import { parse as yamlParse } from 'yaml';
 import { useImportTemplates } from './use_import_templates';
 import { postTemplate, patchTemplate } from '../api/api';
 import { casesQueriesKeys } from '../../../containers/constants';
@@ -79,6 +80,83 @@ describe('useImportTemplates', () => {
         template: expect.objectContaining({ owner: 'securitySolution' }),
       })
     );
+  });
+
+  it('sends template metadata as saved-object attributes and only case defaults in the definition', async () => {
+    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    const template = makeTemplate({
+      description: 'Template metadata description',
+      tags: ['metadata-tag'],
+      caseDefaults: {
+        title: 'Case default title',
+        description: 'Case default description',
+        tags: ['case-tag'],
+        severity: 'high',
+        category: 'malware',
+        assignees: [{ uid: 'analyst-1' }],
+      },
+    });
+
+    const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
+    await result.current.importTemplates([template]);
+
+    // Template identity is persisted on the saved-object attributes (single source of truth).
+    expect(postTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          name: 'Test Template',
+          description: 'Template metadata description',
+          tags: ['metadata-tag'],
+        }),
+      })
+    );
+
+    const request = (postTemplate as jest.Mock).mock.calls[0][0] as {
+      template: { definition: string };
+    };
+    const parsedDefinition = yamlParse(request.template.definition) as {
+      template_name?: string;
+      template_description?: string;
+      template_tags?: string[];
+      name?: string;
+      description?: string;
+      tags?: string[];
+      severity?: string;
+      category?: string;
+      assignees?: Array<{ uid: string }>;
+    };
+    // Template identity is NOT duplicated inside the definition.
+    expect(parsedDefinition.template_name).toBeUndefined();
+    expect(parsedDefinition.template_description).toBeUndefined();
+    expect(parsedDefinition.template_tags).toBeUndefined();
+    // Case defaults live in the definition.
+    expect(parsedDefinition.name).toEqual('Case default title');
+    expect(parsedDefinition.description).toEqual('Case default description');
+    expect(parsedDefinition.tags).toEqual(['case-tag']);
+    expect(parsedDefinition.severity).toEqual('high');
+    expect(parsedDefinition.category).toEqual('malware');
+    expect(parsedDefinition.assignees).toEqual([{ uid: 'analyst-1' }]);
+  });
+
+  it('keeps an explicit empty assignees list in imported definition YAML', async () => {
+    (postTemplate as jest.Mock).mockResolvedValue({ templateId: 'new-1' });
+    const template = makeTemplate({
+      caseDefaults: {
+        assignees: [],
+      },
+    });
+
+    const { result } = renderHook(() => useImportTemplates(), { wrapper: TestProviders });
+    await result.current.importTemplates([template]);
+
+    const request = (postTemplate as jest.Mock).mock.calls[0][0] as {
+      template: { definition: string };
+    };
+    const parsedDefinition = yamlParse(request.template.definition) as {
+      assignees?: Array<{ uid: string }>;
+    };
+
+    expect(parsedDefinition.assignees).toEqual([]);
   });
 
   it('shows success toast when all imports succeed', async () => {

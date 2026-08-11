@@ -43,6 +43,8 @@ interface BaseLifecyclePhaseProps {
   showDefaultRepositoryCallout?: boolean;
   onCreateDefaultRepository?: () => void;
   createDefaultRepositoryHref?: string;
+  manageRepositoriesUrl?: string;
+  hasExistingRepositories?: boolean;
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
   /** Stable schema phase id (e.g. 'frozen'). Separate from `label` which is a localized string. */
@@ -62,6 +64,8 @@ interface BaseLifecyclePhaseProps {
   isRemoveDisabled?: boolean;
   removeDisabledReason?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 interface DeleteLifecyclePhaseProps extends BaseLifecyclePhaseProps {
@@ -93,6 +97,8 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     showDefaultRepositoryCallout = false,
     onCreateDefaultRepository,
     createDefaultRepositoryHref,
+    manageRepositoriesUrl,
+    hasExistingRepositories,
     onRefreshDefaultRepository,
     isRefreshingDefaultRepository,
     name: nameProp,
@@ -111,6 +117,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     isRemoveDisabled = false,
     removeDisabledReason,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
   } = props;
   const isDelete = props.isDelete === true;
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
@@ -125,6 +132,9 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     ((showEnterpriseCallout && Boolean(onUpgradeEnterprise)) || showDefaultRepositoryCallout);
 
   const handleClick = () => {
+    if (disableInteractions) {
+      return;
+    }
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to this phase instead of showing the popover
       onEditPhase?.(phaseId);
@@ -168,10 +178,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           size={size}
           testSubjPrefix={testSubjPrefix}
           isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+          disableInteractions={disableInteractions}
           showWarningIcon={showWarningIcon}
         />
       }
-      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen && !disableInteractions}
       closePopover={closePopover}
       anchorPosition="upCenter"
       aria-labelledby={popoverTitleId}
@@ -287,17 +298,20 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
-        style={{ width: '300px' }}
+        style={{ width: '360px' }}
         data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
       >
-        {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
-          <FrozenEnterpriseRequiredCallout
-            onUpgradeEnterprise={onUpgradeEnterprise}
-            calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
-            upgradeButtonTestSubj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
-          />
-        )}
         <div css={{ padding: euiTheme.size.m }}>
+          {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
+            <>
+              <FrozenEnterpriseRequiredCallout
+                onUpgradeEnterprise={onUpgradeEnterprise}
+                calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
+                upgradeButtonTestSubj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
             <p>{description}</p>
           </EuiText>
@@ -394,10 +408,13 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               <FrozenDefaultRepositoryRequiredCallout
                 onCreateDefaultRepository={onCreateDefaultRepository}
                 createDefaultRepositoryHref={createDefaultRepositoryHref}
+                manageRepositoriesUrl={manageRepositoriesUrl}
+                hasExistingRepositories={hasExistingRepositories}
                 onRefresh={onRefreshDefaultRepository}
                 isRefreshing={isRefreshingDefaultRepository}
                 calloutTestSubj={`${prefix}lifecyclePhase-${label}-defaultRepositoryRequiredCallout`}
                 createButtonTestSubj={`${prefix}lifecyclePhase-${label}-createDefaultRepositoryButton`}
+                manageRepositoriesButtonTestSubj={`${prefix}lifecyclePhase-${label}-manageRepositoriesButton`}
                 refreshButtonTestSubj={`${prefix}lifecyclePhase-${label}-refreshDefaultRepositoryButton`}
               />
             ) : (

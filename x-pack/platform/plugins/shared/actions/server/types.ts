@@ -100,6 +100,7 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -246,6 +247,10 @@ export interface ActionTypeCoreFields<
    * Description of this connector type.
    */
   description?: string;
+  /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
   /**
    * When true, the connector type is shown as technical preview in the UI.
    */

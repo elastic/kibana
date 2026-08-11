@@ -21,13 +21,13 @@ import {
   ConversationRoundStepType,
   ToolOrigin,
   ToolResultType,
-  getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
-  ConversationUpdateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -40,10 +40,10 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 
-export type Document = Pick<
-  GetResponse<ConversationProperties>,
-  '_source' | '_id' | '_seq_no' | '_primary_term'
->;
+export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+
+export type VersionedDocument = Document &
+  Required<Pick<GetResponse<ConversationProperties>, '_seq_no' | '_primary_term'>>;
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
@@ -62,7 +62,9 @@ const convertBaseFromEs = (document: Document) => {
     updated_at: document._source.updated_at,
     status: document._source.status,
     read: document._source.read,
-    access_control: document._source.access_control ?? getDefaultConversationAccessControl(),
+    pinned: document._source.pinned,
+    access_control: normalizeConversationAccessControl(document._source.access_control),
+    ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
   };
 };
@@ -238,7 +240,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     state: conversation.state,
     status: conversation.status,
     read: conversation.read,
-    access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    pinned: conversation.pinned,
+    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
   };
 };
@@ -250,7 +254,7 @@ export const updateConversation = ({
   updateDate,
 }: {
   conversation: Conversation;
-  update: ConversationUpdateRequest;
+  update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
 }) => {
@@ -288,7 +292,9 @@ export const createRequestToEs = ({
     state: conversation.state,
     status: conversation.status,
     read: false,
-    access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    pinned: false,
+    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
   };
 };

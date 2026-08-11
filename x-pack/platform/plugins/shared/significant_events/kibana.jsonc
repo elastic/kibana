@@ -2,43 +2,36 @@
   "type": "plugin",
   "id": "@kbn/significant-events-plugin",
   "owner": "@elastic/obs-sig-events-team",
-  "description": "Signficant Events",
+  "description": "Significant Events",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
-    "id": "significant_events",
-    "configPath": ["xpack", "significant_events"],
+    "id": "significantEvents",
     "browser": true,
     "server": true,
+    "configPath": ["xpack", "significantEvents"],
     "requiredPlugins": [
       "actions",
       "alerting",
-      "console",
-      "data",
+      "alertingVTwo",
       "encryptedSavedObjects",
-      "features",
       "inference",
       "licensing",
-      "ruleRegistry",
       "security",
       "streams",
-      "taskManager",
-      "usageCollection",
       "fieldsMetadata"
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "agentContextLayer",
-      "alertingVTwo",
+      "agentBuilderSml",
       "cloud",
-      "esql",
       "serverless",
-      "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement"
     ],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
   }
 }

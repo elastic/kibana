@@ -17,14 +17,30 @@ const SEVERITY_MAP = {
   info: MarkerSeverity.Info,
 };
 
+export interface CreateMarkersAndDecorationsOptions {
+  omitMarginDecorations?: boolean;
+  omitMarkersForOwners?: readonly string[];
+}
+
 // eslint-disable-next-line complexity
-export function createMarkersAndDecorations(validationResults: YamlValidationResult[]): {
+export function createMarkersAndDecorations(
+  validationResults: YamlValidationResult[],
+  options?: CreateMarkersAndDecorationsOptions
+): {
   markers: monaco.editor.IMarkerData[];
   decorations: monaco.editor.IModelDeltaDecoration[];
 } {
+  const omitMarginDecorations = options?.omitMarginDecorations ?? false;
+  const omitMarkersForOwners = options?.omitMarkersForOwners ?? [];
+  const shouldCreateMarker = (owner: string): boolean => !omitMarkersForOwners.includes(owner);
   const markers: monaco.editor.IMarkerData[] = [];
   const decorations: monaco.editor.IModelDeltaDecoration[] = [];
   for (const validationResult of validationResults) {
+    const pushMarker = (marker: monaco.editor.IMarkerData): void => {
+      if (shouldCreateMarker(validationResult.owner)) {
+        markers.push(marker);
+      }
+    };
     const marker = {
       startLineNumber: validationResult.startLineNumber,
       startColumn: validationResult.startColumn,
@@ -33,7 +49,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
     };
     if (validationResult.owner === 'variable-validation') {
       if (validationResult.severity !== null) {
-        markers.push({
+        pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
@@ -52,7 +68,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
       });
     } else if (validationResult.owner === 'json-schema-default-validation') {
       if (validationResult.severity !== null) {
-        markers.push({
+        pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
@@ -60,7 +76,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
         });
       }
     } else if (validationResult.owner === 'liquid-template-validation') {
-      markers.push({
+      pushMarker({
         ...marker,
         severity: SEVERITY_MAP[validationResult.severity],
         message: validationResult.message,
@@ -77,7 +93,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
         },
       });
     } else if (validationResult.owner === 'step-name-validation') {
-      markers.push({
+      pushMarker({
         ...marker,
         severity: SEVERITY_MAP[validationResult.severity],
         message: validationResult.message,
@@ -92,14 +108,18 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
         ),
         options: {
           className: 'duplicate-step-name-error',
-          marginClassName: 'duplicate-step-name-error-margin',
-          isWholeLine: true,
+          ...(omitMarginDecorations
+            ? { isWholeLine: true }
+            : {
+                marginClassName: 'duplicate-step-name-error-margin',
+                isWholeLine: true,
+              }),
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
         },
       });
     } else if (validationResult.owner === 'connector-id-validation') {
       if (validationResult.severity !== null) {
-        markers.push({
+        pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message ?? '',
@@ -112,7 +132,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
       });
     } else if (validationResult.owner === 'step-property-validation') {
       if (validationResult.severity !== null) {
-        markers.push({
+        pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
@@ -124,7 +144,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
         options: createSelectionDecoration(validationResult),
       });
     } else if (validationResult.owner === 'workflow-output-validation') {
-      markers.push({
+      pushMarker({
         ...marker,
         severity: SEVERITY_MAP[validationResult.severity],
         message: validationResult.message,
@@ -142,7 +162,7 @@ export function createMarkersAndDecorations(validationResults: YamlValidationRes
       });
     } else {
       if (validationResult.severity !== null) {
-        markers.push({
+        pushMarker({
           ...marker,
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,

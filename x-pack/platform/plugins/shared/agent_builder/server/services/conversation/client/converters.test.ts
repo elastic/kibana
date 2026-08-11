@@ -8,7 +8,9 @@
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   ConversationRoundStatus,
+  ConversationOriginType,
   ToolOrigin,
 } from '@kbn/agent-builder-common';
 import {
@@ -22,9 +24,9 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
+  updateConversation,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
@@ -109,6 +111,7 @@ describe('conversation model converters', () => {
         },
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -177,6 +180,7 @@ describe('conversation model converters', () => {
         },
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
@@ -474,10 +478,11 @@ describe('conversation model converters', () => {
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
     });
 
-    it('deserializes conversation access control', () => {
+    it('defaults access control entries to an empty array when absent from the document', () => {
       const serialized = documentBase();
       serialized._source!.access_control = {
         access_mode: ConversationAccessControlMode.Public,
@@ -487,6 +492,72 @@ describe('conversation model converters', () => {
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    it('deserializes conversation access control', () => {
+      const serialized = documentBase();
+      serialized._source!.access_control = {
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [
+          {
+            type: 'user',
+            id: 'alice-profile-id',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [
+          {
+            type: 'user',
+            id: 'alice-profile-id',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
+      });
+    });
+
+    it('deserializes first-class origin', () => {
+      const serialized = documentBase();
+      serialized._source!.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('deserializes round origin and author', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      serialized._source!.conversation_rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(deserialized.rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
       });
     });
   });
@@ -565,6 +636,7 @@ describe('conversation model converters', () => {
         rounds: undefined,
         access_control: {
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         },
       });
       // Verify rounds is not present
@@ -667,12 +739,136 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.access_control = {
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       };
 
       const serialized = toEs(conversation, 'space');
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    it('defaults access control to private with no entries when the conversation has none', () => {
+      const conversation = conversationBase();
+      conversation.access_control = undefined;
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
+    });
+
+    it('preserves access control entries when serializing', () => {
+      const conversation = conversationBase();
+      conversation.access_control = {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'alice-profile-id',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'alice-profile-id',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
+      });
+    });
+
+    it('serializes first-class origin', () => {
+      const conversation = conversationBase();
+      conversation.origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+    });
+
+    it('serializes round origin and author', () => {
+      const conversation = conversationBase();
+      conversation.rounds[0].author = {
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      };
+      conversation.rounds[0].origin = {
+        type: ConversationOriginType.Slack,
+      };
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.conversation_rounds[0].origin).toEqual({
+        type: 'slack',
+      });
+      expect(serialized.conversation_rounds[0].author).toEqual({
+        id: 'U123',
+        full_name: 'Jane Doe',
+        username: 'jane',
+      });
+    });
+  });
+
+  describe('updateConversation', () => {
+    it('preserves access control entries when updating a conversation', () => {
+      const conversation: Conversation = {
+        id: 'conv_id',
+        agent_id: 'agent_id',
+        user: { id: 'user_id', username: 'user_name' },
+        title: 'conv_title',
+        created_at: creationDate,
+        updated_at: updateDate,
+        rounds: [],
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              type: 'user',
+              id: 'alice-profile-id',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-06-29T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+
+      const updated = updateConversation({
+        conversation,
+        update: { id: 'conv_id', title: 'new_title' },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.title).toEqual('new_title');
+      expect(updated.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [
+          {
+            type: 'user',
+            id: 'alice-profile-id',
+            role: ConversationAccessControlRole.Member,
+            added_at: '2026-06-29T00:00:00.000Z',
+          },
+        ],
       });
     });
   });
@@ -729,6 +925,7 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
     });
 
@@ -739,6 +936,7 @@ describe('conversation model converters', () => {
         rounds: [],
         access_control: {
           access_mode: ConversationAccessControlMode.Public,
+          entries: [],
         },
       };
 
@@ -751,6 +949,29 @@ describe('conversation model converters', () => {
 
       expect(serialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+    });
+
+    it('serializes first-class origin when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        origin: {
+          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+        },
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.origin).toEqual({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
     });
   });

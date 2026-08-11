@@ -262,6 +262,14 @@ export const LIQUID_FILTERS = [
     example: '{{ "hello world" | number_of_words }} => 2',
   },
   {
+    name: 'pick',
+    description:
+      'Keeps only the given dotted-path fields of an object, preserving nested structure and value types',
+    insertText: 'pick: ${1:paths}',
+    example:
+      '{{ alert | pick: ["host.name", "event.action"] }} => { host: { name: ... }, event: { action: ... } }',
+  },
+  {
     name: 'plus',
     description: 'Adds a number to another number',
     insertText: 'plus: ${1:number}',

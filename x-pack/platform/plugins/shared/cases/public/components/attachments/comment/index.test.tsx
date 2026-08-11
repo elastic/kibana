@@ -49,7 +49,7 @@ describe('getCommentAttachmentType', () => {
 
     expect(commentType).toStrictEqual({
       id: COMMENT_ATTACHMENT_TYPE,
-      icon: 'editorComment',
+      icon: 'comment',
       displayName: 'Comments',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
@@ -132,7 +132,7 @@ describe('getCommentAttachmentType', () => {
       const commentType = getCommentAttachmentType();
       const removal = commentType.getAttachmentRemovalObject?.(attachmentViewProps);
 
-      expect(removal).toEqual({ event: 'Deleted comment' });
+      expect(removal).toEqual({ event: 'removed comment' });
     });
   });
 });

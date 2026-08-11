@@ -48,7 +48,7 @@ test.describe(
 
         await pageObjects.streams.verifyLifecycleBadge(
           TEST_STREAM_NAME,
-          isServerless ? 'Indefinite' : 'ILM Policy: logs'
+          isServerless ? '∞' : 'ILM Policy: logs'
         );
       });
 
@@ -59,6 +59,9 @@ test.describe(
 
     test('shows Wired badge on wired stream', async ({ pageObjects }) => {
       await pageObjects.streams.gotoDataRetentionTab('logs.otel');
+      // logs.otel is a root wired stream (Technical preview + Data quality + Data Retention +
+      // Wired), so the Wired badge collapses into the overflow popover behind the first two.
+      await pageObjects.streams.openBadgesOverflow();
       await pageObjects.streams.verifyWiredBadge();
     });
 

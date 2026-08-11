@@ -77,4 +77,9 @@ export interface InternalSkillDefinition {
    * To enable a skill when a specific value is set for a UiSetting, pass an object with key and value.
    */
   uiSettingRequired?: string | { key: string; value: unknown };
+  /**
+   * When true, this skill is not automatically included on agents that have
+   * `enable_elastic_capabilities` set.
+   */
+  excludeFromElasticCapabilities?: boolean;
 }

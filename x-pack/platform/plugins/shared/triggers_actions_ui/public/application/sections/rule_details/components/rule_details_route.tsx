@@ -42,7 +42,6 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
     cps,
     notifications: { toasts },
     spaces: spacesApi,
-    application: { getUrlForApp },
     setBreadcrumbs,
   } = useKibana().services;
 
@@ -50,8 +49,8 @@ export const RuleDetailsRoute: React.FunctionComponent<RuleDetailsRouteProps> = 
 
   // sets a baseline breadcrumb regardless of the outcome of loading the rule
   useEffect(() => {
-    setBreadcrumbs([getRulesBreadcrumbWithHref(getUrlForApp)]);
-  }, [getUrlForApp, setBreadcrumbs]);
+    setBreadcrumbs([getRulesBreadcrumbWithHref()]);
+  }, [setBreadcrumbs]);
 
   const [rule, setRule] = useState<ResolvedRule | null>(null);
   const [ruleType, setRuleType] = useState<RuleType | null>(null);

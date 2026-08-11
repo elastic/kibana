@@ -7,7 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
-import { usePhaseColors } from '@kbn/data-lifecycle-phases';
+import { getTimingBoundHelpText, usePhaseColors } from '@kbn/data-lifecycle-phases';
 import {
   getDurationLabel,
   mergeDefaultValue,
@@ -34,10 +34,12 @@ export const DlmPhasesSelector = ({
   hasDefaultSnapshotRepository = false,
   isDisabled = false,
   defaultSnapshotRepository,
+  maximumRetentionPeriod,
   serverless = false,
   manageRepositoriesUrl,
   createDefaultRepositoryUrl,
   canCreateDefaultSnapshotRepository = false,
+  hasExistingRepositories = false,
   enterprise,
   onRefreshDefaultSnapshotRepository,
   onChange,
@@ -61,15 +63,15 @@ export const DlmPhasesSelector = ({
     enterprise &&
     createDefaultRepositoryUrl &&
     hasFrozenRepositoryAccessOrAlreadyActive;
-  const validation = validateDurations(value);
+  const validation = validateDurations(value, maximumRetentionPeriod);
 
   const updateValue = useCallback(
     (nextValue: DlmPhasesSelectorValue) => {
       setValue(nextValue);
-      const nextValidation = validateDurations(nextValue);
+      const nextValidation = validateDurations(nextValue, maximumRetentionPeriod);
       onChange?.(nextValue, serializeDlmPhases(nextValue), nextValidation.isValid);
     },
-    [onChange]
+    [onChange, maximumRetentionPeriod]
   );
 
   const updateFrozen = useCallback(
@@ -88,12 +90,24 @@ export const DlmPhasesSelector = ({
 
   const frozenHelpText =
     value.frozen.enabled && value.delete.enabled
-      ? strings.frozenMustOccurBeforeDeleteHelpText(getDurationLabel(value.delete))
+      ? getTimingBoundHelpText({
+          upper: {
+            neighbor: { type: 'phase', phase: 'delete' },
+            value: getDurationLabel(value.delete),
+          },
+        })
       : undefined;
 
   const deleteHelpText =
     value.frozen.enabled && value.delete.enabled
-      ? strings.deleteMustOccurAfterFrozenHelpText(getDurationLabel(value.frozen))
+      ? getTimingBoundHelpText({
+          lower: {
+            neighbor: { type: 'phase', phase: 'frozen' },
+            value: getDurationLabel(value.frozen),
+          },
+        })
+      : maximumRetentionPeriod && value.delete.enabled
+      ? strings.deleteMaximumRetentionText(maximumRetentionPeriod)
       : undefined;
 
   return (
@@ -119,6 +133,7 @@ export const DlmPhasesSelector = ({
             hasDefaultSnapshotRepository={hasDefaultSnapshotRepository}
             canCreateDefaultSnapshotRepository={canCreateDefaultSnapshotRepository}
             createDefaultRepositoryUrl={createDefaultRepositoryUrl}
+            hasExistingRepositories={hasExistingRepositories}
             enterprise={enterprise}
             onRefreshDefaultSnapshotRepository={onRefreshDefaultSnapshotRepository}
             onChange={updateFrozen}

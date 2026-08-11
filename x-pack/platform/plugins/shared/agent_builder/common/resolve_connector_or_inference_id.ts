@@ -11,6 +11,9 @@ export const CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_REST =
 export const CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW =
   'Cannot specify both connector-id and inference-id.';
 
+export const CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW =
+  'Cannot specify connector-id-by-feature together with connector-id or inference-id.';
+
 export class ConnectorOrInferenceIdConflictError extends Error {
   constructor(message: string) {
     super(message);

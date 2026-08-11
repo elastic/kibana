@@ -12,6 +12,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
   WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
@@ -99,6 +100,22 @@ export const registerUISettings = (
       description: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.description', {
         defaultMessage: 'Enables the Workflow Template Library.',
       }),
+      schema: schema.boolean(),
+      value: false,
+      readonly: true,
+      readonlyMode: 'ui',
+      requiresPageReload: true,
+    },
+    [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.globalExecutionsViewEnabled.name', {
+        defaultMessage: 'Workflow Executions view',
+      }),
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.globalExecutionsViewEnabled.description',
+        {
+          defaultMessage: 'Enables the global Workflow Executions view.',
+        }
+      ),
       schema: schema.boolean(),
       value: false,
       readonly: true,

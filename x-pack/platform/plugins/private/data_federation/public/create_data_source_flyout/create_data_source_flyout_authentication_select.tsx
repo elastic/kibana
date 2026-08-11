@@ -27,7 +27,8 @@ import {
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
 
-const CLOUD_SECURITY_DOCS_URL = 'https://www.elastic.co/docs/solutions/security/cloud';
+const DATA_FEDERATION_AUTH_DOCS_URL =
+  'https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-sources#authentication';
 
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
@@ -60,7 +61,7 @@ export function CreateDataSourceFlyoutAuthenticationSelect({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={CLOUD_SECURITY_DOCS_URL}
+            href={DATA_FEDERATION_AUTH_DOCS_URL}
             target="_blank"
             external={false}
             rel="noopener noreferrer"

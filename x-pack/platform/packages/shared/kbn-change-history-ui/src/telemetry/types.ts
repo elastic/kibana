@@ -81,6 +81,7 @@ export interface ReportChangeHistoryRestoreConfirmedActionParams
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
+  hadUnsavedLocalEdits?: boolean;
 }
 
 export interface ReportChangeHistoryRestoreCompletedActionParams
@@ -89,6 +90,7 @@ export interface ReportChangeHistoryRestoreCompletedActionParams
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
+  hadUnsavedLocalEdits?: boolean;
   durationMs?: number;
 }
 
@@ -98,6 +100,7 @@ export interface ReportChangeHistoryRestoreFailedActionParams
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
+  hadUnsavedLocalEdits?: boolean;
   errorCode?: string;
 }
 

@@ -5,12 +5,18 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { ExperimentalFeatures } from '../../../../../common';
-import { createToolHandlerContext, createToolTestMocks } from '../../../__mocks__/test_helpers';
-import { dismissLeadTool } from './dismiss_lead_tool';
+import {
+  createToolHandlerContext,
+  createToolTestMocks,
+  setupMockCoreStartServices,
+} from '../../../__mocks__/test_helpers';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { dismissLeadTool, SECURITY_DISMISS_LEAD_TOOL_ID } from './dismiss_lead_tool';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 
@@ -30,11 +36,13 @@ describe('dismissLeadTool', () => {
   const tool = dismissLeadTool(mockCore, mockLogger, mockExperimentalFeatures);
 
   let mockDismissLead: jest.Mock;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockDismissLead = jest.fn().mockResolvedValue(true);
     mockCreateLeadDataClient.mockReturnValue({ dismissLead: mockDismissLead });
     mockGetUserLeadPrivileges.mockResolvedValue({
@@ -185,6 +193,129 @@ describe('dismissLeadTool', () => {
       const errResult = result.results[0] as ErrorResult;
       expect(errResult.type).toBe(ToolResultType.error);
       expect((errResult.data as { message: string }).message).toContain('ES unavailable');
+    });
+  });
+
+  describe('handler — telemetry', () => {
+    it('does not report telemetry while only asking for confirmation', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+
+      await tool.handler({ id: LEAD_ID }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports userConfirmationOutcome=accepted and success=true after a successful dismiss', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ id: LEAD_ID }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports userConfirmationOutcome=rejected when the user declines the prompt', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.rejected,
+      });
+
+      await tool.handler({ id: LEAD_ID }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
+        }
+      );
+    });
+
+    it('reports success=false when the caller lacks write privilege', async () => {
+      mockGetUserLeadPrivileges.mockResolvedValue({
+        adhoc: { has_read_permissions: true, has_write_permissions: false },
+        scheduled: { has_read_permissions: true, has_write_permissions: false },
+        has_all_required: false,
+        privileges: {},
+      });
+
+      await tool.handler({ id: LEAD_ID }, handlerContext());
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'You do not have permission to dismiss leads in this space.',
+          userConfirmationOutcome: undefined,
+        }
+      );
+    });
+
+    it('reports success=false when the lead is not found', async () => {
+      mockDismissLead.mockResolvedValue(false);
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ id: LEAD_ID }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: `Lead not found: ${LEAD_ID}`,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports success=false and errorMessage when the dismiss call throws', async () => {
+      mockDismissLead.mockRejectedValue(new Error('boom'));
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler({ id: LEAD_ID }, ctx);
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_DISMISS_LEAD_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'boom',
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
     });
   });
 });

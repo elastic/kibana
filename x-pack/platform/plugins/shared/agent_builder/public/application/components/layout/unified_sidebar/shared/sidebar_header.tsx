@@ -90,6 +90,11 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               color="text"
               size="s"
               onClick={onToggleCondensed}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.EXPAND,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -127,7 +132,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         ) : (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               size="s"
               flush="both"
@@ -155,6 +160,11 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 color="text"
                 size="s"
                 onClick={onToggleCondensed}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE,
+                })}
               />
             </EuiToolTip>
           </EuiFlexItem>

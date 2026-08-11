@@ -38,6 +38,7 @@ import {
   ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,
@@ -87,7 +88,7 @@ const mockOptions = {
   startedAtOverridden: false,
   previousStartedAt: null,
   state: {},
-  spaceId: '',
+  spaceId: DEFAULT_SPACE_ID,
   rule: {
     id: '',
     name: '',

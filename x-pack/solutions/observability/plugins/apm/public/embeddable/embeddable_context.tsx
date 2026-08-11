@@ -19,7 +19,7 @@ import {
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../../common/cps_feature_flag';
+} from '@kbn/apm-shared/public';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { apmRouter } from '../components/routing/apm_route_config';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
@@ -120,7 +120,7 @@ export function ApmEmbeddableContext({
     lens: deps.pluginsStart.lens,
     uiActions: deps.pluginsStart.uiActions,
     observabilityAIAssistant: deps.pluginsStart.observabilityAIAssistant,
-    share: deps.pluginsSetup.share,
+    share: deps.pluginsStart.share,
     kibanaEnvironment: deps.kibanaEnvironment,
     observabilityRuleTypeRegistry: deps.observabilityRuleTypeRegistry,
     licensing: deps.pluginsStart.licensing,
@@ -131,9 +131,11 @@ export function ApmEmbeddableContext({
     OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
     OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
   );
-  const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
-  const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
-  setApmInternalServices({ callApmApi, cpsManager });
+  useMemo(() => {
+    const cpsManager = isCpsEnabled ? deps.pluginsStart.cps?.cpsManager : undefined;
+    const callApmApi = createCallApmApiV2(deps.coreStart, { cpsManager });
+    setApmInternalServices({ callApmApi, cpsManager });
+  }, [deps.coreStart, deps.pluginsStart.cps?.cpsManager, isCpsEnabled]);
 
   return (
     <I18nProvider>

@@ -206,6 +206,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           rulesAuthz,
           productFeaturesService,
           license: licensing.license,
+          analytics: core.analytics,
+          userProfile: coreStart.userProfile,
+          logger: options.logger,
         });
       }),
 

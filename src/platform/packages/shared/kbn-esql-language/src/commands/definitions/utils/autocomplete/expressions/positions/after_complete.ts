@@ -177,7 +177,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     builder.addOperators({
       leftParamType: expressionType === 'param' ? undefined : expressionType,
       allowed: allowedOperators,
-      ignored: ['=', ':'],
+      ignored: ['='],
     });
   }
 

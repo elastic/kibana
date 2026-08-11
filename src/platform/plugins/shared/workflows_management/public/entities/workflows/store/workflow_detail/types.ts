@@ -40,6 +40,11 @@ export interface WorkflowDetailState {
   cursorPosition?: LineColumnPosition;
   /** The step id that is focused in the workflow yaml editor */
   focusedStepId?: string;
+  /**
+   * Set when the cursor is inside the triggers block (holds `HIGHLIGHTED_STEP_TRIGGER`).
+   * At most one of `focusedStepId` / `focusedTriggerId` is non-null at any time.
+   */
+  focusedTriggerId?: string;
   /** The step id that is highlighted in the workflow yaml editor */
   highlightedStepId?: string;
   /** The modal to test the workflow is open */

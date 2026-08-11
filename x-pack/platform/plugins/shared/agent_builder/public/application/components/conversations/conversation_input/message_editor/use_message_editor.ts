@@ -30,6 +30,8 @@ export interface MessageEditorInstance {
   dismissActionMenu: () => void;
   /** Handle selection of an item from the command menu */
   handleCommandSelect: (selection: CommandBadgeData) => void;
+  /** Reports whether the active command's mounted menu has anything to show, for a given query */
+  reportMenuContent: (hasVisibleContent: boolean, forQuery: string) => void;
 }
 
 export interface MessageEditorController {
@@ -60,6 +62,7 @@ const useMessageEditorInstance = ({
     match: commandMatch,
     dismiss: dismissCommandMenu,
     checkInputForCommand,
+    reportContent,
   } = useCommandMenu();
   const prefetchCommandMenus = useCommandMenuPrefetch();
 
@@ -93,6 +96,7 @@ const useMessageEditorInstance = ({
       },
       commandMatch,
       dismissActionMenu: dismissCommandMenu,
+      reportMenuContent: reportContent,
       // Replace the command text (e.g. "/summ") with a badge element:
       handleCommandSelect: (selection: CommandBadgeData) => {
         if (!ref.current || !commandMatch.activeCommand) {
@@ -125,6 +129,7 @@ const useMessageEditorInstance = ({
       prefetchCommandMenus,
       commandMatch,
       dismissCommandMenu,
+      reportContent,
       onEditorFocus,
     ]
   );

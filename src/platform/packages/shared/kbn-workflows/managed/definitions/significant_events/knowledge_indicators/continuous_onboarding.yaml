@@ -1,8 +1,9 @@
 # Continuous KI (Knowledge Indicator) onboarding workflow.
 #
 # Runs on a schedule and orchestrates onboarding across managed streams:
-#   1. Fetches eligible streams from the _eligible API endpoint (respects
-#      interval, exclusions, concurrency).
+#   1. Fetches eligible streams from the _eligible API endpoint. Stream
+#      selection (onboard-all vs. an explicit include list) and interval come
+#      from the continuous KI extraction Advanced Settings.
 #   2. Starts the managed onboarding workflow for ALL candidate streams via
 #      workflow.executeAsync (features AND queries generation), confirming each
 #      reaches in_progress before moving to the next.
@@ -53,9 +54,6 @@ triggers:
       - name: extractionIntervalHours
         type: number
         description: 'Override for the min hours between extractions per stream. When omitted the Advanced Setting is used.'
-      - name: excludedStreamPatterns
-        type: string
-        description: 'Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used.'
 steps:
   # Step 1: Fetch eligible streams from the classification endpoint.
   - name: get_eligible
@@ -65,7 +63,6 @@ steps:
       path: |-
         /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
-        {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
       headers:
         x-elastic-internal-origin: 'kibana'
     on-failure:
