@@ -69,8 +69,6 @@ const mockKibana = {
     telemetryClient: mockTelemetryClient,
   },
 };
-mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mockReturnValue(caseHooksReturnedValue);
-
 mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mockReturnValue(
   caseHooksReturnedValue
 );
@@ -344,7 +342,7 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('should refresh when adding an alert to a new case', async () => {
+  it('should open the add-to-case modal', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
@@ -352,28 +350,27 @@ describe('ObservabilityActions component', () => {
     });
     wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().simulate('click');
 
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('should refresh when the add-to-case modal succeeds', async () => {
+    await setup('nothing');
+
+    // @ts-expect-error: The object will always be defined
+    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
+      updatedAt: null,
     });
 
-    wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
     expect(refresh).toHaveBeenCalled();
   });
 
-  it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
+  it('should report telemetry when creating a case from the modal', async () => {
     await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
-
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  it('should report telemetry when adding alert to a new case', async () => {
-    await setup('nothing');
-
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
+    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
+      updatedAt: null,
+    });
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       true,
@@ -382,38 +379,13 @@ describe('ObservabilityActions component', () => {
     );
   });
 
-  it('should refresh when adding an alert to an existing case', async () => {
-    const wrapper = await setup('nothing');
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(1);
-    });
-    wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().simulate('click');
-
-    await waitFor(() => {
-      expect(
-        wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length
-      ).toBe(1);
-    });
-
-    wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  it('should refresh when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
+  it('should report telemetry when selecting an existing case', async () => {
     await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
-
-    expect(refresh).toHaveBeenCalled();
-  });
-
-  it('should report telemetry when adding alert to an existing case', async () => {
-    await setup('nothing');
-
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
+    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
+      updatedAt: '2026-08-11T00:00:00.000Z',
+    });
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       false,

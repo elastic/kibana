@@ -29,8 +29,7 @@ import type {
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
+  ADD_TO_CASE,
   ADD_TO_CHAT,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   EDIT_TAGS,
@@ -42,10 +41,7 @@ import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query'
 import { useTagsAction } from '../components/tags/use_tags_action';
 import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
 
-export const BULK_ADD_TO_CASE_ACTION_IDS = {
-  addToExistingCase: 'attach-existing-case',
-  addToNewCase: 'attach-new-case',
-} as const;
+export const BULK_ADD_TO_CASE_ACTION_ID = 'alerts-table-add-to-case';
 
 export const BULK_ADD_TO_CHAT_ACTION_ID = 'bulk-add-to-chat';
 export const BULK_EDIT_TAGS_ACTION_ID = 'edit-tags';
@@ -181,7 +177,6 @@ export const useBulkAddToCaseActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
     noAttachmentsToaster: {
@@ -193,30 +188,16 @@ export const useBulkAddToCaseActions = ({
 
   return useMemo(() => {
     return isCasesContextAvailable &&
-      createCaseFlyout &&
       selectCaseModal &&
       userCasesPermissions?.create &&
       userCasesPermissions?.read
       ? [
           {
-            label: ADD_TO_NEW_CASE,
-            key: BULK_ADD_TO_CASE_ACTION_IDS.addToNewCase,
-            'data-test-subj': 'attach-new-case',
+            label: ADD_TO_CASE,
+            key: BULK_ADD_TO_CASE_ACTION_ID,
+            'data-test-subj': BULK_ADD_TO_CASE_ACTION_ID,
             disableOnQuery: true,
-            disabledLabel: ADD_TO_NEW_CASE,
-            onClick: (alerts?: TimelineItem[]) => {
-              createCaseFlyout.open({
-                getAttachments: (owner) =>
-                  alerts ? casesService?.helpers.groupAlertsByRule(alerts, owner) ?? [] : [],
-              });
-            },
-          },
-          {
-            label: ADD_TO_EXISTING_CASE,
-            key: BULK_ADD_TO_CASE_ACTION_IDS.addToExistingCase,
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_EXISTING_CASE,
-            'data-test-subj': 'attach-existing-case',
+            disabledLabel: ADD_TO_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
@@ -241,7 +222,6 @@ export const useBulkAddToCaseActions = ({
   }, [
     caseOwner,
     casesService?.helpers,
-    createCaseFlyout,
     isCasesContextAvailable,
     selectCaseModal,
     userCasesPermissions?.create,

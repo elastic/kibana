@@ -107,18 +107,18 @@ export interface SystemCellComponentMap {
 
 export type SystemCellId = keyof SystemCellComponentMap;
 
-type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: (props: { attachments?: any[]; getAttachments?: (owner: string) => any[] }) => void;
-  close: () => void;
-};
+interface CaseInfo {
+  id: string;
+  updatedAt?: string | null;
+}
 
 type UseCasesAddToExistingCaseModal = (
-  props?: Record<string, unknown> & { onSuccess: () => void }
+  props?: Record<string, unknown> & { onSuccess: (theCase: CaseInfo) => void }
 ) => {
   open: ({
     getAttachments,
   }: {
-    getAttachments: ({ theCase }: { theCase?: { id: string; owner: string } }) => any[];
+    getAttachments: ({ theCase }: { theCase?: CaseInfo }) => any[];
   }) => void;
   close: () => void;
 };
@@ -146,7 +146,6 @@ export interface CasesService {
     getCasesContext: () => FC<any>;
   };
   hooks: {
-    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {

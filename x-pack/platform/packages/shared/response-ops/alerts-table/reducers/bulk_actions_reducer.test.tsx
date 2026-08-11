@@ -251,12 +251,7 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
         1
       );
-
-      await userEvent.click(screen.getByTestId('alerts-table-add-to-case'));
-      expect(await screen.findByText('Case type')).toBeInTheDocument();
-      expect(screen.getByTestId('attach-new-case')).toBeInTheDocument();
-      expect(screen.getByTestId('attach-existing-case')).toBeInTheDocument();
-      expect(screen.queryByTestId('add-to-case-submit')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alerts-table-add-to-case')).toHaveTextContent('Add to case');
     });
 
     it('should show only mute/unmute actions when user does not have case write access', async () => {
