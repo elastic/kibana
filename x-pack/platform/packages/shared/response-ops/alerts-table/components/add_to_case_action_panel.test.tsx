@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { AddToCaseActionPanel } from './add_to_case_action_panel';
 
 describe('AddToCaseActionPanel', () => {
-  it('requires an action selection before submitting', async () => {
+  it('executes an action when it is clicked', async () => {
     const onAddToNewCase = jest.fn();
     const onAddToExistingCase = jest.fn();
 
@@ -34,14 +34,13 @@ describe('AddToCaseActionPanel', () => {
       />
     );
 
-    const submitButton = screen.getByTestId('add-to-case-submit');
-    expect(submitButton).toBeDisabled();
+    expect(screen.queryByTestId('add-to-case-submit')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('add-to-new-case'));
-
-    expect(submitButton).toBeEnabled();
-    await userEvent.click(submitButton);
     expect(onAddToNewCase).toHaveBeenCalledTimes(1);
     expect(onAddToExistingCase).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('add-to-existing-case'));
+    expect(onAddToExistingCase).toHaveBeenCalledTimes(1);
   });
 });

@@ -7,6 +7,7 @@
 
 import { getNewRule } from '../../../../../objects/rule';
 import {
+  ADD_TO_CASE_BUTTON,
   ADD_TO_EXISTING_CASE_BUTTON,
   ADD_TO_NEW_CASE_BUTTON,
   SELECTED_ALERTS,
@@ -36,12 +37,13 @@ describe('Alerts table bulk actions', { tags: ['@ess', '@serverless'] }, () => {
     visit(ALERTS_URL);
   });
 
-  it('shows the and cases bulk actions', () => {
+  it('shows the case bulk actions', () => {
     waitForAlertsToPopulate();
     selectNumberOfAlerts(2);
     cy.get(SELECTED_ALERTS).should('have.text', `Selected 2 alerts`);
     cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
     cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible');
+    cy.get(ADD_TO_CASE_BUTTON).click();
     cy.get(ADD_TO_NEW_CASE_BUTTON).should('be.visible');
     cy.get(ADD_TO_EXISTING_CASE_BUTTON).should('be.visible');
   });

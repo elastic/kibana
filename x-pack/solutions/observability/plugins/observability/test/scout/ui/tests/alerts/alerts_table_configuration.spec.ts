@@ -128,8 +128,7 @@ test.describe(
       await pageObjects.alertsTablePage.waitForTableToLoad();
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       for (const action of [
-        'add-to-existing-case-action',
-        'add-to-new-case-action',
+        'add-to-case-action',
         'viewRuleDetails',
         'viewAlertDetailsPage',
         'untrackAlert',
@@ -137,6 +136,10 @@ test.describe(
       ]) {
         await expect(page.testSubj.locator(action)).toBeAttached();
       }
+
+      await pageObjects.alertsTablePage.openAddToCasePanel();
+      await expect(pageObjects.alertsTablePage.addToExistingCaseAction).toBeAttached();
+      await expect(pageObjects.alertsTablePage.addToNewCaseAction).toBeAttached();
     });
 
     test('remembers hidden columns across navigations', async ({ page, pageObjects }) => {
