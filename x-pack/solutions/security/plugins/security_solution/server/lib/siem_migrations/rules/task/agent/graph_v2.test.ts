@@ -11,7 +11,7 @@ import type { NodeResponse } from '../__mocks__/mocks';
 import { SiemMigrationFakeLLM, MockSiemMigrationTelemetryClient } from '../__mocks__/mocks';
 import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks';
 import { MockRuleMigrationsRetriever } from '../retrievers/__mocks__/mocks';
-import { getRuleMigrationAgent } from './graph';
+import { getRuleMigrationAgentV2 } from './graph_v2';
 import { getRulesMigrationTools } from './tools';
 import { createRuleMigrationsDataClientMock } from '../../data/__mocks__/mocks';
 
@@ -26,30 +26,8 @@ const mockOriginalRule = {
     '`sysmon` EventCode=7 process_name IN ("WINWORD.EXE", "EXCEL.EXE", "POWERPNT.EXE","onenote.exe","onenotem.exe","onenoteviewer.exe","onenoteim.exe","msaccess.exe") loaded_file_path IN ("*\\\\VBE7INTL.DLL","*\\\\VBE7.DLL", "*\\\\VBEUI.DLL") | stats min(_time) as firstTime max(_time) as lastTime values(loaded_file) as loaded_file count by dest EventCode process_name process_guid | `security_content_ctime(firstTime)` | `security_content_ctime(lastTime)` | `office_document_executing_macro_code_filter`',
 };
 
-const mockIntegrationResult = {
-  id: 'testintegration',
-  title: 'testintegration',
-  description: 'testintegration',
-  data_streams: [
-    {
-      dataset: 'teststream',
-      title: 'teststream',
-      index_pattern: 'logs-testintegration-testdatastream-default',
-    },
-  ],
-  elser_embedding: 'testintegration - testintegration - teststream',
-};
-
 const mockPartialNlToEsqlResponse =
   '```esql\nFROM logs-*\n| STATS web_event_count = COUNT(*) BY src, http_method\n| LOOKUP JOIN "app:count_by_http_method_by_src_1d" ON src\n```';
-
-const mockFullNlToEsqlResponse =
-  '```esql\nFROM logs-testintegration-*\n| STATS web_event_count = COUNT(*) BY src, http_method\n| LOOKUP JOIN "app:count_by_http_method_by_src_1d" ON src\n```';
-
-const mockOriginalInputLookup = {
-  ...mockOriginalRule,
-  query: 'inputlookup something test',
-};
 
 const mockPrebuiltRule = {
   rule_id: 'test-rule',
@@ -69,23 +47,20 @@ const mockSemanticQueryResponse = JSON.stringify({
 
 const mockPrebuiltRuleMatchResponse = JSON.stringify({
   match: 'Suspicious MS Office Child Process',
+  semantic_query: 'suspicious ms office child process macro',
   summary:
-    '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications. While the Splunk rule specifically looks for the loading of macro-related DLLs, the Elastic rule takes a broader approach by monitoring for suspicious child processes of Office applications, which would include processes initiated by macro execution. The Elastic rule provides a more comprehensive coverage of potential threats, including but not limited to macro-based attacks, making it a suitable match for the given Splunk rule\'s intent.',
+    '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications.',
 });
 
 const mockPrebuiltRuleNoMatchResponse = JSON.stringify({
   match: '',
+  semantic_query: 'office document macro code execution',
   summary: '## Prebuilt Rule Matching Summary\\n No matches found',
 });
 
 const mockIntegrationNoMatchResponse = JSON.stringify({
   match: '',
   summary: '## Integration Matching Summary\\nNo related integration found.',
-});
-
-const mockIntegrationMatchResponse = JSON.stringify({
-  match: 'testintegration',
-  summary: '## Integration Matching Summary\\nNo Found one testintegration',
 });
 
 const logger = loggerMock.create();
@@ -97,7 +72,7 @@ let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 const setupAgent = async (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
   const model = fakeLLM as unknown as InferenceChatModel;
-  const graph = getRuleMigrationAgent({
+  const graph = getRuleMigrationAgentV2({
     model,
     esqlKnowledgeBase: mockEsqlKnowledgeBase,
     ruleMigrationsRetriever: mockRetriever,
@@ -110,10 +85,11 @@ const setupAgent = async (responses: NodeResponse[]) => {
   return graph;
 };
 
-// This tests the v1 one-shot `matchPrebuiltRule` node path, used when the
-// `ruleMigrationGraphv2` experimental feature is disabled (default). See `./graph_v2.test.ts`
-// for the v2 `matchPrebuiltRule` subgraph path (security-team#18589).
-describe('getRuleMigrationAgent', () => {
+// This tests the v2 `matchPrebuiltRule` subgraph path (security-team#18589), used when the
+// `ruleMigrationGraphv2` experimental feature is enabled. The subgraph agent generates its own
+// pre-built-rule-specific semantic query instead of consuming the parent's `semantic_query`.
+// See `./graph.test.ts` for the v1 one-shot node path (flag disabled, default).
+describe('getRuleMigrationAgentV2', () => {
   beforeEach(() => {
     mockRetriever = new MockRuleMigrationsRetriever();
     mockTelemetryClient = new MockSiemMigrationTelemetryClient();
@@ -130,7 +106,7 @@ describe('getRuleMigrationAgent', () => {
   describe('prebuilt rules', () => {
     // Eval note (security-team#18589): compare prebuilt match rates for Splunk, QRadar, and
     // Sentinel via kbn-evals-suite-security-automatic-migrations prebuilt_rule_match evaluator.
-    it('successful match', async () => {
+    it('successful match via the match subgraph', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
       const graph = await setupAgent([
         {
@@ -150,7 +126,7 @@ describe('getRuleMigrationAgent', () => {
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
 
-    it('llm respond with non existing integration name', async () => {
+    it('llm respond with non existing prebuilt rule name', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
         {
@@ -195,7 +171,7 @@ describe('getRuleMigrationAgent', () => {
       expect(response.translation_result).toEqual('untranslatable');
     });
 
-    it('skipPrebuiltRulesMatching bypasses the match node', async () => {
+    it('skipPrebuiltRulesMatching bypasses the match subgraph', async () => {
       mockEsqlKnowledgeBase.translate.mockResolvedValue(mockPartialNlToEsqlResponse);
       mockRetriever.integrations.search.mockResolvedValue([]);
       const graph = await setupAgent([
@@ -222,89 +198,6 @@ describe('getRuleMigrationAgent', () => {
       expect(mockRetriever.prebuiltRules.search).not.toHaveBeenCalled();
       expect(response.elastic_rule?.prebuilt_rule_id).toBeUndefined();
       expect(response.translation_result).toEqual('partial');
-    });
-  });
-
-  describe('custom translation', () => {
-    it('unsupported query', async () => {
-      mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      const graph = await setupAgent([
-        {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
-        },
-        {
-          nodeId: 'matchPrebuiltRule',
-          response: mockPrebuiltRuleNoMatchResponse,
-        },
-      ]);
-
-      const response = await graph.invoke({
-        id: 'test',
-        original_rule: mockOriginalInputLookup,
-        resources: {},
-      });
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
-      expect(response.translation_result).toEqual('untranslatable');
-      // Because of the inputlookup in the query, we expect it to end before calling the LLM
-      expect(fakeLLM.getNodeCallCount('inlineQuery')).toBe(0);
-    });
-
-    it('no integrations found in RAG and partial results', async () => {
-      mockEsqlKnowledgeBase.translate.mockResolvedValue(mockPartialNlToEsqlResponse);
-      mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      const graph = await setupAgent([
-        {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
-        },
-        {
-          nodeId: 'matchPrebuiltRule',
-          response: mockPrebuiltRuleNoMatchResponse,
-        },
-        {
-          nodeId: 'retrieveIntegrations',
-          response: mockIntegrationNoMatchResponse,
-        },
-      ]);
-      const response = await graph.invoke({
-        id: 'test',
-        original_rule: mockOriginalRule,
-        resources: {},
-      });
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
-      expect(mockEsqlKnowledgeBase.translate).toHaveBeenCalledTimes(2);
-      expect(response.translation_result).toEqual('partial');
-      expect(fakeLLM.getNodeCallCount('retrieveIntegrations')).toBe(0);
-    });
-
-    it('integration found and full translation results', async () => {
-      mockEsqlKnowledgeBase.translate.mockResolvedValue(mockFullNlToEsqlResponse);
-      mockRetriever.prebuiltRules.search.mockResolvedValue([mockPrebuiltRule]);
-      mockRetriever.integrations.search.mockResolvedValue([mockIntegrationResult]);
-      const graph = await setupAgent([
-        {
-          nodeId: 'createSemanticQuery',
-          response: mockSemanticQueryResponse,
-        },
-        {
-          nodeId: 'matchPrebuiltRule',
-          response: mockPrebuiltRuleNoMatchResponse,
-        },
-        {
-          nodeId: 'retrieveIntegrations',
-          response: mockIntegrationMatchResponse,
-        },
-      ]);
-      const response = await graph.invoke({
-        id: 'test',
-        original_rule: mockOriginalRule,
-        resources: {},
-      });
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
-      expect(mockEsqlKnowledgeBase.translate).toHaveBeenCalledTimes(2);
-      expect(fakeLLM.getNodeCallCount('retrieveIntegrations')).toBe(1);
-      expect(response.translation_result).toEqual('full');
     });
   });
 });
