@@ -41,4 +41,17 @@ describe('compatibility rules plugin predicates', () => {
       })
     ).toBe(false);
   });
+
+  it('identifies the bare `nullable: true` branch left by the Zod converter', () => {
+    expect(compatibilityRulesPlugin._test.isNullablePlaceholder({ nullable: true })).toBe(true);
+    expect(
+      compatibilityRulesPlugin._test.isNullablePlaceholder({ nullable: true, type: 'string' })
+    ).toBe(false);
+    expect(
+      compatibilityRulesPlugin._test.isNullablePlaceholder({
+        nullable: true,
+        description: 'a described nullable branch still constrains nothing on its own',
+      })
+    ).toBe(false);
+  });
 });

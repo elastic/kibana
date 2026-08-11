@@ -32,17 +32,25 @@ const isPathParameter = (value) => {
 };
 
 /**
+ * A null branch that survived conversion instead of being folded into its
+ * parent as `nullable: true`. Two spellings reach here: `{ enum: [], nullable:
+ * true }` from the @kbn/config-schema converter, and a bare `{ nullable: true }`
+ * from the Zod converter. Both carry no type and constrain nothing, so a
+ * generator sees them as an untyped union member.
+ *
  * @param {unknown} value
- * @returns {value is SchemaLike & { enum: []; nullable: true; type?: undefined }}
+ * @returns {value is SchemaLike & { nullable: true; type?: undefined }}
  */
 const isNullablePlaceholder = (value) => {
-  return (
-    isPlainObject(value) &&
-    Array.isArray(value.enum) &&
-    value.enum.length === 0 &&
-    value.nullable === true &&
-    value.type === undefined
-  );
+  if (!isPlainObject(value) || value.nullable !== true || value.type !== undefined) {
+    return false;
+  }
+
+  if (Array.isArray(value.enum)) {
+    return value.enum.length === 0;
+  }
+
+  return Object.keys(value).length === 1;
 };
 
 /**
@@ -86,7 +94,7 @@ function NoEmptyNullableEnum() {
 
         ctx.report({
           message:
-            'Found the internal `enum: []` + `nullable: true` placeholder. Null values must be emitted as an OpenAPI-compatible schema.',
+            'Found an internal nullable placeholder (`enum: []` + `nullable: true`, or a bare `nullable: true` branch). Null values must be emitted as an OpenAPI-compatible schema.',
           location: ctx.location,
         });
       },
