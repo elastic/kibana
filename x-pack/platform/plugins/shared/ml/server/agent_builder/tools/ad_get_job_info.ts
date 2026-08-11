@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
@@ -76,10 +76,9 @@ export const createAdGetJobInfoTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_GET_JOB_INFO_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description:
     'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
   experimental: true,

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -35,10 +35,9 @@ export const createAdCreateJobTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_CREATE_JOB_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description:
     'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation.',
   experimental: true,

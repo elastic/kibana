@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -46,10 +46,9 @@ export const createAdManageJobStateTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_MANAGE_JOB_STATE_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description:
     'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, or preview a datafeed.',
   experimental: true,

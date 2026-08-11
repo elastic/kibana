@@ -9,7 +9,7 @@ import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import { getIndexPatternFromESQLQuery, getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
@@ -134,10 +134,9 @@ export const createQueryAnomaliesTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: QUERY_ANOMALIES_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description: `## Before calling this tool — required
 
 Read one of the referenced ES|QL content files and copy a complete query into \`query\`:

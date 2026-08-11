@@ -10,7 +10,6 @@ import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../common/license';
 import type { MlFeatures } from '../../common/constants/app';
 import type { MlAuthorizationService } from '../lib/capabilities/check_capabilities';
-import { registerAnomalyDetectionTools } from './tools';
 import { createAnomalyDetectionSkill } from './skills/anomaly_detection';
 
 export const registerAnomalyDetectionAgentBuilder = ({
@@ -26,12 +25,7 @@ export const registerAnomalyDetectionAgentBuilder = ({
   mlLicense?: MlLicense;
   enabledFeatures?: MlFeatures;
 }): void => {
-  registerAnomalyDetectionTools(
-    agentBuilder,
-    resolveMlCapabilities,
-    authorization,
-    mlLicense,
-    enabledFeatures
+  agentBuilder.skills.register(
+    createAnomalyDetectionSkill(resolveMlCapabilities, authorization, mlLicense, enabledFeatures)
   );
-  agentBuilder.skills.register(createAnomalyDetectionSkill());
 };

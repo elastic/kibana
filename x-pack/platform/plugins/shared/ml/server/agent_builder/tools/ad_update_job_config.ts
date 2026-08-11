@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlLicense } from '../../../common/license';
@@ -175,10 +175,9 @@ export const createAdUpdateJobConfigTool = (
   authorization?: MlAuthorizationService,
   mlLicense?: MlLicense,
   enabledFeatures?: MlFeatures
-): BuiltinToolDefinition<typeof schema> => ({
+): BuiltinSkillBoundedTool<typeof schema> => ({
   id: AD_UPDATE_JOB_CONFIG_TOOL_ID,
   type: ToolType.builtin,
-  tags: ['ml', 'anomaly-detection'],
   description:
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts only missing events, then associates all job_ids with the calendar. Pass every job that should share the calendar in one call.',
   experimental: true,
