@@ -14,25 +14,28 @@ import { cacheInScope, Global } from '@kbn/core-di-internal';
 import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
 
 export function loadHttp({ bind }: KibanaContainerModuleLoadOptions): void {
-  bind(Route).onSetup(({ get }, route, router) => {
+  bind(Route).onSetup(({ inject }, route, router) => {
     const register = router[route.method] as RouteRegistrar<
       typeof route.method,
       RequestHandlerContext
     >;
-    let handler: RequestHandler = async (_context, request, response) => {
-      const scope = get(CoreStart('injection')).fork();
+    let handler: RequestHandler = inject(
+      CoreStart('injection'),
+      async (injection, _context, request, response) => {
+        const scope = injection.fork();
 
-      scope.bind(Request).toConstantValue(request);
-      scope.bind(Response).toConstantValue(response);
-      scope.bind(Global).toConstantValue(Request);
-      scope.bind(Global).toConstantValue(Response);
+        scope.bind(Request).toConstantValue(request);
+        scope.bind(Response).toConstantValue(response);
+        scope.bind(Global).toConstantValue(Request);
+        scope.bind(Global).toConstantValue(Response);
 
-      try {
-        return await (await scope.getAsync(route, { autobind: true })).handle();
-      } finally {
-        scope.unbindAllAsync();
+        try {
+          return await (await scope.getAsync(route, { autobind: true })).handle();
+        } finally {
+          scope.unbindAllAsync();
+        }
       }
-    };
+    );
 
     if (route.handleLegacyErrors) {
       handler = router.handleLegacyErrors(handler);
