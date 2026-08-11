@@ -48,7 +48,7 @@ export const fromSavedObjectTabToAppState = ({
       breakdownField: tab.breakdownField,
       interval: tab.chartInterval,
       density: tab.density,
-      isApproximate: tab.isApproximate,
+      esqlApproximation: tab.esqlApproximation,
     },
     isUndefined
   );
@@ -193,9 +193,9 @@ export const fromTabStateToSavedObjectTab = ({
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
-    isApproximate:
-      isTextBasedQuery && typeof tab.appState.isApproximate === 'boolean'
-        ? tab.appState.isApproximate
+    esqlApproximation:
+      isTextBasedQuery && typeof tab.appState.esqlApproximation === 'boolean'
+        ? tab.appState.esqlApproximation
         : undefined,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,

@@ -132,7 +132,7 @@ export interface DiscoverAppState {
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
 }
 
 export interface CascadedDocumentsState {

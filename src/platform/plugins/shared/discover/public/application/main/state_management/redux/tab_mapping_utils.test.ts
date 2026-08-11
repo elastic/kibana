@@ -459,7 +459,7 @@ describe('tab mapping utils', () => {
           "hideChart": false,
           "hideTable": false,
           "id": "1",
-          "isApproximate": undefined,
+          "esqlApproximation": undefined,
           "isTextBasedQuery": false,
           "label": "Tab 1",
           "refreshInterval": undefined,
@@ -500,7 +500,7 @@ describe('tab mapping utils', () => {
           "hideChart": false,
           "hideTable": false,
           "id": "1",
-          "isApproximate": undefined,
+          "esqlApproximation": undefined,
           "isTextBasedQuery": false,
           "label": "Tab 1",
           "refreshInterval": Object {

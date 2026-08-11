@@ -40,7 +40,7 @@ export const getDiscoverSession = async (
       hideAggregatedPreview: tab.attributes.hideAggregatedPreview,
       rowHeight: tab.attributes.rowHeight,
       headerRowHeight: tab.attributes.headerRowHeight,
-      isApproximate: tab.attributes.isApproximate,
+      esqlApproximation: tab.attributes.esqlApproximation,
       timeRestore: tab.attributes.timeRestore,
       timeRange: tab.attributes.timeRange,
       refreshInterval: tab.attributes.refreshInterval,

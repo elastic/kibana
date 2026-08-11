@@ -146,7 +146,7 @@ const SCHEMA_TAB_ATTRIBUTES_V13 = schema.object({
     ])
   ),
   hideAggregatedPreview: schema.maybe(schema.boolean()),
-  isApproximate: schema.maybe(schema.boolean()),
+  esqlApproximation: schema.maybe(schema.boolean()),
 });
 
 const SCHEMA_TAB_V13 = schema.object({

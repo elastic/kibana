@@ -165,7 +165,7 @@ export function useDataCascadeRowExpansionHandlers({
     DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>,
     'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed'
   > {
-  const { cascadedDocumentsFetcher, esqlQuery, esqlVariables, timeRange, isApproximate } =
+  const { cascadedDocumentsFetcher, esqlQuery, esqlVariables, timeRange, esqlApproximation } =
     useCascadedDocumentsContext();
   const { trackCascadeExpanded, trackCascadeCollapsed } = useCascadedDocumentsTelemetry();
 
@@ -211,7 +211,7 @@ export function useDataCascadeRowExpansionHandlers({
       esqlVariables,
       timeRange,
       dataView,
-      isApproximate,
+      esqlApproximation,
     });
   });
 

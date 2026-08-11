@@ -95,7 +95,7 @@ export const saveDiscoverSession = async (
         hideAggregatedPreview: tab.hideAggregatedPreview,
         rowHeight: tab.rowHeight,
         headerRowHeight: tab.headerRowHeight,
-        isApproximate: tab.isApproximate,
+        esqlApproximation: tab.esqlApproximation,
         timeRestore: tab.timeRestore,
         timeRange: tab.timeRange,
         refreshInterval: tab.refreshInterval,
