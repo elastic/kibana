@@ -10,6 +10,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { MigrationTranslationResult } from '../../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../../rule_migrations_telemetry_client';
+import type { RuleSemanticSearchResult } from '../../../../../types';
 import {
   cleanMarkdown,
   generateAssistantComment,
@@ -35,6 +36,8 @@ interface PrebuiltRuleMatchResponse {
   semantic_query?: string;
 }
 
+type ModelResponse = Awaited<ReturnType<ModelWithTools['invoke']>>;
+
 const NO_MATCH_SUMMARY = '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.';
 
 const jsonParser = new JsonOutputParser<PrebuiltRuleMatchResponse>();
@@ -58,31 +61,12 @@ export const getMatchPrebuiltRuleAgentNode = ({
 
     const response = await model.invoke([...prompt, ...state.messages]);
 
-    const hasToolCall =
-      response &&
-      typeof response === 'object' &&
-      'tool_calls' in response &&
-      Array.isArray(response.tool_calls) &&
-      response.tool_calls.length > 0;
-
-    if (hasToolCall && BaseMessage.isInstance(response)) {
+    if (hasToolCall(response) && BaseMessage.isInstance(response)) {
       return { messages: [response] };
     }
 
-    const responseText = typeof response === 'string' ? response : response.text;
-    let parsedResponse: PrebuiltRuleMatchResponse | undefined;
-    try {
-      parsedResponse = await jsonParser.parse(responseText);
-    } catch {
-      // LLM did not return valid JSON; fall back to no-match
-    }
-
-    const latestSearchPayload = getLatestPrebuiltRulesSearchPayload(state.messages);
-    const semanticQuery =
-      parsedResponse?.semantic_query?.trim() ||
-      latestSearchPayload?.query ||
-      `${state.original_rule.title} ${state.original_rule.description}`.trim();
-
+    const parsedResponse = await parseMatchResponse(getResponseText(response));
+    const semanticQuery = resolveSemanticQuery(parsedResponse, state);
     const prebuiltRules = semanticQuery
       ? await ruleMigrationsRetriever.prebuiltRules.search(semanticQuery, techniqueIds)
       : [];
@@ -100,27 +84,71 @@ export const getMatchPrebuiltRuleAgentNode = ({
       ...(matchedRule ? { postFilterRule: matchedRule } : {}),
     });
 
-    if (!matchedRule) {
-      return {
-        comments,
-        ...(BaseMessage.isInstance(response) ? { messages: [response] } : {}),
-      };
-    }
+    return buildMatchResult(response, comments, matchedRule);
+  };
+};
 
-    return {
-      comments,
-      elastic_rule: {
-        title: matchedRule.name,
-        description: matchedRule.description,
-        prebuilt_rule_id: matchedRule.rule_id,
-        id: matchedRule.current?.id,
-        integration_ids: matchedRule.target?.related_integrations?.map((i) => i.package),
-        severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
-        risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
-      },
-      translation_result: MigrationTranslationResult.FULL,
-      ...(BaseMessage.isInstance(response) ? { messages: [response] } : {}),
-    };
+const hasToolCall = (response: ModelResponse): boolean => {
+  return (
+    Boolean(response) &&
+    typeof response === 'object' &&
+    'tool_calls' in response &&
+    Array.isArray(response.tool_calls) &&
+    response.tool_calls.length > 0
+  );
+};
+
+const getResponseText = (response: ModelResponse): string => {
+  return typeof response === 'string' ? response : response.text;
+};
+
+const parseMatchResponse = async (
+  responseText: string
+): Promise<PrebuiltRuleMatchResponse | undefined> => {
+  try {
+    return await jsonParser.parse(responseText);
+  } catch {
+    // LLM did not return valid JSON; fall back to no-match
+    return undefined;
+  }
+};
+
+const resolveSemanticQuery = (
+  parsedResponse: PrebuiltRuleMatchResponse | undefined,
+  state: MatchPrebuiltRuleState
+): string => {
+  const latestSearchPayload = getLatestPrebuiltRulesSearchPayload(state.messages);
+  return (
+    parsedResponse?.semantic_query?.trim() ||
+    latestSearchPayload?.query ||
+    `${state.original_rule.title} ${state.original_rule.description}`.trim()
+  );
+};
+
+const buildMatchResult = (
+  response: ModelResponse,
+  comments: ReturnType<typeof generateAssistantComment>[],
+  matchedRule: RuleSemanticSearchResult | undefined
+): Partial<MatchPrebuiltRuleState> => {
+  const responseMessages = BaseMessage.isInstance(response) ? { messages: [response] } : {};
+
+  if (!matchedRule) {
+    return { comments, ...responseMessages };
+  }
+
+  return {
+    comments,
+    elastic_rule: {
+      title: matchedRule.name,
+      description: matchedRule.description,
+      prebuilt_rule_id: matchedRule.rule_id,
+      id: matchedRule.current?.id,
+      integration_ids: matchedRule.target?.related_integrations?.map((i) => i.package),
+      severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
+      risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
+    },
+    translation_result: MigrationTranslationResult.FULL,
+    ...responseMessages,
   };
 };
 
