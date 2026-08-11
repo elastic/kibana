@@ -295,7 +295,7 @@ The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reac
 fails=0
 for i in $(seq 1 25); do
   node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
-  node -e 'const [r] = require("/tmp/gh-aw/agent/jest-run.json").testResults; console.log(r ? r.assertionResults.reduce((total, a) => total + (a.duration || 0), 0) : 0)' >> /tmp/gh-aw/agent/jest-durations
+  node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
 done
 echo "$fails/25 runs failed"
 awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
@@ -303,7 +303,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 
 - **Run it before the fix, not only after.** `git stash` the patch if you have already written it. A pre-fix loop that fails is what turns the post-fix loop into evidence; if the unpatched test survives all 25 runs, the flake doesn't reproduce here and a clean post-fix loop confirms nothing. Fix the root cause you diagnosed anyway, but say so under "Not verified locally".
 - **Report both loops** on the Jest line of the PR's "Verified locally" block, as `<failures>/<runs> before the fix (avg, max), then the same after`. The counts show whether the loop had any power to detect this flake, and the timings show what the fix cost. Under "Not verified locally", note that both loops ran without CI's parallel load, so they can't rule out a flake driven by contention on a busy agent.
-- **Read the timings, not only the counts.** Jest reports these itself, so they exclude startup and are comparable across the two loops; each number is the file's total test time, not one test's. An average that jumps after the patch means it bought its reliability by waiting longer, which the PR body has to justify; a max far above the average means a slow path is still racing something, whichever loop it shows up in.
+- **Read the timings, not only the counts.** These are the flaky test's own durations as Jest measured them, so they exclude startup and compare cleanly across the two loops. An average that jumps after the patch means it bought its reliability by waiting longer, which the PR body has to justify; a max far above the average means a slow path is still racing something, whichever loop it shows up in.
 - **Scale the count to the runtime.** 25 runs is the floor; go to 50 when a run takes only a few seconds. A loop this size catches a test that fails every few runs, not one that fails once a week.
 - **Run the test's neighbours at least once** (`node scripts/jest <directory-containing-the-test>`), so sibling tests share a worker with it. A flake caused by state leaking between tests in the same worker never reproduces while the file runs on its own.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
@@ -321,6 +321,15 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
 
+  <only when the test failed by running past its time budget, add this table right below the Summary, so the numbers are visible without opening Verification. Fill it from the two loops in "Verifying a Jest fix", and name the budget the test failed against (5s unless the file raises it with `jest.setTimeout`):
+
+  | Runtime vs. 5s budget | Failed | Avg | Max |
+  | --- | --- | --- | --- |
+  | Before fix | 4/25 | 4.6s | 5.0s |
+  | After fix | 0/25 | 0.9s | 1.1s |
+
+  Omit the table for every other kind of flake.>
+
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
@@ -334,7 +343,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
   ✅ Passed: `node scripts/eslint <files>`
   ✅ Passed: `node scripts/type_check --project <tsconfig>`
-  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 5.1s), 0/25 after (avg 890ms, max 1.0s)
+  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
   ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
