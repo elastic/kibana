@@ -140,82 +140,64 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   }
 
   async showActionsByEntity(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showActionsOnEntity(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEntityDetails(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEntityRelationships(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideActionsOnEntity(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      const btnText = await this.testSubjects.getVisibleText(
-        GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
-      );
-      expect(btnText).to.be('Hide actions done to this entity');
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    const btnText = await this.testSubjects.getVisibleText(
+      GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID
+    );
+    expect(btnText).to.be('Hide actions done to this entity');
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async exploreRelatedEntities(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId);
-      await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId);
+    await this.testSubjects.click(GRAPH_NODE_POPOVER_EXPLORE_RELATED_TEST_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-      await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async showEventOrAlertDetails(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-      await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
   async hideEventsOfSameAction(nodeId: string): Promise<void> {
-    await this.retry.try(async () => {
-      await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
-      const btnText = await this.testSubjects.getVisibleText(
-        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
-      );
-      expect(btnText).to.be('Hide related events');
-      await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
-    });
+    await this.clickOnNodeExpandButton(nodeId, GRAPH_LABEL_EXPAND_POPOVER_TEST_ID);
+    const btnText = await this.testSubjects.getVisibleText(
+      GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID
+    );
+    expect(btnText).to.be('Hide related events');
+    await this.testSubjects.click(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 

@@ -273,7 +273,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
-      await expandedFlyoutGraph.waitGraphIsLoaded();
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
         'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(0)oa(0)'
