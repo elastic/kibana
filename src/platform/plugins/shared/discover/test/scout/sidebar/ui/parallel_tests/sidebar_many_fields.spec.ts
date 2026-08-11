@@ -30,22 +30,21 @@ spaceTest.describe('Discover sidebar many fields', { tag: tags.deploymentAgnosti
   spaceTest('loads a data view with thousands of fields', async ({ pageObjects }) => {
     const { discover, unifiedFieldList } = pageObjects;
 
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
     await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
       String(testData.LOGSTASH_AVAILABLE_FIELD_COUNT)
     );
 
-    await discover.selectDataView('indices-stats*');
-    await discover.waitUntilSearchingHasFinished();
-
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
-    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText('6873');
+    // Avoid selectDataView's default field-list wait: `countLoading` hidden races when the
+    // spinner has not mounted yet. The available-count assertion is the readiness signal.
+    await discover.selectDataView('indices-stats*', { waitForFieldList: false });
+    // Existence fetch for ~6.8k fields exceeds Scout's 10s expect timeout on CI (FTR used
+    // retry.waitFor with a much larger budget for the same condition).
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText('6873', {
+      timeout: 30_000,
+    });
     await expect(unifiedFieldList.getSidebarSectionCountLocator('meta')).toHaveText('4');
 
-    await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
-    await discover.waitUntilSearchingHasFinished();
-
-    await unifiedFieldList.waitUntilSidebarHasLoaded();
+    await discover.selectDataView(testData.DEFAULT_DATA_VIEW, { waitForFieldList: false });
     await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
       String(testData.LOGSTASH_AVAILABLE_FIELD_COUNT)
     );
