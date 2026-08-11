@@ -62,12 +62,9 @@ describe('EventsTableBulkActionMenu', () => {
     await userEvent.click(screen.getByTestId('add-to-case'));
 
     expect(await screen.findByText('Case type')).toBeInTheDocument();
-    const submitButton = await screen.findByTestId('add-to-case-submit');
-    expect(submitButton).toBeDisabled();
+    expect(screen.queryByTestId('add-to-case-submit')).not.toBeInTheDocument();
 
     fireEvent.click(await screen.findByTestId('attach-existing-case'));
-    expect(submitButton).toBeEnabled();
-    fireEvent.click(submitButton);
 
     expect(onAddToExistingCase).toHaveBeenCalledTimes(1);
     expect(onAddToNewCase).not.toHaveBeenCalled();
