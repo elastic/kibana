@@ -27,7 +27,7 @@ describe('MonitorTypeBadge', () => {
 
     expect(
       screen.getByRole('button', {
-        name: 'Journey, Click to filter monitors for type: Journey',
+        name: 'Journey, Click to filter monitors for this type',
       })
     ).toBeInTheDocument();
   });
@@ -37,7 +37,7 @@ describe('MonitorTypeBadge', () => {
 
     expect(
       screen.getByRole('button', {
-        name: 'HTTP, Click to filter monitors for type: HTTP',
+        name: 'HTTP, Click to filter monitors for this type',
       })
     ).toBeInTheDocument();
   });

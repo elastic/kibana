@@ -56672,7 +56672,6 @@
     "xpack.synthetics.management.monitorList.locations.expand": "Klicken Sie, um die verbleibenden Standorte anzuzeigen",
     "xpack.synthetics.management.monitorList.monitorName": "Überwachen",
     "xpack.synthetics.management.monitorList.monitorType": "Typ",
-    "xpack.synthetics.management.monitorList.monitorTypeBadge.filter": "Klicken Sie, um Überwachungen nach Typ zu filtern: {type}",
     "xpack.synthetics.management.monitorList.noItemForSelectedFiltersMessage": "Für die ausgewählten Filterkriterien wurden keine Überwachen gefunden",
     "xpack.synthetics.management.monitorList.noItemMessage": "Keine Monitore gefunden",
     "xpack.synthetics.management.monitorList.projectId": "Projekt-ID",

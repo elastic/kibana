@@ -56427,7 +56427,6 @@
     "xpack.synthetics.management.monitorList.locations.expand": "Cliquer pour afficher les emplacements restants",
     "xpack.synthetics.management.monitorList.monitorName": "Moniteur",
     "xpack.synthetics.management.monitorList.monitorType": "Type",
-    "xpack.synthetics.management.monitorList.monitorTypeBadge.filter": "Cliquez pour filtrer les moniteurs pour le type : {type}",
     "xpack.synthetics.management.monitorList.noItemForSelectedFiltersMessage": "Aucun moniteur trouvé pour les critères de filtre sélectionnés",
     "xpack.synthetics.management.monitorList.noItemMessage": "Aucun moniteur trouvé",
     "xpack.synthetics.management.monitorList.projectId": "ID projet",

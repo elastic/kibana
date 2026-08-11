@@ -56852,7 +56852,6 @@
     "xpack.synthetics.management.monitorList.locations.expand": "单击以查看剩余位置",
     "xpack.synthetics.management.monitorList.monitorName": "监测",
     "xpack.synthetics.management.monitorList.monitorType": "类型",
-    "xpack.synthetics.management.monitorList.monitorTypeBadge.filter": "单击以筛选类型为 {type} 的监测",
     "xpack.synthetics.management.monitorList.noItemForSelectedFiltersMessage": "未找到匹配选定筛选条件的监测",
     "xpack.synthetics.management.monitorList.noItemMessage": "未找到任何监测",
     "xpack.synthetics.management.monitorList.projectId": "项目 ID",

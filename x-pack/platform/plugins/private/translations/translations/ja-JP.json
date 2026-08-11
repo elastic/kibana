@@ -56849,7 +56849,6 @@
     "xpack.synthetics.management.monitorList.locations.expand": "クリックすると、残りの場所が表示されます",
     "xpack.synthetics.management.monitorList.monitorName": "監視",
     "xpack.synthetics.management.monitorList.monitorType": "型",
-    "xpack.synthetics.management.monitorList.monitorTypeBadge.filter": "クリックして、タイプ{type}のモニターをフィルタリング",
     "xpack.synthetics.management.monitorList.noItemForSelectedFiltersMessage": "選択されたフィルター条件でモニターが見つかりませんでした",
     "xpack.synthetics.management.monitorList.noItemMessage": "モニターが見つかりません",
     "xpack.synthetics.management.monitorList.projectId": "プロジェクト ID",
