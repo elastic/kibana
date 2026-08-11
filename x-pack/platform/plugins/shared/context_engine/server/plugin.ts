@@ -18,6 +18,7 @@ import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
+import { SignalsService } from './signals/service';
 
 export class ContextEnginePlugin
   implements
@@ -30,6 +31,7 @@ export class ContextEnginePlugin
 {
   private logger: Logger;
   private aiIndexService?: AiIndexService;
+  private signalsService?: SignalsService;
   private readonly aiIndexRegistry = new AiIndexRegistry();
 
   constructor(context: PluginInitializerContext) {
@@ -70,6 +72,12 @@ export class ContextEnginePlugin
       logger: aiIndexLogger,
     });
 
+    this.signalsService = new SignalsService({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger: this.logger.get('signals'),
+    });
+    const signalsService = this.signalsService;
+
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
 
@@ -93,7 +101,9 @@ export class ContextEnginePlugin
         );
       });
 
-    return {};
+    return {
+      getSignalsService: () => signalsService,
+    };
   }
 
   stop() {}
