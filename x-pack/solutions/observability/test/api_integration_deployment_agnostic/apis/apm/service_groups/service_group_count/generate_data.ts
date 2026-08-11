@@ -23,6 +23,7 @@ export async function generateData({
     apm
       .service({ name: 'synth-java', environment: 'testing', agentName: 'java' })
       .instance('instance-2'),
+    // One service has only transactions and no metric documents to test we are fetching from both metrics and transactions.
     apm
       .service({ name: 'opbeans-node', environment: 'testing', agentName: 'nodejs' })
       .instance('instance-3'),
