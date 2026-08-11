@@ -158,6 +158,112 @@ describe('useDocumentSummary', () => {
     expect(result.current.recommendedActions).toBe('Generated actions');
   });
 
+  it('should recover summaries wrapped in markdown code fences', async () => {
+    (useFetchDocumentSummary as jest.Mock)
+      .mockReturnValueOnce({
+        data: { data: [], prompt: 'Generate an alert summary!' },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      })
+      .mockReturnValue({
+        data: {
+          data: [
+            {
+              id: 'summary-id',
+              summary: 'Summary from fenced response',
+              recommendedActions: 'Actions from fenced response',
+              replacements: {},
+            },
+          ],
+          prompt: 'Generate an alert summary!',
+        },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      });
+
+    const fencedResponse = `\`\`\`json\n${JSON.stringify({
+      summary: 'Summary from fenced response',
+      recommendedActions: 'Actions from fenced response',
+    })}\n\`\`\``;
+
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
+
+    mockSendMessage.mockResolvedValue({ response: fencedResponse, isError: false });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).toHaveBeenCalled();
+    expect(result.current.fetchError).toBeNull();
+    expect(result.current.summary).toBe('Summary from fenced response');
+    expect(result.current.recommendedActions).toBe('Actions from fenced response');
+  });
+
+  it('should recover summaries embedded in prose', async () => {
+    (useFetchDocumentSummary as jest.Mock)
+      .mockReturnValueOnce({
+        data: { data: [], prompt: 'Generate an alert summary!' },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      })
+      .mockReturnValue({
+        data: {
+          data: [
+            {
+              id: 'summary-id',
+              summary: 'Summary embedded in prose',
+              recommendedActions: 'Actions embedded in prose',
+              replacements: {},
+            },
+          ],
+          prompt: 'Generate an alert summary!',
+        },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      });
+
+    const proseResponse = `Here is the summary:\n${JSON.stringify({
+      summary: 'Summary embedded in prose',
+      recommendedActions: 'Actions embedded in prose',
+    })}\nLet me know if you need more.`;
+
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
+
+    mockSendMessage.mockResolvedValue({ response: proseResponse, isError: false });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).toHaveBeenCalled();
+    expect(result.current.fetchError).toBeNull();
+    expect(result.current.summary).toBe('Summary embedded in prose');
+    expect(result.current.recommendedActions).toBe('Actions embedded in prose');
+  });
+
   it('should surface an error when the AI response is not valid JSON', async () => {
     const { result } = renderHook(() =>
       useDocumentSummary({

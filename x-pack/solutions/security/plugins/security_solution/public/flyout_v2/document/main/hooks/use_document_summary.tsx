@@ -92,6 +92,38 @@ export interface UseDocumentSummaryResult {
 }
 
 /**
+ * Attempts to parse a JSON object from an LLM response string using progressively
+ * more lenient strategies:
+ * 1. Direct JSON.parse (strict, as instructed by the prompt).
+ * 2. Strip markdown code fences and retry (model ignored the no-fence instruction).
+ * 3. Extract the first complete {...} block from the response (model added prose around it).
+ * Returns null when no valid JSON object can be recovered.
+ */
+const extractJsonFromLlmResponse = (raw: string): Record<string, unknown> | null => {
+  const stripped = raw
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/, '')
+    .trim();
+  const jsonBlock = raw.match(/\{[\s\S]*\}/)?.[0] ?? '';
+  const candidates = [raw, stripped, jsonBlock];
+
+  for (const candidate of candidates) {
+    if (candidate) {
+      try {
+        const parsed: unknown = JSON.parse(candidate);
+        if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as Record<string, unknown>;
+        }
+      } catch {
+        // try the next candidate
+      }
+    }
+  }
+
+  return null;
+};
+
+/**
  * Hook that generates the document AI summary along side other related items
  */
 export const useDocumentSummary = ({
@@ -214,8 +246,8 @@ export const useDocumentSummary = ({
       let responseRecommendedActions: string | undefined;
       let hasInvalidResponse = false;
 
-      try {
-        const parsedResponse = JSON.parse(rawResponse.response);
+      const parsedResponse = extractJsonFromLlmResponse(rawResponse.response);
+      if (parsedResponse != null) {
         if (
           typeof parsedResponse.summary === 'string' &&
           parsedResponse.summary.trim().length > 0
@@ -227,7 +259,7 @@ export const useDocumentSummary = ({
         } else {
           hasInvalidResponse = true;
         }
-      } catch (e) {
+      } else {
         hasInvalidResponse = true;
       }
 
