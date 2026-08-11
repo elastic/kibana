@@ -268,7 +268,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
     assertDowngradeResult(result);
   });
 
-  test('supports a downgraded LogsDB data stream without host.name field', async ({
+  test('supports a LogsDB stream without a predefined host.name mapping', async ({
     page,
     pageObjects,
     tsdbScenario,
