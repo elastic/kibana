@@ -304,10 +304,9 @@ export const labels = {
         defaultMessage:
           'Revoking removes these connections only. The client stays registered and can accept new connections.',
       }),
-    reconnectionNote: i18n.translate(
-      'xpack.security.management.applicationConnections.revoke.reconnectionNote',
-      { defaultMessage: 'Applications can be reconnected at any time.' }
-    ),
+    note: i18n.translate('xpack.security.management.applicationConnections.revoke.note', {
+      defaultMessage: 'Applications can be reconnected at any time.',
+    }),
     cancelButton: i18n.translate(
       'xpack.security.management.applicationConnections.revoke.cancelButton',
       { defaultMessage: 'Cancel' }
@@ -368,12 +367,9 @@ export const labels = {
           '{count, plural, one {This connection has} other {These connections have}} already been revoked. Deleting permanently removes {count, plural, one {it} other {them}} from your organization immediately instead of waiting for the 90-day retention period.',
         values: { count },
       }),
-    reconnectionNote: i18n.translate(
-      'xpack.security.management.applicationConnections.delete.reconnectionNote',
-      {
-        defaultMessage: 'This action cannot be undone.',
-      }
-    ),
+    note: i18n.translate('xpack.security.management.applicationConnections.delete.note', {
+      defaultMessage: 'This action cannot be undone.',
+    }),
     cancelButton: i18n.translate(
       'xpack.security.management.applicationConnections.delete.cancelButton',
       { defaultMessage: 'Cancel' }
