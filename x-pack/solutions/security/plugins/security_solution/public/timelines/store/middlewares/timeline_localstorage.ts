@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Action, Middleware } from 'redux';
-import { z } from '@kbn/zod';
+import type { Action, Middleware } from 'redux-v4';
+import { z } from '@kbn/zod/v4';
 
 import { selectTimelineById } from '../selectors';
 import { updateColumnWidth } from '../actions';

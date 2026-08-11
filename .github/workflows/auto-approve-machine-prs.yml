@@ -1,5 +1,10 @@
 # Generic auto-approve for machine-created PRs.
 # Add new rules to the whitelist in the check step; approval runs when any rule matches.
+# Each rule can optionally specify a `token` field to control the approving identity:
+#   'kibana' - approve as kibanamachine using KIBANAMACHINE_TOKEN
+#   'github' - approve as github-actions[bot] using the default GITHUB_TOKEN
+name: Auto-approve machine PRs
+
 on:
   pull_request_target:
     types:
@@ -13,7 +18,8 @@ jobs:
       pull-requests: write
     steps:
       - id: check
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        name: Check if PR should be auto-approved
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const user = context.payload.pull_request.user.login;
@@ -21,10 +27,12 @@ jobs:
             const baseRef = context.payload.pull_request.base.ref;
 
             const whitelist = [
-              // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/ },
-              // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/ },
-              { user: 'kibanamachine', branchPrefix: 'scout_metadata_update' },
-              // { user: 'elasticmachine', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
+              // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/, token: 'kibana' },
+              // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/, token: 'kibana' },
+              { user: 'kibanamachine', branchPrefix: 'scout_metadata_update', token: 'github' },
+              { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/, token: 'github' },
+              { user: 'kibanamachine', branchPrefix: 'bump-versions', token: 'github' },
+              { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'], token: 'kibana' },
             ];
 
             // Fetch the list of changed files in the PR
@@ -37,7 +45,7 @@ jobs:
             const changedFiles = files.data.map(file => file.filename);
             core.info(`Changed files: ${changedFiles.join(', ')}`);
 
-            const matches = whitelist.some((rule) => {
+            const matchedRule = whitelist.find((rule) => {
               if (rule.user !== user) return false;
               if (!headRef.startsWith(rule.branchPrefix)) return false;
               if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return false;
@@ -45,7 +53,7 @@ jobs:
 
               // If paths is specified, verify at least one changed file matches
               if (rule.paths) {
-                const hasMatchingFile = changedFiles.some(file => 
+                const hasMatchingFile = changedFiles.some(file =>
                   rule.paths.some(path => {
                     // Support glob patterns
                     if (path.includes('*')) {
@@ -64,7 +72,17 @@ jobs:
               return true;
             });
 
-            core.setOutput('should_approve', matches ? 'true' : 'false');
+            core.setOutput('should_approve', matchedRule ? 'true' : 'false');
+            core.setOutput('token', matchedRule?.token ?? 'kibana');
 
       - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
-        if: steps.check.outputs.should_approve == 'true'
+        name: Approve as github-actions[bot]
+        if: steps.check.outputs.should_approve == 'true' && steps.check.outputs.token == 'github'
+        with:
+          github-token: ${{ github.token }}
+
+      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
+        name: Approve as kibanamachine
+        if: steps.check.outputs.should_approve == 'true' && steps.check.outputs.token == 'kibana'
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}

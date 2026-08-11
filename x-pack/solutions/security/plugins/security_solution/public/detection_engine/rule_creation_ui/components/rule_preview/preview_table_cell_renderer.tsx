@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { LegacyField } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { PageScope } from '../../../../data_view_manager/constants';
 import type { CellValueElementProps } from '../../../../../common/types';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
@@ -30,13 +30,20 @@ export const PreviewRenderCellValue: React.FC<
   rowRenderers,
   truncate,
 }) => {
-  const legacyAlert = useMemo(() => (data ?? []) as LegacyField[], [data]);
+  const alert = useMemo<Alert>(() => {
+    const fields = Object.fromEntries((data ?? []).map(({ field, value }) => [field, value]));
+    return {
+      ...fields,
+      _id: fields._id?.[0] || ecsData?._id || '',
+      _index: fields._index?.[0] || ecsData?._index || '',
+    } as Alert;
+  }, [data, ecsData]);
+
   return (
     <CellValue
       tableType={TableId.rulePreview}
       pageScope={PageScope.alerts}
-      legacyAlert={legacyAlert}
-      ecsAlert={ecsData}
+      alert={alert}
       asPlainText={true}
       setCellProps={setCellProps}
       isExpandable={isExpandable}

@@ -25,7 +25,9 @@ import {
   ALERT_TAGGING_CONTEXT_MENU,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_UPDATE_BUTTON,
-  ALERTS_HISTOGRAM_LEGEND,
+  ALERTS_HISTOGRAM,
+  ALERTS_HISTOGRAM_LEGEND_BUTTON,
+  ALERTS_HISTOGRAM_SERIES,
   ALERTS_TABLE_ROW_LOADER,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
@@ -61,7 +63,7 @@ import {
   TIMELINE_CONTEXT_MENU_BTN,
   TOOLTIP,
 } from '../screens/alerts';
-import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
+import { REFRESH_BUTTON } from '../screens/security_header';
 import {
   ENRICHMENT_QUERY_END_INPUT,
   ENRICHMENT_QUERY_RANGE_PICKER,
@@ -165,6 +167,11 @@ export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).first().should('be.visible');
   // Cypress is flaky on clicking this button despite production not having that issue
   cy.get(EXPAND_ALERT_BTN).first().trigger('click');
+};
+
+export const expandBulkActions = () => {
+  cy.contains(SELECTED_ALERTS, /Selected \d+ alerts/);
+  cy.get(TAKE_ACTION_POPOVER_BTN).should('be.visible').click();
 };
 
 export const hideMessageTooltip = () => {
@@ -350,8 +357,8 @@ export const openAlertsFieldBrowser = () => {
 };
 
 export const selectNumberOfAlerts = (numberOfAlerts: number) => {
+  waitForAlerts();
   for (let i = 0; i < numberOfAlerts; i++) {
-    waitForAlerts();
     cy.get(ALERT_CHECKBOX).eq(i).as('checkbox').check();
     cy.get('@checkbox').should('be.checked');
   }
@@ -389,8 +396,17 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
-export const clickAlertsHistogramLegend = () => {
-  cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+export const clickAlertsHistogramLegend = (ruleName: string) => {
+  cy.get(ALERTS_HISTOGRAM).find(ALERTS_HISTOGRAM_SERIES).should('contain.text', ruleName);
+
+  recurse(
+    () => {
+      cy.get('body').type('{esc}');
+      cy.get(ALERTS_HISTOGRAM).contains(ruleName).realHover();
+      return cy.get(ALERTS_HISTOGRAM_LEGEND_BUTTON(ruleName));
+    },
+    ($el) => $el.is(':visible')
+  ).click();
 };
 
 export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
@@ -449,9 +465,12 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 export const waitForAlerts = () => {
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
-  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
+  // `.should('not.be.true')` on a jQuery collection is always true (a jQuery object is
+  // never strictly `=== true`), so this used to be a silent no-op regardless of whether
+  // the data grid was mid-refresh. Assert on absence of the element instead so Cypress
+  // actually retries until the in-progress indicator is gone.
+  cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.exist');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
   cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 

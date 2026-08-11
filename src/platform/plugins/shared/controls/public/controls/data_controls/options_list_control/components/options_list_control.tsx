@@ -9,6 +9,7 @@
 
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -24,14 +25,17 @@ import {
 import { css } from '@emotion/react';
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
-import { ConditionalLabelWrapper } from '../../../control_labels';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
+import { ConditionalLabelWrapper } from '../../../control_labels';
+import { isDSLOptionsListApi } from '../../../utils';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
+import type { DSLOptionsListComponentApi } from '../types';
 import { OptionsListPopover } from './options_list_popover';
+import type { ESQLOptionsListComponentApi } from '../../../esql_control/types';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
@@ -93,24 +97,40 @@ export const OptionsListControl = ({
   const { componentApi, displaySettings, customStrings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
+
+  const conditionalApiSubjects: [
+    PublishingSubject<boolean | undefined>,
+    PublishingSubject<boolean | undefined>,
+    DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
+    ESQLOptionsListComponentApi['tooltipLabel$'] | PublishingSubject<undefined>
+  ] = useMemo(() => {
+    const isDSLControl = isDSLOptionsListApi(componentApi);
+    return [
+      isDSLControl ? componentApi.exclude$ : new BehaviorSubject<boolean | undefined>(false),
+      isDSLControl ? componentApi.existsSelected$ : new BehaviorSubject<boolean | undefined>(false),
+      isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
+      !isDSLControl ? componentApi.tooltipLabel$ : new BehaviorSubject(undefined),
+    ];
+  }, [componentApi]);
+
   const [
-    excludeSelected,
-    existsSelected,
     selectedOptions,
     invalidSelections,
-    field,
     loading,
     label,
+    excludeSelected,
+    existsSelected,
+    field,
     fieldFormatter,
+    tooltipLabel,
   ] = useBatchedPublishingSubjects(
-    componentApi.exclude$,
-    componentApi.existsSelected$,
     componentApi.selectedOptions$,
     componentApi.invalidSelections$,
-    componentApi.field$,
     componentApi.dataLoading$,
     componentApi.label$,
-    componentApi.fieldFormatter
+    ...conditionalApiSubjects
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
@@ -141,8 +161,10 @@ export const OptionsListControl = ({
                 <>
                   {selectedOptions?.length
                     ? selectedOptions.map((value: OptionsListSelection, i, { length }) => {
-                        const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter}`;
-                        const isInvalid = invalidSelections?.has(value);
+                        const text = `${fieldFormatter ? fieldFormatter(value) : value}${
+                          i + 1 === length ? '' : delimiter
+                        }`;
+                        const isInvalid = invalidSelections?.has(value as string);
                         return (
                           <span
                             key={value}
@@ -165,11 +187,10 @@ export const OptionsListControl = ({
                   customStrings?.invalidSelectionsLabel ??
                   OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
                 }
-                delay="long"
               >
                 <EuiToken
                   tabIndex={0}
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   color="euiColorVis9"
                   shape="square"
@@ -206,7 +227,7 @@ export const OptionsListControl = ({
       role="combobox"
       isLoading={loading}
       compressed={isCompressed(componentApi)}
-      iconType={'arrowDown'}
+      iconType={'chevronSingleDown'}
       iconSide="right"
       value={hasSelections || existsSelected ? selectionDisplayNode : ''}
       placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
@@ -224,7 +245,12 @@ export const OptionsListControl = ({
   );
 
   return (
-    <ConditionalLabelWrapper label={label} isPinned={isPinned}>
+    <ConditionalLabelWrapper
+      label={label}
+      isPinned={isPinned}
+      tooltipLabel={tooltipLabel}
+      api={componentApi}
+    >
       <div
         className={'kbnGridLayout--hideDragHandle'}
         css={optionListControlStyles.filterGroup}

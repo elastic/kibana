@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type httpProxy from 'http-proxy';
+import httpProxy from 'http-proxy';
 import type http from 'http';
 import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
@@ -27,6 +27,32 @@ const defaultValues: Record<string, any> = {
   headers: null,
   hasAuth: true,
 };
+
+function expectBasicHttpConnectorShape({
+  action,
+  expectedUrl,
+  expectedHeaders = null,
+}: {
+  action: Record<string, any>;
+  expectedUrl: string;
+  expectedHeaders?: Record<string, string> | null;
+}) {
+  expect(action.is_preconfigured).to.be(false);
+  expect(action.is_system_action).to.be(false);
+  expect(action.is_deprecated).to.be(false);
+  expect(action.name).to.be('A generic Http action');
+  expect(action.connector_type_id).to.be('.http');
+  expect(action.is_missing_secrets).to.be(false);
+  expect(action.is_connector_type_deprecated).to.be(false);
+
+  expect(action.config.url).to.be(expectedUrl);
+  expect(action.config.headers).to.eql(expectedHeaders);
+  expect(action.config.hasAuth).to.be(true);
+
+  if (action.config.authType != null) {
+    expect(action.config.authType).to.be(AuthType.Basic);
+  }
+}
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
   return {
@@ -125,19 +151,10 @@ export default function httpTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-        },
-        is_connector_type_deprecated: false,
+      expectBasicHttpConnectorShape({
+        action: createdAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: defaultValues.headers,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -146,19 +163,10 @@ export default function httpTest({ getService }: FtrProviderContext) {
         .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-        },
-        is_connector_type_deprecated: false,
+      expectBasicHttpConnectorShape({
+        action: fetchedAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: defaultValues.headers,
       });
     });
 
@@ -182,22 +190,12 @@ export default function httpTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-          headers: {
-            someHeader: '123',
-          },
+      expectBasicHttpConnectorShape({
+        action: createdAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: {
+          someHeader: '123',
         },
-        is_connector_type_deprecated: false,
       });
 
       await supertest
@@ -222,22 +220,12 @@ export default function httpTest({ getService }: FtrProviderContext) {
         .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-          headers: {
-            someOtherHeader: '456',
-          },
+      expectBasicHttpConnectorShape({
+        action: fetchedAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: {
+          someOtherHeader: '456',
         },
-        is_connector_type_deprecated: false,
       });
     });
 
@@ -291,6 +279,35 @@ export default function httpTest({ getService }: FtrProviderContext) {
         expect(executeEvent?.kibana?.action?.execution?.source).to.be('http_request');
       });
     }
+
+    it('should base64-encode binary responses and preserve the original bytes', async () => {
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            method: 'POST',
+            body: 'binary_response',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+      expect(result.connector_id).to.eql(httpActionId);
+
+      const responseHeaders = result.data?.headers ?? {};
+      const contentType = responseHeaders['content-type'] ?? responseHeaders['Content-Type'];
+      expect(contentType).to.match(/^image\/png/);
+
+      // The connector must surface binary bodies as a base64-encoded string so
+      // that non-UTF8 byte sequences are not corrupted by lossy text decoding.
+      const data = result.data?.data;
+      expect(typeof data).to.be('string');
+
+      const expectedBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      expect(Buffer.from(data as string, 'base64')).to.eql(expectedBytes);
+    });
 
     it('should handle target https that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
@@ -348,7 +365,56 @@ export default function httpTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling http, retry later/);
-      expect(result.service_message).to.eql('[500] Internal Server Error');
+      expect(result.service_message).to.eql('[500] Internal Server Error: Error');
+    });
+
+    it('should not abort when the request completes normally', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_200', method: 'POST' } })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(0);
+    });
+
+    it('should abort the http request when the execution is cancelled', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const startTime = Date.now();
+
+      const executeReq = supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_30000', method: 'POST' } });
+
+      setTimeout(() => executeReq.abort(), 1000);
+
+      try {
+        await executeReq;
+      } catch (err) {
+        // Expected: connection reset due to client abort
+      }
+
+      const elapsed = Date.now() - startTime;
+      expect(elapsed).to.be.lessThan(5000);
+
+      // wait for the proxy server to close the connection
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(1);
     });
 
     it('sends both config and secret headers in the http request', async () => {
@@ -515,12 +581,8 @@ export default function httpTest({ getService }: FtrProviderContext) {
         oauth2Server.server.close();
       });
 
-      afterEach(() => {
-        oauth2Server.reset();
-      });
-
-      it('should get access token with client credentials', async () => {
-        const { body: result } = await supertest
+      it('should get access token with client credentials and refresh once expired', async () => {
+        const { body: firstResult } = await supertest
           .post(`/api/actions/connector/${httpActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -531,49 +593,27 @@ export default function httpTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // HTTP connector returns data: { status, statusText, headers, data }; simulator responds with body 'OK'
-        expect(result.status).to.eql('ok');
-        expect(result.connector_id).to.eql(httpActionId);
-        expect(result.data?.data).to.eql('OK');
+        expect(firstResult.status).to.eql('ok');
+        expect(firstResult.connector_id).to.eql(httpActionId);
+        expect(firstResult.data?.data).to.eql('OK');
 
-        // this is the request that Kibana did to the auth server
-        // before calling the http server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        let tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(1);
         expect(tokenRequests[0].client_id).to.be(clientId);
         expect(tokenRequests[0].client_secret).to.be(clientSecret);
         expect(tokenRequests[0].grant_type).to.be('client_credentials');
         expect(tokenRequests[0].token).to.be('test-token-1');
 
-        // this is the request Kibana did to the http server
-        // it returns headers because we are sending body: 'header_as_payload'
-        const httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
-        const httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
+        let httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
+        let httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
         expect(httpSimulatorHeaders.length).to.be(1);
         expect(JSON.parse(httpSimulatorHeaders[0]).authorization).to.equal('Bearer test-token-1');
-      });
 
-      it('should refresh the token once the previous one has expired', async () => {
-        // first call will generate a token as we could see in the previous test
-        await supertest
-          .post(`/api/actions/connector/${httpActionId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              method: 'POST',
-              body: 'header_as_payload',
-            },
-          })
-          .expect(200);
-
-        // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000 + 2500)
         );
 
-        // this second call should trigger a second call to the auth server because
-        // the token will be expired
-        const { body: result } = await supertest
+        const { body: secondResult } = await supertest
           .post(`/api/actions/connector/${httpActionId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
@@ -584,26 +624,86 @@ export default function httpTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // HTTP connector returns data: { status, statusText, headers, data }; simulator responds with body 'OK'
-        expect(result.status).to.eql('ok');
-        expect(result.connector_id).to.eql(httpActionId);
-        expect(result.data?.data).to.eql('OK');
+        expect(secondResult.status).to.eql('ok');
+        expect(secondResult.connector_id).to.eql(httpActionId);
+        expect(secondResult.data?.data).to.eql('OK');
 
-        // this is the request that Kibana did to the auth server
-        // before calling the http server
-        const tokenRequests = oauth2Server.getTokenRequests();
+        tokenRequests = oauth2Server.getTokenRequests();
         expect(tokenRequests.length).to.be(2);
         expect(tokenRequests[1].client_id).to.be(clientId);
         expect(tokenRequests[1].client_secret).to.be(clientSecret);
         expect(tokenRequests[1].grant_type).to.be('client_credentials');
         expect(tokenRequests[1].token).to.be('test-token-2');
 
-        // this is the request Kibana did to the http server
-        // it returns headers because we are sending body: 'header_as_payload'
-        const httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
-        const httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
-        expect(httpSimulatorHeaders.length).to.be(2);
-        expect(JSON.parse(httpSimulatorHeaders[1]).authorization).to.equal('Bearer test-token-2');
+        httpSimulatorHeadersRaw = await fetch(httpSimulatorURL);
+        httpSimulatorHeaders = await httpSimulatorHeadersRaw.json();
+        expect(httpSimulatorHeaders.length).to.be(1);
+        expect(JSON.parse(httpSimulatorHeaders[0]).authorization).to.equal('Bearer test-token-2');
+      });
+    });
+
+    describe('Proxy settings', () => {
+      let connectorProxyServer: httpProxy;
+      let connectorProxyUrl: string;
+      let connectorProxyHaveBeenCalled = false;
+
+      before(async () => {
+        const connectorProxyPort = await getPort({ port: getPort.makeRange(9200, 9300) });
+        connectorProxyServer = httpProxy.createProxyServer({
+          target: httpSimulatorURL,
+          secure: false,
+          selfHandleResponse: false,
+        });
+        connectorProxyServer.on('proxyRes', () => {
+          connectorProxyHaveBeenCalled = true;
+        });
+        connectorProxyServer.listen(connectorProxyPort);
+        connectorProxyUrl = `http://localhost:${connectorProxyPort}`;
+      });
+
+      beforeEach(() => {
+        connectorProxyHaveBeenCalled = false;
+        proxyHaveBeenCalled = false;
+      });
+
+      after(() => {
+        connectorProxyServer.close();
+      });
+
+      it('should use the connector-level proxy instead of the global proxy', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Http action',
+            connector_type_id: '.http',
+            secrets: {
+              user: 'username',
+              password: 'mypassphrase',
+            },
+            config: {
+              url: httpSimulatorURL,
+              proxyUrl: connectorProxyUrl,
+            },
+          })
+          .expect(200);
+
+        objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
+
+        const { body: result } = await supertest
+          .post(`/api/actions/connector/${createdAction.id}/_execute`)
+          .set('kbn-xsrf', 'test')
+          .send({
+            params: {
+              method: 'POST',
+              body: 'success_post_method',
+            },
+          })
+          .expect(200);
+
+        expect(result.status).to.eql('ok');
+        expect(connectorProxyHaveBeenCalled).to.equal(true);
+        expect(proxyHaveBeenCalled).to.equal(false);
       });
     });
 

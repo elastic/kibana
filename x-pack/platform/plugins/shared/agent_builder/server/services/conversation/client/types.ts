@@ -10,9 +10,21 @@ import type {
   ToolCallWithResult,
   ConversationRoundStepMixin,
   ReasoningStep,
+  CompactionStep,
+  BackgroundAgentCompleteStep,
+  TodosStep,
+  AskUserQuestionStep,
+  RelevantSkillsStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
@@ -21,8 +33,48 @@ export type ConversationCreateRequest = Omit<
   id?: string;
 };
 
-export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<Pick<Conversation, 'title' | 'rounds' | 'attachments' | 'state'>>;
+export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
+  Partial<
+    Pick<
+      Conversation,
+      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+    >
+  >;
+
+export type ConversationUpdateRequest = Pick<
+  ConversationUpdatableFields,
+  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+>;
+
+/**
+ * Persists a single completed round as intent, not end state, so it can be merged into
+ * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.
+ */
+export interface UpsertRoundRequest {
+  id: string;
+  /** Upserted by `round.id`: appended if new, replaced in place if present (HITL resume). */
+  round: ConversationRound;
+  /** `action: 'regenerate'` only: id of the round this one supersedes. */
+  replacesRoundId?: string;
+  state?: ConversationInternalState;
+  /** Reconciled into the stored list; `snapshot` is what the round started from. */
+  attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Applied only when the stored conversation has no workspace yet. */
+  workspaceId?: string;
+}
+
+/**
+ * Adds attachments to the conversation and references them from the last stored
+ * round. Merge semantics: the target round and the attachment list are both
+ * resolved against stored state, so concurrent round or attachment writes survive.
+ */
+export interface AddAttachmentsToLastRoundRequest {
+  id: string;
+  /** Merged into the last stored round's `input.attachment_refs`. */
+  refs: AttachmentVersionRef[];
+  /** Reconciled into the stored list; `snapshot` is what the caller started from. */
+  attachments: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+}
 
 export interface ConversationListOptions {
   agentId?: string;
@@ -46,12 +98,38 @@ export type PersistentToolCallStep = ConversationRoundStepMixin<
 /**
  * A union of all possible persistent step types.
  */
-export type PersistentConversationRoundStep = PersistentToolCallStep | ReasoningStep;
+export type PersistentConversationRoundStep =
+  | PersistentToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep
+  | AskUserQuestionStep
+  | RelevantSkillsStep;
+
+/**
+ * Legacy fields that may exist in old persisted documents.
+ * These are normalized to the current model shape during deserialization.
+ */
+interface LegacyRoundFields {
+  /** @deprecated Use `pending_prompts` (array). Normalized on read. */
+  pending_prompt?: PromptRequest;
+}
+
+/**
+ * Legacy fields that may exist in old persisted RoundState documents.
+ * Normalized to use `nodes` (array) during deserialization.
+ */
+export interface LegacyAgentStateFields {
+  /** @deprecated Use `nodes` (array). Normalized on read. */
+  node?: AgentNodeState;
+}
 
 /**
  * Represents a conversation round suitable for persistence, with tool
  * call results serialized to a string.
  */
-export type PersistentConversationRound = Omit<ConversationRound, 'steps'> & {
-  steps: PersistentConversationRoundStep[];
-};
+export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
+  LegacyRoundFields & {
+    steps: PersistentConversationRoundStep[];
+  };

@@ -6,9 +6,9 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 import { adminTestUser } from '@kbn/test';
 
@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await es.indices.refresh({ index: '.kibana_security_session*' });
 
-      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = findSessionCookie(response.headers['set-cookie']);
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
       log.debug(`Authenticating as ${basicUsername} with valid session cookie.`);
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(401);
 
-      expect(resp.headers[SESSION_ERROR_REASON_HEADER]).to.be('SESSION_EXPIRED');
+      expect(resp.headers[SESSION_ERROR_REASON_HEADER]).to.be('SESSION_IDLE_TIMEOUT');
     });
   });
 }

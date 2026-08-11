@@ -41,6 +41,7 @@ describe('user activity injected context', () => {
       new BehaviorSubject({
         enabled: true,
         appenders: new Map([['console', { type: 'console', layout: { type: 'json' } }]]),
+        filters: [],
       })
     );
     const loggingService = loggingServiceMock.createInternalSetupContract();
@@ -63,6 +64,7 @@ describe('user activity injected context', () => {
       authentication_type: 'realm',
       elastic_cloud_user: false,
       profile_uid: 'test_profile_uid',
+      http_authentication_scheme: null,
     };
 
     const httpSetup = await server.setup({
@@ -78,7 +80,7 @@ describe('user activity injected context', () => {
     const router = httpSetup.createRouter('');
     router.post(
       {
-        path: '/s/{spaceId}/api/user_activity_injected_context/_track',
+        path: '/api/user_activity_injected_context/_track',
         security: {
           authz: {
             enabled: false,
@@ -92,6 +94,7 @@ describe('user activity injected context', () => {
           message: 'ua-test',
           event: { action: 'ua_test_action' as any, type: 'user' },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+          metadata: { a: 1, b: '2', c: { d: true } },
         });
         return response.ok({ body: { ok: true } });
       }
@@ -117,6 +120,7 @@ describe('user activity injected context', () => {
       message: 'ua-test',
       event: { action: 'ua_test_action', type: 'user' },
       object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+      metadata: { a: 1, b: '2', c: { d: true } },
       kibana: { space: { id: 'myspace' } },
       http: { request: { referrer } },
       session: { id: 'some-redacted-sid' },

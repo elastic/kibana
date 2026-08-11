@@ -64,7 +64,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 describe('Handle request to schedule', () => {
@@ -823,10 +822,10 @@ describe('Handle request to schedule', () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `);

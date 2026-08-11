@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { useLocation, useHistory } from 'react-router-dom';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
-import { SearchAndFiltersBar, StickyFlexItem } from './components/search_and_filters_bar';
+import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
+import {
+  useSetUrlCategory,
+  useUrlDefaultCategories,
+  useSetUrlDefaultCategories,
+} from './hooks/url_categories';
 import { NoDataPrompt } from './components/no_data_prompt';
 import {
   ManageIntegrationsTable,
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
-import { CreateNewIntegrationButton } from './components/create_new_integration';
+
+const OBLT_DEFAULT_CATEGORIES = ['opentelemetry', 'observability'];
 
 export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
   prereleaseIntegrationsEnabled,
 }) => {
   useBreadcrumbs('integrations_all');
 
-  const { automaticImportVTwo, application } = useStartServices();
+  const { automaticImport, application, cloud } = useStartServices();
   const { pathname, search } = useLocation();
   const history = useHistory();
   const euiTheme = useEuiTheme();
@@ -39,15 +44,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     application.capabilities as Record<string, { view?: boolean } | undefined>
   ).automatic_import;
   const canReadAutomaticImportIntegrations =
-    automaticImportCapabilities?.view ?? Boolean(automaticImportVTwo);
+    automaticImportCapabilities?.view ?? Boolean(automaticImport);
 
   const useGetAllIntegrationsHook = canReadAutomaticImportIntegrations
-    ? automaticImportVTwo?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
+    ? automaticImport?.hooks.useGetAllIntegrations ?? useEmptyAllIntegrations
     : useEmptyAllIntegrations;
   const {
     integrations,
-    isLoading: isLoadingCreatedIntegrations,
+    isInitialLoading: isLoadingCreatedIntegrations,
     isError: isCreatedIntegrationsError,
+    refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
   const hasCreatedIntegrations = integrations.length > 0;
   const isManageIntegrationsView = useMemo(() => {
@@ -68,30 +74,64 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [history, manageIntegrationsHref]
   );
 
+  const setUrlCategory = useSetUrlCategory();
+  const setUrlDefaultCategories = useSetUrlDefaultCategories();
+  const urlDefaultCategories = useUrlDefaultCategories();
   const {
     allCategories,
     initialSelectedCategory,
-    selectedCategory,
+    selectedCategories,
     mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
+    availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
+  // Tracks whether we've already auto-redirected to the default categories this page visit.
+  // Without this, clicking "All categories" (which clears URL categories) would immediately
+  // trigger another redirect back to the defaults — preventing the user from removing them.
+  const hasAutoRedirectedRef = useRef(false);
+
+  const isObservability = cloud?.serverless?.projectType === 'observability';
+
+  useEffect(() => {
+    if (
+      hasAutoRedirectedRef.current ||
+      !isObservability ||
+      isLoading ||
+      isManageIntegrationsView ||
+      initialSelectedCategory ||
+      urlDefaultCategories.length > 0
+    )
+      return;
+    // Mark as redirected regardless of whether valid defaults exist, so the
+    // effect does not keep re-running when none of the default categories exist
+    // in the catalog.
+    hasAutoRedirectedRef.current = true;
+    const validDefaults = OBLT_DEFAULT_CATEGORIES.filter((cat) =>
+      categoryExists(cat, allCategories)
+    );
+    if (validDefaults.length > 0) {
+      setUrlDefaultCategories(validDefaults, { replace: true });
+    }
+  }, [
+    isObservability,
+    isLoading,
+    isManageIntegrationsView,
+    initialSelectedCategory,
+    urlDefaultCategories.length,
+    allCategories,
+    setUrlDefaultCategories,
+  ]);
+
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
-    setUrlandReplaceHistory({
-      searchString: '',
-      categoryId: '',
-      subCategoryId: '',
-      onlyAgentless: onlyAgentlessFilter,
-    });
+    setUrlCategory({ category: '' }, { replace: true });
     return null;
   }
 
@@ -116,39 +156,26 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
       <Sidebar
         isLoading={isLoading}
         categories={mainCategories}
-        selectedCategory={selectedCategory}
+        selectedCategories={selectedCategories}
         onCategoryChange={onCategoryChange}
         CreateIntegrationCardButton={
           canReadAutomaticImportIntegrations
-            ? automaticImportVTwo?.components.CreateIntegrationSideCardButton
+            ? automaticImport?.components.CreateIntegrationSideCardButton
             : undefined
         }
         hasCreatedIntegrations={hasCreatedIntegrations}
+        createdIntegrationsCount={integrations.length}
+        isLoadingCreatedIntegrations={isLoadingCreatedIntegrations}
+        manageIntegrationsHref={manageIntegrationsHref}
         onManageIntegrationsClick={onManageIntegrationsClick}
       />
       <EuiFlexItem grow={5}>
         <EuiFlexGroup direction="column" gutterSize="none">
-          {isManageIntegrationsView ? (
-            <StickyFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow>
-                  <EuiFieldSearch
-                    compressed
-                    placeholder={i18n.translate(
-                      'xpack.fleet.epmList.manageIntegrations.searchPlaceholder',
-                      { defaultMessage: 'Search integrations' }
-                    )}
-                    fullWidth
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <CreateNewIntegrationButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </StickyFlexItem>
-          ) : (
-            <SearchAndFiltersBar />
+          {!isManageIntegrationsView && (
+            <SearchAndFiltersBar
+              categories={mainCategories}
+              availableSubCategories={availableSubCategories}
+            />
           )}
           {noEprCallout ? noEprCallout : null}
           <EuiFlexItem
@@ -160,11 +187,16 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
             }}
           >
             {isManageIntegrationsView ? (
-              <ManageIntegrationsTable
-                integrations={integrations}
-                isLoading={isLoadingCreatedIntegrations}
-                isError={isCreatedIntegrationsError}
-              />
+              <>
+                <EuiSpacer size="m" />
+                <ManageIntegrationsTable
+                  integrations={integrations}
+                  isLoading={isLoadingCreatedIntegrations}
+                  isError={isCreatedIntegrationsError}
+                  onRefetch={refetchCreatedIntegrations}
+                  prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+                />
+              </>
             ) : filteredCards.length === 0 && !isLoading ? (
               <NoDataPrompt />
             ) : (
@@ -185,7 +217,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 function useEmptyAllIntegrations() {
   return {
     integrations: [] as CreatedIntegrationRow[],
-    isLoading: false,
+    isInitialLoading: false,
     isError: false,
     error: null,
     refetch: () => {},

@@ -99,6 +99,7 @@ export const getSignificantTermRequest = (
     query,
     size: 0,
     aggs: wrap(fieldCandidateAggs),
+    ...(params.projectRouting ? { project_routing: params.projectRouting } : {}),
   };
 
   return {

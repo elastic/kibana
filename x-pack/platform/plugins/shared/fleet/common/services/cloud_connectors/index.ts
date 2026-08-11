@@ -53,5 +53,6 @@ export {
   getCloudConnectorVars,
   getAllCloudConnectorVarNames,
   getIacTemplateUrlFromVarGroupSelection,
+  getAccountTypeFromVarGroupOrInputs,
   detectTargetCsp,
 } from './var_group_helpers';

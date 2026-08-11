@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { CommonProps, EuiButtonIconPropsForButton } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { COLLAPSE_ACTION, EXPAND_ACTION } from './translations';
 
 export interface CardExpandButtonProps extends Pick<CommonProps, 'data-test-subj'> {
@@ -18,12 +18,14 @@ export interface CardExpandButtonProps extends Pick<CommonProps, 'data-test-subj
 export const CardExpandButton = memo<CardExpandButtonProps>(
   ({ expanded, onClick, 'data-test-subj': dataTestSubj }) => {
     return (
-      <EuiButtonIcon
-        iconType={expanded ? 'arrowUp' : 'arrowDown'}
-        onClick={onClick}
-        data-test-subj={dataTestSubj}
-        aria-label={expanded ? COLLAPSE_ACTION : EXPAND_ACTION}
-      />
+      <EuiToolTip content={expanded ? COLLAPSE_ACTION : EXPAND_ACTION} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+          onClick={onClick}
+          data-test-subj={dataTestSubj}
+          aria-label={expanded ? COLLAPSE_ACTION : EXPAND_ACTION}
+        />
+      </EuiToolTip>
     );
   }
 );

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { flushSync } from 'react-dom';
 import { BehaviorSubject, firstValueFrom, type Observable, Subject, type Subscription } from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs';
 import type { History } from 'history';
@@ -105,6 +106,7 @@ interface AppInternalState {
  */
 export class ApplicationService {
   private readonly apps = new Map<string, App<any>>();
+  private readonly appOwners = new Map<string, PluginOpaqueId>();
   private readonly mounters = new Map<string, Mounter>();
   private readonly capabilities = new CapabilitiesService();
   private readonly appInternalStates = new Map<string, AppInternalState>();
@@ -147,8 +149,11 @@ export class ApplicationService {
     });
 
     this.navigate = (url, state, replace) => {
-      // basePath not needed here because `history` is configured with basename
-      return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+      // any side effects are executed immediately to reduce breaking changes due to moving to concurrent mode
+      return flushSync(() => {
+        // basePath not needed here because `history` is configured with basename
+        return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
+      });
     };
 
     this.openInNewTab = (url) => {
@@ -215,6 +220,7 @@ export class ApplicationService {
           status: app.status ?? AppStatus.accessible,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
+        this.appOwners.set(app.id, plugin);
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
         }
@@ -331,6 +337,12 @@ export class ApplicationService {
         takeUntil(this.stop$)
       ),
       history: this.history!,
+      getRegisteredAppsInfo: () =>
+        [...this.apps.entries()].map(([appId, app]) => ({
+          appId,
+          owner: this.appOwners.get(appId)!,
+          deepLinkIds: Object.keys(flattenDeepLinks(app.deepLinks)),
+        })),
       isAppRegistered: (appId: string): boolean => {
         return applications$.value.get(appId) !== undefined;
       },

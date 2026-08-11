@@ -10,10 +10,7 @@ import Boom from '@hapi/boom';
 import { AttachmentPatchRequestRtV2 } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import {
-  isCommentRequestTypeExternalReference,
-  isLegacyAttachmentRequest,
-} from '../../../common/utils/attachments';
+import { isCommentRequestTypeExternalReference } from '../../../common/utils/attachments';
 import type { Case } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -22,7 +19,7 @@ import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
-import { getCaseOwner } from './utils';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Update an attachment.
@@ -30,7 +27,7 @@ import { getCaseOwner } from './utils';
  * @ignore
  */
 export async function update(
-  { caseID, updateRequest: queryParams }: UpdateArgs,
+  { caseID, updateRequest: queryParams, mode = 'legacy' }: UpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<Case> {
   const {
@@ -38,6 +35,7 @@ export async function update(
     logger,
     authorization,
     externalReferenceAttachmentTypeRegistry,
+    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
@@ -59,8 +57,19 @@ export async function update(
       unifiedAttachmentTypeRegistry
     );
 
+    // Also enforce registry registration and the unified zod schema for
+    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
+    // paths so PATCH stays in sync with POST.
+    validateRegisteredAttachments({
+      query: queryRestAttributes,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+    });
+
     const myComment = await attachmentService.getter.get({
-      attachmentId: queryCommentId,
+      savedObjectId: queryCommentId,
+      mode,
     });
 
     if (myComment == null) {
@@ -78,12 +87,7 @@ export async function update(
       throw Boom.badRequest(`You cannot change the type of the comment.`);
     }
 
-    const caseOwner = await getCaseOwner(caseID, clientArgs);
-    const owner = isLegacyAttachmentRequest(queryRestAttributes)
-      ? queryRestAttributes.owner
-      : caseOwner;
-
-    if (myComment.attributes.owner !== owner) {
+    if (myComment.attributes.owner !== queryRestAttributes.owner) {
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
@@ -115,9 +119,10 @@ export async function update(
       updateRequest: queryParams,
       updatedAt: updatedDate,
       owner: myComment.attributes.owner,
+      mode,
     });
 
-    return await updatedModel.encodeWithComments();
+    return await updatedModel.encodeWithComments({ mode });
   } catch (error) {
     throw createCaseError({
       message: `Failed to patch comment case id: ${caseID}: ${error}`,

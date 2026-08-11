@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import {
+  UserAtSpaceScenarios,
+  ManageRuleSettingsOnlyUserAtSpace1,
+  AllWithoutManageRuleSettingsUserAtSpace1,
+} from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from '../../../../rule_gaps_utils';
@@ -18,6 +22,7 @@ const isUserAuthorized = (scenarioId: string) =>
     'space_1_all at space1',
     'space_1_all_alerts_none_actions at space1',
     'space_1_all_with_restricted_fixture at space1',
+    'manage_rule_settings_only at space1',
   ].includes(scenarioId);
 
 export default function createGapAutoFillSchedulerTests({ getService }: FtrProviderContext) {
@@ -46,7 +51,9 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
       });
     }
 
-    for (const scenario of UserAtSpaceScenarios) {
+    const ScenariosToTest = [...UserAtSpaceScenarios, ManageRuleSettingsOnlyUserAtSpace1];
+
+    for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         const apiOptions = {
@@ -130,7 +137,8 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
             case 'space_1_all_alerts_none_actions at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1': {
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'manage_rule_settings_only at space1': {
               expect(schedulerResp.statusCode).to.eql(200);
 
               // For stability, only assert create returns a persisted id; skip backfill polling
@@ -721,5 +729,42 @@ export default function createGapAutoFillSchedulerTests({ getService }: FtrProvi
         });
       });
     }
+
+    describe(AllWithoutManageRuleSettingsUserAtSpace1.id, () => {
+      const { user, space } = AllWithoutManageRuleSettingsUserAtSpace1;
+
+      afterEach(async () => {
+        await objectRemover.removeAll();
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/_test/gap_auto_fill_scheduler/_delete_all`)
+          .set('kbn-xsrf', 'foo')
+          .send({});
+      });
+
+      it('denies scheduler management when manage_rule_settings sub-feature is disabled', async () => {
+        const schedulerBody = {
+          name: `it-scheduler-no-manage-settings-${Date.now()}`,
+          schedule: { interval: '1m' },
+          gap_fill_range: 'now-30d',
+          max_backfills: 100,
+          num_retries: 1,
+          scope: ['test-scope'],
+          rule_types: [
+            {
+              type: 'test.patternFiringAutoRecoverFalse',
+              consumer: 'alertsFixture',
+            },
+          ],
+        };
+
+        const resp = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/auto_fill_scheduler`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send(schedulerBody);
+
+        expect(resp.statusCode).to.eql(403);
+      });
+    });
   });
 }

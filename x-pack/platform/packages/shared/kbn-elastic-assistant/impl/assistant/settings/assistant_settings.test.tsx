@@ -76,7 +76,7 @@ const testProps = {
   setPaginationObserver: jest.fn(),
 };
 jest.mock('../../assistant_context');
-jest.mock('../../..', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => {
     return {
       data: [],

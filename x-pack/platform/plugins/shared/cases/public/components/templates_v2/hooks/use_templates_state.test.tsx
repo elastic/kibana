@@ -31,6 +31,7 @@ describe('useTemplatesState', () => {
       search: '',
       tags: [],
       author: [],
+      owner: [],
       isDeleted: false,
     });
   });
@@ -75,6 +76,7 @@ describe('useTemplatesState', () => {
       search: '',
       tags: [],
       author: [],
+      owner: [],
       isDeleted: false,
     });
   });
@@ -193,6 +195,7 @@ describe('useTemplatesState', () => {
       search: 'test',
       tags: [],
       author: [],
+      owner: [],
       isDeleted: false,
     });
   });

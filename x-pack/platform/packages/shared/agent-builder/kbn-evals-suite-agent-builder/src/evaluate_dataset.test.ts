@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import type { TaskOutput } from '@kbn/evals';
+import type {
+  DefaultEvaluators,
+  EvalsExecutorClient,
+  Evaluator,
+  Example,
+  TaskOutput,
+} from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { extractSearchRetrievedDocs } from './rag_extractor';
+import { createEvaluateExternalDataset } from './evaluate_dataset';
+import type { AgentBuilderEvaluationChatClient } from './chat_client';
 
 describe('extractSearchRetrievedDocs', () => {
   it('extracts docs from direct data.reference shape', () => {
@@ -100,5 +110,84 @@ describe('extractSearchRetrievedDocs', () => {
     } satisfies TaskOutput;
 
     expect(extractSearchRetrievedDocs(output)).toEqual([]);
+  });
+});
+
+describe('createEvaluateExternalDataset', () => {
+  function createTraceEvaluator(name: string): Evaluator<Example, unknown> {
+    return {
+      name,
+      kind: 'CODE',
+      evaluate: async () => ({ score: 1 }),
+    };
+  }
+
+  function createDefaultEvaluators(): DefaultEvaluators {
+    return {
+      criteria: () => ({
+        name: 'Criteria',
+        kind: 'LLM',
+        evaluate: async () => ({ score: 1 }),
+      }),
+      correctnessAnalysis: () => ({
+        name: 'CorrectnessAnalysis',
+        kind: 'LLM',
+        evaluate: async () => ({ score: 1 }),
+      }),
+      groundednessAnalysis: () => ({
+        name: 'GroundednessAnalysis',
+        kind: 'LLM',
+        evaluate: async () => ({ score: 1 }),
+      }),
+      traceBasedEvaluators: {
+        inputTokens: createTraceEvaluator('InputTokens'),
+        outputTokens: createTraceEvaluator('OutputTokens'),
+        latency: createTraceEvaluator('Latency'),
+        toolCalls: createTraceEvaluator('ToolCalls'),
+        cachedTokens: createTraceEvaluator('CachedTokens'),
+      },
+    };
+  }
+
+  function createTestSetup() {
+    const runExperiment = jest.fn(async () => ({}));
+
+    const evaluator = createEvaluateExternalDataset({
+      evaluators: createDefaultEvaluators(),
+      executorClient: { runExperiment } as unknown as EvalsExecutorClient,
+      chatClient: {
+        converse: async () => ({ errors: [], messages: [], steps: [] }),
+      } as unknown as AgentBuilderEvaluationChatClient,
+      traceEsClient: {} as unknown as EsClient,
+      log: {
+        info: jest.fn(),
+        debug: jest.fn(),
+        warning: jest.fn(),
+        error: jest.fn(),
+      } as unknown as ToolingLog,
+    });
+
+    return { evaluator, runExperiment };
+  }
+
+  it('passes dataset name and Elasticsearch description to runExperiment', async () => {
+    const { evaluator, runExperiment } = createTestSetup();
+
+    await evaluator('my-dataset');
+
+    expect(runExperiment).toHaveBeenCalledTimes(1);
+    expect(runExperiment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        datasets: [
+          {
+            name: 'my-dataset',
+            description: 'External dataset resolved from Elasticsearch by name',
+            examples: [],
+          },
+        ],
+        trustUpstreamDataset: true,
+      }),
+      expect.any(Array)
+    );
   });
 });

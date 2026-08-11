@@ -28,7 +28,7 @@ import type {
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
 } from '@kbn/lens-common';
-import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 import type { DrilldownsManager, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import {
   combineQueryAndFilters,
@@ -254,7 +254,7 @@ export function initializeActionApi(
   getComparators: () => DrilldownsManager['comparators'];
   getLatestState: () => ReturnType<DrilldownsManager['getLatestState']>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
+  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
 } {
   return {
     api: {
@@ -275,7 +275,7 @@ export function initializeActionApi(
     cleanup: () => {
       drilldownsManager.cleanup();
     },
-    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
+    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
       drilldownsManager.reinitializeState(lastSaved ?? {});
     },
   };

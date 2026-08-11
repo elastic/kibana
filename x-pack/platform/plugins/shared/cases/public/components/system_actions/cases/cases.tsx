@@ -16,15 +16,28 @@ import {
   CASES_CONNECTOR_ID,
   CASES_CONNECTOR_TITLE,
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+  getMaximumOpenCases,
 } from '../../../../common/constants';
 import type { CasesActionParams } from './types';
 import * as i18n from './translations';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 interface ValidationErrors {
   timeWindow: string[];
   maximumCasesToOpen: string[];
 }
+
+const getConfiguredMaximumOpenCases = () => {
+  try {
+    return getMaximumOpenCases(
+      KibanaServices.get().uiSettings?.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
+    );
+  } catch {
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
+  }
+};
 
 export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams> {
   return {
@@ -44,6 +57,7 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
       const validationResult = {
         errors,
       };
+      const maxOpenCases = getConfiguredMaximumOpenCases();
 
       const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
 
@@ -68,8 +82,8 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
 
         const { maximumCasesToOpen } = actionParams.subActionParams;
         if (isNumber(maximumCasesToOpen)) {
-          if (maximumCasesToOpen < 1 || maximumCasesToOpen > MAX_OPEN_CASES) {
-            errors.maximumCasesToOpen.push(i18n.MAX_CASES_TO_OPEN_ERROR(MAX_OPEN_CASES));
+          if (maximumCasesToOpen < 1 || maximumCasesToOpen > maxOpenCases) {
+            errors.maximumCasesToOpen.push(i18n.MAX_CASES_TO_OPEN_ERROR(maxOpenCases));
           }
         }
       }

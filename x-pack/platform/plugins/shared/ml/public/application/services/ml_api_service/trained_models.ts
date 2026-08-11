@@ -15,72 +15,25 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ModelPipelines,
-  TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
   TrainedModelUIItem,
   TrainedModelConfigResponse,
   StartTrainedModelDeploymentResponse,
-} from '../../../../common/types/trained_models';
-
-export interface InferenceQueryParams {
-  from?: number;
-  size?: number;
-  tags?: string;
-  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
-}
-
-export interface InferenceStatsQueryParams {
-  from?: number;
-  size?: number;
-}
-
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
-}
-
-export interface InferenceStatsResponse {
-  count: number;
-  trained_model_stats: TrainedModelStat[];
-}
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type CommonDeploymentParams = {
-  deployment_id?: string;
-  threads_per_allocation: number;
-  priority: 'low' | 'normal';
-  number_of_allocations?: number;
-};
-
-export interface AdaptiveAllocationsParams {
-  enabled: boolean;
-  min_number_of_allocations?: number;
-  max_number_of_allocations?: number;
-}
-
-export interface StartAllocationParams {
-  modelId: string;
-  deploymentParams: CommonDeploymentParams;
-  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
-}
-export interface DeleteModelParams {
-  modelId: string;
-  options?: { with_pipelines?: boolean; force?: boolean };
-}
-export interface UpdateAllocationParams {
-  number_of_allocations?: number;
-  adaptive_allocations?: AdaptiveAllocationsParams;
-}
+  InferenceQueryParams,
+  InferenceStatsQueryParams,
+  InferenceStatsResponse,
+  StartAllocationParams,
+  DeleteModelParams,
+  UpdateAllocationParams,
+} from '@kbn/ml-common-types/trained_models';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import type { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 /**
  * Service with APIs calls to perform operations with trained models.

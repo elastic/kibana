@@ -62,12 +62,13 @@ export const AddListItemPopover = ({ listId }: { listId: string }) => {
 
   return (
     <EuiPopover
+      aria-label={ADD_LIST_ITEM}
       initialFocus="#value-list-item-value"
       button={
         <EuiButton
           iconSide="right"
           fill
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj="value-list-item-add-button-show-popover"
           onClick={() => setIsPopoverOpen(true)}
         >

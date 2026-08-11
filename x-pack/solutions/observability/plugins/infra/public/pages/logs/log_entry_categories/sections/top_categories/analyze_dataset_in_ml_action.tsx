@@ -55,7 +55,7 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   );
 
   return (
-    <EuiToolTip content={analyseCategoryDatasetInMlTooltipDescription} delay="long">
+    <EuiToolTip content={analyseCategoryDatasetInMlTooltipDescription}>
       <EuiButtonIcon
         aria-label={analyseCategoryDatasetInMlButtonLabel}
         iconType="machineLearningApp"

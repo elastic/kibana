@@ -47,7 +47,7 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
     <EuiCallOut
       data-test-subj="sloHealthCallout"
       color="danger"
-      iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+      iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
       size="s"
       onClick={(e) => {
         setIsOpen(!isOpen);

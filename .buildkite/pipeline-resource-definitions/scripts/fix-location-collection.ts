@@ -9,7 +9,7 @@
  */
 
 import fs from 'fs';
-import jsYaml from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import path from 'path';
 import { execSync } from 'child_process';
 
@@ -38,14 +38,12 @@ async function main() {
 
   const preamble = locationFileLines.slice(0, 1);
 
-  const locationObj = jsYaml.load(
-    locationFileLines.slice(1).join('\n')
-  ) as BackstageLocationResource;
+  const locationObj = parse(locationFileLines.slice(1).join('\n')) as BackstageLocationResource;
   locationObj.spec.targets = pipelines.map(
     (fileName) => `${resourceDefinitionsBaseUrl}/${fileName}`
   );
 
-  const locationYaml = jsYaml.dump(locationObj, { lineWidth: 400 });
+  const locationYaml = stringify(locationObj, { lineWidth: 400 });
 
   fs.writeFileSync(locationFile, `${preamble.join('\n')}\n${locationYaml}`);
 

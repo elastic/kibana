@@ -7,6 +7,7 @@
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -19,6 +20,7 @@ const HOVER_INTENT_DELAY = 100; // ms
 export interface HoverPopoverProps {
   hoverContent: React.ReactNode;
   anchorPosition?: PopoverAnchorPosition;
+  'aria-label'?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ export interface HoverPopoverProps {
  * reader users to navigate to and from your popover.
  */
 export const HoverPopover = React.memo<PropsWithChildren<HoverPopoverProps>>(
-  ({ hoverContent, anchorPosition = 'downCenter', children }) => {
+  ({ hoverContent, anchorPosition = 'downCenter', 'aria-label': ariaLabel, children }) => {
     const [isOpen, setIsOpen] = useState(hoverContent != null);
     const [showHoverContent, setShowHoverContent] = useState(false);
     const [, setHoverTimeout] = useState<number | undefined>(undefined);
@@ -96,6 +98,12 @@ export const HoverPopover = React.memo<PropsWithChildren<HoverPopoverProps>>(
         <EuiPopover
           ref={popoverRef}
           anchorPosition={anchorPosition}
+          aria-label={
+            ariaLabel ??
+            i18n.translate('xpack.securitySolution.hoverPopover.ariaLabel', {
+              defaultMessage: 'Hover actions',
+            })
+          }
           button={
             <div data-test-subj="HoverPopoverButton" onMouseEnter={onMouseEnter}>
               {children}

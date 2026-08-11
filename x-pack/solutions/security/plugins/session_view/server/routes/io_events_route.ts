@@ -20,6 +20,11 @@ import {
   IO_EVENT_FIELDS,
 } from '../../common/constants';
 import { normalizeEventProcessArgs } from '../../common/utils/process_args_normalizer';
+import {
+  sessionEntityIdSchema,
+  sessionTimestampSchema,
+  sessionViewIndexPatternSchema,
+} from './validation';
 
 export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -39,10 +44,10 @@ export const registerIOEventsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              index: schema.string(),
-              sessionEntityId: schema.string(),
-              sessionStartTime: schema.string(),
-              cursor: schema.maybe(schema.string()),
+              index: sessionViewIndexPatternSchema,
+              sessionEntityId: sessionEntityIdSchema,
+              sessionStartTime: sessionTimestampSchema,
+              cursor: schema.maybe(sessionTimestampSchema),
               pageSize: schema.maybe(schema.number({ min: 1, max: IO_EVENTS_PER_PAGE })), // currently only set in FTR tests to test pagination
             }),
           },

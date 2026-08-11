@@ -59,6 +59,7 @@ export class LogsSharedPlugin
 
     if (!isServerless) {
       // Conditionally register log view saved objects
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(logViewSavedObjectType);
     } else {
       // Register a static internal view to use as a fallback when the log view SO is not registered

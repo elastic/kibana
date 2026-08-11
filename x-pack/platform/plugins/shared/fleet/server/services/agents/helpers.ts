@@ -23,7 +23,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[]; pipeline_config?: string[]; signals?: string[] };
   }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
@@ -73,6 +73,7 @@ export function searchHitToAgent(
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
+    policy_base_id: hit._source?.policy_base_id,
     last_checkin: hit._source?.last_checkin,
     last_checkin_status:
       hit._source?.last_checkin_status?.toLowerCase() as Agent['last_checkin_status'],
@@ -118,6 +119,12 @@ export function searchHitToAgent(
       );
   } else {
     agent.status = hit.fields.status[0];
+  }
+  if (hit.fields?.pipeline_config?.length) {
+    agent.pipeline_config = hit.fields.pipeline_config[0];
+  }
+  if (hit.fields?.signals?.length) {
+    agent.signals = hit.fields.signals;
   }
   return agent;
 }

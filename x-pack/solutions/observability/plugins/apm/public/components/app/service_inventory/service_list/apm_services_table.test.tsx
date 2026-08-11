@@ -21,6 +21,8 @@ import { ServiceInventoryFieldName } from '../../../../../common/service_invento
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { fromQuery } from '../../../shared/links/url_helpers';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
+import { EuiThemeProvider } from '@elastic/eui';
 
 jest.mock('../../../../hooks/use_breakpoints', () => ({
   useBreakpoints: () => ({
@@ -57,6 +59,7 @@ const mockKibanaServices = {
   apmSourcesAccess: {
     getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
   },
+  telemetry: mockTelemetryClient,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -74,6 +77,7 @@ jest.mock('../../../alerting/ui_components/alerting_flyout', () => ({
 }));
 
 jest.mock('../../../shared/slo_overview_flyout', () => ({
+  ...jest.requireActual('../../../shared/slo_overview_flyout'),
   SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
     <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
   ),
@@ -188,27 +192,30 @@ function renderApmServicesTable({
   history,
   services = mockServices,
   status = FETCH_STATUS.SUCCESS,
-  displayHealthStatus = false,
+  displayAnomalies = false,
   displayAlerts = false,
   displaySlos = false,
 }: {
   history: MemoryHistory;
   services?: ServiceListItem[];
   status?: FETCH_STATUS;
-  displayHealthStatus?: boolean;
+  displayAnomalies?: boolean;
   displayAlerts?: boolean;
   displaySlos?: boolean;
 }) {
   const defaultSortFn = (items: ServiceListItem[]) => items;
 
+  // TODO: This should be replaced with renderWithKibanaRenderContext, which would eliminate
+  // the need for <EuiThemeProvider> and <IntlProvider> wrappers, but that's currently
+  // impossible with the way <MockApmPluginContextWrapper> is shaped
   return render(
-    <IntlProvider locale="en">
+    <EuiThemeProvider>
       <MockApmPluginContextWrapper history={history}>
         <ApmServicesTable
           status={status}
           items={services}
           comparisonDataLoading={false}
-          displayHealthStatus={displayHealthStatus}
+          displayAnomalies={displayAnomalies}
           displayAlerts={displayAlerts}
           displaySlos={displaySlos}
           initialSortField={ServiceInventoryFieldName.ServiceName}
@@ -219,7 +226,7 @@ function renderApmServicesTable({
           maxCountExceeded={false}
         />
       </MockApmPluginContextWrapper>
-    </IntlProvider>
+    </EuiThemeProvider>
   );
 }
 
@@ -281,7 +288,7 @@ describe('ApmServicesTable', () => {
               status={FETCH_STATUS.SUCCESS}
               items={mockServices}
               comparisonDataLoading={false}
-              displayHealthStatus={false}
+              displayAnomalies={false}
               displayAlerts={false}
               displaySlos={false}
               initialSortField={ServiceInventoryFieldName.ServiceName}
@@ -303,7 +310,7 @@ describe('ApmServicesTable', () => {
     it('returns correct number of columns with all features enabled', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -312,15 +319,16 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       expect(columns.length).toBe(9);
     });
 
-    it('hides health column when showHealthStatusColumn is false', () => {
+    it('hides anomalies column when showAnomaliesColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: false,
+        showAnomaliesColumn: false,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -329,16 +337,17 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
-      const hasHealthColumn = columns.some((c) => c.field === 'healthStatus');
-      expect(hasHealthColumn).toBe(false);
+      const hasAnomaliesColumn = columns.some((c) => c.field === 'anomalyScore');
+      expect(hasAnomaliesColumn).toBe(false);
     });
 
     it('hides alerts column when showAlertsColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -347,6 +356,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasAlertsColumn = columns.some((c) => c.field === 'alertsCount');
@@ -356,7 +366,7 @@ describe('ApmServicesTable', () => {
     it('hides SLOs column when showSlosColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -365,6 +375,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -374,7 +385,7 @@ describe('ApmServicesTable', () => {
     it('shows SLOs column when showSlosColumn is true', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -383,6 +394,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasSlosColumn = columns.some((c) => c.field === 'sloStatus');
@@ -392,7 +404,7 @@ describe('ApmServicesTable', () => {
     it('hides transaction type column when showTransactionTypeColumn is false', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: false,
         breakpoints: { isSmall: true, isLarge: false, isXl: false } as Breakpoints,
@@ -401,6 +413,7 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasTransactionTypeColumn = columns.some((c) => c.field === 'transactionType');
@@ -410,7 +423,7 @@ describe('ApmServicesTable', () => {
     it('hides environment column on large screens', () => {
       const columns = getServiceColumns({
         comparisonDataLoading: false,
-        showHealthStatusColumn: true,
+        showAnomaliesColumn: true,
         query: defaultQuery,
         showTransactionTypeColumn: true,
         breakpoints: { isSmall: false, isLarge: true, isXl: false } as Breakpoints,
@@ -419,10 +432,64 @@ describe('ApmServicesTable', () => {
         link: apmRouter.link,
         serviceOverflowCount: 0,
         onSloBadgeClick: jest.fn(),
+        locators: undefined,
       });
 
       const hasEnvironmentColumn = columns.some((c) => c.field === 'environments');
       expect(hasEnvironmentColumn).toBe(false);
+    });
+
+    describe('anomaly badge navigation', () => {
+      it('renders anomaly badge with href when locators is provided and service has anomaly score', () => {
+        const mockGetRedirectUrl = jest.fn().mockReturnValue('/services/opbeans-python/overview');
+        const mockLocators = {
+          get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+        } as any;
+
+        const columns = getServiceColumns({
+          comparisonDataLoading: false,
+          showAnomaliesColumn: true,
+          query: defaultQuery,
+          showTransactionTypeColumn: false,
+          breakpoints: { isSmall: false, isLarge: false, isXl: false } as Breakpoints,
+          showAlertsColumn: false,
+          showSlosColumn: false,
+          link: apmRouter.link,
+          serviceOverflowCount: 0,
+          onSloBadgeClick: jest.fn(),
+          locators: mockLocators,
+        });
+
+        const anomalyColumn = columns.find((c) => c.field === 'anomalyScore')!;
+        const serviceWithAnomaly: ServiceListItem = {
+          ...mockService,
+          anomalyScore: 85,
+          anomalyEnvironment: 'production',
+        };
+
+        const element = anomalyColumn.render!(
+          serviceWithAnomaly.anomalyScore,
+          serviceWithAnomaly
+        ) as React.ReactNode;
+
+        render(
+          <EuiThemeProvider>
+            <IntlProvider locale="en">{element}</IntlProvider>
+          </EuiThemeProvider>
+        );
+
+        const badge = screen.getByTestId('apmAnomaliesBadge');
+        expect(badge.closest('a')).not.toBeNull();
+        expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+          expect.objectContaining({
+            serviceName: 'opbeans-python',
+            query: expect.objectContaining({
+              environment: 'production',
+              comparisonEnabled: true,
+            }),
+          })
+        );
+      });
     });
 
     describe('responsive columns', () => {
@@ -449,7 +516,7 @@ describe('ApmServicesTable', () => {
         it('shows environment, transaction type and sparklines', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -462,6 +529,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -494,7 +562,7 @@ describe('ApmServicesTable', () => {
         it('hides environment, transaction type and sparklines', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -507,6 +575,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -529,7 +598,7 @@ describe('ApmServicesTable', () => {
         it('hides transaction type', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -542,6 +611,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -573,7 +643,7 @@ describe('ApmServicesTable', () => {
         it('shows all columns including transaction type', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
-            showHealthStatusColumn: true,
+            showAnomaliesColumn: true,
             query: defaultQuery,
             showTransactionTypeColumn: true,
             breakpoints: {
@@ -586,6 +656,7 @@ describe('ApmServicesTable', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
             onSloBadgeClick: jest.fn(),
+            locators: undefined,
           }).map((c) =>
             c.render
               ? c.render!(serviceForColumnTest[c.field!], serviceForColumnTest)
@@ -843,21 +914,21 @@ describe('ApmServicesTable', () => {
     });
   });
 
-  describe('health column', () => {
-    it('renders health column when displayHealthStatus is true', async () => {
-      renderApmServicesTable({ history, displayHealthStatus: true });
+  describe('anomalies column', () => {
+    it('renders anomalies column when displayAnomalies is true', async () => {
+      renderApmServicesTable({ history, displayAnomalies: true });
 
       await screen.findByRole('table');
 
-      expect(screen.getByText('Health')).toBeInTheDocument();
+      expect(screen.getByText('Anomalies')).toBeInTheDocument();
     });
 
-    it('does not render health column when displayHealthStatus is false', async () => {
-      renderApmServicesTable({ history, displayHealthStatus: false });
+    it('does not render anomalies column when displayAnomalies is false', async () => {
+      renderApmServicesTable({ history, displayAnomalies: false });
 
       await screen.findByRole('table');
 
-      expect(screen.queryByText('Health')).not.toBeInTheDocument();
+      expect(screen.queryByText('Anomalies')).not.toBeInTheDocument();
     });
   });
 
@@ -891,7 +962,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloViolatedBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'violated');
       expect(screen.getByText('2 Violated')).toBeInTheDocument();
     });
 
@@ -908,7 +981,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloDegradingBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(sloBadge).toHaveAttribute('data-slo-status', 'degrading');
       expect(screen.getByText('3 Degrading')).toBeInTheDocument();
     });
 
@@ -925,7 +1000,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloHealthyBadge')).toBeInTheDocument();
+      const sloBadge = screen.getByTestId('apmSloBadge');
+      expect(sloBadge).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'healthy');
       expect(screen.getByText('Healthy')).toBeInTheDocument();
     });
 
@@ -942,11 +1019,13 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.getByTestId('serviceInventorySloNoDataBadge')).toBeInTheDocument();
+      const badge = screen.getByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noData');
       expect(screen.getByText('No data')).toBeInTheDocument();
     });
 
-    it('does not render SLO badge when service has no SLO status', async () => {
+    it('renders "no SLOs" badge when service has no SLO status', async () => {
       const servicesWithoutSlos: ServiceListItem[] = [
         {
           ...mockService,
@@ -959,10 +1038,9 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      expect(screen.queryByTestId('serviceInventorySloViolatedBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloDegradingBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloHealthyBadge')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('serviceInventorySloNoDataBadge')).not.toBeInTheDocument();
+      const badge = screen.queryByTestId('apmSloBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute('data-slo-status', 'noSLOs');
     });
 
     it('opens SLO overview flyout when clicking SLO badge', async () => {
@@ -978,7 +1056,7 @@ describe('ApmServicesTable', () => {
 
       await screen.findByRole('table');
 
-      const sloBadge = screen.getByTestId('serviceInventorySloViolatedBadge');
+      const sloBadge = screen.getByTestId('apmSloBadge');
       fireEvent.click(sloBadge);
 
       await waitFor(() => {

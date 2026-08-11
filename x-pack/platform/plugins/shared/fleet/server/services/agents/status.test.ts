@@ -14,7 +14,11 @@ import { createAppContextStartContractMock } from '../../mocks';
 
 import { appContextService } from '../app_context';
 
-import { getAgentStatusForAgentPolicy, getIncomingDataByAgentsId } from './status';
+import {
+  getAgentStatusForAgentPolicy,
+  getIncomingDataByAgentsId,
+  getIncomingDataByDataStreams,
+} from './status';
 
 describe('getAgentStatusForAgentPolicy', () => {
   beforeEach(async () => {
@@ -215,9 +219,9 @@ describe('getAgentStatusForAgentPolicy', () => {
           bool: expect.objectContaining({
             must: expect.arrayContaining([
               expect.objectContaining({
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([{ terms: { policy_base_id: agentPolicyIds } }]),
+                }),
               }),
             ]),
           }),
@@ -234,9 +238,53 @@ describe('getAgentStatusForAgentPolicy', () => {
       })
     );
   });
+
+  it('matches version-specific policy variants when a single agentPolicyId is provided', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: {
+          status: {
+            buckets: [{ key: 'online', doc_count: 1 }],
+          },
+        },
+      }),
+    };
+
+    const soClient = {
+      find: jest.fn().mockResolvedValue({
+        saved_objects: [{ id: 'agentPolicyId', attributes: { name: 'Policy 1' } }],
+      }),
+    };
+
+    await getAgentStatusForAgentPolicy(esClient as any, soClient as any, 'agentPolicyId');
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            must: expect.arrayContaining([
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([{ term: { policy_base_id: 'agentPolicyId' } }]),
+                }),
+              }),
+            ]),
+          }),
+        }),
+      })
+    );
+  });
 });
 
 describe('getIncomingDataByAgentsId', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   it('should work with a large set of datastream patterns', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -272,6 +320,134 @@ describe('getIncomingDataByAgentsId', () => {
         },
       ],
       dataPreview: [],
+    });
+  });
+
+  it('should filter by event.ingested rather than @timestamp', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({
+      hits: {},
+      aggregations: { agent_ids: { buckets: [] } },
+    } as any);
+
+    await getIncomingDataByAgentsId({
+      esClient,
+      agentsIds: ['agentId1'],
+      dataStreamPattern: 'logs-*',
+    });
+
+    const searchArgs = esClient.search.mock.calls[0][0] as any;
+    const rangeFilter = searchArgs.query.bool.filter.find((f: any) => f.range);
+    expect(Object.keys(rangeFilter.range)).toEqual(['event.ingested']);
+  });
+});
+
+describe('getIncomingDataByDataStreams', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
+  it('queries only the given pattern with the event.ingested recency filter, no agent.id filter or aggregation', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({ hits: { total: { value: 0 } } } as any);
+
+    await getIncomingDataByDataStreams({
+      esClient,
+      agentId: 'agent-1',
+      dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+    });
+
+    const searchArgs = esClient.search.mock.calls[0][0] as any;
+    expect(searchArgs.index).toBe('metrics-supabase.metrics.otel-production');
+    expect(searchArgs.aggs).toBeUndefined();
+    expect(searchArgs.query.bool.filter).toEqual([
+      { range: { 'event.ingested': { gte: 'now-5m', lte: 'now' } } },
+    ]);
+  });
+
+  it('sets ignore_unavailable so a not-yet-created namespace-scoped data stream reports zero hits instead of throwing', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({ hits: { total: { value: 0 } } } as any);
+
+    await getIncomingDataByDataStreams({
+      esClient,
+      agentId: 'agent-1',
+      dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+    });
+
+    const searchArgs = esClient.search.mock.calls[0][0] as any;
+    expect(searchArgs.ignore_unavailable).toBe(true);
+  });
+
+  it('reports data: true for the requested agent when the search reports a hit', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({ hits: { total: { value: 1 } } } as any);
+
+    const result = await getIncomingDataByDataStreams({
+      esClient,
+      agentId: 'agent-1',
+      dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+    });
+
+    expect(result).toEqual({ items: [{ 'agent-1': { data: true } }], dataPreview: [] });
+  });
+
+  it('reports data: false for the requested agent when the search reports no hits', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    esClient.search.mockReturnValueOnce({ hits: { total: { value: 0 } } } as any);
+
+    const result = await getIncomingDataByDataStreams({
+      esClient,
+      agentId: 'agent-1',
+      dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+    });
+
+    expect(result).toEqual({ items: [{ 'agent-1': { data: false } }], dataPreview: [] });
+  });
+
+  it('returnDataPreview controls _source and size, and dataPreview carries the hits through unchanged', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: true } as any);
+    const previewHits = [{ _index: 'metrics-supabase.metrics.otel-production', _source: {} }];
+    esClient.search.mockReturnValueOnce({
+      hits: { total: { value: 1 }, hits: previewHits },
+    } as any);
+
+    const result = await getIncomingDataByDataStreams({
+      esClient,
+      agentId: 'agent-1',
+      dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+      returnDataPreview: true,
+    });
+
+    const searchArgs = esClient.search.mock.calls[0][0] as any;
+    expect(searchArgs._source).toBe(true);
+    expect(searchArgs.size).toBeGreaterThan(0);
+    expect(result.dataPreview).toEqual(previewHits);
+  });
+
+  it('surfaces missing read access the same way getIncomingDataByAgentsId does', async () => {
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as any);
+
+    await expect(
+      getIncomingDataByDataStreams({
+        esClient,
+        agentId: 'agent-1',
+        dataStreamPattern: 'metrics-supabase.metrics.otel-production',
+      })
+    ).rejects.toMatchObject({
+      message: expect.stringContaining('Unable to retrieve incoming data'),
     });
   });
 });

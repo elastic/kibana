@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -127,7 +127,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+  const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: sessionsFilter,
     tableId,
     from: startDate,
@@ -138,9 +138,9 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction],
+      customBulkActions: addBulkToTimelineActions,
     } as BulkActionsProp;
-  }, [addBulkToTimelineAction]);
+  }, [addBulkToTimelineActions]);
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
@@ -158,7 +158,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={PageScope.default}
+        pageScope={PageScope.default}
         start={startDate}
         unit={unit}
       />

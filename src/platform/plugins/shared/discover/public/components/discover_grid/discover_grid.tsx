@@ -51,12 +51,12 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     cascadedDocumentsContext,
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-    onUpdateESQLQuery,
+    onUpdateESQLQuery: _onUpdateESQLQuery,
     onOpenInNewTab,
     onFullScreenChange,
     ...props
   }) => {
-    const { dataView, setExpandedDoc, renderDocumentView } = props;
+    const { dataView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
       return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
@@ -67,10 +67,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     );
     const rowAdditionalLeadingControls = useMemo(() => {
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
-        actions: {
-          updateESQLQuery: onUpdateESQLQuery,
-          setExpandedDoc: renderDocumentView ? setExpandedDoc : undefined,
-        },
         dataView,
         query,
       });
@@ -78,10 +74,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       customRowAdditionalLeadingControls,
       dataView,
       getRowAdditionalLeadingControlsAccessor,
-      onUpdateESQLQuery,
       query,
-      setExpandedDoc,
-      renderDocumentView,
     ]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
@@ -278,7 +271,16 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
 
     return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
       <CascadedDocumentsProvider value={cascadedDocumentsContext}>
-        <LazyCascadedDocumentsLayout {...props} />
+        <LazyCascadedDocumentsLayout
+          rows={props.rows}
+          columns={props.columns}
+          dataGridDensityState={props.dataGridDensityState}
+          showTimeCol={props.showTimeCol}
+          dataView={props.dataView}
+          showKeyboardShortcuts={props.showKeyboardShortcuts}
+          externalCustomRenderers={props.externalCustomRenderers}
+          onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+        />
       </CascadedDocumentsProvider>
     ) : (
       <UnifiedDataTable

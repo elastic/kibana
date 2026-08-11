@@ -8,13 +8,9 @@
 import type { RootSchema } from '@elastic/ebt/client';
 import type {
   StreamEndpointLatencyProps,
-  StreamsSystemIdentificationIdentifiedProps,
-  StreamsDescriptionGeneratedProps,
-  StreamsSignificantEventsQueriesGeneratedProps,
-  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
-  StreamsFeaturesIdentifiedProps,
+  StreamsAgentToolEventCreateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -70,177 +66,6 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-const streamsSystemIdentificationIdentifiedSchema: RootSchema<StreamsSystemIdentificationIdentifiedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems identified',
-      },
-    },
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-  };
-
-const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-};
-
-const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignificantEventsQueriesGeneratedProps> =
-  {
-    count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of significant events queries generated',
-      },
-    },
-    systems_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems used to generate the queries',
-      },
-    },
-    input_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of input tokens used for the generation request',
-      },
-    },
-    output_tokens_used: {
-      type: 'long',
-      _meta: {
-        description: 'The number of output tokens used for the generation request',
-      },
-    },
-    stream_type: {
-      type: 'keyword',
-      _meta: {
-        description: 'The type of the stream: wired or classic',
-      },
-    },
-    stream_name: {
-      type: 'keyword',
-      _meta: {
-        description: 'The name of the Stream',
-      },
-    },
-    tool_usage: {
-      properties: {
-        get_stream_features: {
-          properties: {
-            calls: {
-              type: 'long',
-              _meta: {
-                description: 'The number of calls to the get_stream_features tool',
-              },
-            },
-            failures: {
-              type: 'long',
-              _meta: {
-                description: 'The number of failures to the get_stream_features tool',
-              },
-            },
-            latency_ms: {
-              type: 'long',
-              _meta: {
-                description: 'The latency of the get_stream_features tool in milliseconds',
-              },
-            },
-          },
-        },
-        add_queries: {
-          properties: {
-            calls: {
-              type: 'long',
-              _meta: {
-                description: 'The number of calls to the add_queries tool',
-              },
-            },
-            failures: {
-              type: 'long',
-              _meta: {
-                description: 'The number of failures to the add_queries tool',
-              },
-            },
-            latency_ms: {
-              type: 'long',
-              _meta: {
-                description: 'The latency of the add_queries tool in milliseconds',
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-
-const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the generation request',
-      optional: true,
-    },
-  },
-};
-
 const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
   {
     duration_ms: {
@@ -275,65 +100,30 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
     },
   };
 
-const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {
-  inferred_total_count: {
-    type: 'long',
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
     _meta: {
-      description: 'The total number of inferred features',
+      description: 'Whether the event creation succeeded',
     },
   },
-  inferred_dedup_count: {
-    type: 'long',
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
     _meta: {
-      description: 'The number of inferred features after deduplication',
+      description: 'The names of the Streams associated with the event',
     },
   },
-  input_tokens_used: {
-    type: 'long',
+  error_message: {
+    type: 'text',
     _meta: {
-      description: 'The number of input tokens used for the identification request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the identification request',
-    },
-  },
-  total_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The total number of tokens used for the identification request',
-    },
-  },
-  total_duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The total duration of the features identification task in milliseconds',
-    },
-  },
-  identification_duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the LLM features identification in milliseconds',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  state: {
-    type: 'keyword',
-    _meta: {
-      description: 'The state of the features identification task (success, failure, or canceled)',
+      description: 'Error message when event creation fails',
+      optional: true,
     },
   },
 };
@@ -341,10 +131,6 @@ const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
-  streamsSystemIdentificationIdentifiedSchema,
-  streamsDescriptionGeneratedSchema,
-  streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
-  streamsFeaturesIdentifiedSchema,
+  streamsAgentToolEventCreateSchema,
 };

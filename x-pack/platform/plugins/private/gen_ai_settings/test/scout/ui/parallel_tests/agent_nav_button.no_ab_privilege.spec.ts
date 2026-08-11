@@ -8,11 +8,19 @@
 import { expect } from '@kbn/scout/ui';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Agent Nav Button without Agent Builder Privileges',
-  { tag: ['@ess', '@svlOblt', '@svlSecurity', '@svlSearch'] },
+  {
+    tag: [
+      '@local-stateful-classic',
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.search,
+    ],
+  },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
       await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Agent });

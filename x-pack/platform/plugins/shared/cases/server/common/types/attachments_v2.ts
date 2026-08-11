@@ -16,11 +16,12 @@ import type {
   AttachmentAttributesV2,
   UnifiedAttachmentAttributes,
 } from '../../../common/types/domain/attachment/v2';
-import type { CommonAttributes } from './attachments_v1';
+import type { AttachmentPersistedAttributes } from './attachments_v1';
 export type { AttachmentAttributesV2, UnifiedAttachmentAttributes };
 export type { AttachmentPersistedAttributes, CommonAttributes } from './attachments_v1';
 
-export type UnifiedAttachmentPersistedAttributes = UnifiedAttachmentAttributes & CommonAttributes;
+export type UnifiedAttachmentPersistedAttributes = UnifiedAttachmentAttributes &
+  AttachmentPersistedAttributes;
 export type UnifiedAttachmentSavedObjectTransformed =
   SavedObject<UnifiedAttachmentPersistedAttributes>;
 

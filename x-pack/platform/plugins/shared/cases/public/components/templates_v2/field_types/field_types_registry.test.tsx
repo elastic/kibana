@@ -6,9 +6,20 @@
  */
 
 import React from 'react';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
+
+jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+    resolvedFields: fields.filter((f) => 'control' in f),
+    isLoading: false,
+  }),
+}));
+
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['cases'] }),
+}));
 import { render, screen } from '@testing-library/react';
 import { TemplateFieldRenderer } from './field_renderer';
 
@@ -41,6 +52,10 @@ fields:
     control: TEXTAREA
     label: Textarea label
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Toggle label
+    type: boolean
 `;
 
 const invalidTemplateDefinition = `
@@ -52,54 +67,35 @@ fields:
     type: keyword
 `;
 
-const TestTemplatedFormRenderer = ({
-  templateDefinition,
-  values,
-}: {
-  templateDefinition: string;
-  values: Record<string, unknown>;
-}) => {
+const TestTemplatedFormRenderer = ({ templateDefinition }: { templateDefinition: string }) => {
   const parseResult = ParsedTemplateDefinitionSchema.safeParse(parseYaml(templateDefinition));
 
   if (!parseResult.success) {
     return <>{`Invalid template definition:\n ${parseResult.error}`}</>;
   }
 
-  return <TemplateFieldRenderer parsedTemplate={parseResult.data} values={values} />;
+  return <TemplateFieldRenderer parsedTemplate={parseResult.data} />;
 };
 
 describe('controlRegistry', () => {
   it('should render all the controls specified in the template', () => {
-    render(
-      <TestTemplatedFormRenderer
-        templateDefinition={mockTemplateDefinition}
-        values={{ severity: 'low' }}
-      />
-    );
-    expect(screen.getByTestId('select')).toBeInTheDocument();
-    expect(screen.getAllByTestId('input')).toHaveLength(3);
-    expect(screen.getByText('Select label')).toBeInTheDocument();
-    expect(screen.getByText('Input text label')).toBeInTheDocument();
-    expect(screen.getByText('Input number label')).toBeInTheDocument();
-    expect(screen.getByText('Textarea label')).toBeInTheDocument();
+    render(<TestTemplatedFormRenderer templateDefinition={mockTemplateDefinition} />);
+    expect(screen.getByLabelText('Select label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Input text label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Input number label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Textarea label')).toBeInTheDocument();
+    expect(screen.getByText('Toggle label')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'low' })).toBeInTheDocument();
   });
 
   it('renders an error for unknown controls', () => {
-    render(
-      <TestTemplatedFormRenderer templateDefinition={invalidTemplateDefinition} values={{}} />
-    );
+    render(<TestTemplatedFormRenderer templateDefinition={invalidTemplateDefinition} />);
 
     expect(screen.getByText(/Invalid template definition/)).toBeInTheDocument();
   });
 
   it('renders controls in template order', () => {
-    render(
-      <TestTemplatedFormRenderer
-        templateDefinition={mockTemplateDefinition}
-        values={{ severity: 'low' }}
-      />
-    );
+    render(<TestTemplatedFormRenderer templateDefinition={mockTemplateDefinition} />);
 
     const labels = screen.getAllByText(/label$/i).map((node) => node.textContent);
     expect(labels).toEqual([
@@ -107,6 +103,7 @@ describe('controlRegistry', () => {
       'Input text label',
       'Input number label',
       'Textarea label',
+      'Toggle label',
     ]);
   });
 });

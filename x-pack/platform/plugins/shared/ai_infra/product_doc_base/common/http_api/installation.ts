@@ -12,6 +12,7 @@ export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 export const UPDATE_ALL_API_PATH = '/internal/product_doc_base/update_all';
+export const GET_DEFAULT_INFERENCE_ID_API_PATH = '/internal/product_doc_base/default_inference_id';
 
 export interface InstallationStatusResponse {
   inferenceId: string;
@@ -19,6 +20,7 @@ export interface InstallationStatusResponse {
   perProducts: Record<ProductName, ProductInstallState>;
   /** Resource type for this installation status */
   resourceType?: ResourceType;
+  openApiStatus?: OpenAPISpecInstallStatusResponse;
 }
 
 export interface PerformInstallResponse {
@@ -35,6 +37,10 @@ export interface UninstallResponse {
   success: boolean;
 }
 
+export interface DefaultInferenceIdResponse {
+  inferenceId: string;
+}
+
 export interface ProductDocInstallParams {
   inferenceId: string | undefined;
   /**
@@ -44,16 +50,16 @@ export interface ProductDocInstallParams {
    */
   resourceType?: ResourceType;
 }
-
-/**
- * Security Labs specific installation status response.
- */
-export interface SecurityLabsInstallStatusResponse {
+export interface BaseInstallStatusResponse<T extends ResourceType> {
   inferenceId: string;
-  resourceType: 'security_labs';
+  resourceType: T;
   status: InstallationStatus;
   version?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
   failureReason?: string;
 }
+
+export type OpenAPISpecInstallStatusResponse = BaseInstallStatusResponse<'openapi_spec'>;
+
+export type SecurityLabsInstallStatusResponse = BaseInstallStatusResponse<'security_labs'>;

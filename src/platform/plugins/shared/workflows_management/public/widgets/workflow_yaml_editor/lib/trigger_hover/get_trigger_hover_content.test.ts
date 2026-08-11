@@ -9,8 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { getTriggerHoverContent, getTriggerTypeAtPath } from './get_trigger_hover_content';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 describe('getTriggerHoverContent', () => {
+  beforeEach(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
+
   it('returns null for built-in trigger: manual', () => {
     const result = getTriggerHoverContent('manual');
     expect(result).toBeNull();
@@ -35,6 +40,7 @@ describe('getTriggerHoverContent', () => {
       id === 'cases.updated'
         ? {
             id: 'cases.updated',
+            stability: 'tech_preview' as const,
             title: 'Case updated',
             description: 'Fired when a case is created or updated.',
             eventSchema,
@@ -43,6 +49,11 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
+    expect(result!.value).toContain('Tech preview');
+    expect(result!.value).toContain('<img src="data:image/svg+xml,');
+    expect(result!.value).not.toContain(
+      'This functionality is experimental and not supported. It may change or be removed at any time.'
+    );
     expect(result!.value).toContain('Case updated');
     expect(result!.value).toContain('**Trigger**:');
     expect(result!.value).toContain('Fired when a case is created or updated');
@@ -54,20 +65,50 @@ describe('getTriggerHoverContent', () => {
     expect(result!.value).toContain('The action that triggered');
   });
 
+  it('includes nested event schema properties as a tree in trigger hover', () => {
+    const eventSchema = z.object({
+      message: z.string(),
+      foo: z
+        .object({
+          bar: z.object({
+            baz: z.string(),
+          }),
+        })
+        .optional(),
+    });
+    const definition = {
+      id: 'example.nested',
+      stability: 'tech_preview' as const,
+      title: 'Nested example',
+      description: 'Trigger with nested event shape.',
+      eventSchema,
+    };
+    const result = getTriggerHoverContent('example.nested', definition);
+    expect(result).not.toBeNull();
+    expect(result!.value).toContain('`message`');
+    expect(result!.value).toContain('`foo`');
+    expect(result!.value).toContain('`bar`');
+    expect(result!.value).toContain('`baz`');
+    // Nested segments are indented (tree format)
+    expect(result!.value).toMatch(/\n  - `bar`/);
+    expect(result!.value).toMatch(/\n    - `baz`/);
+  });
+
   it('returns content for custom trigger with documentation', () => {
     const eventSchema = z.object({ severity: z.string() });
     const getTriggerDefinition = (id: string) =>
       id === 'alerts.severity_high'
         ? {
             id: 'alerts.severity_high',
+            stability: 'tech_preview' as const,
             title: 'High severity alert',
             description: 'Fired when an alert has high severity.',
             eventSchema,
             documentation: {
               details: 'Filter when this workflow runs using KQL on event properties.',
               examples: [
-                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity == "high"\'\n```',
-                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    with:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
+                '## Exact severity\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity == "high"\'\n```',
+                '## Multiple severities\n```yaml\ntriggers:\n  - type: alerts.severity_high\n    on:\n      condition: \'event.severity in ["high", "critical"]\'\n```',
               ],
             },
           }

@@ -205,7 +205,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       data-test-subj="ruleStatusDropdownBadge"
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'chevronSingleDown' : undefined}
       onClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
       isDisabled={isUpdating}
@@ -235,6 +235,10 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               panelPaddingSize="s"
               data-test-subj="statusDropdown"
               title={badgeMessage}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.ruleStatusDropdown.popoverAriaLabel',
+                { defaultMessage: 'Rule status' }
+              )}
             >
               <RuleStatusMenu
                 onClosePopover={onClosePopover}

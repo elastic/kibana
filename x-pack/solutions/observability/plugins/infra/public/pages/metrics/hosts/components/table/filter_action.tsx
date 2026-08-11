@@ -45,6 +45,9 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
         closePopover={closePopover}
         data-test-subj="bulkAction"
         panelPaddingSize="s"
+        aria-label={i18n.translate('xpack.infra.hostsViewPage.table.bulkActionAriaLabel', {
+          defaultMessage: 'Selected hosts actions',
+        })}
         className={cx({
           [css`
             top: -${euiTheme.size.s};
@@ -66,7 +69,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
             size="xs"
             flush="left"
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
           >
             {selectedHostsLabel(selectedItemsCount)}

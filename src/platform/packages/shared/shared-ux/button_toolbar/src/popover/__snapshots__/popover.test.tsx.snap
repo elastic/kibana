@@ -7,7 +7,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
 >
   <button
     aria-expanded="false"
-    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text-ToolbarStandardButton"
+    class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-text"
     type="button"
   >
     <span
@@ -20,7 +20,7 @@ exports[`<ToolbarPopover /> is rendered 1`] = `
       </span>
       <span
         color="inherit"
-        data-euiicon-type="arrowDown"
+        data-euiicon-type="chevronSingleDown"
       />
     </span>
   </button>

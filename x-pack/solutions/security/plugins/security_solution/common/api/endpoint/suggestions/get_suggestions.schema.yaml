@@ -23,7 +23,11 @@ paths:
                   type: string
                 query:
                   type: string
-                filters: {}
+                filters:
+                  type: array
+                  maxItems: 50
+                  items:
+                    type: object
                 fieldMeta: {}
       parameters:
         - name: suggestion_type

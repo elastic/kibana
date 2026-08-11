@@ -10,7 +10,7 @@ import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
 import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 import type { TimeRange } from '@kbn/es-query';
@@ -22,7 +22,10 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
+import {
+  savedSearchComparator,
+  hasNonEmptyEsqlQuery,
+} from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -122,21 +125,31 @@ export const useDiscoverInTimelineActions = (
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
-          const discoverDispatch = discoverStateContainer.current?.internalState.dispatch;
-          const injectCurrentTab = discoverStateContainer.current?.injectCurrentTab;
-          const internalStateActions = discoverStateContainer.current?.internalStateActions;
+          const currentContainer = discoverStateContainer.current;
 
-          discoverDispatch(injectCurrentTab(internalStateActions.stopSyncing)());
-          discoverDispatch(injectCurrentTab(internalStateActions.initializeAndSync)());
+          if (
+            !currentContainer?.internalState?.dispatch ||
+            !currentContainer?.injectCurrentTab ||
+            !currentContainer?.internalActions
+          ) {
+            return;
+          }
+
+          const discoverDispatch = currentContainer.internalState.dispatch;
+          const injectCurrentTab = currentContainer.injectCurrentTab;
+          const internalActions = currentContainer.internalActions;
+
+          discoverDispatch(injectCurrentTab(internalActions.stopSyncing)());
+          discoverDispatch(injectCurrentTab(internalActions.initializeAndSync)());
 
           await discoverDispatch(
-            injectCurrentTab(internalStateActions.updateAppStateAndReplaceUrl)({
+            injectCurrentTab(internalActions.updateAppStateAndReplaceUrl)({
               appState: savedSearchState?.appState ?? {},
             })
           );
           setDiscoverAppState(savedSearchState?.appState ?? defaultDiscoverAppState());
           discoverDispatch(
-            injectCurrentTab(internalStateActions.updateGlobalState)({
+            injectCurrentTab(internalActions.updateGlobalState)({
               globalState: {
                 timeRange: savedSearch.timeRange ?? defaultDiscoverTimeRange,
               },
@@ -147,16 +160,20 @@ export const useDiscoverInTimelineActions = (
         }
       } else {
         const defaultState = defaultDiscoverAppState();
+        const currentProfileState =
+          discoverStateContainer.current?.getCurrentTab().profileState ?? {};
+
         discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current.injectCurrentTab(
-            discoverStateContainer.current.internalStateActions.resetAppState
+            discoverStateContainer.current.internalActions.initializeTabState
           )({
-            appState: defaultState,
+            initialAppState: defaultState,
+            initialProfileState: currentProfileState,
           })
         );
         await discoverStateContainer.current?.internalState.dispatch(
           discoverStateContainer.current?.injectCurrentTab(
-            discoverStateContainer.current?.internalStateActions.updateAppStateAndReplaceUrl
+            discoverStateContainer.current?.internalActions.updateAppStateAndReplaceUrl
           )({
             appState: {},
           })
@@ -164,7 +181,7 @@ export const useDiscoverInTimelineActions = (
         setDiscoverAppState(defaultState);
         const discoverState = discoverStateContainer.current;
         discoverState?.internalState.dispatch(
-          discoverState.injectCurrentTab(discoverState.internalStateActions.updateGlobalState)({
+          discoverState.injectCurrentTab(discoverState.internalActions.updateGlobalState)({
             globalState: {
               timeRange: defaultDiscoverTimeRange,
             },
@@ -217,6 +234,23 @@ export const useDiscoverInTimelineActions = (
 
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
+        // If an ES|QL query was explicitly cleared (query has `esql` key but value is blank),
+        // drop the savedSearchId link immediately so the next explicit timeline save sends
+        // savedSearchId: null to the server and the timeline appears compatible in the list
+        // without requiring a second save. Non-ES|QL queries (kuery/lucene) must not trigger
+        // this path — they have no `esql` key and are not related to the saved-search lifecycle.
+        const currentQuery = savedSearch.searchSource.getField('query');
+        const esqlQueryWasCleared =
+          currentQuery != null &&
+          typeof currentQuery === 'object' &&
+          'esql' in currentQuery &&
+          !hasNonEmptyEsqlQuery(currentQuery);
+        if (esqlQueryWasCleared) {
+          dispatch(
+            timelineActions.updateSavedSearchId({ id: TimelineId.active, savedSearchId: null })
+          );
+          return;
+        }
         savedSearch.id = savedSearchId;
         if (!timelineRef.current.savedSearch) {
           dispatch(
@@ -248,7 +282,6 @@ export const useDiscoverInTimelineActions = (
             })
           );
           const response = await persistSavedSearch(savedSearch, {
-            onTitleDuplicate: () => {},
             copyOnSave: !savedSearchId,
           });
 

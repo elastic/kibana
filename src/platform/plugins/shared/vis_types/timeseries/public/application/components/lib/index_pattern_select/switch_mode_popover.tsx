@@ -13,12 +13,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonIcon,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiLink,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { PopoverProps } from './types';
@@ -32,6 +34,7 @@ const allowStringIndicesMessage = i18n.translate(
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
@@ -74,25 +77,36 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
-        <EuiButtonIcon
-          iconType={'gear'}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
             {
               defaultMessage: 'Configure data view selection mode',
             }
           )}
-          onClick={onButtonClick}
-          data-test-subj="switchIndexPatternSelectionModePopoverButton"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType={'gear'}
+            aria-label={i18n.translate(
+              'visTypeTimeseries.indexPatternSelect.switchModePopover.areaLabel',
+              {
+                defaultMessage: 'Configure data view selection mode',
+              }
+            )}
+            onClick={onButtonClick}
+            data-test-subj="switchIndexPatternSelectionModePopoverButton"
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       css={{ height: 'auto' }}
     >
       <div css={{ width: '360px' }} data-test-subj="switchIndexPatternSelectionModePopoverContent">
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId}>
           {i18n.translate('visTypeTimeseries.indexPatternSelect.switchModePopover.title', {
             defaultMessage: 'Data view mode',
           })}

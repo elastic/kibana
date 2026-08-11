@@ -68,7 +68,11 @@ export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
     kqlQuery: schema.maybe(schema.string()),
   },
   {
-    meta: { description: 'The parameters for the rule.' },
+    meta: {
+      title: 'Synthetics Monitor Status Rule Params',
+      description:
+        'The parameters for the synthetics monitor status rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.monitorStatus`.',
+    },
   }
 );
 

@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks, ESQLFieldWithMetadata, IndexAutocompleteItem } from '@kbn/esql-types';
-import {
-  BasicPrettyPrinter,
-  esqlCommandRegistry,
-  isSource,
-  synth,
-  TRANSFORMATIONAL_COMMANDS,
-  Walker,
-  type ESQLAstCommand,
-} from '../..';
+import type { ESQLAstJoinCommand, ESQLAstPromqlCommand, ESQLAstCommand } from '@elastic/esql/types';
+import { BasicPrettyPrinter, isSource, synth, Walker } from '@elastic/esql';
+import { esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '../..';
 import {
   UnmappedFieldsStrategy,
   type ESQLColumnData,
   type ESQLPolicy,
 } from '../commands/registry/types';
-import type { ESQLAstJoinCommand, ESQLAstPromqlCommand } from '../types';
 import type { IAdditionalFields } from '../commands/registry/registry';
 import { enrichFieldsWithECSInfo } from './enrich_fields_with_ecs';
 import { columnIsPresent } from '../commands/definitions/utils/columns';
@@ -111,10 +104,11 @@ function createGetPromqlFields(
 }
 // Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
-  const metadata = await getEcsMetadata(resourceRetriever);
-  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
-  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
-  return fieldsWithMetadata;
+  const [metadata, fieldsOfType] = await Promise.all([
+    getEcsMetadata(resourceRetriever),
+    resourceRetriever?.getColumnsFor?.({ query }),
+  ]);
+  return enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
 }
 
 /**
@@ -132,8 +126,8 @@ export function getUnmappedFields(
   previousPipeFields: ESQLColumnData[],
   unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLColumnData[] {
-  // Not collect unmmaped fields if the strategy is FAIL or undefined
-  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.FAIL) {
+  // Not collect unmmaped fields if the strategy is DEFAULT or undefined
+  if (!unmappedFieldsStrategy || unmappedFieldsStrategy === UnmappedFieldsStrategy.DEFAULT) {
     return [];
   }
 
@@ -213,7 +207,7 @@ export async function getCurrentQueryAvailableColumns(
       fields,
       originalQueryText,
       additionalFields,
-      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.FAIL
+      unmappedFieldsStrategy ?? UnmappedFieldsStrategy.DEFAULT
     );
   }
   return fields;

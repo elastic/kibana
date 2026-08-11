@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const samlAuth = getService('samlAuth');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
@@ -98,35 +97,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           expect(await testSubjects.getVisibleText('title')).to.contain(TEST_COMPONENT_TEMPLATE);
         });
-      });
-    });
-
-    describe('no access', () => {
-      this.tags(['skipSvlOblt', 'skipMKI']);
-      before(async () => {
-        await samlAuth.setCustomRole({
-          elasticsearch: {
-            cluster: ['monitor'],
-            indices: [{ names: ['*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              base: ['all'],
-              feature: {},
-              spaces: ['*'],
-            },
-          ],
-        });
-        await pageObjects.svlCommonPage.loginWithCustomRole();
-        await pageObjects.common.navigateToApp('indexManagement');
-      });
-
-      after(async () => {
-        await samlAuth.deleteCustomRole();
-      });
-
-      it('hides the component templates tab', async () => {
-        await testSubjects.missingOrFail('component_templatesTab');
       });
     });
   });

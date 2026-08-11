@@ -54,7 +54,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       onDismiss={onDismiss}
       iconType="info"
       title={i18n.translate('xpack.elasticAssistant.assistant.connectors.elasticLlmCallout.title', {
-        defaultMessage: 'You are now using the Elastic Managed LLM connector',
+        defaultMessage: 'You are now using an Elastic Inference Service model',
       })}
       size="s"
       css={css`
@@ -64,7 +64,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
       <p>
         <FormattedMessage
           id="xpack.elasticAssistant.assistant.connectors.tour.elasticLlmDescription"
-          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Managed LLM connector is used by default ({costLink}) when no custom connectors are available. You can configure a {customConnector} if you prefer."
+          defaultMessage="Elastic AI Assistant and other AI features are powered by an LLM. The Elastic Inference Service is used by default ({costLink}). You can configure a {customConnector} if you prefer."
           values={{
             costLink: (
               <EuiLink
@@ -84,7 +84,7 @@ export const ElasticLlmCallout = ({ showEISCallout }: { showEISCallout: boolean 
               <EuiLink
                 data-test-subj="elasticLlmConnectorLink"
                 href={getUrlForApp('management', {
-                  path: `/insightsAndAlerting/triggersActionsConnectors/connectors`,
+                  path: `/modelManagement/model_settings`,
                 })}
                 target="_blank"
                 rel="noopener noreferrer"

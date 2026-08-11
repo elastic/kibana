@@ -5,193 +5,105 @@
  * 2.0.
  */
 
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
-} from '@kbn/actions-plugin/server/plugin';
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import type {
+  AuthenticatedUser,
+  CoreRequestHandlerContext,
+  CoreSetup,
+  CustomRequestHandlerContext,
+  ElasticsearchClient,
+  IRouter,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { AutomaticImportService } from './services';
 
+export const PLUGIN_ID = 'automaticImport' as const;
+
+/** The plugin setup interface */
 export interface AutomaticImportPluginSetup {
+  actions: ActionsPluginSetup;
+  spaces?: SpacesPluginSetup;
+  /**
+   * Serverless / product-tier integration: when called with `false`, Automatic Import APIs
+   * report the feature as unavailable (in addition to license checks).
+   */
   setIsAvailable: (isAvailable: boolean) => void;
 }
 
-export interface AutomaticImportPluginStart {
-  inference: InferenceServerStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AutomaticImportPluginStart {}
 
 export interface AutomaticImportPluginSetupDependencies {
-  licensing: LicensingPluginSetup;
   actions: ActionsPluginSetup;
+  spaces?: SpacesPluginSetup;
+  features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 export interface AutomaticImportPluginStartDependencies {
-  licensing: LicensingPluginStart;
+  spaces?: SpacesPluginStart;
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
+  licensing: LicensingPluginStart;
+  security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
+  fieldsMetadata: FieldsMetadataServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
-export interface SimplifiedProcessor {
-  if?: string;
-  field: string;
-  value_from?: string;
-  value?: string;
+export interface AutomaticImportPluginApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
+  actions: ActionsPluginStart;
+  logger: Logger;
+  getServerBasePath: () => string;
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+  inference: InferenceServerStart;
+  savedObjectsClient: SavedObjectsClientContract;
+  getSpaceId: () => string;
+  automaticImportService: AutomaticImportService;
+  esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
+  reportTelemetryEvent: <TEventType extends string>(
+    eventType: TEventType,
+    eventData: Record<string, unknown>
+  ) => void;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  isAvailable: () => boolean;
 }
 
-export interface SimplifiedProcessors {
-  type: string;
-  processors: SimplifiedProcessor[];
-}
+/**
+ * @internal
+ */
+export type AutomaticImportPluginRequestHandlerContext = CustomRequestHandlerContext<{
+  automaticImport: AutomaticImportPluginApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+}>;
 
-export interface ApiAnalysisState {
-  dataStreamName: string;
-  pathOptions: object;
-  results: object;
-  suggestedPaths: string[];
-  lastExecutedChain: string;
-}
+export type AutomaticImportPluginRouter = IRouter<AutomaticImportPluginRequestHandlerContext>;
 
-export interface CategorizationState {
-  rawSamples: string[];
-  samples: string[];
-  ecsTypes: string;
-  ecsCategories: string;
-  exAnswer: string;
-  lastExecutedChain: string;
-  packageName: string;
-  dataStreamName: string;
-  errors: object;
-  previousError: string;
-  pipelineResults: object[];
-  previousPipelineResults: object[];
-  lastReviewedSamples: number[]; // Filled when reviewing.
-  stableSamples: number[]; // Samples that did not change due to a review.
-  reviewCount: number;
-  finalized: boolean;
-  currentPipeline: object;
-  currentProcessors: object[];
-  invalidCategorization: object[];
-  previousInvalidCategorization: string;
-  initialPipeline: object;
-  results: object;
-  samplesFormat: SamplesFormat;
-}
-
-export interface CelInputState {
-  dataStreamName: string;
-  path: string;
-  authType: CelAuthType;
-  openApiPathDetails: object;
-  openApiSchemas: object;
-  openApiAuthSchema: object;
-  lastExecutedChain: string;
-  finalized: boolean;
-  apiQuerySummary: string;
-  currentProgram: string;
-  hasProgramHeaders: boolean | undefined;
-  stateVarNames: string[];
-  stateSettings: object;
-  configFields: object;
-  redactVars: string[];
-  results: object;
-}
-
-export interface EcsMappingState {
-  ecs: string;
-  chunkSize: number;
-  lastExecutedChain: string;
-  rawSamples: string[];
-  additionalProcessors: ESProcessorItem[];
-  prefixedSamples: string[];
-  combinedSamples: string;
-  sampleChunks: string[];
-  exAnswer: string;
-  packageName: string;
-  dataStreamName: string;
-  finalized: boolean;
-  currentMapping: object;
-  finalMapping: object;
-  chunkMapping: object;
-  useFinalMapping: boolean;
-  hasTriedOnce: boolean;
-  currentPipeline: object;
-  duplicateFields: string[];
-  missingKeys: string[];
-  invalidEcsFields: string[];
-  results: object;
-  samplesFormat: SamplesFormat;
-  ecsVersion: string;
-}
-
-export interface LogFormatDetectionState {
-  lastExecutedChain: string;
-  packageName: string;
-  dataStreamName: string;
-  packageTitle: string;
-  dataStreamTitle: string;
-  logSamples: string[];
-  jsonSamples: string[];
-  exAnswer: string;
-  finalized: boolean;
-  samplesFormat: SamplesFormat;
-  header: boolean;
-  ecsVersion: string;
-  results: object;
-  additionalProcessors: ESProcessorItem[]; // Generated in handleXXX nodes or subgraphs.
-}
-
-export interface KVState {
-  lastExecutedChain: string;
-  packageName: string;
-  dataStreamName: string;
-  kvProcessor: ESProcessorItem;
-  grokPattern: string;
-  logSamples: string[];
-  kvLogMessages: string[];
-  jsonSamples: string[];
-  finalized: boolean;
-  header: boolean;
-  errors: object;
-  additionalProcessors: object[];
-  ecsVersion: string;
-}
-
-export interface UnstructuredLogState {
-  lastExecutedChain: string;
-  packageName: string;
-  dataStreamName: string;
-  grokPatterns: string[];
-  currentPattern: string;
-  logSamples: string[];
-  jsonSamples: string[];
-  finalized: boolean;
-  errors: object[];
-  unParsedSamples: string[];
-  additionalProcessors: object[];
-  ecsVersion: string;
-  isFirst: boolean;
-}
-
-export interface RelatedState {
-  rawSamples: string[];
-  samples: string[];
-  ecs: string;
-  exAnswer: string;
-  packageName: string;
-  dataStreamName: string;
-  errors: object;
-  previousError: string;
-  pipelineResults: object[];
-  finalized: boolean;
-  reviewed: boolean;
-  hasTriedOnce: boolean;
-  currentPipeline: object;
-  currentProcessors: object[];
-  initialPipeline: object;
-  results: object;
-  lastExecutedChain: string;
-  samplesFormat: SamplesFormat;
-}
-
-export type ChatModels = InferenceChatModel;
+export type AutomaticImportPluginCoreSetupDependencies = CoreSetup<
+  AutomaticImportPluginStartDependencies,
+  AutomaticImportPluginStart
+>;

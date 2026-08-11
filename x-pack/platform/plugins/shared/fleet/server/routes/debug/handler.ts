@@ -23,7 +23,7 @@ export const fetchIndexHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const res = await fetchIndex(esClient, request.body.index);
-  return response.ok({ body: res });
+  return res.ok ? response.ok({ body: res.body }) : response.badRequest({ body: res.body });
 };
 
 export const fetchSavedObjectsHandler: FleetRequestHandler<
@@ -33,7 +33,7 @@ export const fetchSavedObjectsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const res = await fetchSavedObjects(soClient, request.body.type, request.body.name);
-  return response.ok({ body: res });
+  return res.ok ? response.ok({ body: res.body }) : response.badRequest({ body: res.body });
 };
 
 export const fetchSavedObjectNamesHandler: FleetRequestHandler<
@@ -43,5 +43,5 @@ export const fetchSavedObjectNamesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
   const res = await fetchSavedObjectNames(soClient, request.body.type);
-  return response.ok({ body: res });
+  return res.ok ? response.ok({ body: res.body }) : response.badRequest({ body: res.body });
 };

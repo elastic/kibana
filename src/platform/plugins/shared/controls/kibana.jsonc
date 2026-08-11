@@ -11,13 +11,13 @@
     "server": true,
     "requiredPlugins": [
       "presentationUtil",
-      "presentationPanel",
       "embeddable",
       "dataViews",
       "data",
       "kql",
       "uiActions",
-      "kibanaReact"
+      "kibanaReact",
+      "esql"
     ]
   }
 }

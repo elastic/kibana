@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '../../types';
-import { Builder } from '../../ast';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { Builder } from '@elastic/esql';
 
 /**
  * Expands EVAL commands into separate single-expression EVAL commands.

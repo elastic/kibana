@@ -8,8 +8,7 @@
  */
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { FindFieldsMetadataResponsePayload } from '@kbn/fields-metadata-plugin/common/latest';
-import type { UnifiedMetricsGridProps } from '../../types';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../types';
 
 export interface FieldsMetadataContext {
   fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;
@@ -27,7 +26,7 @@ function FieldsMetadataProvider({
   services,
 }: {
   children: React.ReactNode;
-  fields: MetricField[];
+  fields: ParsedMetricItem[];
 } & Pick<UnifiedMetricsGridProps, 'services'>) {
   const [accumulatedMetadata, setAccumulatedMetadata] = useState<
     FindFieldsMetadataResponsePayload['fields']
@@ -43,8 +42,8 @@ function FieldsMetadataProvider({
     () =>
       isFieldsMetadataAvailable
         ? (fields || [])
-            .filter((field) => !seenFields.current.has(field.name))
-            .map((field) => field.name)
+            .filter((field) => !seenFields.current.has(field.metricName))
+            .map((field) => field.metricName)
         : [],
     [fields, isFieldsMetadataAvailable]
   );

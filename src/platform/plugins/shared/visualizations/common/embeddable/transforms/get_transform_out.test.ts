@@ -46,7 +46,6 @@ describe('getTransformOut', () => {
         transformOut(
           {
             drilldowns: [storedDrilldown],
-            timeRange: { from: '15-now', to: 'now' },
             title: 'custom title',
             uiState: 'someUiState',
           },
@@ -70,10 +69,6 @@ describe('getTransformOut', () => {
             },
           ],
           "savedObjectId": "1234",
-          "timeRange": Object {
-            "from": "15-now",
-            "to": "now",
-          },
           "title": "custom title",
           "uiState": "someUiState",
         }
@@ -94,7 +89,6 @@ describe('getTransformOut', () => {
                 },
               },
             } as StoredVis,
-            timeRange: { from: '15-now', to: 'now' },
             title: 'custom title',
           },
           [
@@ -122,10 +116,6 @@ describe('getTransformOut', () => {
                 "index": "1234",
               },
             },
-          },
-          "timeRange": Object {
-            "from": "15-now",
-            "to": "now",
           },
           "title": "custom title",
         }

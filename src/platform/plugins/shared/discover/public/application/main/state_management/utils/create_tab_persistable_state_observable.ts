@@ -12,6 +12,11 @@ import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
 import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
 import { isEqualState } from './state_comparators';
 
+export type TabPersistableState = Pick<
+  TabState,
+  'appState' | 'globalState' | 'attributes' | 'profileState'
+> & { comment?: string };
+
 export const createTabPersistableStateObservable = ({
   tabId,
   internalState$,
@@ -20,8 +25,8 @@ export const createTabPersistableStateObservable = ({
   tabId: string;
   internalState$: Observable<DiscoverInternalState>;
   getState: () => DiscoverInternalState;
-}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes'> & { comment?: string }> => {
-  const getTabState = (): Pick<TabState, 'appState' | 'globalState' | 'attributes'> & { comment?: string } => {
+}): Observable<TabPersistableState> => {
+  const getTabState = (): TabPersistableState => {
     const tabState = selectTab(getState(), tabId);
 
     return {
@@ -29,6 +34,7 @@ export const createTabPersistableStateObservable = ({
       globalState: tabState.globalState,
       attributes: tabState.attributes,
       comment: tabState.uiState.comment,
+      profileState: tabState.profileState,
     };
   };
 
@@ -39,7 +45,8 @@ export const createTabPersistableStateObservable = ({
         isEqualState(a.appState, b.appState) &&
         isEqualState(a.globalState, b.globalState) &&
         isEqual(a.attributes, b.attributes) &&
-        a.comment === b.comment
+        a.comment === b.comment &&
+        isEqual(a.profileState, b.profileState)
     ),
     skip(1)
   );

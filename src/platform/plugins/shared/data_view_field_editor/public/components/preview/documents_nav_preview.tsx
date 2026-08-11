@@ -10,12 +10,13 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useStateSelector } from '../../state_utils';
 import type { PreviewState } from './types';
@@ -107,34 +108,54 @@ export const DocumentsNavPreview = () => {
           <EuiFlexItem grow={false} data-test-subj="documentsNav">
             <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  onClick={prev}
-                  iconType="arrowLeft"
-                  data-test-subj="goToPrevDocButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
                     {
                       defaultMessage: 'Previous document',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    onClick={prev}
+                    iconType="chevronSingleLeft"
+                    data-test-subj="goToPrevDocButton"
+                    aria-label={i18n.translate(
+                      'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
+                      {
+                        defaultMessage: 'Previous document',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  onClick={next}
-                  iconType="arrowRight"
-                  data-test-subj="goToNextDocButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
                     {
                       defaultMessage: 'Next document',
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    onClick={next}
+                    iconType="chevronSingleRight"
+                    data-test-subj="goToNextDocButton"
+                    aria-label={i18n.translate(
+                      'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',
+                      {
+                        defaultMessage: 'Next document',
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

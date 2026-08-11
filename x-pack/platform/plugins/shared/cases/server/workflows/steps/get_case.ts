@@ -10,10 +10,9 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   getCaseStepCommonDefinition,
   type GetCaseStepInput,
-  type GetCaseStepOutput,
 } from '../../../common/workflows/steps/get_case';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler } from './utils';
+import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 
 export const getCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -21,11 +20,17 @@ export const getCaseStepDefinition = (
   createServerStepDefinition({
     ...getCaseStepCommonDefinition,
     handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseStepInput) => {
+      // `include_comments` is deprecated (see common definition) but behavior is preserved
+      // to avoid breaking existing workflows. Prefer the `cases.getAllAttachments` step.
+      // Hard removal is deferred to v10, gated on usage telemetry.
       const theCase = await client.cases.get({
         id: input.case_id,
         includeComments: input.include_comments,
       });
 
-      return theCase as GetCaseStepOutput['case'];
+      return safeParseCaseForWorkflowOutput(
+        getCaseStepCommonDefinition.outputSchema.shape.case,
+        theCase
+      );
     }),
   });

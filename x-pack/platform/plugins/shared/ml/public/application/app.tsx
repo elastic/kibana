@@ -19,9 +19,8 @@ import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
-import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';
@@ -34,7 +33,7 @@ import type { ManagementSectionId } from './management';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions' | 'cps'
 > &
   MlStartDependencies;
 
@@ -43,6 +42,7 @@ interface AppProps {
   deps: MlDependencies;
   appMountParams: ManagementAppMountParams | AppMountParameters;
   isServerless: boolean;
+  isCPSEnabled: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
   nlpSettings: NLPSettings;
@@ -62,6 +62,7 @@ export const App: FC<AppProps> = ({
   deps,
   appMountParams,
   isServerless,
+  isCPSEnabled,
   mlFeatures,
   experimentalFeatures,
   nlpSettings,
@@ -69,9 +70,6 @@ export const App: FC<AppProps> = ({
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
-    setHeaderActionMenu: isPopulatedObject(appMountParams, ['setHeaderActionMenu'])
-      ? appMountParams.setHeaderActionMenu
-      : undefined,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
@@ -86,6 +84,7 @@ export const App: FC<AppProps> = ({
       dashboard: deps.dashboard,
       data: deps.data,
       dataViewEditor: deps.dataViewEditor,
+      dataViewFieldEditor: deps.dataViewFieldEditor,
       dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
       embeddable: deps.embeddable,
@@ -111,6 +110,7 @@ export const App: FC<AppProps> = ({
       spaces: deps.spaces,
       fieldsMetadata: deps.fieldsMetadata,
       fileUpload: deps.fileUpload,
+      cps: deps.cps,
     };
   }, [deps, coreStart]);
 
@@ -133,7 +133,7 @@ export const App: FC<AppProps> = ({
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile', 'chrome');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, [
       'data',
@@ -159,6 +159,7 @@ export const App: FC<AppProps> = ({
             <DatePickerContextProvider {...datePickerDeps}>
               <EnabledFeaturesContextProvider
                 isServerless={isServerless}
+                isCPSEnabled={isCPSEnabled}
                 mlFeatures={mlFeatures}
                 showMLNavMenu={chromeStyle === 'classic'}
                 experimentalFeatures={experimentalFeatures}
@@ -182,6 +183,7 @@ export const renderApp = (
   deps: MlDependencies,
   appMountParams: AppMountParameters,
   isServerless: boolean,
+  isCPSEnabled: boolean,
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures,
   nlpSettings: NLPSettings
@@ -194,6 +196,7 @@ export const renderApp = (
       deps={deps}
       appMountParams={appMountParams}
       isServerless={isServerless}
+      isCPSEnabled={isCPSEnabled}
       mlFeatures={mlFeatures}
       experimentalFeatures={experimentalFeatures}
       nlpSettings={nlpSettings}

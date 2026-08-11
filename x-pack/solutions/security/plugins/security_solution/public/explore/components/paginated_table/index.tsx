@@ -228,7 +228,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -320,6 +320,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
+                        aria-label={i18n.ROWS}
                         id="customizablePagination"
                         data-test-subj="loadingMoreSizeRowPopover"
                         button={button}

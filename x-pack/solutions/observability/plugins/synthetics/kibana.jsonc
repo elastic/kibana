@@ -53,6 +53,8 @@
       "telemetry",
       "licenseManagement",
       "observabilityAIAssistant",
+      "agentBuilder",
+      "observabilityAgentBuilder",
       "maintenanceWindows"
     ],
     "requiredBundles": [
@@ -61,8 +63,8 @@
       "kibanaReact",
       "kibanaUtils",
       "observability",
-      "spaces",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "observabilityAgentBuilder"
     ]
   }
 }

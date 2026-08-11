@@ -121,7 +121,7 @@ export const useEndpointActionItems = (
         ? [
             {
               'data-test-subj': 'console',
-              icon: 'console',
+              icon: 'commandLine',
               key: 'consoleLink',
               onClick: (ev: React.MouseEvent) => {
                 ev.preventDefault();

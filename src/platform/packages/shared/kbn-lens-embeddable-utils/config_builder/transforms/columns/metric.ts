@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_DOCUMENT_FIELD_NAME } from '@kbn/lens-common';
 import type {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
   CounterRateIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
+  DataType,
   DerivativeIndexPatternColumn,
   FormulaIndexPatternColumn,
   LastValueIndexPatternColumn,
@@ -82,7 +84,8 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
-  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation
+  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation,
+  dataType?: DataType
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
     return [fromCountAPItoLensState(options)];
@@ -109,7 +112,7 @@ export function fromMetricAPItoLensState(
     return [fromFormulaAPItoLensState(options)];
   }
   if (isAPIColumnOfType<LensApiLastValueOperation>('last_value', options)) {
-    return [fromLastValueAPItoLensState(options)];
+    return [fromLastValueAPItoLensState(options, dataType)];
   }
   if (isAPIColumnOfType<LensApiPercentileOperation>('percentile', options)) {
     return [fromPercentileAPItoLensState(options)];
@@ -131,11 +134,20 @@ export function fromMetricAPItoLensState(
     return [fromCounterRateAPItoLensState(options), refColumn];
   }
   if (isAPIColumnOfType<LensApiCumulativeSumOperation>('cumulative_sum', options)) {
-    const [refColumn] = fromMetricAPItoLensState({
-      operation: 'sum',
-      field: options.field,
-      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-    });
+    const { field } = options;
+    const isCountOfRecords = field == null || field === LENS_DOCUMENT_FIELD_NAME;
+    const [refColumn] = fromMetricAPItoLensState(
+      isCountOfRecords
+        ? {
+            operation: 'count',
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          }
+        : {
+            operation: 'sum',
+            field,
+            empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+          }
+    );
     if (!refColumn || !('sourceField' in refColumn)) {
       return [];
     }
@@ -227,7 +239,10 @@ export function getMetricApiColumnFromLensState(
   }
   if (isLensStateColumnOfType<CumulativeSumIndexPatternColumn>('cumulative_sum', options)) {
     const refColumn = getMetricReferableApiColumnFromLensState(options, columns);
-    if (!isAPIColumnOfType<LensApiSumMetricOperation>('sum', refColumn)) {
+    if (
+      !isAPIColumnOfType<LensApiCountMetricOperation>('count', refColumn) &&
+      !isAPIColumnOfType<LensApiSumMetricOperation>('sum', refColumn)
+    ) {
       throw new Error(`Unsupported referenced metric operation: ${options.operationType}`);
     }
     return fromCumulativeSumLensStateToAPI(options, refColumn);

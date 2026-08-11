@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from 'redux-toolkit-v1';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
+import { WORKFLOW_GRAPH_FOCUS_TRIGGER } from '@kbn/workflows';
 import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
-import { findStepByLine } from './utils/step_finder';
+import { resolveFocusForLine } from './utils/trigger_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type { WorkflowsResponse } from '../../model/types';
+
+/**
+ * Sentinel value dispatched as `highlightedStepId` to scroll the editor to the
+ * triggers section.  Shared between the execution-detail component (producer)
+ * and the YAML editor (consumer).
+ */
+export const HIGHLIGHTED_STEP_TRIGGER = WORKFLOW_GRAPH_FOCUS_TRIGGER;
 
 export const initialWorkflowsState: WorkflowsResponse = {
   workflows: {},
@@ -35,11 +43,14 @@ const initialState: WorkflowDetailState = {
   schema: getWorkflowZodSchema({}, triggerSchemas.getRegisteredIds()),
   cursorPosition: undefined,
   focusedStepId: undefined,
+  focusedTriggerId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
-  replayExecutionId: null,
+  testStepModalOpenStepId: undefined,
+  replay: undefined,
   loading: initialLoadingState,
   hasYamlSchemaValidationErrors: false,
+  aiAssisted: false,
   connectorFlyout: {
     isOpen: false,
     connectorType: undefined,
@@ -54,6 +65,14 @@ const workflowDetailSlice = createSlice({
   initialState,
   reducers: {
     setWorkflow: (state, action: { payload: WorkflowDetailDto }) => {
+      if (state.workflow?.id !== action.payload?.id) {
+        // New workflow: re-arm the middleware bootstrap (the `!computed` guard needs
+        // undefined) and drop cursor/focus state carried over from the previous workflow.
+        state.computed = undefined;
+        state.cursorPosition = undefined;
+        state.focusedStepId = undefined;
+        state.focusedTriggerId = undefined;
+      }
       state.workflow = action.payload;
     },
     updateWorkflow: (state, action: { payload: Partial<EsWorkflow> }) => {
@@ -69,23 +88,39 @@ const workflowDetailSlice = createSlice({
     },
     setCursorPosition: (state, action: { payload: LineColumnPosition }) => {
       state.cursorPosition = action.payload;
-      if (!state.computed?.workflowLookup) {
+      const lookup = state.computed?.workflowLookup;
+      if (!lookup) {
         state.focusedStepId = undefined;
+        state.focusedTriggerId = undefined;
         return;
       }
-      state.focusedStepId = findStepByLine(
-        action.payload.lineNumber,
-        state.computed.workflowLookup
-      );
+      Object.assign(state, resolveFocusForLine(action.payload.lineNumber, lookup));
     },
-    setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
+    setHighlightedStepId: (state, action: { payload: { stepId: string | undefined } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
     setIsTestModalOpen: (state, action: { payload: boolean }) => {
       state.isTestModalOpen = action.payload;
     },
     setReplayExecutionId: (state, action: { payload: string | null }) => {
-      state.replayExecutionId = action.payload;
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.executionId = action.payload ?? undefined;
+      state.replay.stepExecutionId = undefined; // only one replay type at a time
+    },
+    setReplayStepExecutionId: (state, action: { payload: string | null }) => {
+      if (state.replay === undefined) {
+        state.replay = {};
+      }
+      state.replay.stepExecutionId = action.payload ?? undefined;
+      state.replay.executionId = undefined; // only one replay type at a time
+    },
+    setTestStepModalOpenStepId: (state, action: { payload: string | undefined }) => {
+      state.testStepModalOpenStepId = action.payload;
+    },
+    clearReplay: (state) => {
+      state.replay = undefined;
     },
     setConnectors: (state, action: { payload: WorkflowDetailState['connectors'] }) => {
       state.connectors = action.payload;
@@ -106,6 +141,9 @@ const workflowDetailSlice = createSlice({
 
     setHasYamlSchemaValidationErrors: (state, action: { payload: boolean }) => {
       state.hasYamlSchemaValidationErrors = action.payload;
+    },
+    setAiAssisted: (state, action: { payload: boolean }) => {
+      state.aiAssisted = action.payload;
     },
 
     // Connector flyout actions
@@ -128,19 +166,18 @@ const workflowDetailSlice = createSlice({
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
       state.computed = action.payload;
-      // Recalculate the focused step now that workflowLookup may have changed.
+      // Recalculate focused step/trigger now that workflowLookup may have changed.
       // This handles the case where the cursor was positioned before the
       // debounced YAML computation completed.
-      if (state.cursorPosition && action.payload.workflowLookup) {
-        state.focusedStepId = findStepByLine(
-          state.cursorPosition.lineNumber,
-          action.payload.workflowLookup
-        );
+      const lookup = action.payload.workflowLookup;
+      if (state.cursorPosition && lookup) {
+        Object.assign(state, resolveFocusForLine(state.cursorPosition.lineNumber, lookup));
       }
     },
     _clearComputedData: (state) => {
       state.computed = {};
       state.focusedStepId = undefined;
+      state.focusedTriggerId = undefined;
     },
     _setGeneratedSchemaInternal: (state, action: { payload: WorkflowDetailState['schema'] }) => {
       state.schema = action.payload;
@@ -167,12 +204,16 @@ export const {
   setHighlightedStepId,
   setIsTestModalOpen,
   setReplayExecutionId,
+  setReplayStepExecutionId,
+  setTestStepModalOpenStepId,
+  clearReplay,
   setConnectors,
   setWorkflows,
   setExecution,
   clearExecution,
   setActiveTab,
   setHasYamlSchemaValidationErrors,
+  setAiAssisted,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,

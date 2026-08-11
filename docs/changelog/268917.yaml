@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/268917
+issues:
+- https://github.com/elastic/kibana/issues/265843
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Retry sample fetch with halved size on async search response limit error

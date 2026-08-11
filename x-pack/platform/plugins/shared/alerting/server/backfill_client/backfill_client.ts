@@ -8,13 +8,13 @@ import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
-  SavedObject,
+  SavedObjectBulkResult,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
   RunContext,
@@ -108,7 +108,6 @@ export class BackfillClient {
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
         priority: TaskPriority.Low,
-        maxConcurrency: 3,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -333,7 +332,7 @@ export class BackfillClient {
     }
 
     // Pre-size result array to preserve original order regardless of parallel completion order
-    const orderedResults: Array<SavedObject<AdHocRunSO> | BulkCreateError> = new Array(
+    const orderedResults: Array<SavedObjectBulkResult<AdHocRunSO> | BulkCreateError> = new Array(
       adHocSOsToCreate.length
     );
 
@@ -384,17 +383,17 @@ export class BackfillClient {
     );
 
     const isBulkCreateError = (
-      result: SavedObject<AdHocRunSO> | BulkCreateError
+      result: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError
     ): result is BulkCreateError => {
       return 'bulkCreateError' in result && result.bulkCreateError !== undefined;
     };
 
     const transformedResponse: ScheduleBackfillResults = orderedResults.map(
-      (so: SavedObject<AdHocRunSO> | BulkCreateError, index: number) => {
+      (so: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError, index: number) => {
         if (isBulkCreateError(so)) {
           return createBackfillError(so.bulkCreateError.message, so.ruleId, so.ruleName);
         }
-        if (so.error) {
+        if (isSavedObjectErrorResult(so)) {
           auditLogger?.log(
             adHocRunAuditEvent({
               action: AdHocRunAuditAction.CREATE,

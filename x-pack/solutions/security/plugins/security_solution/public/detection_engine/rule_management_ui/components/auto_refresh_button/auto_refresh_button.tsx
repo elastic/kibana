@@ -63,11 +63,12 @@ const AutoRefreshButtonComponent = ({
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={closePopover}
+      aria-label={i18n.AUTO_REFRESH_POPOVER_ARIA_LABEL}
       button={
         <EuiButtonEmpty
           data-test-subj="autoRefreshButton"
           color={'text'}
-          iconType={'timeRefresh'}
+          iconType={'refreshTime'}
           onClick={togglePopover}
           disabled={isDisabled}
           css={css`

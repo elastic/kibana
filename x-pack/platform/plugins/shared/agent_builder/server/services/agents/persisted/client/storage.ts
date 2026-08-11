@@ -8,7 +8,11 @@
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { AgentType, ToolSelection } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControl,
+  AgentAccessControlMode,
+  ToolSelection,
+} from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const agentsIndexName = chatSystemIndex('agents');
@@ -25,9 +29,28 @@ const storageSettings = {
       labels: types.keyword({}),
       avatar_color: types.keyword({}),
       avatar_symbol: types.keyword({}),
+      created_by_id: types.keyword({}),
+      created_by_name: types.keyword({}),
+      access_control: types.object({
+        properties: {
+          access_mode: types.keyword({}),
+          entries: types.nested({
+            properties: {
+              type: types.keyword({}),
+              name: types.keyword({}),
+              role: types.keyword({}),
+            },
+          }),
+        },
+        dynamic: false,
+      }),
       config: types.object({
         properties: {
           workflow_ids: types.keyword({}),
+          plugin_ids: types.keyword({}),
+          skill_ids: types.keyword({}),
+          connector_ids: types.keyword({}),
+          ai_indices: types.keyword({}),
         },
         dynamic: false,
       }),
@@ -40,23 +63,33 @@ const storageSettings = {
 export interface AgentProperties {
   id: string;
   name: string;
-  type: AgentType;
+  type: string;
   space: string;
   description: string;
   labels?: string[];
   avatar_color?: string;
   avatar_symbol?: string;
+  created_by_id?: string;
+  created_by_name?: string;
+  access_control?: AgentAccessControl;
   config: AgentConfigurationProperties;
   created_at: string;
   updated_at: string;
   // deprecated fields
   configuration?: AgentConfigurationProperties;
+  visibility?: AgentAccessControlMode;
+  acl?: Pick<AgentAccessControl, 'entries'>;
 }
 
 export interface AgentConfigurationProperties {
   instructions?: string;
   tools: ToolSelection[];
+  skill_ids?: string[];
+  enable_elastic_capabilities?: boolean;
   workflow_ids?: string[];
+  plugin_ids?: string[];
+  connector_ids?: string[];
+  ai_indices?: string[];
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

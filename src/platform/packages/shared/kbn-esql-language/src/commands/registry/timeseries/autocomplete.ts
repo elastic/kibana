@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { newLineAndPipeCompleteItems, commaCompleteItem } from '../complete_items';
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import {
   getSourcesFromCommands,
@@ -23,6 +23,7 @@ import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -50,6 +51,8 @@ export async function autocomplete(
     return metadataSuggestions;
   }
 
+  // Only use overlap here to decide when to show `METADATA`.
+  // The replacement range is still handled centrally.
   const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
   // TS /
@@ -66,10 +69,14 @@ export async function autocomplete(
     return sourceSuggestions;
   }
   // TS something /
-  else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
+  else if (
+    indexes.length > 0 &&
+    endsWithWhitespace(innerText) &&
+    !isRestartingExpression(innerText)
+  ) {
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
-    suggestions.push(pipeCompleteItem);
+    suggestions.push(...newLineAndPipeCompleteItems);
     suggestions.push(
       ...(await getRecommendedQueriesSuggestions(
         context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] }

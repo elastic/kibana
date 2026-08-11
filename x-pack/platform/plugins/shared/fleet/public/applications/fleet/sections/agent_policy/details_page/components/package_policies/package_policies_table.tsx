@@ -12,7 +12,6 @@ import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -44,6 +43,8 @@ import {
   packagePolicyHasOtelInputs,
 } from '../../../../../../../../common/services/otelcol_helpers';
 
+import { PackagePolicyUpgradeCell } from '../../../../../../integrations/sections/epm/screens/detail/policies/components/package_policy_upgrade_cell';
+
 import { AddIntegrationFlyout } from './add_integration_flyout';
 
 interface Props {
@@ -73,7 +74,12 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const canReadAgentPolicies = authz.fleet.readAgentPolicies;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
-  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
+  const {
+    isPackagePolicyUpgradable,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+    getUpgradeVersion,
+  } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
@@ -101,6 +107,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           packageTitle: packagePolicy.package?.title ?? '',
           packageVersion: packagePolicy.package?.version ?? '',
           hasUpgrade,
+          upgradeVersion: getUpgradeVersion(packagePolicy),
+          pendingUpgradeReview: getPackagePolicyUpgradeReview(packagePolicy),
+          keepPoliciesUpToDate: getKeepPoliciesUpToDate(packagePolicy),
         };
       }
     );
@@ -109,7 +118,13 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       .sort(stringSortAscending)
       .map(toFilterOption);
     return [mappedPackagePolicies, namespaceFilterOptions];
-  }, [originalPackagePolicies, isPackagePolicyUpgradable]);
+  }, [
+    originalPackagePolicies,
+    isPackagePolicyUpgradable,
+    getUpgradeVersion,
+    getPackagePolicyUpgradeReview,
+    getKeepPoliciesUpToDate,
+  ]);
 
   const getSharedPoliciesNumber = useCallback((packagePolicy: PackagePolicy) => {
     return packagePolicy.policy_ids.length || 0;
@@ -201,7 +216,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
                         defaultMessage="Shared"
                       />{' '}
-                      <EuiIcon type="info" />
+                      <EuiIcon type="info" aria-hidden={true} />
                     </EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -220,7 +235,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ),
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
               <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
                 <EuiLink
                   href={
@@ -256,37 +271,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexGroup>
                 </EuiLink>
               </EuiFlexItem>
-              {packagePolicy.hasUpgrade && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      type="warning"
-                      color="warning"
-                      content={i18n.translate(
-                        'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
-                        { defaultMessage: 'Upgrade Available' }
-                      )}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="PackagePoliciesTableUpgradeButton"
-                      size="s"
-                      minWidth="0"
-                      isDisabled={!canWriteIntegrationPolicies}
-                      href={`${getHref('upgrade_package_policy', {
-                        policyId: agentPolicy.id,
-                        packagePolicyId: packagePolicy.id,
-                      })}?from=fleet-policy-list`}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                        defaultMessage="Upgrade"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </>
-              )}
+              <PackagePolicyUpgradeCell
+                packagePolicy={packagePolicy}
+                agentPolicies={[agentPolicy]}
+                from="fleet-policy-list"
+              />
             </EuiFlexGroup>
           );
         },
@@ -440,7 +429,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     key="addPackagePolicyButton"
                     fill
                     isDisabled={!canWriteIntegrationPolicies}
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => {
                       setShowAddIntegrationFlyout(true);
                     }}

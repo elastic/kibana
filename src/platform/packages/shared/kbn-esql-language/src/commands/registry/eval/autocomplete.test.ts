@@ -171,8 +171,14 @@ describe('EVAL Autocomplete', () => {
     ]);
   });
 
+  test('does not suggest subqueries after IN', async () => {
+    await evalExpectSuggestions('from a | eval col = doubleField in ', ['($0)']);
+    await evalExpectSuggestions('from a | eval col = doubleField not in ', ['($0)']);
+  });
+
   test('after column after assignment', async () => {
     await evalExpectSuggestions('from a | eval col = doubleField ', [
+      '\n',
       ', ',
       '| ',
       ...getFunctionSignaturesByReturnType(
@@ -231,6 +237,24 @@ describe('EVAL Autocomplete', () => {
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) ',
       [
+        '\n',
+        ', ',
+        '| ',
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true },
+          ['double', 'long']
+        ),
+        ...getOperatorSuggestions([...inOperators, ...nullCheckOperators]),
+      ],
+      mockCallbacks
+    );
+
+    await evalExpectSuggestions(
+      'from a | eval a=round((doubleField)) ',
+      [
+        '\n',
         ', ',
         '| ',
         ...getFunctionSignaturesByReturnType(
@@ -292,11 +316,12 @@ describe('EVAL Autocomplete', () => {
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedNumeric.map((name) => ({ label: name, text: name }))
     );
+    const numericAndDenseVector = [...ESQL_COMMON_NUMERIC_TYPES, 'dense_vector'] as const;
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) + ',
       [
         ...expectedNumeric,
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],
@@ -306,7 +331,7 @@ describe('EVAL Autocomplete', () => {
       'from a | eval a=round(doubleField)+ ',
       [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],
@@ -316,7 +341,7 @@ describe('EVAL Autocomplete', () => {
       'from a | eval a=doubleField+ ',
       [
         ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-        ...getFunctionSignaturesByReturnType(Location.EVAL, ESQL_COMMON_NUMERIC_TYPES, {
+        ...getFunctionSignaturesByReturnType(Location.EVAL, [...numericAndDenseVector], {
           scalar: true,
         }),
       ],
@@ -430,6 +455,7 @@ describe('EVAL Autocomplete', () => {
   test('discards query after cursor', async () => {
     // Smoke testing for suggestions in previous position than the end of the statement
     await evalExpectSuggestions('from a | eval col0 = abs(doubleField) / | eval abs(col0)', [
+      '\n',
       ...getFunctionSignaturesByReturnType(
         Location.EVAL,
         'any',
@@ -467,6 +493,7 @@ describe('EVAL Autocomplete', () => {
     const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
 
     await evalExpectSuggestions('from a | eval a = 1 ', [
+      '\n',
       ', ',
       '| ',
       ...getFunctionSignaturesByReturnType(
@@ -477,7 +504,7 @@ describe('EVAL Autocomplete', () => {
       ),
     ]);
 
-    await evalExpectSuggestions('from a | eval a = 1 year ', [', ', '| ', '+ $0', '- $0']);
+    await evalExpectSuggestions('from a | eval a = 1 year ', ['\n', ', ', '| ', '+ $0', '- $0']);
 
     await evalExpectSuggestions('from a | eval col0=date_trunc(2 ', [
       ...dateSuggestions.map((t) => `${t}, `),

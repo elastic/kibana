@@ -14,7 +14,7 @@ import type {
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -24,6 +24,10 @@ const ARIA_PLACEHOLDER_MESSAGE = i18n.translate(
   'xpack.securitySolution.inputCapture.ariaPlaceHolder',
   { defaultMessage: 'Enter a command' }
 );
+
+const ARIA_LABEL_MESSAGE = i18n.translate('xpack.securitySolution.inputCapture.ariaLabel', {
+  defaultMessage: 'Response console input',
+});
 
 const deSelectTextOnPage = () => {
   const selection = getSelection();
@@ -308,6 +312,7 @@ export const InputCapture = memo<InputCaptureProps>(
       >
         <div
           role="textbox"
+          aria-label={ARIA_LABEL_MESSAGE}
           aria-placeholder={ARIA_PLACEHOLDER_MESSAGE}
           tabIndex={0}
           ref={focusEleRef}
@@ -327,6 +332,7 @@ export const InputCapture = memo<InputCaptureProps>(
           </div>
           <div className="textSelectionBoundaryHelper"> </div>
           <input
+            name="inputCapture"
             ref={hiddenInputEleRef}
             type="text"
             value=""

@@ -11,12 +11,34 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig, devices } from '@playwright/test';
 import {
   scoutFailedTestsReporter,
+  scoutFailureSummaryReporter,
   scoutPlaywrightReporter,
   generateTestRunId,
 } from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import type { ScoutPlaywrightOptions, ScoutTestOptions } from '../types';
 import { VALID_CONFIG_MARKER } from '../types';
+
+const DEFAULT_CI_RETRIES = 1;
+
+/**
+ * Number of Playwright retries: 1 on CI, 0 locally. `SCOUT_TEST_RETRIES` overrides both —
+ * e.g. the flaky-test runner sets it to 0.
+ */
+const resolveRetries = (): number => {
+  const override = process.env.SCOUT_TEST_RETRIES;
+
+  if (override === undefined) {
+    return process.env.CI ? DEFAULT_CI_RETRIES : 0;
+  }
+
+  const parsed = Number.parseInt(override, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    throw new Error(`SCOUT_TEST_RETRIES must be a non-negative integer, got '${override}'`);
+  }
+
+  return parsed;
+};
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
   /**
@@ -62,27 +84,42 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
    * While Playwright doesn't allow to read 'use' from the parent project, we have to create
    * a setup project with the explicit 'use' object for each parent project.
    * This is a workaround for https://github.com/microsoft/playwright/issues/32547
+   *
+   * The matching teardown project is always emitted: if no `global.teardown.ts` exists in
+   * `testDir`, the project's `testMatch` finds no tests and Playwright silently skips it,
+   * so plugins opt-in to teardown simply by adding the file. Linking it via Playwright's
+   * `teardown` field on the setup project guarantees teardown runs after the setup project
+   * AND every project depending on it has finished — including on test failure.
    */
+  const GLOBAL_HOOK_TIMEOUT_MS = 180000; // 3 minutes
   scoutProjects = options.runGlobalSetup
     ? scoutDefaultProjects.flatMap((project) => [
         {
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
-          timeout: 180000, // Default to 3 minutes for global setup
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+          teardown: `teardown-${project?.name}`,
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
+        {
+          name: `teardown-${project?.name}`,
+          use: project?.use ? { ...project.use } : {},
+          testMatch: /global.teardown\.ts/,
+          timeout: GLOBAL_HOOK_TIMEOUT_MS,
+        },
       ])
     : scoutDefaultProjects;
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    metadata: options.metadata,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-    /* Retry on CI only */
-    retries: 0, // disable retry for Playwright runner
+    /* Retries happen immediately, in a fresh worker. See resolveRetries(). */
+    retries: resolveRetries(),
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -91,6 +128,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       ['json', { outputFile: './.scout/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
+      scoutFailureSummaryReporter({ name: 'scout-failure-summary', runId }), // Scout failure summary (local only)
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -104,12 +142,15 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       /* Base URL to use in actions like `await page.goto('/')`. */
       // baseURL: 'http://127.0.0.1:3000',
 
-      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-      trace: 'on-first-retry',
+      /* Tracing adds per-test overhead (screenshots, DOM snapshots, network/console capture)
+       * for every attempt, which can push already-marginal tests over their timeout in a
+       * shared CI lane. Keep it off, as it was before retries existed. */
+      trace: 'off',
       screenshot: 'only-on-failure',
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

@@ -24,5 +24,3 @@ export const plugin: PluginInitializer<
   InferenceStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new InferencePlugin(pluginInitializerContext);
-
-export { getDefaultConnector } from '../common/utils/get_default_connector';

@@ -6,7 +6,7 @@
  */
 
 import type moment from 'moment';
-
+import { sum } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -227,6 +227,9 @@ export const groupAndBulkCreate = async ({
       }
 
       const buckets = eventsByGroupResponseWithAggs.aggregations.eventGroups.buckets;
+
+      // Collect rule execution metrics
+      toReturn.alertsCandidateCount = sum(buckets.map((b) => b.doc_count));
 
       // we can create only as many unsuppressed alerts, as total number of alerts(suppressed and unsuppressed) does not exceeds maxSignals
       const maxUnsuppressedCount = tuple.maxSignals - buckets.length;

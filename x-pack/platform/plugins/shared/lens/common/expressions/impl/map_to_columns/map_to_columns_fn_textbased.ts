@@ -63,7 +63,7 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       }
       if (column.variable) {
         const originalColumn = idMapColEntries
-          .map(([_id, columns]) => columns.find((c) => c.variable === column.variable))
+          .map(([_id, cols]) => cols.find((c) => c.variable === column.variable))
           .filter(isOriginalColumn);
 
         if (!originalColumn) {
@@ -72,32 +72,56 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
 
         return originalColumn.map((c) => ({ ...column, id: c.id }));
       }
-      return idMap[column.id].map((originalColumn) => ({
-        ...column,
-        id: originalColumn.id,
-        name: originalColumn.label,
-        meta: {
-          ...column.meta,
-          ...('sourceField' in originalColumn ? { field: originalColumn.sourceField } : {}),
-          ...('format' in originalColumn ? { params: originalColumn.format } : {}),
-          sourceParams: {
-            ...(column.meta?.sourceParams ?? {}),
-            ...('sourceField' in originalColumn ? { sourceField: originalColumn.sourceField } : {}),
-            ...('operationType' in originalColumn
-              ? { operationType: originalColumn.operationType }
-              : {}),
-            ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
-            ...('params' in originalColumn
-              ? {
-                  params: {
-                    ...(originalColumn.params as object),
-                    used_interval: `${originalColumn.interval}ms`,
-                  },
-                }
-              : {}),
+
+      const params =
+        column.meta?.sourceParams?.params &&
+        typeof column.meta.sourceParams.params === 'object' &&
+        !Array.isArray(column.meta.sourceParams.params)
+          ? column.meta.sourceParams.params
+          : undefined;
+
+      return idMap[column.id].map((originalColumn) => {
+        // The interval is normally recovered from the ES|QL execution metadata (esMeta.bucket).
+        // When that metadata is missing, fall back to the Lens-computed interval if exists, so it can still
+        // be resolved from sourceParams.params.used_interval (similar to esaggs case)
+        const hasInterval =
+          'interval' in originalColumn && typeof originalColumn.interval === 'number';
+        const hasDropPartials = 'dropPartials' in originalColumn;
+        const bucketParams =
+          hasInterval || hasDropPartials
+            ? {
+                params: {
+                  ...(params ?? {}),
+                  ...(hasInterval ? { used_interval: `${originalColumn.interval}ms` } : {}),
+                  ...(hasDropPartials
+                    ? { drop_partials: Boolean(originalColumn.dropPartials) }
+                    : {}),
+                },
+              }
+            : {};
+
+        return {
+          ...column,
+          id: originalColumn.id,
+          name: originalColumn.label,
+          meta: {
+            ...column.meta,
+            ...('sourceField' in originalColumn ? { field: originalColumn.sourceField } : {}),
+            ...('format' in originalColumn ? { params: originalColumn.format } : {}),
+            sourceParams: {
+              ...(column.meta?.sourceParams ?? {}),
+              ...('sourceField' in originalColumn
+                ? { sourceField: originalColumn.sourceField }
+                : {}),
+              ...('operationType' in originalColumn
+                ? { operationType: originalColumn.operationType }
+                : {}),
+              ...('interval' in originalColumn ? { interval: originalColumn.interval } : {}),
+              ...bucketParams,
+            },
           },
-        },
-      }));
+        };
+      });
     }),
   };
 };

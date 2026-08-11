@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -24,6 +25,8 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/core-plugins-browser",
+    "@kbn/core-http-browser",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

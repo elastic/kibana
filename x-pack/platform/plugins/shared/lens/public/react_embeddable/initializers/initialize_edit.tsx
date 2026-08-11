@@ -15,7 +15,6 @@ import type {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -28,9 +27,18 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
-import { extractInheritedViewModeObservable } from '../helper';
+import {
+  extractInheritedViewModeObservable,
+  saveUpdatedLinkedAnnotationsToLibrary,
+} from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlinePanel } from '../mount';
@@ -40,18 +48,40 @@ import {
   apiPublishesIsEditableByUser,
 } from '../type_guards';
 import type { SearchContextConfig } from './initialize_search_context';
+import { isESQLModeEnabled } from './utils';
 
 function getSupportedTriggers(
   getState: GetStateType,
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return ensureNestedTriggers([
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ]);
     }
-    return [];
+    return panelTriggers;
   };
+}
+
+/**
+ * ON_CLICK_VALUE and ON_SELECT_RANGE also trigger ON_APPLY_FILTER.
+ * This function appends ON_APPLY_FILTER to the list of triggers if either ON_CLICK_VALUE
+ * or ON_SELECT_RANGE is supported.
+ * @param triggers
+ */
+function ensureNestedTriggers(triggers: string[]): string[] {
+  if (
+    !triggers.includes(ON_APPLY_FILTER) &&
+    (triggers.includes(ON_CLICK_VALUE) || triggers.includes(ON_SELECT_RANGE))
+  ) {
+    return [...triggers, ON_APPLY_FILTER];
+  }
+
+  return triggers;
 }
 
 function isReadOnly(viewMode$: PublishingSubject<ViewMode>) {
@@ -92,8 +122,6 @@ export function initializeEditApi(
     return currentState.managed || (hasManagedApi(parentApi) ? parentApi.isManaged : false);
   };
 
-  const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
-
   const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
@@ -102,11 +130,6 @@ export function initializeEditApi(
         disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
         setDisabledActionIds: noop,
       };
-
-  if (isTextBasedLanguage(initialState)) {
-    // do not expose the drilldown action for ES|QL
-    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
-  }
 
   /**
    * Inline editing section
@@ -119,7 +142,7 @@ export function initializeEditApi(
       const parentApiContext = parentApi.getAppContext();
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(currentState.savedObjectId),
+        path: getEditPath(currentState.ref_id),
         state: {
           embeddableId: uuid,
           valueInput: currentState,
@@ -138,9 +161,9 @@ export function initializeEditApi(
     canEdit: () => isEditMode(viewMode$),
   });
 
-  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
+  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'ref_id'>) => {
     stateApi.updateAttributes(newState.attributes);
-    stateApi.updateSavedObjectId(newState.savedObjectId);
+    stateApi.updateRefId(newState.ref_id);
   };
 
   /**
@@ -206,7 +229,7 @@ export function initializeEditApi(
     }
     const currentState = getState();
     // check if it's in ES|QL mode
-    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled()) {
+    if (isTextBasedLanguage(currentState) && !isESQLModeEnabled({ uiSettings })) {
       return false;
     }
     if (isManaged(currentState)) {
@@ -214,7 +237,7 @@ export function initializeEditApi(
     }
     return (
       Boolean(capabilities.visualize_v2.save) ||
-      (!getState().savedObjectId &&
+      (!getState().ref_id &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize_v2.show))
     );
@@ -233,21 +256,29 @@ export function initializeEditApi(
       // prevent serializing incomplete state during editing
       internalApi.updateEditingState(true);
     }
-    // save the initial state in case it needs to revert later on
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
-      // restore the first state found when the panel opened
       onCancel: () => {
         internalApi.updateEditingState(false);
         updateState({ ...firstState });
       },
-      // the getState() here contains the wrong filters references but the input attributes
-      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: !canEdit()
-        ? noop
-        : (attributes: LensRuntimeState['attributes']) => {
+        ? undefined
+        : async (attributes) => {
+            let appliedAttributes = attributes;
+            if (attributes.visualizationType === 'lnsXY') {
+              const updatedVisState = await saveUpdatedLinkedAnnotationsToLibrary(
+                attributes.state.visualization,
+                startDependencies.eventAnnotationService
+              );
+              appliedAttributes = {
+                ...attributes,
+                state: { ...attributes.state, visualization: updatedVisState },
+              };
+            }
             internalApi.updateEditingState(false);
-            updateState({ ...getState(), attributes });
+            updateState({ ...getState(), attributes: appliedAttributes });
+            return appliedAttributes;
           },
       closeFlyout: () => {
         internalApi.updateEditingState(false);
@@ -350,8 +381,8 @@ export function initializeEditApi(
         }
         const currentState = getState();
         return getEditPath(
-          currentState.savedObjectId,
-          currentState.timeRange,
+          currentState.ref_id,
+          currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()
         );

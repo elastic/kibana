@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/261591
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Search and data
+title: Mark all LLM connectors as deprecated

@@ -11,25 +11,12 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { fetchDurationRanges } from '../correlations/queries/fetch_duration_ranges';
 import { fetchDurationHistogramRangeSteps } from '../correlations/queries/fetch_duration_histogram_range_steps';
 import { getPercentileThresholdValue } from './get_percentile_threshold_value';
+import type { EntityType } from '../../../common/correlations/types';
 import type { OverallLatencyDistributionResponse } from './types';
 import type { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getOverallLatencyDistribution({
-  chartType,
-  apmEventClient,
-  start,
-  end,
-  environment,
-  kuery,
-  query,
-  percentileThreshold,
-  durationMinOverride,
-  durationMaxOverride,
-  searchMetrics,
-  isOtel = false,
-}: {
-  chartType: LatencyDistributionChartType;
+type GetOverallLatencyDistributionParams = {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -39,15 +26,33 @@ export async function getOverallLatencyDistribution({
   percentileThreshold: number;
   durationMinOverride?: number;
   durationMaxOverride?: number;
-  searchMetrics: boolean;
   isOtel?: boolean;
-}) {
+} & (
+  | { chartType: LatencyDistributionChartType; searchMetrics: boolean; entityType?: never }
+  | { entityType: EntityType; chartType?: never; searchMetrics?: never }
+);
+
+export async function getOverallLatencyDistribution({
+  chartType,
+  entityType,
+  apmEventClient,
+  start,
+  end,
+  environment,
+  kuery,
+  query,
+  percentileThreshold,
+  durationMinOverride,
+  durationMaxOverride,
+  searchMetrics = false,
+  isOtel = false,
+}: GetOverallLatencyDistributionParams) {
   return withApmSpan('get_overall_latency_distribution', async () => {
     const overallLatencyDistribution: OverallLatencyDistributionResponse = {};
+    const useEntityType = entityType !== undefined;
 
     // #1: get 95th percentile to be displayed as a marker in the log log chart
     overallLatencyDistribution.percentileThresholdValue = await getPercentileThresholdValue({
-      chartType,
       apmEventClient,
       start,
       end,
@@ -55,8 +60,10 @@ export async function getOverallLatencyDistribution({
       kuery,
       query,
       percentileThreshold,
-      searchMetrics,
       isOtel,
+      ...(useEntityType
+        ? { entityType }
+        : { chartType: chartType!, searchMetrics: searchMetrics! }),
     });
 
     // finish early if we weren't able to identify the percentileThresholdValue.
@@ -66,17 +73,18 @@ export async function getOverallLatencyDistribution({
 
     // #2: get histogram range steps
     const { durationMin, durationMax, rangeSteps } = await fetchDurationHistogramRangeSteps({
-      chartType,
       apmEventClient,
       start,
       end,
       environment,
       kuery,
       query,
-      searchMetrics,
       durationMinOverride,
       durationMaxOverride,
       isOtel,
+      ...(useEntityType
+        ? { entityType }
+        : { chartType: chartType!, searchMetrics: searchMetrics! }),
     });
 
     if (!rangeSteps) {
@@ -85,7 +93,6 @@ export async function getOverallLatencyDistribution({
 
     // #3: get histogram chart data
     const { totalDocCount, durationRanges } = await fetchDurationRanges({
-      chartType,
       apmEventClient,
       start,
       end,
@@ -93,8 +100,10 @@ export async function getOverallLatencyDistribution({
       kuery,
       query,
       rangeSteps,
-      searchMetrics,
       isOtel,
+      ...(useEntityType
+        ? { entityType }
+        : { chartType: chartType!, searchMetrics: searchMetrics! }),
     });
 
     overallLatencyDistribution.durationMin = durationMin;

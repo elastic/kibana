@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/server/services';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
@@ -60,6 +59,9 @@ import {
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
 
+const FLEET_AGENT_POLICIES_READ = 'fleet-agent-policies-read';
+const FLEET_AGENTS_READ = 'fleet-agents-read';
+
 export function registerConnectorRoutes({ router, log, getStartServices }: RouteDependencies) {
   router.post(
     {
@@ -73,11 +75,11 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
-          index_name: schema.maybe(schema.string()),
+          index_name: schema.maybe(schema.string({ maxLength: 255 })),
           is_native: schema.boolean(),
-          language: schema.nullable(schema.string()),
-          name: schema.maybe(schema.string()),
-          service_type: schema.maybe(schema.string()),
+          language: schema.nullable(schema.string({ maxLength: 512 })),
+          name: schema.maybe(schema.string({ maxLength: 1000 })),
+          service_type: schema.maybe(schema.string({ maxLength: 512 })),
         }),
       },
     },
@@ -189,8 +191,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.recordOf(
-          schema.string(),
-          schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+          schema.string({ maxLength: 1000 }),
+          schema.oneOf([schema.string({ maxLength: 4096 }), schema.number(), schema.boolean()])
         ),
         params: schema.object({
           connectorId: schema.string(),
@@ -219,9 +221,18 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          full: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
-          incremental: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
+          access_control: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
+          full: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
+          incremental: schema.object({
+            enabled: schema.boolean(),
+            interval: schema.string({ maxLength: 512 }),
+          }),
         }),
         params: schema.object({
           connectorId: schema.string(),
@@ -368,7 +379,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
-          name: schema.string(),
+          name: schema.string({ maxLength: 1000 }),
           reduce_whitespace: schema.boolean(),
           run_ml_inference: schema.boolean(),
         }),
@@ -397,7 +408,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
-          name: schema.string(),
+          name: schema.string({ maxLength: 1000 }),
           reduce_whitespace: schema.boolean(),
           run_ml_inference: schema.boolean(),
         }),
@@ -438,7 +449,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
         },
       },
       validate: {
-        body: schema.object({ serviceType: schema.string() }),
+        body: schema.object({ serviceType: schema.string({ maxLength: 512 }) }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -465,7 +476,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
         },
       },
       validate: {
-        body: schema.object({ status: schema.string() }),
+        body: schema.object({ status: schema.string({ maxLength: 512 }) }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -493,8 +504,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          description: schema.nullable(schema.string()),
-          name: schema.string(),
+          description: schema.nullable(schema.string({ maxLength: 4096 })),
+          name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           connectorId: schema.string(),
@@ -527,17 +538,17 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          advanced_snippet: schema.string(),
+          advanced_snippet: schema.string({ maxLength: 10000 }),
           filtering_rules: schema.arrayOf(
             schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
+              created_at: schema.string({ maxLength: 512 }),
+              field: schema.string({ maxLength: 1000 }),
+              id: schema.string({ maxLength: 512 }),
               order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
+              policy: schema.string({ maxLength: 512 }),
+              rule: schema.string({ maxLength: 1000 }),
+              updated_at: schema.string({ maxLength: 512 }),
+              value: schema.string({ maxLength: 10000 }),
             }),
             { maxSize: 1000 }
           ),
@@ -573,17 +584,17 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.maybe(
           schema.object({
-            advanced_snippet: schema.string(),
+            advanced_snippet: schema.string({ maxLength: 10000 }),
             filtering_rules: schema.arrayOf(
               schema.object({
-                created_at: schema.string(),
-                field: schema.string(),
-                id: schema.string(),
+                created_at: schema.string({ maxLength: 512 }),
+                field: schema.string({ maxLength: 1000 }),
+                id: schema.string({ maxLength: 512 }),
                 order: schema.number(),
-                policy: schema.string(),
-                rule: schema.string(),
-                updated_at: schema.string(),
-                value: schema.string(),
+                policy: schema.string({ maxLength: 512 }),
+                rule: schema.string({ maxLength: 1000 }),
+                updated_at: schema.string({ maxLength: 512 }),
+                value: schema.string({ maxLength: 10000 }),
               }),
               { maxSize: 1000 }
             ),
@@ -987,8 +998,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          connectorName: schema.maybe(schema.string()),
-          connectorType: schema.string(),
+          connectorName: schema.maybe(schema.string({ maxLength: 1000 })),
+          connectorType: schema.string({ maxLength: 512 }),
           isManagedConnector: schema.maybe(schema.boolean()),
         }),
       },
@@ -1032,8 +1043,11 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       path: '/internal/enterprise_search/{connectorId}/agentless_policy',
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the scoped ES client',
+          requiredPrivileges: [
+            {
+              anyRequired: [FLEET_AGENT_POLICIES_READ, FLEET_AGENTS_READ],
+            },
+          ],
         },
       },
       validate: {
@@ -1045,6 +1059,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { connectorId } = request.params;
       const { client } = (await context.core).elasticsearch;
+      const soClient = (await context.core).savedObjects.client;
 
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
@@ -1079,26 +1094,24 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           });
         }
 
-        const [_core, start] = await getStartServices();
-
-        const savedObjects = _core.savedObjects;
+        const [, start] = await getStartServices();
 
         const agentlessPoliciesService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
-
-        const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
 
         const service = new AgentlessConnectorsInfraService(
           soClient,
           client.asCurrentUser,
           packagePolicyService,
           agentlessPoliciesService,
-          agentService,
           log
         );
 
-        const policy = await service.getAgentPolicyForConnectorId({ connectorId });
+        const policy = await service.getAgentPolicyForConnectorId({
+          connectorId,
+          agentClient: agentService.asScoped(request),
+        });
 
         if (!policy) {
           return response.ok({

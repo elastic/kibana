@@ -7,11 +7,7 @@
 
 import { ServerlessRoleName } from '../../support/roles';
 import { initializeDataViews } from '../../tasks/login';
-import {
-  addLiveQueryToCase,
-  checkActionItemsInResults,
-  viewRecentCaseAndCheckResults,
-} from '../../tasks/live_query';
+import { addLiveQueryToCase, viewRecentCaseAndCheckResults } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
@@ -52,12 +48,6 @@ describe('Add to Cases', () => {
       viewRecentCaseAndCheckResults();
 
       cy.contains(liveQueryQuery);
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
-      });
     });
   });
 
@@ -84,12 +74,6 @@ describe('Add to Cases', () => {
       viewRecentCaseAndCheckResults();
 
       cy.contains('SELECT * FROM os_version;');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: false,
-        timeline: false,
-      });
     });
   });
 });

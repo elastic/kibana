@@ -9,7 +9,7 @@ import { act, fireEvent } from '@testing-library/react';
 
 import React from 'react';
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { zodStringWithDurationValidation } from '../../../../../common/settings/agent_policy_settings';
 import type { SettingsConfig } from '../../../../../common/settings/types';

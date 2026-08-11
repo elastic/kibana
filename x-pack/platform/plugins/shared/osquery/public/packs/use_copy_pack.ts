@@ -12,7 +12,7 @@ import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-import { PACKS_ID } from './constants';
+import { PACKS_ID, PACK_USERS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseCopyPackProps {
@@ -57,6 +57,7 @@ export const useCopyPack = ({ packId }: UseCopyPackProps) => {
       },
       onSuccess: (response) => {
         queryClient.invalidateQueries([PACKS_ID]);
+        queryClient.invalidateQueries([PACK_USERS_ID]);
         navigateToApp(PLUGIN_ID, {
           path: pagePathGetters.pack_edit({
             packId: response.data.saved_object_id,

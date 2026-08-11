@@ -20,6 +20,8 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -39,7 +41,8 @@ export const useData = (
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment }
 ) => {
-  const { executionContext, uiSettings } = useAiopsAppContext();
+  const { executionContext, uiSettings, cps } = useAiopsAppContext();
+  const { projectRouting } = useProjectRouting(cps);
 
   useExecutionContext(executionContext, {
     name: AIOPS_PLUGIN_ID,
@@ -140,6 +143,12 @@ export const useData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (projectRouting) {
+      setLastRefresh(Date.now());
+    }
+  }, [projectRouting]);
+
   return {
     documentStats,
     timefilter,
@@ -151,3 +160,19 @@ export const useData = (
     forceRefresh: () => setLastRefresh(Date.now()),
   };
 };
+
+function useProjectRouting(cps?: CPSPluginStart): { projectRouting: ProjectRouting | undefined } {
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
+    cps?.cpsManager?.getProjectRouting()
+  );
+
+  useEffect(() => {
+    const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe((newRouting) => {
+      setProjectRouting(newRouting);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [cps?.cpsManager]);
+
+  return { projectRouting };
+}

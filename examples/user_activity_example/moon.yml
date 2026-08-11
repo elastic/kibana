@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/user-activity-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/user-activity-example-plugin'
+  title: '@kbn/user-activity-example-plugin'
   description: Moon project for @kbn/user-activity-example-plugin
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: examples/user_activity_example
+  sourceRoot: examples/user_activity_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/developer-examples-plugin'

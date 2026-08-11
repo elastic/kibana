@@ -17,7 +17,7 @@ export class QueueVertex extends Vertex {
   }
 
   get iconType() {
-    return 'logstashQueue';
+    return 'queue';
   }
 
   get next() {

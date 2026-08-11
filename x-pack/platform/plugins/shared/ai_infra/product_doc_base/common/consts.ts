@@ -7,7 +7,9 @@
 
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
+export const LATEST_PRODUCT_VERSION = 'latest';
 export const productDocInstallStatusSavedObjectTypeName = 'product-doc-install-status';
+export const openAPISpecInstallStatusSavedObjectTypeName = 'openapi-spec-install-status';
 
 /**
  * The id of the inference endpoint we're creating for our product doc indices.

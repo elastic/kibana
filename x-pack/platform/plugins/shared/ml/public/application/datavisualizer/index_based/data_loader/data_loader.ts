@@ -11,7 +11,7 @@ import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { IndexPatternTitle } from '../../../../../common/types/kibana';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import type { MlApi } from '../../../services/ml_api_service';
 
 import type { FieldHistogramRequestConfig } from '../common/request';
@@ -33,7 +33,8 @@ export class DataLoader {
     fields: FieldHistogramRequestConfig[],
     query: string | estypes.QueryDslQueryContainer,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
-    editorRuntimeMappings?: RuntimeMappings
+    editorRuntimeMappings?: RuntimeMappings,
+    projectRouting?: string
   ): Promise<any[]> {
     const stats = await this._mlApi.getVisualizerFieldHistograms({
       indexPattern: this._indexPatternTitle,
@@ -41,6 +42,7 @@ export class DataLoader {
       fields,
       samplerShardSize,
       runtimeMappings: editorRuntimeMappings || this._runtimeMappings,
+      projectRouting,
     });
 
     return stats;

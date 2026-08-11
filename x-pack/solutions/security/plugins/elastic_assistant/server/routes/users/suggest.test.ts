@@ -83,7 +83,7 @@ describe('Suggest users route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `searchTerm: Expected string, received number`
+        `searchTerm: Invalid input: expected string, received number`
       );
     });
   });

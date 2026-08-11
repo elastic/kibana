@@ -6,8 +6,10 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock } from '../mocks';
+import { PackagePolicyNameExistsError } from '../errors';
 
 import type { AgentPolicy, PackagePolicy } from '../types';
 
@@ -16,7 +18,6 @@ import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
-import type { KibanaRequest } from '@kbn/core/server';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
@@ -82,18 +83,39 @@ describe('createAgentPolicyWithPackages', () => {
       (soClient: any, packageName: string, spaceIds: string[]) =>
         Promise.resolve(`${packageName}-1`)
     );
-    mockedPackagePolicyService.create.mockImplementation((soClient, esClient, newPolicy) =>
-      Promise.resolve({
-        ...newPolicy,
-      } as PackagePolicy)
-    );
-
     jest.mocked(mockedBulkInstallPackages).mockReset();
     jest.mocked(mockedPackagePolicyService.create).mockReset();
+    jest
+      .mocked(mockedPackagePolicyService.create)
+      .mockImplementation((soClient, esClient, newPolicy) =>
+        Promise.resolve({
+          ...newPolicy,
+          id: 'mock-package-policy-id',
+        } as PackagePolicy)
+      );
   });
 
   afterEach(() => {
     appContextService.stop();
+  });
+
+  it('should retry via the lock when create throws PackagePolicyNameExistsError', async () => {
+    jest
+      .mocked(mockedPackagePolicyService.create)
+      .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
+      .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
+      .mockResolvedValue({ id: 'mock-package-policy-id' } as PackagePolicy);
+
+    await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: { name: 'Agent policy 1', namespace: 'default' },
+      withSysMonitoring: true,
+      spaceId: 'default',
+    });
+
+    expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(3);
   });
 
   it('should roll back agent policy if package policy creation failed', async () => {

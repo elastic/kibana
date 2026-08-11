@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APM_HOST_TROUBLESHOOTING_LINK } from '../../../../components/asset_details/constants';
 import { Popover } from '../../../../components/asset_details/tabs/common/popover';
-import { HOST_NAME_FIELD } from '../../../../../common/constants';
+import { DEFAULT_SCHEMA, HOST_NAME_FIELD } from '../../../../../common/constants';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -42,6 +42,7 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
+import { NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
@@ -66,9 +67,8 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
-  const defaultValue = value ?? 0;
-  return createInventoryMetricFormatter({ type })(defaultValue);
+const formatMetric = (type: InfraEntityMetricType, value: number) => {
+  return createInventoryMetricFormatter({ type })(value);
 };
 
 const buildMetricCell = (
@@ -76,8 +76,11 @@ const buildMetricCell = (
   formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
-  if (!hasSystemMetrics && value === null) {
-    return <AddDataTroubleshootingPopover />;
+  if (value === null) {
+    if (!hasSystemMetrics) {
+      return <AddDataTroubleshootingPopover />;
+    }
+    return NOT_AVAILABLE_LABEL;
   }
 
   return formatMetric(formatType, value);
@@ -162,7 +165,7 @@ export const useHostsTable = () => {
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema: searchCriteria.preferredSchema ?? 'ecs',
+        schema: searchCriteria.preferredSchema ?? DEFAULT_SCHEMA,
       }),
     [inventoryModel.metrics, searchCriteria.preferredSchema]
   );

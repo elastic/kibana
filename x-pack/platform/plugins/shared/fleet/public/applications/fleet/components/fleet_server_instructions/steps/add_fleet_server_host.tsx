@@ -274,7 +274,6 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: submittedFleetServerHost.host_urls[0],
                 fleetSettingsLink: (
-                  // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiLink href={getHref('settings')} onClick={onClose}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"

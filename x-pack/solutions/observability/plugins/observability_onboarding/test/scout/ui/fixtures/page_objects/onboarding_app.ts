@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class OnboardingApp {
@@ -37,10 +38,6 @@ export class OnboardingApp {
 
   public get otelLogsCard() {
     return this.page.getByTestId('integration-card:otel-logs');
-  }
-
-  public get kubernetesQuickStartCard() {
-    return this.page.getByTestId('integration-card:kubernetes-quick-start');
   }
 
   public get otelKubernetesCard() {
@@ -102,7 +99,7 @@ export class OnboardingApp {
         await this.autoDetectLogsCard.waitFor({ state: 'visible' });
         break;
       case 'kubernetes':
-        await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+        await this.otelKubernetesCard.waitFor({ state: 'visible' });
         break;
       case 'cloud':
         await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
@@ -119,9 +116,8 @@ export class OnboardingApp {
   }
 
   async selectKubernetesUseCase() {
-    const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
-    await kubernetesRadio.click();
-    await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
+    await this.kubernetesUseCaseTile.getByRole('radio').click();
+    await this.page.waitForURL(/\/kubernetes(\?|$|#)/);
   }
 
   async selectCloudUseCase() {
@@ -138,23 +134,28 @@ export class OnboardingApp {
 
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
-    await card.click();
 
     const nonRouting =
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
-      await this.page.waitForURL(
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/,
-        { timeout: 30_000 }
-      );
-    }
+      const urlPattern =
+        /.*\/(auto-detect|kubernetes|otel-logs|apm-virtual|otel-virtual|synthetics-virtual)/;
 
-    // For flows that have the ingestion selector, wait for it to be visible
-    const flowsWithIngestionSelector =
-      /(auto-detect-logs|kubernetes-quick-start|otel-logs|otel-kubernetes)/;
-    if (flowsWithIngestionSelector.test(cardSelector)) {
-      await this.ingestionModeSelector.waitFor({ state: 'visible', timeout: 30000 });
+      // Retry click + URL check to handle race conditions where the card
+      // is rendered but React click handlers aren't yet attached after a re-render
+      await expect(async () => {
+        if (!urlPattern.test(this.page.url())) {
+          await card.click();
+        }
+        expect(this.page.url()).toMatch(urlPattern);
+      }).toPass({ timeout: 30_000 });
+    } else {
+      await card.click();
     }
+  }
+
+  async waitForIngestionModeSelector(timeout = 30_000) {
+    await this.ingestionModeSelector.waitFor({ state: 'visible', timeout });
   }
 
   async getGridColumnCount() {
@@ -220,16 +221,8 @@ export class OnboardingApp {
     return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
   }
 
-  public get kubernetesCodeSnippet() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
-  }
-
   async getAutoDetectCommandContent(): Promise<string> {
     return (await this.autoDetectCodeSnippet.textContent()) ?? '';
-  }
-
-  async getKubernetesCommandContent(): Promise<string> {
-    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
   }
 
   // Enable Wired Streams Modal
@@ -251,5 +244,14 @@ export class OnboardingApp {
 
   async confirmEnableWiredStreamsModal() {
     await this.enableWiredStreamsConfirmButton.click();
+  }
+
+  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
+    try {
+      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
+      await this.confirmEnableWiredStreamsModal();
+    } catch {
+      // Modal omitted: Wired Streams was already enabled in this session.
+    }
   }
 }

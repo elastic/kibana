@@ -6,8 +6,9 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
 export interface ToolManagerParams {
@@ -20,6 +21,9 @@ export interface AddToolOptions {
   dynamic?: boolean;
 }
 
+export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
+export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
+
 export enum ToolManagerToolType {
   executable = 'executable',
   browser = 'browser',
@@ -27,13 +31,13 @@ export enum ToolManagerToolType {
 
 export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
-  tools: ExecutableTool | ExecutableTool[];
+  tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
   logger: Logger;
 }
 
 export interface BrowserToolInput {
   type: ToolManagerToolType.browser;
-  tools: BrowserApiToolMetadata | BrowserApiToolMetadata[];
+  tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput;
@@ -48,6 +52,13 @@ export interface ToolManager {
    * Should be called once per run before adding tools.
    */
   setEventEmitter(eventEmitter: AgentEventEmitterFn): void;
+
+  /**
+   * Sets the token budget used by the tool-result length guardrail for tools that
+   * don't define their own `maxResultTokens` override.
+   * Should be called once per run before adding tools (else will use default value);
+   */
+  setMaxToolResultTokens(maxTokens: number): void;
 
   /**
    * Adds tools to the tool manager.
@@ -77,10 +88,26 @@ export interface ToolManager {
    */
   getToolIdMapping(): Map<string, string>;
 
+  getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
+
+  /**
+   * Returns the resolved executable tool for the given internal id, or `undefined`
+   * if no such tool was registered for this run. Use with `Runner.runInternalTool`
+   * to dispatch a tool from outside the LangChain graph (e.g. `exec_tool` in bash)
+   * while still going through the standard hooks/telemetry pipeline.
+   */
+  getExecutable(toolId: string): ExecutableTool | undefined;
+
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.
    * Returns internal tool IDs (not LangChain names) for persistence.
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];
+
+  /**
+   * Gets the summarizer function for a tool by its internal tool ID.
+   * Returns undefined if the tool is not found or has no summarizer.
+   */
+  getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined;
 }

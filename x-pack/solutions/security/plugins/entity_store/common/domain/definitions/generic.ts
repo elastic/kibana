@@ -7,18 +7,24 @@
 
 import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+} from './common_fields';
 
-export const genericEntityDefinition: EntityDefinitionWithoutId = {
+// Generic entities represent cloud and orchestrator resources (e.g. AWS ARNs, Azure Resource IDs,
+// GCP Resource Names, Kubernetes pods) sourced from CSP integrations that populate `entity.id`.
+// They are consumed by Graph (entity and event flyout visualizations) and Asset Inventory.
+// Customers without CSP integrations will not produce any generic entities.
+export const genericEntityDefinition = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
-  identityField: {
-    requiresOneOfFields: ['entity.id'],
-    euidFields: [[{ field: 'entity.id' }]],
-  },
+  identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
-    // We want this to make sure it's also extracted on CCS logs extraction
+    // We want this to make sure it's also extracted on remote log extraction
     newestValue({ source: 'entity.id' }),
     newestValue({ source: 'entity.name' }),
     ...getEntityFieldsDescriptions(),
@@ -44,7 +50,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'orchestrator.organization' }),
     newestValue({ source: 'orchestrator.resource.annotation' }),
     newestValue({ source: 'orchestrator.resource.id' }),
-    newestValue({ source: 'orchestrator.resource.ip' }),
+    newestValue({ source: 'orchestrator.resource.ip', mapping: { type: 'ip' } }),
     newestValue({ source: 'orchestrator.resource.label' }),
     newestValue({ source: 'orchestrator.resource.name' }),
     newestValue({ source: 'orchestrator.resource.parent.type' }),
@@ -53,4 +59,4 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
 
     ...getCommonFieldDescriptions('entity'),
   ],
-} as const satisfies EntityDefinitionWithoutId;
+} satisfies EntityDefinitionWithoutId;

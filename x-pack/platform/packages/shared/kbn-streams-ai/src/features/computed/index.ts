@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
+import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
 import { logPatternsGenerator } from './log_patterns';
@@ -45,6 +46,7 @@ const generators: ComputedFeatureGenerator[] = [
   logSamplesGenerator,
   logPatternsGenerator,
   errorLogsGenerator,
+  codeAnalysisGenerator,
 ];
 
 generators.forEach((generator) => registry.register(generator));
@@ -52,10 +54,14 @@ generators.forEach((generator) => registry.register(generator));
 /**
  * Returns formatted LLM instructions for all computed feature types.
  * This is automatically included in prompts so the LLM knows how to use each feature type.
+ *
+ * `excludedTypes` skips types a consumer never receives, so the prompt won't
+ * describe a feature type that never appears in tool results.
  */
-export function getComputedFeatureInstructions(): string {
+export function getComputedFeatureInstructions(excludedTypes: readonly string[] = []): string {
   return registry
     .getAll()
+    .filter((generator) => !excludedTypes.includes(generator.type))
     .map((generator) => `**${generator.type}**: ${generator.llmInstructions}`)
     .join('\n\n');
 }
@@ -80,14 +86,22 @@ function toComputedFeature(
 
 /**
  * Generates all computed features by running all registered generators in parallel.
+ *
+ * Generators that return `undefined` (e.g. an externally-backed generator whose
+ * provider is absent or that found no match) are skipped.
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
 ): Promise<BaseFeature[]> {
-  return Promise.all(
+  const results = await Promise.all(
     registry.getAll().map(async (generator) => {
       const value = await generator.generate(options);
+      if (value === undefined) {
+        return undefined;
+      }
       return toComputedFeature(generator, value, options.stream.name);
     })
   );
+
+  return results.filter((feature): feature is BaseFeature => feature !== undefined);
 }

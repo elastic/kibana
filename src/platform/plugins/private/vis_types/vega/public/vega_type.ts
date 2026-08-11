@@ -17,12 +17,14 @@ import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/publ
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
+import { specUsesEsql } from './lib/spec_uses_esql';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 import type { VisParams } from './vega_fn';
+import { VegaIcon } from './vega_icon';
 
 export const vegaVisType: VisTypeDefinition<VisParams> = {
   name: 'vega',
@@ -32,10 +34,11 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
     description: 'Vega and Vega-Lite are product names and should not be translated',
   }),
-  icon: 'visVega',
+  icon: VegaIcon, // VegaIcon svg is wrapped into EUIIcon
   group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
-    defaultMessage: 'Custom visualization',
+    defaultMessage: 'Vega',
+    description: 'Vega is a product name and should not be translated',
   }),
   visConfig: { defaults: { spec: getDefaultSpec() } },
   editorConfig: {
@@ -55,7 +58,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     try {
       const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
 
-      return extractIndexPatternsFromSpec(spec);
+      return await extractIndexPatternsFromSpec(spec);
     } catch (e) {
       // spec is invalid
     }
@@ -70,6 +73,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
       // spec is invalid
     }
     return undefined;
+  },
+  usesEsql: (visParams) => {
+    try {
+      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+      return specUsesEsql(spec);
+    } catch (e) {
+      // spec is invalid
+    }
+    return false;
   },
   inspectorAdapters: createInspectorAdapters,
   /**

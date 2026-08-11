@@ -33,6 +33,7 @@ export async function initPlugin() {
 
 function createServerCallback() {
   let payloads: string[] = [];
+  let abortedCount = 0;
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -49,6 +50,19 @@ function createServerCallback() {
 
     // return the payloads that were posted to be remembered (e.g. from header_as_payload)
     if (request.method === 'GET') {
+      if (request.url?.includes('reset_aborted_count')) {
+        abortedCount = 0;
+        response.statusCode = 200;
+        response.end('OK');
+        return;
+      }
+      if (request.url?.includes('aborted_count')) {
+        response.statusCode = 200;
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify({ abortedCount }));
+        return;
+      }
+
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
@@ -82,12 +96,21 @@ function createServerCallback() {
           return validateReceivedHeaders(request.headers, response);
         case 'failure':
           response.statusCode = 500;
+          response.setHeader('Content-Type', 'text/plain; charset=utf-8');
           response.end('Error');
           return;
         case 'header_as_payload':
           payloads.push(JSON.stringify(request.headers));
           response.statusCode = 200;
+          response.setHeader('Content-Type', 'text/plain; charset=utf-8');
           response.end('OK');
+          return;
+        case 'binary_response':
+          response.statusCode = 200;
+          response.setHeader('Content-Type', 'image/png');
+          // PNG file signature, used as a deterministic non-UTF8 byte sequence
+          // to verify the http connector preserves binary responses.
+          response.end(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
           return;
       }
 
@@ -100,10 +123,28 @@ function createServerCallback() {
         return;
       }
 
+      const delayMatch = data.match(/^delay_(\d+)$/);
+      if (delayMatch) {
+        const delayMs = parseInt(delayMatch[1], 10);
+        let aborted = false;
+        response.on('close', () => {
+          if (!response.writableEnded) {
+            aborted = true;
+            abortedCount++;
+          }
+        });
+        setTimeout(() => {
+          if (!aborted) {
+            response.statusCode = 200;
+            response.end('OK');
+          }
+        }, delayMs);
+        return;
+      }
+
       response.statusCode = 400;
       response.end(`unexpected body ${data}`);
-      // eslint-disable-next-line no-console
-      console.log(`http simulator received unexpected body: ${data}`);
+
       return;
     });
   };

@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { ConnectorSelector } from '.';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { mockAssistantAvailability, TestProviders } from '../../mock/test_providers/test_providers';
 import { mockActionTypes, mockConnectors } from '../../mock/connectors';
 import * as i18n from '../translations';
-import { useLoadConnectors } from '../use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { createMockUseLoadConnectorsResult } from '../../mock/test_helpers';
 
 const onConnectorSelectionChange = jest.fn();
@@ -27,7 +27,7 @@ const connectorTwo = mockConnectors[1];
 
 const mockRefetchConnectors = jest.fn();
 
-jest.mock('../use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(),
 }));
 
@@ -139,8 +139,7 @@ describe('Connector selector', () => {
     expect(addButton).toBeDisabled();
   });
 
-  it('shows tooltip with missing privileges message when hovering disabled add connector button', () => {
-    jest.useFakeTimers();
+  it('shows tooltip with missing privileges message when hovering disabled add connector button', async () => {
     jest.mocked(useLoadConnectors).mockReturnValue(
       createMockUseLoadConnectorsResult({
         data: [],
@@ -168,14 +167,12 @@ describe('Connector selector', () => {
     expect(addButton).toBeDisabled();
 
     fireEvent.mouseOver(addButton);
-    act(() => {
-      jest.runAllTimers();
-    });
 
-    expect(screen.getByRole('tooltip')).toHaveTextContent(
-      i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION
-    );
-    jest.useRealTimers();
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
+        i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION
+      );
+    });
   });
 
   it('renders add new connector button if no selected connector is provided', () => {
@@ -247,6 +244,30 @@ describe('Connector selector', () => {
 
     expect(screen.getByTestId('connector-selector')).not.toHaveTextContent(
       i18n.INLINE_CONNECTOR_PLACEHOLDER
+    );
+  });
+
+  it('passes loadConnectorFeatureId to useLoadConnectors when defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} loadConnectorFeatureId="test-feature-id" />
+      </TestProviders>
+    );
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'test-feature-id' })
+    );
+  });
+
+  it('defaults loadConnectorFeatureId to elastic_assistant when not defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'elastic_assistant' })
     );
   });
 });

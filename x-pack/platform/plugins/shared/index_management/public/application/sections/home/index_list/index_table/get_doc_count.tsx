@@ -16,7 +16,7 @@ import {
   map,
   of,
   scan,
-  share,
+  shareReplay,
 } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { INTERNAL_API_BASE_PATH } from '../../../../../../common/constants';
@@ -29,6 +29,8 @@ export enum RequestResultType {
   Success = 'success',
   Error = 'error',
 }
+
+export type DocCountApi = ReturnType<typeof docCountApi>;
 
 export const docCountApi = (httpSetup: HttpSetup) => {
   const subj = new Subject<string>();
@@ -84,8 +86,8 @@ export const docCountApi = (httpSetup: HttpSetup) => {
         return next;
       }
     }, {} as Record<string, DocCountResult>),
-    // share the observable so it can be used multiple times
-    share()
+    // replay the latest accumulated state to late subscribers (e.g. the index actions context menu)
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   return {

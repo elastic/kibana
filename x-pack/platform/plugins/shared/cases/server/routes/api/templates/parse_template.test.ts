@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { parseTemplate } from './parse_template';
 
-const buildDefinition = (name: string) =>
-  yaml.dump({
-    name,
+const buildDefinition = (title: string) =>
+  yamlStringify({
+    name: title,
     fields: [
       {
         control: 'INPUT_TEXT',
@@ -57,7 +57,9 @@ describe('parseTemplate', () => {
       description: 'A description',
       tags: ['tag-1', 'tag-2'],
       fieldCount: 1,
-      fieldNames: ['test_field'],
+      fieldDefinitions: [
+        { name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' },
+      ],
       usageCount: 5,
       lastUsedAt: '2024-01-15T10:00:00.000Z',
       isDefault: true,
@@ -74,7 +76,9 @@ describe('parseTemplate', () => {
     expect(result.tags).toEqual(['tag-1', 'tag-2']);
     expect(result.author).toBe('test-user');
     expect(result.fieldCount).toBe(1);
-    expect(result.fieldNames).toEqual(['test_field']);
+    expect(result.fieldDefinitions).toEqual([
+      { name: 'test_field', label: 'Test Field', type: 'keyword', control: 'TEXT' },
+    ]);
     expect(result.usageCount).toBe(5);
     expect(result.lastUsedAt).toBe('2024-01-15T10:00:00.000Z');
     expect(result.isDefault).toBe(true);
@@ -93,5 +97,78 @@ describe('parseTemplate', () => {
 
     expect(result.isLatest).toBe(true);
     expect(result.latestVersion).toBe(1);
+  });
+
+  it('defaults latestVersion to this document templateVersion (not a hardcoded 1)', () => {
+    const template = createTemplate({ templateVersion: 3, isLatest: true });
+    const result = parseTemplate(template);
+
+    expect(result.templateVersion).toBe(3);
+    expect(result.latestVersion).toBe(3);
+  });
+
+  it('uses an explicit latestVersion override when fetching a historical revision', () => {
+    const template = createTemplate({ templateVersion: 1, isLatest: false });
+    const result = parseTemplate(template, { latestVersion: 4 });
+
+    expect(result.templateVersion).toBe(1);
+    expect(result.isLatest).toBe(false);
+    expect(result.latestVersion).toBe(4);
+  });
+
+  it('parses case defaults from the definition', () => {
+    const definition = yamlStringify({
+      name: 'Template with severity',
+      severity: 'high',
+      category: 'security',
+      fields: [],
+    });
+    const template = createTemplate({ definition });
+    const result = parseTemplate(template);
+
+    expect(result.definition.severity).toBe('high');
+    expect(result.definition.category).toBe('security');
+  });
+
+  it('omits optional top-level defaults when not present in the definition', () => {
+    const template = createTemplate({
+      definition: yamlStringify({
+        // Every case default is optional; `name` is just provided here to assert the others are omitted.
+        name: 'Case default title',
+        fields: [],
+      }),
+    });
+    const result = parseTemplate(template);
+
+    expect(result.definition.name).toBe('Case default title');
+    expect(result.definition.severity).toBeUndefined();
+    expect(result.definition.category).toBeUndefined();
+    expect(result.definition.description).toBeUndefined();
+    expect(result.definition.tags).toBeUndefined();
+  });
+
+  it('includes definitionString with the original YAML', () => {
+    const template = createTemplate();
+    const result = parseTemplate(template);
+
+    expect(result.definitionString).toBe(template.definition);
+    expect(typeof result.definitionString).toBe('string');
+  });
+
+  it('preserves YAML comments in definitionString', () => {
+    const yamlWithComments = `# Template header
+name: Test Template
+# Field configuration
+fields:
+  - control: INPUT_TEXT
+    name: test_field
+    type: keyword`;
+
+    const template = createTemplate({ definition: yamlWithComments });
+    const result = parseTemplate(template);
+
+    expect(result.definitionString).toBe(yamlWithComments);
+    expect(result.definitionString).toContain('# Template header');
+    expect(result.definitionString).toContain('# Field configuration');
   });
 });

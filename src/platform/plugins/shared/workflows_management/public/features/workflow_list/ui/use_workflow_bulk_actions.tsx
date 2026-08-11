@@ -16,10 +16,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { ExportReferencesModal } from './export_references_modal';
+import { useExportWithReferences } from './use_export_with_references';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];
+  allWorkflows: WorkflowListItemDto[];
   onAction: () => void;
   onActionSuccess: () => void;
   deselectWorkflows: () => void;
@@ -30,8 +33,11 @@ interface UseWorkflowBulkActionsReturn {
   modals: JSX.Element;
 }
 
+const TOAST_LIFE_TIME_MS = 3000;
+
 export const useWorkflowBulkActions = ({
   selectedWorkflows,
+  allWorkflows,
   onAction,
   onActionSuccess,
   deselectWorkflows,
@@ -41,19 +47,49 @@ export const useWorkflowBulkActions = ({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const modalTitleId = useGeneratedHtmlId();
 
+  const allWorkflowsMap = useMemo(
+    () => new Map(allWorkflows.map((w) => [w.id, w])),
+    [allWorkflows]
+  );
+
+  const {
+    exportModalState,
+    startExport,
+    handleIgnore: handleExportIgnore,
+    handleAddDirect: handleExportAddDirect,
+    handleAddAll: handleExportAddAll,
+    handleCancel: handleExportCancel,
+  } = useExportWithReferences({
+    allWorkflowsMap,
+    onComplete: deselectWorkflows,
+  });
+
   const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
   const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
+  const canReadWorkflow = application?.capabilities.workflowsManagement.readWorkflow;
 
   const isDisabled = selectedWorkflows.length === 0;
+  const hasManagedWorkflows = selectedWorkflows.some((workflow) => workflow.managed === true);
+  const canDeleteSelectedWorkflows = canDeleteWorkflow && !hasManagedWorkflows;
 
   const handleDeleteWorkflows = useCallback(() => {
+    if (hasManagedWorkflows) {
+      return;
+    }
     onAction();
     setShowDeleteModal(true);
-  }, [onAction]);
+  }, [hasManagedWorkflows, onAction]);
 
   const confirmDelete = useCallback(() => {
-    const ids = selectedWorkflows.map((workflow) => workflow.id);
+    const ids = selectedWorkflows
+      .filter((workflow) => workflow.managed !== true)
+      .map((workflow) => workflow.id);
     const count = ids.length;
+    if (count === 0) {
+      setShowDeleteModal(false);
+      deselectWorkflows();
+      return;
+    }
 
     setShowDeleteModal(false);
     deselectWorkflows();
@@ -72,7 +108,7 @@ export const useWorkflowBulkActions = ({
                 'Failed to delete {count} {count, plural, one {workflow} other {workflows}}',
               values: { count },
             }),
-            toastLifeTimeMs: 3000,
+            toastLifeTimeMs: TOAST_LIFE_TIME_MS,
           });
         },
       }
@@ -100,6 +136,7 @@ export const useWorkflowBulkActions = ({
           {
             id: workflow.id,
             workflow: updateData,
+            workflowDefinition: workflow.definition ?? undefined,
             isBulkAction: true,
             bulkActionCount: totalCount,
             skipRefetch: true,
@@ -156,6 +193,11 @@ export const useWorkflowBulkActions = ({
     bulkUpdateWorkflows(enabledWorkflows, { enabled: false });
   }, [selectedWorkflows, bulkUpdateWorkflows]);
 
+  const handleExportWorkflows = useCallback(() => {
+    onAction();
+    startExport(selectedWorkflows);
+  }, [selectedWorkflows, onAction, startExport]);
+
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
 
@@ -188,7 +230,21 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canUpdateWorkflow && canDeleteWorkflow && mainPanelItems.length > 0) {
+    const hasExportableWorkflows = selectedWorkflows.some((w) => w.definition !== null);
+    if (canReadWorkflow && hasExportableWorkflows) {
+      mainPanelItems.push({
+        name: i18n.translate('workflows.bulkActions.export', {
+          defaultMessage: 'Export',
+        }),
+        icon: 'exportAction',
+        disabled: isDisabled,
+        onClick: handleExportWorkflows,
+        'data-test-subj': 'workflows-bulk-action-export',
+        key: 'workflows-bulk-action-export',
+      });
+    }
+
+    if (mainPanelItems.length > 0 && canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         isSeparator: true as const,
         key: 'bulk-actions-separator',
@@ -196,7 +252,7 @@ export const useWorkflowBulkActions = ({
       });
     }
 
-    if (canDeleteWorkflow) {
+    if (canDeleteSelectedWorkflows) {
       mainPanelItems.push({
         name: (
           <EuiTextColor color="danger">
@@ -225,10 +281,12 @@ export const useWorkflowBulkActions = ({
   }, [
     selectedWorkflows,
     canUpdateWorkflow,
-    canDeleteWorkflow,
+    canDeleteSelectedWorkflows,
+    canReadWorkflow,
     isDisabled,
     handleEnableWorkflows,
     handleDisableWorkflows,
+    handleExportWorkflows,
     handleDeleteWorkflows,
   ]);
 
@@ -264,9 +322,29 @@ export const useWorkflowBulkActions = ({
             </p>
           </EuiConfirmModal>
         )}
+        {exportModalState && (
+          <ExportReferencesModal
+            missingWorkflows={exportModalState.missingWorkflows}
+            onIgnore={handleExportIgnore}
+            onAddDirect={handleExportAddDirect}
+            onAddAll={handleExportAddAll}
+            onCancel={handleExportCancel}
+          />
+        )}
       </>
     );
-  }, [showDeleteModal, selectedWorkflows.length, cancelDelete, confirmDelete, modalTitleId]);
+  }, [
+    showDeleteModal,
+    selectedWorkflows.length,
+    cancelDelete,
+    confirmDelete,
+    modalTitleId,
+    exportModalState,
+    handleExportIgnore,
+    handleExportAddDirect,
+    handleExportAddAll,
+    handleExportCancel,
+  ]);
 
   return {
     panels,

@@ -14,12 +14,10 @@ import type { CPSProject, ProjectTagsResponse } from '@kbn/cps-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 
-const DEFAULT_NPRE_VALUE = '_alias:default_npre_value';
+const DEFAULT_NPRE_VALUE = '_alias:*';
 
-const mockGetProjectRoutingAccess = jest.fn();
 jest.mock('./async_services', () => ({
   ...jest.requireActual('./async_services'),
-  getProjectRoutingAccess: (...args: unknown[]) => mockGetProjectRoutingAccess(...args),
 }));
 
 describe('CPSManager', () => {
@@ -65,8 +63,6 @@ describe('CPSManager', () => {
   };
 
   beforeEach(() => {
-    mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
-
     mockHttp = {
       post: jest.fn().mockResolvedValue(mockResponse),
       get: jest.fn().mockResolvedValue(undefined),
@@ -74,6 +70,7 @@ describe('CPSManager', () => {
         get: jest.fn().mockReturnValue(''),
         serverBasePath: '',
       },
+      spaceId: 'default',
     } as unknown as jest.Mocked<HttpSetup>;
 
     mockApplication = {
@@ -89,8 +86,8 @@ describe('CPSManager', () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
-    mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
   });
 
   describe('fetchProjects', () => {
@@ -101,15 +98,10 @@ describe('CPSManager', () => {
       });
       jest.clearAllMocks();
       const result = await cpsManager.fetchProjects();
-
-      // getProjectRouting() returns undefined here because initializeDefaultProjectRouting
-      // fetches the NPRE value (http.get returns undefined), so defaultProjectRouting = undefined
-      expect(mockHttp.post).toHaveBeenCalledWith('/internal/cps/projects_tags', {
-        body: JSON.stringify({}),
-      });
+      expect(mockHttp.post).not.toHaveBeenCalled();
       expect(result).toEqual({
         origin: mockOriginProject,
-        linkedProjects: [mockLinkedProjects[1], mockLinkedProjects[0]], // sorted by alias
+        linkedProjects: [mockLinkedProjects[1], mockLinkedProjects[0]],
       });
     });
 
@@ -123,6 +115,8 @@ describe('CPSManager', () => {
 
   describe('retry logic', () => {
     it('should retry on failure with exponential backoff', async () => {
+      await cpsManager.whenReady();
+      jest.clearAllMocks();
       jest.useFakeTimers();
       jest.clearAllMocks();
       mockHttp.post
@@ -130,42 +124,39 @@ describe('CPSManager', () => {
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce(mockResponse);
 
-      const promise = cpsManager.fetchProjects();
+      const promise = cpsManager.fetchProjects('_alias:_origin');
       await jest.runAllTimersAsync();
 
       const result = await promise;
 
       expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
       expect(result!.origin).toEqual(mockOriginProject);
-
-      jest.useRealTimers();
     });
 
     it('should throw error after max retries exceeded', async () => {
+      await cpsManager.whenReady();
       jest.clearAllMocks();
       jest.useFakeTimers();
       mockHttp.post.mockRejectedValue(new Error('Persistent error'));
 
-      const promise = cpsManager.fetchProjects();
+      const promise = cpsManager.fetchProjects('_alias:_origin');
       const timerPromise = jest.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow('Persistent error');
 
       expect(mockHttp.post).toHaveBeenCalledTimes(3); // initial + 2 retries
-
-      jest.useRealTimers();
     });
 
     it('should throw error on final failure', async () => {
+      await cpsManager.whenReady();
+      jest.clearAllMocks();
       jest.useFakeTimers();
       mockHttp.post.mockRejectedValue(new Error('Error'));
 
-      const promise = cpsManager.fetchProjects();
+      const promise = cpsManager.fetchProjects('_alias:_origin');
       const timerPromise = jest.runAllTimersAsync();
 
       await expect(Promise.all([promise, timerPromise])).rejects.toThrow();
-
-      jest.useRealTimers();
     });
   });
 
@@ -184,6 +175,7 @@ describe('CPSManager', () => {
         http: mockHttp,
         logger: mockLogger,
         application: mockApplication,
+        appAccessResolvers: new Map([['discover', () => ProjectRoutingAccess.EDITABLE]]),
       });
 
       await manager.whenReady();
@@ -213,14 +205,10 @@ describe('CPSManager', () => {
       it('should initialize with the current space name', async () => {
         const spaceProjectRoutingValue = '_alias:_origin';
 
-        // Mock basePath to return a space-specific path
         const customMockHttp = {
           ...mockHttp,
           get: jest.fn().mockResolvedValue(spaceProjectRoutingValue),
-          basePath: {
-            get: jest.fn().mockReturnValue('/s/test-space'),
-            serverBasePath: '',
-          },
+          spaceId: 'test-space',
         } as unknown as jest.Mocked<HttpSetup>;
 
         const manager = new CPSManager({
@@ -262,18 +250,17 @@ describe('CPSManager', () => {
     const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     beforeEach(() => {
-      // Use a resolved NPRE value so defaultProjectRouting is populated for READONLY assertions
-      mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
       mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
       cpsManager = new CPSManager({
         http: mockHttp,
         logger: mockLogger,
         application: mockApplication,
+        appAccessResolvers: new Map([['discover', () => ProjectRoutingAccess.EDITABLE]]),
       });
     });
 
     const changeAccess = async (access: ProjectRoutingAccess) => {
-      mockGetProjectRoutingAccess.mockReturnValue(access);
+      cpsManager.registerAppAccess('app', () => access);
       (mockApplication.currentAppId$ as BehaviorSubject<string | undefined>).next('app');
       await flushAsync();
     };
@@ -343,11 +330,19 @@ describe('CPSManager', () => {
       expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
     });
 
-    it('returns undefined when access is DISABLED, regardless of override', async () => {
+    it('returns override value when access is DISABLED', async () => {
       await changeAccess(ProjectRoutingAccess.DISABLED);
 
       expect(cpsManager.getProjectRouting()).toBeUndefined();
-      expect(cpsManager.getProjectRouting('_alias:_origin')).toBeUndefined();
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
+    });
+
+    it('returns override value when access is READONLY', async () => {
+      await cpsManager.whenReady();
+      await changeAccess(ProjectRoutingAccess.READONLY);
+
+      expect(cpsManager.getProjectRouting()).toBe(DEFAULT_NPRE_VALUE);
+      expect(cpsManager.getProjectRouting('_alias:_origin')).toBe('_alias:_origin');
     });
 
     it('resets projectRouting$ to default when access changes to DISABLED', async () => {
@@ -369,20 +364,19 @@ describe('CPSManager', () => {
     const flushAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
 
     const changeAccess = async (access: ProjectRoutingAccess) => {
-      mockGetProjectRoutingAccess.mockReturnValue(access);
+      cpsManager.registerAppAccess('app', () => access);
       (mockApplication.currentAppId$ as BehaviorSubject<string | undefined>).next('app');
       await flushAsync();
     };
 
     beforeEach(() => {
-      // Ensure default routing gets initialized to a known value.
-      mockGetProjectRoutingAccess.mockReturnValue(ProjectRoutingAccess.EDITABLE);
       mockHttp.get = jest.fn().mockResolvedValue(DEFAULT_NPRE_VALUE);
 
       cpsManager = new CPSManager({
         http: mockHttp,
         logger: mockLogger,
         application: mockApplication,
+        appAccessResolvers: new Map([['discover', () => ProjectRoutingAccess.EDITABLE]]),
       });
     });
 

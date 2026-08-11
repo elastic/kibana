@@ -6,11 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
-import { pipeCompleteItem } from '../complete_items';
-import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
+import { newLineAndPipeCompleteItems } from '../complete_items';
 
 export async function autocomplete(
   query: string,
@@ -21,7 +20,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   if (/MV_EXPAND\s+\S+\s+$/i.test(innerText)) {
-    return [pipeCompleteItem];
+    return newLineAndPipeCompleteItems;
   }
 
   const columnSuggestions =
@@ -29,14 +28,6 @@ export async function autocomplete(
       advanceCursor: true,
       openSuggestions: true,
     })) ?? [];
-
-  const fragment = findFinalWord(innerText);
-  columnSuggestions.forEach((suggestion) => {
-    suggestion.rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length,
-    };
-  });
 
   return columnSuggestions;
 }

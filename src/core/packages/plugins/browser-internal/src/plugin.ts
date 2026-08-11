@@ -16,6 +16,7 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
+import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 import { type PluginDefinition, read } from './plugin_reader';
@@ -69,13 +70,14 @@ export class PluginWrapper<
 
     if (this.definition.module) {
       this.container = setupContext.injection.getContainer();
-      this.container.loadSync(this.definition.module);
-      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
+      this.container.load(this.definition.module);
+      this.container.load(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
-    return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
-      Boolean
-    )!;
+    return [
+      this.instance?.setup(setupContext, plugins),
+      this.container?.get(Setup as ServiceToken<TSetup>),
+    ].find(Boolean)!;
   }
 
   /**
@@ -90,10 +92,10 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    this.container?.loadSync(createStartModule(startContext, plugins));
+    this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.get<TStart>(Start),
+      this.container?.get(Start as ServiceToken<TStart>),
     ].find(Boolean)!;
 
     this.startDependencies$.next([startContext, plugins, contract]);
@@ -110,7 +112,7 @@ export class PluginWrapper<
     }
 
     await this.instance?.stop?.();
-    await this.container?.unbindAll();
+    await this.container?.unbindAllAsync();
     this.instance = undefined;
     this.container = undefined;
   }

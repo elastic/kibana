@@ -171,7 +171,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               },
             }),
         'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.limit': 2800,
         'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
@@ -477,7 +477,7 @@ describe('Alerts Service', () => {
               ...existingIndexTemplate.index_template.template,
               settings: {
                 ...existingIndexTemplate.index_template.template?.settings,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
@@ -555,6 +555,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -606,6 +607,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -653,6 +655,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -719,6 +722,7 @@ describe('Alerts Service', () => {
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
               name: '.alerts-test.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
           expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
@@ -774,6 +778,7 @@ describe('Alerts Service', () => {
                 '.reindexed-v8-internal.alerts-test.alerts-another-namespace-*',
               ],
               name: '.alerts-test.alerts-another-namespace',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
         });
@@ -811,6 +816,7 @@ describe('Alerts Service', () => {
               '.reindexed-v8-internal.alerts-test.alerts-default-*',
             ],
             name: '.alerts-test.alerts-default',
+            expand_wildcards: ['open', 'hidden'],
           });
           expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
           expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
@@ -867,7 +873,7 @@ describe('Alerts Service', () => {
                     }),
                 'index.mapping.ignore_malformed': true,
                 'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.limit': 2800,
               },
               mappings: {
                 _meta: {
@@ -901,6 +907,7 @@ describe('Alerts Service', () => {
                 '.reindexed-v8-internal.alerts-empty.alerts-default-*',
               ],
               name: '.alerts-empty.alerts-default',
+              expand_wildcards: ['open', 'hidden'],
             });
           }
 
@@ -2966,6 +2973,66 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('getAlertSnoozeSnapshot', () => {
+        test('should fetch and return the requested snapshot fields', async () => {
+          clusterClient.search.mockResponseOnce({
+            hits: {
+              total: 1,
+              hits: [
+                {
+                  _index: '.alerts-default',
+                  _id: 'alert-1',
+                  _source: {
+                    'host.name': 'web-01',
+                    'kibana.alert.severity': 'high',
+                  },
+                },
+              ],
+            },
+            took: 0,
+            timed_out: false,
+            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          });
+
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          const result = await alertsService.getAlertSnoozeSnapshot({
+            indices: ['.alerts-default'],
+            alertId: 'alert-1',
+            ruleId: 'rule-1',
+            fields: ['host.name', 'kibana.alert.severity'],
+          });
+
+          expect(result).toEqual({
+            'host.name': 'web-01',
+            'kibana.alert.severity': 'high',
+          });
+          expect(clusterClient.search).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            allow_no_indices: true,
+            size: 1,
+            _source: ['host.name', 'kibana.alert.severity'],
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.status': 'active' } },
+                ],
+                filter: [{ term: { 'kibana.alert.instance.id': 'alert-1' } }],
+              },
+            },
+          });
         });
       });
 

@@ -5,27 +5,34 @@
  * 2.0.
  */
 
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { registerKibanaFunction } from './kibana';
 import type { FunctionRegistrationParameters } from '.';
 
-jest.mock('axios');
-const mockedAxios = jest.mocked(axios);
+function registerFunction(
+  overrides: {
+    requestUrl?: URL;
+    rewrittenUrl?: URL;
+    basePath?: string;
+    headers?: Record<string, string | string[]>;
+    fetchError?: Error;
+  } = {}
+) {
+  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
+  const fetch = jest.fn().mockImplementation((pathname: string) => {
+    if (overrides.fetchError) {
+      throw overrides.fetchError;
+    }
 
-function registerFunction(overrides: {
-  publicBaseUrl?: string;
-  requestUrl?: URL;
-  rewrittenUrl?: URL;
-  headers?: Record<string, string>;
-}) {
-  const logger = { info: jest.fn(), error: jest.fn() };
+    return {
+      body: { ok: true },
+      request: { url: `https://target.example/base${pathname}` },
+    };
+  });
+  const scopedClient = { fetch };
   const coreStart = {
     http: {
-      basePath: {
-        publicBaseUrl: overrides.publicBaseUrl ?? 'https://kibana.example.com:5601',
-        serverBasePath: '',
-        get: jest.fn(),
+      selfClient: {
+        asScoped: jest.fn().mockReturnValue(scopedClient),
       },
     },
   };
@@ -35,12 +42,12 @@ function registerFunction(overrides: {
       url:
         overrides.requestUrl ??
         new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
+      basePath: overrides.basePath ?? '',
       rewrittenUrl: overrides.rewrittenUrl,
-      headers: {
+      headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
         origin: 'https://attacker.example',
-        ...(overrides.headers ?? {}),
       },
     },
     logger,
@@ -57,6 +64,7 @@ function registerFunction(overrides: {
   return {
     handler: functions.registerFunction.mock.calls[0][1],
     coreStart,
+    fetch,
     resources,
   };
 }
@@ -64,17 +72,39 @@ function registerFunction(overrides: {
 describe('kibana tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAxios.mockResolvedValue({ data: { ok: true } });
   });
 
-  it('forwards requests to the configured publicBaseUrl host only', async () => {
-    const { handler } = registerFunction({
-      headers: {
-        host: 'malicious-host:9200',
-        origin: 'https://malicious-host:9200',
-        'x-forwarded-host': 'another-host',
+  it('calls Kibana through the Core scoped self client', async () => {
+    const { handler, coreStart, fetch, resources } = registerFunction();
+    const signal = new AbortController().signal;
+
+    const result = await handler(
+      {
+        arguments: {
+          method: 'POST',
+          pathname: '/api/apm/agent_keys',
+          query: { type: 'dashboard' },
+          body: { foo: 'bar' },
+        },
       },
+      signal
+    );
+
+    expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
+    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys', {
+      method: 'POST',
+      query: { type: 'dashboard' },
+      body: { foo: 'bar' },
+      signal,
+      forwardRequestHeaders: true,
+      access: 'public',
+      asResponse: true,
     });
+    expect(result).toEqual({ content: { ok: true } });
+  });
+
+  it('logs the source request and resolved target url', async () => {
+    const { handler, fetch, resources } = registerFunction({ basePath: '/s/my-space' });
 
     await handler({
       arguments: {
@@ -84,41 +114,69 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.url).toBe(
-      'https://kibana.example.com:5601/api/saved_objects/_find?type=dashboard'
+    expect(resources.logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('GET https://target.example/base/api/saved_objects/_find')
     );
-    expect(forwardedRequest.url).not.toContain('malicious-host');
-  });
-
-  it('builds the forwarded url using the space from the incoming request path', async () => {
-    const { handler } = registerFunction({
-      requestUrl: new URL(
-        'https://source.example/s/my-space/internal/observability_ai_assistant/chat/complete'
-      ),
-    });
-
-    await handler({
-      arguments: {
-        method: 'POST',
-        pathname: '/api/apm/agent_keys',
-        body: { foo: 'bar' },
-      },
-    });
-
-    expect(mockedAxios).toHaveBeenCalledWith(
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/saved_objects/_find',
       expect.objectContaining({
-        url: 'https://kibana.example.com:5601/s/my-space/api/apm/agent_keys',
-        data: JSON.stringify({ foo: 'bar' }),
+        method: 'GET',
+        query: { type: 'dashboard' },
       })
     );
   });
 
-  it('forwards authorization header', async () => {
-    const { handler } = registerFunction({
+  it('logs the resolved target URL when the self call fails', async () => {
+    const error = Object.assign(new Error('Not found'), {
+      request: { url: 'https://target.example/base/api/missing' },
+    });
+    const { handler, resources } = registerFunction({ fetchError: error });
+
+    await expect(
+      handler({
+        arguments: {
+          method: 'GET',
+          pathname: '/api/missing',
+        },
+      })
+    ).rejects.toThrow('Not found');
+
+    expect(resources.logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('GET https://target.example/base/api/missing')
+    );
+  });
+
+  it('uses the rewritten url in logs when present', async () => {
+    const rewrittenUrl = new URL('https://source.example/s/space/original');
+    const { handler, resources } = registerFunction({ rewrittenUrl });
+
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/api/status',
+      },
+    });
+
+    expect(resources.logger.info).toHaveBeenCalledWith(
+      expect.stringContaining(String(rewrittenUrl))
+    );
+  });
+
+  it('opts into Core safe request header forwarding for self calls', async () => {
+    const { handler, fetch } = registerFunction({
       headers: {
-        authorization: 'Basic dGVzdA==',
-        'x-forwarded-user': 'should-be-stripped',
+        accept: 'application/json',
+        'accept-language': 'en-US',
+        authorization: 'Bearer attacker',
+        cookie: 'sid=attacker',
+        host: 'attacker.example',
+        'kbn-version': '1.2.3',
+        origin: 'https://origin.example',
+        referer: 'https://origin.example/app/home',
+        'sec-fetch-site': 'same-origin',
+        'x-elastic-internal-origin': 'attacker',
+        'x-elastic-product-origin': 'observability',
+        'x-kbn-context': '%7B%7D',
       },
     });
 
@@ -129,25 +187,29 @@ describe('kibana tool', () => {
       },
     });
 
-    const forwardedRequest = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
-    expect(forwardedRequest.headers?.authorization).toBe('Basic dGVzdA==');
-    expect(forwardedRequest.headers).not.toHaveProperty('x-forwarded-user');
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/status',
+      expect.objectContaining({
+        forwardRequestHeaders: true,
+      })
+    );
   });
 
-  it('throws when server.publicBaseUrl is not configured', async () => {
-    const { handler, coreStart } = registerFunction({});
-    coreStart.http.basePath.publicBaseUrl = undefined as any;
+  it('requests internal access for internal Kibana APIs', async () => {
+    const { handler, fetch } = registerFunction();
 
-    await expect(
-      handler({
-        arguments: {
-          method: 'GET',
-          pathname: '/api/saved_objects/_find',
-          query: { type: 'dashboard' },
-        },
+    await handler({
+      arguments: {
+        method: 'GET',
+        pathname: '/internal/search',
+      },
+    });
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/internal/search',
+      expect.objectContaining({
+        access: 'internal',
       })
-    ).rejects.toThrow(
-      'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
     );
   });
 });

@@ -17,5 +17,5 @@ export default {
 };
 
 export const AutoOpsPromotionCallout = () => {
-  return <Component learnMoreLink="https://www.elastic.co/blog/elasticsearch-autoops-on-prem" />;
+  return <Component />;
 };

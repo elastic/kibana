@@ -16,14 +16,15 @@ import { File } from '../file';
  * Get the files that are staged for commit (excluding deleted files)
  * as `File` objects that are aware of their commit status.
  *
- * @param  {String} gitRef
+ * @param  {String|String[]} gitRef
  * @param  {{ includeUntracked?: boolean }} options
  * @return {Promise<Array<File>>}
  */
 export async function getFilesForCommit(gitRef, options = {}) {
   const { includeUntracked = false } = options;
   const simpleGit = new SimpleGit(REPO_ROOT);
-  const gitRefForDiff = gitRef ? gitRef : '--cached';
+  const normalizedGitRef = Array.isArray(gitRef) ? gitRef.find(Boolean) : gitRef;
+  const gitRefForDiff = normalizedGitRef ? normalizedGitRef : '--cached';
   const output = await simpleGit.diff(['--name-status', gitRefForDiff]);
 
   const trackedPaths = output

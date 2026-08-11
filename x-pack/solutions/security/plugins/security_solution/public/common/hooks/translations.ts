@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string) =>
   i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage', {
     values: { fieldOrValue },
-    defaultMessage: `Added {fieldOrValue} to timeline`,
+    defaultMessage: `Added {fieldOrValue} to Timeline`,
   });
 
 export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
   i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage', {
     values: { fieldOrValue },
-    defaultMessage: `Added {fieldOrValue} to timeline template`,
+    defaultMessage: `Added {fieldOrValue} to Timeline template`,
   });
 
 export const ERROR_FETCH_AI_CONNECTORS = i18n.translate(

@@ -29,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ host: { original: 'test-host' } }];
       await testBed.ingest(indexName, docs);
@@ -56,7 +56,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         // Add `mappingDoc` to address ES|QL limitation that any column used as operand must be available as a column (pre-mapped)
         const mappingDoc = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
@@ -89,7 +89,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithFields = { host: { original: 'new-host-0', renamed: 'old-host-0' } };
       const docWithMissingSource = { host: { renamed: 'old-host-1' } };
@@ -125,7 +125,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithFields = { host: { original: 'test-host', renamed: 'old-host' } };
       const docWithMissingSource = { host: { renamed: 'old-value' } }; // should be dropped
@@ -156,7 +156,7 @@ apiTest.describe(
           } as RenameProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       ); // Should throw validation error for Mustache templates
     });

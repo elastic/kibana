@@ -13,6 +13,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
 import { DisabledProjectPicker, ProjectPicker } from './project_picker';
+import { useFetchProjects } from './use_fetch_projects';
 import { ProjectPickerSettings } from './project_picker_settings';
 
 interface ProjectPickerContainerProps {
@@ -20,13 +21,32 @@ interface ProjectPickerContainerProps {
 }
 
 /**
- * Container component that connects ProjectPicker to CPSManager
- * Handles observable subscriptions and provides bound fetchProjects
- * Access control is managed by CPSManager based on current app and route
+ * Container component that connects ProjectPicker to CPSManager.
+ * Delegates to ActiveProjectPicker or DisabledProjectPicker based on access level,
+ * so the fetch hook only runs when the picker is actually active.
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
-  const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
   const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
+
+  if (access === ProjectRoutingAccess.DISABLED) {
+    return <DisabledProjectPicker totalProjectCount={cpsManager.getTotalProjectCount()} />;
+  }
+
+  return (
+    <ActiveProjectPicker
+      cpsManager={cpsManager}
+      isReadonly={access === ProjectRoutingAccess.READONLY}
+    />
+  );
+};
+
+interface ActiveProjectPickerProps {
+  cpsManager: ICPSManager;
+  isReadonly: boolean;
+}
+
+const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({ cpsManager, isReadonly }) => {
+  const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
 
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => {
@@ -35,29 +55,27 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
     [cpsManager]
   );
 
+  const projects = useFetchProjects(fetchProjects, projectRouting);
+
   const resetProjectPicker = useCallback(() => {
     updateProjectRouting(cpsManager.getDefaultProjectRouting());
   }, [cpsManager, updateProjectRouting]);
-
-  if (access === ProjectRoutingAccess.DISABLED) {
-    return <DisabledProjectPicker totalProjectCount={cpsManager.getTotalProjectCount()} />;
-  }
 
   return (
     <ProjectPicker
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
-      fetchProjects={fetchProjects}
+      projects={projects}
       totalProjectCount={cpsManager.getTotalProjectCount()}
-      isReadonly={access === ProjectRoutingAccess.READONLY}
+      isReadonly={isReadonly}
       settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
     />
   );
 };
 
 /**
- * Hook for interacting with project routing observable
- * Subscribes to routing changes and provides setter function
+ * Hook for interacting with project routing observable.
+ * Subscribes to routing changes and provides setter function.
  */
 const useProjectRouting = (cpsManager: ICPSManager) => {
   const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(

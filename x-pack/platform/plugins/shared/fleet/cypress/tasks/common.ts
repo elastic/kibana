@@ -82,6 +82,7 @@ const disableNewFeaturesTours = (window: Window) => {
 
 const disableFleetTours = (window: Window) => {
   window.localStorage.setItem('fleet.autoUpgradeAgentsTour', JSON.stringify({ active: false }));
+  window.localStorage.setItem('fleet.agentExportCSVTour', JSON.stringify({ active: false }));
 };
 
 export const waitForPageToBeLoaded = () => {

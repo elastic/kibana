@@ -13,7 +13,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
-  extractEsqlVariables,
   internalStateActions,
   useCurrentTabAction,
   useCurrentTabSelector,
@@ -98,8 +97,20 @@ export const useESQLVariables = ({
         onUpdateESQLQuery(pendingQueryUpdate.current);
         pendingQueryUpdate.current = undefined;
       }
+    });
 
-      const newVariables = extractEsqlVariables(controlGroupState);
+    return () => {
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroupApi, dispatch, isEsqlMode, onUpdateESQLQuery, updateAttributes]);
+
+  useEffect(() => {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
+      return;
+    }
+
+    const variablesSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
         dispatch(setEsqlVariables({ esqlVariables: newVariables }));
@@ -108,18 +119,9 @@ export const useESQLVariables = ({
     });
 
     return () => {
-      inputSubscription.unsubscribe();
+      variablesSubscription.unsubscribe();
     };
-  }, [
-    controlGroupApi,
-    currentEsqlVariables,
-    dispatch,
-    isEsqlMode,
-    onUpdateESQLQuery,
-    updateAttributes,
-    setEsqlVariables,
-    fetchData,
-  ]);
+  }, [controlGroupApi, currentEsqlVariables, dispatch, fetchData, isEsqlMode, setEsqlVariables]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {

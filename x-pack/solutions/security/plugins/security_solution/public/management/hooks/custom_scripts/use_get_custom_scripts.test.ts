@@ -57,7 +57,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('endpoint'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'endpoint'],
+      queryKey: ['get-custom-scripts', 'endpoint', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -66,7 +66,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('crowdstrike'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'crowdstrike'],
+      queryKey: ['get-custom-scripts', 'crowdstrike', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -75,7 +75,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('sentinel_one'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'sentinel_one'],
+      queryKey: ['get-custom-scripts', 'sentinel_one', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -117,7 +117,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('sentinel_one', undefined, { cacheTime: 1 }));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'sentinel_one'],
+      queryKey: ['get-custom-scripts', 'sentinel_one', {}],
       queryFn: expect.any(Function),
       cacheTime: 1,
     });

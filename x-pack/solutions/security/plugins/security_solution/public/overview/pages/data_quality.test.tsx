@@ -16,13 +16,29 @@ import { DataQuality } from './data_quality';
 import { useKibana } from '../../common/lib/kibana';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks/mock_data_view';
+import {
+  getMockDataView,
+  getMockDataViewWithMatchedIndices,
+} from '../../data_view_manager/mocks/mock_data_view';
 import {
   defaultImplementation,
   withIndices,
 } from '../../data_view_manager/hooks/__mocks__/use_data_view';
+import { DataQualityPanel } from '@kbn/ecs-data-quality-dashboard';
 
 const mockedUseKibana = mockUseKibana();
+
+jest.mock('@kbn/ecs-data-quality-dashboard', () => {
+  const actual = jest.requireActual('@kbn/ecs-data-quality-dashboard');
+  const ReactActual = jest.requireActual('react');
+
+  return {
+    ...actual,
+    DataQualityPanel: jest.fn((props: React.ComponentProps<typeof actual.DataQualityPanel>) =>
+      ReactActual.createElement(actual.DataQualityPanel, props)
+    ),
+  };
+});
 
 jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/lib/kibana', () => {
@@ -51,17 +67,6 @@ jest.mock('../../common/lib/kibana', () => {
     useUiSetting$: () => ['0,0.[000]'],
   };
 });
-
-const defaultUseSourcererReturn = {
-  indexPattern: '',
-  indicesExist: true,
-  loading: false,
-  selectedPatterns: ['auditbeat-*', 'logs-*', 'packetbeat-*'],
-};
-const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
 
 const defaultUseSignalIndexReturn = {
   loading: false,
@@ -104,7 +109,6 @@ describe('DataQuality', () => {
       },
     });
 
-    mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
 
     jest
@@ -144,9 +148,39 @@ describe('DataQuality', () => {
     });
   });
 
-  describe('when indices exist, but sourcerer is still loading', () => {
+  describe('when useDataView matched indices include the same pattern as the signal index', () => {
+    const alertsIndex = '.alerts-security.alerts-default';
+
     beforeEach(async () => {
-      mockUseSourcererDataView.mockReturnValue({ ...defaultUseSourcererReturn, loading: true });
+      jest.mocked(useDataView).mockReturnValue(withIndices(['logs-*', alertsIndex, 'auditbeat-*']));
+
+      render(
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('dataQualitySummary')).toBeInTheDocument();
+      });
+    });
+
+    test('passes each pattern once to DataQualityPanel', () => {
+      const MockDataQualityPanel = jest.mocked(DataQualityPanel);
+      expect(MockDataQualityPanel.mock.calls[0][0].patterns).toEqual([
+        alertsIndex,
+        'logs-*',
+        'auditbeat-*',
+      ]);
+    });
+  });
+
+  describe('when indices exist, but dataView is still loading', () => {
+    beforeEach(async () => {
       jest.mocked(useDataView).mockReturnValue({
         dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
         status: 'loading',
@@ -218,11 +252,6 @@ describe('DataQuality', () => {
 
   describe('when indices do NOT exist, and loading is complete', () => {
     beforeEach(async () => {
-      mockUseSourcererDataView.mockReturnValue({
-        ...defaultUseSourcererReturn,
-        indicesExist: false,
-        loading: false,
-      });
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
       jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
@@ -256,16 +285,11 @@ describe('DataQuality', () => {
     });
   });
 
-  describe('when indices do NOT exist, but sourcerer is still loading', () => {
+  describe('when indices do NOT exist, but dataview is still loading', () => {
     beforeEach(async () => {
-      mockUseSourcererDataView.mockReturnValue({
-        ...defaultUseSourcererReturn,
-        indicesExist: false,
-        loading: true,
-      });
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
       jest.mocked(useDataView).mockReturnValue({
-        dataView: getMockDataViewWithMatchedIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']),
+        dataView: getMockDataView(),
         status: 'loading',
       });
 
@@ -301,11 +325,6 @@ describe('DataQuality', () => {
 
   describe('when indices do NOT exist, but the signal index name is still loading', () => {
     beforeEach(async () => {
-      mockUseSourcererDataView.mockReturnValue({
-        ...defaultUseSourcererReturn,
-        indicesExist: false,
-        loading: false,
-      });
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: true });
 
       render(

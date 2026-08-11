@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerResult, ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';

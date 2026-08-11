@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   CONTAINER_ID,
   KUBERNETES_POD_NAME,
-  KUBERNETES_POD_NAME_OTEL,
+  K8S_POD_NAME,
   HOST_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -37,49 +37,45 @@ export const getInfrastructureData = async ({
   end: number;
 }) => {
   const isOtel = Boolean(agentName && hasOpenTelemetryPrefix(agentName));
-  const k8sFilterField = isOtel ? KUBERNETES_POD_NAME_OTEL : KUBERNETES_POD_NAME;
+  const k8sFilterField = isOtel ? K8S_POD_NAME : KUBERNETES_POD_NAME;
 
-  const response = await apmEventClient.search(
-    'get_service_infrastructure',
-    {
-      apm: {
-        events: [ProcessorEvent.metric],
+  const response = await apmEventClient.search('get_service_infrastructure', {
+    apm: {
+      events: [ProcessorEvent.metric],
+    },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
+    },
+    aggs: {
+      containerIds: {
+        terms: {
+          field: CONTAINER_ID,
+          size: 500,
         },
       },
-      aggs: {
-        containerIds: {
-          terms: {
-            field: CONTAINER_ID,
-            size: 500,
-          },
+      hostNames: {
+        terms: {
+          field: HOST_NAME,
+          size: 500,
         },
-        hostNames: {
-          terms: {
-            field: HOST_NAME,
-            size: 500,
-          },
-        },
-        podNames: {
-          terms: {
-            field: k8sFilterField,
-            size: 500,
-          },
+      },
+      podNames: {
+        terms: {
+          field: k8sFilterField,
+          size: 500,
         },
       },
     },
-    { skipProcessorEventFilter: true }
-  );
+  });
 
   let containerIds: string[] =
     response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key as string) ?? [];

@@ -8,7 +8,9 @@
 import { useCallback } from 'react';
 
 import type { AlertAssignees } from '../../../../../../common/api/detection_engine';
-import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { useSetAttacksAssignees } from '../../../../../common/containers/attacks/hooks/use_set_attacks_assignees';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
@@ -27,8 +29,11 @@ interface ApplyAttackAssigneesReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
-  const { mutateAsync: setUnifiedAlertsAssignees } = useSetUnifiedAlertsAssignees();
+  const { mutateAsync: setAttacksAssignees } = useSetAttacksAssignees();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyAssignees = useCallback(
     async ({
@@ -37,6 +42,7 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
       relatedAlertIds,
       setIsLoading,
       onSuccess,
+      telemetrySource,
     }: ApplyAttackAssigneesProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
@@ -47,18 +53,27 @@ export const useApplyAttackAssignees = (): ApplyAttackAssigneesReturn => {
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionAssigneeUpdated, {
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
-        // Combine IDs based on user choice
-        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-        await setUnifiedAlertsAssignees({ ids: allIds, assignees });
+        await setAttacksAssignees({
+          ids: attackIds,
+          assignees,
+          update_related_alerts: result.updateAlerts,
+        });
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsAssignees, showModalIfNeeded]
+    [setAttacksAssignees, showModalIfNeeded, telemetry]
   );
 
   return { applyAssignees };

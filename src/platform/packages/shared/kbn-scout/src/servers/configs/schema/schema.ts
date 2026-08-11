@@ -64,12 +64,15 @@ const dockerServerSchema = () =>
 export const schema = Joi.object()
   .keys({
     serverless: Joi.boolean().default(false),
+    http2: Joi.boolean().default(false),
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
+        // Only applicable for serverless CPS configs (cross-project search)
+        linkedElasticsearch: urlPartsSchema(),
         fleetserver: urlPartsSchema(),
       })
       .default(),
@@ -97,6 +100,8 @@ export const schema = Joi.object()
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
+        uiamOAuth: Joi.boolean().default(false),
+        cps: Joi.boolean().default(false),
       })
       .default(),
 

@@ -45,7 +45,7 @@ export function ErrorCallout(error: IHttpSerializedFetchError<unknown>) {
       title={i18n.translate('xpack.synthetics.monitorDetail.errorTitle', {
         defaultMessage: 'Error fetching monitor details',
       })}
-      iconType="alert"
+      iconType="warning"
     >
       <p>
         {i18n.translate('xpack.synthetics.monitorDetailFlyout.fetchError.description', {

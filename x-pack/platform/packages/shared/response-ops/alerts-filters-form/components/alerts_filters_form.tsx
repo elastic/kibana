@@ -14,6 +14,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -255,7 +256,7 @@ export const AlertsFiltersForm = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     size="xs"
                     onClick={() => addOperand('or')}
                     isDisabled={isDisabled}
@@ -266,7 +267,7 @@ export const AlertsFiltersForm = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     size="xs"
                     onClick={() => addOperand('and')}
                     isDisabled={isDisabled}
@@ -309,14 +310,16 @@ const Operator = ({ operator, onDelete }: OperatorProps) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          aria-label={DELETE_OPERAND_LABEL}
-          onClick={onDelete}
-          iconSize="s"
-          color="text"
-          data-test-subj={DELETE_OPERAND_BUTTON_SUBJ}
-        />
+        <EuiToolTip content={DELETE_OPERAND_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="trash"
+            aria-label={DELETE_OPERAND_LABEL}
+            onClick={onDelete}
+            iconSize="s"
+            color="text"
+            data-test-subj={DELETE_OPERAND_BUTTON_SUBJ}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

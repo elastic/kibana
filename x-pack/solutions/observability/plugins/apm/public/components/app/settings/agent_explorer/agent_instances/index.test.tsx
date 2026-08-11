@@ -50,19 +50,16 @@ jest.mock('./agent_instances_details', () => ({
 }));
 
 // Mock ResponsiveFlyout
-jest.mock(
-  '../../../transaction_details/waterfall_with_summary/waterfall_container/waterfall/responsive_flyout',
-  () => ({
-    ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
-      <div data-test-subj="responsive-flyout">
-        <button data-test-subj="close-flyout" onClick={onClose}>
-          Close
-        </button>
-        {children}
-      </div>
-    ),
-  })
-);
+jest.mock('../../../../shared/responsive_flyout', () => ({
+  ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
+    <div data-test-subj="responsive-flyout">
+      <button data-test-subj="close-flyout" onClick={onClose}>
+        Close
+      </button>
+      {children}
+    </div>
+  ),
+}));
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

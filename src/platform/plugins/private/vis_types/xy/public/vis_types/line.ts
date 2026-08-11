@@ -31,7 +31,7 @@ import { getVisTypeFromParams } from './get_vis_type_from_params';
 export const lineVisTypeDefinition = {
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
-  icon: 'visLine',
+  icon: 'chartLine',
   description: i18n.translate('visTypeXy.line.lineDescription', {
     defaultMessage: 'Display data as a series of points.',
   }),

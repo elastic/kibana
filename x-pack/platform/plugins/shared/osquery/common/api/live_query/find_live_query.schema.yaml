@@ -9,14 +9,19 @@ components:
       type: object
       properties:
         kuery:
+          description: 'A KQL search string to filter live queries.'
           type: string
         page:
+          description: 'The page number to return. The default is 1.'
           type: integer
         pageSize:
+          description: 'The number of results to return per page. The default is 20.'
           type: integer
         sort:
+          description: 'The field to sort results by.'
           type: string
         sortOrder:
+          description: 'The sort order.'
           type: string
           enum: [asc, desc]
         withResultCounts:
@@ -25,13 +30,78 @@ components:
             When true, the response includes result_counts on each item with
             aggregated result statistics from the action responses index.
     FindLiveQueryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            total:
+              description: 'The total number of live queries.'
+              type: integer
+            items:
+              description: 'An array of live query action items.'
+              type: array
+              items:
+                type: object
+                properties:
+                  _source:
+                    type: object
+                    properties:
+                      action_id:
+                        type: string
+                      expiration:
+                        type: string
+                        format: date-time
+                      '@timestamp':
+                        type: string
+                        format: date-time
+                      agents:
+                        type: array
+                        items:
+                          type: string
+                      user_id:
+                        type: string
+                      pack_id:
+                        type: string
+                      queries:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            id:
+                              type: string
+                            query:
+                              type: string
+                            saved_query_id:
+                              type: string
+                            ecs_mapping:
+                              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+                            agents:
+                              type: array
+                              items:
+                                type: string
+                      result_counts:
+                        type: object
+                        description: 'Result count statistics (present when withResultCounts is true).'
+                        properties:
+                          total_rows:
+                            type: integer
+                          responded_agents:
+                            type: integer
+                          successful_agents:
+                            type: integer
+                          error_agents:
+                            type: integer
       example:
         data:
+          total: 1
           items:
-            - fields:
+            - _source:
                 action_id: '3c42c847-eb30-4452-80e0-728584042334'
                 expiration: '2023-10-31T00:00:00Z'
-                "@timestamp": '2023-10-31T00:00:00Z'
+                '@timestamp': '2023-10-31T00:00:00Z'
                 agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
                 user_id: 'elastic'
                 queries:
@@ -48,16 +118,89 @@ components:
                   responded_agents: 1
                   successful_agents: 1
                   error_agents: 0
-      type: object
-      properties: { }
     FindLiveQueryDetailsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            action_id:
+              type: string
+            expiration:
+              type: string
+              format: date-time
+            '@timestamp':
+              type: string
+              format: date-time
+            agents:
+              type: array
+              items:
+                type: string
+            user_id:
+              type: string
+            user_profile_uid:
+              type: string
+            pack_id:
+              type: string
+            pack_name:
+              type: string
+            prebuilt_pack:
+              type: boolean
+            tags:
+              type: array
+              items:
+                type: string
+            status:
+              description: 'Global status of the live query (completed, running).'
+              type: string
+              enum: [completed, running]
+            queries:
+              description: 'The queries with their execution status.'
+              type: array
+              items:
+                type: object
+                properties:
+                  action_id:
+                    type: string
+                  id:
+                    type: string
+                  query:
+                    type: string
+                  saved_query_id:
+                    type: string
+                  ecs_mapping:
+                    $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingOrUndefined'
+                  agents:
+                    type: array
+                    items:
+                      type: string
+                  docs:
+                    description: 'Number of result documents.'
+                    type: integer
+                  failed:
+                    description: 'Number of failed queries.'
+                    type: integer
+                  pending:
+                    description: 'Number of pending agents.'
+                    type: integer
+                  responded:
+                    description: 'Total responded agents.'
+                    type: integer
+                  successful:
+                    description: 'Number of successful agents.'
+                    type: integer
+                  status:
+                    description: 'Status of this individual query.'
+                    type: string
+                    enum: [completed, running]
       example:
         data:
           action_id: "3c42c847-eb30-4452-80e0-728584042334"
           expiration: "2022-07-26T10:04:32.220Z"
-          "@timestamp": "2022-07-26T09:59:32.220Z"
+          '@timestamp': "2022-07-26T09:59:32.220Z"
           agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
           user_id: "elastic"
+          status: "completed"
           queries:
             - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
               id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
@@ -68,12 +211,9 @@ components:
                   field: "total_seconds"
               agents:
                 - "16d7caf5-efd2-4212-9b62-73dafc91fa13"
-              docs: 0  # results count
-              failed: 1  # failed queries
-              pending: 0  # pending agents
-              responded: 1  # total responded agents
-              successful: 0  # successful agents
-              status: "completed"  # single query status
-          status: "completed"  # global status of the live query (completed, pending)
-      type: object
-      properties: { }
+              docs: 0
+              failed: 1
+              pending: 0
+              responded: 1
+              successful: 0
+              status: "completed"

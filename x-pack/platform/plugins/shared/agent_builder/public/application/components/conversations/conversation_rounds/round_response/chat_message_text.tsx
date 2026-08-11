@@ -30,6 +30,7 @@ import type {
 import {
   visualizationElement,
   renderAttachmentElement,
+  renderElement,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -41,11 +42,11 @@ import {
   visualizationTagParser,
   renderAttachmentTagParser,
   createRenderAttachmentRenderer,
+  renderTagParser,
+  createRenderRenderer,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { CanvasProvider } from './attachments/canvas_context';
-import { CanvasFlyout } from './attachments/canvas_flyout';
 import { ExternalLinkModal } from './external_link_modal';
 
 interface Props {
@@ -54,6 +55,7 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
+  isStreaming?: boolean;
 }
 
 /**
@@ -66,6 +68,7 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
+  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -82,7 +85,8 @@ export function ChatMessageText({
     }
   `;
 
-  const { attachmentsService, startDependencies } = useAgentBuilderServices();
+  const { attachmentsService, renderersService, conversationsService, startDependencies } =
+    useAgentBuilderServices();
   const stepsFromPrevRounds = useStepsFromPrevRounds();
   const { isEmbeddedContext: isSidebar } = useConversationContext();
   const {
@@ -106,6 +110,48 @@ export function ChatMessageText({
       // Internal link in full page: target="_blank" handles navigation
     },
     [isSidebar, http?.externalUrl, application]
+  );
+
+  const visualizationRenderer = useMemo(
+    () =>
+      createVisualizationRenderer({
+        application,
+        startDependencies,
+        stepsFromCurrentRound,
+        stepsFromPrevRounds,
+      }),
+    [application, startDependencies, stepsFromCurrentRound, stepsFromPrevRounds]
+  );
+
+  const renderAttachmentRenderer = useMemo(
+    () =>
+      createRenderAttachmentRenderer({
+        conversationAttachments,
+        attachmentRefs,
+        conversationId,
+        isSidebar,
+        attachmentsService,
+        isStreaming,
+      }),
+    [
+      conversationAttachments,
+      attachmentRefs,
+      conversationId,
+      isSidebar,
+      attachmentsService,
+      isStreaming,
+    ]
+  );
+
+  const renderRenderer = useMemo(
+    () =>
+      createRenderRenderer({
+        renderersService,
+        conversationsService,
+        conversationId,
+        isStreaming,
+      }),
+    [renderersService, conversationsService, conversationId, isStreaming]
   );
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
@@ -154,42 +200,42 @@ export function ChatMessageText({
       },
       table: (props) => (
         <>
-          <EuiTable
-            {...props}
-            className={css`
-              .euiTableCellContent__text {
-                white-space: normal;
-              }
-            `}
-          />
+          <EuiTable {...props} tableLayout="auto" scrollableInline responsiveBreakpoint={false} />
           <EuiSpacer size="m" />
         </>
       ),
       th: (props) => {
         const { children, ...rest } = props;
-        return <EuiTableHeaderCell {...rest}>{children}</EuiTableHeaderCell>;
+        return (
+          <EuiTableHeaderCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
+            {children}
+          </EuiTableHeaderCell>
+        );
       },
       tr: (props) => <EuiTableRow {...props} />,
       td: (props) => {
         const { children, ...rest } = props;
         return (
-          <EuiTableRowCell truncateText={true} {...rest}>
+          <EuiTableRowCell
+            minWidth="10em"
+            // This is just a recommendation and will be ignored if there aren't
+            // enough columns to fill the entire container's width.
+            maxWidth="30em"
+            {...rest}
+          >
             {children}
           </EuiTableRowCell>
         );
       },
-      [visualizationElement.tagName]: createVisualizationRenderer({
-        startDependencies,
-        stepsFromCurrentRound,
-        stepsFromPrevRounds,
-      }),
-      [renderAttachmentElement.tagName]: createRenderAttachmentRenderer({
-        conversationAttachments,
-        attachmentRefs,
-        conversationId,
-        isSidebar,
-        attachmentsService,
-      }),
+      [visualizationElement.tagName]: visualizationRenderer,
+      [renderAttachmentElement.tagName]: renderAttachmentRenderer,
+      [renderElement.tagName]: renderRenderer,
     };
 
     return {
@@ -198,24 +244,15 @@ export function ChatMessageText({
         esqlLanguagePlugin,
         visualizationTagParser,
         renderAttachmentTagParser,
+        renderTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
     };
-  }, [
-    startDependencies,
-    stepsFromCurrentRound,
-    stepsFromPrevRounds,
-    conversationAttachments,
-    attachmentRefs,
-    conversationId,
-    isSidebar,
-    attachmentsService,
-    handleLinkClick,
-  ]);
+  }, [visualizationRenderer, renderAttachmentRenderer, renderRenderer, handleLinkClick]);
 
   return (
-    <CanvasProvider>
+    <>
       <EuiText size="m" className={containerClassName}>
         <EuiMarkdownFormat
           textSize="m"
@@ -225,8 +262,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <CanvasFlyout attachmentsService={attachmentsService} />
       <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
-    </CanvasProvider>
+    </>
   );
 }

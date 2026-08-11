@@ -10,16 +10,18 @@ import React, { useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
-import type { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
+import type { CustomRuleEditorSource } from '../../../../../common/constants/usage_collection';
+
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -38,6 +40,7 @@ interface TimeSeriesChartWithTooltipsProps {
     interval: string;
   };
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
+  telemetrySource: CustomRuleEditorSource;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -57,6 +60,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     interval: 'second',
   },
   sourceIndicesWithGeoFields,
+  telemetrySource,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -160,6 +164,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             tooltipService={tooltipService}
             tableData={tableData}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            telemetrySource={telemetrySource}
           />
         )}
       </MlTooltipComponent>

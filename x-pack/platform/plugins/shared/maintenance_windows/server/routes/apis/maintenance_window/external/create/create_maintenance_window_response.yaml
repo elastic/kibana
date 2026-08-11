@@ -1,0 +1,27 @@
+summary: Create a maintenance window response
+description: >
+  The response returned when a maintenance window is successfully created.
+value:
+  id: 'f0cb1780-537a-4e34-8adf-3b4336862858'
+  title: 'Weekly Maintenance Window'
+  enabled: true
+  schedule:
+    custom:
+      start: '2025-03-01T08:00:00.000Z'
+      duration: '2h'
+      timezone: 'Europe/Amsterdam'
+      recurring:
+        every: '1w'
+        onWeekDay:
+          - 'MO'
+          - 'WE'
+        occurrences: 10
+  scope:
+    alerting:
+      query:
+        kql: 'kibana.alert.tags: "infra"'
+  status: 'upcoming'
+  created_at: '2025-02-25T10:00:00.000Z'
+  updated_at: '2025-02-25T10:00:00.000Z'
+  created_by: 'elastic'
+  updated_by: 'elastic'

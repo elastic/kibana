@@ -18,21 +18,13 @@ const streams = [
       { destination: 'logs.foo', where: { always: {} }, status: 'enabled' },
       { destination: 'logs.hello', where: { always: {} }, status: 'enabled' },
     ],
-    queries: [
-      { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
-    ],
   }),
   testContentPackEntry({
     name: 'logs.foo',
     routing: [{ destination: 'logs.foo.bar', where: { always: {} }, status: 'enabled' }],
   }),
   testContentPackEntry({ name: 'logs.foo.bar' }),
-  testContentPackEntry({
-    name: 'logs.hello',
-    queries: [
-      { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
-    ],
-  }),
+  testContentPackEntry({ name: 'logs.hello' }),
 ];
 
 describe('content pack export', () => {
@@ -52,21 +44,13 @@ describe('content pack export', () => {
           { destination: 'foo', where: { always: {} }, status: 'enabled' },
           { destination: 'hello', where: { always: {} }, status: 'enabled' },
         ],
-        queries: [
-          { id: 'logs-query', title: 'logs-query', kql: { query: 'logs' }, esql: { query: '' } },
-        ],
       }),
       testContentPackEntry({
         name: 'foo',
         routing: [{ destination: 'foo.bar', where: { always: {} }, status: 'enabled' }],
       }),
       testContentPackEntry({ name: 'foo.bar' }),
-      testContentPackEntry({
-        name: 'hello',
-        queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
-        ],
-      }),
+      testContentPackEntry({ name: 'hello' }),
     ]);
   });
 
@@ -75,14 +59,12 @@ describe('content pack export', () => {
       include: {
         objects: {
           mappings: true,
-          queries: [],
           routing: [
             {
               destination: 'logs.hello',
               objects: {
                 mappings: true,
                 routing: [],
-                queries: [{ id: 'hello-query' }],
               },
             },
           ],
@@ -98,12 +80,7 @@ describe('content pack export', () => {
         name: ROOT_STREAM_ID,
         routing: [{ destination: 'hello', where: { always: {} }, status: 'enabled' }],
       }),
-      testContentPackEntry({
-        name: 'hello',
-        queries: [
-          { id: 'hello-query', title: 'hello-query', kql: { query: 'hello' }, esql: { query: '' } },
-        ],
-      }),
+      testContentPackEntry({ name: 'hello' }),
     ]);
   });
 });

@@ -44,7 +44,7 @@ export interface ManagementAppDependencies {
   kibanaVersion: string;
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
@@ -110,6 +110,11 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
       }
     : undefined;
 
+  const mountedApp = selectedId
+    ? sections.flatMap((section) => section.apps).find((app) => app.id === selectedId)
+    : undefined;
+  const mainPaddingSize = mountedApp?.mainPaddingSize;
+
   const contextDependencies: AppDependencies = {
     appBasePath,
     sections,
@@ -118,7 +123,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
     coreStart,
     chromeStyle,
     cloud: dependencies.cloud,
-    hasEnterpriseLicense: dependencies.hasEnterpriseLicense,
+    isAirGapped: dependencies.isAirGapped,
     getAutoOpsStatusHook: dependencies.getAutoOpsStatusHook,
   };
 
@@ -131,7 +136,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
             solutionNav={solution}
             // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
             // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-            mainProps={{ paddingSize: 'l' }}
+            mainProps={{ paddingSize: mainPaddingSize ?? 'm' }}
             panelled
           >
             <ManagementRouter

@@ -18,15 +18,22 @@ fi
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
-# Ensure a stable run id across steps/jobs in the same Buildkite build.
-# If unset, Scout will generate a random run id when Playwright loads configs,
-# which makes it hard to correlate results across suites and connectors.
+# Set a base build run ID from the Buildkite build. This is used as a seed for
+# generating deterministic per-task experiment IDs (not as the experiment_id itself)
+# and feeds metadata.execution_id, the key the Experiments listing groups by
+# (see buildExecutionId in @kbn/evals for how the suite and model are combined).
 if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
 
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
+
+EVAL_SUITE_INFO="$(
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
+)"
+EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
+EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
 
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
@@ -36,7 +43,56 @@ cleanup() {
     rm -f "$FANOUT_PIPELINE_FILE" 2>/dev/null || true
   fi
 }
-trap cleanup EXIT
+
+record_suite_failure() {
+  local exit_status="$1"
+  if [[ "$exit_status" -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "${KBN_EVALS:-}" != "1" ]]; then
+    return 0
+  fi
+  if [[ -z "${EVAL_SUITE_ID:-}" || -z "${EVAL_PROJECT:-}" ]]; then
+    return 0
+  fi
+  if ! command -v buildkite-agent >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local suite_key_safe
+  suite_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  local project_key_safe
+  project_key_safe="$(printf '%s' "$EVAL_PROJECT" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
+  # Use one key per failing project to avoid non-atomic read/modify/write races when fanout steps fail concurrently.
+  local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
+  buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
+
+  local failure_log_key="kbn-evals:suite-failure-log:${suite_key_safe}:${project_key_safe}"
+  if [[ -n "${KBN_EVALS_RUN_LOG:-}" && -f "${KBN_EVALS_RUN_LOG}" ]]; then
+    local excerpt
+    excerpt="$(
+      tail -c 4000 "${KBN_EVALS_RUN_LOG}" | sed -E 's/\x1b\[[0-9;]*[a-zA-Z]//g' || true
+    )"
+    if [[ -n "${excerpt}" ]]; then
+      buildkite-agent meta-data set "$failure_log_key" "${excerpt}" >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
+on_exit() {
+  local exit_status=$?
+  trap - EXIT
+  cleanup
+  record_suite_failure "$exit_status"
+  exit "$exit_status"
+}
+
+trap on_exit EXIT
+
+# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# This must run after bootstrap so Node is available for the generator script.
+source .buildkite/scripts/steps/evals/setup_connectors.sh
 
 # Fan out into one Buildkite step per connector project when requested.
 # This is the only practical way to run all connector projects within the 1h job timeout.
@@ -56,7 +112,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
   # If the judge connector is EIS-backed, we still need EIS connectors even when running a LiteLLM project.
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_CONNECTORS="true"
   fi
 
@@ -91,8 +147,8 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
 
     if [[ -z "${CONNECTOR_IDS:-}" ]]; then
       echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-        export EVAL_PROJECT="${EVALUATION_CONNECTOR_ID}"
+      if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
+        export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
       fi
     else
       echo "--- Uploading eval connector fanout steps"
@@ -112,28 +168,42 @@ steps:
     steps:
 EOF
 
+      fanout_preemptible=true
+      if [[ "$(printf '%s' "${EVAL_PREEMPTIBLE:-1}" | tr '[:upper:]' '[:lower:]')" =~ ^(0|false|no)$ ]]; then
+        fanout_preemptible=false
+      fi
+
+      fanout_step_keys=()
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        step_key="kbn-evals-${group_key_safe}-${key_safe}"
+        fanout_step_keys+=("$step_key")
 
         # Default BK step timeout is 120m to allow slower models/suites without
         # needing per-suite/per-model special-casing. Can be overridden if needed.
         timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}"
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
-      - label: "${connector_id}"
-        key: "kbn-evals-${group_key_safe}-${key_safe}"
+      - label: "LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+        key: "${step_key}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
           KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
-          EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
+          EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          EVAL_GREP: "${EVAL_GREP:-}"
+          EVAL_REPETITIONS: "${EVAL_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -142,19 +212,182 @@ EOF
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
+EOF
+
+        if [[ "$fanout_preemptible" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
         retry:
           automatic:
             - exit_status: "-1"
               limit: 3
 EOF
+        fi
       done <<<"$CONNECTOR_IDS"
+
+      # Resolve a PR number (if any) so triage can be posted as a PR comment:
+      # GITHUB_PR_NUMBER (PR-label CI) -> BUILDKITE_PULL_REQUEST -> refs/pull/<N>/head
+      # branch (how on-demand selects a PR via the New Build form).
+      resolved_pr_number=""
+      if [[ -n "${GITHUB_PR_NUMBER:-}" ]]; then
+        resolved_pr_number="${GITHUB_PR_NUMBER}"
+      elif [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        resolved_pr_number="${BUILDKITE_PULL_REQUEST}"
+      elif [[ "${BUILDKITE_BRANCH:-}" =~ ^refs/pull/([0-9]+)/head$ ]]; then
+        resolved_pr_number="${BASH_REMATCH[1]}"
+      fi
+
+      # Only ping suite owners on the pipeline's default branch (main). Manual rebuilds
+      # from feature branches still run the evals but skip the Slack notification, so we
+      # don't spam suite owners with results from in-progress/experimental branches.
+      EVAL_NOTIFY_BRANCH="${BUILDKITE_PIPELINE_DEFAULT_BRANCH:-main}"
+      
+      # Enable the suite owner notify step when there is somewhere to send triage:
+      # - weekly: the suite's team channel
+      # - any run: a PR comment (PR context) or EVAL_SLACK_NOTIFICATION_CHANNEL
+      enable_suite_owner_notify="false"
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]] && [[ "${BUILDKITE_BRANCH:-}" == "${EVAL_NOTIFY_BRANCH}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${resolved_pr_number}" ]]; then
+        enable_suite_owner_notify="true"
+      elif [[ -n "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}" ]]; then
+        enable_suite_owner_notify="true"
+      fi
+
+      if [[ "${enable_suite_owner_notify}" == "true" ]]; then
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
+        key: "kbn-evals-${group_key_safe}-suite-owner-notify"
+        command: "bash .buildkite/scripts/steps/evals/suite_owner_notify.sh"
+        env:
+          KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
+          EVAL_SLACK_NOTIFICATION_CHANNEL: "${EVAL_SLACK_NOTIFICATION_CHANNEL:-}"
+          EVAL_PR_NUMBER: "${resolved_pr_number}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_TRIAGE_MODEL_ID: "${EVAL_TRIAGE_MODEL_ID:-}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        soft_fail: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+      fi
+
+      # PR-only steps: post-comparison comment + refresh baseline block/trigger.
+      # Both live here in the fanout so they start only after all model steps
+      # complete and execution IDs are written by evaluate.ts.
+      if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+        suite_display_name="${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}"
+
+        # Post-comparison step (inside the fanout group — 6-space indent).
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (post comparison)"
+        key: "kbn-evals-${group_key_safe}-post-comparison"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+        # Refresh baseline block + trigger (top-level — 2-space indent).
+        # The trigger fires a fresh main eval run so the PR comment is updated
+        # with a same-day baseline when the auto-discovered one is stale.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+  - block: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-block"
+    depends_on:
+      - "kbn-evals-${group_key_safe}-post-comparison"
+    allow_dependency_failure: true
+  - trigger: kibana-evals-on-demand-llm-evals
+    label: "LLM Evals: Refresh ${suite_display_name}"
+    key: "kbn-evals-${group_key_safe}-refresh-trigger"
+    async: true
+    soft_fail: true
+    depends_on:
+      - "kbn-evals-${group_key_safe}-refresh-block"
+    build:
+      branch: main
+      message: "Fresh baseline for PR #${BUILDKITE_PULL_REQUEST}: ${EVAL_SUITE_ID}"
+      env:
+        EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+        EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+        FRESH_BASELINE_PR_EXPERIMENT_ID: "bk-${BUILDKITE_BUILD_ID}"
+        EVAL_PR_NUMBER: "${BUILDKITE_PULL_REQUEST}"
+        EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+        EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+        EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+        EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+EOF
+      elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
+        # Fresh-baseline mode: emit the post-comparison step inside the fanout so
+        # it starts only after all model steps have written their execution IDs to
+        # Buildkite metadata.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (fresh baseline comparison)"
+        key: "kbn-evals-${group_key_safe}-fresh-compare"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
+      fi
 
       if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
         echo "Fanout pipeline upload failed. Dumping generated YAML with line numbers:"
         nl -ba "$FANOUT_PIPELINE_FILE" || true
         exit 1
       fi
+
+      # Publish the connector list so the post-comparison step can discover
+      # which models ran without querying the experiments API.
+      _connectors_csv="$(printf '%s' "$CONNECTOR_IDS" | tr '\n' ',' | sed 's/,$//')"
+      buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
+
       echo "Fanout uploaded. Exiting parent step."
       exit 0
     fi
@@ -197,7 +430,7 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
   if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
-  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+  if [[ -n "${EVAL_CONNECTOR_ID:-}" ]] && [[ "${EVAL_CONNECTOR_ID}" == eis-* ]]; then
     NEED_EIS_RUNTIME="true"
   fi
   if [[ "${EVAL_MODEL_GROUPS:-}" == *"eis/"* ]]; then
@@ -282,10 +515,26 @@ done
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
-if [[ -n "${EVAL_PROJECT:-}" ]]; then
-  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT"
-else
-  node scripts/evals run --suite "$EVAL_SUITE_ID"
+EVAL_RUN_ARGS=()
+if [[ -n "${EVAL_GREP:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
 fi
+
+run_eval_suite() {
+  if [[ -n "${EVAL_PROJECT:-}" ]]; then
+    KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
+    export KBN_EVALS_RUN_LOG
+    set +e
+    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
+    local eval_exit="${PIPESTATUS[0]}"
+    set -e
+    return "${eval_exit}"
+  fi
+
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
+}
+
+run_eval_suite
 

@@ -48,6 +48,7 @@ export async function mountManagementSection(
     data,
     dataViews,
     dataViewEditor,
+    cps,
     share,
     spaces,
     triggersActionsUi,
@@ -57,7 +58,6 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
-    contentManagement,
     fieldsMetadata,
   } = plugins;
   const { docTitle } = chrome;
@@ -72,6 +72,7 @@ export async function mountManagementSection(
     analytics,
     application,
     chrome,
+    cps,
     data,
     dataViewEditor,
     dataViews,
@@ -95,7 +96,6 @@ export async function mountManagementSection(
     fieldFormats,
     savedObjectsManagement,
     savedSearch,
-    contentManagement,
     fieldsMetadata,
   };
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -85,6 +85,25 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body).to.eql({ [adJobId]: { type: jobType, success: true } });
       await ml.api.assertJobSpaces(adJobId, jobType, [idSpace1]);
+    });
+
+    it('should fail when attempting to remove all spaces from an AD job', async () => {
+      const jobType = 'anomaly-detector';
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
+      const body = await runRequest(
+        {
+          jobType,
+          jobIds: [adJobId],
+          spacesToAdd: [],
+          spacesToRemove: [defaultSpaceId],
+        },
+        400,
+        USER.ML_POWERUSER
+      );
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.message).to.eql(`Cannot remove job '${adJobId}' from all spaces`);
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
     });
 
     it('should assign DFA job to space for user with access to that space', async () => {

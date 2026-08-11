@@ -5,14 +5,18 @@
  * 2.0.
  */
 import type {
-  SerializedTitles,
+  HasSupportedTriggers,
   PublishesWritableTitle,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { Subject } from 'rxjs';
-import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
-import { type CoreStart } from '@kbn/core/public';
+import type { ErrorBudgetEmbeddableState } from '../../../../common/embeddables/error_budget/types';
+
+export type {
+  ErrorBudgetCustomState,
+  ErrorBudgetEmbeddableState,
+} from '../../../../common/embeddables/error_budget/types';
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;
@@ -21,20 +25,8 @@ export interface EmbeddableSloProps {
   onRenderComplete?: () => void;
 }
 
-export interface ErrorBudgetCustomInput {
-  sloId: string | undefined;
-  sloInstanceId: string | undefined;
-}
-
-export type SloErrorBudgetEmbeddableState = SerializedTitles & ErrorBudgetCustomInput;
-export type ErrorBudgetApi = DefaultEmbeddableApi<SloErrorBudgetEmbeddableState> &
+export type ErrorBudgetApi = DefaultEmbeddableApi<ErrorBudgetEmbeddableState> &
   PublishesWritableTitle &
-  PublishesTitle;
-
-export interface SloEmbeddableDeps {
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  i18n: CoreStart['i18n'];
-  application: ApplicationStart;
-  notifications: NotificationsStart;
-}
+  PublishesTitle &
+  HasDrilldowns &
+  HasSupportedTriggers;

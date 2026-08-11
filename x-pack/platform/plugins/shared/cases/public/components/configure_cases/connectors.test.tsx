@@ -15,6 +15,7 @@ import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/types/domain';
 import userEvent from '@testing-library/user-event';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 const useApplicationCapabilitiesMock = useApplicationCapabilities as jest.Mocked<
   typeof useApplicationCapabilities
@@ -49,6 +50,15 @@ describe('Connectors', () => {
     expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
   });
 
+  it('hides the described form group title when hideTitle is true', () => {
+    renderWithTestingProviders(<Connectors {...props} hideTitle />);
+
+    expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'External incident management system' })
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the connectors form row', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
@@ -65,6 +75,7 @@ describe('Connectors', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 
     await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     expect(onChangeConnector).toHaveBeenCalled();
@@ -82,6 +93,7 @@ describe('Connectors', () => {
     );
 
     await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('dropdown-connector-no-connector'));
 
     expect(onChangeConnector).toHaveBeenCalled();

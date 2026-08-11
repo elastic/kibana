@@ -51,12 +51,16 @@
       "discover",
       "exploratoryView",
       "home",
+      "globalSearch",
       "usageCollection",
       "cloud",
       "spaces",
       "serverless",
       "observabilityAIAssistant",
-      "investigate"
+      "investigate",
+      "cps",
+      "ingestHub",
+      "significantEvents"
     ],
     "requiredBundles": [
       "aiops",
@@ -67,8 +71,8 @@
       "logsShared",
       "kibanaReact",
       "kibanaUtils",
+      "significantEvents",
       "stackAlerts",
-      "spaces",
       "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]

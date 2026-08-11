@@ -22,7 +22,7 @@ export const SecurityUserAvatar: React.FC<Props> = ({ user }) => {
   if (userProfile) {
     return (
       <UserAvatar
-        data-test-subj="userAvatar"
+        data-test-subj="user"
         user={userProfile.user}
         avatar={userProfile.avatar}
         size="l"
@@ -35,7 +35,7 @@ export const SecurityUserAvatar: React.FC<Props> = ({ user }) => {
       name="user"
       size="l"
       color="subdued"
-      iconType="userAvatar"
+      iconType="user"
     />
   );
 };

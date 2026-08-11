@@ -19,21 +19,49 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestExample:
+              summary: Bad request
+              value:
+                statusCode: 400
+                error: Bad Request
+                message: "Invalid value 'foo' supplied to: id"
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedExample:
+              summary: Unauthorized
+              value:
+                statusCode: 401
+                error: Unauthorized
+                message: "security_exception: unable to authenticate user for REST request [/api/observability/slos]"
     '403':
-      description: Unauthorized response
+      description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenExample:
+              summary: Forbidden
+              value:
+                statusCode: 403
+                error: Forbidden
+                message: "security_exception: action [slo_write] is unauthorized for user"
     '404':
       description: Not found response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundExample:
+              summary: Not found
+              value:
+                statusCode: 404
+                error: Not Found
+                message: "SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found"

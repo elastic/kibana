@@ -56,7 +56,7 @@ export function useKeyboardNavigation({
    */
   const findNodeInDirection = useCallback(
     (currentNodeId: string, direction: ArrowDirection): ServiceMapNode | null => {
-      const currentNode = nodes.find((n) => n.id === currentNodeId);
+      const currentNode = nodes?.find((n) => n.id === currentNodeId);
       if (!currentNode) return null;
 
       const current = currentNode.position;
@@ -105,7 +105,7 @@ export function useKeyboardNavigation({
         if (edgeElement) {
           const edgeElementId = edgeElement.getAttribute('data-id');
           if (!edgeElementId) return;
-          const focusedEdge = edges.find((e) => e.id === edgeElementId);
+          const focusedEdge = edges?.find((e) => e.id === edgeElementId);
           if (!focusedEdge) return;
           event.preventDefault();
 
@@ -128,7 +128,7 @@ export function useKeyboardNavigation({
         const nodeElement = activeElement?.closest('[data-id]');
         if (nodeElement && !edgeElement) {
           const nodeId = nodeElement.getAttribute('data-id');
-          const focusedNode = nodes.find((n) => n.id === nodeId);
+          const focusedNode = nodes?.find((n) => n.id === nodeId);
           if (!focusedNode) return;
 
           event.preventDefault();

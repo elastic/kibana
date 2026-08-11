@@ -55,7 +55,7 @@ function toErrorMessage(error: unknown): string {
   }
 }
 
-function getStatusCode(error: any): number | undefined {
+export function getStatusCode(error: any): number | undefined {
   return (
     error?.statusCode ??
     error?.status ??
@@ -97,6 +97,8 @@ function computeDelayMs({
   return base + Math.floor(Math.random() * extra);
 }
 
+const RETRYABLE_SERVER_STATUSES = new Set<number>([502, 503, 504]);
+
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
   const status = getStatusCode(error);
   const message = toErrorMessage(error);
@@ -108,9 +110,21 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     return { retry: true, retryAfterMs };
   }
 
-  // Common transient network issues (best-effort)
-  if (/ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND/i.test(message)) {
-    return { retry: true };
+  // Transient server-side failures (idempotent endpoints can safely retry).
+  if (status !== undefined && RETRYABLE_SERVER_STATUSES.has(status)) {
+    return { retry: true, retryAfterMs };
+  }
+
+  // Common transient network issues (best-effort).
+  // "other side closed" / "fetch failed" are SocketError signatures from undici when a
+  // keep-alive connection is closed by the server (e.g. Kibana's Node.js keepAliveTimeout)
+  // while the eval worker is busy with a long ES replay operation.
+  if (
+    /ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|other side closed|socket hang up|fetch failed/i.test(
+      message
+    )
+  ) {
+    return { retry: true, retryAfterMs };
   }
 
   return { retry: false };

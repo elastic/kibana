@@ -8,7 +8,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { addTool } from './add_tool';
 import type { ToolDefinition } from '../types';
 
@@ -43,7 +43,7 @@ describe('addTool', () => {
       'sample_tool',
       {
         description: 'A sample tool for testing',
-        inputSchema: sampleTool.inputSchema.shape,
+        inputSchema: sampleTool.inputSchema,
       },
       expect.any(Function)
     );

@@ -12,15 +12,16 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiPortal,
-  useEuiTheme,
-  EuiTitle,
-  EuiTourStepIndicator,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSplitPanel,
   EuiForm,
-  EuiButtonIcon,
+  EuiPortal,
+  EuiSplitPanel,
+  EuiTitle,
+  EuiToolTip,
+  EuiTourStepIndicator,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EuiTourStepStatus } from '@elastic/eui/src/components/tour/tour_step_indicator';
@@ -117,6 +118,7 @@ function InterceptDisplayManager({
           currentIntercept.onDismiss?.({
             runId: currentIntercept.runId,
             stepId: currentIntercept.steps[0].id,
+            interceptId: currentIntercept.id,
           });
           break;
         }
@@ -124,6 +126,7 @@ function InterceptDisplayManager({
           currentIntercept.onFinish?.({
             response: feedbackStore.current,
             runId: currentIntercept.runId,
+            interceptId: currentIntercept.id,
           });
           break;
         }
@@ -169,6 +172,7 @@ function InterceptDisplayManager({
         stepId: this.id,
         stepResponse: value,
         runId: currentIntercept!.runId,
+        interceptId: currentIntercept!.id,
       });
       seekNextStep();
     },
@@ -215,12 +219,14 @@ function InterceptDisplayManager({
                     </EuiFlexItem>
                     {currentStepIndex > 0 && !isLastStep && (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="cross"
-                          aria-label="Close dialog"
-                          onClick={dismissProductIntercept}
-                          color="text"
-                        />
+                        <EuiToolTip content="Close dialog" disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            iconType="cross"
+                            aria-label="Close dialog"
+                            onClick={dismissProductIntercept}
+                            color="text"
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>

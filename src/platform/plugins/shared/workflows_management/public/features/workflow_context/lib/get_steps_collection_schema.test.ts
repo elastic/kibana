@@ -13,6 +13,13 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
 
+function unwrapStepSchema(schema: z.ZodTypeAny): z.ZodObject<any> {
+  if (schema instanceof z.ZodLazy) {
+    return schema.unwrap() as z.ZodObject<any>;
+  }
+  return schema as z.ZodObject<any>;
+}
+
 describe('getStepsCollectionSchema', () => {
   it('should return empty steps collection schema for a step with no predecessors', () => {
     const definition = {
@@ -98,8 +105,10 @@ describe('getStepsCollectionSchema', () => {
     expect(loopShape.index.def.type).toBe('number');
     expect(loopShape.total.def.type).toBe('number');
 
-    // For the main schema, check the step-1 output
-    const step1Schema = (stepsCollectionSchema as z.ZodObject<any>).shape['step-1'];
+    // For the main schema, check the step-1 output (unwrap ZodLazy for non-foreach steps)
+    const step1Schema = unwrapStepSchema(
+      (stepsCollectionSchema as z.ZodObject<any>).shape['step-1']
+    );
     expect(step1Schema).toBeDefined();
     expect(step1Schema.shape.output.def.type).toBe('optional');
     expect(step1Schema.shape.error.def.type).toBe('optional');
@@ -180,14 +189,200 @@ describe('getStepsCollectionSchema', () => {
       'after-check'
     );
 
-    const checkSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.check;
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
     expect(checkSchema).toBeDefined();
-    const checkShape = (checkSchema as z.ZodObject<any>).shape;
-    expect(checkShape.output).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
 
-    const outputInnerType = checkShape.output.unwrap();
+    const outputInnerType = checkSchema.shape.output.unwrap();
     const outputShape = (outputInnerType as z.ZodObject<any>).shape;
     expect(outputShape.conditionResult).toBeDefined();
+  });
+
+  it('should include inner step outputs for while step (do-while semantics)', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.check.output.done }}',
+          steps: [
+            {
+              name: 'check',
+              type: 'console',
+              with: { message: 'checking...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
+    expect(checkSchema).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
+    expect(checkSchema.shape.error).toBeDefined();
+  });
+
+  it('should include inner steps and predecessors for while step after other steps', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'setup',
+          type: 'console',
+          with: { message: 'init' },
+        },
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.check.output.done }}',
+          steps: [
+            {
+              name: 'check',
+              type: 'console',
+              with: { message: 'checking...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    const setupSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.setup);
+    expect(setupSchema).toBeDefined();
+    expect(setupSchema.shape.output).toBeDefined();
+
+    const checkSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.check);
+    expect(checkSchema).toBeDefined();
+    expect(checkSchema.shape.output).toBeDefined();
+  });
+
+  it('should include multiple inner steps for while step', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'poll',
+          type: 'while',
+          condition: '{{ steps.evaluate.output.done }}',
+          steps: [
+            {
+              name: 'fetch',
+              type: 'console',
+              with: { message: 'fetching...' },
+            },
+            {
+              name: 'evaluate',
+              type: 'console',
+              with: { message: 'evaluating...' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'poll'
+    );
+
+    const fetchSchema = unwrapStepSchema((stepsCollectionSchema as z.ZodObject<any>).shape.fetch);
+    expect(fetchSchema).toBeDefined();
+    expect(fetchSchema.shape.output).toBeDefined();
+
+    const evaluateSchema = unwrapStepSchema(
+      (stepsCollectionSchema as z.ZodObject<any>).shape.evaluate
+    );
+    expect(evaluateSchema).toBeDefined();
+    expect(evaluateSchema.shape.output).toBeDefined();
+  });
+
+  it('should not include inner steps for non-while steps (e.g. foreach)', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        {
+          name: 'loop',
+          type: 'foreach',
+          foreach: '["a", "b"]',
+          steps: [
+            {
+              name: 'inner',
+              type: 'console',
+              with: { message: 'hi' },
+            },
+          ],
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+    const stepsCollectionSchema = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'loop'
+    );
+
+    const innerSchema = (stepsCollectionSchema as z.ZodObject<any>).shape.inner;
+    expect(innerSchema).toBeUndefined();
+  });
+
+  it('should produce the same schema when precomputedPredecessors are passed', () => {
+    const definition = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const, enabled: true }],
+      steps: [
+        { name: 'step-1', type: 'console', with: { message: 'hi' } },
+        { name: 'step-2', type: 'console', with: { message: 'hello' } },
+        { name: 'step-3', type: 'console', with: { message: 'hey' } },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+    const withoutPrecomputed = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3'
+    );
+
+    const stepNode = workflowGraph.getStepNode('step-3')!;
+    const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
+    const withPrecomputed = getStepsCollectionSchema(
+      DynamicStepContextSchema,
+      workflowGraph,
+      'step-3',
+      predecessors
+    );
+
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(
+      Object.keys(withoutPrecomputed.shape).sort()
+    );
+    expect(Object.keys(withPrecomputed.shape).sort()).toEqual(['step-1', 'step-2']);
   });
 
   it('should use step names as is', () => {

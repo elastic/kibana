@@ -5,53 +5,45 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { WithAllKeys } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React, { useEffect } from 'react';
-import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import React, { useEffect, useMemo } from 'react';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
-import { GroupSloView } from './group_view/group_view';
-import { SloOverview } from './slo_overview';
-import { SloCardChartList } from './slo_overview_grid';
+import {
+  SLO_EMBEDDABLE_SUPPORTED_TRIGGERS,
+  SLO_OVERVIEW_EMBEDDABLE_ID,
+} from '../../../../common/embeddables/overview/constants';
+import { SloOverviewPanelContent } from './slo_overview_panel_content';
+import type { SloOverviewApi } from './types';
 import type {
-  GroupSloCustomInput,
-  SloOverviewApi,
-  SloOverviewEmbeddableState,
-  SloOverviewState,
-} from './types';
+  GroupOverviewCustomState,
+  OverviewEmbeddableState,
+  SingleOverviewCustomState,
+} from '../../../../common/embeddables/overview/types';
 import { openSloConfiguration } from './slo_overview_open_configuration';
+import { ensureLicense } from '../ensure_license';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
     defaultMessage: 'SLO Overview',
   });
-
-const defaultSloEmbeddableState: WithAllKeys<SloOverviewState> = {
-  sloId: undefined,
-  sloInstanceId: undefined,
-  showAllGroupByInstances: undefined,
-  overviewMode: undefined,
-  groupFilters: undefined,
-  remoteName: undefined,
-};
 
 export const getOverviewEmbeddableFactory = ({
   coreStart,
@@ -61,8 +53,17 @@ export const getOverviewEmbeddableFactory = ({
   coreStart: CoreStart;
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
-}): EmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> => ({
+}): EmbeddablePublicDefinition<OverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
+  getPlacementHints: (serializedState?: OverviewEmbeddableState) => {
+    if (
+      (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
+      (serializedState as GroupOverviewCustomState)?.group_filters
+    ) {
+      return { width: 24, height: 8 };
+    }
+    return { width: 12, height: 8 };
+  },
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -70,64 +71,103 @@ export const getOverviewEmbeddableFactory = ({
     uuid,
     parentApi,
   }) => {
+    await ensureLicense(pluginsStart.licensing);
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
-    const sloStateManager = initializeStateManager(state, defaultSloEmbeddableState);
+    const overviewMode$ = new BehaviorSubject<OverviewEmbeddableState['overview_mode'] | undefined>(
+      state.overview_mode
+    );
+    function setOverviewMode(overviewMode: OverviewEmbeddableState['overview_mode'] | undefined) {
+      overviewMode$.next(overviewMode);
+    }
+    const singleSloManager = initializeStateManager<
+      Omit<SingleOverviewCustomState, 'overview_mode'>
+    >(state as SingleOverviewCustomState, {
+      slo_id: '',
+      slo_instance_id: ALL_VALUE,
+      remote_name: undefined,
+    });
+    const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
+      state as GroupOverviewCustomState,
+      {
+        group_filters: { group_by: 'status' as const },
+      }
+    );
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const reload$ = new Subject<boolean>();
 
-    function serializeState() {
-      return {
-        ...titleManager.getLatestState(),
-        ...sloStateManager.getLatestState(),
-        ...drilldownsManager.getLatestState(),
-      };
-    }
-
-    const unsavedChangesApi = initializeUnsavedChanges<SloOverviewEmbeddableState>({
+    const stateApi = initializeStateApi<OverviewEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => {
+        const commonState = {
+          ...titleManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+        };
+
+        if (overviewMode$.getValue() === 'single') {
+          return {
+            ...commonState,
+            overview_mode: 'single',
+            ...singleSloManager.getLatestState(),
+          };
+        }
+
+        if (overviewMode$.getValue() === 'groups') {
+          return {
+            ...commonState,
+            overview_mode: 'groups',
+            ...groupSloManager.getLatestState(),
+          };
+        }
+
+        throw new Error('overview_mode not provided');
+      },
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
-        sloStateManager.anyStateChange$
+        overviewMode$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        singleSloManager.anyStateChange$,
+        groupSloManager.anyStateChange$
       ),
       getComparators: () => ({
-        sloId: 'referenceEquality',
-        sloInstanceId: 'referenceEquality',
-        groupFilters: 'referenceEquality',
-        showAllGroupByInstances: 'referenceEquality',
-        remoteName: 'referenceEquality',
-        overviewMode: 'referenceEquality',
+        slo_id: 'referenceEquality',
+        slo_instance_id: 'referenceEquality',
+        group_filters: 'referenceEquality',
+        remote_name: 'referenceEquality',
+        overview_mode: 'referenceEquality',
         ...titleComparators,
         ...drilldownsManager.comparators,
       }),
-      onReset: (lastSaved) => {
-        drilldownsManager.reinitializeState(lastSaved ?? {});
-        titleManager.reinitializeState(lastSaved);
-        sloStateManager.reinitializeState(lastSaved);
+      applySerializedState: (nextState) => {
+        drilldownsManager.reinitializeState(nextState);
+        titleManager.reinitializeState(nextState);
+        singleSloManager.reinitializeState(nextState as SingleOverviewCustomState);
+        groupSloManager.reinitializeState(nextState as GroupOverviewCustomState);
+        setOverviewMode(nextState.overview_mode);
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       ...drilldownsManager.api,
-      ...sloStateManager.api,
       defaultTitle$,
       hideTitle$: titleManager.api.hideTitle$,
       setHideTitle: titleManager.api.setHideTitle,
-      supportedTriggers: () => [],
+      supportedTriggers: () => SLO_EMBEDDABLE_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
           defaultMessage: 'criteria',
         }),
-      isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+      isEditingEnabled: () => overviewMode$.getValue() === 'groups',
       onEdit: async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -136,21 +176,19 @@ export const getOverviewEmbeddableFactory = ({
             sloClient,
             api.getSloGroupOverviewConfig()
           );
-          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+          api.updateSloGroupOverviewConfig(result as GroupOverviewCustomState);
         } catch (e) {
           return Promise.reject();
         }
       },
-      serializeState,
-      getSloGroupOverviewConfig: () => {
-        const { groupFilters, overviewMode } = sloStateManager.getLatestState();
+      getSloGroupOverviewConfig: (): GroupOverviewCustomState => {
         return {
-          groupFilters,
-          overviewMode,
+          ...groupSloManager.getLatestState(),
+          overview_mode: 'groups',
         };
       },
-      updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
-        sloStateManager.api.setGroupFilters(update.groupFilters);
+      updateSloGroupOverviewConfig: (update: GroupOverviewCustomState) => {
+        groupSloManager.api.setGroupFilters(update.group_filters);
       },
     });
 
@@ -163,21 +201,14 @@ export const getOverviewEmbeddableFactory = ({
     return {
       api,
       Component: () => {
-        const [
-          sloId,
-          sloInstanceId,
-          showAllGroupByInstances,
-          overviewMode,
-          groupFilters,
-          remoteName,
-        ] = useBatchedPublishingSubjects(
-          sloStateManager.api.sloId$,
-          sloStateManager.api.sloInstanceId$,
-          sloStateManager.api.showAllGroupByInstances$,
-          sloStateManager.api.overviewMode$,
-          sloStateManager.api.groupFilters$,
-          sloStateManager.api.remoteName$
-        );
+        const [sloId, sloInstanceId, overviewMode, groupFilters, remoteName] =
+          useBatchedPublishingSubjects(
+            singleSloManager.api.sloId$,
+            singleSloManager.api.sloInstanceId$,
+            overviewMode$,
+            groupSloManager.api.groupFilters$,
+            singleSloManager.api.remoteName$
+          );
 
         useEffect(() => {
           return () => {
@@ -185,53 +216,12 @@ export const getOverviewEmbeddableFactory = ({
             fetchSubscription.unsubscribe();
           };
         }, []);
-        const renderOverview = () => {
-          if (overviewMode === 'groups') {
-            const groupBy = groupFilters?.groupBy ?? 'status';
-            const kqlQuery = groupFilters?.kqlQuery ?? '';
-            const groups = groupFilters?.groups ?? [];
-            return (
-              <div
-                css={({ euiTheme }: UseEuiTheme) => css`
-                  width: 100%;
-                  padding: ${euiTheme.size.xs} ${euiTheme.size.base};
-                  overflow: scroll;
 
-                  .euiAccordion__buttonContent {
-                    min-width: ${euiTheme.base * 6}px;
-                  }
-                `}
-              >
-                <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
-                  <EuiFlexItem
-                    css={({ euiTheme }: UseEuiTheme) => css`
-                      margin-top: ${euiTheme.base * 1.25}px;
-                    `}
-                  >
-                    <GroupSloView
-                      view="cardView"
-                      groupBy={groupBy}
-                      groups={groups}
-                      kqlQuery={kqlQuery}
-                      filters={groupFilters?.filters}
-                      reloadSubject={reload$}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            );
-          } else {
-            return (
-              <SloOverview
-                sloId={sloId}
-                sloInstanceId={sloInstanceId}
-                reloadSubject={reload$}
-                showAllGroupByInstances={showAllGroupByInstances}
-                remoteName={remoteName}
-              />
-            );
-          }
-        };
+        const fetchContext = useFetchContext(api);
+        const dashboardFilters = useMemo(
+          () => rewriteFiltersForSloSummary(fetchContext.filters ?? []),
+          [fetchContext.filters]
+        );
 
         const queryClient = new QueryClient();
         return (
@@ -247,19 +237,15 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {overviewMode === 'groups' ? (
-                    renderOverview()
-                  ) : showAllGroupByInstances ? (
-                    <div
-                      data-test-subj="sloSingleOverviewPanel"
-                      data-shared-item=""
-                      style={{ width: '100%' }}
-                    >
-                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
-                    </div>
-                  ) : (
-                    renderOverview()
-                  )}
+                  <SloOverviewPanelContent
+                    sloId={sloId ?? undefined}
+                    sloInstanceId={sloInstanceId}
+                    overviewMode={overviewMode}
+                    groupFilters={groupFilters}
+                    dashboardFilters={dashboardFilters}
+                    remoteName={remoteName}
+                    reloadSubject={reload$}
+                  />
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>

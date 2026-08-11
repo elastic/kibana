@@ -23,7 +23,7 @@ function Check({ group, selectedGroups }) {
     } else {
       return (
         <div className="check selected">
-          <EuiIcon type="check" />
+          <EuiIcon type="check" aria-hidden={true} />
         </div>
       );
     }

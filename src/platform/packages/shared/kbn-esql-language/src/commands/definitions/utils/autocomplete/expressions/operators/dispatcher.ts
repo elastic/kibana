@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression } from '../../../../../../ast/is';
+import { isFunctionExpression } from '@elastic/esql';
+import type { ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLFunction } from '../../../../../../types';
 import type { ExpressionContext } from '../types';
 import { handleListOperator } from './handlers';
-import { handleStringListOperator, handleNullCheckOperator } from './handlers';
+import { handleStringListOperator, handleNullCheckOperator, handleMatchOperator } from './handlers';
 
 const handlers: Record<string, (ctx: ExpressionContext) => Promise<ISuggestionItem[] | null>> = {
   in: handleListOperator,
@@ -23,6 +23,7 @@ const handlers: Record<string, (ctx: ExpressionContext) => Promise<ISuggestionIt
   'not rlike': handleStringListOperator,
   'is null': handleNullCheckOperator,
   'is not null': handleNullCheckOperator,
+  ':': handleMatchOperator,
 };
 
 export async function dispatchOperators(ctx: ExpressionContext): Promise<ISuggestionItem[] | null> {

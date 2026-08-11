@@ -135,7 +135,7 @@ export const TagCloudChart = ({
           : { value: row[tagColumn], tag: row[tagColumn] };
 
       return {
-        text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
+        text: bucketFormatter ? bucketFormatter.convertToText(tag) : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
@@ -207,7 +207,7 @@ export const TagCloudChart = ({
 
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
-          ? bucketFormatter.convert(row[termsBucketId], 'text')
+          ? bucketFormatter.convertToText(row[termsBucketId])
           : row[termsBucketId];
         return formattedValue === clickedValue;
       });
@@ -257,7 +257,7 @@ export const TagCloudChart = ({
               angleCount={ORIENTATIONS[orientation].angleCount}
               padding={5}
               fontWeight={400}
-              fontFamily="Inter UI, sans-serif"
+              fontFamily="'Elastic UI Numeric', 'Inter UI', sans-serif"
               fontStyle="normal"
               minFontSize={visParams.minFontSize}
               maxFontSize={visParams.maxFontSize}

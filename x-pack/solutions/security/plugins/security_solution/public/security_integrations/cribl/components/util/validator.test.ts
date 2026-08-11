@@ -53,4 +53,13 @@ describe('validator: allRouteEntriesArePaired', () => {
     const result = allRouteEntriesArePaired(routeEntries);
     expect(result).toBeTruthy();
   });
+
+  it('paired route entries with namespace => valid', () => {
+    const routeEntries: RouteEntry[] = [
+      { dataId: 'criblSource1', datastream: 'logs-destination1.cloud', namespace: 'production' },
+      { dataId: 'criblSource2', datastream: 'logs-destination2' },
+    ];
+    const result = allRouteEntriesArePaired(routeEntries);
+    expect(result).toBeTruthy();
+  });
 });

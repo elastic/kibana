@@ -15,7 +15,7 @@ export const FilterBadgeInvalidPlaceholder = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiBadge iconType="unlink" color={euiTheme.colors.lightestShade}>
+    <EuiBadge iconType="linkSlash" color={euiTheme.colors.lightestShade}>
       <FormattedMessage
         id="unifiedSearch.filter.filterBadgeInvalidPlaceholder.label"
         defaultMessage="filter value is invalid or incomplete"

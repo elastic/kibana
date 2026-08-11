@@ -229,7 +229,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiButton
               {...reactRouterNavigate(history, linkToAddRepository(currentUrl))}
               color="danger"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="addRepositoryButton"
             >
               <FormattedMessage
@@ -281,6 +281,10 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           fullWidth
           data-test-subj="repositorySelect"
           disabled={policy?.isManagedPolicy && isEditing}
+          aria-label={i18n.translate(
+            'xpack.snapshotRestore.policyForm.stepLogistics.repositorySelectAriaLabel',
+            { defaultMessage: 'Repository' }
+          )}
         />
       </DisableToolTip>
     );

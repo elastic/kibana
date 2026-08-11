@@ -184,6 +184,7 @@ describe('Agentless Agent service', () => {
           fleet_url: 'http://fleetserver:8220',
           policy_id: 'mocked-agentless-agent-policy-id',
           stack_version: 'mocked-kibana-version-infinite',
+          is_elastic_staff_owned: false,
           labels: {
             owner: {
               org: 'elastic',
@@ -201,6 +202,73 @@ describe('Agentless Agent service', () => {
         }),
         headers: expect.anything(),
         httpsAgent: expect.anything(),
+        method: 'POST',
+        url: 'http://api.agentless.com/api/v1/ess/deployments',
+      })
+    );
+  });
+
+  it('should include is_elastic_staff_owned when cloud reports elastic staff owned deployment', async () => {
+    jest.mocked(axios).mockResolvedValueOnce(mockAgentlessDeploymentResponse);
+    const soClient = getAgentPolicyCreateMock();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+        deploymentSecrets: {
+          fleetAppToken: 'fleet-app-token',
+          elasticsearchAppToken: 'es-app-token',
+        },
+      },
+    } as any);
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isCloudEnabled: true, isElasticStaffOwned: true } as any);
+    jest
+      .spyOn(appContextService, 'getKibanaVersion')
+      .mockReturnValue('mocked-kibana-version-infinite');
+    mockedFleetServerHostService.get.mockResolvedValue({
+      id: 'mocked-fleet-server-id',
+      host: 'http://fleetserver:8220',
+      active: true,
+      is_default: true,
+      host_urls: ['http://fleetserver:8220'],
+    } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValue({
+      items: [
+        {
+          id: 'mocked-fleet-enrollment-token-id',
+          policy_id: 'mocked-fleet-enrollment-policy-id',
+          api_key: 'mocked-fleet-enrollment-api-key',
+        },
+      ],
+    } as any);
+
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, {
+      id: 'mocked-agentless-agent-policy-id',
+      name: 'agentless agent policy',
+      namespace: 'default',
+      fleet_server_host_id: 'mock-fleet-default-fleet-server-host',
+      data_output_id: 'mock-fleet-default-output',
+      supports_agentless: true,
+    } as AgentPolicy);
+
+    expect(axios).toHaveBeenCalledTimes(1);
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          policy_id: 'mocked-agentless-agent-policy-id',
+          is_elastic_staff_owned: true,
+          stack_version: 'mocked-kibana-version-infinite',
+        }),
         method: 'POST',
         url: 'http://api.agentless.com/api/v1/ess/deployments',
       })
@@ -2029,6 +2097,217 @@ describe('Agentless Agent service', () => {
 
       // Assert that the error is logged
       expect(mockedLogger.error).toBeCalledTimes(1);
+    });
+  });
+});
+
+describe('getDefaultFleetServerId', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should return the ECH fleet server id when cloud is enabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    expect(agentlessAgentService.getDefaultFleetServerId()).toBe('internal-agentless-fleet-server');
+  });
+
+  it('should return the serverless fleet server id when serverless is enabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
+
+    expect(agentlessAgentService.getDefaultFleetServerId()).toBe('default-fleet-server-internal');
+  });
+
+  it('should return undefined when self-managed', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+
+    expect(agentlessAgentService.getDefaultFleetServerId()).toBeUndefined();
+  });
+});
+
+describe('getDefaultOutputId', () => {
+  const CONNECTOR_POLICY = {
+    package_policies: [{ package: { name: 'elastic_connectors' } }],
+  };
+  const OTEL_POLICY = {
+    package_policies: [{ package: { name: 'otel' }, inputs: [{ type: 'otelcol', enabled: true }] }],
+  };
+  const PLAIN_POLICY = {
+    package_policies: [{ package: { name: 'nginx' }, inputs: [{ type: 'log', enabled: true }] }],
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  describe('ECH', () => {
+    beforeEach(() => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isCloudEnabled: true,
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+    });
+
+    it('should return the direct-ES output for a connector policy, even when managed bulk is enabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(CONNECTOR_POLICY)).toBe(
+        'es-agentless-output'
+      );
+    });
+
+    it('should return the direct-ES output for an OTel policy, even when managed bulk is enabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(OTEL_POLICY)).toBe('es-agentless-output');
+    });
+
+    it('should return the direct-ES output for a plain policy when managed bulk is disabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: false } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(PLAIN_POLICY)).toBe('es-agentless-output');
+    });
+
+    it('should return the managed bulk output for a plain policy when managed bulk is enabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(PLAIN_POLICY)).toBe(
+        'es-managed-bulk-agentless-output'
+      );
+    });
+
+    it('should return the direct-ES output for a plain policy when managedOtlp.url is absent', () => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(PLAIN_POLICY)).toBe('es-agentless-output');
+    });
+  });
+
+  describe('Serverless', () => {
+    beforeEach(() => {
+      jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isServerlessEnabled: true,
+        managedOtlp: { url: 'https://managed-otlp.example.com' },
+      } as any);
+    });
+
+    it('should return the direct-ES output for a connector policy, even when managed bulk is enabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(CONNECTOR_POLICY)).toBe(
+        'es-default-output-internal'
+      );
+    });
+
+    it('should return the managed bulk output for a plain policy when managed bulk is enabled', () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { managedBulk: { enabled: true } },
+      } as any);
+
+      expect(agentlessAgentService.getDefaultOutputId(PLAIN_POLICY)).toBe(
+        'es-managed-bulk-agentless-output-internal'
+      );
+    });
+  });
+
+  it('should return undefined when self-managed', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultOutputId(PLAIN_POLICY)).toBeUndefined();
+  });
+});
+
+describe('getDefaultSettings', () => {
+  const PLAIN_POLICY = {
+    package_policies: [{ package: { name: 'nginx' }, inputs: [{ type: 'log', enabled: true }] }],
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should combine the direct-ES output id and fleet server id for ECH when managed bulk is disabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: false } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultSettings(PLAIN_POLICY)).toEqual({
+      outputId: 'es-agentless-output',
+      fleetServerId: 'internal-agentless-fleet-server',
+    });
+  });
+
+  it('should combine the managed bulk output id and fleet server id for ECH when managed bulk is enabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultSettings(PLAIN_POLICY)).toEqual({
+      outputId: 'es-managed-bulk-agentless-output',
+      fleetServerId: 'internal-agentless-fleet-server',
+    });
+  });
+
+  it('should combine the direct-ES output id and fleet server id for Serverless when managed bulk is disabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isServerlessEnabled: true,
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: false } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultSettings(PLAIN_POLICY)).toEqual({
+      outputId: 'es-default-output-internal',
+      fleetServerId: 'default-fleet-server-internal',
+    });
+  });
+
+  it('should combine the managed bulk output id and fleet server id for Serverless when managed bulk is enabled', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isServerlessEnabled: true,
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultSettings(PLAIN_POLICY)).toEqual({
+      outputId: 'es-managed-bulk-agentless-output-internal',
+      fleetServerId: 'default-fleet-server-internal',
+    });
+  });
+
+  it('should return undefined for both when self-managed', () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({} as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    expect(agentlessAgentService.getDefaultSettings(PLAIN_POLICY)).toEqual({
+      outputId: undefined,
+      fleetServerId: undefined,
     });
   });
 });

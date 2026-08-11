@@ -11,7 +11,12 @@ import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/aler
 import { useAttackTitles } from './use_attack_titles';
 import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import type { AttacksListAgg, AttacksListBucket, AttacksListItem } from './types';
+import type { SeverityCount } from '../../../../../entity_analytics/components/severity/types';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { getAttacksListAggregations } from './aggregations';
+import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
+
+const ATTACKS_LIST_QUERY_ID = 'attacks-kpi-attacks-list';
 
 /** The default page size */
 const DEFAULT_PAGE_SIZE = 5;
@@ -24,6 +29,21 @@ export interface UseAttacksListDataProps {
   /** Optional page size */
   pageSize?: number;
 }
+
+const getSeverityKey = (key: string): RiskSeverity => {
+  switch (key) {
+    case 'critical':
+      return RiskSeverity.Critical;
+    case 'high':
+      return RiskSeverity.High;
+    case 'moderate':
+      return RiskSeverity.Moderate;
+    case 'low':
+      return RiskSeverity.Low;
+    default:
+      return RiskSeverity.Unknown;
+  }
+};
 
 /**
  * Hook for fetching and parsing attacks list data
@@ -43,16 +63,21 @@ export const useAttacksListData = ({
     [pageIndex, pageSize]
   );
 
+  const combinedFilters = useMemo(() => {
+    return [...(filters ?? []), ...buildAttacksOnlyFilter()];
+  }, [filters]);
+
   // Get the attack IDs
   const {
     data: aggData,
     loading: isAggLoading,
     refetch: refetchAgg,
   } = useAlertsAggregation<AttacksListAgg>({
-    filters,
+    filters: combinedFilters,
     query,
     aggs,
     queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
+    uniqueQueryId: ATTACKS_LIST_QUERY_ID,
   });
 
   const {
@@ -64,6 +89,11 @@ export const useAttacksListData = ({
     const items = buckets.map((b: AttacksListBucket) => ({
       id: b.key,
       alertsCount: b.attackRelatedAlerts?.doc_count ?? 0,
+      severityCount: (b.alertsSeverities?.buckets ?? []).reduce<SeverityCount>((acc, curr) => {
+        const severityKey = getSeverityKey(curr.key);
+        acc[severityKey] = curr.doc_count;
+        return acc;
+      }, {} as SeverityCount),
     }));
     const ids = items.map((item) => item.id);
     const totalCount = aggData?.aggregations?.total_attacks?.value ?? 0;
@@ -73,7 +103,7 @@ export const useAttacksListData = ({
 
   // Get the attack titles
   const {
-    attackTitles,
+    attackDetails,
     isLoading: isAttacksLoading,
     refetch: refetchDetails,
   } = useAttackTitles({
@@ -83,14 +113,15 @@ export const useAttacksListData = ({
   // Get the items
   const items = useMemo<AttacksListItem[]>(() => {
     return attackIds.map((attackId, index) => {
-      const attackTitle = attackTitles[attackId];
+      const attackDetail = attackDetails[attackId];
       const item = pageItems[index];
       return {
         ...item,
-        name: attackTitle || attackId,
+        alertsCount: attackDetail?.count ?? item.alertsCount,
+        name: attackDetail?.title || attackId,
       };
     });
-  }, [attackIds, pageItems, attackTitles]);
+  }, [attackIds, pageItems, attackDetails]);
 
   // Refetch the attack IDs and titles
   const refetch = () => {

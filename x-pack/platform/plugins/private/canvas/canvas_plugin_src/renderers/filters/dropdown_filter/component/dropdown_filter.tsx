@@ -7,7 +7,6 @@
 
 import type { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import type { EuiSelectOption } from '@elastic/eui';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -87,10 +86,4 @@ export const DropdownFilter: FunctionComponent<Props> = ({
       />
     </div>
   );
-};
-
-DropdownFilter.propTypes = {
-  choices: PropTypes.array,
-  initialValue: PropTypes.string,
-  commit: PropTypes.func.isRequired,
 };

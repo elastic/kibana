@@ -9,6 +9,7 @@ export const ES_ARCHIVES = {
   RUM_8_0_0: 'x-pack/solutions/observability/plugins/ux/e2e/fixtures/rum_8.0.0',
   RUM_TEST_DATA: 'x-pack/solutions/observability/plugins/ux/e2e/fixtures/rum_test_data',
   FULL_HEARTBEAT:
-    'x-pack/solutions/observability/plugins/synthetics/e2e/fixtures/es_archiver/full_heartbeat',
-  BROWSER: 'x-pack/solutions/observability/plugins/synthetics/e2e/fixtures/es_archiver/browser',
+    'x-pack/solutions/observability/plugins/synthetics/test/scout/common/ui/es_archiver/full_heartbeat',
+  BROWSER:
+    'x-pack/solutions/observability/plugins/synthetics/test/scout/common/ui/es_archiver/browser',
 } as const;

@@ -28,7 +28,12 @@ import type { RawRule, RawRuleTemplate } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import type { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
+export {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+  type ExpiredSnoozedInstance,
+} from './partially_update_rule';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 import {
   adHocRunParamsModelVersions,
@@ -37,6 +42,7 @@ import {
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
   gapAutoFillSchedulerModelVersions,
+  uiamApiKeysProvisioningStatusModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
@@ -44,6 +50,8 @@ export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
+export const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE =
+  'uiam_api_keys_provisioning_status';
 
 export const RuleAttributesToEncrypt = ['apiKey', 'uiamApiKey'];
 
@@ -97,9 +105,13 @@ export type RuleAttributesNotPartiallyUpdatable =
   | 'meta'
   | 'alertDelay';
 
-export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
+export const AdHocRunAttributesToEncrypt = ['apiKeyToUse', 'uiamApiKey'];
 export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
-export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
+export type AdHocRunAttributesNotPartiallyUpdatable =
+  | 'rule'
+  | 'spaceId'
+  | 'apiKeyToUse'
+  | 'uiamApiKey';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -126,7 +138,7 @@ export function setupSavedObjects(
       getInAppUrl: (savedObject: SavedObject<RawRule>) => {
         return {
           path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
-          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActionsRules',
         };
       },
       onImport(ruleSavedObjects) {
@@ -252,8 +264,19 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
-        return `${ruleTemplateSavedObject.attributes.name}`;
+        const { attributes } = ruleTemplateSavedObject;
+        if (attributes.engine === 'v2' && 'rule' in attributes) {
+          const ruleName = (attributes.rule as { metadata?: { name?: string } }).metadata?.name;
+          if (ruleName) {
+            return ruleName;
+          }
+        }
+        if ('name' in attributes && attributes.name) {
+          return attributes.name;
+        }
+        return ruleTemplateSavedObject.id;
       },
+
       getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
         return {
           path: `${triggersActionsRoute}${createRuleFromTemplateRoute.replace(
@@ -266,6 +289,37 @@ export function setupSavedObjects(
     },
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
+  });
+
+  // Serverless only saved object used to track the status of UIAM API keys provisioning.
+  savedObjects.registerType({
+    name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+        },
+        entityId: {
+          type: 'keyword',
+        },
+        entityType: {
+          type: 'keyword',
+        },
+        status: {
+          type: 'keyword',
+        },
+        message: {
+          type: 'text',
+        },
+        errorCode: {
+          type: 'keyword',
+        },
+      },
+    },
+    modelVersions: uiamApiKeysProvisioningStatusModelVersions,
   });
 
   // Encrypted attributes

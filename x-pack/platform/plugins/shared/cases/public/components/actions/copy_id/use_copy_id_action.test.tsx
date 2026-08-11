@@ -44,8 +44,9 @@ describe('useCopyIDAction', () => {
       Object {
         "data-test-subj": "cases-action-copy-id",
         "icon": <EuiIcon
+          aria-hidden={true}
           size="m"
-          type="copyClipboard"
+          type="copy"
         />,
         "key": "cases-action-copy-id",
         "name": <EuiTextColor>

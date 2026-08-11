@@ -58,7 +58,7 @@ test.describe(
       });
 
       await test.step('Verify waterfall button is visible', async () => {
-        await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -75,7 +75,7 @@ test.describe(
         end: testData.END_DATE,
       });
 
-      const child1Span = page.getByTestId('waterfallItem').filter({ hasText: 'child1' });
+      const child1Span = page.getByTestId('traceItemRowContent').filter({ hasText: 'child1' });
 
       await test.step('Verify waterfall item is initially visible', async () => {
         await expect(child1Span).toBeVisible({
@@ -84,7 +84,10 @@ test.describe(
       });
 
       await test.step('Click on waterfall accordion to fold', async () => {
-        await page.getByTestId('apmWaterfallButton').click();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await page.getByTestId('traceWaterfallAccordionButton').click();
       });
 
       await test.step('Verify waterfall item is hidden after folding', async () => {
@@ -92,7 +95,7 @@ test.describe(
       });
 
       await test.step('Click on the same waterfall accordion to unfold', async () => {
-        await page.getByTestId('apmWaterfallButton').click();
+        await page.getByTestId('traceWaterfallAccordionButton').click();
       });
 
       await test.step('Verify waterfall item is visible after unfolding', async () => {
@@ -140,13 +143,13 @@ test.describe(
       });
 
       await test.step('Verify waterfall button is visible', async () => {
-        await expect(page.getByTestId('apmWaterfallButton')).toBeVisible({
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
 
       await test.step('Verify waterfall is rendered', async () => {
-        await expect(page.getByTestId('waterfallItem')).toBeVisible();
+        await expect(page.getByTestId('traceItemRowContent')).toBeVisible();
       });
     });
 
@@ -162,11 +165,14 @@ test.describe(
       });
 
       await test.step('Click on waterfall accordion', async () => {
-        await page.getByTestId('apmWaterfallButton').click();
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await page.getByTestId('traceWaterfallAccordionButton').click();
       });
 
       await test.step('Verify service name in flyout', async () => {
-        await expect(page.getByTestId('waterfallItem')).toContainText(
+        await expect(page.getByTestId('traceItemRowContent')).toContainText(
           testData.EDOT_TRANSACTION_NAME
         );
       });

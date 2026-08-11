@@ -7,10 +7,12 @@
 
 import { useCallback } from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { FILTER_CLOSED } from '../../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
-import { useSetUnifiedAlertsWorkflowStatus } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_workflow_status';
+import { useSetAttacksStatus } from '../../../../../common/containers/attacks/hooks/use_set_attacks_status';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
@@ -31,8 +33,11 @@ interface ApplyAttackWorkflowStatusReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn => {
-  const { mutateAsync: setUnifiedAlertsWorkflowStatus } = useSetUnifiedAlertsWorkflowStatus();
+  const { mutateAsync: setAttacksStatus } = useSetAttacksStatus();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyWorkflowStatus = useCallback(
     async ({
@@ -42,6 +47,7 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
       relatedAlertIds,
       setIsLoading,
       onSuccess,
+      telemetrySource,
     }: ApplyAttackWorkflowStatusProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
@@ -52,14 +58,21 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionStatusUpdated, {
+          status,
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
-        // Combine IDs based on user choice
-        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-        await setUnifiedAlertsWorkflowStatus({
-          signal_ids: allIds,
+        await setAttacksStatus({
+          ids: attackIds,
           status,
+          update_related_alerts: result.updateAlerts,
           ...(status === FILTER_CLOSED && reason ? { reason } : {}),
         });
         onSuccess?.();
@@ -67,7 +80,7 @@ export const useApplyAttackWorkflowStatus = (): ApplyAttackWorkflowStatusReturn 
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsWorkflowStatus, showModalIfNeeded]
+    [setAttacksStatus, showModalIfNeeded, telemetry]
   );
 
   return { applyWorkflowStatus };

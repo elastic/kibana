@@ -8,11 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import type { NetworkDirectionProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
+import { tags } from '@kbn/scout';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to ES|QL - Network Direction Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should set network direction with internal networks', async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-network-direction-basic';
@@ -28,7 +29,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ source_ip: '128.232.110.120', destination_ip: '192.168.1.1' }];
       await testBed.ingest(indexName, docs);
@@ -54,7 +55,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -88,7 +89,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           { source_ip: '128.232.110.120', destination_ip: '192.168.1.1' },
@@ -97,9 +98,9 @@ apiTest.describe(
         await testBed.ingest(indexName, docs);
         const esqlResult = await esql.queryOnIndex(indexName, query);
 
-        expect(esqlResult.documents).toHaveLength(2);
-        expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-        expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+        expect(esqlResult.documentsOrdered).toHaveLength(2);
+        expect(esqlResult.documentsOrdered[0]?.['network.direction']).toBe('inbound');
+        expect(esqlResult.documentsOrdered[1]?.['network.direction']).toBeNull();
       }
     );
 
@@ -121,7 +122,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { source_ip: '128.232.110.120', destination_ip: '192.168.1.1', event: { kind: 'test' } },
@@ -134,9 +135,9 @@ apiTest.describe(
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.['network.direction']).toBe('inbound');
-      expect(esqlResult.documents[1]?.['network.direction']).toBeNull();
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.['network.direction']).toBe('inbound');
+      expect(esqlResult.documentsOrdered[1]?.['network.direction']).toBeNull();
     });
   }
 );

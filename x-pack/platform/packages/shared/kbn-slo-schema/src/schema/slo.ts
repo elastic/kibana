@@ -32,6 +32,7 @@ const settingsSchema = t.intersection([
     syncDelay: durationType,
     frequency: durationType,
     preventInitialBackfill: t.boolean,
+    preventCrossProjectSearch: t.boolean,
   }),
   t.partial({ syncField: t.union([t.string, t.null]) }),
 ]);
@@ -42,6 +43,7 @@ const optionalSettingsSchema = t.partial({
   syncDelay: durationType,
   frequency: durationType,
   preventInitialBackfill: t.boolean,
+  preventCrossProjectSearch: t.boolean,
   syncField: t.union([t.string, t.null]),
 });
 

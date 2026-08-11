@@ -25,6 +25,7 @@ export const uiPrivileges = {
   write: 'write',
   manageAgents: 'manageAgents',
   manageTools: 'manageTools',
+  manageSkills: 'manageSkills',
 };
 
 export const apiPrivileges = {
@@ -34,9 +35,11 @@ export const apiPrivileges = {
   writeAgentBuilder: `${AGENTBUILDER_FEATURE_ID}:write`,
   manageAgents: `${AGENTBUILDER_FEATURE_ID}:manageAgents`,
   manageTools: `${AGENTBUILDER_FEATURE_ID}:manageTools`,
+  manageSkills: `${AGENTBUILDER_FEATURE_ID}:manageSkills`,
 };
 
 export const subFeaturePrivilegeIds = {
   manageAgents: 'manage_agents',
   manageTools: 'manage_tools',
+  manageSkills: 'manage_skills',
 } as const;

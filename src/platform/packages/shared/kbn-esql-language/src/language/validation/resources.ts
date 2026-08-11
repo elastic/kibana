@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { Walker } from '@elastic/esql';
 import type { ESQLPolicy } from '../../commands/registry/types';
-import type { ESQLAstAllCommands, ESQLCommand } from '../../types';
-import { Walker } from '../../ast';
 import { getPolicyHelper, getSourcesHelper } from '../shared/resources_helpers';
 
 function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {

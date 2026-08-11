@@ -14,6 +14,7 @@ import type { RequestOptions, RequestOptionsPaginated } from '../..';
 export type ActionEdges = estypes.SearchResponse<object>['hits']['hits'];
 
 export type ActionResultEdges = estypes.SearchResponse<object>['hits']['hits'];
+
 export interface ActionsStrategyResponse extends IEsSearchResponse {
   edges: ActionEdges;
   inspect?: Maybe<Inspect>;
@@ -51,6 +52,7 @@ export interface ActionDetails {
   pack_name?: string;
   space_id?: string;
   pack_prebuilt?: boolean;
+  tags?: string[];
   status?: string;
   result_counts?: ResultCounts;
   queries?: Array<{
@@ -109,4 +111,5 @@ export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   startDate?: string;
   useNewDataStream?: boolean;
   integrationNamespaces?: string[];
+  spaceId: string;
 }

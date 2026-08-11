@@ -41,9 +41,11 @@ import type {
   MaintenanceWindowClient,
   MaintenanceWindowsServerStart,
 } from '@kbn/maintenance-windows-plugin/server';
+import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
+import type { SyntheticsIndicesCache } from './services/synthetics_indices_cache';
 
 export interface SyntheticsServerSetup {
   router: UptimeRouter;
@@ -69,6 +71,7 @@ export interface SyntheticsServerSetup {
   getMaintenanceWindowClientInternal: (
     request: KibanaRequest
   ) => MaintenanceWindowClient | undefined;
+  syntheticsIndicesCache: SyntheticsIndicesCache;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -84,6 +87,7 @@ export interface SyntheticsPluginsSetupDependencies {
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
   embeddable: EmbeddableSetup;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {

@@ -6,7 +6,7 @@
  */
 
 import { DataLoadingState } from '@kbn/unified-data-table';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { TimelineArgs, UseTimelineEventsProps } from '.';
 import * as useTimelineEventsModule from '.';
 import { SecurityPageName } from '../../../common/constants';
@@ -20,8 +20,8 @@ import { getMockTimelineSearchSubscription } from '../../common/mock/mock_timeli
 const { initSortDefault, useTimelineEvents } = useTimelineEventsModule;
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -150,6 +150,7 @@ describe('useTimelineEventsHandler', () => {
       DataLoadingState.loading,
       {
         events: [],
+        rawEvents: [],
         id: TimelineId.active,
         inspect: expect.objectContaining({ dsl: [], response: [] }),
         loadNextBatch: expect.any(Function),
@@ -182,6 +183,7 @@ describe('useTimelineEventsHandler', () => {
         DataLoadingState.loaded,
         {
           events: expect.any(Array),
+          rawEvents: expect.any(Array),
           id: TimelineId.active,
           inspect: result.current[1].inspect,
           loadNextBatch: result.current[1].loadNextBatch,
@@ -229,6 +231,7 @@ describe('useTimelineEventsHandler', () => {
       DataLoadingState.loaded,
       {
         events: expect.any(Array),
+        rawEvents: expect.any(Array),
         id: TimelineId.active,
         inspect: result.current[1].inspect,
         loadNextBatch: result.current[1].loadNextBatch,

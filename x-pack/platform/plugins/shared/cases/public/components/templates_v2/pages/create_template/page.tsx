@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import type { TemplateFormValues } from '../../components/template_form';
-import { CreateTemplateForm } from '../../components/template_form';
+import type { YamlEditorFormValues } from '../../components/template_form';
 import { exampleTemplateDefinition } from '../../field_types/constants';
-import { GENERAL_CASES_OWNER } from '../../../../../common/constants';
 import { TemplateFormLayout } from '../../components/template_form_layout';
+import { useCreateTemplate } from '../../hooks/use_create_template';
+import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../common/use_cases_features';
+import { useAvailableCasesOwners } from '../../../app/use_available_owners';
+import { getOwnerDefaultValue } from '../../../create/utils';
+import { useCasesEditTemplateNavigation } from '../../../../common/navigation';
+import { LOCAL_STORAGE_KEYS, SECURITY_SOLUTION_OWNER } from '../../../../../common/constants';
+import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
+import type { TemplateMetadata } from '../../utils/template_metadata';
+import type { TemplateSettings } from '../../../../../common/types/domain/template/v1';
 
 import * as i18n from '../../translations';
 
@@ -20,25 +28,65 @@ import * as i18n from '../../translations';
 export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
-  const form = useForm<TemplateFormValues>({
+  useCasesTemplatesBreadcrumbs(i18n.ADD_TEMPLATE_TITLE);
+  const initialMetadata: TemplateMetadata = {
+    name: '',
+    description: '',
+    tags: [],
+  };
+
+  const form = useForm<YamlEditorFormValues>({
     defaultValues: {
-      name: '',
-      owner: GENERAL_CASES_OWNER,
       definition: exampleTemplateDefinition,
     },
   });
+  const { mutateAsync, isLoading: isSaving } = useCreateTemplate();
+  const { owner } = useCasesContext();
+  const availableOwners = useAvailableCasesOwners();
+  const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
+  const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
+  const { isExtractObservablesEnabled } = useCasesFeatures();
 
-  // NOTE: reset the form to propagate initial value to the renderer.
-  // For some reason it does not happen automatically.
-  useEffect(() => {
-    form.reset();
-  }, [form]);
+  // Defaults for a new template mirror toggle visibility: extract observables on only where the
+  // solution enables it, sync alerts on only for Security (the toggles are hidden otherwise).
+  // Gated on the (synchronous) feature config rather than license, since the license loads async
+  // and the panel seeds these defaults once at mount.
+  const initialSettings = useMemo<TemplateSettings>(
+    () => ({
+      syncAlerts: defaultOwnerValue === SECURITY_SOLUTION_OWNER,
+      extractObservables: isExtractObservablesEnabled,
+    }),
+    [defaultOwnerValue, isExtractObservablesEnabled]
+  );
+
+  const handleCreate = useCallback(
+    async (data: YamlEditorFormValues, metadata: TemplateMetadata, isEnabled: boolean) => {
+      const created = await mutateAsync({
+        template: {
+          name: metadata.name,
+          description: metadata.description || undefined,
+          tags: metadata.tags.length > 0 ? metadata.tags : undefined,
+          owner: defaultOwnerValue,
+          definition: data.definition,
+          isEnabled,
+        },
+      });
+      // Stay in the editor after the first save: switch to edit mode for the new template so a
+      // subsequent Save updates it instead of creating a duplicate.
+      navigateToCasesEditTemplate({ templateId: created.templateId });
+    },
+    [defaultOwnerValue, mutateAsync, navigateToCasesEditTemplate]
+  );
 
   return (
     <TemplateFormLayout
       form={form}
-      title={i18n.ADD_TEMPLATE_TITLE}
-      formContent={<CreateTemplateForm />}
+      initialMetadata={initialMetadata}
+      isSaving={isSaving}
+      onCreate={handleCreate}
+      storageKey={LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState}
+      initialValue={exampleTemplateDefinition}
+      initialSettings={initialSettings}
     />
   );
 };

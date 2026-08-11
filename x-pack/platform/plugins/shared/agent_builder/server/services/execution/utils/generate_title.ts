@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { defer, shareReplay } from 'rxjs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
@@ -49,8 +49,12 @@ const generateConversationTitle = async ({
   chatModel: InferenceChatModel;
 }) => {
   return withActiveInferenceSpan(
-    'GenerateTitle',
-    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+    'generate_title',
+    {
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+      },
+    },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
         z
@@ -80,8 +84,6 @@ Now, generate a title for the following conversation.`,
       ];
 
       const { title } = await structuredModel.invoke(prompt);
-
-      span?.setAttribute('output.value', title);
 
       return title;
     }

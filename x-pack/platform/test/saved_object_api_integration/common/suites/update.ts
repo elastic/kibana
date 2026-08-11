@@ -6,11 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type { Agent as SuperTestAgent } from 'supertest';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface UpdateTestDefinition extends TestDefinition {
   request: { type: string; id: string; upsert?: boolean };
@@ -34,7 +35,9 @@ export const TEST_CASES: Record<string, UpdateTestCase> = Object.freeze({
 
 const createRequest = ({ type, id, upsert }: UpdateTestCase) => ({ type, id, upsert });
 
-export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
+export function updateTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('update');
   const expectResponseBody =
     (testCase: UpdateTestCase): ExpectResponseBody =>
@@ -76,16 +79,53 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTestAgen
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+          await testDataLoader.createLegacyUrlAliases([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases_all.json',
+            },
+            {
+              spaceName: 'space_x',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+            },
+            {
+              spaceName: 'space_y',
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/legacy_url_aliases.json',
+              disabled: true,
+            },
+          ]);
+        });
+        after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

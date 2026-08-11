@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export { ChromeComponentsProvider } from './src/context';
+export type { ChromeComponentsDeps } from './src/context';
+
+export { ClassicHeader } from './src/classic';
+export { ChromeNextGlobalHeader } from './src/chrome_next';
+export {
+  ChromeAppHeaderRenderer,
+  ProjectHeader,
+  useHasChromeAppHeaderContent,
+} from './src/project';
+export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
+export { Sidebar } from './src/sidebar';
+export { AppMenuBar } from './src/project/app_menu';
+export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
+export { useHasAppMenu, useHasInlineAppHeader } from './src/shared/chrome_hooks';
+export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';

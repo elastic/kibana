@@ -6,11 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { optionalExcludedGapReasonsSchema } from '../../../../../../common/schemas';
 
 export const getGapsSummaryByRuleIdsParamsSchema = schema.object({
   start: schema.string(),
   end: schema.string(),
   ruleIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
+  excludedReasons: optionalExcludedGapReasonsSchema,
+  schedulerId: schema.maybe(schema.string()),
 });
 
 export const getGapsSummaryByRuleIdsResponseSchema = schema.object({

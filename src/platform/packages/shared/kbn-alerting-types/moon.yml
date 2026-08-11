@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/alerting-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/alerting-types'
+  title: '@kbn/alerting-types'
   description: Moon project for @kbn/alerting-types
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-alerting-types
+  sourceRoot: src/platform/packages/shared/kbn-alerting-types
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/rule-data-utils'
@@ -40,16 +39,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

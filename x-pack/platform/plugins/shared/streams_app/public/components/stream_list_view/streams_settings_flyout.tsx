@@ -11,7 +11,6 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -35,8 +34,6 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { WiredStreamsToggle } from './wired_streams_toggle';
@@ -67,7 +64,6 @@ export function StreamsSettingsFlyout({
 
   const {
     ui: { manage: canManageWiredKibana },
-    features: { significantEvents },
   } = useStreamsPrivileges();
 
   const [loading, setLoading] = React.useState(false);
@@ -145,36 +141,6 @@ export function StreamsSettingsFlyout({
     }
   };
 
-  const [{ loading: isChangingSignificantEvents }, toggleSignificantEvents] = useAsyncFn(
-    async (event) => {
-      const isEnabled = event.target.checked;
-      try {
-        await core.uiSettings.set(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS, isEnabled);
-
-        core.notifications.toasts.addInfo(
-          isEnabled
-            ? i18n.translate('xpack.streams.streamsListView.significantEventsEnabledToast', {
-                defaultMessage: 'Significant events enabled',
-              })
-            : i18n.translate('xpack.streams.streamsListView.significantEventsDisabledToast', {
-                defaultMessage: 'Significant events disabled',
-              })
-        );
-      } catch (error) {
-        core.notifications.toasts.addError(getFormattedError(error), {
-          title: i18n.translate(
-            'xpack.streams.streamsListView.significantEventsToggleErrorToastTitle',
-            {
-              defaultMessage: 'Error updating Significant events setting',
-            }
-          ),
-          toastLifeTimeMs: 5000,
-        });
-      }
-    },
-    [core]
-  );
-
   // Shipper button group state
   const shipperButtonGroupPrefix = useGeneratedHtmlId({ prefix: 'shipperButtonGroup' });
   const shipperOptions = [
@@ -209,7 +175,7 @@ export function StreamsSettingsFlyout({
     log_statements:
       - context: resource
         statements:
-          - set(attributes["elasticsearch.index"], "logs")
+          - set(attributes["elasticsearch.index"], "logs.otel")
 
 service:
   pipelines:
@@ -220,7 +186,7 @@ service:
     [`${shipperButtonGroupPrefix}__filebeat`]: `filebeat.inputs:
   - type: filestream
     id: my-filestream-id
-    index: logs
+    index: logs.ecs
     enabled: true  
     paths:
       - /var/log/*.log
@@ -237,16 +203,19 @@ output.elasticsearch:
   elasticsearch {
     hosts => ["<elasticsearch-host>"]
     api_key => "<your-api-key>"
-    index => "logs"
+    index => "logs.ecs"
     action => "create"
   }
 }`,
-    [`${shipperButtonGroupPrefix}__curl`]: `POST /logs/_bulk
-{ "create": {} }
-{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }
-{ "create": {} }
-{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`,
   };
+
+  const curlOtelExample = `POST /logs.otel/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "body": { "text": "Hello world!" }, "resource": { "attributes": { "host.name": "my-host-name" } } }`;
+
+  const curlEcsExample = `POST /logs.ecs/_bulk
+{ "create": {} }
+{ "@timestamp": "2025-05-05T12:12:12", "message": "Hello world!", "host.name": "my-host-name" }`;
 
   return (
     <>
@@ -311,162 +280,108 @@ output.elasticsearch:
             </EuiFormRow>
           </EuiDescribedFormGroup>
 
-          {significantEvents?.available && (
-            <EuiDescribedFormGroup
-              fullWidth
-              descriptionFlexItemProps={{ grow: 2 }}
-              title={
+          {isToggleOn && (
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiText size="xs">
                 <h3>
-                  <EuiFlexGroup gutterSize="s">
-                    {i18n.translate('xpack.streams.streamsListView.significantEventsTitle', {
-                      defaultMessage: 'Significant events',
-                    })}
-                    <EuiBetaBadge
-                      label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
-                        defaultMessage: 'Technical Preview',
-                      })}
-                      tooltipContent={i18n.translate(
-                        'xpack.streams.streamsListView.betaBadgeDescription',
-                        {
-                          defaultMessage:
-                            'This functionality is experimental and not supported. It may change or be removed at any time.',
-                        }
-                      )}
-                      alignment="middle"
-                      size="s"
-                    />
-                  </EuiFlexGroup>
-                </h3>
-              }
-              description={
-                <p>
-                  {i18n.translate('xpack.streams.streamsListView.significantEventsDescription', {
-                    defaultMessage:
-                      "A Significant event is a single, 'interesting' log event identified by an automated rule as being important for understanding a system's behavior.",
+                  {i18n.translate('xpack.streams.streamsListView.shipperConfigTitle', {
+                    defaultMessage: 'Configure your shippers',
                   })}
-                </p>
-              }
-            >
-              <EuiFormRow fullWidth>
-                <EuiSwitch
-                  label={i18n.translate(
-                    'xpack.streams.streamsListView.enableSignificantEventsSwitchLabel',
-                    {
-                      defaultMessage: 'Enable Significant events',
-                    }
-                  )}
-                  checked={Boolean(significantEvents?.enabled)}
-                  onChange={toggleSignificantEvents}
-                  data-test-subj="streamsSignificantEventsSwitch"
-                  disabled={
-                    core.uiSettings.isOverridden(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS) ||
-                    isChangingSignificantEvents
-                  }
-                />
-              </EuiFormRow>
-            </EuiDescribedFormGroup>
-          )}
-
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiText size="xs">
-              <h3>
-                {i18n.translate('xpack.streams.streamsListView.shipperConfigTitle', {
-                  defaultMessage: 'Configure your shippers',
-                })}
-              </h3>
-            </EuiText>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.streams.streamsListView.shipperConfigDescription"
-                  defaultMessage="Send logs data to wired streams. <docLink>Check the documentation</docLink> for more info."
-                  values={{
-                    docLink: (...chunks: React.ReactNode[]) => (
-                      <EuiLink
-                        href={core.docLinks.links.observability.wiredStreams}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        external
-                      >
-                        {chunks}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.streams.streamsListView.shipperButtonGroupLegend', {
-                defaultMessage: 'Select shipper type',
-              })}
-              options={shipperOptions}
-              idSelected={selectedShipperId}
-              onChange={setSelectedShipperId}
-              buttonSize="m"
-              isFullWidth={false}
-              data-test-subj="streamsShipperButtonGroup"
-            />
-            {selectedShipperId.endsWith('__fleet') ? (
-              <EuiText size="s">
+                </h3>
+              </EuiText>
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.streams.streamsListView.shipperConfigFleetDescription"
-                    defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send data to Wired Streams:"
+                    id="xpack.streams.streamsListView.shipperConfigDescription"
+                    defaultMessage="Send logs data to wired streams. <docLink>Check the documentation</docLink> for more info."
                     values={{
-                      b: (chunks) => <b>{chunks}</b>,
+                      docLink: (...chunks: React.ReactNode[]) => (
+                        <EuiLink
+                          href={core.docLinks.links.observability.wiredStreams}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          external
+                        >
+                          {chunks}
+                        </EuiLink>
+                      ),
                     }}
                   />
                 </p>
-                <ul>
-                  <li>
-                    {i18n.translate(
-                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep1',
-                      {
-                        defaultMessage:
-                          'Enable "Write to logs streams" for the output you want to use in the Fleet Settings tab.',
-                      }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep2',
-                      {
-                        defaultMessage:
-                          'Add the Custom Logs (Filestream) integration to an agent policy.',
-                      }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3',
-                      {
-                        defaultMessage:
-                          'Enable the \'Use the "logs" data stream\' setting in the integration configuration.',
-                      }
-                    )}
-                  </li>
-                  <li>
-                    {i18n.translate(
-                      'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4',
-                      {
-                        defaultMessage:
-                          'Make sure the agent policy is using the output you configured in step 1.',
-                      }
-                    )}
-                  </li>
-                </ul>
               </EuiText>
-            ) : (
-              <>
-                {selectedShipperId.endsWith('__curl') && (
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.streams.streamsListView.shipperButtonGroupLegend', {
+                  defaultMessage: 'Select shipper type',
+                })}
+                options={shipperOptions}
+                idSelected={selectedShipperId}
+                onChange={setSelectedShipperId}
+                buttonSize="m"
+                isFullWidth={false}
+                data-test-subj="streamsShipperButtonGroup"
+              />
+              {selectedShipperId.endsWith('__fleet') ? (
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamsListView.shipperConfigFleetDescription"
+                      defaultMessage="Use the <b>Custom Logs (Filestream)</b> integration to send ECS data to the <b>logs.ecs</b> wired stream:"
+                      values={{
+                        b: (chunks) => <b>{chunks}</b>,
+                      }}
+                    />
+                  </p>
+                  <ul>
+                    <li>
+                      {i18n.translate(
+                        'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep1',
+                        {
+                          defaultMessage:
+                            'Enable "Write to logs streams" for the output you want to use in the Fleet Settings tab.',
+                        }
+                      )}
+                    </li>
+                    <li>
+                      {i18n.translate(
+                        'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep2',
+                        {
+                          defaultMessage:
+                            'Add the Custom Logs (Filestream) integration to an agent policy.',
+                        }
+                      )}
+                    </li>
+                    <li>
+                      {i18n.translate(
+                        'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep3',
+                        {
+                          defaultMessage:
+                            'Enable the \'Use the "logs.ecs" data stream\' setting in the integration configuration.',
+                        }
+                      )}
+                    </li>
+                    <li>
+                      {i18n.translate(
+                        'xpack.streams.streamsListView.shipperConfigFleetDescriptionStep4',
+                        {
+                          defaultMessage:
+                            'Make sure the agent policy is using the output you configured in step 1.',
+                        }
+                      )}
+                    </li>
+                  </ul>
+                </EuiText>
+              ) : selectedShipperId.endsWith('__curl') ? (
+                <>
                   <EuiText size="s">
                     <p>
                       <FormattedMessage
                         id="xpack.streams.streamsListView.shipperConfigCurlDescription"
-                        defaultMessage="Send data to the {logsEndpoint} endpoint using the {bulkApiLink}. Refer to the following example for more information:"
+                        defaultMessage="Send data to the {logsOtelEndpoint} or {logsEcsEndpoint} endpoints using the {bulkApiLink}. Refer to the following examples for more information:"
                         values={{
                           // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
-                          logsEndpoint: <code>/logs/</code>,
+                          logsOtelEndpoint: <code>/logs.otel/</code>,
+                          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                          logsEcsEndpoint: <code>/logs.ecs/</code>,
                           bulkApiLink: (
                             <EuiLink
                               href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk"
@@ -482,18 +397,50 @@ output.elasticsearch:
                       />
                     </p>
                   </EuiText>
-                )}
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('xpack.streams.streamsListView.shipperConfigCurlOtelLabel', {
+                        defaultMessage: 'For logs.otel (OTel format):',
+                      })}
+                    </p>
+                  </EuiText>
+                  <EuiCodeBlock
+                    language="json"
+                    isCopyable
+                    paddingSize="m"
+                    data-test-subj="streamsShipperConfigExampleCurlOtel"
+                  >
+                    {curlOtelExample}
+                  </EuiCodeBlock>
+                  <EuiSpacer size="m" />
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('xpack.streams.streamsListView.shipperConfigCurlEcsLabel', {
+                        defaultMessage: 'For logs.ecs (ECS format):',
+                      })}
+                    </p>
+                  </EuiText>
+                  <EuiCodeBlock
+                    language="json"
+                    isCopyable
+                    paddingSize="m"
+                    data-test-subj="streamsShipperConfigExampleCurlEcs"
+                  >
+                    {curlEcsExample}
+                  </EuiCodeBlock>
+                </>
+              ) : (
                 <EuiCodeBlock
-                  language={selectedShipperId.endsWith('__curl') ? 'json' : 'yaml'}
+                  language="yaml"
                   isCopyable
                   paddingSize="m"
                   data-test-subj="streamsShipperConfigExample"
                 >
                   {shipperConfigExamples[selectedShipperId]}
                 </EuiCodeBlock>
-              </>
-            )}
-          </EuiFlexGroup>
+              )}
+            </EuiFlexGroup>
+          )}
         </EuiFlyoutBody>
       </EuiFlyout>
       {showDisableModal && (

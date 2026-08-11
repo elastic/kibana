@@ -9,7 +9,9 @@ import { Readable } from 'stream';
 import { createFileClientMock, createFileMock } from '@kbn/files-plugin/server/mocks';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ScriptsLibrarySavedObjectAttributes, ScriptsLibraryClientInterface } from './types';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import type { ScriptsLibraryClientInterface, ScriptsLibrarySavedObjectAttributes } from './types';
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { createHapiReadableStreamMock } from '../actions/mocks';
 import type {
@@ -33,12 +35,13 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     fileName: 'my_script.sh',
     fileSize: 12098,
     fileHash: 'e5441eb2bb',
+    fileType: overrides.fileType ?? 'script',
     requiresInput: false,
     downloadUri: SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', '1-2-3'),
     description: 'does some stuff',
     instructions: 'just execute it',
     example: 'bash -c script_one.sh',
-    pathToExecutable: undefined,
+    pathToExecutable: overrides.fileType === 'archive' ? `/usr/local/bin/script_one.sh` : undefined,
     createdBy: 'elastic',
     createdAt: '2025-11-20T14:15:09.900Z',
     updatedBy: 'admin',
@@ -51,6 +54,8 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
 const generateCreateScriptBodyMock = (
   overrides: Partial<CreateScriptRequestBody> = {}
 ): CreateScriptRequestBody => {
+  const { fileType, pathToExecutable, ...rest } = overrides;
+  const _fileType = fileType ? fileType : 'script';
   return {
     name: 'script one',
     platform: ['linux', 'macos'],
@@ -60,7 +65,10 @@ const generateCreateScriptBodyMock = (
     requiresInput: false,
     tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
-    ...overrides,
+    fileType: _fileType,
+    // @ts-expect-error pathToExecutable is conditionally required
+    pathToExecutable: _fileType === 'archive' ? pathToExecutable : undefined,
+    ...rest,
   };
 };
 
@@ -87,6 +95,7 @@ const generateSavedObjectScriptEntryMock = (
       file_size: 12098,
       file_name: 'my_script.sh',
       file_hash_sha256: 'e5441eb2bb',
+      file_type: 'script',
       name: 'my script',
       platform: ['macos', 'linux'],
       requires_input: undefined,
@@ -181,6 +190,21 @@ const applySoClientMocks = (soClient: jest.Mocked<SavedObjectsClientContract>): 
   });
 };
 
+const createRulesClientMock = () => {
+  const rulesClient = rulesClientMock.create();
+
+  rulesClient.find.mockImplementation(async () => {
+    return {
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    };
+  });
+
+  return rulesClient as jest.Mocked<RulesClient>;
+};
+
 export const ScriptsLibraryMock = Object.freeze({
   getMockedClient: getScriptsLibraryClientMock,
   generateScriptEntry: generateScriptEntryMock,
@@ -188,5 +212,6 @@ export const ScriptsLibraryMock = Object.freeze({
   generateUpdateScriptBody: generateUpdateScriptBodyMock,
   generateSavedObjectScriptEntry: generateSavedObjectScriptEntryMock,
   createFilesPluginClient: createFilesPluginClientMock,
+  createRulesClient: createRulesClientMock,
   applyMocksToSoClient: applySoClientMocks,
 });

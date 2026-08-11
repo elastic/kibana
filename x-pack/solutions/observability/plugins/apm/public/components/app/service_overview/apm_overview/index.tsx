@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -31,9 +32,12 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { ServiceOverviewDependenciesTable } from '../service_overview_dependencies_table';
 import { ServiceOverviewErrorsTable } from '../service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from '../service_overview_instances_chart_and_table';
+import { ServiceOverviewServiceMapSection } from '../service_overview_service_map_section';
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { AnomaliesAutomaticEnvironmentSelectionCallout } from '../../../shared/anomalies_automatic_environment_selection_callout';
 
 const latencyChartHeight = 200;
 
@@ -83,50 +87,82 @@ export function ApmOverview() {
   const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
-  const { hasSlos } = useServiceSloContext();
+  const { hasSlos, sloFetchStatus } = useServiceSloContext();
 
+  const trackEvent = useUiTracker({ app: 'apm' });
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
     false
   );
+  const dismissSloCallout = useCallback(() => {
+    setSloCalloutDismissed(true);
+    trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
+  }, [trackEvent, setSloCalloutDismissed]);
 
-  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
-    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+  const handleOnLoadTable = useCallback((key: keyof TablesLoadedState) => {
+    setHaveTablesLoaded((currentValues) =>
+      currentValues[key] ? currentValues : { ...currentValues, [key]: true }
+    );
+  }, []);
 
-  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
-  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
-  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
+  const onTransactionsTableLoad = useCallback(
+    () => handleOnLoadTable('transactions'),
+    [handleOnLoadTable]
+  );
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), [handleOnLoadTable]);
+  const onDependenciesTableLoad = useCallback(
+    () => handleOnLoadTable('dependencies'),
+    [handleOnLoadTable]
+  );
+
+  const shouldRenderCallout =
+    !sloCalloutDismissed && !hasSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   return (
     <>
-      {!sloCalloutDismissed && !hasSlos && (
+      {shouldRenderCallout && (
         <>
           <SloCallout
-            dismissCallout={() => {
-              setSloCalloutDismissed(true);
-            }}
+            dismissCallout={dismissSloCallout}
             serviceName={serviceName}
             environment={environment}
           />
           <EuiSpacer />
         </>
       )}
+      <AnomaliesAutomaticEnvironmentSelectionCallout />
       {fallbackToTransactions && (
         <EuiFlexItem>
           <AggregatedTransactionsBadge />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <LatencyChart height={latencyChartHeight} kuery={kuery} />
-        </EuiPanel>
+        <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={1}>
+            <EuiPanel hasBorder={true}>
+              <LatencyChart height={latencyChartHeight} kuery={kuery} />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <ServiceOverviewThroughputChart height={latencyChartHeight} kuery={kuery} />
+          </EuiFlexItem>
+          {!isRumAgent && (
+            <EuiFlexItem grow={1}>
+              <FailedTransactionRateChart
+                height={latencyChartHeight}
+                showAnnotations={false}
+                kuery={kuery}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
           <EuiFlexItem grow={3}>
-            <ServiceOverviewThroughputChart height={nonLatencyChartHeight} kuery={kuery} />
+            <ServiceOverviewServiceMapSection />
           </EuiFlexItem>
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <TransactionsTable
                 kuery={kuery}
@@ -145,16 +181,7 @@ export function ApmOverview() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
-          {!isRumAgent && (
-            <EuiFlexItem grow={3}>
-              <FailedTransactionRateChart
-                height={nonLatencyChartHeight}
-                showAnnotations={false}
-                kuery={kuery}
-              />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={7}>
+          <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
@@ -186,7 +213,7 @@ export function ApmOverview() {
             )
           )}
           {!isRumAgent && (
-            <EuiFlexItem grow={7}>
+            <EuiFlexItem grow={7} style={{ minWidth: 0 }}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
                   onLoadTable={onDependenciesTableLoad}

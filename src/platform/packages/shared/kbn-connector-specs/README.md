@@ -15,7 +15,47 @@ The `@kbn/connector-specs` package provides a simplified, declarative way to def
 - **Standard Auth Patterns**: Reusable authentication schemas (Basic, Bearer, Headers)
 - **Policy-Based Configuration**: Built-in support for rate limiting, retry policies, pagination, and more
 
-## Quick Start (Recommended): Generate a New Connector Spec
+## Quick Start (Recommended): Build a Connector with AI
+
+This package includes Agent Skills that automate the full connector development lifecycle.
+The `/build-connector` skill orchestrates creating a connector spec, workflows, tests, documentation, activation in Kibana, and end-to-end testing via Agent Builder.
+
+### Prerequisites
+
+Agent Skills must be loaded. If you do not see them already available, it's usually sufficient to prompt:
+
+```
+> Load all **/SKILL.md skills
+```
+
+or:
+
+```
+> Look for connector and agent builder SKILL.md files, and load those skills
+```
+
+
+### Usage
+
+In your AI Assistant of choice, run:
+
+```
+/build-connector <service-name>
+```
+
+For example: `/build-connector Figma`
+
+This will walk through 12 tasks: generating code, reviewing it, activating the connector in a running Kibana, creating a test agent, chatting with it, iterating on quality, and delivering a final result.
+
+### Other available skills
+
+| Skill | Description |
+|-------|-------------|
+| `/create-connector <name>` | Generate just the connector spec, workflows, tests, and docs (no activation or testing) |
+| `/activate-connector <type>` | Create a connector instance in a running Kibana via the Actions API |
+| `/review-connector` | Review connector spec changes against a quality checklist |
+
+## Alternate: Generate a New Connector Spec
 
 Use the generator to create the folder structure and wire everything up:
 
@@ -65,7 +105,7 @@ The `createConnectorTypeFromSpec()` function converts the `SingleFileConnectorDe
 
 ```typescript
 // src/specs/my_connector/my_connector.ts
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 export const MyConnector: ConnectorSpec = {
@@ -74,7 +114,9 @@ export const MyConnector: ConnectorSpec = {
     displayName: 'My Connector',
     description: 'A custom connector example',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    // See "Intermediate release state" below: a new connector type ships with
+    // ['agentBuilder'] and gains its remaining feature IDs in a follow-up PR.
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -106,8 +148,9 @@ export const MyConnector: ConnectorSpec = {
   test: {
     handler: async (ctx) => {
       await ctx.client.get(`${ctx.config.url}/health`);
-      return { ok: true, message: 'Connection successful' };
+      return {};
     },
+    enabled: true,
   },
 };
 ```
@@ -173,6 +216,19 @@ metadata: {
 }
 ```
 
+#### Intermediate release state
+
+A new connector type must reach Production-NonCanary before it can declare user-facing
+features. Serverless rollouts and rollbacks leave nodes on different Kibana versions for a
+while, and a user action referencing a connector type that a node does not have breaks on
+that node. So adding a connector takes two PRs:
+
+1. Ship the connector with `supportedFeatureIds: ['agentBuilder']`.
+2. Once the connector is registered in every Production-NonCanary version, add `'workflows'`
+   and any other user-facing feature IDs in a follow-up PR.
+
+Mention the required follow-up PR in the first PR's description so it is not forgotten.
+
 ### Auth Type
 
 Specify which standard auth schemas (if any) are supported by this connector. If none
@@ -236,17 +292,22 @@ actions: {
 
 ### Test
 
-Optional connection test:
+Optional connection test shown in the connector Test tab when `enabled: true`:
 
 ```typescript
 test: {
   handler: async (ctx) => {
-    // Test connection logic
-    return { ok: boolean, message?: string };
+    await ctx.client.get(`${ctx.config.url}/health`);
+    return {};
   },
   description?: string,
+  enabled?: boolean, // requires throw-on-failure handler contract below
 }
 ```
+
+Test handler contract: **throw on failure**; do not return an `{ ok }` flag. A resolved
+return value (including `{}` or optional data) is treated as success. Set `enabled: true` only
+after migrating the handler to this contract.
 
 ### Policies (Optional)
 

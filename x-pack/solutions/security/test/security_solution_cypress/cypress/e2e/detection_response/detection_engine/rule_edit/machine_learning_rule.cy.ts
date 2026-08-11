@@ -47,7 +47,7 @@ describe(
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
     const suppressByFields = ['by_field_name', 'by_field_value'];
-    const jobId = 'v3_linux_anomalous_network_activity';
+    const jobId = 'v3_linux_anomalous_network_activity_ea';
 
     before(() => {
       const machineLearningJobIds = ([] as string[]).concat(

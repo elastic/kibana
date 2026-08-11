@@ -11,6 +11,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiTextArea,
+  EuiSuperSelect,
   EuiComboBox,
   EuiColorPicker,
   EuiTitle,
@@ -22,22 +23,42 @@ import {
   EuiPanel,
   EuiMarkdownEditor,
   EuiHorizontalRule,
+  EuiSwitch,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  agentBuilderDefaultAgentId,
+  AgentAccessControlMode,
+  AGENT_BUILDER_UI_EBT,
+  ACCESS_CONTROL_MODE_ICON,
+  type UserIdAndName,
+} from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { AccessForm } from '../../access/access_form';
 import { labels } from '../../../../utils/i18n';
 import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
+import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
+import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
+import { truncateAvatarSymbol } from '../agent_form_validation';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
   formState: FormState<AgentFormData>;
   isCreateMode: boolean;
   isFormDisabled: boolean;
+  canChangeAccessControl: boolean;
+  owner?: UserIdAndName;
+  agentId?: string;
 }
 
 export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
@@ -45,19 +66,68 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   formState,
   isCreateMode,
   isFormDisabled,
+  canChangeAccessControl,
+  owner,
+  agentId,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
+  const { docLinksService } = useAgentBuilderServices();
+  const { isAdmin } = useUiPrivileges();
   const {
-    services: { settings },
+    services: { uiSettings },
   } = useKibana();
+
+  const currentAccessControlMode = useWatch({ control, name: 'access_control.access_mode' });
+
+  // Lightweight projection used only by AccessForm to filter selectable access control roles.
+  // The real entries come from the form's `access_control.entries` field via Controller
+  // (seeded from the loaded agent in `useAgentEdit`), not from local state.
+  const accessFormAgent = useMemo(
+    () => ({
+      access_control: { access_mode: currentAccessControlMode, entries: [] },
+    }),
+    [currentAccessControlMode]
+  );
+
   const showAgentWorkflowsSection = useMemo(() => {
-    return isPreExecutionWorkflowEnabled(settings.client);
-  }, [settings]);
+    return isPreExecutionWorkflowEnabled(uiSettings);
+  }, [uiSettings]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
   const formFlexColumnStyles = css`
     min-width: 0;
   `;
+  const renderAccessControlModeOption = ({ icon, label }: { icon: EuiIconType; label: string }) => (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={icon} aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>{label}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+  const accessControlModeOptions = [
+    {
+      value: AgentAccessControlMode.Public,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Public],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Public],
+      }),
+    },
+    {
+      value: AgentAccessControlMode.Shared,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Shared],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Shared],
+      }),
+    },
+    {
+      value: AgentAccessControlMode.Private,
+      inputDisplay: renderAccessControlModeOption({
+        icon: ACCESS_CONTROL_MODE_ICON[AgentAccessControlMode.Private],
+        label: ACCESS_CONTROL_MODE_LABELS[AgentAccessControlMode.Private],
+      }),
+    },
+  ];
 
   return (
     <>
@@ -199,25 +269,183 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         direction="row"
         gutterSize="xl"
         alignItems="flexStart"
-        aria-labelledby="labels-section-title"
+        aria-labelledby="elastic-capabilities-section-title"
+      >
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiIcon type="sparkles" aria-hidden={true} />
+              <EuiTitle size="xs">
+                <h2 id="elastic-capabilities-section-title">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle',
+                    {
+                      defaultMessage: 'Elastic capabilities',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription"
+                defaultMessage="Automatically assign all current and future Elastic-built tools, skills, and plugins to the agent. Disable to manage assignments manually. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={docLinksService.elasticCapabilities}
+                      target="_blank"
+                      aria-label={i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDocumentationAriaLabel',
+                        {
+                          defaultMessage:
+                            'Learn more about Elastic capabilities in the documentation',
+                        }
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesLearnMoreLabel',
+                        {
+                          defaultMessage: 'Learn more.',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+          <Controller
+            name="configuration.enable_elastic_capabilities"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel',
+                  {
+                    defaultMessage: 'Enable Elastic capabilities',
+                  }
+                )}
+                checked={Boolean(value)}
+                onChange={(e) => onChange(e.target.checked)}
+                disabled={isFormDisabled}
+                data-test-subj="agentSettingsEnableElasticCapabilitiesSwitch"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.ELASTIC_CAPABILITIES_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
+              />
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
+        aria-labelledby="organization-access-section-title"
       >
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiIcon type="tag" aria-hidden={true} />
               <EuiTitle size="xs">
-                <h2 id="labels-section-title">
-                  {i18n.translate('xpack.agentBuilder.agents.form.settings.labelsTitle', {
-                    defaultMessage: 'Labels',
-                  })}
+                <h2 id="organization-access-section-title">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
+                    { defaultMessage: 'Organization' }
+                  )}
                 </h2>
               </EuiTitle>
             </EuiFlexGroup>
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.agentBuilder.agents.form.settings.labelsDescription', {
-                defaultMessage: 'Add labels to group, filter, or organize your agents.',
-              })}
+              {i18n.translate(
+                'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
+                {
+                  defaultMessage:
+                    'Use labels to organize agents and control who can view and interact with them.',
+                }
+              )}
             </EuiText>
+            <EuiSpacer size="s" />
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiTitle size="xxs">
+                  <span>
+                    {i18n.translate(
+                      'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningLabel',
+                      {
+                        defaultMessage: 'Access control levels',
+                      }
+                    )}
+                  </span>
+                </EuiTitle>
+                <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPublicLabel',
+                          {
+                            defaultMessage: 'Public:',
+                          }
+                        )}
+                      </strong>{' '}
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPublicDescription',
+                        {
+                          defaultMessage: 'Anyone can view and edit.',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningSharedLabel',
+                          {
+                            defaultMessage: 'Shared:',
+                          }
+                        )}
+                      </strong>{' '}
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningSharedDescription',
+                        {
+                          defaultMessage:
+                            'Anyone can view. Only the owner, an administrator, or people you explicitly grant access to can edit.',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPrivateLabel',
+                          {
+                            defaultMessage: 'Private:',
+                          }
+                        )}
+                      </strong>{' '}
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.accessControlModeMeaningPrivateDescription',
+                        {
+                          defaultMessage:
+                            'Only the owner, an administrator, or people you explicitly grant access to can view and edit.',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={2} css={formFlexColumnStyles}>
@@ -263,6 +491,69 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               )}
             />
           </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.agentBuilder.agents.form.accessControlModeLabel', {
+              defaultMessage: 'Access control',
+            })}
+            helpText={
+              agentId === agentBuilderDefaultAgentId
+                ? i18n.translate(
+                    'xpack.agentBuilder.agents.form.accessControlModeDefaultAgentReason',
+                    {
+                      defaultMessage: 'The default agent is always accessible to all users.',
+                    }
+                  )
+                : !canChangeAccessControl
+                ? i18n.translate('xpack.agentBuilder.agents.form.accessControlModeDisabledReason', {
+                    defaultMessage:
+                      'Only the owner or an administrator can change the access control mode.',
+                  })
+                : undefined
+            }
+            isInvalid={!!formState.errors.access_control?.access_mode}
+            error={formState.errors.access_control?.access_mode?.message}
+          >
+            <Controller
+              name="access_control.access_mode"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <EuiSuperSelect
+                  fullWidth
+                  options={accessControlModeOptions}
+                  valueOfSelected={value}
+                  onChange={onChange}
+                  disabled={isFormDisabled || !canChangeAccessControl}
+                  aria-label={i18n.translate(
+                    'xpack.agentBuilder.agents.form.accessControlModeAriaLabel',
+                    {
+                      defaultMessage: 'Agent access control mode',
+                    }
+                  )}
+                  data-test-subj="agentSettingsAccessControlModeSelect"
+                />
+              )}
+            />
+          </EuiFormRow>
+
+          {!isCreateMode && agentId !== agentBuilderDefaultAgentId && (
+            <>
+              <EuiSpacer size="m" />
+              <Controller
+                name="access_control.entries"
+                control={control}
+                render={({ field }) => (
+                  <AccessForm
+                    agent={accessFormAgent}
+                    entries={field.value ?? []}
+                    ownerName={owner?.username}
+                    isDisabled={isFormDisabled || !canChangeAccessControl}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -450,8 +741,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiFieldText
                       {...rest}
                       onChange={(event) => {
-                        const value = event.target.value;
-                        rest.onChange(value.slice(0, 2));
+                        rest.onChange(truncateAvatarSymbol(event.target.value));
                       }}
                       inputRef={ref}
                       disabled={isFormDisabled}
@@ -496,7 +786,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.workflowDescription', {
                     defaultMessage:
-                      'Runs immediately when the agent is invoked, before the first LLM call.',
+                      'Runs once after each user message, before the agent makes any LLM calls in response.',
                   })}
                 </EuiText>
               </EuiFlexGroup>
@@ -512,13 +802,24 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     {labels.common.optional}
                   </EuiText>
                 }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.workflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure pre-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
                 isInvalid={!!formState.errors.configuration?.workflow_ids}
                 error={formState.errors.configuration?.workflow_ids?.message}
               >
                 <WorkflowPicker
                   name="configuration.workflow_ids"
                   singleSelection={false}
-                  isDisabled={isFormDisabled}
+                  isDisabled={isFormDisabled || !isAdmin}
                 />
               </EuiFormRow>
             </EuiFlexItem>

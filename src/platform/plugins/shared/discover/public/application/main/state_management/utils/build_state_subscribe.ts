@@ -10,10 +10,11 @@
 import { isEqual } from 'lodash';
 import {
   internalStateActions,
-  type InternalStateStore,
+  type InternalStateDispatch,
   type RuntimeStateManager,
   selectTabRuntimeState,
   type TabState,
+  type DiscoverInternalState,
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -31,19 +32,20 @@ import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
- * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
- * @param stateContainer
+ * or programmatically. Its main purpose is to detect which changes should trigger a refetch of the data.
  */
 export const buildStateSubscribe =
   ({
     dataState,
-    internalState,
+    dispatch,
+    getState,
     runtimeStateManager,
     services,
     getCurrentTab,
   }: {
     dataState: DiscoverDataStateContainer;
-    internalState: InternalStateStore;
+    dispatch: InternalStateDispatch;
+    getState: () => DiscoverInternalState;
     runtimeStateManager: RuntimeStateManager;
     services: DiscoverServices;
     getCurrentTab: () => TabState;
@@ -79,12 +81,14 @@ export const buildStateSubscribe =
       }
     }
 
-    const { sampleSize, sort, dataSource } = prevState;
+    const { sampleSize, sort, dataSource, isApproximate } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
+    const approximationChanged =
+      (nextState.isApproximate ?? false) !== (isApproximate ?? false) && isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
@@ -99,7 +103,7 @@ export const buildStateSubscribe =
           getCurrentTab().id
         )?.currentDataView$.getValue(),
         isEsqlMode,
-        internalState,
+        savedDataViews: getState().savedDataViews,
         runtimeStateManager,
         services,
       });
@@ -107,7 +111,7 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        await internalState.dispatch(
+        await dispatch(
           internalStateActions.updateAppStateAndReplaceUrl({
             tabId: getCurrentTab().id,
             appState: {
@@ -122,7 +126,7 @@ export const buildStateSubscribe =
       }
 
       dataState.reset();
-      internalState.dispatch(
+      dispatch(
         internalStateActions.assignNextDataView({
           tabId: getCurrentTab().id,
           dataView: nextDataView,
@@ -135,7 +139,13 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
+    if (
+      sampleSizeChanged ||
+      docTableSortChanged ||
+      dataSourceChanged ||
+      queryChanged ||
+      approximationChanged
+    ) {
       const logData = {
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),

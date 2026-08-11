@@ -95,13 +95,12 @@ describe('timelineEqlRequestOptionsSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"array\\",
-          \\"received\\": \\"number\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"fieldRequested\\"
           ],
-          \\"message\\": \\"Expected array, received number\\"
+          \\"message\\": \\"Invalid input: expected array, received number\\"
         }
       ]"
     `);

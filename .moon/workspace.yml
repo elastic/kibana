@@ -2,25 +2,28 @@
 $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
+  # Glob-based discovery skips dotfile directories, so `.buildkite` is registered
+  # explicitly via `sources` below.
   globs:
-    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
     - src/**/moon.yml
     - x-pack/**/moon.yml
     - examples/**/moon.yml
     - packages/**/moon.yml
+  sources:
+    kibana-buildkite: .buildkite
 vcs:
   defaultBranch: main
-  manager: git
-
-hasher:
-  batchSize: 1500
+  client: git
 
 pipeline:
   installDependencies: false
+  syncWorkspace: false
+  syncProjectDependencies: false
+  syncProjects: false
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.
-unstable_remote:
+remote:
   host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
   api: http
   cache:

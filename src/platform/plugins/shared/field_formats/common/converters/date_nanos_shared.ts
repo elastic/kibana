@@ -14,7 +14,7 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import { NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat, FIELD_FORMAT_IDS } from '..';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type { TextContextTypeConvert } from '../types';
 
 interface FractPatternObject {
   length: number;
@@ -77,6 +77,7 @@ export class DateNanosFormat extends FieldFormat {
 
   protected memoizedConverter: Function = noop;
   protected memoizedPattern: string = '';
+  protected memoizedFallbackPattern: string = '';
   protected timeZone: string = '';
 
   getParamDefaults() {
@@ -93,13 +94,15 @@ export class DateNanosFormat extends FieldFormat {
     const pattern = this.param('pattern');
     const timezone = this.param('timezone');
     const fractPattern = analysePatternForFract(pattern);
-    const fallbackPattern = this.param('patternFallback');
+    const fallbackPattern = this.param('fallbackPattern');
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;
-    if (timezoneChanged || datePatternChanged) {
+    const fallbackPatternChanged = this.memoizedFallbackPattern !== fallbackPattern;
+    if (timezoneChanged || datePatternChanged || fallbackPatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+      this.memoizedFallbackPattern = fallbackPattern;
 
       this.memoizedConverter = memoize(function converter(value: string | number) {
         if (value === null || value === undefined) {
@@ -121,14 +124,5 @@ export class DateNanosFormat extends FieldFormat {
     }
 
     return this.memoizedConverter(val);
-  };
-
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
   };
 }

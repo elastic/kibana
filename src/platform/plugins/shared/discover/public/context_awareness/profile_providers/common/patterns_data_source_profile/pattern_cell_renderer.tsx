@@ -10,11 +10,12 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCode, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { extractCategorizeTokens } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { useContainerStyle } from './use_container_style';
 
 interface Props {
   pattern: string;
@@ -23,14 +24,10 @@ interface Props {
 }
 
 export const PatternCellRenderer: FC<Props> = ({ pattern, isDetails, defaultRowHeight }) => {
-  const { euiTheme } = useEuiTheme();
   const styles = useMemoCss(componentStyles);
 
   const keywords = useMemo(() => extractCategorizeTokens(pattern), [pattern]);
-  const containerStyle = useMemo(
-    () => getContainerStyle(euiTheme, defaultRowHeight),
-    [euiTheme, defaultRowHeight]
-  );
+  const containerStyle = useContainerStyle(defaultRowHeight);
 
   const formattedTokens = useMemo(
     () =>
@@ -111,27 +108,4 @@ export function getPatternCellRenderer(
       defaultRowHeight={defaultRowHeight}
     />
   );
-}
-
-function getContainerStyle(euiTheme: UseEuiTheme['euiTheme'], defaultRowHeight?: number) {
-  // the keywords are slightly larger than the default text height,
-  // so they need to be adjusted to fit within the row height while
-  // not truncating the bottom of the text
-  let rowHeight = 2;
-  if (defaultRowHeight === undefined) {
-    rowHeight = 2;
-  } else if (defaultRowHeight < 2) {
-    rowHeight = 1;
-  } else {
-    rowHeight = Math.floor(defaultRowHeight / 1.5);
-  }
-
-  return {
-    display: '-webkit-box',
-    WebkitBoxOrient: 'vertical' as const,
-    WebkitLineClamp: rowHeight,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    transform: `translateY(calc(${euiTheme.size.m} / 4))`, // we apply this transform so that the component appears vertically centered
-  };
 }

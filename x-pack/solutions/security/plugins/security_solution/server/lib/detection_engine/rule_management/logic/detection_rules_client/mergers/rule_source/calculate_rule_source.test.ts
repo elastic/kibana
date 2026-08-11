@@ -55,7 +55,7 @@ describe('calculateRuleSource', () => {
     rule.immutable = true;
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -78,7 +78,7 @@ describe('calculateRuleSource', () => {
     rule.tags = ['Updated tag'];
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -103,7 +103,7 @@ describe('calculateRuleSource', () => {
     rule.updated_by = 'new-user';
 
     const baseRule = getSampleRuleAsset();
-    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([baseRule]);
+    prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [baseRule] });
 
     const result = await calculateRuleSource({
       prebuiltRuleAssetClient,
@@ -126,7 +126,7 @@ describe('calculateRuleSource', () => {
       rule.immutable = true;
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -154,7 +154,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -182,7 +182,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -215,7 +215,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -244,7 +244,7 @@ describe('calculateRuleSource', () => {
       };
 
       // No base version
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([]);
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({ assets: [] });
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,

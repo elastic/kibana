@@ -1,5 +1,9 @@
 {
-  "sha1": "1284fc5f1ff1408ac248272036442119308302bb",
+  "sha1": "1b4933768451a655edb0d4c768954271ef15aba6",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
@@ -11,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 58,
+        "column": 9
       }
     },
     {
@@ -25,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 68,
+        "column": 8
       }
     },
     {
@@ -39,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 77,
+        "column": 12
       }
     },
     {
@@ -53,8 +57,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 84,
+        "column": 78
+      }
+    },
+    {
+      "id": "e7ca8c886a58426-cd9616071db0523",
+      "title": "Home page Data streams - renders storage size units in uppercase",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
+        "line": 92,
+        "column": 11
       }
     },
     {
@@ -67,7 +85,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 78,
+        "line": 133,
         "column": 7
       }
     },
@@ -81,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 141,
+        "column": 18
       }
     },
     {
@@ -95,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/home_page.spec.ts",
-        "line": 104,
-        "column": 7
+        "line": 152,
+        "column": 24
       }
     },
     {
@@ -109,8 +127,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 12,
+        "column": 39
       }
     },
     {
@@ -123,8 +141,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 31,
+        "column": 5
       }
     },
     {
@@ -137,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 43,
+        "column": 95
       }
     },
     {
@@ -151,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 59,
+        "column": 8
       }
     },
     {
@@ -165,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_mappings.spec.ts",
-        "line": 100,
-        "column": 7
+        "line": 69,
+        "column": 11
       }
     },
     {
@@ -179,8 +197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard_preview.spec.ts",
-        "line": 23,
-        "column": 7
+        "line": 15,
+        "column": 58
       }
     },
     {
@@ -193,8 +211,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard.spec.ts",
-        "line": 25,
-        "column": 7
+        "line": 15,
+        "column": 58
+      }
+    },
+    {
+      "id": "334b2c159a85a53-5c9af8158963588",
+      "title": "Index Management — management sidebar smoke data section contains index_management and transform for index_management_user role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/management_sidebar_smoke.spec.ts",
+        "line": 27,
+        "column": 100
       }
     }
   ]

@@ -13,8 +13,9 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
-import { useCreateCaseNavigation } from '../../common/navigation';
+import { useCreateCaseNavigation, useCasesTemplatesNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { KibanaServices } from '../../common/lib/kibana';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
@@ -25,7 +26,10 @@ type Props = OwnProps;
 export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
   const { permissions } = useCasesContext();
   const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+  const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
   const { euiTheme } = useEuiTheme();
+  const isTemplatesEnabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+  const showTemplatesButton = isTemplatesEnabled && permissions.manageTemplates;
   const navigateToCreateCaseClick = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
@@ -33,8 +37,15 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
     },
     [navigateToCreateCase]
   );
+  const navigateToCasesTemplatesClick = useCallback(
+    (e: React.SyntheticEvent) => {
+      e.preventDefault();
+      navigateToCasesTemplates();
+    },
+    [navigateToCasesTemplates]
+  );
 
-  if (!permissions.create && !permissions.settings) {
+  if (!permissions.create && !permissions.settings && !showTemplatesButton) {
     return null;
   }
 
@@ -60,13 +71,26 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
             />
           </EuiFlexItem>
         )}
+        {showTemplatesButton && (
+          <EuiFlexItem grow={false}>
+            <LinkButton
+              onClick={navigateToCasesTemplatesClick}
+              href={getCasesTemplatesUrl()}
+              iconType="documents"
+              isEmpty={true}
+              data-test-subj="cases-templates-button"
+            >
+              {i18n.TEMPLATES_BUTTON}
+            </LinkButton>
+          </EuiFlexItem>
+        )}
         {permissions.create && (
           <EuiFlexItem>
             <LinkButton
               fill
               onClick={navigateToCreateCaseClick}
               href={getCreateCaseUrl()}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="createNewCaseBtn"
             >
               {i18n.CREATE_CASE_TITLE}

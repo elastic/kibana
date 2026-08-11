@@ -24,3 +24,4 @@ export * from './tools/get_service_topology/topology';
 export * from './tools/get_service_topology/topology_trace_isolation';
 export * from './tools/get_service_topology/topology_cycle';
 export * from './tools/get_runtime_metrics/runtime_metrics';
+export * from './tools/get_logs/missing_db_index_pool_exhaustion';

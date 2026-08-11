@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { ExportRulesRequestQueryInput } from './export_rules_route.gen';
 import { ExportRulesRequestBody, ExportRulesRequestQuery } from './export_rules_route.gen';
 
@@ -24,7 +24,9 @@ describe('Export rules request schema', () => {
 
       const result = ExportRulesRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('objects: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'objects: Invalid input: expected array, received undefined'
+      );
     });
 
     test('empty object array does validate', () => {
@@ -50,7 +52,9 @@ describe('Export rules request schema', () => {
 
       const result = ExportRulesRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('objects.0.rule_id: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'objects.0.rule_id: Invalid input: expected string, received undefined'
+      );
     });
   });
 
@@ -91,7 +95,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'file_name: Expected string, received number'
+        'file_name: Invalid input: expected string, received number'
       );
     });
 
@@ -120,7 +124,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        `exclude_export_details: Invalid enum value. Expected 'true' | 'false', received 'invalid string', exclude_export_details: Expected boolean, received string`
+        'Invalid option: expected one of "true"|"false", Invalid input: expected boolean, received string'
       );
     });
   });

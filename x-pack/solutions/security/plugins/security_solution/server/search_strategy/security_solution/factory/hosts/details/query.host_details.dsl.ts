@@ -7,22 +7,31 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { isEmpty } from 'lodash';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
-import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
+import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
-  hostName,
   defaultIndex,
+  hostName,
   timerange: { from, to },
+  filterQuery,
+  entityStoreV2,
 }: HostDetailsRequestOptions): ISearchRequestParams => {
   const esFields = reduceFields(HOST_DETAILS_FIELDS, {
     ...hostFieldsMap,
     ...cloudFieldsMap,
   });
 
+  // When no filter query is defined, we default to using the host name
+  const hostNameFilter = isEmpty(filterQuery) ? { term: { 'host.name': hostName } } : undefined;
+
   const filter = [
-    { term: { 'host.name': hostName } },
+    ...(entityStoreV2 ? [euid.dsl.getEuidDocumentsContainsIdFilter('host')] : []),
+    ...(hostNameFilter ? [hostNameFilter] : []),
+    ...createQueryFilterClauses(filterQuery),
     {
       range: {
         '@timestamp': {

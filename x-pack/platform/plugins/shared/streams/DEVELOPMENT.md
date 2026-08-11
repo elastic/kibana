@@ -14,11 +14,62 @@ The main use cases are **refining stream entities** (splitting and routing data)
 |------|-------------|
 | **Wired stream** | Opinionated, managed, hierarchical stream for logs. Tree structure (e.g. `logs.otel`, `logs.otel.nginx`). Underlying ES objects are fully managed. |
 | **Classic stream** | Compatibility layer for existing data streams. Flat structure, partially managed. Often created by Integrations/Fleet. |
-| **Query stream** | Virtual, read-only, defined by ES\|QL. No stored data; resolves on read. |
+| **Query stream** | Virtual, read-only, defined by ES\|QL. No stored data; resolves on read. Isolated from parent views via the `$.` prefix (see below). |
 
 ### Wired Stream Hierarchy
 
 Wired streams form a tree. Two root streams exist: `logs.otel` (OTel-normalized) and `logs.ecs` (no transformation). Data enters a root, gets processed, and routing rules may send it to child streams. Mappings are inherited down the tree and must be additive (children cannot change field types defined by parents).
+
+### Query Streams and the `$.` Prefix
+
+Query streams are virtual, read-only streams backed by ES|QL views. They let users define aggregations, transformations, or filtered projections of existing stream data without storing anything — the query runs on read.
+
+#### How they work
+
+When a query stream named `cars.electric` is created, the system creates an ES|QL view named `$.cars.electric` via the Elasticsearch `PUT /_query/view` API. The `$.` prefix (defined as `ESQL_VIEW_PREFIX` in `@kbn/streams-schema`) is central to how query streams are stored and queried.
+
+#### Why the `$.` prefix matters
+
+The prefix serves two purposes:
+
+1. **Avoids name shadowing.** Without the prefix, an ES|QL view named `cars.electric` would shadow the `cars.electric` data stream. The `$.` namespace keeps them separate.
+
+2. **Isolates query streams from parent views.** Ingest streams query their data using patterns like `FROM cars, cars.*`. Because query stream views live in the `$.` namespace, the wildcard `cars.*` never matches `$.cars.electric`. This means:
+   - Aggregated or transformed columns (e.g. `error_count`, `doubled`) defined by query streams do not leak into parent stream schemas
+   - Users querying a parent ingest stream see only ingest data, not derived query stream results
+   - The isolation works at any nesting depth — `$.cars.electric.fast` is equally invisible to `FROM cars, cars.*`
+
+#### How to query a query stream
+
+Query streams must be queried directly by their `$.`-prefixed view name:
+
+```
+FROM $.cars.electric
+```
+
+The Discover integration handles this automatically — `getDiscoverEsqlQuery()` returns `FROM ${definition.query.view}` for query streams, which is the prefixed name.
+
+#### Key implementation files
+
+| File | Role |
+|------|------|
+| `@kbn/streams-schema/.../query/view_name.ts` | `ESQL_VIEW_PREFIX`, `getEsqlViewName()`, `getStreamNameFromViewName()` |
+| `@kbn/streams-schema/.../helpers/hierarchy_helpers.ts` | `getIndexPatternsForStream()` — returns `[name, name.*]` for ingest streams (no `$.`) |
+| `@kbn/streams-schema/.../helpers/get_discover_esql_query.ts` | Returns `FROM $.name` for query streams, `FROM name, name.*` for ingest |
+| `streams/server/.../esql_views/manage_esql_views.ts` | Creates/reads/deletes ES|QL views via `/_query/view` |
+| `streams/server/.../state_management/streams/query_stream.ts` | Uses `getEsqlViewName()` when building create/update/delete actions |
+
+#### Known limitation: wildcard queries over ES|QL views
+
+Querying query streams with wildcard patterns like `FROM $.parent.*` is **unreliable** and should not be used. Manual testing revealed that Elasticsearch produces false "circular view reference" errors even when no actual cycles exist in the view graph. Key findings:
+
+- `FROM $.parent.*` may succeed or fail unpredictably depending on the **global view graph state** — the full set of ES|QL views defined in the cluster, not just those matching the wildcard
+- Adding or removing an unrelated view elsewhere in the system can cause a previously working wildcard query to start failing, or vice versa
+- The error message (`circular view reference`) is misleading — it does not indicate an actual circular dependency
+- Elasticsearch's `Regex.simpleMatch()` matches across dots, so `*` is multi-segment (e.g., `$.parent.*` matches `$.parent.child.grandchild`)
+- The behavior appears tied to view resolution order, which is non-deterministic from the user's perspective
+
+This is an Elasticsearch-level limitation, not a Kibana bug. The `$.` prefix isolation ensures that **ingest stream** wildcard patterns (`FROM parent, parent.*`) work reliably because they never enter the `$.` namespace. But querying across query stream views with wildcards should be avoided until Elasticsearch resolves the underlying view resolution issue.
 
 ### Draft Mode
 
@@ -90,8 +141,8 @@ The full route repository is assembled in `server/routes/index.ts` by spreading 
 | `GET /api/streams/{name}/_ingest` | Get ingest settings for an ingest stream |
 | `PUT /api/streams/{name}/_ingest` | Update ingest settings (processing, lifecycle, fields, routing) |
 | `GET /api/streams/{name}/_doc_counts` | Get document counts per stream |
-| `GET/PUT/DELETE /api/streams/{name}/queries/*` | Manage significant event queries |
-| `GET/POST /api/queries/*` | Query management |
+| `GET /api/streams/{name}/_query` | Get a query stream definition |
+| `PUT /api/streams/{name}/_query` | Create or update a query stream (creates `$.`-prefixed ES\|QL view) |
 | `GET/PUT /api/content/*` | Content pack import/export |
 | `GET/POST/DELETE /api/attachments/*` | Asset attachments (dashboards, rules) |
 
@@ -112,7 +163,6 @@ The `GET /api/streams/{name}` response enriches the raw stream definition with d
   privileges: { manage, read_failure_store, ... },
   dashboards: ["id1", "id2"],
   rules: ["id3"],
-  queries: [{ ... }],
   index_mode: "...",
 }
 ```
@@ -181,23 +231,20 @@ streams/
 │   ├── routes/
 │   │   ├── create_server_route.ts  # Route factory with telemetry + error mapping
 │   │   ├── streams/           # Public API routes (/api/streams/*)
+│   │   ├── attachments/       # Attachment routes
+│   │   ├── content/           # Content pack routes
 │   │   └── internal/          # Internal API routes (/internal/streams/*)
+│   │       ├── attachments/
+│   │       ├── connectors/
 │   │       └── streams/
 │   │           ├── crud/          # List, detail, resolve index
 │   │           ├── schema/        # Field mapping management
 │   │           ├── lifecycle/     # Retention configuration
 │   │           ├── processing/    # Processing pipeline management
-│   │           ├── management/    # Enable/disable, fork, resync
+│   │           ├── management/    # Enable/disable, fork, resync, suggestions
 │   │           ├── ingest/        # Bulk ingest endpoint
-│   │           ├── features/      # Feature identification
-│   │           ├── systems/       # System identification
-│   │           ├── queries/       # Query management
-│   │           ├── insights/      # Insights discovery
-│   │           ├── significant_events/  # Significant events
-│   │           ├── prompts/       # AI prompt configuration
-│   │           ├── failure_store/  # Failure store access
-│   │           ├── onboarding/    # Onboarding flows
-│   │           └── tasks/         # Background task management
+│   │           ├── failure_store/ # Failure store access
+│   │           └── time_series/   # Time series data
 │   └── lib/
 │       ├── streams/
 │       │   ├── service.ts         # StreamsService (creates scoped clients)
@@ -209,21 +256,19 @@ streams/
 │       │   │   └── streams/           # WiredStream, ClassicStream state types
 │       │   ├── storage/           # StreamsStorageClient for .kibana_streams
 │       │   ├── attachments/       # Dashboard/SLO/rule linking
-│       │   ├── assets/query/      # Query storage and linking
-│       │   ├── feature/           # Feature identification service
-│       │   ├── system/            # System identification service
 │       │   ├── component_templates/
 │       │   ├── data_streams/
+│       │   ├── errors/
 │       │   ├── esql_views/
+│       │   ├── failure_store/
 │       │   ├── index_templates/
 │       │   ├── ingest_pipelines/
 │       │   ├── lifecycle/
+│       │   ├── resolvers/
 │       │   └── helpers/
 │       ├── content/           # Content pack import/export
-│       ├── rules/             # ES|QL alerting rule type
-│       ├── tasks/             # Background task definitions
-│       │   └── task_definitions/  # Description gen, system ID, features, insights
-│       ├── significant_events/  # Significant event generation
+│       ├── pattern_extraction/  # Log pattern extraction
+│       ├── prompts/           # AI prompt override configuration
 │       └── telemetry/         # EBT and usage collection
 └── test/scout/                # Scout API tests
 ```
@@ -267,7 +312,6 @@ Key services and their clients:
 - `SystemService` → `SystemClient`
 - `ContentService` → `ContentClient`
 - `QueryService` → `QueryClient`
-- `TaskService` → `TaskClient`
 
 #### State Management (Server)
 
@@ -282,11 +326,14 @@ This ensures that all Elasticsearch objects stay in sync with stream definitions
 #### Feature Flags
 
 Features behind flags are registered as `uiSettings` in `feature_flags.ts`:
-- `observability:streams:enableSignificantEvents`
-- `observability:streams:enableSignificantEventsDiscovery`
-- `observability:streams:enableContentPacks`
-- `observability:streams:enableAttachments`
-- `observability:streams:enableQueryStreams`
+- `observability:streamsEnableContentPacks`
+- `observability:streamsEnableQueryStreams`
+- `observability:streamsEnableWiredStreamViews`
+- `observability:streamsEnableDraftStreams`
+- `observability:streamsEnableCanvas`
+
+Significant events is **not** gated here — it lives in the `significant_events` plugin behind the
+`streams.significantEventsAvailable` feature flag (`significant_events/common/feature_flags.ts`).
 
 ## streams_app Plugin Architecture
 
@@ -311,39 +358,47 @@ streams_app/
 │   │   ├── app_root/          # Providers, router, breadcrumbs, tour
 │   │   ├── stream_list_view/  # Stream list + tree table
 │   │   ├── stream_root/       # Stream detail wrapper
-│   │   ├── data_management/   # Core management tabs
-│   │   │   ├── stream_detail_routing/      # Partitioning / routing rules
-│   │   │   ├── stream_detail_enrichment/   # Processing pipeline (Streamlang)
-│   │   │   │   ├── state_management/       # XState machines
-│   │   │   │   │   ├── stream_enrichment_state_machine/
-│   │   │   │   │   ├── simulation_state_machine/
-│   │   │   │   │   ├── interactive_mode_machine/
-│   │   │   │   │   ├── steps_state_machine/
-│   │   │   │   │   └── yaml_mode_machine/
-│   │   │   │   └── steps/blocks/action/    # Processor editors
-│   │   │   ├── stream_detail_schema_editor/
-│   │   │   ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
-│   │   │   └── shared/                     # Condition editor, condition display
-│   │   ├── stream_detail_systems/          # Systems + features + description
-│   │   ├── stream_detail_significant_events_view/
-│   │   ├── significant_events_discovery/   # Discovery page
+│   │   ├── stream_management/
+│   │   │   └── data_management/   # Core management tabs
+│   │   │       ├── stream_detail_management/
+│   │   │       ├── stream_detail_routing/      # Partitioning / routing rules
+│   │   │       ├── stream_detail_enrichment/   # Processing pipeline (Streamlang)
+│   │   │       ├── stream_detail_schema_editor/
+│   │   │       ├── stream_detail_lifecycle/    # Retention, downsampling, failure store
+│   │   │       ├── stream_detail_canvas/
+│   │   │       └── shared/                     # Condition editor, condition display
+│   │   ├── significant_events_app_redirect/ # Bookmark shim → significant_events_app
 │   │   └── query_streams/                  # Query stream creation
 │   └── telemetry/
 ├── server/                    # Minimal server plugin
 └── test/scout/                # Scout UI tests (Playwright)
 ```
 
+Significant Events UI lives in `significant_events_app` (`/app/significant_events`).
+`streams_app` keeps `/_discovery` routes as a bookmark shim that redirects into that app.
+
+Streams gates Significant Events UI (list button, overview Knowledge Indicators panel,
+redirect shim) via two optional plugins:
+
+- `significantEventsApp` — start contract `getKnowledgeIndicatorsPanel()` / navigation
+- `significant_events` — `significantEventsRepositoryClient.fetch('GET /internal/significant_events/availability')`
+
+When either is absent, or the availability probe returns unavailable, SE UI stays hidden.
+Streams gates on that server probe directly; SEA does not expose an availability observable.
+
 ### UI Routes
 
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `StreamListView` | Stream list with tree table |
-| `/_discovery/{tab}` | `SignificantEventsDiscoveryPage` | Discovery: streams, features, queries, insights |
+| `/_discovery/{tab}` | `SignificantEventsAppRedirect` | Shim → `/app/significant_events/{tab}` |
 | `/{key}/management/{tab}` | `StreamDetailManagement` | Tabbed management (differs by stream type) |
 
-Management tabs for **wired streams**: partitioning, processing, schema, retention, advanced, significant events, data quality, attachments.
+Management tabs for **wired streams**: overview, partitioning, processing, schema, lifecycle, data quality, attachments, canvas.
 
-Management tabs for **classic streams**: processing, advanced, data quality, retention, significant events, schema, attachments.
+Management tabs for **classic streams**: overview, lifecycle, partitioning, processing, data quality, schema, attachments, canvas.
+
+There is no per-stream significant events tab. Old `/_discovery` bookmarks redirect into `significant_events_app`.
 
 ### Key UI Patterns
 
@@ -448,13 +503,13 @@ Scout tests for the streams_app use Playwright:
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-npx playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:
@@ -477,6 +532,7 @@ These rules are enforced by the system and must be preserved in any change:
 - **Routing is owned by the parent**: routing conditions for child streams are stored in the parent stream's definition
 - **Routing happens after processing**: all processing steps execute before routing decisions
 - **Root streams are read-only** except for routing decisions
+- **Query streams are isolated from parent views**: the `$.` prefix on ES|QL view names ensures that `FROM parent, parent.*` never includes query stream data. Users must query them directly via `FROM $.name`
 - **Draft mode is query-time only**: draft processing uses ES|QL views, not ingest pipelines
 - **Classic streams are partially managed**: their underlying ES objects can be changed directly by users
 - **Stream definitions are the source of truth**: all wired stream ES objects must be reconstructible from `.kibana_streams`

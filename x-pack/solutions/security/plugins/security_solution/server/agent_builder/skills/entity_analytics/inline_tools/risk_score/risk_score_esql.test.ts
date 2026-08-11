@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { euid } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
 import { riskScoreDynamicInlineToolHandler } from './risk_score_esql';
@@ -135,7 +135,7 @@ describe('riskScoreInlineToolHandler', () => {
         index: RISK_SCORE_LATEST_INDEX,
         nlQuery: 'What is the risk score?',
         additionalContext: expect.stringContaining(
-          `${euid.getEuidEsqlDocumentsContainsIdFilter('host')}`
+          `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
         ),
       })
     );

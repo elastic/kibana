@@ -9,7 +9,6 @@ import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 
 export const patchCaseRoute = createCasesRoute({
@@ -26,8 +25,7 @@ export const patchCaseRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const cases = request.body as caseApiV1.CasesPatchRequest;
-
-      const res: caseDomainV1.Cases = await casesClient.cases.bulkUpdate(cases);
+      const res: caseApiV1.CasesPatchResponse = await casesClient.cases.bulkUpdate(cases);
 
       return response.ok({
         body: res,

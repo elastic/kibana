@@ -21,6 +21,7 @@ import {
 import { buildStatusesKuery } from './support/agent_status';
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
+import { prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
 
 export interface QueryBuilderOptions {
   page: number;
@@ -70,7 +71,10 @@ const getUnitedMetadataSortMethod = (
   }
 };
 
-export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
+export function getESQueryHostMetadataByID(
+  agentID: string,
+  ccsEnabled: boolean = false
+): estypes.SearchRequest {
   return {
     query: {
       bool: {
@@ -88,12 +92,13 @@ export function getESQueryHostMetadataByID(agentID: string): estypes.SearchReque
     },
     sort: MetadataSortMethod,
     size: 1,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
   };
 }
 
 export function getESQueryHostMetadataByFleetAgentIds(
-  fleetAgentIds: string[]
+  fleetAgentIds: string[],
+  ccsEnabled: boolean = false
 ): estypes.SearchRequest {
   return {
     query: {
@@ -108,11 +113,14 @@ export function getESQueryHostMetadataByFleetAgentIds(
       },
     },
     sort: MetadataSortMethod,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
   };
 }
 
-export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchRequest {
+export function getESQueryHostMetadataByIDs(
+  agentIDs: string[],
+  ccsEnabled: boolean = false
+): estypes.SearchRequest {
   return {
     query: {
       bool: {
@@ -129,7 +137,7 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchR
       },
     },
     sort: MetadataSortMethod,
-    index: metadataCurrentIndexPattern,
+    index: prefixIndexPatternsWithCcs(metadataCurrentIndexPattern, ccsEnabled),
     size: agentIDs.length,
   };
 }
@@ -154,10 +162,47 @@ interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
   index: string;
 }
 
+/**
+ * Space filter for a fanned-out endpoint list read.
+ *
+ * The local branch is today's filter, unchanged: integration policy ids resolved from local Fleet
+ * saved objects. Saved objects do not fan out, so a linked project's agent carries a policy id this
+ * project has never seen and can only be matched on a field the document carries. That field is
+ * `united.agent.namespaces`, and it is required to match explicitly: Fleet leaves it empty on agents
+ * enrolled before space awareness and nothing backfills `.fleet-agents`, so a missing value proves
+ * nothing once a read fans out.
+ *
+ * Deliberately not keyed on `_index`. The provenance of a *hit* is readable that way and the policy
+ * response path uses it, but whether a *query* on `_index` sees the project prefix is unverified, and
+ * a filter that silently matched nothing would drop every linked project's row.
+ */
+const buildCpsMetadataFilter = (
+  fleetAgentPolicyIds: string[],
+  spaceId: string
+): estypes.QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      buildBaseEndpointMetadataFilter(fleetAgentPolicyIds),
+      {
+        bool: {
+          must: [
+            buildBaseEndpointMetadataFilter(),
+            { term: { 'united.agent.namespaces': spaceId } },
+          ],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 export async function buildUnitedIndexQuery(
   soClient: SavedObjectsClientContract,
   queryOptions: GetMetadataListRequestQuery,
-  endpointPolicyIds: string[] = []
+  fleetAgentPolicyIds: string[] = [],
+  ccsEnabled: boolean = false,
+  /** Set only when the read fans out, and carries the space it must be bounded to */
+  cpsSpaceId?: string
 ): Promise<BuildUnitedIndexQueryResponse> {
   const {
     page = ENDPOINT_DEFAULT_PAGE,
@@ -169,7 +214,9 @@ export async function buildUnitedIndexQuery(
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
-  const idFilter = buildBaseEndpointMetadataFilter(endpointPolicyIds);
+  const idFilter = cpsSpaceId
+    ? buildCpsMetadataFilter(fleetAgentPolicyIds, cpsSpaceId)
+    : buildBaseEndpointMetadataFilter(fleetAgentPolicyIds);
 
   let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
@@ -198,6 +245,8 @@ export async function buildUnitedIndexQuery(
     runtime_mappings: runtimeMappings,
     from: page * pageSize,
     size: pageSize,
-    index: METADATA_UNITED_INDEX,
+    // CPS routes the read across projects on its own, and the two are not meant to be enabled
+    // together, so a fanned-out read does not also search CCS remote outputs
+    index: prefixIndexPatternsWithCcs(METADATA_UNITED_INDEX, ccsEnabled && !cpsSpaceId),
   };
 }

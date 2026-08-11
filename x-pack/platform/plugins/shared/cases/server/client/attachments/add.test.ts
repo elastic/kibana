@@ -19,11 +19,6 @@ import {
 import { createCasesClientMockArgs } from '../mocks';
 import { commentAttachmentType } from '../../attachment_framework/attachments';
 import { addComment } from './add';
-import { getCaseOwner } from './utils';
-
-jest.mock('./utils', () => ({
-  getCaseOwner: jest.fn(),
-}));
 
 describe('addComment', () => {
   const caseId = 'test-case';
@@ -39,7 +34,6 @@ describe('addComment', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(getCaseOwner).mockResolvedValue(SECURITY_SOLUTION_OWNER);
   });
 
   it('throws with excess fields', async () => {
@@ -85,7 +79,7 @@ describe('addComment', () => {
     );
   });
 
-  it('accepts unified type (v2) request without owner and uses case owner', async () => {
+  it('accepts unified type (v2) request', async () => {
     clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
 
@@ -103,18 +97,64 @@ describe('addComment', () => {
     );
     attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
 
-    const unifiedComment = { type: 'comment' as const, data: { content: 'unified text' } };
+    const unifiedComment = {
+      type: 'comment' as const,
+      data: { content: 'unified text' },
+      owner: SECURITY_SOLUTION_OWNER,
+    };
 
     await expect(
       addComment({ comment: unifiedComment, caseId }, clientArgs)
     ).resolves.toBeDefined();
 
-    expect(getCaseOwner).toHaveBeenCalledWith(caseId, clientArgs);
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
         entities: expect.arrayContaining([
           expect.objectContaining({ owner: SECURITY_SOLUTION_OWNER }),
         ]),
+      })
+    );
+  });
+
+  it('emits attachmentAdded event after creating a comment', async () => {
+    if (!clientArgs.unifiedAttachmentTypeRegistry.has(commentAttachmentType.id)) {
+      clientArgs.unifiedAttachmentTypeRegistry.register(commentAttachmentType);
+    }
+    userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseId]: 0 });
+
+    const theCase = { ...mockCases[0], id: caseId };
+    caseService.getCase.mockResolvedValue(theCase);
+    caseService.patchCase.mockResolvedValue(theCase);
+    caseService.getAllCaseComments.mockResolvedValue({
+      saved_objects: [],
+      total: 1,
+      per_page: 1,
+      page: 1,
+    });
+    attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+      new Map([[caseId, { alerts: 0, userComments: 0, events: 0 }]])
+    );
+    attachmentService.create.mockResolvedValue(mockCaseUnifiedAttachments[0]);
+
+    await addComment(
+      {
+        comment: {
+          type: 'comment',
+          data: { content: 'unified text' },
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        caseId,
+      },
+      clientArgs
+    );
+
+    expect(clientArgs.casesEventBus.emitAttachmentsAdded).toHaveBeenCalledWith(
+      clientArgs.request,
+      expect.objectContaining({
+        caseId,
+        attachmentIds: expect.any(Array),
+        attachmentType: 'comment',
+        owner: SECURITY_SOLUTION_OWNER,
       })
     );
   });

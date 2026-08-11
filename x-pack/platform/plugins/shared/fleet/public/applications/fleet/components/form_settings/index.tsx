@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ZodFirstPartyTypeKind } from '@kbn/zod';
 import React from 'react';
 import { EuiCheckbox, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 
@@ -15,22 +14,55 @@ import type { SettingsConfig } from '../../../../../common/settings/types';
 import { YamlCodeEditorWithPlaceholder } from '../../sections/settings/components/edit_output_flyout/yaml_code_editor_with_placeholder';
 
 import { SettingsFieldGroup } from './settings_field_group';
-import { getInnerType, SettingsFieldWrapper } from './settings_field_wrapper';
+import { getInnerType, SettingsFieldWrapper, ZodSchemaType } from './settings_field_wrapper';
 
 export const settingComponentRegistry = new Map<
   string,
   (settingsconfig: SettingsConfig & { disabled?: boolean }) => React.ReactElement
 >();
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, ({ disabled, ...settingsConfig }) => (
+const getEnumOptions = (schema: SettingsConfig['schema']) => {
+  let currentSchema: any = schema;
+
+  while (currentSchema) {
+    const v4Type = currentSchema?._zod?.def?.type;
+    const v3Type = currentSchema?._def?.typeName;
+
+    if (v4Type === 'default' || v4Type === 'optional') {
+      currentSchema = currentSchema._zod.def.innerType;
+      continue;
+    }
+
+    if (v3Type === 'ZodDefault' || v3Type === 'ZodOptional') {
+      currentSchema = currentSchema._def.innerType;
+      continue;
+    }
+
+    break;
+  }
+
+  const entries = currentSchema?._zod?.def?.entries;
+  if (entries && typeof entries === 'object') {
+    return Object.values(entries).map((value) => ({ text: String(value), value: String(value) }));
+  }
+
+  const values = currentSchema?._def?.values;
+  if (Array.isArray(values)) {
+    return values.map((value) => ({ text: String(value), value: String(value) }));
+  }
+
+  return [];
+};
+
+settingComponentRegistry.set(ZodSchemaType.object, ({ disabled, ...settingsConfig }) => (
   <SettingsFieldGroup settingsConfig={settingsConfig} disabled={disabled} />
 ));
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set(ZodSchemaType.number, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodNumber}
+      typeName={ZodSchemaType.number}
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
@@ -47,12 +79,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...se
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set(ZodSchemaType.string, ({ disabled, ...settingsConfig }) => {
   if (settingsConfig.type === 'yaml') {
     return (
       <SettingsFieldWrapper
         settingsConfig={settingsConfig}
-        typeName={ZodFirstPartyTypeKind.ZodString}
+        typeName={ZodSchemaType.string}
         renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
           <YamlCodeEditorWithPlaceholder
             value={fieldValue}
@@ -73,7 +105,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodString}
+      typeName={ZodSchemaType.string}
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
         <EuiFieldText
           fullWidth
@@ -88,12 +120,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set(ZodSchemaType.enum, ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       disabled={disabled}
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodEnum}
+      typeName={ZodSchemaType.enum}
       renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
         <EuiSelect
           data-test-subj={fieldKey}
@@ -108,12 +140,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
             })
           }
           options={
-            settingsConfig.options
-              ? settingsConfig.options
-              : settingsConfig.schema._def.innerType._def.values.map((value: string) => ({
-                  text: value,
-                  value,
-                }))
+            settingsConfig.options ? settingsConfig.options : getEnumOptions(settingsConfig.schema)
           }
         />
       )}
@@ -121,29 +148,26 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
   );
 });
 
-settingComponentRegistry.set(
-  ZodFirstPartyTypeKind.ZodBoolean,
-  ({ disabled, ...settingsConfig }) => {
-    return (
-      <SettingsFieldWrapper
-        disabled={disabled}
-        settingsConfig={settingsConfig}
-        typeName={ZodFirstPartyTypeKind.ZodBoolean}
-        renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
-          <EuiCheckbox
-            data-test-subj={fieldKey}
-            id={fieldKey}
-            label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
-              defaultMessage: 'Enable',
-            })}
-            checked={fieldValue}
-            onChange={handleChange}
-          />
-        )}
-      />
-    );
-  }
-);
+settingComponentRegistry.set(ZodSchemaType.boolean, ({ disabled, ...settingsConfig }) => {
+  return (
+    <SettingsFieldWrapper
+      disabled={disabled}
+      settingsConfig={settingsConfig}
+      typeName={ZodSchemaType.boolean}
+      renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
+        <EuiCheckbox
+          data-test-subj={fieldKey}
+          id={fieldKey}
+          label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
+            defaultMessage: 'Enable',
+          })}
+          checked={fieldValue}
+          onChange={handleChange}
+        />
+      )}
+    />
+  );
+});
 
 export function ConfiguredSettings({
   configuredSettings,
@@ -160,7 +184,7 @@ export function ConfiguredSettings({
           const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
           if (!Component) {
-            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}`);
+            throw new Error(`Unknown setting type: ${getInnerType(configuredSetting.schema)}`);
           }
 
           return (

@@ -221,13 +221,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-        expect(parseInt(size, 10)).to.be.greaterThan(0);
+        // The `size` KPI is backed by the metering stats API, which can lag behind
+        // the other KPIs, so retry until every value has populated to avoid a NaN read.
+        await retry.tryForTime(30 * 1000, async () => {
+          const { docsCountTotal, degradedDocs, services, hosts, size } =
+            await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(docsCountTotal, 10)).to.be(226);
+          expect(parseInt(degradedDocs, 10)).to.be(1);
+          expect(parseInt(services, 10)).to.be(3);
+          expect(parseInt(hosts, 10)).to.be(52);
+          expect(parseInt(size, 10)).to.be.greaterThan(0);
+        });
       });
     });
 
@@ -266,6 +270,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
 
         await PageObjects.datasetQuality.selectQualityIssueChart('failed');
+
+        // Wait for the URL to reflect the chart selection before clicking the link,
+        // otherwise the Discover link may still hold the degraded-docs query.
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain('qualityIssuesChart:failed');
+        });
 
         // This line is required to solve problems where rendered lens visualisation below gets the hover bringing additional action icons
         // which over lap with the button on top of the visualisation causing ElementClickInterceptedError to happen
@@ -448,9 +459,19 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await firstDashboardButton.click();
 
-        const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+        await retry.tryForTime(30 * 1000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const breadcrumbText = await retry.try(async () => {
+            const titleSubj = (await testSubjects.exists('breadcrumb last', { timeout: 1000 }))
+              ? 'breadcrumb last'
+              : 'appHeaderTitle';
+            return testSubjects.getVisibleText(titleSubj);
+          });
 
-        expect(breadcrumbText).to.eql(dashboardText);
+          expect(parsedUrl.pathname).to.contain('/app/dashboards');
+          expect(breadcrumbText).to.eql(dashboardText);
+        });
       });
     });
 

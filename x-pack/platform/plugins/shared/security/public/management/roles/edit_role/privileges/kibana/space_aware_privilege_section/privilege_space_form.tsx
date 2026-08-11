@@ -33,17 +33,17 @@ import {
   PrivilegeFormCalculator,
   constants as UI_CONSTANTS,
 } from '@kbn/security-ui-components';
-import type { Space } from '@kbn/spaces-plugin/public';
 
 import { SpaceSelector } from './space_selector';
 import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { ALL_SPACES_ID } from '../../../../../../../common/constants';
 import { copyRole } from '../../../../../../../common/model';
+import type { DisplaySpace } from '../display_space';
 
 interface Props {
   role: Role;
   kibanaPrivileges: KibanaPrivileges;
-  spaces: Space[];
+  spaces: DisplaySpace[];
   privilegeIndex: number;
   canCustomizeSubFeaturePrivileges: boolean;
   onChange: (role: Role) => void;
@@ -99,6 +99,21 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         size="m"
         maxWidth={true}
         maskProps={{ headerZindexLocation: 'below' }}
+        aria-label={
+          this.state.mode === 'create'
+            ? i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.assignRoleFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Assign role to spaces',
+                }
+              )
+            : i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.editRoleFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Edit role privileges for spaces',
+                }
+              )
+        }
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

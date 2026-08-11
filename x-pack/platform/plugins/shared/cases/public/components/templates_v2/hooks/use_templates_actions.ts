@@ -6,15 +6,15 @@
  */
 
 import { useCallback, useState } from 'react';
-import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
+import { stringify as yamlDump } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
-import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
+import { useUpdateTemplate } from './use_update_template';
 import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 interface UseTemplatesActionsProps {
   onDeleteSuccess?: () => void;
@@ -27,18 +27,15 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     onSuccess: onDeleteSuccess,
   });
 
-  const { mutate: setDefaultTemplate, isLoading: isSettingDefault } = useUpdateTemplate({
-    disableDefaultSuccessToast: true,
-    onSuccess: (data) => {
-      showSuccessToast(i18n.SUCCESS_SET_AS_DEFAULT_TEMPLATE(data.name));
-    },
-  });
-
   const { mutate: cloneTemplate, isLoading: isCloning } = useCreateTemplate({
     disableDefaultSuccessToast: true,
   });
 
   const { mutate: bulkExportTemplates, isLoading: isExporting } = useBulkExportTemplates();
+
+  const { mutate: updateTemplate, isLoading: isUpdating } = useUpdateTemplate({
+    disableDefaultSuccessToast: true,
+  });
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -51,26 +48,21 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const handleClone = useCallback(
     (template: Template) => {
-      // The list endpoint returns definition as a parsed object (via parseTemplate),
-      // but the create endpoint expects a YAML string. Parse if needed, update the
-      // name, then re-serialize to YAML.
-      const parsed =
+      const clonedName = i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name);
+      const clonedDefinition =
         typeof template.definition === 'string'
-          ? (yamlLoad(template.definition) as Record<string, unknown>)
-          : (template.definition as Record<string, unknown>);
-
-      const clonedDefinition = yamlDump(
-        { ...parsed, name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name) },
-        { lineWidth: -1 }
-      ).trimEnd();
+          ? template.definition
+          : yamlDump(template.definition as Record<string, unknown>, { lineWidth: 0 }).trimEnd();
 
       cloneTemplate(
         {
           template: {
+            name: clonedName,
             owner: template.owner,
             definition: clonedDefinition,
             description: template.description,
             tags: template.tags,
+            isEnabled: template.isEnabled,
           },
         },
         {
@@ -81,16 +73,6 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
       );
     },
     [cloneTemplate, showSuccessToast]
-  );
-
-  const handleSetAsDefault = useCallback(
-    (template: Template) => {
-      setDefaultTemplate({
-        templateId: template.templateId,
-        template: { isDefault: true },
-      });
-    },
-    [setDefaultTemplate]
   );
 
   const handleExport = useCallback(
@@ -115,18 +97,35 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     setTemplateToDelete(null);
   }, []);
 
+  const handleIsEnabledChange = useCallback(
+    (template: Template) => {
+      updateTemplate(
+        {
+          templateId: template.templateId,
+          template: { isEnabled: template.isEnabled === false },
+        },
+        {
+          onSuccess: () => {
+            showSuccessToast(i18n.SUCCESS_UPDATING_TEMPLATE);
+          },
+        }
+      );
+    },
+    [updateTemplate, showSuccessToast]
+  );
+
   return {
     handleEdit,
     handleClone,
-    handleSetAsDefault,
     handleExport,
     handleDelete,
     confirmDelete,
     cancelDelete,
     templateToDelete,
     isDeleting,
-    isSettingDefault,
     isCloning,
     isExporting,
+    isUpdating,
+    handleIsEnabledChange,
   };
 };

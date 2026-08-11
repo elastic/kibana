@@ -22,7 +22,6 @@ describe('CasesClientFactory', () => {
 
   const rawRequest: FakeRawRequest = {
     headers: {},
-    path: '/',
   };
 
   const fakeRequest = kibanaRequestFactory(rawRequest);
@@ -51,7 +50,6 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        internalClusterClient: coreStart.elasticsearch.client.asInternalUser,
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -76,7 +74,6 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        internalClusterClient: coreStart.elasticsearch.client.asInternalUser,
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -96,7 +93,6 @@ describe('CasesClientFactory', () => {
         request: fakeRequest,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        internalClusterClient: coreStart.elasticsearch.client.asInternalUser,
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -115,7 +111,6 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        internalClusterClient: coreStart.elasticsearch.client.asInternalUser,
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();

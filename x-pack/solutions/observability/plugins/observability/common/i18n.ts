@@ -53,3 +53,17 @@ export const NOT_BETWEEN_TEXT = i18n.translate(
     defaultMessage: 'not between',
   }
 );
+
+export const BETWEEN_INCLUSIVE_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.betweenInclusive',
+  {
+    defaultMessage: 'between (inclusive)',
+  }
+);
+
+export const NOT_BETWEEN_INCLUSIVE_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.notBetweenInclusive',
+  {
+    defaultMessage: 'not between (inclusive)',
+  }
+);

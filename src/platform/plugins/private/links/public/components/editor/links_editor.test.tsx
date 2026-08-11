@@ -8,45 +8,48 @@
  */
 
 import React from 'react';
-import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+
 import { EuiThemeProvider } from '@elastic/eui';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
+import type { ResolvedLink } from '../../types';
+import { LinksStrings } from '../links_strings';
 import type { LinksEditorProps } from './links_editor';
 import LinksEditor from './links_editor';
-import { LinksStrings } from '../links_strings';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import type { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [
     {
       id: 'foo',
       type: 'dashboardLink' as const,
-      order: 1,
       destination: '123',
       title: 'dashboard 01',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       id: 'bar',
       type: 'dashboardLink' as const,
-      order: 4,
       destination: '456',
       title: 'dashboard 02',
       description: 'awesome dashboard if you ask me',
+      options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     },
     {
       id: 'bizz',
       type: 'externalLink' as const,
-      order: 3,
       destination: 'http://example.com',
       title: 'http://example.com',
+      options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },
     {
       id: 'buzz',
       type: 'externalLink' as const,
-      order: 2,
       destination: 'http://elastic.co',
       title: 'Elastic website',
+      options: DEFAULT_EXTERNAL_LINK_OPTIONS,
     },
   ];
 
@@ -83,7 +86,7 @@ describe('LinksEditor', () => {
   });
 
   test('shows links in order', async () => {
-    const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
+    const expectedLinkIds = [...someLinks].map(({ id }) => id);
     renderEditor({ initialLinks: someLinks });
 
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
@@ -98,24 +101,22 @@ describe('LinksEditor', () => {
   });
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
-    const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     const onSaveToLibrary = jest.fn().mockImplementation(() => Promise.resolve());
     renderEditor({ initialLinks: someLinks, onSaveToLibrary, isByReference: true });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
-    const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     const onAddToDashboard = jest.fn();
     renderEditor({ initialLinks: someLinks, onAddToDashboard, isByReference: false });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
   });
 });

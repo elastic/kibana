@@ -5,33 +5,38 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { OnAppLeave } from '../context/app_leave_context';
 import { labels } from '../utils/i18n';
 
 interface UseNavigationAbortParams {
   onAppLeave: OnAppLeave;
   isResponseLoading: boolean;
+  cancelAll: () => void;
 }
 
 /**
  * Hook that handles navigation abort confirmation when user tries to navigate away
- * while a chat request is in progress.
+ * while one or more chat streams are in progress.
  *
- * When user confirms navigation, the request is aborted and the round is marked as aborted.
- * When user cancels, they stay on the page and the request continues.
+ * If the user confirms, every in-flight stream is cancelled before the platform
+ * proceeds with navigation. If the user cancels, they stay on the page and the
+ * streams continue.
  */
-export const useNavigationAbort = ({ onAppLeave, isResponseLoading }: UseNavigationAbortParams) => {
-  const shouldAbortOnUnmountRef = useRef(false);
-
+export const useNavigationAbort = ({
+  onAppLeave,
+  isResponseLoading,
+  cancelAll,
+}: UseNavigationAbortParams) => {
   useEffect(() => {
     onAppLeave((actions) => {
       if (isResponseLoading) {
-        shouldAbortOnUnmountRef.current = true;
         return actions.confirm(
           labels.navigationAbort.message,
           labels.navigationAbort.title,
-          () => {},
+          () => {
+            cancelAll();
+          },
           labels.navigationAbort.confirmButton,
           'danger'
         );
@@ -42,5 +47,5 @@ export const useNavigationAbort = ({ onAppLeave, isResponseLoading }: UseNavigat
     return () => {
       onAppLeave((actions) => actions.default());
     };
-  }, [onAppLeave, isResponseLoading]);
+  }, [onAppLeave, isResponseLoading, cancelAll]);
 };

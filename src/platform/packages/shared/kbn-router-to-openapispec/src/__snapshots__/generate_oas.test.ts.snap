@@ -285,7 +285,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
-                  "any": Object {},
+                  "any": Object {
+                    "description": "any type",
+                    "nullable": true,
+                  },
                   "array": Object {
                     "items": Object {
                       "additionalProperties": false,
@@ -453,7 +456,10 @@ Object {
               "schema": Object {
                 "additionalProperties": false,
                 "properties": Object {
-                  "any": Object {},
+                  "any": Object {
+                    "description": "any type",
+                    "nullable": true,
+                  },
                   "array": Object {
                     "items": Object {
                       "additionalProperties": false,
@@ -739,6 +745,10 @@ Object {
             "application/json": Object {
               "schema": Object {
                 "discriminator": Object {
+                  "mapping": Object {
+                    "a": "#/components/schemas/my-a-my-team",
+                    "b": "#/components/schemas/my-b-my-team",
+                  },
                   "propertyName": "type",
                 },
                 "oneOf": Array [

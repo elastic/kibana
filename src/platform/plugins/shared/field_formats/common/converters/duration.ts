@@ -12,7 +12,7 @@ import type { unitOfTime, Duration } from 'moment';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
@@ -20,6 +20,7 @@ import {
   DURATION_INPUT_FORMATS,
   DURATION_OUTPUT_FORMATS,
 } from '../constants/duration_formats';
+import { asPrettyString } from '../utils';
 
 const ratioToSeconds: Record<string, number> = {
   picoseconds: 0.000000000001,
@@ -67,10 +68,16 @@ export class DurationFormat extends FieldFormat {
     };
   }
 
-  textConvert: TextContextTypeConvert = (val: number) => {
+  textConvert: TextContextTypeConvert = (val) => {
     const missing = this.checkForMissingValueText(val);
     if (missing) {
       return missing;
+    }
+
+    // Some fields like histogram have object values that cannot be represented as a duration,
+    // so render them as-is.
+    if (typeof val === 'object') {
+      return asPrettyString(val);
     }
 
     const inputFormat = this.param('inputFormat');
@@ -111,15 +118,6 @@ export class DurationFormat extends FieldFormat {
     const suffix = showSuffix && unitText && !human ? `${includeSpace}${unitText}` : '';
 
     return humanPrecise ? precise : prefix + precise + suffix;
-  };
-
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
   };
 }
 

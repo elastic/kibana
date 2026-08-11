@@ -20,6 +20,7 @@ export interface RunTestsOptions {
   testTarget: ScoutTestTarget;
   configPath: string;
   headed: boolean;
+  repeatEach: number | undefined;
   testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
@@ -29,13 +30,14 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles'],
+  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testFiles', 'repeatEach'],
   default: { ...SERVER_FLAG_OPTIONS.default, headed: false },
   help: `
     ${SERVER_FLAG_OPTIONS.help}
     --config            Playwright config file path (required if --testFiles not provided)
     --testFiles         Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed            Run Playwright with browser head
+    --repeatEach        Run each test N times for local flakiness validation (e.g. --repeatEach 5)
   `,
 };
 
@@ -55,6 +57,12 @@ export async function parseTestFlags(flags: FlagsReader) {
   }
 
   const headed = flags.boolean('headed');
+  const repeatEach = flags.number('repeatEach');
+
+  if (repeatEach !== undefined && (repeatEach < 1 || !Number.isInteger(repeatEach))) {
+    throw createFlagError(`'--repeatEach' must be a positive integer, got '${repeatEach}'`);
+  }
+
   let scoutConfigPath: string;
   const testFiles: string[] = [];
 
@@ -77,6 +85,7 @@ export async function parseTestFlags(flags: FlagsReader) {
     ...serverOptions,
     configPath: scoutConfigPath,
     headed,
+    repeatEach,
     ...(testFiles.length > 0 && { testFiles }),
   };
 }

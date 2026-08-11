@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 export const nodeTypeClass = {
   invalid: 'warning',
   node: 'storage',
-  master: 'starFilled',
-  master_only: 'starEmpty',
+  master: 'starFill',
+  master_only: 'star',
   data: 'database',
-  client: 'glasses',
+  client: 'readOnly',
 };
 
 export const nodeTypeLabel = {

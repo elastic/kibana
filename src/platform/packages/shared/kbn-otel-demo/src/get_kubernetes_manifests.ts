@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 const OTEL_DEMO_VERSION = '1.12.0';
 const NAMESPACE = 'otel-demo';
@@ -82,7 +82,7 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     rules: [
       {
@@ -108,12 +108,12 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRoleBinding',
     metadata: {
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     roleRef: {
       apiGroup: 'rbac.authorization.k8s.io',
       kind: 'ClusterRole',
-      name: 'otel-collector',
+      name: `otel-collector-${NAMESPACE}`,
     },
     subjects: [
       {
@@ -493,7 +493,7 @@ export function getKubernetesManifests(options: K8sManifestOptions): string {
     },
   });
 
-  return manifests.map((m) => yaml.dump(m)).join('---\n');
+  return manifests.map((m) => stringify(m)).join('---\n');
 }
 
 function createDeployment(opts: {

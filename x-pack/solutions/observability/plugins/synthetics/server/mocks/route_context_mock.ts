@@ -23,6 +23,7 @@ export const getRouteContextMock = () => {
   );
 
   const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+
   return {
     routeContext: {
       syntheticsMonitorClient,

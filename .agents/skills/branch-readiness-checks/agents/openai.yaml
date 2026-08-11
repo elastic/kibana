@@ -1,0 +1,5 @@
+interface:
+  display_name: "Branch Readiness Checks"
+  short_description: "Run branch-focused validation checks"
+policy:
+  allow_implicit_invocation: false

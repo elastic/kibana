@@ -67,9 +67,14 @@ import type {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
-import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  VisualizeConstants,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VISUALIZE_SAVED_OBJECT_TYPE,
+} from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import type { VisEditorsRegistry } from './vis_editors_registry';
@@ -110,14 +115,16 @@ import {
   setSavedSearch,
   setDataViews,
   setInspector,
-  getTypes,
   setNotifications,
+  getTypes,
 } from './services';
 import type { ListingViewRegistry } from './types';
 import type { VisualizationSavedObjectAttributes } from '../common/content_management';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { registerActions } from './actions/register_actions';
 import type { VisualizeByReferenceState } from '../common/embeddable/types';
+import { VegaIcon } from './components/vega_icon';
+import { updateBasicSoAttributes } from './utils/saved_objects_utils/update_basic_attributes';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -137,6 +144,14 @@ export interface VisualizationsStart extends TypesStart {
     references?: Reference[],
     referencesToExclude?: Reference[]
   ) => ReturnType<typeof findListItems>;
+  updateVisualizationLibraryItem: (
+    id: string,
+    type: string,
+    newAttributes: {
+      title: string;
+      description: string;
+    }
+  ) => ReturnType<typeof updateBasicSoAttributes>;
 }
 
 export interface VisualizationsSetupDeps {
@@ -388,6 +403,7 @@ export class VisualizationsPlugin
         ]);
         const services: VisualizeServices = {
           ...coreStart,
+          isScreenshotMode: pluginsStart.screenshotMode.isScreenshotMode(),
           history,
           kbnUrlStateStorage: createKbnUrlStateStorage({
             history,
@@ -432,6 +448,7 @@ export class VisualizationsPlugin
 
         params.element.classList.add(styles.visAppWrapper);
         if (pluginsStart.screenshotMode.isScreenshotMode()) {
+          coreStart.chrome.setIsVisible(false);
           params.element.classList.add(styles.visEditorScreenshotMode);
           injectGlobal(styles.globalScreenshotMode);
         }
@@ -474,13 +491,9 @@ export class VisualizationsPlugin
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
     expressions.registerFunction(xyDimensionExpressionFunction);
-    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const {
-        plugins: { embeddable: embeddableStart },
-      } = start();
-
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
-      return getVisualizeEmbeddableFactory({ embeddableStart });
+    embeddable.registerEmbeddablePublicDefinition(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { visualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
+      return visualizeEmbeddableFactory;
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
@@ -496,13 +509,13 @@ export class VisualizationsPlugin
           }
         );
       },
-      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_SAVED_OBJECT_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return getTypes().get(visState.type)?.icon ?? '';
+        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(
@@ -545,6 +558,7 @@ export class VisualizationsPlugin
       dataViews,
       inspector,
       serverless,
+      cps,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -580,7 +594,7 @@ export class VisualizationsPlugin
         const isServerless = Boolean(serverless);
         const isSolutionView = space.solution && space.solution !== 'classic';
         const visibleIn: AppDeepLinkLocations[] =
-          isServerless || isSolutionView ? [] : ['globalSearch', 'sideNav'];
+          isServerless || isSolutionView ? [] : ['globalSearch', 'classicSideNav'];
         this.visibilityUpdater.next(() => ({ visibleIn }));
       });
     }
@@ -591,11 +605,22 @@ export class VisualizationsPlugin
 
     registerActions(uiActions, data, types);
 
+    cps?.cpsManager?.registerAppAccess('visualize', (location: string) =>
+      location.includes('type:vega') ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+    );
+
     return {
       ...types,
       showNewVisModal,
       findListItems: (search, size, references, referencesToExclude) =>
         findListItems(types, search, size, references, referencesToExclude),
+      updateVisualizationLibraryItem: (id, type, newAttributes) =>
+        updateBasicSoAttributes(id, type, newAttributes, {
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
+          typesService: getTypes(),
+          contentManagement,
+          ...core,
+        }),
     };
   }
 

@@ -69,4 +69,4 @@ POST kbn://api/agent_builder/tools/_execute
 ## Notes
 
 - Results are returned as `traces` (one entry per discovered `trace.id`).
-- Each trace contains `items` (sorted by `@timestamp`) and an `isTruncated` flag.
+- Each trace includes `traceId`, `items` (sorted by `@timestamp`), `services`, and an `isTruncated` flag.

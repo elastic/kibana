@@ -16,7 +16,7 @@ export const SearchLabsButtonPanel = () => {
           href="https://github.com/elastic/elasticsearch-labs/tree/main/notebooks"
           target="_blank"
           iconSide="right"
-          iconType="popout"
+          iconType="external"
           data-test-subj="console-notebooks-search-labs-btn"
           data-telemetry-id="console-notebooks-search-labs-btn"
         >

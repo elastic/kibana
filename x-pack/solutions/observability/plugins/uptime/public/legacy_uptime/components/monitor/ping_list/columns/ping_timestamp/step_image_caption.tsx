@@ -74,7 +74,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
                   setStepNumber(stepNumber - 1);
                   evt.preventDefault();
                 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 aria-label={prevAriaLabel}
                 isLoading={isLoading}
               >
@@ -93,7 +93,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
                   setStepNumber(stepNumber + 1);
                   evt.stopPropagation();
                 }}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 aria-label={nextAriaLabel}
                 isLoading={isLoading}
