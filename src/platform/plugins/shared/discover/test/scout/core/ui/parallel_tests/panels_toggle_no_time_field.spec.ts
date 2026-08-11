@@ -27,8 +27,6 @@ spaceTest.describe(
   'Discover panels toggle - no time field',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
       await discoverScoutSpace.savedObjects.load(testData.WITHOUT_TIMEFIELD_KBN_ARCHIVE);

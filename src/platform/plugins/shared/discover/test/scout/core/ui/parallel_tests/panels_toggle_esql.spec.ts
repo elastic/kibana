@@ -33,8 +33,6 @@ spaceTest.describe(
   'Discover panels toggle - ES|QL mode',
   { tag: '@local-stateful-classic' },
   () => {
-    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
     });
