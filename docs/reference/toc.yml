@@ -66,6 +66,7 @@ toc:
           - file: connectors-kibana/servicenow-itom-action-type.md
           - file: connectors-kibana/servicenow-sir-action-type.md
           - file: connectors-kibana/slack-action-type.md
+          - file: connectors-kibana/elastic-slack-action-type.md
           - file: connectors-kibana/swimlane-action-type.md
           - file: connectors-kibana/thehive-action-type.md
           - file: connectors-kibana/tines-action-type.md

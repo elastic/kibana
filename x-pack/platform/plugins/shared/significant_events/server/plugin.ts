@@ -13,13 +13,18 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
+import {
+  getRelayAppConnectionSavedObjectType,
+  RELAY_APP_CONNECTION_SO_TYPE,
+} from './lib/slack_app/saved_object';
+import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
   createSignificantEventsMaintenanceService,
@@ -374,6 +379,8 @@ export class SignificantEventsPlugin
       this.server.agentBuilder = plugins.agentBuilder;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      this.restoreElasticSlackConnector(core, this.server);
     }
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
@@ -584,6 +591,27 @@ export class SignificantEventsPlugin
     // installed workflows stay enabled during a paused deployment.
     await this.maintenanceService.reassertPausedWorkflows({
       request: createMaintenanceSystemRequest(),
+    });
+  }
+
+  /**
+   * The Elastic Slack connector is an in-memory connector, so it does not survive a restart.
+   * A deployment that was already connected must get it back without the user reconnecting,
+   * which means reading the connection document once here rather than waiting for the settings
+   * UI to poll status. Failures are logged and swallowed: a missing connector degrades Slack
+   * actions but must not take down plugin start.
+   */
+  private restoreElasticSlackConnector(core: CoreStart, server: StreamsServer): void {
+    const soClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
+    );
+
+    new SlackAppService(server).syncConnector(soClient).catch((error) => {
+      this.logger.warn(
+        `significantEvents: failed to restore the Elastic Slack connector: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     });
   }
 

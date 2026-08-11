@@ -231,12 +231,41 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   responseSizeHeader?: string;
 }
 
+/**
+ * Structural view of the Actions plugin's Relay client, for specs that talk to Elastic's
+ * Relay service rather than a third-party API. It is declared here (instead of imported)
+ * so this package stays free of x-pack dependencies; the concrete `RelayClient` satisfies
+ * it by shape.
+ *
+ * Relay calls cannot go through `ActionContext.client`: the Relay base URL and its mTLS
+ * settings come from `xpack.actions.relay`, which only the Actions plugin resolves.
+ */
+export interface RelayActionClient {
+  /** Post an outbound message to a channel bound to this deployment. */
+  trigger(input: {
+    tenantKey: string;
+    channel: string;
+    message: string;
+    threadTs?: string;
+  }): Promise<{ ref: string; tenantKey: string }>;
+  /** Fetch one page of this deployment's channel bindings for a workspace. */
+  listBindings(
+    tenantKey: string,
+    options?: { cursor?: string; limit?: number }
+  ): Promise<{
+    bindings: Array<{ scope_id?: string; display_name?: string }>;
+    nextCursor?: string;
+  }>;
+}
+
 export interface ActionContext {
   client: AxiosInstance;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /** Present only when `xpack.actions.relay.url` is configured. */
+  relay?: RelayActionClient;
 }
 
 // ============================================================================

@@ -8,7 +8,7 @@
  */
 
 import type { EditorHandlers } from '@kbn/workflows/types/latest';
-import { getIndexSelectionHandler } from '@kbn/workflows-ui';
+import { getConnectorChannelSelectionHandler, getIndexSelectionHandler } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../types';
 
 export class InternalStepsEditorHandlers {
@@ -43,6 +43,12 @@ export class InternalStepsEditorHandlers {
       allowWildcard: false,
       showAllIndices: false,
     });
+    // Connector-derived step types get their contracts from the actions plugin, which cannot
+    // carry browser handlers, so their editor handlers are registered here alongside the
+    // built-in ones.
+    const elasticSlackChannelSelectionHandler = getConnectorChannelSelectionHandler(services, {
+      subAction: 'listChannels',
+    });
 
     return {
       'elasticsearch.search': {
@@ -56,6 +62,9 @@ export class InternalStepsEditorHandlers {
       },
       'elasticsearch.indices.delete': {
         input: { index: { selection: deleteIndexSelectionHandler } },
+      },
+      'elastic_slack.sendMessage': {
+        input: { channel: { selection: elasticSlackChannelSelectionHandler } },
       },
     };
   };

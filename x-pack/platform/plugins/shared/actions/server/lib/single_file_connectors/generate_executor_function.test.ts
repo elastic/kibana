@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { generateExecutorFunction } from './generate_executor_function';
 import { setConnectorActionErrorMeta, TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, RelayActionClient } from '@kbn/connector-specs';
 import type { GetAxiosInstanceWithAuthFn } from '../get_axios_instance';
 
 describe('generateExecutorFunction', () => {
@@ -19,6 +19,8 @@ describe('generateExecutorFunction', () => {
   let mockGetAxiosInstanceWithAuth: jest.MockedFunction<GetAxiosInstanceWithAuthFn>;
   let mockAxiosInstance: object;
   let mockHandler: jest.Mock;
+  let mockRelayClient: RelayActionClient;
+  let mockGetRelayClient: jest.MockedFunction<() => RelayActionClient | undefined>;
 
   const makeExecOptions = (params: Record<string, unknown>) =>
     ({
@@ -44,6 +46,8 @@ describe('generateExecutorFunction', () => {
     mockAxiosInstance = { get: jest.fn() };
     mockGetAxiosInstanceWithAuth = jest.fn().mockResolvedValue(mockAxiosInstance);
     mockHandler = jest.fn().mockResolvedValue({ result: 'ok' });
+    mockRelayClient = { trigger: jest.fn(), listBindings: jest.fn() };
+    mockGetRelayClient = jest.fn().mockReturnValue(mockRelayClient);
   });
 
   const makeActions = (handler: jest.Mock = mockHandler): ConnectorSpec['actions'] => ({
@@ -59,6 +63,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -72,6 +77,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const subActionParams = { message: 'hello', count: 3 };
@@ -87,14 +93,32 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
       await executor({ ...opts, config, secrets });
 
       expect(mockHandler).toHaveBeenCalledWith(
-        { log: logger, client: mockAxiosInstance, config, secrets },
+        { log: logger, client: mockAxiosInstance, config, secrets, relay: mockRelayClient },
         {}
+      );
+    });
+
+    it('leaves relay undefined in the handler context when no Relay is configured', async () => {
+      mockGetRelayClient.mockReturnValue(undefined);
+
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
+      });
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ relay: undefined }),
+        expect.anything()
       );
     });
 
@@ -104,6 +128,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -119,6 +144,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -138,6 +164,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await executor({
@@ -164,6 +191,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await executor(
@@ -187,6 +215,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await expect(
@@ -202,6 +231,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await expect(
@@ -219,6 +249,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -242,6 +273,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -273,6 +305,7 @@ describe('generateExecutorFunction', () => {
           },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -301,6 +334,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -324,6 +358,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
@@ -337,6 +372,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -356,6 +392,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       await expect(
@@ -378,6 +415,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -404,6 +442,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result = await executor(
@@ -431,6 +470,7 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions,
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getRelayClient: mockGetRelayClient,
       });
 
       const result1 = await executor(

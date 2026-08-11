@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './connector_channel_selection_handler';
 export * from './index_selection_handler';

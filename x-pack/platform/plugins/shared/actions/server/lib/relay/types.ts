@@ -62,6 +62,28 @@ export interface RelayBindingsPage {
   nextCursor?: string;
 }
 
+/**
+ * Outbound message sent to a bound channel through the Relay's `POST /v1/trigger`
+ * endpoint. The Relay resolves the target binding from `tenantKey` + `channel` and
+ * rejects channels this deployment does not own, so `channel` must be the Slack
+ * channel *id* (as returned by `listBindings`), not its display name.
+ */
+export interface RelayTriggerInput {
+  tenantKey: string;
+  /** Slack channel id, i.e. the `scope_id` of one of this deployment's bindings. */
+  channel: string;
+  message: string;
+  /** Timestamp of the message to reply to, when posting into an existing thread. */
+  threadTs?: string;
+}
+
+/** Acknowledgement of an accepted outbound message. */
+export interface RelayTriggerResponse {
+  /** Relay-side reference for the posted message. */
+  ref: string;
+  tenantKey: string;
+}
+
 export interface RelayClientContract {
   startInstall(body: RelayInstallRequest): Promise<RelayInstallResponse>;
   fetchClaim(claimId: string): Promise<RelayClaimResponse>;
@@ -78,6 +100,11 @@ export interface RelayClientContract {
   bind(tenantKey: string, channelId: string): Promise<void>;
   /** Release a channel binding owned by this deployment (404 if none; 403 if owned by another). */
   unbindChannel(tenantKey: string, channelId: string): Promise<void>;
+  /**
+   * Post an outbound message to a channel bound to this deployment (403 when the channel
+   * is not bound here; 409 when the workspace is no longer installed).
+   */
+  trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }

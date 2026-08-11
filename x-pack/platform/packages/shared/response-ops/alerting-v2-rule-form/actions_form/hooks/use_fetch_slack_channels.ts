@@ -27,22 +27,30 @@ interface ExecuteResponse {
 const connectorExecutePath = (id: string) =>
   `/api/actions/connector/${encodeURIComponent(id)}/_execute`;
 
+/**
+ * Loads the channels a Slack-style connector can post to by executing its channel-listing
+ * sub-action. Shared by the Slack (v2) and Slack (Elastic app) selectors, which expose the
+ * same `{ id, name }` channel shape under different sub-action names.
+ */
 export const useFetchSlackChannels = ({
   connectorId,
+  subAction = 'listChannels',
   enabled = true,
 }: {
   connectorId: string | null;
+  /** Sub-action that returns `{ ok, channels }`. */
+  subAction?: string;
   enabled?: boolean;
 }) => {
   const http = useService(CoreStart('http'));
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<SlackChannel[], Error>({
-    queryKey: ['alertingV2', 'slackChannels', connectorId],
+    queryKey: ['alertingV2', 'slackChannels', connectorId, subAction],
     queryFn: async () => {
       const res = await http.post<ExecuteResponse>(connectorExecutePath(connectorId!), {
         body: JSON.stringify({
-          params: { subAction: 'listChannels', subActionParams: {} },
+          params: { subAction, subActionParams: {} },
         }),
       });
 

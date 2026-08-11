@@ -122,6 +122,10 @@ export const ConnectorIconsMap: Map<
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
+  [
+    '.elastic_slack',
+    lazy(() => import(/* webpackChunkName: "connectorIconElasticSlack" */ './specs/slack/icon')),
+  ],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
   [
     '.azure-blob',

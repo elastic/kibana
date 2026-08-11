@@ -219,6 +219,65 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('trigger', () => {
+    it('POSTs the outbound message to the trigger endpoint and returns the Relay ref', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ok: true, surface: 'slack', tenant_key: 'team-A', ref: 'C123:1700000000.000100' },
+      } as never);
+
+      await expect(
+        createClient().trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+      ).resolves.toEqual({ ref: 'C123:1700000000.000100', tenantKey: 'team-A' });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/trigger',
+          method: 'post',
+          data: { surface: 'slack', tenant_key: 'team-A', channel: 'C123', message: 'hello' },
+          sslOverrides: relaySSLSettings,
+        })
+      );
+    });
+
+    it('includes thread_ts only when replying in a thread', async () => {
+      requestMock.mockResolvedValue({ status: 202, data: { ref: 'ref-1' } } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'reply',
+        threadTs: '1700000000.000100',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ thread_ts: '1700000000.000100' }),
+        })
+      );
+    });
+
+    it.each([
+      [403, 'channel is not bound to this deployment or project', true],
+      [409, 'workspace is not installed', true],
+      [502, 'failed to post outbound message', false],
+    ])('surfaces a %i Relay response as a RelayRequestError', async (status, message, terminal) => {
+      requestMock.mockResolvedValue({ status, data: { message } } as never);
+
+      const error = await createClient()
+        .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        .then(() => undefined)
+        .catch((cause) => cause);
+
+      expect(error).toBeInstanceOf(RelayRequestError);
+      expect(error).toMatchObject({
+        statusCode: status,
+        relayMessage: message,
+        isTerminal: terminal,
+      });
+    });
+  });
+
   it('preserves Relay errors', async () => {
     requestMock.mockResolvedValue({
       status: 400,

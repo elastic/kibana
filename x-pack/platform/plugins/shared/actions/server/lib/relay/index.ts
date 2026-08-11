@@ -9,9 +9,13 @@ export { RelayClient } from './relay_client';
 export { RelayRequestError } from './relay_error';
 export type {
   RelayBinding,
+  RelayBindingsPage,
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayListBindingsOptions,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './types';

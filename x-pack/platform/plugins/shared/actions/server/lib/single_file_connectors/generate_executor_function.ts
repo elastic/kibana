@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConnectorSpec } from '@kbn/connector-specs';
+import type { ConnectorSpec, RelayActionClient } from '@kbn/connector-specs';
 import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
@@ -65,9 +65,11 @@ const getErrorMeta = ({
 export const generateExecutorFunction = ({
   actions,
   getAxiosInstanceWithAuth,
+  getRelayClient,
 }: {
   actions: ConnectorSpec['actions'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
+  getRelayClient: () => RelayActionClient | undefined;
 }) =>
   async function (
     execOptions: ConnectorTypeExecutorOptions<RecordUnknown, RecordUnknown, RecordUnknown>
@@ -112,6 +114,7 @@ export const generateExecutorFunction = ({
       client: axiosInstance,
       secrets,
       config,
+      relay: getRelayClient(),
     };
 
     try {

@@ -24,6 +24,7 @@ import {
 } from './saved_object';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
+import { registerElasticSlackConnector, unregisterElasticSlackConnector } from './connector';
 
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
@@ -60,6 +61,37 @@ export class SlackAppService {
     return this.server.core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [RELAY_APP_CONNECTION_SO_TYPE],
     });
+  }
+
+  /**
+   * Publish the connector that lets rules and workflows post to the connected channels.
+   * The connector is in-memory only, so this runs on every connect transition and again at
+   * plugin start (see `syncConnector`) for a deployment that was already connected.
+   */
+  private publishConnector(tenantKey: string): void {
+    registerElasticSlackConnector({
+      actions: this.server.actions,
+      logger: this.logger,
+      tenantKey,
+    });
+  }
+
+  /** Withdraw the connector whenever the connection stops being usable. */
+  private withdrawConnector(): void {
+    unregisterElasticSlackConnector({ actions: this.server.actions, logger: this.logger });
+  }
+
+  /**
+   * Restore the connector on a deployment that was already connected before this process
+   * started. Called once from plugin start with an internal Saved Objects client, since there
+   * is no request to scope to; the connection document is namespace-agnostic, so a single read
+   * covers the whole deployment.
+   */
+  async syncConnector(soClient: SavedObjectsClientContract): Promise<void> {
+    const connection = await this.readConnection(soClient);
+    if (connection?.status === RELAY_APP_CONNECTION_STATUS.connected && connection.tenantKey) {
+      this.publishConnector(connection.tenantKey);
+    }
   }
 
   private async readConnection(
@@ -218,6 +250,11 @@ export class SlackAppService {
       createdAt: now,
     });
 
+    // The install may land on a different workspace, so any connector left over from the
+    // connection being replaced now carries a stale tenant key. It is republished from the
+    // new tenant key once the claim completes.
+    this.withdrawConnector();
+
     return { authorizeUrl: installResponse.authorize_url };
   }
 
@@ -243,6 +280,7 @@ export class SlackAppService {
       apiKeyId: null,
       error: message,
     });
+    this.withdrawConnector();
 
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
@@ -298,6 +336,7 @@ export class SlackAppService {
             tenantKey: claim.tenant_key,
             status: RELAY_APP_CONNECTION_STATUS.connected,
           });
+          this.publishConnector(claim.tenant_key);
           return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
       } catch (error) {
@@ -406,6 +445,11 @@ export class SlackAppService {
     if (!connection) {
       return { status: 'disconnected' };
     }
+
+    // Withdrawn up front rather than on the success path: a failed Relay unbind below leaves
+    // the connection in `error` state for the user to retry, and rules must not keep posting
+    // through a connection that is being torn down.
+    this.withdrawConnector();
 
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');

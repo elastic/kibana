@@ -39,11 +39,15 @@ export type { PluginSetupContract, PluginStartContract } from './plugin';
 export { RelayRequestError } from './lib/relay';
 export type {
   RelayBinding,
+  RelayBindingsPage,
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayListBindingsOptions,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './lib/relay';
 
 export {
