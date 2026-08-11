@@ -347,9 +347,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -1753,9 +1751,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected'));
     });
 
     it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
@@ -1777,9 +1773,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           namespace: 'test-namespace',
         })
-      ).rejects.toThrow(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace'));
     });
     it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
       const soClient = createSavedObjectClientMock();
@@ -1865,9 +1859,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrow(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {

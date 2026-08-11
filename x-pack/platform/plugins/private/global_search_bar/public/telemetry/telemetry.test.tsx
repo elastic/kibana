@@ -134,8 +134,18 @@ describe('SearchBar', () => {
 
       simulateTypeChar('d');
 
-      expect(mockReportUiCounter).toHaveBeenNthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).toHaveBeenNthCalledWith(2, 'global_search_bar', 'count', 'search_request');
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        1,
+        'global_search_bar',
+        'count',
+        'search_focus'
+      );
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        2,
+        'global_search_bar',
+        'count',
+        'search_request'
+      );
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
@@ -157,8 +167,18 @@ describe('SearchBar', () => {
         expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
       });
 
-      expect(mockReportUiCounter).toHaveBeenNthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-      expect(mockReportUiCounter).toHaveBeenNthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        1,
+        'global_search_bar',
+        'count',
+        'shortcut_used'
+      );
+      expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+        2,
+        'global_search_bar',
+        'count',
+        'search_focus'
+      );
       expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
@@ -298,8 +318,18 @@ describe('SearchBar', () => {
         fireEvent.click(await screen.findByTestId('nav-search-conceal'));
         expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-        expect(mockReportUiCounter).toHaveBeenNthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-        expect(mockReportUiCounter).toHaveBeenNthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          1,
+          'global_search_bar',
+          'count',
+          'shortcut_used'
+        );
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          2,
+          'global_search_bar',
+          'count',
+          'search_focus'
+        );
         expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
       });
 
@@ -326,7 +356,12 @@ describe('SearchBar', () => {
         fireEvent.click(await screen.findByTestId('nav-search-conceal'));
         expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
 
-        expect(mockReportUiCounter).toHaveBeenNthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
+        expect(mockReportUiCounter).toHaveBeenNthCalledWith(
+          1,
+          'global_search_bar',
+          'count',
+          'search_focus'
+        );
         expect(mockReportUiCounter).toHaveBeenCalledTimes(1);
 
         expect(mockReportEvent).toHaveBeenNthCalledWith(1, 'global_search_bar_blur', {

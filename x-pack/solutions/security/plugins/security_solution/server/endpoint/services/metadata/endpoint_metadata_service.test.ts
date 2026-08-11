@@ -219,7 +219,10 @@ describe('EndpointMetadataService', () => {
       unitedIndexQuery.runtime_mappings.status.script.source = expect.any(String);
 
       expect(esClient.search).toHaveBeenCalledWith(unitedIndexQuery);
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), agentPolicyIds);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(
+        expect.anything(),
+        agentPolicyIds
+      );
       expect(metadataListResponse).toEqual({
         data: [
           {
@@ -308,7 +311,9 @@ describe('EndpointMetadataService', () => {
 
       await metadataService.getHostMetadataList(queryOptions);
 
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [basePolicyId]);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [
+        basePolicyId,
+      ]);
     });
 
     it('should return the stripped `policy_id` in the applied agent policy info.', async () => {
@@ -335,7 +340,9 @@ describe('EndpointMetadataService', () => {
       await metadataService.getHostMetadataList(queryOptions);
 
       expect(basePolicyId).toEqual('test-agent-policy-id#blah');
-      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [basePolicyId]);
+      expect(agentPolicyServiceMock.getByIds).toHaveBeenCalledWith(expect.anything(), [
+        basePolicyId,
+      ]);
     });
   });
 

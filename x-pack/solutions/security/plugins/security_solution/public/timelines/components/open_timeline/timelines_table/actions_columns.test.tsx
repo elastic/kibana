@@ -164,7 +164,10 @@ describe('#getActionsColumns', () => {
 
     wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
 
-    expect(onOpenTimeline).toHaveBeenCalledWith({ duplicate: true, timelineId: 'saved-timeline-11' });
+    expect(onOpenTimeline).toHaveBeenCalledWith({
+      duplicate: true,
+      timelineId: 'saved-timeline-11',
+    });
   });
 
   test('it renders the export icon when enableExportTimelineDownloader is including the action export', () => {

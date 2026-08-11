@@ -468,9 +468,7 @@ describe('validateTypeMigrations', () => {
         convertToMultiNamespaceTypeVersion: '3.2.4',
         namespaceType: 'multiple',
       });
-      expect(() =>
-        validate({ type, convertVersion: '3.2.3', kibanaVersion: '3.2.3' })
-      ).toThrow(
+      expect(() => validate({ type, convertVersion: '3.2.3', kibanaVersion: '3.2.3' })).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be any other than '3.2.3'.`
       );
     });
@@ -481,9 +479,7 @@ describe('validateTypeMigrations', () => {
         convertToMultiNamespaceTypeVersion: '3.2.4',
         namespaceType: 'multiple',
       });
-      expect(() =>
-        validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })
-      ).toThrow(
+      expect(() => validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
       );
     });
@@ -494,9 +490,7 @@ describe('validateTypeMigrations', () => {
         convertToMultiNamespaceTypeVersion: '3.1.1',
         namespaceType: 'multiple',
       });
-      expect(() =>
-        validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })
-      ).toThrow(
+      expect(() => validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.1.1' cannot be used on a patch version (must be like 'x.y.0').`
       );
     });

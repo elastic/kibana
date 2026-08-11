@@ -104,7 +104,10 @@ describe('AnalyticsIndex', () => {
     await index.upsertIndex();
 
     expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
-    expect(esClient.putScript).toHaveBeenCalledWith({ id: painlessScriptId, script: painlessScript });
+    expect(esClient.putScript).toHaveBeenCalledWith({
+      id: painlessScriptId,
+      script: painlessScript,
+    });
     expect(esClient.indices.create).toHaveBeenCalledWith({
       index: indexName,
       timeout: '300s',
@@ -156,7 +159,10 @@ describe('AnalyticsIndex', () => {
 
     expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
     expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
-    expect(esClient.putScript).toHaveBeenCalledWith({ id: painlessScriptId, script: painlessScript });
+    expect(esClient.putScript).toHaveBeenCalledWith({
+      id: painlessScriptId,
+      script: painlessScript,
+    });
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: indexName,
       ...mappings,
@@ -242,7 +248,10 @@ describe('AnalyticsIndex', () => {
 
       expect(nextBackOff).toHaveBeenCalledTimes(1);
       expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
-      expect(esClient.putScript).toHaveBeenCalledWith({ id: painlessScriptId, script: painlessScript });
+      expect(esClient.putScript).toHaveBeenCalledWith({
+        id: painlessScriptId,
+        script: painlessScript,
+      });
       expect(esClient.indices.create).toHaveBeenCalledTimes(2);
       expect(scheduleCAIBackfillTaskMock).toHaveBeenCalledWith({
         taskId,
@@ -278,7 +287,10 @@ describe('AnalyticsIndex', () => {
       expect(nextBackOff).toHaveBeenCalledTimes(1);
       expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });
       expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: indexName });
-      expect(esClient.putScript).toHaveBeenCalledWith({ id: painlessScriptId, script: painlessScript });
+      expect(esClient.putScript).toHaveBeenCalledWith({
+        id: painlessScriptId,
+        script: painlessScript,
+      });
 
       expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(esClient.indices.putMapping).toHaveBeenCalledWith({

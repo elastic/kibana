@@ -55,7 +55,9 @@ describe('write_lines_to_bulk_list_items', () => {
       options.stream.push('127.0.0.1\n');
       options.stream.push(null);
       await promise;
-      expect(createListItemsBulk).toHaveBeenCalledWith(expect.objectContaining({ value: ['127.0.0.1'] }));
+      expect(createListItemsBulk).toHaveBeenCalledWith(
+        expect.objectContaining({ value: ['127.0.0.1'] })
+      );
     });
 
     test('It imports a set of items to a write buffer by calling "getListItemByValues" with two values given', async () => {

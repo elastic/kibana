@@ -51,9 +51,7 @@ describe('CollectorSet', () => {
         });
       };
 
-      expect(registerPojo).toThrow(
-        'CollectorSet can only have Collector instances registered'
-      );
+      expect(registerPojo).toThrow('CollectorSet can only have Collector instances registered');
     });
 
     it('should throw when 2 collectors with the same type are registered', () => {

@@ -55,6 +55,9 @@ describe('NumberRow', () => {
       target: { value: '5' },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(defaultProps.onChange).toHaveBeenLastCalledWith({ id: defaultProps.model.id, value: '5' });
+    expect(defaultProps.onChange).toHaveBeenLastCalledWith({
+      id: defaultProps.model.id,
+      value: '5',
+    });
   });
 });

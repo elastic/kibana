@@ -107,10 +107,13 @@ describe('EditTagsSelectable', () => {
     }
 
     expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(propsMultipleCases.tags.length);
-    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(propsMultipleCases.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleCases.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('renders the icons correctly after selecting and deselecting tags', async () => {
@@ -132,10 +135,13 @@ describe('EditTagsSelectable', () => {
     }
 
     expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(propsMultipleCases.tags.length);
-    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(propsMultipleCases.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleCases.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('adds a new tag correctly', async () => {

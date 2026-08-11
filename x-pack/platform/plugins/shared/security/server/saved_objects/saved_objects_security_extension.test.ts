@@ -1162,9 +1162,7 @@ describe('#authorize (unpublished by interface)', () => {
           spaces,
           actions: new Set([SecurityAction.CLOSE_POINT_IN_TIME]), // this is currently the only security action that does not require authz
         })
-      ).rejects.toThrow(
-        'No actions or access control types specified for authorization check'
-      );
+      ).rejects.toThrow('No actions or access control types specified for authorization check');
     });
   });
 
@@ -1386,9 +1384,9 @@ describe('#create', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeCreate({ namespace, object: obj1 })
-      ).rejects.toThrow('Oh no!');
+      await expect(securityExtension.authorizeCreate({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -1911,9 +1909,9 @@ describe('update', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeUpdate({ namespace, object: obj1 })
-      ).rejects.toThrow('Oh no!');
+      await expect(securityExtension.authorizeUpdate({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2426,9 +2424,9 @@ describe('delete', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeDelete({ namespace, object: obj1 })
-      ).rejects.toThrow('Oh no!');
+      await expect(securityExtension.authorizeDelete({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2665,9 +2663,9 @@ describe('delete', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeBulkDelete({ namespace, objects })
-      ).rejects.toThrow('Oh no!');
+      await expect(securityExtension.authorizeBulkDelete({ namespace, objects })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -2905,9 +2903,9 @@ describe('get', () => {
       const { securityExtension, checkPrivileges } = setup();
       checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-      await expect(
-        securityExtension.authorizeGet({ namespace, object: obj1 })
-      ).rejects.toThrow('Oh no!');
+      await expect(securityExtension.authorizeGet({ namespace, object: obj1 })).rejects.toThrow(
+        'Oh no!'
+      );
     });
 
     test(`calls internal authorize methods with expected actions, types, spaces, and enforce map`, async () => {
@@ -3569,9 +3567,9 @@ describe(`#authorizeCheckConflicts`, () => {
     const { securityExtension, checkPrivileges } = setup();
     checkPrivileges.mockRejectedValue(new Error('Oh no!'));
 
-    await expect(
-      securityExtension.authorizeCheckConflicts({ namespace, objects })
-    ).rejects.toThrow('Oh no!');
+    await expect(securityExtension.authorizeCheckConflicts({ namespace, objects })).rejects.toThrow(
+      'Oh no!'
+    );
   });
 
   test(`calls authorize methods with expected actions, types, spaces, and enforce map`, async () => {

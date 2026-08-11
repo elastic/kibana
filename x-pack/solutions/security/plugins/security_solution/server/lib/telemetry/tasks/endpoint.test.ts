@@ -58,9 +58,9 @@ describe('endpoint telemetry task test', () => {
       testTaskExecutionPeriod.current
     );
     expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toHaveBeenCalledTimes(
-      1
-    );
+    expect(
+      mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter
+    ).toHaveBeenCalledTimes(1);
   });
 
   test('endpoint telemetry task should fetch endpoint data even if fetchPolicyConfigs throws an error', async () => {

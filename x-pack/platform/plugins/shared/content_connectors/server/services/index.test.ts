@@ -651,7 +651,9 @@ describe('AgentlessConnectorsInfraService', () => {
       await service.removeDeployment(packagePolicyId);
 
       expect(agentlessPoliciesService.deleteAgentlessPolicy).toHaveBeenCalledWith(agentPolicyId);
-      expect(packagePolicyService.delete).toHaveBeenCalledWith(soClient, esClient, [packagePolicyId]);
+      expect(packagePolicyService.delete).toHaveBeenCalledWith(soClient, esClient, [
+        packagePolicyId,
+      ]);
     });
 
     test('Raises an error if deletion of agent policy failed', async () => {

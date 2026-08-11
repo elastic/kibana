@@ -93,9 +93,7 @@ describe('getExampleAttackDiscoveriesWithReplacements', () => {
       },
     };
 
-    expect(() =>
-      getExampleAttackDiscoveriesWithReplacements(missingAttackDiscoveries)
-    ).toThrow();
+    expect(() => getExampleAttackDiscoveriesWithReplacements(missingAttackDiscoveries)).toThrow();
   });
 
   it('throws when attackDiscoveries is null', () => {

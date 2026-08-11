@@ -661,7 +661,9 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toHaveBeenCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test:preconfigured: Preconfigured'
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -869,7 +871,9 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toHaveBeenCalledWith('executing action test.sub-feature-action:1: 1');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test.sub-feature-action:1: 1'
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
@@ -1310,7 +1314,9 @@ describe('Action Executor', () => {
         ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
-      expect(loggerMock.debug).toHaveBeenCalledWith('executing action test:preconfigured: Preconfigured');
+      expect(loggerMock.debug).toHaveBeenCalledWith(
+        'executing action test:preconfigured: Preconfigured'
+      );
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
 
       const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);

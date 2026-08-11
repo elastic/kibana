@@ -29,9 +29,7 @@ describe('extractToolReturn', () => {
   it('should throw an error if the message does not contain an artifact and is not an error message', () => {
     const mockMessage = createMessage(undefined);
 
-    expect(() => extractToolReturn(mockMessage)).toThrow(
-      'No artifact attached to tool message'
-    );
+    expect(() => extractToolReturn(mockMessage)).toThrow('No artifact attached to tool message');
   });
 
   it('should return an error artifact if the message does not contain an artifact and is an error message', () => {

@@ -249,7 +249,9 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(sharepointPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      sharepointPackagePolicy.package_policy_id
+    );
   });
 
   test('Does not remove a package policy if no connectors match the policy', async () => {
@@ -293,8 +295,12 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(sharepointPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      sharepointPackagePolicy.package_policy_id
+    );
     expect(serviceMock.removeDeployment).toHaveBeenCalledWith(mysqlPackagePolicy.package_policy_id);
-    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(githubPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(
+      githubPackagePolicy.package_policy_id
+    );
   });
 });

@@ -376,9 +376,7 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Bad request' } }),
       });
 
-      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrow(
-        'Bad request'
-      );
+      await expect(uiamService.refreshSessionTokens('old-refresh')).rejects.toThrow('Bad request');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_refresh', {
@@ -425,9 +423,9 @@ describe('UiamService', () => {
         json: async () => ({ error: { message: 'Bad request' } }),
       });
 
-      await expect(
-        uiamService.invalidateSessionTokens('old-token', 'old-refresh')
-      ).rejects.toThrow('Bad request');
+      await expect(uiamService.invalidateSessionTokens('old-token', 'old-refresh')).rejects.toThrow(
+        'Bad request'
+      );
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/tokens/_invalidate', {

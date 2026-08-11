@@ -612,9 +612,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrow(
-        /`global_data_tags` can only be set on agentless integration policies/
-      );
+      ).rejects.toThrow(/`global_data_tags` can only be set on agentless integration policies/);
     });
 
     beforeEach(() => {

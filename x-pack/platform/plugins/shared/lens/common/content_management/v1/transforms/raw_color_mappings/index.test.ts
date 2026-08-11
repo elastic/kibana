@@ -75,7 +75,10 @@ describe('Legend stat transforms', () => {
     } as LensAttributes;
     const result = convertToRawColorMappingsFn(attributes);
 
-    expect(convertPieToRawColorMappings).toHaveBeenCalledWith('partitionVisState', 'datasourceStates');
+    expect(convertPieToRawColorMappings).toHaveBeenCalledWith(
+      'partitionVisState',
+      'datasourceStates'
+    );
     expect(result.state).toMatchObject({
       visualization: 'new partitionVisState',
     });

@@ -101,10 +101,13 @@ describe('EditTagsSelectable', () => {
     }
 
     expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(propsMultipleAlerts.tags.length);
-    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(propsMultipleAlerts.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleAlerts.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('renders the icons correctly after selecting and deselecting tags', async () => {
@@ -126,10 +129,13 @@ describe('EditTagsSelectable', () => {
     }
 
     expect(propsMultipleAlerts.onChangeTags).toHaveBeenCalledTimes(propsMultipleAlerts.tags.length);
-    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(propsMultipleAlerts.tags.length, {
-      selectedItems: ['two', 'three', 'coke', 'pepsi'],
-      unSelectedItems: ['one'],
-    });
+    expect(propsMultipleAlerts.onChangeTags).toHaveBeenNthCalledWith(
+      propsMultipleAlerts.tags.length,
+      {
+        selectedItems: ['two', 'three', 'coke', 'pepsi'],
+        unSelectedItems: ['one'],
+      }
+    );
   });
 
   it('adds a new tag correctly', async () => {

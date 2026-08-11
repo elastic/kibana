@@ -157,8 +157,14 @@ describe('logPluginsStatusChanges', () => {
     expect(l.error).toHaveBeenNthCalledWith(2, 'B plugin is now unavailable: Unavail!');
     expect(l.info).toHaveBeenNthCalledWith(2, 'B plugin is now available: Avail!');
     expect(l.info).toHaveBeenNthCalledWith(3, 'A plugin is now available: Avail!');
-    expect(l.error).toHaveBeenNthCalledWith(3, 'B plugin is now unavailable: Unavail! (repeated 10 times)');
-    expect(l.info).toHaveBeenNthCalledWith(4, 'B plugin is now available: Avail! (repeated 10 times)');
+    expect(l.error).toHaveBeenNthCalledWith(
+      3,
+      'B plugin is now unavailable: Unavail! (repeated 10 times)'
+    );
+    expect(l.info).toHaveBeenNthCalledWith(
+      4,
+      'B plugin is now available: Avail! (repeated 10 times)'
+    );
   });
 
   it('discards messages when a plugin emits too many different ones', async () => {

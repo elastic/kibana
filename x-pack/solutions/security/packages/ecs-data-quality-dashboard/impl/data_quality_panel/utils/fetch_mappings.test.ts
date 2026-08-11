@@ -65,9 +65,7 @@ describe('helpers', () => {
           httpFetch: mockFetch,
           patternOrIndexName: 'auditbeat-custom-index-1',
         })
-      ).rejects.toThrow(
-        'Error loading mappings for auditbeat-custom-index-1: simulated error'
-      );
+      ).rejects.toThrow('Error loading mappings for auditbeat-custom-index-1: simulated error');
     });
   });
 });

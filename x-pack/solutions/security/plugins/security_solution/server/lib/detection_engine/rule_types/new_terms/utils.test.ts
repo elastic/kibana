@@ -27,9 +27,7 @@ describe('new terms utils', () => {
     test(`should throw an error without a name if the string can't be parsed as a date`, () => {
       const date = 'notValid';
       const forceNow = new Date();
-      expect(() => parseDateString({ date, forceNow })).toThrow(
-        `Failed to parse 'date string'`
-      );
+      expect(() => parseDateString({ date, forceNow })).toThrow(`Failed to parse 'date string'`);
     });
 
     test(`should throw an error with a name if the string can't be parsed as a date`, () => {

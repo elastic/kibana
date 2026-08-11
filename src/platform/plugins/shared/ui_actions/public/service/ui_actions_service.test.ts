@@ -353,9 +353,9 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
-      expect(() =>
-        service.registerActionAsync(ACTION_HELLO_WORLD, async () => action)
-      ).toThrow('Action [action.id = ACTION_HELLO_WORLD] already registered.');
+      expect(() => service.registerActionAsync(ACTION_HELLO_WORLD, async () => action)).toThrow(
+        'Action [action.id = ACTION_HELLO_WORLD] already registered.'
+      );
     });
   });
 });

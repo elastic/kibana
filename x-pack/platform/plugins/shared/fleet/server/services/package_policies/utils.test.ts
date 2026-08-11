@@ -209,9 +209,7 @@ describe('Package Policy Utils', () => {
             policy_templates: [],
           } as any
         )
-      ).rejects.toThrow(
-        '[data_stream.type]: required for stream in package "non-dynamic-pkg"'
-      );
+      ).rejects.toThrow('[data_stream.type]: required for stream in package "non-dynamic-pkg"');
     });
 
     it('should not throw if dynamic_signal_types package has a stream with undefined data_stream.type', async () => {

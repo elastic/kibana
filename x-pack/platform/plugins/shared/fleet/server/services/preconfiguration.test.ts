@@ -1178,7 +1178,9 @@ describe('policy preconfiguration', () => {
       );
 
       expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledTimes(1);
-      expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith(TEST_NAMESPACE);
+      expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith(
+        TEST_NAMESPACE
+      );
 
       expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(1);
       expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(

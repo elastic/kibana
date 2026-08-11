@@ -39,6 +39,8 @@ describe('getSpaceAwareSaveobjectsClients', () => {
     expect(mockedSavedObjectTagging.createInternalAssignmentService).toHaveBeenCalledWith({
       client: scoppedSoClient,
     });
-    expect(mockedSavedObjectTagging.createTagClient).toHaveBeenCalledWith({ client: scoppedSoClient });
+    expect(mockedSavedObjectTagging.createTagClient).toHaveBeenCalledWith({
+      client: scoppedSoClient,
+    });
   });
 });

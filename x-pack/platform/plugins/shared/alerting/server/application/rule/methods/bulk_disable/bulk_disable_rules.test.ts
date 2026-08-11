@@ -653,7 +653,9 @@ describe('bulkDisableRules', () => {
         'Successfully disabled schedules for underlying tasks: id1'
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Failure to disable schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to disable schedules for underlying tasks: id2'
+      );
     });
 
     test('should call task manager bulkDeleteIfExist', async () => {
@@ -693,7 +695,9 @@ describe('bulkDisableRules', () => {
         'Successfully deleted schedules for underlying tasks: id1'
       );
       expect(logger.error).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failure to delete schedules for underlying tasks: id2'
+      );
     });
 
     test('should disable one task if one rule was successfully disabled and one has 500 error', async () => {

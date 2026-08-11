@@ -199,7 +199,9 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockEndpointContext.service.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
+      expect(
+        mockEndpointContext.service.savedObjects.createInternalScopedSoClient
+      ).toHaveBeenCalledWith({
         spaceId: DEFAULT_SPACE_ID,
         readonly: false,
       });
@@ -237,7 +239,9 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should update a legacy note using a writable client scoped to the note namespace', async () => {
@@ -263,12 +267,18 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith('request-space');
-      expect(mockEndpointContext.service.savedObjects.createInternalScopedSoClient).toHaveBeenCalledWith({
+      expect(mockEndpointContext.service.getInternalFleetServices).toHaveBeenCalledWith(
+        'request-space'
+      );
+      expect(
+        mockEndpointContext.service.savedObjects.createInternalScopedSoClient
+      ).toHaveBeenCalledWith({
         spaceId: 'legacy-space',
         readonly: false,
       });
-      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
+        ...mockedSOSuccessfulUpdateResponse
+      );
     });
 
     it('should return the note if one exists', async () => {

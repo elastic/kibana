@@ -622,9 +622,7 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdFromAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdFromAlerts({ alerts, caseId })
-      ).resolves.not.toThrow();
+      await expect(alertService.removeCaseIdFromAlerts({ alerts, caseId })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing case test-case from alerts: An error'
@@ -652,9 +650,7 @@ describe('updateAlertsStatus', () => {
     it('should not throw an error and log it', async () => {
       alertsClient.removeCaseIdsFromAllAlerts.mockRejectedValueOnce('An error');
 
-      await expect(
-        alertService.removeCaseIdsFromAllAlerts({ caseIds })
-      ).resolves.not.toThrow();
+      await expect(alertService.removeCaseIdsFromAllAlerts({ caseIds })).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'

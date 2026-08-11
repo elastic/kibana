@@ -382,9 +382,7 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrow(
-        /Breaking schema changes.*forwardCompatibility schema removed from model version/s
-      );
+      ).toThrow(/Breaking schema changes.*forwardCompatibility schema removed from model version/s);
     });
 
     it('should not flag an unchanged function-based schema when comparing against a legacy hash baseline', () => {
@@ -578,9 +576,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('changes_in_initial_version.json');
 
-    expect(() =>
-      validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })
-    ).toThrow(
+    expect(() => validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })).toThrow(
       `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });

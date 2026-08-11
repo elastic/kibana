@@ -611,9 +611,9 @@ describe('UserProfileService', () => {
         } as unknown as SecurityGetUserProfileResponse);
 
         const startContract = userProfileService.start(mockStartParams);
-        await expect(
-          startContract.getCurrent({ request: enrichedFakeRequest })
-        ).rejects.toThrow(/User profile is not found/);
+        await expect(startContract.getCurrent({ request: enrichedFakeRequest })).rejects.toThrow(
+          /User profile is not found/
+        );
 
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
@@ -636,9 +636,9 @@ describe('UserProfileService', () => {
         );
 
         const startContract = userProfileService.start(mockStartParams);
-        await expect(
-          startContract.getCurrent({ request: enrichedFakeRequest })
-        ).rejects.toThrow(/boom/);
+        await expect(startContract.getCurrent({ request: enrichedFakeRequest })).rejects.toThrow(
+          /boom/
+        );
 
         expect(mockStartParams.session.getSID).not.toHaveBeenCalled();
         expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('[fake=true]'));

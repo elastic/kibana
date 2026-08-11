@@ -493,9 +493,7 @@ describe('validateSecrets', () => {
   };
 
   test('should not run validation when secrets are undefined', () => {
-    expect(() =>
-      validateSecrets(actionType, undefined, { configurationUtilities })
-    ).not.toThrow();
+    expect(() => validateSecrets(actionType, undefined, { configurationUtilities })).not.toThrow();
   });
 
   test('should not run validation when secrets are null', () => {

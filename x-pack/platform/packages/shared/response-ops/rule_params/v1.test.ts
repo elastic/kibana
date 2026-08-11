@@ -66,9 +66,7 @@ describe('rule params schemas', () => {
             timeWindowUnit: 'm',
           },
         })
-      ).toThrow(
-        `[params.timeWindowSize]: expected value of type [number] but got [undefined]`
-      );
+      ).toThrow(`[params.timeWindowSize]: expected value of type [number] but got [undefined]`);
     });
 
     it('throws when params contain unexpected fields for the matched rule type', () => {

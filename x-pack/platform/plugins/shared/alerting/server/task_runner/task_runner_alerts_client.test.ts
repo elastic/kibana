@@ -387,9 +387,13 @@ describe('Task Runner', () => {
 
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            tags: ['1', 'test'],
+          }
+        );
         expect(logger.debug).toHaveBeenNthCalledWith(
           2,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
@@ -414,7 +418,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -500,7 +506,10 @@ describe('Task Runner', () => {
           'executing rule test:1 at 1970-01-01T00:00:00.000Z',
           { tags: ['1', 'test'] }
         );
-        expect(logger.debug).toHaveBeenNthCalledWith(debugCall++, `Initializing resources for AlertsService`);
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          debugCall++,
+          `Initializing resources for AlertsService`
+        );
 
         if (!useDataStreamForAlerts) {
           expect(logger.debug).toHaveBeenNthCalledWith(
@@ -542,7 +551,9 @@ describe('Task Runner', () => {
             },
           })
         );
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -723,9 +734,13 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            tags: ['1', 'test'],
+          }
+        );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
           ...generateRuleUpdateParams({
@@ -735,7 +750,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -808,9 +825,13 @@ describe('Task Runner', () => {
         expect(ruleType.executor).toHaveBeenCalledTimes(1);
 
         expect(logger.debug).toHaveBeenCalledTimes(5);
-        expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-          tags: ['1', 'test'],
-        });
+        expect(logger.debug).toHaveBeenNthCalledWith(
+          1,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+          {
+            tags: ['1', 'test'],
+          }
+        );
 
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
           ...generateRuleUpdateParams({
@@ -820,7 +841,9 @@ describe('Task Runner', () => {
           })
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
+        expect(
+          taskRunnerFactoryInitializerParams.executionContext.withContext
+        ).toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(

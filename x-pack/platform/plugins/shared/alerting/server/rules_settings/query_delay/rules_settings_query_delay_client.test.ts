@@ -148,9 +148,7 @@ describe('RulesSettingsQueryDelayClient', () => {
       client.update({
         delay: 19,
       })
-    ).rejects.toThrow(
-      'savedObjectsClient errored trying to update query delay settings: failed!!'
-    );
+    ).rejects.toThrow('savedObjectsClient errored trying to update query delay settings: failed!!');
   });
 
   test('throws if new query delay setting fails verification', async () => {

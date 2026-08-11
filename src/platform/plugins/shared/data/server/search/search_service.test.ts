@@ -536,9 +536,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrow(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
@@ -557,9 +555,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrow(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];

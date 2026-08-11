@@ -150,7 +150,9 @@ describe('reset agent policies', () => {
 
       await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-      expect(soClient.bulkGet).toHaveBeenCalledWith([{ id: 'policy1', type: 'ingest-agent-policies' }]);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'policy1', type: 'ingest-agent-policies' },
+      ]);
       expect(soClient.delete).not.toHaveBeenCalled();
       expect(mockedSetupFleet).toHaveBeenCalled();
     });

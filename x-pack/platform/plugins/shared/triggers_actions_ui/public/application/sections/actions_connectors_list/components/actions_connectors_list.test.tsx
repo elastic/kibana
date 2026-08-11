@@ -443,7 +443,10 @@ describe('actions_connectors_list', () => {
       );
 
       await waitFor(() => {
-        expect(mockedEditItem).toHaveBeenCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+        expect(mockedEditItem).toHaveBeenCalledWith(
+          selectedConnector,
+          EditConnectorTabs.Configuration
+        );
       });
       expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
       expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
