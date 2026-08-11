@@ -39,6 +39,7 @@ import {
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { getConnectorType } from './fixtures';
 import { USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { LeasePool } from './lib';
 
 function getConfig(overrides = {}) {
   return {
@@ -171,6 +172,14 @@ describe('Actions Plugin', () => {
       expect(pluginsSetup.encryptedSavedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
       );
+    });
+
+    it('should expose the same client lease pool before start', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+
+      const clientLeasePool = setupContract.getClientLeasePool();
+      expect(clientLeasePool).toBeInstanceOf(LeasePool);
+      expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
@@ -846,11 +855,12 @@ describe('Actions Plugin', () => {
 
       describe('Dynamic connectors', () => {
         let pluginStart: PluginStartContract;
+        let pluginSetup: PluginSetupContract;
         beforeEach(async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
 
-          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
           pluginSetup.registerType(serverLogConnectorType);
 
           pluginStart = await plugin.start(coreStart, pluginsStart);
@@ -939,6 +949,37 @@ describe('Actions Plugin', () => {
           expect(
             pluginStart.inMemoryConnectors.find((c) => c.id === newDynamicConnector.id)
           ).toBeUndefined();
+        });
+
+        it('should evict pooled clients when removing a dynamic connector', async () => {
+          const newDynamicConnector: InMemoryConnector = {
+            id: 'dynamic-connector-id',
+            actionTypeId: '.inference',
+            name: 'Inference Test',
+            config: {},
+            secrets: {},
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            isConnectorTypeDeprecated: false,
+          };
+          pluginStart.registerDynamicConnector(newDynamicConnector);
+
+          // A dynamic connector's ID can be re-registered with different config, and in-memory
+          // connectors share one revision sentinel, so the lease key alone cannot invalidate a
+          // stale client. Unregistering has to evict.
+          const pool = pluginSetup.getClientLeasePool();
+          const terminate = jest.fn().mockResolvedValue(undefined);
+          await pool.lease(
+            `${newDynamicConnector.id}:fake:shared:in-memory`,
+            async () => ({}),
+            terminate
+          );
+
+          pluginStart.unregisterDynamicConnector(newDynamicConnector.id);
+          await new Promise(process.nextTick);
+
+          expect(terminate).toHaveBeenCalledTimes(1);
         });
 
         it('should mutate the inMemoryConnectors array in place when removing a dynamic connector', () => {
