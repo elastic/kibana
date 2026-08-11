@@ -40118,7 +40118,6 @@
     "xpack.security.management.applicationConnections.revoke.connectedByColumn": "Connecté par",
     "xpack.security.management.applicationConnections.revoke.connectionNameColumn": "Nom de la connexion",
     "xpack.security.management.applicationConnections.revoke.intro": "Connexions à révoquer :",
-    "xpack.security.management.applicationConnections.revoke.reconnectionNote": "Les applications peuvent être reconnectées à tout moment.",
     "xpack.security.management.applicationConnections.revoke.tableCaption": "Connexions à révoquer",
     "xpack.security.management.applicationConnections.revoke.title": "Révoquer {count, plural, one {connection} other {connexions}} ?",
     "xpack.security.management.applicationConnections.revoke.unexpectedErrorToast": "Impossible de révoquer les connexions",

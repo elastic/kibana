@@ -40346,7 +40346,6 @@
     "xpack.security.management.applicationConnections.revoke.connectionNameColumn": "连接名称",
     "xpack.security.management.applicationConnections.revoke.intro": "待撤销的连接：",
     "xpack.security.management.applicationConnections.revoke.partialFailedToast": "已撤销 {succeeded} 个连接（共 {total} 个{total, plural, one {connection} other {连接}}）",
-    "xpack.security.management.applicationConnections.revoke.reconnectionNote": "应用程序可以随时重新连接。",
     "xpack.security.management.applicationConnections.revoke.successToast": "已撤销 {count, plural, one {# connection} other {# 个连接}}",
     "xpack.security.management.applicationConnections.revoke.tableCaption": "待撤销的连接",
     "xpack.security.management.applicationConnections.revoke.title": "撤销{count, plural, one {connection} other {连接}}？",

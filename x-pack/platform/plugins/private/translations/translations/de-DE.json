@@ -40222,7 +40222,6 @@
     "xpack.security.management.applicationConnections.revoke.connectionNameColumn": "Verbindungsname",
     "xpack.security.management.applicationConnections.revoke.intro": "Zu widerrufende Verbindungen:",
     "xpack.security.management.applicationConnections.revoke.partialFailedToast": "{succeeded} von {total} {total, plural, one {connection} other {Verbindungen}} widerrufen",
-    "xpack.security.management.applicationConnections.revoke.reconnectionNote": "Anwendungen können jederzeit wieder verbunden werden.",
     "xpack.security.management.applicationConnections.revoke.successToast": "{count, plural, one {# connection} other {# Verbindungen}} widerrufen",
     "xpack.security.management.applicationConnections.revoke.tableCaption": "Zu widerrufende Verbindungen",
     "xpack.security.management.applicationConnections.revoke.title": "Möchten Sie {count, plural, one {connection} other {Verbindungen}} widerrufen?",
