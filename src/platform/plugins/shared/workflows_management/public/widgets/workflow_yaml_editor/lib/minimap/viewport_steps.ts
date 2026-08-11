@@ -31,8 +31,9 @@ export interface ViewportStepRange {
 export const buildEffectiveLineEnd = (
   stepEntries: Array<[string, StepInfo]>
 ): Map<string, number> => {
-  // stepEntries is sorted by lineStart, so the first child encountered per parent has
-  // the smallest lineStart (i.e. Math.min is a no-op after the first).
+  // stepEntries is sorted by lineStart, so for a given parent the first child
+  // encountered has the smallest lineStart — each subsequent child can only shrink
+  // the effective end further, never grow it, which is why Math.min is correct here.
   const effectiveLineEnd = new Map<string, number>(
     stepEntries.map(([id, step]) => [id, step.lineEnd])
   );

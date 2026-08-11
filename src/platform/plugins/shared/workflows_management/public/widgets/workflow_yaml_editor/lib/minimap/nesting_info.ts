@@ -40,10 +40,14 @@ export const buildNestingInfo = (
   // not registered steps — the walk stops there, still yielding depth >= 1,
   // which is all the two-track layout needs.
   const depths = new Map<string, number>();
+  // Cap the walk at stepEntries.length: `steps` is keyed by user-authored id, not
+  // structurally guaranteed to be a tree. A cycle in parentStepId (malformed YAML)
+  // would otherwise spin the loop forever on every keystroke.
+  const maxDepth = stepEntries.length;
   for (const [id, step] of stepEntries) {
     let depth = 0;
     let current: StepInfo | undefined = step;
-    while (current?.parentStepId) {
+    while (current?.parentStepId && depth < maxDepth) {
       depth++;
       current = stepsMap[current.parentStepId];
     }
@@ -76,8 +80,15 @@ export const buildNestingInfo = (
     // Walk up to the branch root: the highest node whose parent is either the
     // top-level ancestor itself or an unregistered container under it.
     let node: StepInfo = step;
-    while (node.parentStepId && node.parentStepId !== topLevelId && stepsMap[node.parentStepId]) {
+    let walkDepth = 0;
+    while (
+      node.parentStepId &&
+      node.parentStepId !== topLevelId &&
+      stepsMap[node.parentStepId] &&
+      walkDepth < maxDepth
+    ) {
       node = stepsMap[node.parentStepId];
+      walkDepth++;
     }
     const branchId = `${node.parentStepId ?? ''}:${node.branchKey ?? 'steps'}`;
 

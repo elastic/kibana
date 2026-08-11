@@ -137,15 +137,13 @@ export function inspectStep(
 
     node.items.forEach((item) => {
       if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-        if (isNestedStepKey(item.key.value)) {
+        // Hoist to a local so the isNestedStepKey predicate narrows the type,
+        // exactly as the sibling forEach above already does with `keyValue`.
+        const nestedKeyValue = item.key.value;
+        if (isNestedStepKey(nestedKeyValue)) {
           Object.assign(
             result,
-            inspectStep(
-              item.value,
-              lineCounter,
-              stepId ?? parentStepId,
-              item.key.value as NestedStepKey
-            )
+            inspectStep(item.value, lineCounter, stepId ?? parentStepId, nestedKeyValue)
           );
         }
       }

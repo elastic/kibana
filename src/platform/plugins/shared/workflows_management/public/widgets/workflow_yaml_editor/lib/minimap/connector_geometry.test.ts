@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepInfo } from '@kbn/workflows-yaml';
 import {
   buildBranchConnectors,
   buildConnectorPath,
@@ -21,21 +20,13 @@ const OUTER_TRACK_X = 26;
 const INNER_TRACK_X = 6;
 const DOT_R = 4;
 
-// buildOuterRailSegments only reads step ids from entries, so a minimal stub is enough.
-const stub = (stepId: string) => [stepId, {} as StepInfo] as [string, StepInfo];
-
 describe('buildOuterRailSegments', () => {
   it('draws one solid segment between consecutive top-level steps', () => {
     const depths = new Map([
       ['a', 0],
       ['b', 0],
     ]);
-    const segments = buildOuterRailSegments(
-      [stub('a'), stub('b')],
-      depths,
-      OUTER_TRACK_X,
-      ITEM_HEIGHT
-    );
+    const segments = buildOuterRailSegments(['a', 'b'], depths, OUTER_TRACK_X, ITEM_HEIGHT);
     expect(segments).toHaveLength(1);
     expect(segments[0].dashed).toBe(false);
   });
@@ -47,7 +38,7 @@ describe('buildOuterRailSegments', () => {
       ['b', 0],
     ]);
     const segments = buildOuterRailSegments(
-      [stub('a'), stub('nested'), stub('b')],
+      ['a', 'nested', 'b'],
       depths,
       OUTER_TRACK_X,
       ITEM_HEIGHT
@@ -58,7 +49,7 @@ describe('buildOuterRailSegments', () => {
 
   it('produces no segments for a single top-level step', () => {
     const depths = new Map([['a', 0]]);
-    expect(buildOuterRailSegments([stub('a')], depths, OUTER_TRACK_X, ITEM_HEIGHT)).toHaveLength(0);
+    expect(buildOuterRailSegments(['a'], depths, OUTER_TRACK_X, ITEM_HEIGHT)).toHaveLength(0);
   });
 });
 

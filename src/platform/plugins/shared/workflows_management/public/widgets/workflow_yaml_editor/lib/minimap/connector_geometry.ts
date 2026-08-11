@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StepInfo } from '@kbn/workflows-yaml';
 import type { NestingInfo } from './nesting_info';
 
 export interface RailSegment {
@@ -28,12 +27,12 @@ export interface BranchConnector {
  * top-level steps, dashed where nested children occupy those rows.
  */
 export const buildOuterRailSegments = (
-  stepEntries: Array<[string, StepInfo]>,
+  stepIds: readonly string[],
   depths: Map<string, number>,
   outerTrackX: number,
   itemHeight: number
 ): RailSegment[] => {
-  const topLevelIndexes = stepEntries.reduce<number[]>((acc, [id], index) => {
+  const topLevelIndexes = stepIds.reduce<number[]>((acc, id, index) => {
     if ((depths.get(id) ?? 0) === 0) acc.push(index);
     return acc;
   }, []);

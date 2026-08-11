@@ -12,6 +12,21 @@ import type { YamlValidationResult } from '../../../../features/validate_workflo
 
 export type StepSeverity = 'error' | 'warning' | null;
 
+/** Severity and own-vs-inherited origin of a step's worst validation marker. */
+export interface StepSeverityInfo {
+  /** Highest-severity marker in this step's range (own or inherited from descendants). */
+  severity: StepSeverity;
+  /**
+   * True when at least one marker falls in the step's *own* line range
+   * (`lineStart` to `effectiveLineEnd`, where `effectiveLineEnd` is trimmed to
+   * just before the first direct child). False means all markers are inherited
+   * from descendants whose lines fall beyond `effectiveLineEnd`.
+   *
+   * Used only to drive screen-reader text — the visual dot is identical in both cases.
+   */
+  isOwn: boolean;
+}
+
 export const getStepSeverity = (step: StepInfo, errors: YamlValidationResult[]): StepSeverity => {
   let hasWarning = false;
   for (const err of errors) {
@@ -28,18 +43,66 @@ export const getStepSeverity = (step: StepInfo, errors: YamlValidationResult[]):
 };
 
 /**
- * Precomputes severity for every step once, instead of the pill render loop calling
- * `getStepSeverity` (an O(errors) scan) once per step per render. Callers should memoize
- * this on `[stepEntries, validationErrors]` so it isn't rebuilt on every viewport-driven
- * re-render (see the viewport tracking effect in `workflow_step_minimap.tsx`).
+ * Precomputes severity (and own-vs-inherited origin) for every step once, instead of
+ * the pill render loop calling `getStepSeverity` (an O(errors) scan) once per step
+ * per render. Callers should memoize this on `[stepEntries, validationErrors,
+ * effectiveLineEnd]` so it isn't rebuilt on every viewport-driven re-render.
+ *
+ * **Roll-up is intentional.** A parent step's `lineEnd` spans its entire subtree, so
+ * errors on any descendant also appear as severity on every ancestor. This differs
+ * deliberately from `buildEffectiveLineEnd` in `viewport_steps`, which *trims*
+ * `lineEnd` to exclude nested rows. The minimap severity communicates "something is
+ * wrong in or under this step", which is more useful than silently hiding ancestor dots
+ * when a child has an error. The roll-up behaviour is pinned by the `buildStepSeverityMap`
+ * tests; do not "fix" this without understanding the intent.
+ *
+ * **Performance.** Errors are first bucketed by start line — O(errors) — so the
+ * per-step range scan touches only unique-error lines rather than the full error list.
+ * Total: O(errors + steps × unique_error_lines_in_range), which is significantly
+ * cheaper than the naive O(steps × errors) when the error list is large.
  */
 export const buildStepSeverityMap = (
   stepEntries: Array<[string, StepInfo]>,
-  errors: YamlValidationResult[]
-): Map<string, StepSeverity> => {
-  const severityByStepId = new Map<string, StepSeverity>();
-  for (const [stepId, step] of stepEntries) {
-    severityByStepId.set(stepId, getStepSeverity(step, errors));
+  errors: YamlValidationResult[],
+  effectiveLineEnd: Map<string, number>
+): Map<string, StepSeverityInfo> => {
+  // Bucket errors by start line, keeping the highest severity per line — O(errors).
+  const worstByLine = new Map<number, StepSeverity>();
+  for (const err of errors) {
+    if (err.severity === null) continue;
+    const line = err.startLineNumber;
+    const prev = worstByLine.get(line);
+    if (prev !== 'error') {
+      // 'error' beats 'warning'; set on first visit or upgrade warning → error.
+      worstByLine.set(line, err.severity === 'error' ? 'error' : prev ?? err.severity);
+    }
   }
-  return severityByStepId;
+
+  const result = new Map<string, StepSeverityInfo>();
+  for (const [stepId, step] of stepEntries) {
+    // ownEnd: trimmed line range (own errors only); step.lineEnd: full subtree (roll-up).
+    const ownEnd = effectiveLineEnd.get(stepId) ?? step.lineEnd;
+    let ownWorst: StepSeverity = null;
+    let inheritedWorst: StepSeverity = null;
+
+    for (const [line, sev] of worstByLine) {
+      if (line < step.lineStart || line > step.lineEnd) continue;
+      if (line <= ownEnd) {
+        if (!ownWorst || (sev === 'error' && ownWorst === 'warning')) ownWorst = sev;
+      } else {
+        if (!inheritedWorst || (sev === 'error' && inheritedWorst === 'warning')) inheritedWorst = sev;
+      }
+    }
+
+    const severity: StepSeverity =
+      ownWorst === 'error' || inheritedWorst === 'error'
+        ? 'error'
+        : ownWorst === 'warning' || inheritedWorst === 'warning'
+        ? 'warning'
+        : null;
+
+    result.set(stepId, { severity, isOwn: ownWorst !== null });
+  }
+
+  return result;
 };

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shade, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiScreenReaderOnly, shade, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux-v7';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
@@ -26,38 +27,28 @@ import {
 } from '../lib/minimap/connector_geometry';
 import { buildNestingInfo } from '../lib/minimap/nesting_info';
 import { buildStepSeverityMap } from '../lib/minimap/step_severity';
+import type { StepSeverityInfo } from '../lib/minimap/step_severity';
 import { computeStepStructureFingerprint } from '../lib/minimap/step_structure_fingerprint';
 import { useStableByFingerprint } from '../lib/minimap/use_stable_by_fingerprint';
 import { buildEffectiveLineEnd, computeViewportSteps } from '../lib/minimap/viewport_steps';
 import type { VisibleLineRange } from '../lib/minimap/viewport_steps';
 import {
   EDITOR_PADDING_TOP_PX,
+  MINIMAP_DOT_R,
+  MINIMAP_INNER_TRACK_X,
+  MINIMAP_ITEM_HEIGHT,
+  MINIMAP_MAX_LABEL_W,
+  MINIMAP_NESTED_PILL_INDENT,
+  MINIMAP_OUTER_TRACK_X,
   MINIMAP_PADDING_LEFT_PX,
   MINIMAP_PADDING_RIGHT_PX,
-  MINIMAP_WIDTH_PX,
+  MINIMAP_PILL_H,
+  MINIMAP_PILL_RADIUS,
+  MINIMAP_PILL_TRACK_GAP,
+  MINIMAP_TRACK_W,
+  MINIMAP_TRACK_X,
+  MINIMAP_VIEWPORT_BORDER_RIGHT_EXTRA_PX,
 } from '../styles/constants';
-
-const ITEM_HEIGHT = 32;
-const DOT_R = 4;
-const TRACK_W = 32;
-const PILL_TRACK_GAP = 6;
-const MAX_LABEL_W = MINIMAP_WIDTH_PX - TRACK_W - PILL_TRACK_GAP;
-const PILL_H = 22;
-const PILL_RADIUS = 11;
-
-// Single-track (no nesting): centred in the column
-const TRACK_X = 10;
-// Two-track (nesting present). Spread wide enough that the middle connector
-// lane ((outer+inner)/2) keeps clear daylight from both rails and their dots.
-const OUTER_TRACK_X = 26; // top-level steps
-const INNER_TRACK_X = 6; // nested steps
-// Nested pills are slightly narrower so they visually indent from parent pills
-const NESTED_PILL_INDENT = 10;
-
-/** Extra px the viewport-indicator border's right edge extends past the track so it
- *  clears the SVG track dots. Unrelated to `MINIMAP_GAP_PX`-style constants elsewhere —
- *  this one is purely about the border, not the panel's reserved layout width. */
-const VIEWPORT_BORDER_RIGHT_EXTRA_PX = 8;
 
 // Static per-step styles shared by every row — hoisted to module scope so they're
 // created once instead of being rebuilt (and re-hashed by Emotion) on every render.
@@ -66,8 +57,8 @@ const VIEWPORT_BORDER_RIGHT_EXTRA_PX = 8;
 const stepButtonBaseCss = css({
   position: 'absolute',
   left: 0,
-  right: TRACK_W + PILL_TRACK_GAP,
-  height: ITEM_HEIGHT,
+  right: MINIMAP_TRACK_W + MINIMAP_PILL_TRACK_GAP,
+  height: MINIMAP_ITEM_HEIGHT,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
@@ -89,10 +80,10 @@ const severityDotBaseCss = css({
 
 const pillBaseCss = css({
   display: 'inline-block',
-  height: PILL_H,
-  lineHeight: `${PILL_H}px`,
+  height: MINIMAP_PILL_H,
+  lineHeight: `${MINIMAP_PILL_H}px`,
   paddingInline: '8px',
-  borderRadius: PILL_RADIUS,
+  borderRadius: MINIMAP_PILL_RADIUS,
   fontSize: '12px',
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -102,22 +93,148 @@ const pillBaseCss = css({
   pointerEvents: 'none',
 });
 
+// ── Sub-components (React.memo) ──────────────────────────────────────────────
+// Extracted so a focus change re-renders 2 rows instead of rebuilding all N rows
+// and re-serializing ~3 Emotion objects per row on every cursor move.
+
+interface MinimapDotProps {
+  cx: number;
+  cy: number;
+  isFocused: boolean;
+  activeColor: string;
+  dotBgColor: string;
+  railColor: string;
+}
+
+const MinimapDot = React.memo(
+  ({ cx, cy, isFocused, activeColor, dotBgColor, railColor }: MinimapDotProps) => (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={MINIMAP_DOT_R}
+      fill={isFocused ? activeColor : dotBgColor}
+      stroke={isFocused ? activeColor : railColor}
+      strokeWidth={2}
+    />
+  )
+);
+
+interface MinimapColors {
+  activeBg: string;
+  activeBgHover: string;
+  activeText: string;
+  inactiveBg: string;
+  inactiveBgHover: string;
+  inactiveText: string;
+  dangerColor: string;
+  warningColor: string;
+  fontFamily: string;
+}
+
+interface MinimapStepRowProps {
+  stepId: string;
+  lineStart: number;
+  index: number;
+  isFocused: boolean;
+  severityInfo: StepSeverityInfo | null;
+  isNested: boolean;
+  colors: MinimapColors;
+  onStepClick: (lineStart: number) => void;
+}
+
+const MinimapStepRow = React.memo(
+  ({
+    stepId,
+    lineStart,
+    index,
+    isFocused,
+    severityInfo,
+    isNested,
+    colors,
+    onStepClick,
+  }: MinimapStepRowProps) => {
+    const pillMaxW = isNested ? MINIMAP_MAX_LABEL_W - MINIMAP_NESTED_PILL_INDENT : MINIMAP_MAX_LABEL_W;
+    return (
+      <button
+        role="listitem"
+        type="button"
+        title={stepId}
+        // `style` for the dynamic top position avoids creating a new Emotion css
+        // object on every render; the stable stepButtonBaseCss covers everything else.
+        style={{ top: index * MINIMAP_ITEM_HEIGHT }}
+        onClick={(e) => {
+          onStepClick(lineStart);
+          // Blur only on pointer click (e.detail > 0), not on keyboard Enter/Space,
+          // so Tab → Enter keeps focus on the pill and lets the user navigate further.
+          if (e.detail > 0) e.currentTarget.blur();
+        }}
+        css={[
+          stepButtonBaseCss,
+          css({
+            '&:hover .minimap-pill': {
+              background: isFocused ? colors.activeBgHover : colors.inactiveBgHover,
+            },
+          }),
+        ]}
+      >
+        {severityInfo?.severity && (
+          <>
+            <span
+              css={[
+                severityDotBaseCss,
+                css({
+                  backgroundColor:
+                    severityInfo.severity === 'error' ? colors.dangerColor : colors.warningColor,
+                }),
+              ]}
+            />
+            <EuiScreenReaderOnly>
+              <span>
+                {severityInfo.isOwn
+                  ? i18n.translate('workflows.stepMinimap.stepHasErrors', {
+                      defaultMessage: 'has errors',
+                    })
+                  : i18n.translate('workflows.stepMinimap.stepContainsErrors', {
+                      defaultMessage: 'contains steps with errors',
+                    })}
+              </span>
+            </EuiScreenReaderOnly>
+          </>
+        )}
+        <span
+          className="minimap-pill"
+          css={[
+            pillBaseCss,
+            css({
+              maxWidth: pillMaxW,
+              background: isFocused ? colors.activeBg : colors.inactiveBg,
+              color: isFocused ? colors.activeText : colors.inactiveText,
+              fontFamily: colors.fontFamily,
+              fontWeight: isFocused ? 600 : 400,
+            }),
+          ]}
+        >
+          {stepId}
+        </span>
+      </button>
+    );
+  }
+);
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 interface WorkflowStepMinimapProps {
-  editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
+  /** Mounted Monaco editor instance; null until `handleEditorDidMount` fires. */
+  editor: monaco.editor.IStandaloneCodeEditor | null;
   validationErrors: YamlValidationResult[];
   /** The scrollable container div that wraps this minimap (owned by the parent). */
-  scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
-  /** Becomes true once the Monaco editor has finished mounting. Used to ensure
-   *  the viewport tracking effect re-runs after Monaco is ready even when steps
-   *  are already available in Redux from a previous session. */
-  isEditorMounted: boolean;
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const WorkflowStepMinimap = ({
-  editorRef,
+  editor,
   validationErrors,
   scrollContainerRef,
-  isEditorMounted,
 }: WorkflowStepMinimapProps) => {
   const { euiTheme } = useEuiTheme();
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -134,10 +251,13 @@ export const WorkflowStepMinimap = ({
   // `workflowLookup` is recomputed (as a brand new object) on every keystroke, even when
   // the step list's shape hasn't changed. Stabilizing by a structural fingerprint means
   // the nesting/severity/geometry memos below only re-run on a real structural change,
-  // not on every keystroke.
-  const current = useStableByFingerprint(rawCurrent, (c) =>
-    computeStepStructureFingerprint(c.entries)
+  // not on every keystroke. The fingerprint is memoized here (not inside the hook) so
+  // the O(steps) map+join runs exactly once per render, not twice.
+  const fingerprint = useMemo(
+    () => computeStepStructureFingerprint(rawCurrent.entries),
+    [rawCurrent]
   );
+  const current = useStableByFingerprint(rawCurrent, fingerprint);
 
   // While the user types, the YAML is often transiently unparseable and the
   // lookup collapses to nothing. Blanking the minimap on every such keystroke
@@ -159,31 +279,32 @@ export const WorkflowStepMinimap = ({
     [stepEntries, stepsMap]
   );
 
-  // Precomputed once per [stepEntries, validationErrors] instead of once per step per
-  // render — `validationErrors` is itself already reference-stable across no-op
-  // revalidations (see `use_yaml_validation`'s fingerprint-gated setter), so this only
-  // recomputes on a real structural or validation change, never on scroll.
+  // Depends only on stepEntries, not on scroll position — split out from
+  // computeViewportSteps so it isn't rebuilt on every scroll frame.
+  const effectiveLineEnd = useMemo(() => buildEffectiveLineEnd(stepEntries), [stepEntries]);
+
+  // Precomputed once per [stepEntries, validationErrors, effectiveLineEnd] instead of
+  // once per step per render. Now also splits own vs inherited severity for SR text,
+  // while keeping the visual dot identical in both cases (roll-up is intentional).
   const severityMap = useMemo(
-    () => buildStepSeverityMap(stepEntries, validationErrors),
-    [stepEntries, validationErrors]
+    () => buildStepSeverityMap(stepEntries, validationErrors, effectiveLineEnd),
+    [stepEntries, validationErrors, effectiveLineEnd]
   );
 
   const handleStepClick = useCallback(
     (lineStart: number) => {
-      const editor = editorRef.current;
       if (!editor) return;
       editor.revealLineInCenter(lineStart);
       editor.setPosition({ lineNumber: lineStart, column: 1 });
       editor.focus();
     },
-    [editorRef]
+    [editor]
   );
 
   // ── Viewport tracking ─────────────────────────────────────
   const [visibleLineRange, setVisibleLineRange] = useState<VisibleLineRange | null>(null);
 
   useEffect(() => {
-    const editor = editorRef.current;
     if (!editor) return;
 
     let rafId: number | null = null;
@@ -228,46 +349,53 @@ export const WorkflowStepMinimap = ({
       layoutDisposable.dispose();
       cursorDisposable.dispose();
     };
-    // Re-run when Monaco finishes mounting (isEditorMounted) or when steps first
-    // appear. Without isEditorMounted, cached Redux state can cause the effect to
-    // fire before editorRef.current is set, leaving no listeners attached.
-  }, [editorRef, stepEntries.length, isEditorMounted]);
-
-  // Depends only on stepEntries, not on scroll position — split out from
-  // computeViewportSteps so it isn't rebuilt on every scroll frame.
-  const effectiveLineEnd = useMemo(() => buildEffectiveLineEnd(stepEntries), [stepEntries]);
+    // Re-run when the editor instance changes (e.g. after mount). The `editor` prop
+    // is null until handleEditorDidMount fires, so the effect cleanly re-attaches
+    // listeners once the real editor is available — no separate isEditorMounted flag needed.
+  }, [editor]);
 
   const viewportSteps = useMemo(
     () => computeViewportSteps(stepEntries, effectiveLineEnd, visibleLineRange),
     [stepEntries, effectiveLineEnd, visibleLineRange]
   );
 
-  // Scroll the minimap container to keep the viewport band centred.
-  // Items are offset by EDITOR_PADDING_TOP_PX within the container, matching Monaco's padding.top.
+  // Unified minimap scroll: keep the viewport band centred and ensure the focused
+  // step is visible. Only writes scrollTop when the target is out of view — this
+  // prevents overriding manual minimap scrolls and stops the two former effects from
+  // racing on pill click.
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container || !viewportSteps) return;
-    const bandCenterY =
-      EDITOR_PADDING_TOP_PX + ((viewportSteps.first + viewportSteps.last) / 2 + 0.5) * ITEM_HEIGHT;
-    const targetScrollTop = Math.max(0, bandCenterY - container.clientHeight / 2);
-    container.scrollTop = targetScrollTop;
-  }, [scrollContainerRef, viewportSteps]);
+    if (!container) return;
 
-  // When a step is focused (clicked in the YAML editor) ensure it is visible in the minimap.
-  // Only scrolls if the step is already outside the minimap's current visible area.
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || !focusedStepInfo) return;
-    const stepIndex = stepEntries.findIndex(([id]) => id === focusedStepInfo.stepId);
-    if (stepIndex === -1) return;
-    const stepTop = EDITOR_PADDING_TOP_PX + stepIndex * ITEM_HEIGHT;
-    const stepBottom = stepTop + ITEM_HEIGHT;
     const visibleTop = container.scrollTop;
     const visibleBottom = container.scrollTop + container.clientHeight;
-    if (stepTop >= visibleTop && stepBottom <= visibleBottom) return;
-    const stepCenterY = stepTop + ITEM_HEIGHT / 2;
-    container.scrollTop = Math.max(0, stepCenterY - container.clientHeight / 2);
-  }, [focusedStepInfo, stepEntries, scrollContainerRef]);
+
+    // Priority 1: If a step is focused (e.g. from the graph view), ensure it's visible.
+    if (focusedStepInfo) {
+      const stepIndex = stepEntries.findIndex(([id]) => id === focusedStepInfo.stepId);
+      if (stepIndex !== -1) {
+        const stepTop = EDITOR_PADDING_TOP_PX + stepIndex * MINIMAP_ITEM_HEIGHT;
+        const stepBottom = stepTop + MINIMAP_ITEM_HEIGHT;
+        if (stepTop < visibleTop || stepBottom > visibleBottom) {
+          container.scrollTop = Math.max(
+            0,
+            stepTop + MINIMAP_ITEM_HEIGHT / 2 - container.clientHeight / 2
+          );
+          return;
+        }
+      }
+    }
+
+    // Priority 2: Keep the viewport band centred when it's outside the minimap's view.
+    if (!viewportSteps) return;
+    const bandTop = EDITOR_PADDING_TOP_PX + viewportSteps.first * MINIMAP_ITEM_HEIGHT;
+    const bandBottom = EDITOR_PADDING_TOP_PX + (viewportSteps.last + 1) * MINIMAP_ITEM_HEIGHT;
+    if (bandTop >= visibleTop && bandBottom <= visibleBottom) return;
+    const bandCenterY =
+      EDITOR_PADDING_TOP_PX +
+      ((viewportSteps.first + viewportSteps.last) / 2 + 0.5) * MINIMAP_ITEM_HEIGHT;
+    container.scrollTop = Math.max(0, bandCenterY - container.clientHeight / 2);
+  }, [scrollContainerRef, viewportSteps, focusedStepInfo, stepEntries]);
 
   // Theme-derived colors, recomputed only when the theme itself changes — not on
   // every scroll-driven re-render.
@@ -289,19 +417,47 @@ export const WorkflowStepMinimap = ({
     [euiTheme]
   );
 
-  const totalHeight = stepEntries.length * ITEM_HEIGHT;
+  // Split colors into two stable subsets so MinimapDot and MinimapStepRow each
+  // receive only what they need, preventing unnecessary prop inequality.
+  const dotColors = useMemo(
+    () => ({
+      activeColor: colors.activeColor,
+      dotBgColor: colors.dotBgColor,
+      railColor: colors.railColor,
+    }),
+    [colors]
+  );
+  const rowColors: MinimapColors = useMemo(
+    () => ({
+      activeBg: colors.activeBg,
+      activeBgHover: colors.activeBgHover,
+      activeText: colors.activeText,
+      inactiveBg: colors.inactiveBg,
+      inactiveBgHover: colors.inactiveBgHover,
+      inactiveText: colors.inactiveText,
+      dangerColor: colors.dangerColor,
+      warningColor: colors.warningColor,
+      fontFamily: colors.fontFamily,
+    }),
+    [colors]
+  );
+
+  const totalHeight = stepEntries.length * MINIMAP_ITEM_HEIGHT;
+
+  // Pre-compute step IDs once for buildOuterRailSegments (which only needs ids, not full StepInfo).
+  const stepIds = useMemo(() => stepEntries.map(([id]) => id), [stepEntries]);
 
   const outerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
-        ? buildOuterRailSegments(stepEntries, nestingInfo.depths, OUTER_TRACK_X, ITEM_HEIGHT)
+        ? buildOuterRailSegments(stepIds, nestingInfo.depths, MINIMAP_OUTER_TRACK_X, MINIMAP_ITEM_HEIGHT)
         : [],
-    [stepEntries, nestingInfo]
+    [stepIds, nestingInfo]
   );
   const innerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
-        ? buildInnerRailSegments(nestingInfo.parentGroups, INNER_TRACK_X, ITEM_HEIGHT)
+        ? buildInnerRailSegments(nestingInfo.parentGroups, MINIMAP_INNER_TRACK_X, MINIMAP_ITEM_HEIGHT)
         : [],
     [nestingInfo]
   );
@@ -310,28 +466,26 @@ export const WorkflowStepMinimap = ({
       nestingInfo.hasNesting
         ? buildBranchConnectors(
             nestingInfo.parentGroups,
-            OUTER_TRACK_X,
-            INNER_TRACK_X,
-            DOT_R,
-            ITEM_HEIGHT
+            MINIMAP_OUTER_TRACK_X,
+            MINIMAP_INNER_TRACK_X,
+            MINIMAP_DOT_R,
+            MINIMAP_ITEM_HEIGHT
           )
         : [],
     [nestingInfo]
   );
 
-  // The rails/dots/pills below depend only on structure, focus, severity and theme —
-  // never on scroll position — so they're built once per real change and reused as-is
-  // across the scroll-driven re-renders that only update the viewport indicator overlay.
-  const railsAndDots = useMemo(
+  // Rail lines only — no focus dependency, so they're never rebuilt on cursor moves.
+  const railLines = useMemo(
     () => (
       <>
         {/* No-nesting: single continuous solid line */}
         {!nestingInfo.hasNesting && stepEntries.length > 1 && (
           <line
-            x1={TRACK_X}
-            y1={ITEM_HEIGHT / 2}
-            x2={TRACK_X}
-            y2={totalHeight - ITEM_HEIGHT / 2}
+            x1={MINIMAP_TRACK_X}
+            y1={MINIMAP_ITEM_HEIGHT / 2}
+            x2={MINIMAP_TRACK_X}
+            y2={totalHeight - MINIMAP_ITEM_HEIGHT / 2}
             stroke={colors.railColor}
             strokeWidth={2}
             strokeLinecap="round"
@@ -375,24 +529,6 @@ export const WorkflowStepMinimap = ({
             strokeLinecap="round"
           />
         ))}
-
-        {stepEntries.map(([stepId], index) => {
-          const isFocused = stepId === focusedStepInfo?.stepId;
-          const cy = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-          const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
-          const cx = nestingInfo.hasNesting ? (isNested ? INNER_TRACK_X : OUTER_TRACK_X) : TRACK_X;
-          return (
-            <circle
-              key={stepId}
-              cx={cx}
-              cy={cy}
-              r={DOT_R}
-              fill={isFocused ? colors.activeColor : colors.dotBgColor}
-              stroke={isFocused ? colors.activeColor : colors.railColor}
-              strokeWidth={2}
-            />
-          );
-        })}
       </>
     ),
     [
@@ -402,83 +538,30 @@ export const WorkflowStepMinimap = ({
       outerRailSegments,
       innerRailSegments,
       branchConnectors,
-      colors,
-      focusedStepInfo?.stepId,
+      colors.railColor,
     ]
-  );
-
-  const pillButtons = useMemo(
-    () =>
-      stepEntries.map(([stepId, step], index) => {
-        const isFocused = stepId === focusedStepInfo?.stepId;
-        const severity = severityMap.get(stepId) ?? null;
-        const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
-        const pillMaxW = isNested ? MAX_LABEL_W - NESTED_PILL_INDENT : MAX_LABEL_W;
-
-        return (
-          <button
-            key={stepId}
-            type="button"
-            title={stepId}
-            onClick={(e) => {
-              handleStepClick(step.lineStart);
-              // Blur immediately so the browser doesn't fight our programmatic scroll
-              e.currentTarget.blur();
-            }}
-            css={[
-              stepButtonBaseCss,
-              css({
-                top: index * ITEM_HEIGHT,
-                '&:hover .minimap-pill': {
-                  background: isFocused ? colors.activeBgHover : colors.inactiveBgHover,
-                },
-              }),
-            ]}
-          >
-            {severity && (
-              <span
-                aria-hidden="true"
-                css={[
-                  severityDotBaseCss,
-                  css({
-                    backgroundColor:
-                      severity === 'error' ? colors.dangerColor : colors.warningColor,
-                  }),
-                ]}
-              />
-            )}
-            <span
-              className="minimap-pill"
-              css={[
-                pillBaseCss,
-                css({
-                  maxWidth: pillMaxW,
-                  background: isFocused ? colors.activeBg : colors.inactiveBg,
-                  color: isFocused ? colors.activeText : colors.inactiveText,
-                  fontFamily: colors.fontFamily,
-                  fontWeight: isFocused ? 600 : 400,
-                }),
-              ]}
-            >
-              {stepId}
-            </span>
-          </button>
-        );
-      }),
-    [stepEntries, focusedStepInfo?.stepId, severityMap, nestingInfo, colors, handleStepClick]
   );
 
   if (stepEntries.length === 0) return null;
 
   return (
-    <div
+    <nav
+      aria-label={i18n.translate('workflows.stepMinimap.regionLabel', {
+        defaultMessage: 'Workflow step navigation',
+      })}
       css={css({
         paddingTop: EDITOR_PADDING_TOP_PX,
         paddingLeft: MINIMAP_PADDING_LEFT_PX,
         paddingRight: MINIMAP_PADDING_RIGHT_PX,
       })}
     >
-      <div css={css({ position: 'relative', width: MAX_LABEL_W + TRACK_W, height: totalHeight })}>
+      <div
+        css={css({
+          position: 'relative',
+          width: MINIMAP_MAX_LABEL_W + MINIMAP_TRACK_W,
+          height: totalHeight,
+        })}
+      >
         {/* Viewport indicator — shows which steps are currently visible in the editor.
           Negative left/right offsets extend the border into the outer padding zones so
           severity dots (left) and SVG track circles (right) sit inside the border. */}
@@ -491,10 +574,15 @@ export const WorkflowStepMinimap = ({
               aria-hidden="true"
               css={css({
                 position: 'absolute',
-                top: viewportSteps.first * ITEM_HEIGHT,
+                top: viewportSteps.first * MINIMAP_ITEM_HEIGHT,
                 left: -MINIMAP_PADDING_LEFT_PX,
-                right: -(OUTER_TRACK_X + DOT_R - TRACK_W + VIEWPORT_BORDER_RIGHT_EXTRA_PX),
-                height: (viewportSteps.last - viewportSteps.first + 1) * ITEM_HEIGHT,
+                right: -(
+                  MINIMAP_OUTER_TRACK_X +
+                  MINIMAP_DOT_R -
+                  MINIMAP_TRACK_W +
+                  MINIMAP_VIEWPORT_BORDER_RIGHT_EXTRA_PX
+                ),
+                height: (viewportSteps.last - viewportSteps.first + 1) * MINIMAP_ITEM_HEIGHT,
                 border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
                 borderRadius: 6,
                 pointerEvents: 'none',
@@ -505,17 +593,54 @@ export const WorkflowStepMinimap = ({
         {/* ── SVG track ── */}
         <svg
           css={css({ position: 'absolute', right: 0, top: 0, zIndex: 1 })}
-          width={TRACK_W}
+          width={MINIMAP_TRACK_W}
           height={totalHeight}
           style={{ pointerEvents: 'none' }}
           aria-hidden="true"
         >
-          {railsAndDots}
+          {railLines}
+          {stepEntries.map(([stepId], index) => {
+            const isNested =
+              nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
+            const cx = nestingInfo.hasNesting
+              ? isNested
+                ? MINIMAP_INNER_TRACK_X
+                : MINIMAP_OUTER_TRACK_X
+              : MINIMAP_TRACK_X;
+            const cy = index * MINIMAP_ITEM_HEIGHT + MINIMAP_ITEM_HEIGHT / 2;
+            return (
+              <MinimapDot
+                key={stepId}
+                cx={cx}
+                cy={cy}
+                isFocused={stepId === focusedStepInfo?.stepId}
+                activeColor={dotColors.activeColor}
+                dotBgColor={dotColors.dotBgColor}
+                railColor={dotColors.railColor}
+              />
+            );
+          })}
         </svg>
 
         {/* ── Step pill buttons ── */}
-        {pillButtons}
+        {stepEntries.map(([stepId, step], index) => {
+          const isNested =
+            nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
+          return (
+            <MinimapStepRow
+              key={stepId}
+              stepId={stepId}
+              lineStart={step.lineStart}
+              index={index}
+              isFocused={stepId === focusedStepInfo?.stepId}
+              severityInfo={severityMap.get(stepId) ?? null}
+              isNested={isNested}
+              colors={rowColors}
+              onStepClick={handleStepClick}
+            />
+          );
+        })}
       </div>
-    </div>
+    </nav>
   );
 };
