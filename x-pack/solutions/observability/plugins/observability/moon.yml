@@ -95,7 +95,6 @@ dependsOn:
   - '@kbn/home-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/license-management-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/security-plugin'
   - '@kbn/serverless'
   - '@kbn/core-application-browser'
