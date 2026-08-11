@@ -42,6 +42,14 @@ describe('InfoBlocks', () => {
     expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
   });
 
+  it('truncates string values in the middle, keeping the full text available', () => {
+    const resource = 'etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system';
+    render(<InfoBlocks items={[{ title: 'Resource', value: resource }]} />);
+
+    // Both the title and the value truncate, so match across the rendered full-text nodes.
+    expect(screen.getAllByTestId('fullText').map((el) => el.textContent)).toContain(resource);
+  });
+
   it('honors a custom data-test-subj on the container', () => {
     render(<InfoBlocks data-test-subj="myBlocks" items={[{ title: 'A', value: '1' }]} />);
     expect(screen.getByTestId('myBlocks')).toBeInTheDocument();
