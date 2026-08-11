@@ -41,7 +41,7 @@ const setupScenario = async (
   await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
 };
 
-const visualizeTimestampHistogram = async (
+const assertTimestampHistogram = async (
   context: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<void> => {
@@ -102,7 +102,7 @@ const visualizeTimestampHistogram = async (
   expect(barsAfterDowngrade.some(({ y }) => y > 0)).toBe(true);
 };
 
-const visualizeAlternateDateHistogram = async (
+const assertAlternateDateHistogram = async (
   context: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<void> => {
@@ -128,7 +128,7 @@ const visualizeAlternateDateHistogram = async (
   expect(bars[bars.length - 1]?.y).toBeGreaterThan(0);
 };
 
-const visualizeAnnotation = async (
+const assertAnnotation = async (
   context: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[],
   timeField: string,
@@ -169,7 +169,7 @@ const visualizeAnnotation = async (
   await expect(annotationIcons).not.toHaveCount(0);
 };
 
-const visualizeEsql = async (
+const assertEsqlVisualization = async (
   context: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<void> => {
@@ -269,7 +269,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
       pageObjects,
       tsdbScenario,
     }) => {
-      await visualizeTimestampHistogram({ page, pageObjects, tsdbScenario }, indexes);
+      await assertTimestampHistogram({ page, pageObjects, tsdbScenario }, indexes);
     });
 
     test(`renders an alternate-date histogram for ${title}`, async ({
@@ -277,7 +277,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
       pageObjects,
       tsdbScenario,
     }) => {
-      await visualizeAlternateDateHistogram({ page, pageObjects, tsdbScenario }, indexes);
+      await assertAlternateDateHistogram({ page, pageObjects, tsdbScenario }, indexes);
     });
 
     test(`renders a timestamp annotation for ${title}`, async ({
@@ -285,7 +285,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
       pageObjects,
       tsdbScenario,
     }) => {
-      await visualizeAnnotation({ page, pageObjects, tsdbScenario }, indexes, '@timestamp', [
+      await assertAnnotation({ page, pageObjects, tsdbScenario }, indexes, '@timestamp', [
         'host.name',
         'utc_time',
       ]);
@@ -296,7 +296,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
       pageObjects,
       tsdbScenario,
     }) => {
-      await visualizeAnnotation({ page, pageObjects, tsdbScenario }, indexes, 'utc_time', [
+      await assertAnnotation({ page, pageObjects, tsdbScenario }, indexes, 'utc_time', [
         'host.name',
         '@timestamp',
       ]);
@@ -307,7 +307,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
       pageObjects,
       tsdbScenario,
     }) => {
-      await visualizeEsql({ page, pageObjects, tsdbScenario }, indexes);
+      await assertEsqlVisualization({ page, pageObjects, tsdbScenario }, indexes);
     });
   }
 });
