@@ -240,7 +240,7 @@ export const useBulkAlertActionItems = ({
 
       if (status === FILTER_CLOSED) {
         return alertClosingReasonItem
-          ? { ...alertClosingReasonItem, icon, groupId: 'status' }
+          ? { ...alertClosingReasonItem, icon, groupId: 'status' as const }
           : undefined;
       }
 
@@ -254,7 +254,7 @@ export const useBulkAlertActionItems = ({
         disableOnQuery: false,
         onClick: getOnAction(status),
         icon,
-        groupId: 'status',
+        groupId: 'status' as const,
       };
     },
     [alertClosingReasonItem, getOnAction]

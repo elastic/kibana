@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsDataGrid } from '../components/alerts_data_grid';
-import type { BulkActionsConfig, BulkActionsState } from '../types';
+import type { BulkActionGroupId, BulkActionsConfig, BulkActionsState } from '../types';
 import { AlertsField } from '../types';
 import type { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
@@ -407,6 +407,34 @@ describe('AlertsDataGrid bulk actions', () => {
     it('should show the bulk actions column', async () => {
       render(<TestComponent {...dataGridPropsWithBulkActions} />);
       expect(await screen.findByTestId('bulk-actions-header')).toBeInTheDocument();
+    });
+
+    it('should render an action with an unsupported runtime group in the custom group', async () => {
+      render(
+        <TestComponent
+          {...dataGridPropsWithBulkActions}
+          additionalBulkActions={[
+            {
+              id: 0,
+              items: [
+                {
+                  label: 'Unsupported group action',
+                  key: 'unsupportedGroupAction',
+                  groupId: 'unsupported' as BulkActionGroupId,
+                  'data-test-subj': 'unsupported-group-action',
+                  disableOnQuery: false,
+                },
+              ],
+            },
+          ]}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByTestId('unsupported-group-action')).toBeInTheDocument();
     });
 
     describe('and triggering the "select all" action', () => {

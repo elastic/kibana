@@ -716,11 +716,21 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
       canModifyAlerts?: boolean;
     };
 
+export type BulkActionGroupId =
+  | 'status'
+  | 'assignees'
+  | 'cases'
+  | 'tags'
+  | 'timeline'
+  | 'custom'
+  | 'workflow'
+  | 'chat';
+
 export interface BulkActionsConfig {
   label: string;
   key: string;
   icon?: EuiContextMenuPanelItemDescriptor['icon'];
-  groupId?: string;
+  groupId?: BulkActionGroupId;
   'data-test-subj'?: string;
   disableOnQuery: boolean;
   disabledLabel?: string;
