@@ -51,7 +51,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
               label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
               disableOnQuery: true,
               icon: 'tag' as const,
-              groupId: 'tags',
+              groupId: 'tags' as const,
             },
           ]
         : [],

@@ -215,7 +215,7 @@ export const useAddBulkToTimelineAction = ({
               disableOnQuery: disableActionOnSelectAll,
               onClick: onActionClick,
               icon: 'timeline' as const,
-              groupId: 'timeline',
+              groupId: 'timeline' as const,
             },
           ]
         : [],
