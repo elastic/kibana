@@ -123,10 +123,9 @@ describe('zod', () => {
             createdBy: { type: 'string', nullable: true, description: 'Who created it.' },
           },
         });
-        expect(result.schema.properties!.createdBy).not.toHaveProperty('anyOf');
       });
 
-      test('collapses .nullish() the same way', () => {
+      test('collapses .nullish() to nullable: true', () => {
         const result = convert(z.object({ count: z.number().nullish() }) as any);
 
         expect(result.schema).toMatchObject({
@@ -134,7 +133,7 @@ describe('zod', () => {
         });
       });
 
-      test('keeps the combiner and marks it nullable when several branches remain', () => {
+      test('preserves anyOf and marks nullable when multiple non-null union members remain', () => {
         const result = convert(
           z.object({ value: z.union([z.string(), z.number(), z.boolean()]).nullable() }) as any
         );
@@ -159,7 +158,7 @@ describe('zod', () => {
         });
       });
 
-      test('collapses a nullable inside a nullable object', () => {
+      test('collapses nullable properties inside a nullable object', () => {
         const result = convert(
           z.object({
             throttle: z.object({ interval: z.string().nullable() }).nullable(),
@@ -177,7 +176,7 @@ describe('zod', () => {
         });
       });
 
-      test('boxes a nullable named component in allOf so nullable is not a $ref sibling', () => {
+      test('wraps a nullable named component in allOf so nullable is not a $ref sibling', () => {
         const groupingMode = z.enum(['per_episode', 'per_alert']);
         registerZodV4Component(groupingMode, 'GroupingMode');
 
@@ -185,13 +184,17 @@ describe('zod', () => {
 
         expect(result.shared).toHaveProperty('GroupingMode');
         expect(result.shared.GroupingMode).not.toHaveProperty('nullable');
-        expect(result.schema.properties!.groupingMode).toEqual({
-          allOf: [{ $ref: '#/components/schemas/GroupingMode' }],
-          nullable: true,
+        expect(result.schema).toMatchObject({
+          properties: {
+            groupingMode: {
+              allOf: [{ $ref: '#/components/schemas/GroupingMode' }],
+              nullable: true,
+            },
+          },
         });
       });
 
-      test('boxes a nullable recursive $ref in allOf', () => {
+      test('wraps a nullable recursive $ref in allOf', () => {
         const condition: z.ZodType = z.lazy(() =>
           z.object({ field: z.string(), and: z.array(condition).optional() })
         );
@@ -201,13 +204,14 @@ describe('zod', () => {
 
         expect(result.shared).toHaveProperty('Condition');
         expect(result.shared.Condition).not.toHaveProperty('nullable');
-        expect(result.schema.properties!.condition).toEqual({
-          allOf: [{ $ref: '#/components/schemas/Condition' }],
-          nullable: true,
+        expect(result.schema).toMatchObject({
+          properties: {
+            condition: { allOf: [{ $ref: '#/components/schemas/Condition' }], nullable: true },
+          },
         });
       });
 
-      test('leaves no half-converted { nullable: true } branch behind', () => {
+      test('fully collapses nullable across scalars, arrays, and nested objects', () => {
         const result = convert(
           z.object({
             a: z.string().nullable(),

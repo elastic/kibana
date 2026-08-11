@@ -710,7 +710,7 @@ const isNullBranch = (branch: unknown): boolean =>
   Object.keys(branch as Record<string, unknown>).length === 1;
 
 // OAS 3.0 ignores keywords sibling to $ref; COMPONENT_ID_MARKER branches become $ref later.
-const mustStayBoxed = (branch: Record<string, unknown>): boolean =>
+const keepWrapped = (branch: Record<string, unknown>): boolean =>
   '$ref' in branch || COMPONENT_ID_MARKER in branch;
 
 // Must run before the recursive descent, which rewrites { type: 'null' } to { nullable: true }.
@@ -737,7 +737,7 @@ function collapseNullBranches(node: Record<string, unknown>): {
       typeof sole === 'object' &&
       sole !== null &&
       !Array.isArray(sole) &&
-      !mustStayBoxed(sole as Record<string, unknown>);
+      !keepWrapped(sole as Record<string, unknown>);
 
     if (soleIsMergeable) {
       const { [combiner]: _combiner, ...rest } = result;
