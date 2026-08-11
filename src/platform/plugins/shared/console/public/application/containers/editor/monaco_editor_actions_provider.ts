@@ -25,22 +25,15 @@ import type { Actions } from '../../stores/request';
 import {
   AutocompleteType,
   containsUrlParams,
-  getAutoIndentedRequests,
   getBodyCompletionItems,
-  getCurlRequest,
   getDocumentationLinkFromAutocomplete,
   getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
-  getRequestEndLineNumber,
-  getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   isRequestLineStart,
-  replaceRequestVariables,
   shouldTriggerSuggestions,
-  trackSentRequests,
-  getRequestFromEditor,
   getTripleQuoteContext,
 } from './utils';
 import type { TripleQuoteContext } from './utils';
@@ -48,7 +41,17 @@ import type { TripleQuoteContext } from './utils';
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import type { ContextValue } from '../../contexts';
-import { containsComments, removeCommentsFromData } from './utils/requests_utils';
+import {
+  containsComments,
+  getAutoIndentedRequests,
+  getCurlRequest,
+  getRequestEndLineNumber,
+  getRequestFromEditor,
+  getRequestStartLineNumber,
+  removeCommentsFromData,
+  replaceRequestVariables,
+  trackSentRequests,
+} from './utils/request';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
