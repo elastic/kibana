@@ -33,10 +33,10 @@ describe('PercentFormat', () => {
   test('fractional: false treats values as percent units', () => {
     const formatter = new PercentFormat({ fractional: false }, getConfig);
 
-    expect(formatter.convertToText(35)).toBe('35%');
-    expect(formatter.convertToText(3500)).toBe('3,500%');
-    expect(formatter.convertToText('35')).toBe('35%');
-    expect(formatter.convertToText(null)).toBe('(null)');
+    expect(formatter.convert(35)).toBe('35%');
+    expect(formatter.convert(3500)).toBe('3,500%');
+    expect(formatter.convert('35')).toBe('35%');
+    expect(formatter.convert(null)).toBe('(null)');
   });
 
   test('missing value', () => {
