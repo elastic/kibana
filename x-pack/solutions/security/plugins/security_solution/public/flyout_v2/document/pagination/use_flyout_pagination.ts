@@ -16,7 +16,9 @@ const absentValue: FlyoutPaginationValue = {
 
 // Module-level stubs for when there is no PaginationStoreProvider. Defined
 // outside the hook so useSyncExternalStore receives stable function references.
-const noopSubscribe = (_listener: () => void): (() => void) => () => {};
+const noopSubscribe =
+  (_listener: () => void): (() => void) =>
+  () => {};
 const getAbsentSnapshot = (): typeof absentSlice => absentSlice;
 
 /**
