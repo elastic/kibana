@@ -41,7 +41,15 @@ export type NightshiftStorybookScenario =
   | 'error';
 
 export type NightshiftLifecycleScenario = 'populated' | 'loading' | 'empty' | 'error';
-export type NightshiftStreamFeaturesScenario = 'populated' | 'loading' | 'empty' | 'error';
+export type NightshiftStreamFeaturesScenario =
+  | 'populated'
+  | 'loading'
+  | 'empty'
+  | 'error'
+  | 'partialError';
+
+/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -111,7 +119,10 @@ const createServices = ({
 }) => {
   const closedEventUuids = new Set<string>();
   const significantEventsRepositoryClient = {
-    fetch: async (route: string, options?: { params?: { path?: { id?: string } } }) => {
+    fetch: async (
+      route: string,
+      options?: { params?: { path?: { id?: string; name?: string } } }
+    ) => {
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
           return neverResolve();
@@ -168,6 +179,12 @@ const createServices = ({
         }
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
+        }
+        if (
+          streamFeaturesScenario === 'partialError' &&
+          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
+        ) {
+          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
         }
       }
 

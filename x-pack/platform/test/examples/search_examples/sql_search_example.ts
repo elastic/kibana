@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Simple smoke test that the SQL search demo still runs a query
+ * and shows request/response. Strategy correctness is covered by unit/API tests; this keeps the example UI honest.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
