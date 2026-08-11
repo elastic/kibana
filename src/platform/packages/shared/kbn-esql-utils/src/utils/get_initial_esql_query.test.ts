@@ -82,31 +82,6 @@ describe('getInitialESQLQuery', () => {
     expect(getInitialESQLQuery(dataView)).toBe('FROM logs* | SORT timestamp DESC');
   });
 
-  it('should NOT add SORT when appendSortByTimestamp is false', () => {
-    const fields = [
-      {
-        name: '@timestamp',
-        displayName: '@timestamp',
-        type: 'date',
-        scripted: false,
-        filterable: true,
-        aggregatable: true,
-        sortable: true,
-      },
-      {
-        name: 'message',
-        displayName: 'message',
-        type: 'string',
-        scripted: false,
-        filterable: false,
-      },
-    ] as DataView['fields'];
-    const dataView = getDataView('logs*', fields, '@timestamp');
-    expect(
-      getInitialESQLQuery(dataView, undefined, undefined, { appendSortByTimestamp: false })
-    ).toBe('FROM logs*');
-  });
-
   it('should append a where clause correctly if there is no @timestamp in the index fields', () => {
     const fields = [
       {
