@@ -14,7 +14,7 @@ import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_sett
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { SaveGroupModal } from '../../app/service_groups/service_group_save/save_modal';
 import { ApmMainTemplate } from './apm_main_template';
 
@@ -38,7 +38,7 @@ export function ServiceGroupTemplate({
     query: { serviceGroup: serviceGroupId },
   } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
 
-  const { data } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (serviceGroupId) {
         return callApmApi('GET /internal/apm/service-group', {
@@ -106,7 +106,7 @@ export function ServiceGroupTemplate({
     }
   );
 
-  const headerTitle = serviceGroupName || pageTitle;
+  const headerTitle = serviceGroupName ?? (!isAllServices && isPending(status) ? '' : pageTitle);
 
   const pageMenu = useMemo<AppMenuConfig | undefined>(() => {
     if (isAllServices) {
@@ -121,12 +121,14 @@ export function ServiceGroupTemplate({
         }),
         iconType: 'pencil',
         testId: 'apmEditButtonEditGroupButton',
+        disableButton: !savedServiceGroup,
+        isLoading: isPending(status),
         run: () => {
           setIsEditGroupModalOpen(true);
         },
       },
     };
-  }, [isAllServices]);
+  }, [isAllServices, savedServiceGroup, status]);
 
   const appHeaderTabs: AppHeaderTab[] = tabs.map(
     ({ id, label, href, isSelected, 'data-test-subj': dataTestSubj }) => ({

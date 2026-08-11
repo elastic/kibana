@@ -5,7 +5,24 @@
  * 2.0.
  */
 
-import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type {
+  AppMenuConfig,
+  AppMenuItemType,
+  AppMenuPrimaryActionItem,
+} from '@kbn/core-chrome-app-menu-components';
+
+/**
+ * Moves a primary action into the overflow ("More") item list.
+ * Primary and item unions are structurally close but not assignable
+ * (primary allows `splitButtonProps` and looser popover fields on button/link variants).
+ */
+function demotePrimaryToOverflowItem(primary: AppMenuPrimaryActionItem): AppMenuItemType {
+  const { splitButtonProps: _splitButtonProps, ...item } = primary;
+  return {
+    ...item,
+    overflow: true,
+  } as AppMenuItemType;
+}
 
 /**
  * Combines page-local AppHeader menu actions with the global APM app menu.
@@ -14,8 +31,8 @@ import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-c
  * primary (e.g. Add data) is demoted into overflow items so it is not lost.
  */
 export function mergeAppMenuConfigs(
-  globalMenu: AppMenuConfig | undefined,
-  pageMenu: AppMenuConfig | undefined
+  globalMenu?: AppMenuConfig,
+  pageMenu?: AppMenuConfig
 ): AppMenuConfig | undefined {
   if (!pageMenu) {
     return globalMenu;
@@ -27,14 +44,7 @@ export function mergeAppMenuConfigs(
   const pagePrimary = pageMenu.primaryActionItem;
   const globalPrimary = globalMenu.primaryActionItem;
   const demotedGlobalPrimary: AppMenuItemType[] =
-    pagePrimary && globalPrimary
-      ? [
-          {
-            ...globalPrimary,
-            overflow: true,
-          },
-        ]
-      : [];
+    pagePrimary && globalPrimary ? [demotePrimaryToOverflowItem(globalPrimary)] : [];
 
   return {
     switch: pageMenu.switch ?? globalMenu.switch,
