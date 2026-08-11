@@ -79,8 +79,8 @@ Follow existing patterns in the target area first; below are common defaults.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
 ### UI Component Selection and Styling
-- Reuse components from the target module, allowed shared packages, and `@elastic/eui`. Prefer available `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components; create or modify `@kbn/ui-*` packages only when explicitly asked.
-- If meeting a requirement would require rebuilding a matching component or overriding its internals, call out the limitation and recommend consulting the component's owning team.
+- Reuse suitable components in this order: the target module, allowed shared packages, available `@kbn/ui-*` packages under `src/platform/kbn-ui`, then `@elastic/eui`. Use `@kbn/ui-*` through their public APIs; create or modify them only when explicitly asked.
+- If a reusable component's public API cannot meet the requirement without duplicating its implementation or overriding its internals, call out the limitation and recommend consulting the component's owning team.
 - Style with Emotion (`@emotion/react`) and EUI design tokens; reserve inline styles for runtime-computed values.
 
 ### Schema validation
