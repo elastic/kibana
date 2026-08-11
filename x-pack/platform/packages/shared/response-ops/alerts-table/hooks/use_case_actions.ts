@@ -19,7 +19,7 @@ export const useCaseActions = ({
   onAddToCase?: (opts: { isNewCase: boolean }) => void;
 }) => {
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
-    onSuccess: ({ updatedAt }) => onAddToCase?.({ isNewCase: !updatedAt }),
+    onSuccess: (_, isNewCase) => onAddToCase?.({ isNewCase }),
   });
 
   const getCaseAttachments = useCallback(() => {
