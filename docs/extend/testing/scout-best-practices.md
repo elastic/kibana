@@ -162,7 +162,7 @@ A test should live in the plugin or package that owns the code it exercises. Whe
 
 This also keeps Scout's selective testing effective: on a PR it runs only the tests owned by the modules that PR affects, so a test placed outside the plugin that owns the code it covers may silently not run when that code changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
 
-## Prefer runtime feature flags over custom server configurations [prefer-runtime-feature-flags]
+## Prefer runtime feature flags over defining test server overrides [prefer-runtime-feature-flags]
 
 When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
 
