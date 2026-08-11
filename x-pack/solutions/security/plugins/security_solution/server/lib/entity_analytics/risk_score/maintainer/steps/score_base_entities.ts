@@ -24,6 +24,19 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
 
+/**
+ * Per-request ES timeout for base-scoring queries.
+ *
+ * Kibana's ES client defaults to a 30s `requestTimeout`. The composite EUID
+ * pagination and per-page ES|QL scoring queries against large alert indices
+ * routinely exceed that (observed on serverless `user` base scoring), throwing
+ * "Request timed out" and failing the entire base-scoring pass. Raise it to 5m
+ * — matching `risk_score_data_client` — while staying under the ~5m cloud proxy
+ * ceiling. This does not speed the queries up; it stops the client from
+ * aborting otherwise-healthy long-running requests.
+ */
+const BASE_SCORING_REQUEST_TIMEOUT = '5m';
+
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
@@ -234,7 +247,8 @@ const fetchNextEuidPage = async ({
       index: alertsIndex,
       pageSize,
       afterKey,
-    })
+    }),
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
@@ -269,10 +283,13 @@ const scorePageFromAlerts = async ({
   alertFilters: QueryDslQueryContainer[];
 }): Promise<ParsedRiskScore[]> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query({
-    query,
-    filter: { bool: { filter: alertFilters } },
-  });
+  const esqlResponse = await esClient.esql.query(
+    {
+      query,
+      filter: { bool: { filter: alertFilters } },
+    },
+    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+  );
 
   return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
 };
