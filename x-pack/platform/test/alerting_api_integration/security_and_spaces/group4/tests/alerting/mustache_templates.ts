@@ -65,8 +65,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .set('kbn-xsrf', 'test')
         .send({
           name: 'testing context variable expansion',
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
+          config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: slackSimulatorURL,
           },
         });
@@ -91,7 +93,10 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
                 id: createdAction.id,
                 group: 'default',
                 params: {
-                  message: `message {{rule.id}} - ${varsTemplate}`,
+                  subAction: 'sendMessage',
+                  subActionParams: {
+                    text: `message {{rule.id}} - ${varsTemplate}`,
+                  },
                 },
               },
             ],

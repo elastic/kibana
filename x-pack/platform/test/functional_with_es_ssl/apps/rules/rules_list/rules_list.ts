@@ -636,23 +636,23 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       });
       await refreshAlertsList();
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.slackFilterOption');
+      await testSubjects.click('actionType.server-logFilterOption');
 
       await retry.try(async () => {
-        const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterWithSlackOnlyResults.length).to.equal(1);
-        expect(filterWithSlackOnlyResults[0].name).to.equal(
+        const filterWithServerLogOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterWithServerLogOnlyResults.length).to.equal(1);
+        expect(filterWithServerLogOnlyResults[0].name).to.equal(
           `${noopAlertWithAction.name}Test: Noop`
         );
-        expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
-        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
+        expect(filterWithServerLogOnlyResults[0].interval).to.equal('1 min');
+        expect(filterWithServerLogOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
       await refreshAlertsList();
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.slackFilterOption');
+      await testSubjects.click('actionType.server-logFilterOption');
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
     });

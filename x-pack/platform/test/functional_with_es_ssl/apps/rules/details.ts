@@ -65,8 +65,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createConnectors(testRunUuid: string) {
     return await Promise.all([
-      createConnector({ name: `slack-${testRunUuid}-${0}` }),
-      createConnector({ name: `slack-${testRunUuid}-${1}` }),
+      createConnector({ name: `server-log-${testRunUuid}-${0}` }),
+      createConnector({ name: `server-log-${testRunUuid}-${1}` }),
     ]);
   }
 
@@ -432,7 +432,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show and update deleted connectors when there are existing connectors of the same type', async () => {
         const connector = await createConnectorManualCleanup({
-          name: `slack-${testRunUuid}-${0}`,
+          name: `server-log-${testRunUuid}-${0}`,
         });
 
         await pageObjects.common.navigateToApp('management', {
@@ -494,14 +494,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('ruleActionsAddActionButton');
         await testSubjects.existOrFail('ruleActionsConnectorsModal');
 
-        // click the available option (my-slack1 is a preconfigured connector created before this test runs)
-        await find.clickByButtonText('Slack#xyztest');
+        // click the available option (my-server-log is a preconfigured connector created before this test runs)
+        await find.clickByButtonText('Serverlog#xyz');
 
         const ruleActionItems = await testSubjects.findAll('ruleActionsItem');
         expect(ruleActionItems.length).to.eql(2);
 
-        expect(await ruleActionItems[0].getVisibleText()).to.contain('Slack');
-        expect(await ruleActionItems[1].getVisibleText()).to.contain('Slack');
+        expect(await ruleActionItems[0].getVisibleText()).to.contain('Server log');
+        expect(await ruleActionItems[1].getVisibleText()).to.contain('Server log');
       });
     });
 

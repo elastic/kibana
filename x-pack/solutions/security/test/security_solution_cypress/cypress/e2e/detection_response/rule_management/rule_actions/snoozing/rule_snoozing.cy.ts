@@ -28,7 +28,7 @@ import {
   snoozeRuleInTable,
   unsnoozeRuleInTable,
 } from '../../../../../tasks/rule_snoozing';
-import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
+import { createWebhookConnector } from '../../../../../tasks/api_calls/connectors';
 import {
   disableAutoRefresh,
   duplicateFirstRule,
@@ -257,17 +257,17 @@ function createRuleWithActions(
     ruleParams: Parameters<typeof createRule>[0]
   ) => Cypress.Chainable<Cypress.Response<RuleResponse>>
 ): Cypress.Chainable<Cypress.Response<RuleResponse>> {
-  return createSlackConnector().then(({ body }) =>
+  return createWebhookConnector().then(({ body }) =>
     ruleCreator(
       getNewRule({
         ...ruleParams,
         actions: [
           {
             id: body.id,
-            action_type_id: '.slack',
+            action_type_id: '.webhook',
             group: 'default',
             params: {
-              message: 'Some message',
+              body: '{"message":"Some message"}',
             },
           },
         ],

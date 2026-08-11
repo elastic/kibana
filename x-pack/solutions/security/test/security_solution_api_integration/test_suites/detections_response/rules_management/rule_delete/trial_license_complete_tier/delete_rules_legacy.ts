@@ -17,7 +17,7 @@ import {
 import {
   createLegacyRuleAction,
   getSimpleRule,
-  getSlackAction,
+  getServerLogAction,
   getWebHookAction,
   getLegacyActionSO,
 } from '../../../utils';
@@ -80,17 +80,17 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       it('should return the legacy action in the response body when it deletes a rule that has one', async () => {
         // create an action
-        const { body: hookAction } = await supertest
+        const { body: serverLogAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getServerLogAction())
           .expect(200);
 
         // create a rule without actions
         const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // Add a legacy rule action to the body of the rule
-        await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
+        await createLegacyRuleAction(supertest, createRuleBody.id, serverLogAction.id);
 
         // delete the rule with the legacy action
         const { body } = await supertest
@@ -102,8 +102,8 @@ export default ({ getService }: FtrProviderContext): void => {
         // ensure the actions contains the response
         expect(body.actions).to.eql([
           {
-            id: hookAction.id,
-            action_type_id: hookAction.connector_type_id,
+            id: serverLogAction.id,
+            action_type_id: serverLogAction.connector_type_id,
             group: 'default',
             params: {
               message:

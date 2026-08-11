@@ -17,7 +17,7 @@ import {
 import {
   createLegacyRuleAction,
   getSimpleRule,
-  getSlackAction,
+  getServerLogAction,
   getWebHookAction,
   getLegacyActionSO,
 } from '../../../utils';
@@ -45,17 +45,17 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       it('should return the legacy action in the response body when it deletes a rule that has one', async () => {
         // create an action
-        const { body: hookAction } = await supertest
+        const { body: serverLogAction } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getServerLogAction())
           .expect(200);
 
         // create a rule without actions
         const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // Add a legacy rule action to the body of the rule
-        await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
+        await createLegacyRuleAction(supertest, createRuleBody.id, serverLogAction.id);
 
         // delete the rule in bulk using the bulk_actions endpoint
         const { body } = await detectionsApi
@@ -72,8 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
         // ensure that its actions equal what we expect
         expect(body.attributes.results.deleted[0].actions).toEqual([
           {
-            id: hookAction.id,
-            action_type_id: hookAction.connector_type_id,
+            id: serverLogAction.id,
+            action_type_id: serverLogAction.connector_type_id,
             group: 'default',
             params: {
               message:
@@ -90,15 +90,15 @@ export default ({ getService }: FtrProviderContext): void => {
        */
       it('should return 2 legacy actions in the response body when it deletes 2 rules', async () => {
         // create two different actions
-        const { body: hookAction1 } = await supertest
+        const { body: serverLogAction1 } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getServerLogAction())
           .expect(200);
-        const { body: hookAction2 } = await supertest
+        const { body: serverLogAction2 } = await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getServerLogAction())
           .expect(200);
 
         // create 2 rules without actions
@@ -106,8 +106,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const createRuleBody2 = await createRule(supertest, log, getSimpleRule('rule-2'));
 
         // Add a legacy rule action to the body of the 2 rules
-        await createLegacyRuleAction(supertest, createRuleBody1.id, hookAction1.id);
-        await createLegacyRuleAction(supertest, createRuleBody2.id, hookAction2.id);
+        await createLegacyRuleAction(supertest, createRuleBody1.id, serverLogAction1.id);
+        await createLegacyRuleAction(supertest, createRuleBody2.id, serverLogAction2.id);
 
         // delete the rule in bulk using the bulk_actions endpoint
         const { body } = await detectionsApi
@@ -129,8 +129,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // ensure that its actions equal what we expect for both responses
         expect(actions).toContainEqual({
-          id: hookAction1.id,
-          action_type_id: hookAction1.connector_type_id,
+          id: serverLogAction1.id,
+          action_type_id: serverLogAction1.connector_type_id,
           group: 'default',
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
@@ -139,8 +139,8 @@ export default ({ getService }: FtrProviderContext): void => {
           uuid: expect.any(String),
         });
         expect(actions).toContainEqual({
-          id: hookAction2.id,
-          action_type_id: hookAction2.connector_type_id,
+          id: serverLogAction2.id,
+          action_type_id: serverLogAction2.connector_type_id,
           group: 'default',
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',

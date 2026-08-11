@@ -59,10 +59,13 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              connector_type_id: '.slack',
-              secrets: {
-                webhookUrl: 'http://localhost:1234',
+              connector_type_id: '.webhook',
+              config: {
+                url: 'http://localhost:1234',
+                method: 'post',
+                hasAuth: false,
               },
+              secrets: {},
             }),
           createRule(supertest, log, rule),
         ]);
@@ -80,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: connector.body.id,
           action_type_id: connector.body.connector_type_id,
           params: {
-            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            body: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
         };
         // update a simple rule's name
@@ -102,11 +105,11 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.revision = 1;
         outputRule.actions = [
           {
-            action_type_id: '.slack',
+            action_type_id: '.webhook',
             group: 'default',
             id: connector.body.id,
             params: {
-              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              body: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: bodyToCompare.actions![0].uuid,
             frequency: { summary: true, throttle: null, notifyWhen: 'onActiveAlert' },

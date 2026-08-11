@@ -42,14 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const [connectorId, createdRule] = await Promise.all([
-        createConnector(supertest, {
-          name: 'My action',
-          connector_type_id: '.slack',
-          config: {},
-          secrets: {
-            webhookUrl: 'http://localhost:1234',
-          },
-        }),
+        createConnector(supertest, getWebHookConnectorParams()),
         createRule(supertest, log, ruleToOverwrite),
       ]);
       await createLegacyRuleAction(supertest, createdRule.id, connectorId);

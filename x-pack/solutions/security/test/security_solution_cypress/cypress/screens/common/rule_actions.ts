@@ -30,7 +30,7 @@ export const EMAIL_ACTION_TO_INPUT = '[data-test-subj="toEmailAddressInput"]';
 
 export const EMAIL_ACTION_SUBJECT_INPUT = '[data-test-subj="subjectInput"]';
 
-export const SLACK_ACTION_BTN = '[data-test-subj=".slack-siem-ActionTypeSelectOption"]';
+export const SLACK_ACTION_BTN = '[data-test-subj=".slack2-siem-ActionTypeSelectOption"]';
 
 export const SLACK_ACTION_MESSAGE_TEXTAREA = '[data-test-subj="messageTextArea"]';
 

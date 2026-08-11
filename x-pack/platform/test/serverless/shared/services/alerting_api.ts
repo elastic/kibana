@@ -241,9 +241,31 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
           name,
           config: {},
           secrets: {
+            authType: 'webhook',
             webhookUrl: 'http://test',
           },
-          connector_type_id: '.slack',
+          connector_type_id: '.slack2',
+        })
+        .expect(200);
+      return body;
+    },
+
+    async createServerLogConnector({
+      roleAuthc,
+      name,
+    }: {
+      roleAuthc: RoleCredentials;
+      name: string;
+    }) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/actions/connector`)
+        .set(samlAuth.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send({
+          name,
+          config: {},
+          secrets: {},
+          connector_type_id: '.server-log',
         })
         .expect(200);
       return body;

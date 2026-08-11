@@ -299,7 +299,10 @@ export default function ({ getService }: FtrProviderContext) {
             group: 'query matched',
             id: connectorId,
             params: {
-              message: `message: {{rule.id}}`,
+              subAction: 'sendMessage',
+              subActionParams: {
+                text: `message: {{rule.id}}`,
+              },
             },
             frequency: {
               notify_when: 'onActiveAlert',
@@ -315,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await alertingApi.helpers.waiting.waitForAllTasks({
         esClient,
         filter: testStart,
-        taskType: 'actions:.slack',
+        taskType: 'actions:.slack2',
         attempts: 1,
       });
       expect(resp.hits.hits.length).to.be(1);
