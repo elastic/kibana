@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -48,10 +48,19 @@ describe('HashDashboardLinkRedirect', () => {
     expect(mockNavigateTo).not.toHaveBeenCalled();
   });
 
-  it.each([['/dashboard/target-dashboard-id'], ['/view/target-dashboard-id']])(
+  it('does not inject a hash when mounting with an empty hash', () => {
+    render(<HashDashboardLinkRedirect />);
+    expect(window.location.hash).toBe('');
+  });
+
+  it.each([['#/dashboard/target-dashboard-id'], ['#/view/target-dashboard-id']])(
     'redirects to the security dashboard url and clears the hash for %s',
-    async (hashPath) => {
-      window.location.hash = hashPath;
+    async (hash) => {
+      window.history.replaceState(
+        null,
+        '',
+        `/app/security/dashboards/current-id${hash}`
+      );
 
       render(<HashDashboardLinkRedirect />);
 
@@ -60,10 +69,22 @@ describe('HashDashboardLinkRedirect', () => {
           url: '/app/security/dashboards/target-dashboard-id',
         })
       );
-      // The broken hash link is cleared immediately (HashRouter settles back to its "root" `#/`
-      // rather than leaving the legacy dashboard id visible); the subsequent real navigation to
-      // the target url fully replaces the address bar, hash included.
       expect(window.location.hash).not.toContain('target-dashboard-id');
     }
   );
+
+  it('redirects when the hash changes after mount', async () => {
+    render(<HashDashboardLinkRedirect />);
+    expect(mockNavigateTo).not.toHaveBeenCalled();
+
+    act(() => {
+      window.location.hash = '#/dashboard/late-dashboard-id';
+    });
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/late-dashboard-id',
+      })
+    );
+  });
 });

@@ -5,56 +5,58 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
+import { useEffect } from 'react';
 import { SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
 
-const HashDashboardLinkRoute = () => {
-  const { dashboardId } = useParams<{ dashboardId: string }>();
+/**
+ * Matches legacy Kibana hash-based dashboard routes, e.g. `#/dashboard/<id>` or `#/view/<id>`.
+ * Captures the dashboard id up to the next query/hash delimiter.
+ */
+const LEGACY_HASH_DASHBOARD_LINK = /^#\/(?:dashboard|view)\/([^/?#]+)/;
+
+const getLegacyDashboardIdFromHash = (hash: string): string | undefined => {
+  const match = hash.match(LEGACY_HASH_DASHBOARD_LINK);
+  if (!match?.[1]) {
+    return undefined;
+  }
+  return decodeURIComponent(match[1]);
+};
+
+/**
+ * Some markdown panels still ship legacy hash dashboard links, e.g.
+ * `[Compliance](#/dashboard/osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05)`.
+ * This listener redirects that hash to the path-based URL
+ * `/app/security/dashboards/osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05`.
+ */
+export const HashDashboardLinkRedirect = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { navigateTo } = useNavigateTo();
 
   useEffect(() => {
-    if (!dashboardId) {
-      return;
-    }
-    // Clear the hash immediately so the broken URL doesn't linger in the address bar/history
-    // while we redirect to the correct, path-based Security dashboard URL.
-    window.history.replaceState(null, '', window.location.pathname + window.location.search);
-    navigateTo({
-      url: getSecuritySolutionUrl({
-        deepLinkId: SecurityPageName.dashboards,
-        path: decodeURIComponent(dashboardId),
-      }),
-    });
-  }, [dashboardId, getSecuritySolutionUrl, navigateTo]);
+    const redirectOnLegacyDashboardHash = () => {
+      const dashboardId = getLegacyDashboardIdFromHash(window.location.hash);
+      if (!dashboardId) {
+        return;
+      }
+      // Clear the hash immediately so the broken URL doesn't linger in the address bar/history
+      // while we redirect to the correct, path-based Security dashboard URL.
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      navigateTo({
+        url: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: dashboardId,
+        }),
+      });
+    };
+
+    redirectOnLegacyDashboardHash();
+    window.addEventListener('hashchange', redirectOnLegacyDashboardHash);
+    return () => {
+      window.removeEventListener('hashchange', redirectOnLegacyDashboardHash);
+    };
+  }, [getSecuritySolutionUrl, navigateTo]);
 
   return null;
 };
-
-/**
- * Some Fleet/Beats integration packages (e.g. Osquery Manager) ship markdown panels containing
- * links using Kibana's old hash-based dashboard routes, e.g. `#/dashboard/<id>` or `#/view/<id>`.
- * Security's dashboards pages are path-routed (not hash-routed), so clicking one of these links
- * only mutates the current page's hash instead of navigating to the target dashboard.
- *
- * Mounting a `HashRouter` here lets us listen for that hash change - the same mechanism the
- * standalone Dashboard app relies on to make these links work - and redirect to the equivalent
- * Security dashboard URL. It coexists with Security's own path-based routing since a `HashRouter`
- * only ever reads/writes the `location.hash` portion of the URL.
- */
-export const HashDashboardLinkRedirect = () => (
-  <HashRouter>
-    <Routes>
-      <Route path="/dashboard/:dashboardId">
-        <HashDashboardLinkRoute />
-      </Route>
-      <Route path="/view/:dashboardId">
-        <HashDashboardLinkRoute />
-      </Route>
-    </Routes>
-  </HashRouter>
-);

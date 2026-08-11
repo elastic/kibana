@@ -16,15 +16,16 @@ import { HashDashboardLinkRedirect } from '../components/hash_dashboard_link_red
 const DashboardsContainerComponent = () => {
   return (
     <DashboardContextProvider>
-      <HashDashboardLinkRedirect />
       <Routes>
         <Route strict path={`${DASHBOARDS_PATH}/create`}>
           <DashboardView initialViewMode={'edit'} />
         </Route>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName/edit`}>
+          <HashDashboardLinkRedirect />
           <DashboardView initialViewMode={'edit'} />
         </Route>
         <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
+          <HashDashboardLinkRedirect />
           <DashboardView initialViewMode={'view'} />
         </Route>
         <Route path={`${DASHBOARDS_PATH}`}>
