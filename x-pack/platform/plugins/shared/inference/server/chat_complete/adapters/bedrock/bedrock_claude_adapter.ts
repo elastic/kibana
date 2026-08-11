@@ -238,7 +238,16 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
     }
   });
 
-  // Combine consecutive user tool result messages into a single message. This format is required by Bedrock.
+  // Combine consecutive user messages when the previous one carries a toolResult.
+  // This format is required by Bedrock: tool results and any immediately following user
+  // content (e.g. injected image parts) must be merged into a single user message.
+  //
+  // Original condition required *both* messages to carry toolResult — that worked for
+  // plain tool-result sequences but rejected a pattern that already exists today
+  // (tool-result → cycle-limit system-notice) and breaks Option D image injection
+  // (tool-result → user[image_url]). OpenAI and Gemini adapters already merge all
+  // consecutive same-role messages unconditionally; this brings Bedrock into parity
+  // for the user-after-toolResult case.
   const combinedConverseMessages = converseMessages.reduce<BedRockMessage[]>((acc, curr) => {
     const lastMessage = acc[acc.length - 1];
 
@@ -246,8 +255,7 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       lastMessage &&
       lastMessage.role === 'user' &&
       lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
-      curr.role === 'user' &&
-      curr.rawContent?.some((c) => 'toolResult' in c)
+      curr.role === 'user'
     ) {
       lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
     } else {
