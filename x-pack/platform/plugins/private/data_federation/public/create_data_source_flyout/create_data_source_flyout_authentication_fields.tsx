@@ -11,22 +11,22 @@ import { EuiSpacer } from '@elastic/eui';
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
-import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
+import type { FederatedIdentityClusterInfo } from './data_sources/s3/federated_identity_cluster_info';
 import {
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   showsAuthenticationCredentialFields,
   type AzureAuthenticationMode,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
-import { CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields } from './create_data_source_flyout_type_settings_azure';
+import { CreateDataSourceFlyoutTypeSettingsAzureAuthenticationFields } from './data_sources/azure/create_data_source_flyout_type_settings_azure';
 import {
   CreateDataSourceFlyoutTypeSettingsGcsCredentials,
   CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity,
-} from './create_data_source_flyout_type_settings_gcs';
+} from './data_sources/gcs/create_data_source_flyout_type_settings_gcs';
 import {
   CreateDataSourceFlyoutTypeSettingsS3Credentials,
   CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity,
-} from './create_data_source_flyout_type_settings_s3';
+} from './data_sources/s3/create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode,

@@ -12,9 +12,9 @@ import { EuiButtonEmpty, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
-import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
-import { CreateDataSourceFlyoutTypeSettingsGcs } from './create_data_source_flyout_type_settings_gcs';
-import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyout_type_settings_s3';
+import { CreateDataSourceFlyoutTypeSettingsAzure } from './data_sources/azure/create_data_source_flyout_type_settings_azure';
+import { CreateDataSourceFlyoutTypeSettingsGcs } from './data_sources/gcs/create_data_source_flyout_type_settings_gcs';
+import { CreateDataSourceFlyoutTypeSettingsS3 } from './data_sources/s3/create_data_source_flyout_type_settings_s3';
 
 export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
