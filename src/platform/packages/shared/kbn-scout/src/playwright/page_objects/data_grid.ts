@@ -480,8 +480,6 @@ export class DataGrid {
 
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    const minDurationMs = 2_000;
-    const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
 
     // Gate on the data fetch first so the visibility budget below isn't spent
@@ -490,31 +488,15 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    let stableSince: number | null = null;
-
-    await expect
-      .poll(
-        async () => {
-          const attr = await table.getAttribute('data-render-complete');
-          const now = Date.now();
-
-          if (attr === 'true') {
-            if (!stableSince) {
-              stableSince = now;
-            }
-            return now - stableSince >= minDurationMs;
-          }
-
-          stableSince = null;
-          return false;
-        },
-        {
-          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
-          timeout: totalTimeoutMs,
-          intervals: [pollIntervalMs],
-        }
-      )
-      .toBe(true);
+    // `data-render-complete` flips to 'false' on every fetch/re-render, so
+    // requiring it to *stay* 'true' for a fixed window is fragile: any
+    // legitimate re-render within that window (e.g. a dashboard panel
+    // re-fetch) resets the wait and can exhaust the whole test timeout even
+    // though the table already rendered correctly. Wait once for the signal
+    // instead. See https://github.com/elastic/kibana/issues/282360.
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: totalTimeoutMs,
+    });
   }
 
   async waitForLoad() {
