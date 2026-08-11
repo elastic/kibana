@@ -222,13 +222,13 @@ type ManagedAccessMethod = 'access_keys' | 'identity_federation';
 
 // Managed Integrations widget — a second, separate credential set (used by
 // the managed integration itself to query data, distinct from the
-// CloudFormation/Setup access credentials above it). "Access Keys" is the
-// default per the same convention used elsewhere on this step.
+// CloudFormation/Setup access credentials above it). Defaults to Identity
+// Federation.
 const ManagedIntegrationsWidget: React.FunctionComponent<{
   servicesCount: number;
   onValidityChange: (isValid: boolean) => void;
 }> = ({ servicesCount, onValidityChange }) => {
-  const [method, setMethod] = useState<ManagedAccessMethod>('access_keys');
+  const [method, setMethod] = useState<ManagedAccessMethod>('identity_federation');
   const [accessKeyId, setAccessKeyId] = useState('');
   const [isAccessKeyIdTouched, setIsAccessKeyIdTouched] = useState(false);
   const [secretAccessKey, setSecretAccessKey] = useState('');
@@ -269,8 +269,8 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
       <EuiSpacer size="m" />
       <EuiRadioGroup
         options={[
-          { id: 'access_keys', label: 'Access Keys' },
           { id: 'identity_federation', label: 'Identity Federation' },
+          { id: 'access_keys', label: 'Access Keys' },
         ]}
         idSelected={method}
         onChange={(id) => setMethod(id as ManagedAccessMethod)}
