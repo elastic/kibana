@@ -39,12 +39,9 @@ const exactFilePathMatcher = (relativePath) =>
  * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
  */
 const JS_YAML_LEGACY_CONSUMERS = [
-  'src/platform/packages/shared/kbn-edot-collector/src/get_edot_collector_configuration.ts',
-  'src/platform/packages/shared/kbn-edot-collector/src/read_kibana_config.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.test.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/yaml_form_utils.ts',
   'x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/yaml_rule_form.test.tsx',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
 ].map(exactFilePathMatcher);
 
 const USES_ELASTIC_APM_AGENT = [
