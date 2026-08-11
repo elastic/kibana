@@ -348,4 +348,8 @@ export const ConnectorIconsMap: Map<
   ],
 
   ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
+  [
+    '.gcp_iam',
+    lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
 ]);
