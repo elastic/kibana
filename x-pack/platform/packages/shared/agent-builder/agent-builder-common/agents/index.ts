@@ -9,6 +9,7 @@ export {
   AgentType,
   chatAgentTypeId,
   agentBuilderDefaultAgentId,
+  agentBuilderDefaultAiIndexId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
