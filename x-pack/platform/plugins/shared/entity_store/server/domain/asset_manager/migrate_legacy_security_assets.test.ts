@@ -114,6 +114,59 @@ describe('migrateLegacySecurityAssets', () => {
     expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
   });
 
+  it('reindexes latest again when neutral index already exists but legacy remains', async () => {
+    const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
+    const newIndex = getLatestEntitiesIndexName(namespace);
+
+    esClient.indices.exists.mockImplementation(async ({ index }: { index: string }) => {
+      if (index === legacyIndex) return true;
+      if (index === newIndex) return true;
+      return false;
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockCreateIndex).toHaveBeenCalledWith(
+      esClient,
+      newIndex,
+      expect.objectContaining({ throwIfExists: false })
+    );
+    expect(mockReindex).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({
+        source: { index: legacyIndex },
+        dest: { index: newIndex },
+      })
+    );
+    expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
+  });
+
+  it('reindexes metadata into the data stream with op_type create', async () => {
+    const legacyMetadata = `.entities.v2.metadata.security_${namespace}`;
+    const newMetadata = `.entities.v2.metadata.${namespace}`;
+
+    esClient.indices.exists.mockImplementation(async ({ index }: { index: string }) => {
+      if (index === legacyMetadata) return true;
+      return false;
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockCreateDataStream).toHaveBeenCalledWith(
+      esClient,
+      newMetadata,
+      expect.objectContaining({ throwIfExists: false })
+    );
+    expect(mockReindex).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({
+        source: { index: legacyMetadata },
+        dest: { index: newMetadata, op_type: 'create' },
+      })
+    );
+    expect(mockDeleteDataStream).toHaveBeenCalledWith(esClient, legacyMetadata);
+  });
+
   it('is a no-op when only neutral assets exist', async () => {
     esClient.indices.exists.mockResolvedValue(false);
 

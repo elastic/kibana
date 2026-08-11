@@ -133,16 +133,17 @@ async function migrateLatestIndex({
     return;
   }
 
-  const newExists = await indexOrDataStreamExists(esClient, newIndex);
-  if (!newExists) {
-    await createIndex(esClient, newIndex, { throwIfExists: false });
-    logger.debug(`Created neutral latest index ${newIndex}`);
-    await reindex(esClient, {
-      source: { index: legacyIndex },
-      dest: { index: newIndex },
-    });
-    logger.info(`Reindexed ${legacyIndex} → ${newIndex}`);
-  }
+  // Legacy still exists, so a prior attempt did not finish. Always (re)create and
+  // reindex before the legacy source is deleted below: createIndex is idempotent and
+  // reindex uses conflicts: 'proceed', so a partial neutral index from an interrupted
+  // run is fully repopulated rather than left empty.
+  await createIndex(esClient, newIndex, { throwIfExists: false });
+  logger.debug(`Ensured neutral latest index ${newIndex}`);
+  await reindex(esClient, {
+    source: { index: legacyIndex },
+    dest: { index: newIndex },
+  });
+  logger.info(`Reindexed ${legacyIndex} → ${newIndex}`);
 
   try {
     await esClient.indices.updateAliases({
@@ -192,14 +193,14 @@ async function migrateMetadataDataStream({
     return;
   }
 
-  if (!(await indexOrDataStreamExists(esClient, newStream))) {
-    await createDataStream(esClient, newStream, { throwIfExists: false });
-    await reindex(esClient, {
-      source: { index: legacyStream },
-      dest: { index: newStream },
-    });
-    logger.info(`Reindexed metadata ${legacyStream} → ${newStream}`);
-  }
+  // Same retry safety as latest: legacy still existing means the copy may be incomplete.
+  // Data-stream destinations require op_type: 'create'.
+  await createDataStream(esClient, newStream, { throwIfExists: false });
+  await reindex(esClient, {
+    source: { index: legacyStream },
+    dest: { index: newStream, op_type: 'create' },
+  });
+  logger.info(`Reindexed metadata ${legacyStream} → ${newStream}`);
 
   await deleteDataStream(esClient, legacyStream);
   logger.debug(`Deleted legacy metadata data stream ${legacyStream}`);
