@@ -264,7 +264,49 @@ describe('useDocumentSummary', () => {
     expect(result.current.recommendedActions).toBe('Actions embedded in prose');
   });
 
-  it('should surface an error when the AI response is not valid JSON', async () => {
+  it('should use raw text as summary when the AI response is not valid JSON', async () => {
+    const rawMarkdown = '## Alert Summary\n\nThis alert was triggered by a suspicious process.';
+
+    (useFetchDocumentSummary as jest.Mock)
+      .mockReturnValueOnce({
+        data: { data: [], prompt: 'Generate an alert summary!' },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      })
+      .mockReturnValue({
+        data: {
+          data: [{ id: 'summary-id', summary: rawMarkdown, replacements: {} }],
+          prompt: 'Generate an alert summary!',
+        },
+        refetch: mockRefetchSummary,
+        isFetched: true,
+      });
+
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.messageAndReplacements).not.toBeNull();
+    });
+
+    mockSendMessage.mockResolvedValue({ response: rawMarkdown, isError: false });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).toHaveBeenCalled();
+    expect(result.current.fetchError).toBeNull();
+    expect(result.current.summary).toBe(rawMarkdown);
+  });
+
+  it('should surface an error when the AI response is an error', async () => {
     const { result } = renderHook(() =>
       useDocumentSummary({
         documentId: 'test-document-id',
@@ -279,8 +321,8 @@ describe('useDocumentSummary', () => {
     });
 
     mockSendMessage.mockResolvedValue({
-      response: 'not valid json {summary: broken',
-      isError: false,
+      response: 'Something went wrong on the server.',
+      isError: true,
     });
 
     await act(async () => {
@@ -289,9 +331,7 @@ describe('useDocumentSummary', () => {
 
     expect(mockBulkUpdate).not.toHaveBeenCalled();
     expect(result.current.hasSummary).toBe(false);
-    expect(result.current.fetchError).toBe(
-      'Due to an unexpected issue, the AI model returned an invalid response. Please try again.'
-    );
+    expect(result.current.fetchError).toBe('Something went wrong on the server.');
   });
 
   it('should abort stream on unmount', () => {

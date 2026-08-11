@@ -260,7 +260,12 @@ export const useDocumentSummary = ({
           hasInvalidResponse = true;
         }
       } else {
-        hasInvalidResponse = true;
+        const trimmed = rawResponse.response?.trim() ?? '';
+        if (trimmed.length > 0) {
+          responseSummary = trimmed;
+        } else {
+          hasInvalidResponse = true;
+        }
       }
 
       if (!rawResponse.isError && !hasInvalidResponse && responseSummary != null) {
