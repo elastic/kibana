@@ -30,6 +30,7 @@ export function registerReadRoute(
   const readRoute = router.get({
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
+    operationId: 'get-dashboard',
     ...routeConfig,
     description: 'Returns the complete state of a dashboard by ID.',
   });

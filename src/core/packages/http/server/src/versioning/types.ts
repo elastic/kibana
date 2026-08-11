@@ -105,6 +105,12 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    * @default undefined
    */
   discontinued?: string;
+
+  /**
+   * @public
+   * {@inheritdoc RouteConfigOptions['operationId']}
+   */
+  operationId?: RouteConfigOptions<RouteMethod>['operationId'];
 };
 
 /**

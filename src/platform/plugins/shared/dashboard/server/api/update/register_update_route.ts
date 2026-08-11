@@ -34,6 +34,7 @@ export function registerUpdateRoute(
     path: `${basePath}/{id}`,
     ...routeConfig,
     summary: `Upsert a dashboard`,
+    operationId: 'upsert-dashboard',
   });
 
   // Do not call getDashboardStateSchema when registering route.

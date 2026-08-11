@@ -32,6 +32,7 @@ export function registerCreateRoute(
   const createRoute = router.post({
     path: basePath,
     summary: 'Create a dashboard',
+    operationId: 'create-dashboard',
     ...routeConfig,
     description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
   });
