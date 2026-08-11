@@ -475,16 +475,6 @@ async function openDisabledFailureStoreFlyout(page: ScoutPage): Promise<Locator>
 }
 
 /**
- * Saves failure store changes in the shared failure store modal
- * (`@kbn/failure-store-modal`, used from the data quality page).
- */
-export async function saveFailureStoreChanges(page: ScoutPage): Promise<void> {
-  const saveButton = page.getByTestId('failureStoreModalSaveButton');
-  await expect(saveButton).toBeEnabled();
-  await saveButton.click();
-}
-
-/**
  * Saves the streams "edit failed data lifecycle" flyout (Apply) and waits for it to close.
  */
 export async function applyFailedLifecycleFlyout(

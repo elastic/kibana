@@ -1,6 +1,6 @@
 ## Test layout
 
-The Scout UI suite for `streams_app` is split into **7 namespaces**, one per
+The Scout UI suite for `streams_app` is split into **8 namespaces**, one per
 feature area. Each namespace is an independent, auto-discovered Playwright
 config (`<namespace>/ui/playwright.config.ts`) with its own `.meta` manifest
 and CI scheduling unit. There is no within-namespace parallelism
@@ -13,11 +13,12 @@ test/scout/
 ├── common/ui/{fixtures,page_objects}/   # shared fixtures, NOT a namespace (no playwright.config.ts)
 ├── processing/ui/     14 specs   data processing / enrichment pipeline
 ├── routing/ui/         9 specs   data routing / partitioning (incl. AI suggestions)
-├── lifecycle/ui/      11 specs   data retention + data quality — owned by @elastic/kibana-management
+├── lifecycle/ui/      10 specs   data retention — owned by @elastic/kibana-management
+├── data_quality/ui/    1 spec    data quality tab — owned by @elastic/kibana-management
 ├── schema/ui/          3 specs   data mapping / schema editor
 ├── query_streams/ui/  11 specs   query streams (stateful-classic only)
-├── core/ui/             9 specs   enablement, layout shell, list view, stream detail chrome
-└── integrations/ui/     4 specs   cross-app surfaces (Discover, ES|QL, TSDB)
+├── core/ui/            9 specs   enablement, layout shell, list view, stream detail chrome
+└── integrations/ui/    4 specs   cross-app surfaces (Discover, ES|QL, TSDB)
 ```
 
 Each namespace has a single `tests/` directory and a single
@@ -57,7 +58,12 @@ node scripts/scout.js start-server --arch stateful --domain classic
 node scripts/scout.js start-server --arch serverless --domain [search|observability_complete|security_complete]
 ```
 
-Then run the tests for a given namespace in another terminal:
+Then run the tests in another terminal. Pick the config matching the namespace
+you want to run — every namespace has exactly one config at
+`test/scout/<namespace>/ui/playwright.config.ts`, where `<namespace>` is one of
+`processing`, `routing`, `lifecycle`, `data_quality`, `schema`, `query_streams`,
+`core`, `integrations`. `query_streams` only has stateful-classic specs, so it
+is a no-op under `--grep serverless-observability`.
 
 ```bash
 # ESS
@@ -67,12 +73,19 @@ node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app
 node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/<namespace>/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
+For example, to run the routing specs against ESS:
+
+```bash
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep stateful-classic
+```
+
 Or via the Scout CLI:
 
 ```bash
 node scripts/scout run-tests --arch stateful --domain classic \
-  --config x-pack/platform/plugins/shared/streams_app/test/scout/<namespace>/ui/playwright.config.ts
+  --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts
 ```
 
 Test results are available in
-`x-pack/platform/plugins/shared/streams_app/test/scout/<namespace>/ui/output`.
+`x-pack/platform/plugins/shared/streams_app/test/scout/<namespace>/ui/.scout/reports`,
+with screenshots, videos and traces in the sibling `.scout/test-artifacts`.
