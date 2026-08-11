@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'labs:canvas:enable_ui',
-};
-
 export type { CanvasAppLocator, CanvasAppLocatorParams } from './locator';

@@ -20,7 +20,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { RULE_VERSION_FALLBACK } from '../rule_changes_history';
 
 /**
@@ -44,7 +44,7 @@ export function assertImmutableUnchanged(
   const changed = IMMUTABLE_RULE_FIELDS.filter((field) => !isEqual(parsed[field], existing[field]));
   if (changed.length > 0) {
     throw Boom.conflict(`Some fields cannot be changed after creation: ${changed.join(', ')}.`, {
-      code: ALERTING_V2_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+      code: ALERTING_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
       details: { fields: changed },
     });
   }
@@ -223,7 +223,7 @@ export function buildUpdateRuleAttributes(
 }
 
 /**
- * Validates the rule schema against the merged
+ * Re-checks the create schema's cross-field invariants against the merged
  * update attributes (the update body alone can't, since `kind` is immutable and
  * `query`/strategy fields update independently). Throws on the first violation.
  *
@@ -243,38 +243,38 @@ export function validateMergedRuleAttributes(
     {
       valid: isSignalUsingStandaloneFormat(attrs),
       message: 'kind "signal" requires query.format "standalone".',
-      code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {
       valid: isSignalQueryBreachOnly(attrs),
       message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-      code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
+      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {
       valid: isRecoveryQueryConsistentWithStrategy(attrs),
       message: 'query.recovery is only allowed when recovery_strategy is "query".',
-      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isRecoveryQueryProvidedForStrategy(attrs),
       message: 'query.recovery is required when recovery_strategy is "query".',
-      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isNoDataQueryConsistentWithStrategy(attrs),
       message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isNoDataQueryProvidedForStrategy(attrs),
       message:
         'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
   ];
