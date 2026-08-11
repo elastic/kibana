@@ -35,7 +35,6 @@ import { EXPLORE_ACTION_ID } from '../hooks/use_explore_actions';
 
 interface ActionMenuProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
-  addToCasePanels: EuiContextMenuPanelDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
@@ -61,6 +60,7 @@ interface ActionMenuProps {
 }
 
 const FOOTER_ACTIONS_BY_TEST_SUBJ: Partial<Record<string, FlyoutActionType>> = {
+  'add-to-case-action': FLYOUT_ACTION.ADD_TO_CASE,
   'open-alert-status': FLYOUT_ACTION.STATUS_OPEN,
   'acknowledged-alert-status': FLYOUT_ACTION.STATUS_ACKNOWLEDGED,
   'alert-close-context-menu-item': FLYOUT_ACTION.STATUS_CLOSED,
@@ -103,7 +103,6 @@ const ACTION_ICONS_BY_ID = {
 
 export const ActionMenu = ({
   addToCaseItems,
-  addToCasePanels,
   alertAssigneeItems,
   alertAssigneePanels,
   alertTagItems,
@@ -187,7 +186,6 @@ export const ActionMenu = ({
 
   const panels = useMemo(
     () => [
-      ...(!isRemoteDocument ? addToCasePanels : []),
       ...(!isRemoteDocument && isAlert ? statusPanels : []),
       ...(!isRemoteDocument && isAlert ? alertAssigneePanels : []),
       ...(!isRemoteDocument && isAlert ? alertTagPanels : []),
@@ -197,7 +195,6 @@ export const ActionMenu = ({
     [
       alertAssigneePanels,
       alertTagPanels,
-      addToCasePanels,
       isAlert,
       isRemoteDocument,
       runAlertWorkflowPanels,

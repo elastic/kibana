@@ -7,19 +7,13 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const ADD_TO_CASE_ITEM = getDataTestSubjectSelector('add-to-case-action');
-export const INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON = getDataTestSubjectSelector(
-  'tiIndicatorTableAddToNewCaseContextMenu'
+export const INDICATORS_TABLE_ADD_TO_CASE_ITEM = getDataTestSubjectSelector(
+  'tiIndicatorTableAddToCaseContextMenu'
 );
-export const INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON = getDataTestSubjectSelector(
-  'tiIndicatorTableAddToExistingCaseContextMenu'
+export const FLYOUT_ADD_TO_CASE_ITEM = getDataTestSubjectSelector(
+  'tiIndicatorFlyoutAddToCaseContextMenu'
 );
-export const FLYOUT_ADD_TO_EXISTING_CASE_ITEM = getDataTestSubjectSelector(
-  'tiIndicatorFlyoutAddToExistingCaseContextMenu'
-);
-export const FLYOUT_ADD_TO_NEW_CASE_ITEM = getDataTestSubjectSelector(
-  'tiIndicatorFlyoutAddToNewCaseContextMenu'
-);
+export const CREATE_NEW_CASE_FROM_MODAL_BUTTON = getDataTestSubjectSelector('createNewCaseBtn');
 export const SELECT_EXISTING_CASE = `.euiButton`;
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
 export const CASE_COMMENT_EXTERNAL_REFERENCE = getDataTestSubjectSelector(
