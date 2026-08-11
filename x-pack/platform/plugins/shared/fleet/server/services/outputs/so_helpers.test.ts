@@ -48,7 +48,7 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
         },
       },
     },
-  } as unknown as Output;
+  } as Output;
 
   const ORIGINAL_KAFKA_OUTPUT = {
     type: 'kafka',
@@ -175,7 +175,7 @@ describe('patchUpdateDataWithRequireEncryptedAADFields', () => {
     it('it should work', () => {
       const updateData = {
         ...ORIGINAL_LOGSTASH_OUTPUT,
-        ssl: JSON.stringify((ORIGINAL_LOGSTASH_OUTPUT as unknown as NewBeatsOutput).ssl),
+        ssl: JSON.stringify((ORIGINAL_LOGSTASH_OUTPUT as NewBeatsOutput).ssl),
         //  Remove kafka field as done by the output service
         password: null,
       };
