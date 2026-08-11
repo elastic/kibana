@@ -171,6 +171,17 @@ describe('database resolution', () => {
       MongoDBConnector.actions.count.handler(ctxWithoutDbPath, { collection: 'orders' })
     ).rejects.toThrow('database name is required');
   });
+
+  it('surfaces the real parse error for a malformed URI instead of "database name is required"', async () => {
+    const ctxWithMalformedUri = {
+      ...mockContext,
+      config: { uri: 'not-a-valid-uri' },
+    } as unknown as ActionContext;
+
+    await expect(
+      MongoDBConnector.actions.count.handler(ctxWithMalformedUri, { collection: 'orders' })
+    ).rejects.toThrow(/invalid scheme|invalid connection string/i);
+  });
 });
 
 // ---------------------------------------------------------------------------

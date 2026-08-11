@@ -28,8 +28,8 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { CollectionInfo } from 'mongodb';
-import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { loadConnectionString } from '../../lib/clients/load_connection_string';
 import type {
   FindInput,
   AggregateInput,
@@ -62,33 +62,29 @@ const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulat
 // server, since this reaches $regex directly from an agent-facing (isTool: true) input.
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Dynamic import keeps mongodb-connection-string-url (and its whatwg-url/tr46
-// dependency chain) out of the browser bundle. Both kbn-optimizer and
-// kbn-rspack-optimizer declare it a browser external so this import is never
-// resolved during browser bundling.
-const loadConnectionString = async (): Promise<typeof ConnectionStringType> => {
-  const { ConnectionString } = await import(
-    /* webpackChunkName: "mongodbConnectionStringUrl" */ 'mongodb-connection-string-url'
-  );
-  return ConnectionString;
-};
-
 /** Resolve the database name: action input → URI path → error. */
 const resolveDb = async (inputDatabase: string | undefined, uri: string): Promise<string> => {
   if (inputDatabase) return inputDatabase;
 
-  try {
-    const ConnectionString = await loadConnectionString();
-    const { pathname } = new ConnectionString(uri);
-    const dbFromUri = pathname.slice(1);
-    if (dbFromUri) return dbFromUri;
-  } catch {
-    // fall through
-  }
+  // Let a malformed uri throw its own MongoParseError here rather than masking it —
+  // ctx.getClient('mongodb') would hit the same parse failure, but only after this call.
+  const ConnectionString = await loadConnectionString();
+  const { pathname } = new ConnectionString(uri);
+  const dbFromUri = pathname.slice(1);
+  if (dbFromUri) return dbFromUri;
 
   throw new Error(
     'database name is required — include it in the URI path (mongodb://host/mydb) or pass it in the action input'
   );
+};
+
+/** Resolve the database name for an action call: action input → connector's configured URI path. */
+const getDatabase = async (
+  ctx: ActionContext,
+  inputDatabase: string | undefined
+): Promise<string> => {
+  const { uri } = ctx.config as { uri: string };
+  return resolveDb(inputDatabase, uri);
 };
 
 const DISALLOWED_OPERATORS_LIST = [...DISALLOWED_OPERATORS].join(', ');
@@ -176,8 +172,7 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: FindInput) => {
         assertReadOnly(input.filter);
         assertReadOnly(input.projection);
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const cursor = client
           .db(database)
@@ -222,8 +217,7 @@ export const MongoDBConnector: ConnectorSpec = {
               : [...input.pipeline.slice(0, -1), { $limit: maxLimit }]
             : [...input.pipeline, { $limit: maxLimit }];
 
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const results = await client
           .db(database)
@@ -244,8 +238,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: CountInputSchema,
       handler: async (ctx, input: CountInput) => {
         assertReadOnly(input.filter);
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const count = await client
           .db(database)
@@ -262,8 +255,7 @@ export const MongoDBConnector: ConnectorSpec = {
         'Use this first to discover what data is available before calling find, aggregate, or count.',
       input: ListCollectionsInputSchema,
       handler: async (ctx, input: ListCollectionsInput) => {
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const { nameFilter } = input;
         const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
@@ -290,8 +282,7 @@ export const MongoDBConnector: ConnectorSpec = {
         'Workflow-only — not available to agents.',
       input: InsertOneInputSchema,
       handler: async (ctx, input: InsertOneInput) => {
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const result = await client
           .db(database)
@@ -311,8 +302,7 @@ export const MongoDBConnector: ConnectorSpec = {
         'the write was acknowledged. Workflow-only — not available to agents.',
       input: UpdateOneInputSchema,
       handler: async (ctx, input: UpdateOneInput) => {
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const result = await client
           .db(database)
@@ -336,8 +326,7 @@ export const MongoDBConnector: ConnectorSpec = {
         'Workflow-only — not available to agents.',
       input: DeleteOneInputSchema,
       handler: async (ctx, input: DeleteOneInput) => {
-        const { uri } = ctx.config as { uri: string };
-        const database = await resolveDb(input.database, uri);
+        const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const result = await client
           .db(database)

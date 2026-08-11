@@ -10,21 +10,8 @@
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
+import { loadConnectionString } from './load_connection_string';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
-
-// Dynamic imports keep the mongodb driver and mongodb-connection-string-url (and its
-// whatwg-url/tr46 dependency chain) out of the browser bundle. `clientTypes` is exported
-// from this package's public entry point and reachable from browser bundles, so a
-// top-level value import here would execute at module-eval time in the browser even
-// though kbn-optimizer/kbn-rspack-optimizer mark both packages as externals — externals
-// only stop bundling, they don't stop the import from running. Both bundler configs
-// already declare these externals to prevent build-time resolution errors.
-const loadConnectionString = async (): Promise<typeof ConnectionStringType> => {
-  const { ConnectionString } = await import(
-    /* webpackChunkName: "mongodbConnectionStringUrl" */ 'mongodb-connection-string-url'
-  );
-  return ConnectionString;
-};
 
 // mongodb:// URIs may list multiple hosts (replica sets, sharded clusters) and the driver
 // connects to all of them, so every one must clear the network guard. mongodb+srv:// URIs
@@ -81,7 +68,7 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');
-    if (!credentials) {
+    if (!credentials || !credentials.username || !credentials.password) {
       throw new Error(
         'basic auth credentials (username and password) are required for MongoDB connections'
       );
@@ -98,6 +85,10 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       // (which the help text and docs tell users to use) would be silently ignored.
       ...(connectionString.searchParams.has('authSource') ? {} : { authSource: 'admin' }),
       serverSelectionTimeoutMS: 10_000,
+      connectTimeoutMS: 10_000,
+      // Bounds in-flight query execution; prevents a runaway scan from holding a pooled
+      // connection indefinitely and starving other calls that reuse the same client.
+      timeoutMS: 30_000,
     });
     await client.connect();
     return client;
@@ -116,12 +107,18 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       ) {
         return true;
       }
-      // instanceof MongoServerError can't be used here because the static import of
-      // the mongodb driver is intentionally avoided to keep this module browser-bundle-safe.
+      // instanceof checks can't be used here because static imports of the mongodb driver
+      // and mongodb-connection-string-url are intentionally avoided to keep this module
+      // browser-bundle-safe.
       if (err.constructor.name === 'MongoServerError') {
         // 18 = AuthenticationFailed, 13 = Unauthorized
         const code = (err as { code?: number }).code;
         return code === 18 || code === 13;
+      }
+      // Thrown by mongodb-connection-string-url when config.uri is malformed — a
+      // configuration mistake, not a framework failure.
+      if (err.constructor.name === 'MongoParseError') {
+        return true;
       }
     }
     return false;

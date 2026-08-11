@@ -95,6 +95,8 @@ describe('mongodbClientType', () => {
         auth: { username: 'alice', password: 'secret' },
         authSource: 'admin',
         serverSelectionTimeoutMS: 10_000,
+        connectTimeoutMS: 10_000,
+        timeoutMS: 30_000,
       });
       expect(mockConnect).toHaveBeenCalledTimes(1);
       expect(result).toBe(mockClientInstance);
@@ -280,6 +282,34 @@ describe('mongodbClientType', () => {
       );
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
+
+    it('throws if the decoded username is empty', async () => {
+      const ctx = makeBuildContext({
+        credential: {
+          getAuthHeaders: jest.fn().mockResolvedValue({
+            Authorization: `Basic ${Buffer.from(':secret').toString('base64')}`,
+          }),
+        },
+      });
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'basic auth credentials (username and password) are required'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
+    it('throws if the decoded password is empty', async () => {
+      const ctx = makeBuildContext({
+        credential: {
+          getAuthHeaders: jest.fn().mockResolvedValue({
+            Authorization: `Basic ${Buffer.from('alice:').toString('base64')}`,
+          }),
+        },
+      });
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'basic auth credentials (username and password) are required'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
   });
 
   describe('terminate', () => {
@@ -325,6 +355,12 @@ describe('mongodbClientType', () => {
 
     it('returns true for MongoServerError with code 13 (Unauthorized)', () => {
       expect(isUserError(new MockMongoServerError('unauthorized', { code: 13 }))).toBe(true);
+    });
+
+    it('returns true for MongoParseError (malformed uri)', () => {
+      const err = new Error('Invalid scheme');
+      Object.defineProperty(err, 'constructor', { value: { name: 'MongoParseError' } });
+      expect(isUserError(err)).toBe(true);
     });
 
     it('returns false for MongoServerError with other error codes', () => {
