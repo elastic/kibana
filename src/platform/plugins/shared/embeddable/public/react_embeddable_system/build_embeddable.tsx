@@ -111,7 +111,6 @@ export async function buildEmbeddable<
     return {
       componentApi: finalizeApi({
         blockingError$: new BehaviorSubject(e),
-        isVisible$,
       } as unknown as EmbeddableApiRegistration<SerializedState, Api>),
       Component: () => <span />,
       internalApi,
