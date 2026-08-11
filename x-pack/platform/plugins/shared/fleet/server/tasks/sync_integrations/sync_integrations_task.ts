@@ -69,14 +69,14 @@ export class SyncIntegrationsTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -121,7 +121,7 @@ export class SyncIntegrationsTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
@@ -148,14 +148,14 @@ export class SyncIntegrationsTask {
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
+      await this.updateSyncedIntegrationsData(esClient, soClient, signal);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        abortController,
+        signal,
         this.logger
       );
 
@@ -197,7 +197,7 @@ export class SyncIntegrationsTask {
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
@@ -277,7 +277,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        abortController,
+        signal,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -295,7 +295,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: abortController.signal }
+      { signal }
     );
   };
 }

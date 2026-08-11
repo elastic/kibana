@@ -87,6 +87,25 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.assertJobSpaces(adJobId, jobType, [idSpace1]);
     });
 
+    it('should fail when attempting to remove all spaces from an AD job', async () => {
+      const jobType = 'anomaly-detector';
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
+      const body = await runRequest(
+        {
+          jobType,
+          jobIds: [adJobId],
+          spacesToAdd: [],
+          spacesToRemove: [defaultSpaceId],
+        },
+        400,
+        USER.ML_POWERUSER
+      );
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.message).to.eql(`Cannot remove job '${adJobId}' from all spaces`);
+      await ml.api.assertJobSpaces(adJobId, jobType, [defaultSpaceId]);
+    });
+
     it('should assign DFA job to space for user with access to that space', async () => {
       const jobType = 'data-frame-analytics';
       await ml.api.assertJobSpaces(dfaJobId, jobType, [defaultSpaceId]);

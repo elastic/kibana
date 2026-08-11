@@ -1,0 +1,142 @@
+name: Stale auto-close
+
+# Adding the `stale:auto-close` label to an issue or PR posts a warning comment
+# and starts a 30 day countdown. Any activity that updates the item (a comment,
+# a pushed commit, an edit, a review) restarts the countdown; removing the
+# label cancels it. A daily sweep closes anything with the label that has not
+# been updated in 30 days.
+#
+# This workflow uses `pull_request_target`, which grants a write token on fork
+# PRs. It must never check out or execute code from the PR.
+
+on:
+  issues:
+    types: [labeled]
+  pull_request_target:
+    types: [labeled]
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Log what would be closed instead of closing'
+        type: boolean
+        default: false
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  warn:
+    name: Comment when the label is added
+    runs-on: ubuntu-latest
+    if: |
+      github.event.action == 'labeled'
+      && github.event.label.name == 'stale:auto-close'
+      && !github.event.issue.pull_request
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const isPr = !!(context.payload.pull_request || context.payload.issue.pull_request);
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                `This ${isPr ? 'pull request' : 'issue'} has been marked to auto-close in 30 days unless there is new activity.`,
+                '',
+                'Any new activity restarts the 30 day countdown; removing the `stale:auto-close` label cancels it.',
+                '',
+                '<!-- stale-auto-close-warning -->',
+              ].join('\n'),
+            });
+
+  sweep:
+    name: Close after 30 days without updates
+    runs-on: ubuntu-latest
+    if: |
+      github.repository == 'elastic/kibana'
+      && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    concurrency:
+      group: stale-auto-close-sweep
+      cancel-in-progress: true
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DRY_RUN: ${{ inputs.dry_run == true }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const LABEL = 'stale:auto-close';
+            const DAYS_UNTIL_CLOSE = 30;
+            const dryRun = process.env.DRY_RUN === 'true';
+            const cutoff = Date.now() - DAYS_UNTIL_CLOSE * 24 * 60 * 60 * 1000;
+
+            // Adding the label bumps `updated_at`, so every item gets at least
+            // 30 days from the moment it is labeled, and any later activity
+            // (which also bumps `updated_at`) restarts the countdown.
+            const items = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: LABEL,
+              per_page: 100,
+            });
+
+            let closed = 0;
+            for (const item of items) {
+              if (new Date(item.updated_at).getTime() > cutoff) {
+                continue;
+              }
+
+              if (dryRun) {
+                core.info(`[dry run] would close #${item.number} (updated ${item.updated_at}): ${item.title}`);
+                continue;
+              }
+
+              // Re-check right before closing to narrow the race with new
+              // activity and manual label removal
+              const { data: fresh } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+              });
+              const stillLabeled = fresh.labels.some(
+                (label) => (typeof label === 'string' ? label : label.name) === LABEL
+              );
+              if (
+                fresh.state !== 'open' ||
+                !stillLabeled ||
+                new Date(fresh.updated_at).getTime() > cutoff
+              ) {
+                continue;
+              }
+
+              const isPr = !!item.pull_request;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+                body: [
+                  `This ${isPr ? 'pull request' : 'issue'} was closed because it had the \`${LABEL}\` label and no activity for ${DAYS_UNTIL_CLOSE} days. If it is still relevant, please leave a comment or reopen it.`,
+                  '',
+                  '<!-- stale-auto-close-closed -->',
+                ].join('\n'),
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: item.number,
+                state: 'closed',
+                ...(isPr ? {} : { state_reason: 'not_planned' }),
+              });
+              closed += 1;
+              core.info(`Closed #${item.number} (updated ${item.updated_at}): ${item.title}`);
+            }
+            core.info(
+              `Checked ${items.length} open item(s) with "${LABEL}", closed ${closed}${dryRun ? ' (dry run)' : ''}`
+            );

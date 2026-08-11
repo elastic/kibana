@@ -6,9 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { waitForApmAppMenuReady } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
@@ -19,7 +18,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getCreateCustomLinkButton() {
@@ -114,11 +113,13 @@ export class CustomLinksPage {
     const valueInput = this.page.getByTestId(`${key}.value`);
     await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
-    const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
     // SuggestionsSelect pulls options from `/internal/apm/suggestions`; on serverless terms_enum is
     // stubbed and aggregation can return empty under load, leaving no clickable option (#262047).
-    // The same control supports committing a typed value via Enter (onCreateOption).
-    await valueComboBox.setCustomSingleOption(value, { settleTimeoutMs: EXTENDED_TIMEOUT });
+    // setCustomSelectedOptions types the value and commits it via onCreateOption (Enter); we can't
+    // rely on a clickable suggestion existing here (see the #262047 note above).
+    await this.page.components
+      .comboBox(`${key}.value`)
+      .setCustomSelectedOptions([value], { timeout: EXTENDED_TIMEOUT });
   }
 
   /**

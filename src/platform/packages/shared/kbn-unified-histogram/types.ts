@@ -37,6 +37,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -142,12 +143,7 @@ export enum UnifiedHistogramExternalVisContextStatus {
   manuallyCustomized = 'manuallyCustomized',
 }
 
-export enum UnifiedHistogramSuggestionType {
-  unsupported = 'unsupported',
-  lensSuggestion = 'lensSuggestion',
-  histogramForESQL = 'histogramForESQL',
-  histogramForDataView = 'histogramForDataView',
-}
+export { UnifiedHistogramSuggestionType };
 
 export interface UnifiedHistogramSuggestionContext {
   suggestion: Suggestion | undefined;
@@ -217,6 +213,10 @@ export interface UnifiedHistogramFetchParamsExternal {
    * The ES|QL variables to use for the chart
    */
   esqlVariables?: ESQLControlVariable[];
+  /**
+   * When true, ES|QL queries use approximate execution for faster, estimated results
+   */
+  isApproximate?: boolean;
   /**
    * The controls state to use for the chart
    */

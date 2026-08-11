@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/evals-plugin'
   - '@kbn/core-chrome-browser'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

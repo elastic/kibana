@@ -69,13 +69,16 @@ export function DateRangePickerControl() {
     onInputChange,
     width,
     disabled,
+    readOnly,
     isLoading,
     settings,
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
     timeRange,
+    transformOptions,
   } = useDateRangePickerContext();
+  const { locale } = transformOptions;
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
   const hintTextPrefix = inputControlTexts.hintTextPrefix;
@@ -99,8 +102,9 @@ export function DateRangePickerControl() {
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
     rangeType: timeRange.type,
+    locale,
     onModifyPart: ({ text: currentText, part, parts, action }) => {
-      const newText = applyPartModification(currentText, part, action, parts);
+      const newText = applyPartModification(currentText, part, action, parts, locale);
       if (newText === undefined) return undefined;
       setText(newText);
       onInputChange?.(newText);
@@ -125,8 +129,10 @@ export function DateRangePickerControl() {
 
     if (!clickedPart) return;
 
-    const inputParts = parseInputParts(text, timeRange.type).filter((part) => part.navigable);
-    const displayParts = parseDisplayParts(displayText);
+    const inputParts = parseInputParts(text, timeRange.type, locale).filter(
+      (part) => part.navigable
+    );
+    const displayParts = parseDisplayParts(displayText, locale);
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
     if (target) {
@@ -139,7 +145,7 @@ export function DateRangePickerControl() {
       });
       return () => cancelAnimationFrame(requestId);
     }
-  }, [displayText, inputRef, isEditing, text, timeRange.type]);
+  }, [displayText, inputRef, isEditing, text, timeRange.type, locale]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -204,8 +210,10 @@ export function DateRangePickerControl() {
   const wrapperRestrictedStyles = css`
     inline-size: var(--kbnDateRangePickerWidthRestricted, 21.25rem);
   `;
+  // `29rem` might seem too large, but it fits a
+  // string like "Jun 15, 2026, 00:00:00 to Jun 17, 2026, 23:59:59"
   const wrapperAutoInputStyles = css`
-    inline-size: var(--kbnDateRangePickerInputWidthAuto, 24rem);
+    inline-size: var(--kbnDateRangePickerInputWidthAuto, 29rem);
   `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
@@ -216,18 +224,25 @@ export function DateRangePickerControl() {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
   `;
+  // Temporary until a fix lands in EUI
+  const disabledIconOverrideStyles = css`
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.textDisabled};
+    }
+  `;
 
   return (
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={
+      css={[
         width === 'restricted'
           ? wrapperRestrictedStyles
           : width === 'auto' && isEditing
           ? wrapperAutoInputStyles
-          : undefined
-      }
+          : undefined,
+        disabled && disabledIconOverrideStyles,
+      ]}
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
@@ -235,6 +250,7 @@ export function DateRangePickerControl() {
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
+        readOnly={readOnly}
         isLoading={isLoading}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
@@ -262,7 +278,7 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
-            disabled={disabled}
+            disabled={disabled || readOnly}
             fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
@@ -300,14 +316,15 @@ export function DateRangePickerControl() {
               aria-label={collapsed ? displayText : undefined}
               onClick={onButtonClick}
               isInvalid={isInvalid}
-              disabled={disabled}
+              disabled={disabled || readOnly}
               compressed={compressed}
             >
               {!collapsed && (
                 <DateRangeValueDisplay
                   displayText={displayText}
                   onPartClick={handleDisplayPartClick}
-                  disabled={disabled}
+                  disabled={disabled || readOnly}
+                  locale={locale}
                 />
               )}
               {!hideBadge && (

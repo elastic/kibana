@@ -16,17 +16,30 @@ export const ParamsText = ({ text }: { text: string }) => {
     <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
-            defaultMessage: 'View parameter value',
-          })}
+          content={
+            isViewing
+              ? i18n.translate('xpack.synthetics.settingsRoute.hideParam', {
+                  defaultMessage: 'Hide parameter value',
+                })
+              : i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
+                  defaultMessage: 'View parameter value',
+                })
+          }
           disableScreenReaderOutput
         >
           <EuiButtonIcon
             data-test-subj="syntheticsParamsTextButton"
             iconType={!isViewing ? 'eye' : 'eyeSlash'}
-            aria-label={i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
-              defaultMessage: 'View parameter value',
-            })}
+            aria-label={
+              isViewing
+                ? i18n.translate('xpack.synthetics.settingsRoute.hideParam', {
+                    defaultMessage: 'Hide parameter value',
+                  })
+                : i18n.translate('xpack.synthetics.settingsRoute.viewParam', {
+                    defaultMessage: 'View parameter value',
+                  })
+            }
+            aria-pressed={isViewing}
             onClick={() => setIsViewing((prevState) => !prevState)}
             disabled={!text}
           />

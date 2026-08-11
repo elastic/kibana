@@ -40,10 +40,6 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:otel-logs');
   }
 
-  public get kubernetesQuickStartCard() {
-    return this.page.getByTestId('integration-card:kubernetes-quick-start');
-  }
-
   public get otelKubernetesCard() {
     return this.page.getByTestId('integration-card:otel-kubernetes');
   }
@@ -120,9 +116,8 @@ export class OnboardingApp {
   }
 
   async selectKubernetesUseCase() {
-    const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
-    await kubernetesRadio.click();
-    await this.otelKubernetesCard.waitFor({ state: 'visible' });
+    await this.kubernetesUseCaseTile.getByRole('radio').click();
+    await this.page.waitForURL(/\/kubernetes(\?|$|#)/);
   }
 
   async selectCloudUseCase() {
@@ -144,7 +139,7 @@ export class OnboardingApp {
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
       const urlPattern =
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/;
+        /.*\/(auto-detect|kubernetes|otel-logs|apm-virtual|otel-virtual|synthetics-virtual)/;
 
       // Retry click + URL check to handle race conditions where the card
       // is rendered but React click handlers aren't yet attached after a re-render
@@ -157,10 +152,6 @@ export class OnboardingApp {
     } else {
       await card.click();
     }
-  }
-
-  async waitForIngestionModeSelector(timeout = 30_000) {
-    await this.ingestionModeSelector.waitFor({ state: 'visible', timeout });
   }
 
   async getGridColumnCount() {
@@ -198,73 +189,11 @@ export class OnboardingApp {
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
   }
 
-  public get ingestionModeSelector() {
-    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
-  }
-
-  public get classicIngestionOption() {
-    return this.ingestionModeSelector.getByRole('button', { name: /Classic ingestion/i });
-  }
-
-  public get wiredStreamsOption() {
-    return this.ingestionModeSelector.getByRole('button', { name: /Wired Streams/i });
-  }
-
-  public get techPreviewBadge() {
-    return this.ingestionModeSelector.locator('.euiBetaBadge', { hasText: 'Tech Preview' });
-  }
-
-  async selectWiredStreams() {
-    await this.wiredStreamsOption.click();
-  }
-
-  async selectClassicIngestion() {
-    await this.classicIngestionOption.click();
-  }
-
   public get autoDetectCodeSnippet() {
     return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
   }
 
-  public get kubernetesCodeSnippet() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
-  }
-
   async getAutoDetectCommandContent(): Promise<string> {
     return (await this.autoDetectCodeSnippet.textContent()) ?? '';
-  }
-
-  async getKubernetesCommandContent(): Promise<string> {
-    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
-  }
-
-  // Enable Wired Streams Modal
-  public get enableWiredStreamsModal() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsModal');
-  }
-
-  public get enableWiredStreamsCancelButton() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsCancelButton');
-  }
-
-  public get enableWiredStreamsConfirmButton() {
-    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsConfirmButton');
-  }
-
-  async cancelEnableWiredStreamsModal() {
-    await this.enableWiredStreamsCancelButton.click();
-  }
-
-  async confirmEnableWiredStreamsModal() {
-    await this.enableWiredStreamsConfirmButton.click();
-  }
-
-  async confirmEnableWiredStreamsModalIfPresent({ timeout = 2_000 } = {}) {
-    try {
-      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout });
-      await this.confirmEnableWiredStreamsModal();
-    } catch {
-      // Modal omitted: Wired Streams was already enabled in this session.
-    }
   }
 }

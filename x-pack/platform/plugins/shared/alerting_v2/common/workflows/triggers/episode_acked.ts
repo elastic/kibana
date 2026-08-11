@@ -20,6 +20,7 @@ export const episodeAckedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeAckedPayloadSchema
 > = {
   id: EPISODE_ACKED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeAckedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeAcked.title', {
     defaultMessage: 'Alerting - Episode acknowledged',

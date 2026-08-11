@@ -26,8 +26,8 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAlertingV2Viewer();
-      await pageObjects.discover.goto();
+      await browserAuth.loginAsAlertingV2Editor();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.writeAndSubmitEsqlQuery(
         'FROM kibana_sample_data_ecommerce | LIMIT 10'
       );
@@ -43,11 +43,8 @@ test.describe(
     }) => {
       await pageObjects.discoverAppMenu.openAlertsMenu();
 
-      await expect(pageObjects.discoverAppMenu.rulesTopLevelButton).toBeHidden();
-
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleButton).toBeVisible();
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toBeVisible();
-      await expect(pageObjects.discoverAppMenu.createEsqlRuleBadge).toHaveText('New');
+      await expect(pageObjects.discoverAppMenu.selectorFlyout).toBeVisible();
+      await expect(pageObjects.discoverAppMenu.createEsqlRuleCard).toBeVisible();
 
       await expect(pageObjects.discoverAppMenu.createAlertButton).toBeHidden();
       await expect(pageObjects.discoverAppMenu.manageAlertsButton).toBeHidden();

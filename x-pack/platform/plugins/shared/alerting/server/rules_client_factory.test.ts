@@ -17,6 +17,7 @@ import {
   uiSettingsServiceMock,
   securityServiceMock,
   coreFeatureFlagsMock,
+  analyticsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -122,6 +123,7 @@ describe('RulesClientFactory', () => {
       shouldGrantUiam: false,
       featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
 
     rulesClientFactoryParams.actions = actionsMock.createStart();
@@ -843,6 +845,68 @@ describe('RulesClientFactory', () => {
     );
   });
 
+  test('getAuthenticationAPIKey() throws a 400 when the request is authenticated with a raw organization-level UIAM API key', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    // Organization-level keys are presented as the raw `essu_` secret, not `base64(id:key)`
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey essu_raw_org_level_key`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    let thrownError;
+    try {
+      constructorCall.getAuthenticationAPIKey('test');
+    } catch (e) {
+      thrownError = e;
+    }
+    expect(thrownError.isBoom).toBe(true);
+    expect(thrownError.output.statusCode).toBe(400);
+    expect(thrownError.message).toMatchInlineSnapshot(
+      `"Cannot use an organization-level API key to create or enable rule \\"test\\". Organization-level API keys are not supported for rule operations; use a project-scoped Elasticsearch API key instead."`
+    );
+  });
+
+  test('getAuthenticationAPIKey() returns uiamResult for a framework-granted UIAM API key encoded as base64(id:key)', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey ${Buffer.from('uiam-key-id:essu_granted_key').toString('base64')}`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
+      apiKeysEnabled: true,
+      uiamResult: {
+        name: 'uiam-test',
+        id: 'uiam-key-id',
+        api_key: 'essu_granted_key',
+      },
+    });
+  });
+
   test('cloneAPIKey is always defined on the context', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
@@ -930,6 +994,71 @@ describe('RulesClientFactory', () => {
         encoded: 'encoded-value',
       },
     });
+  });
+
+  test('cloneAPIKey grants a fresh UIAM key (no ES clone) when the request carries a UIAM credential', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce({
+        api_key: 'uiam-key',
+        id: 'uiam-id',
+        name: 'uiam-name',
+      }),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+
+    const result = await constructorCall.cloneAPIKey('test');
+
+    expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), { name: 'uiam-test' });
+    expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      apiKeysEnabled: true,
+      uiamResult: { api_key: 'uiam-key', id: 'uiam-id', name: 'uiam-name' },
+    });
+    expect(result).not.toHaveProperty('result');
+  });
+
+  test('cloneAPIKey throws when the UIAM grant returns no key for a UIAM request', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    const requestWithUiam = mockRouter.createKibanaRequest({
+      headers: { authorization: 'ApiKey essu_uiam_api_key' },
+    });
+    await factory.create(requestWithUiam, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    const uiamApiKeys = {
+      grant: jest.fn().mockResolvedValueOnce(null),
+      invalidate: jest.fn(),
+    };
+    securityService.authc.apiKeys.uiam = uiamApiKeys as never;
+
+    await expect(constructorCall.cloneAPIKey('test')).rejects.toThrow(
+      'Failed to grant UIAM API key for cloned alerting rule'
+    );
+    expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
 
   test('cloneAPIKey throws when clone fails', async () => {
@@ -1022,5 +1151,71 @@ describe('RulesClientFactory', () => {
     securityService.authc.getCurrentUser.mockReturnValueOnce(null);
 
     expect(constructorCall.isAuthenticationTypeAPIKey()).toBe(false);
+  });
+
+  describe('invalidateApiKeyNow()', () => {
+    const esApiKey = Buffer.from('es-id:es-secret').toString('base64');
+    const uiamApiKey = Buffer.from('uiam-id:essu_uiam_secret').toString('base64');
+
+    const setupFactory = async ({ shouldGrantUiam = false } = {}) => {
+      const factory = new RulesClientFactory();
+      factory.initialize({
+        ...rulesClientFactoryParams,
+        securityService,
+        securityPluginSetup,
+        securityPluginStart,
+        shouldGrantUiam,
+      });
+      // Caller auth is intentionally non-UIAM to prove neither branch depends on it.
+      await factory.create(
+        mockRouter.createKibanaRequest({ headers: { authorization: 'Basic non-uiam-caller' } }),
+        savedObjectsService
+      );
+      return jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+    };
+
+    test('invalidates ES API key via invalidateAsInternalUser, not the caller-scoped invalidate', async () => {
+      const constructorCall = await setupFactory();
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', apiKey: esApiKey });
+
+      expect(securityService.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['es-id'],
+      });
+      expect(securityService.authc.apiKeys.invalidate).not.toHaveBeenCalled();
+    });
+
+    test("invalidates UIAM API key with a forged request carrying the rule's own UIAM credential", async () => {
+      const constructorCall = await setupFactory({ shouldGrantUiam: true });
+      const uiamInvalidate = jest.fn().mockResolvedValueOnce({});
+      securityService.authc.apiKeys.uiam = {
+        grant: jest.fn(),
+        invalidate: uiamInvalidate,
+      } as never;
+
+      await constructorCall.invalidateApiKeyNow({ ruleName: 'rule-x', uiamApiKey });
+
+      expect(uiamInvalidate).toHaveBeenCalledTimes(1);
+      const [forgedRequest, params] = uiamInvalidate.mock.calls[0];
+      expect(params).toEqual({ id: 'uiam-id' });
+      // Forged request must carry the rule's own essu_ credential, NOT the caller's.
+      expect(forgedRequest.headers.authorization).toBe('ApiKey essu_uiam_secret');
+    });
+
+    test('does not call uiam.invalidate when the stored uiamApiKey is not a UIAM credential', async () => {
+      const constructorCall = await setupFactory({ shouldGrantUiam: true });
+      const uiamInvalidate = jest.fn();
+      securityService.authc.apiKeys.uiam = {
+        grant: jest.fn(),
+        invalidate: uiamInvalidate,
+      } as never;
+
+      await constructorCall.invalidateApiKeyNow({
+        ruleName: 'rule-x',
+        uiamApiKey: Buffer.from('uiam-id:not-a-uiam-secret').toString('base64'),
+      });
+
+      expect(uiamInvalidate).not.toHaveBeenCalled();
+    });
   });
 });

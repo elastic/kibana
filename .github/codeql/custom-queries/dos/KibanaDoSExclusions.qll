@@ -32,6 +32,20 @@ predicate shouldExcludeFileFromDoSRules(Expr e) {
     (e.getFile().getBaseName() = "index.ts" and
      path.regexpMatch(".*/plugins/[^/]+(/[^/]+)?/server/index\\.ts"))
     or
+    // Client-side (browser) code. Bundled for the browser and never validates
+    // server-side HTTP request payloads, so schema.string()/z.string() here
+    // shapes client state or client-side forms, not untrusted request input.
+    // Exclude anything under a server/ dir from this rule so server-side route
+    // code that happens to nest a "public" segment (e.g. server/routes/*/public
+    // for public API endpoints) stays in scope.
+    (path.regexpMatch(".*/public/.*") and not path.regexpMatch(".*/server/.*"))
+    or
+    // Fleet saved-object schemas and migrations
+    path.regexpMatch(".*/plugins/shared/fleet/server/saved_objects/.*")
+    or
+    // Security evals evaluators (offline analysis logic, not HTTP routes)
+    path.regexpMatch(".*/kbn-evals-suite-security-esql-generation-regression/src/evaluators/.*")
+    or
     // Saved-object attribute schemas (versioned shapes, never route payloads)
     path.regexpMatch(".*/saved_objects/schemas/.*")
     or
@@ -40,6 +54,15 @@ predicate shouldExcludeFileFromDoSRules(Expr e) {
     or
     // Saved-object type sub-schemas (e.g. cases/server/saved_object_types/*/schemas/*)
     path.regexpMatch(".*/saved_object_types/.*/schemas/.*")
+    or
+    // Endpoint saved-object attribute mappings (data-at-rest, not HTTP input)
+    path.regexpMatch(".*/endpoint/lib/.*/saved_objects/mappings\\.ts")
+    or
+    // Osquery saved-query saved-object schemas (data-at-rest, not HTTP input)
+    path.regexpMatch(".*/osquery/server/lib/saved_query/schemas\\.ts")
+    or
+    // Endpoint metadata Task Manager task-state schema (internal task state, not HTTP input)
+    path.regexpMatch(".*/endpoint/lib/metadata/task_state\\.ts")
     or
     // Dashboard saved-object attribute schemas
     path.regexpMatch(".*/dashboard_saved_object/schema/.*")
@@ -63,6 +86,9 @@ predicate shouldExcludeFileFromDoSRules(Expr e) {
     or
     // Agent-builder tool parameter schemas (AI tool arguments, not HTTP routes)
     path.regexpMatch(".*/agent_builder/tools/.*")
+    or
+    // Agent-builder skill-nested tool parameter schemas (AI tool arguments, not HTTP routes)
+    path.regexpMatch(".*/agent_builder/skills/.*/tools/.*")
     or
     // Benchmark tooling config schemas
     path.regexpMatch(".*/kbn-bench/.*")

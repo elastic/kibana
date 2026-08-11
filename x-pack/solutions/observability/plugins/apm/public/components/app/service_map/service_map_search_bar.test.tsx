@@ -12,14 +12,18 @@ import { Subject } from 'rxjs';
 import { ServiceMapSearchBar } from './service_map_search_bar';
 
 let mockSetEsQuery: jest.Mock;
+let mockSetHighlightedServiceNames: jest.Mock;
 let mockOnFiltersChange: (filters: Filter[]) => void;
 let mockHistoryReplace: jest.Mock;
 let mockLocationSearch: string;
 let mockInitialAppFilters: Filter[];
+let mockRestoredControlSelections: Record<string, string[]> | undefined;
+// Field names that should be reported as absent from the data view.
+let mockMissingFields: string[];
 const filterUpdates$ = new Subject<void>();
 
 jest.mock('../../../hooks/use_apm_params', () => ({
-  useAnyOfApmParams: () => ({
+  useApmParams: () => ({
     query: {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -38,8 +42,10 @@ jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
     dataView: {
       id: 'apm-data-view',
       title: 'apm-*',
-      fields: [],
-      getFieldByName: () => undefined,
+      fields: {
+        getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
+      },
+      getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
     },
   }),
 }));
@@ -51,6 +57,7 @@ jest.mock('@kbn/observability-shared-plugin/public', () => ({
 jest.mock('./service_map_search_context', () => ({
   useServiceMapSearchContext: () => ({
     setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
+    setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
   }),
 }));
 
@@ -58,7 +65,7 @@ jest.mock('./use_filter_url_sync', () => ({
   useFilterUrlSync: () => ({
     initialAppFilters: mockInitialAppFilters,
     persistControlSelections: jest.fn(),
-    getRestoredControlSelections: () => undefined,
+    getRestoredControlSelections: () => mockRestoredControlSelections,
   }),
 }));
 
@@ -95,13 +102,15 @@ jest.mock('./service_map_controls', () => ({
     controlsConfig,
   }: {
     onFiltersChange: (filters: Filter[]) => void;
-    controlsConfig: Array<{ field_name: string }>;
+    controlsConfig: Array<{ field_name: string; width: string; grow: boolean }>;
   }) => {
     mockOnFiltersChange = onFiltersChange;
     return (
       <div
         data-testid="service-map-controls"
         data-fields={controlsConfig.map((c) => c.field_name).join(',')}
+        data-widths={controlsConfig.map((c) => c.width).join(',')}
+        data-grows={controlsConfig.map((c) => String(c.grow)).join(',')}
       />
     );
   },
@@ -126,16 +135,19 @@ jest.mock('@kbn/es-query', () => ({
       .match_phrase;
     return Object.values(mp)[0];
   },
-  isPhrasesFilter: () => false,
+  isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
 }));
 
 describe('ServiceMapSearchBar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSetEsQuery = jest.fn();
+    mockSetHighlightedServiceNames = jest.fn();
     mockHistoryReplace = jest.fn();
     mockLocationSearch = '?environment=production&kuery=service.name%3A%22opbeans-go%22';
     mockInitialAppFilters = [];
+    mockRestoredControlSelections = undefined;
+    mockMissingFields = [];
     mockFilterManager.getAppFilters.mockReturnValue([]);
     mockFilterManager.getGlobalFilters.mockReturnValue([]);
   });
@@ -151,6 +163,75 @@ describe('ServiceMapSearchBar', () => {
     // buildEsQuery was called with [{ query: '', language: 'kuery' }] so the mock
     // only includes filters, not the kuery content.
     expect(esQuery.bool.filter).toEqual([]);
+  });
+
+  it('excludes controls whose field is missing from the data view', async () => {
+    mockMissingFields = ['cloud.region'];
+
+    const { container } = render(<ServiceMapSearchBar />);
+
+    let controls: Element | null = null;
+    await waitFor(() => {
+      controls = container.querySelector('[data-testid="service-map-controls"]');
+      expect(controls).not.toBeNull();
+    });
+
+    const fields = controls!.getAttribute('data-fields') ?? '';
+    expect(fields.split(',')).toEqual([
+      'service.environment',
+      'service.name',
+      'cloud.availability_zone',
+    ]);
+  });
+
+  it('renders a single remaining control at a fixed medium width', async () => {
+    mockMissingFields = ['service.name', 'cloud.region', 'cloud.availability_zone'];
+
+    const { container } = render(<ServiceMapSearchBar />);
+
+    let controls: Element | null = null;
+    await waitFor(() => {
+      controls = container.querySelector('[data-testid="service-map-controls"]');
+      expect(controls).not.toBeNull();
+    });
+
+    expect(controls!.getAttribute('data-fields')).toBe('service.environment');
+    expect(controls!.getAttribute('data-widths')).toBe('medium');
+    expect(controls!.getAttribute('data-grows')).toBe('false');
+  });
+
+  it('renders two remaining controls at a fixed medium width', async () => {
+    mockMissingFields = ['cloud.region', 'cloud.availability_zone'];
+
+    const { container } = render(<ServiceMapSearchBar />);
+
+    let controls: Element | null = null;
+    await waitFor(() => {
+      controls = container.querySelector('[data-testid="service-map-controls"]');
+      expect(controls).not.toBeNull();
+    });
+
+    expect(controls!.getAttribute('data-fields')).toBe('service.environment,service.name');
+    expect(controls!.getAttribute('data-widths')).toBe('medium,medium');
+    expect(controls!.getAttribute('data-grows')).toBe('false,false');
+  });
+
+  it('keeps small growing controls when three or more remain', async () => {
+    mockMissingFields = ['cloud.availability_zone'];
+
+    const { container } = render(<ServiceMapSearchBar />);
+
+    let controls: Element | null = null;
+    await waitFor(() => {
+      controls = container.querySelector('[data-testid="service-map-controls"]');
+      expect(controls).not.toBeNull();
+    });
+
+    expect(controls!.getAttribute('data-fields')).toBe(
+      'service.environment,service.name,cloud.region'
+    );
+    expect(controls!.getAttribute('data-widths')).toBe('small,small,small');
+    expect(controls!.getAttribute('data-grows')).toBe('true,true,true');
   });
 
   it('does not include inherited app filters from another app on initial render', async () => {
@@ -260,6 +341,62 @@ describe('ServiceMapSearchBar', () => {
       expect(mockHistoryReplace).toHaveBeenCalled();
       const call = mockHistoryReplace.mock.calls[0][0];
       expect(call.search).toContain('environment=staging');
+    });
+  });
+
+  it('gates esQuery until Controls fire when controlSelections were restored from the URL', async () => {
+    mockRestoredControlSelections = { 'service.name': ['frontend'] };
+
+    render(<ServiceMapSearchBar />);
+
+    // Allow effects to run — should still be gated.
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(mockSetEsQuery).not.toHaveBeenCalled();
+
+    const serviceFilter: Filter = {
+      meta: { key: 'service.name', negate: false, disabled: false },
+      query: { match_phrase: { 'service.name': 'frontend' } },
+    } as unknown as Filter;
+
+    act(() => {
+      mockOnFiltersChange([serviceFilter]);
+    });
+
+    await waitFor(() => {
+      expect(mockSetEsQuery).toHaveBeenCalled();
+    });
+
+    const esQuery = mockSetEsQuery.mock.calls[0][0];
+    expect(esQuery.bool.filter).toEqual([
+      {
+        match_phrase: { 'service.name': 'value' },
+      },
+    ]);
+    expect(mockSetHighlightedServiceNames).toHaveBeenCalledWith(['frontend']);
+  });
+
+  it('updates highlightedServiceNames when the Service name control changes', async () => {
+    render(<ServiceMapSearchBar />);
+
+    const multiServiceFilter = {
+      meta: {
+        key: 'service.name',
+        negate: false,
+        disabled: false,
+        type: 'phrases',
+        params: ['frontend', 'checkout'],
+      },
+      query: {},
+    } as unknown as Filter;
+
+    act(() => {
+      mockOnFiltersChange([multiServiceFilter]);
+    });
+
+    await waitFor(() => {
+      expect(mockSetHighlightedServiceNames).toHaveBeenCalledWith(['frontend', 'checkout']);
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   type LensAttributes,
   type LensConfig,
   type LensESQLDataset,
+  type LensLegendConfig,
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
@@ -48,6 +49,7 @@ export type LensProps = Pick<
   | 'timeRange'
   | 'attributes'
   | 'esqlVariables'
+  | 'isApproximate'
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
@@ -67,6 +69,7 @@ export const useLensProps = ({
   chartRef,
   chartLayers,
   yBounds,
+  legend,
   error,
   userMessages,
   profileId,
@@ -79,6 +82,7 @@ export const useLensProps = ({
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -99,7 +103,17 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, description, chartLayers, yBounds, effectiveError, userMessages, profileId]);
+  }, [
+    query,
+    title,
+    description,
+    chartLayers,
+    yBounds,
+    legend,
+    effectiveError,
+    userMessages,
+    profileId,
+  ]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -113,6 +127,7 @@ export const useLensProps = ({
       description,
       chartLayers,
       yBounds,
+      legend,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -131,6 +146,7 @@ export const useLensProps = ({
         searchSessionId: fetchParams.searchSessionId,
         timeRange: fetchParams.relativeTimeRange, // same as in the time picker
         esqlVariables: fetchParams.esqlVariables,
+        isApproximate: fetchParams.isApproximate,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
         description,
@@ -144,6 +160,7 @@ export const useLensProps = ({
       fetchParams.relativeTimeRange,
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
+      fetchParams.isApproximate,
       description,
       userMessages,
       profileId,
@@ -253,12 +270,14 @@ const buildLensParams = ({
   description,
   chartLayers,
   yBounds,
+  legend,
 }: {
   query: string;
   title: string;
   description?: string;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
+  legend?: LensLegendConfig;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -267,9 +286,7 @@ const buildLensParams = ({
       esql: query,
     },
     title,
-    legend: {
-      show: false,
-    },
+    legend: legend ?? { show: false },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,
@@ -288,6 +305,7 @@ const getLensProps = ({
   lastReloadRequestTime,
   description,
   esqlVariables,
+  isApproximate,
   userMessages,
   profileId,
   chartId,
@@ -295,6 +313,7 @@ const getLensProps = ({
   searchSessionId?: string;
   attributes: LensAttributes;
   esqlVariables: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
   description?: string;
@@ -309,6 +328,7 @@ const getLensProps = ({
   noPadding: true,
   description,
   esqlVariables,
+  isApproximate,
   searchSessionId,
   executionContext: {
     description: 'metrics experience chart data',

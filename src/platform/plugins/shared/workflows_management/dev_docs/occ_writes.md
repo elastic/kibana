@@ -6,12 +6,14 @@ Platform primitives and bulk patterns: [`@kbn/occ` README](../../../../packages/
 
 ## Entry points
 
-| Path | CRUD method | `OccWriter` method | Reads before write? | Retries |
-|------|-------------|-------------------|---------------------|---------|
-| `WorkflowCrudService.updateWorkflow` | `readModifyWriteWorkflowDocument` | `readModifyWrite` | Yes — inside helper, per attempt | `3` (`DEFAULT_MAX_RETRIES`) |
-| `ManagedWorkflowsService.installManagedWorkflow` **create** | `createWorkflowDocument` | `create` | No | Outer install loop on id collision |
-| `ManagedWorkflowsService.installManagedWorkflow` **update** | `writeWorkflowDocumentWithOcc` | `write` (optimistic OCC) | No — install pre-read supplies `(ifSeqNo, ifPrimaryTerm)` | Outer install loop on 409 |
-| `disableAllWorkflows` | `bulkIndexWithOccRetry` | — | Per-page search only | `3` |
+| Path | CRUD method | `OccWriter` method | Reads before write? | Retries | Version |
+|------|-------------|-------------------|---------------------|---------|---------|
+| `WorkflowCrudService.updateWorkflow` | `readModifyWriteWorkflowDocument` | `readModifyWrite` | Yes — inside helper, per attempt | `3` (`DEFAULT_MAX_RETRIES`) | `applyWorkflowVersion` in composed `mutate` |
+| `ManagedWorkflowsService.installManagedWorkflow` **create** | `createWorkflowDocument` | `create` | No | Outer install loop on id collision | `applyWorkflowVersion(document, undefined)` |
+| `ManagedWorkflowsService.installManagedWorkflow` **update** | `writeWorkflowDocumentWithOcc` | `write` (optimistic OCC) | No — install pre-read supplies `(ifSeqNo, ifPrimaryTerm)` | Outer install loop on 409 | `applyWorkflowVersion` from pre-read `existing` |
+| `WorkflowCrudService.bulkCreateWorkflows` **overwrite** (existing) | `readModifyWriteWorkflowDocument` | `readModifyWrite` | Yes — per attempt | `3` (`DEFAULT_MAX_RETRIES`) | `applyWorkflowVersion` in composed `mutate` |
+| `WorkflowCrudService.bulkCreateWorkflows` **overwrite** (new id) | plain `bulk` `index` | — | No | — | `applyWorkflowVersion(document, undefined)` |
+| `disableAllWorkflows` | `bulkIndexWithOccRetry` | — | Per-page search only | `3` | `applyWorkflowVersion` per bulk item when space-scoped (`bumpVersion`) |
 
 ## CRUD write methods
 

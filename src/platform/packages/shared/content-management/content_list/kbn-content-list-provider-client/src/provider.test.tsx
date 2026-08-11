@@ -242,12 +242,12 @@ describe('ContentListClientProvider', () => {
         }),
       });
 
+      // Registration wires the KQL field + client-side filtering, but does not
+      // auto-render a toolbar control (placement is explicit via
+      // `createFilterControl`).
       expect(result.current.features.fields).toEqual([
         expect.objectContaining({ fieldName: 'contentType' }),
       ]);
-      expect(result.current.features.toolbarFilters?.contentType).toMatchObject({
-        type: 'custom_component',
-      });
       await expect(
         findIds(result.current.dataSource, {
           filters: { contentType: { include: ['visualization'] } },

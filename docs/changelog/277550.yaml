@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277550
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Show human-readable workflow step names in the graph"
+description: "Workflow graph nodes and the node detail flyout display humanized step names instead of slug-style identifiers."

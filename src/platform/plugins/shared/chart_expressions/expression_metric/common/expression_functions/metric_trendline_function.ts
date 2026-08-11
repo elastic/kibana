@@ -14,6 +14,7 @@ import { prepareLogTable } from '@kbn/visualizations-common';
 import { validateAccessor, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { MetricWTrend } from '@elastic/charts';
+import { toEpochMs } from '../utils/to_epoch_ms';
 import type { TrendlineExpressionFunctionDefinition } from '../types';
 import { DEFAULT_TRENDLINE_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
@@ -104,7 +105,7 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
 
     if (!args.breakdownBy) {
       trends[DEFAULT_TRENDLINE_NAME] = table.rows.map((row) => ({
-        x: row[timeColId],
+        x: toEpochMs(row[timeColId]),
         y: row[metricColId],
       }));
     } else {
@@ -126,7 +127,7 @@ export const metricTrendlineFunction = (): TrendlineExpressionFunctionDefinition
       for (const breakdownTerm in rowsByBreakdown) {
         if (!Object.hasOwn(rowsByBreakdown, breakdownTerm)) continue;
         trends[breakdownTerm] = rowsByBreakdown[breakdownTerm].map((row) => ({
-          x: row[timeColId] !== null ? row[timeColId] : NaN,
+          x: toEpochMs(row[timeColId]),
           y: row[metricColId] !== null ? row[metricColId] : NaN,
         }));
       }

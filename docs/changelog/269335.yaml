@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269335
+issues:
+- https://github.com/elastic/security-team/issues/17367
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+title: 'Add `platform.core.list_workflow_executions` tool for Agent Builder'

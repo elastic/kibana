@@ -33,7 +33,7 @@ export const removeAllArtifacts = () => {
   }
 };
 
-export const removeAllArtifactsPromise = () =>
+export const removeAllArtifactsPromise = (): PromiseLike<number> =>
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
     (result) => result.filter(Boolean).length
   );
@@ -69,6 +69,8 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
   [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]:
     ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
   [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS,
+  [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]:
+    ExceptionListTypeEnum.ENDPOINT_CUSTOM_YARA_SIGNATURES,
 };
 
 export const createArtifactList = (listId: keyof typeof ENDPOINT_ARTIFACT_LIST_TYPES) => {

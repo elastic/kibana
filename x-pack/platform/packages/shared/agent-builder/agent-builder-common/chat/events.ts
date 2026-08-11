@@ -21,6 +21,8 @@ import type {
   AskUserQuestionAnswer,
 } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
+import type { ConversationAccessControl } from './access_control';
+import type { UserIdAndName } from '../base/users';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -297,6 +299,10 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Set when this round initialized the bash/VFS workspace for this conversation.
+   */
+  workspace_id?: string;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -312,6 +318,8 @@ export const isRoundCompleteEvent = (
 export interface ConversationCreatedEventData {
   conversation_id: string;
   title: string;
+  access_control: ConversationAccessControl;
+  user: UserIdAndName;
 }
 
 export type ConversationCreatedEvent = ChatEventBase<
@@ -330,6 +338,7 @@ export const isConversationCreatedEvent = (
 export interface ConversationUpdatedEventData {
   conversation_id: string;
   title: string;
+  access_control: ConversationAccessControl;
 }
 
 export type ConversationUpdatedEvent = ChatEventBase<

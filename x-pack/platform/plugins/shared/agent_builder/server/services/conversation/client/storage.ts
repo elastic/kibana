@@ -6,13 +6,16 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Optional } from '@kbn/utility-types';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type {
+  ConversationAccessControl,
   ConversationInternalState,
   ConversationRoundStatus,
+  ConversationOrigin,
 } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
@@ -34,6 +37,28 @@ const storageSettings = {
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
       read: types.boolean({}),
+      pinned: types.boolean({}),
+      workspace_id: types.keyword({}),
+      access_control: types.object({
+        properties: {
+          access_mode: types.keyword({}),
+          entries: types.nested({
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+              role: types.keyword({}),
+              added_at: types.date({}),
+            },
+          }),
+        },
+        dynamic: false,
+      }),
+      origin: types.object({
+        properties: {
+          external_conversation_id: types.keyword({}),
+        },
+        dynamic: false,
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -51,6 +76,10 @@ export interface ConversationProperties {
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
   read?: boolean;
+  pinned?: boolean;
+  workspace_id?: string;
+  access_control?: Optional<ConversationAccessControl, 'entries'>;
+  origin?: ConversationOrigin;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

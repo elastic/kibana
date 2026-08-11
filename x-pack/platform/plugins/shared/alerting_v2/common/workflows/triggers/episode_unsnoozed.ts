@@ -20,6 +20,7 @@ export const episodeUnsnoozedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeUnsnoozedPayloadSchema
 > = {
   id: EPISODE_UNSNOOZED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeUnsnoozedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeUnsnoozed.title', {
     defaultMessage: 'Alerting - Episode unsnoozed',

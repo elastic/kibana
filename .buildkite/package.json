@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
+    "fallow": "2.76.0",
     "@slack/web-api": "^7.0.0",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.0",
     "axios": "^1.13.4",
-    "diff": "^8.0.4",
+    "diff": "^9.0.0",
     "globby": "^11.1.0",
     "json5": "^2.2.3",
     "yaml": "^2.8.1",
@@ -32,7 +33,7 @@
     "nock": "^12.0.2",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.1.6",
+    "typescript": "6.0.3",
     "yarn": "^1.22.22"
   },
   "overrides": {
@@ -40,6 +41,9 @@
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
-    "#pipeline-utils/*": "./pipeline-utils/*"
+    "#pipeline-utils/*": [
+      "./pipeline-utils/*.ts",
+      "./pipeline-utils/*/index.ts"
+    ]
   }
 }

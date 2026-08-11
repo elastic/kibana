@@ -76,10 +76,26 @@ export const registerListDatasetsRoute = ({
             });
           }
 
-          const { page, per_page: perPage } = request.query;
+          const {
+            page,
+            per_page: perPage,
+            search,
+            tags,
+            maturity,
+            sort_field: sortField,
+            sort_order: sortOrder,
+          } = request.query;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient();
-          const datasets = await datasetClient.list({ page, perPage });
+          const datasets = await datasetClient.list({
+            page,
+            perPage,
+            search,
+            tags,
+            maturity,
+            sortField,
+            sortOrder,
+          });
 
           return response.ok({
             body: datasets,
@@ -92,7 +108,8 @@ export const registerListDatasetsRoute = ({
               body: { message: error.message },
             });
           }
-          logger.error(`Failed to list evaluation datasets: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to list evaluation datasets: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to list evaluation datasets' },

@@ -92,6 +92,7 @@ const createQueryClient = () =>
 
 interface RenderProps {
   policy?: ActionPolicyResponse;
+  canWrite?: boolean;
   onClose?: jest.Mock;
   onEdit?: jest.Mock;
   onClone?: jest.Mock;
@@ -120,7 +121,11 @@ const renderFlyout = (props: RenderProps = {}) => {
   render(
     <QueryClientProvider client={createQueryClient()}>
       <I18nProvider>
-        <ActionPolicyDetailsFlyout policy={policy} {...handlers} />
+        <ActionPolicyDetailsFlyout
+          policy={policy}
+          canWrite={props.canWrite ?? true}
+          {...handlers}
+        />
       </I18nProvider>
     </QueryClientProvider>
   );
@@ -151,15 +156,42 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
 
-    it('renders a snoozed-until chip when the policy is actively snoozed', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: futureIso() }) });
 
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
     it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('replaces the chip with the interactive unsnooze button for writers', () => {
+      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+
+      expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toBeInTheDocument();
+      expect(screen.queryByText(/^Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('renders the snooze bell for writers on an enabled policy', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
+    });
+
+    it('does not render the snooze bell for readers', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+    });
+
+    it('unsnoozes from the header when the policy is snoozed', async () => {
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+
+      await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
     });
   });
 
@@ -169,6 +201,21 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(screen.getByText('Routes critical alerts to the oncall workflow')).toBeInTheDocument();
       expect(screen.getByText('production')).toBeInTheDocument();
+    });
+
+    it('renders a expandable list of tags when there are more than one', () => {
+      renderFlyout();
+
+      expect(screen.getByText('production')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+
+    it('opens the tags popover when the "+N" button is clicked', async () => {
+      const user = userEvent.setup();
+      renderFlyout();
+
+      await user.click(screen.getByText('+1'));
+
       expect(screen.getByText('oncall')).toBeInTheDocument();
     });
 
@@ -320,6 +367,23 @@ describe('ActionPolicyDetailsFlyout', () => {
 
       expect(handlers.onUpdateApiKey).toHaveBeenCalledWith(policy.id);
       expect(handlers.onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the user only has read privilege', () => {
+    it('hides the actions menu and the Edit footer button but keeps Close', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId(TEST_SUBJ.actionsMenuButton)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ.editButton)).not.toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.closeButton)).toBeInTheDocument();
+    });
+
+    it('still renders the policy details', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.getByTestId(TEST_SUBJ.title)).toHaveTextContent('Critical alerts policy');
+      expect(screen.getByText('data.severity : "critical"')).toBeInTheDocument();
     });
   });
 });

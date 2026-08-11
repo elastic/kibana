@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -85,14 +85,6 @@ interface SharePointSearchResponse {
   }>;
 }
 
-/**
- * Test result structure
- */
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('SharepointOnline', () => {
   const mockClient = {
     get: jest.fn(),
@@ -116,6 +108,25 @@ describe('SharepointOnline', () => {
         typeof t === 'string' ? t : t.type
       );
       expect(types).toContain('oauth_client_credentials');
+    });
+
+    it('lists delegated auth (ears, oauth_authorization_code) before app-only credentials', () => {
+      const types = (SharepointOnline.auth?.types as Array<string | { type: string }>).map((t) =>
+        typeof t === 'string' ? t : t.type
+      );
+      expect(types).toEqual([
+        'ears',
+        'oauth_authorization_code',
+        'oauth_client_credentials',
+        'oauth_client_credentials_private_key_jwt',
+      ]);
+    });
+
+    it('marks ears (Quick Connect) as recommended', () => {
+      const recommended = (SharepointOnline.auth?.types as Array<string | AuthTypeDef>)
+        .filter((t): t is AuthTypeDef => typeof t === 'object' && Boolean(t.isRecommended))
+        .map((t) => t.type);
+      expect(recommended).toEqual(['ears']);
     });
 
     it('supports ears auth with microsoft provider and SharePoint scopes', () => {
@@ -1436,6 +1447,8 @@ describe('SharepointOnline', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = SharepointOnline.test;
+
     it('should return success when API is accessible', async () => {
       const mockResponse = {
         data: {
@@ -1447,14 +1460,10 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/');
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to SharePoint Online: Contoso');
+      expect(result).toEqual({});
     });
 
     it('should handle site without display name', async () => {
@@ -1466,37 +1475,21 @@ describe('SharepointOnline', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
-      expect(result.ok).toBe(true);
-      expect(result.message).toBe('Successfully connected to SharePoint Online: Unknown');
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid credentials');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle network errors', async () => {
+    it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!SharepointOnline.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await SharepointOnline.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

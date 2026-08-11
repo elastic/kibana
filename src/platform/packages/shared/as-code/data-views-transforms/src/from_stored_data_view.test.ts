@@ -22,6 +22,48 @@ describe('fromStoredDataView', () => {
     });
   });
 
+  it('maps inline allowHidden to allow_hidden_indices and round-trips', () => {
+    const stored = {
+      title: 'my-hidden-*',
+      timeFieldName: '@timestamp',
+      allowHidden: true,
+    };
+    const api = fromStoredDataView(stored);
+    expect(api).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'my-hidden-*',
+      time_field: '@timestamp',
+      allow_hidden_indices: true,
+    });
+    expect(toStoredDataView(api)).toEqual(stored);
+  });
+
+  it('omits allow_hidden_indices when allowHidden is undefined', () => {
+    const api = fromStoredDataView({ title: 'logs-*' });
+    expect(api).not.toHaveProperty('allow_hidden_indices');
+  });
+
+  it('maps inline name and round-trips', () => {
+    const stored = {
+      title: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'My logs',
+    };
+    const api = fromStoredDataView(stored);
+    expect(api).toEqual({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    });
+    expect(toStoredDataView(api)).toEqual(stored);
+  });
+
+  it('omits name when the stored spec has no name', () => {
+    const api = fromStoredDataView({ title: 'logs-*', timeFieldName: '@timestamp' });
+    expect(api).not.toHaveProperty('name');
+  });
+
   it('maps inline spec with indexed field formats and attrs to field_settings', () => {
     expect(
       fromStoredDataView({

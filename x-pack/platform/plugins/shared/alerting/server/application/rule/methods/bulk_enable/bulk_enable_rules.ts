@@ -15,6 +15,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -349,7 +350,6 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
-  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -367,10 +367,15 @@ const bulkEnableRulesWithOCC = async (
 
   await logRuleChanges({
     ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToEnable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: bulkEnableTimestamp,
       metadata: { bulkCount: totalNumOfRules },
     },
   });
@@ -379,7 +384,7 @@ const bulkEnableRulesWithOCC = async (
   const ruleIdsFailedToEnable: Record<string, boolean> = {};
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error) {
+    if (isSavedObjectErrorResult(rule)) {
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
@@ -419,7 +424,7 @@ const bulkEnableRulesWithOCC = async (
   const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
       if (rule.attributes.scheduledTaskId) {
         taskIdsToEnable.push(rule.attributes.scheduledTaskId);
       }

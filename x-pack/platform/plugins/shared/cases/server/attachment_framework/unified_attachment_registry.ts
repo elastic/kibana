@@ -17,7 +17,7 @@ export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<Unifie
     const item: UnifiedAttachmentType = {
       id: attachmentType.id,
       schema: attachmentType.schema,
-      schemaValidator: attachmentType.schemaValidator,
+      workflowSchema: attachmentType.workflowSchema,
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
     };
 

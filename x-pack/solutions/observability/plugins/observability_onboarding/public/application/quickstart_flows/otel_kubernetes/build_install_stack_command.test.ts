@@ -135,101 +135,11 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
   });
 
   describe('wired streams', () => {
-    it('does not include wired streams config when useWiredStreams is false', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        useWiredStreams: false,
-      });
+    it('never emits a wired streams processor', () => {
+      const command = buildInstallStackCommand(defaultArgs);
 
       expect(command).not.toContain('resource\\/wired_streams');
       expect(command).not.toContain('elasticsearch.index');
-    });
-
-    it('routes daemon logs to wired streams when useWiredStreams is true (direct ES)', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: false,
-        useWiredStreams: true,
-      });
-
-      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
-      expect(command).toContain('elasticsearch.index');
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[10]=resource/wired_streams'
-      );
-      expect(command).not.toContain('logs\\/apm');
-    });
-
-    it('routes daemon logs to wired streams when useWiredStreams is true (managed OTLP)', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
-      expect(command).toContain('elasticsearch.index');
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id'
-      );
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[10]=resource/wired_streams'
-      );
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/wired_streams');
-      expect(command).not.toContain('logs\\/apm');
-    });
-
-    it('excludes APM logs from wired streams regardless of metrics onboarding setting', () => {
-      const withMetrics = buildInstallStackCommand({
-        ...defaultArgs,
-        isMetricsOnboardingEnabled: true,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      const withoutMetrics = buildInstallStackCommand({
-        ...defaultArgs,
-        isMetricsOnboardingEnabled: false,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      expect(withMetrics).not.toContain('logs\\/apm');
-      expect(withoutMetrics).not.toContain('logs\\/apm');
-    });
-
-    it('does not modify gateway config when useWiredStreams is true', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        useWiredStreams: true,
-      });
-
-      expect(command).not.toContain('collectors.gateway.config');
-      expect(command).not.toContain('logs_index=logs');
-    });
-
-    it('assigns custom log processors after the base daemon processors', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/wired_streams');
-      expect(command).toContain('logs\\/node.processors[9]=resource/onboarding_id');
-      expect(command).toContain('logs\\/node.processors[10]=resource/wired_streams');
-
-      const onboardingIdPipelineIndex = command.indexOf(
-        'logs\\/node.processors[9]=resource/onboarding_id'
-      );
-      const wiredStreamsPipelineIndex = command.indexOf(
-        'logs\\/node.processors[10]=resource/wired_streams'
-      );
-      expect(onboardingIdPipelineIndex).toBeGreaterThan(-1);
-      expect(wiredStreamsPipelineIndex).toBeGreaterThan(-1);
-      expect(onboardingIdPipelineIndex).toBeLessThan(wiredStreamsPipelineIndex);
     });
   });
 });
