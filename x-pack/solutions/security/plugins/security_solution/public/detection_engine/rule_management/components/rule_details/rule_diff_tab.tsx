@@ -116,6 +116,10 @@ export const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   return rule;
 };
 
+// Stable default so callers that don't pass `extraHiddenProperties` keep a constant dependency
+// identity and don't recompute the diff memo on every render.
+const NO_EXTRA_HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [];
+
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
@@ -134,7 +138,7 @@ export const RuleDiffTab = ({
   rightDiffSideLabel,
   leftDiffSideDescription,
   rightDiffSideDescription,
-  extraHiddenProperties = [],
+  extraHiddenProperties = NO_EXTRA_HIDDEN_PROPERTIES,
 }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
     const hiddenProperties = [...HIDDEN_PROPERTIES, ...extraHiddenProperties];
