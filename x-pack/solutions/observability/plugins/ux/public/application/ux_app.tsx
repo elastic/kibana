@@ -8,11 +8,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
+import { RouterProvider, createRouter, RouteRenderer } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import * as t from 'io-ts';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -30,6 +31,8 @@ import { UrlParamsProvider } from '../context/url_params_context/url_params_cont
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { PluginContext } from '../context/plugin_context';
+import { SessionListPage } from '../components/session_replay/session_list_page';
+import { SessionPlayerPage } from '../components/session_replay/session_player_page';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -65,7 +68,7 @@ export const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
   },
 ];
 
-function UxApp() {
+function UxDashboardPage() {
   useBreadcrumbs(UX_BREADCRUMBS);
 
   return (
@@ -75,7 +78,22 @@ function UxApp() {
   );
 }
 
-export const uxRouter = createRouter({});
+const createUxRoutes = (sessionReplayEnabled: boolean) => ({
+  '/': {
+    element: <UxDashboardPage />,
+  },
+  '/session-replay': {
+    element: sessionReplayEnabled ? <SessionListPage /> : <Redirect to="/" />,
+  },
+  '/session-replay/{sessionId}': {
+    params: t.type({
+      path: t.type({
+        sessionId: t.string,
+      }),
+    }),
+    element: sessionReplayEnabled ? <SessionPlayerPage /> : <Redirect to="/" />,
+  },
+});
 
 export function UXAppRoot({
   appMountParameters,
@@ -95,6 +113,7 @@ export function UXAppRoot({
   },
   isDev,
   spaceId,
+  sessionReplayEnabled,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -102,9 +121,14 @@ export function UXAppRoot({
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
   spaceId: string;
+  sessionReplayEnabled: boolean;
 }) {
   const { history } = appMountParameters;
   const plugins = { ...deps, maps };
+  const uxRouter = React.useMemo(
+    () => createRouter(createUxRoutes(sessionReplayEnabled)),
+    [sessionReplayEnabled]
+  );
 
   createCallApmApi(core);
 
@@ -149,12 +173,12 @@ export function UXAppRoot({
                   isDev,
                 }}
               >
-                <RouterProvider history={history} router={uxRouter}>
+                <RouterProvider history={history} router={uxRouter as any}>
                   <DatePickerContextProvider>
                     <InspectorContextProvider>
                       <UrlParamsProvider>
                         <CsmSharedContextProvider>
-                          <UxApp />
+                          <RouteRenderer />
                         </CsmSharedContextProvider>
                       </UrlParamsProvider>
                     </InspectorContextProvider>
@@ -180,6 +204,7 @@ export const renderApp = ({
   corePlugins,
   isDev,
   spaceId,
+  sessionReplayEnabled,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
@@ -187,6 +212,7 @@ export const renderApp = ({
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
   spaceId: string;
+  sessionReplayEnabled: boolean;
 }) => {
   const { element } = appMountParameters;
 
@@ -210,6 +236,7 @@ export const renderApp = ({
       corePlugins={corePlugins}
       isDev={isDev}
       spaceId={spaceId}
+      sessionReplayEnabled={sessionReplayEnabled}
     />,
     element
   );

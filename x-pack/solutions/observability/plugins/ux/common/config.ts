@@ -11,10 +11,16 @@ import { schema } from '@kbn/config-schema';
 
 const uxConfig = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  sessionReplay: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uxConfig,
+  exposeToBrowser: {
+    sessionReplay: true,
+  },
 };
 
 export type UXConfig = TypeOf<typeof uxConfig>;
