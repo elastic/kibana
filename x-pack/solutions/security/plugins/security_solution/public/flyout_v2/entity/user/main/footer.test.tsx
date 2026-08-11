@@ -10,13 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { Footer } from './footer';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-
-const ADD_TO_CASE_TEST_ID = 'add-to-case-action';
-
-jest.mock('@kbn/response-ops-alerts-table', () => ({
-  ...jest.requireActual('@kbn/response-ops-alerts-table'),
-  AddToCaseContextMenuItem: () => <div data-test-subj="add-to-case-action" />,
-}));
+import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/entity/test_ids';
 
 jest.mock('@kbn/entity-store/public', () => ({
   useEntityStoreEuidApi: jest.fn(() => null),
@@ -54,13 +48,8 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../cases/attachments/entity/components/add_to_new_case', () => ({
-  ADD_TO_NEW_CASE: 'Add to new case',
-  useAddToNewCase: () => jest.fn(),
-}));
-jest.mock('../../../../cases/attachments/entity/components/add_to_existing_case', () => ({
-  ADD_TO_EXISTING_CASE: 'Add to existing case',
-  useAddToExistingCase: () => jest.fn(),
+jest.mock('../../../../cases/attachments/entity/components/add_to_case', () => ({
+  AddToCase: () => <div data-test-subj="eaCasesAddToCase" />,
 }));
 
 const USER_IDENTITY_FIELDS = { 'user.name': 'alice' };
@@ -97,7 +86,7 @@ const renderFooter = (
 describe('Footer – entity attachment actions', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('renders the Add to case submenu when all conditions are met', () => {
+  it('renders the Add to case action when all conditions are met', () => {
     renderFooter(true, true, ENTITY_STORE_RECORD);
 
     expect(screen.getByTestId(ADD_TO_CASE_TEST_ID)).toBeInTheDocument();

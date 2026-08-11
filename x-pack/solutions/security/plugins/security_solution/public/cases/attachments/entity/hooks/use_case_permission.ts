@@ -10,12 +10,11 @@ import { APP_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface EntityCasePermissions {
-  canAddToExistingCase: boolean;
-  canAddToNewCase: boolean;
+  canAddToCase: boolean;
 }
 
 /**
- * Returns if a user can add an entity to an existing or new case based on Cases permissions.
+ * Returns if a user can add an entity to a new or existing case.
  * `createComment` is required because attachments are added as case comment/user-action entries.
  * Existing case requires `update` + `createComment`; new case requires `create` + `createComment`.
  * Owner is scoped to `APP_ID` (`securitySolution`) so permissions match what the Cases API enforces.
@@ -25,7 +24,6 @@ export const useEntityCasePermissions = (): EntityCasePermissions => {
   const permissions: CasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   return {
-    canAddToExistingCase: permissions.update && permissions.createComment,
-    canAddToNewCase: permissions.create && permissions.createComment,
+    canAddToCase: permissions.createComment && (permissions.create || permissions.update),
   };
 };
