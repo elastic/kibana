@@ -33,6 +33,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
 } from '@kbn/detections-response-ftr-services';
 import {
   getEqlRuleForAlertTesting,
@@ -225,6 +226,7 @@ export default ({ getService }: FtrProviderContext) => {
             interval: '30m',
           };
           const createdRule = await createRule(supertest, log, rule);
+          await waitForAlertsToBePresent(supertest, log, 1, [createdRule.id]);
           const alerts = await getOpenAlerts(supertest, log, es, createdRule);
 
           // Close the alert. Subsequent rule executions should ignore this closed alert
