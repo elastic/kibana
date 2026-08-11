@@ -54,6 +54,84 @@
         "line": 71,
         "column": 15
       }
+    },
+    {
+      "id": "90c04f88fddb995-c172a5d2e45e7b9",
+      "title": "Lens chart switching transitions from metric to table to metric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "90c04f88fddb995-6901d63cf80f0b9",
+      "title": "Lens chart switching transitions from line chart to pie chart and to bar chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 61,
+        "column": 3
+      }
+    },
+    {
+      "id": "90c04f88fddb995-ab6487fb390c1bc",
+      "title": "Lens chart switching transitions from bar chart to line chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 91,
+        "column": 13
+      }
+    },
+    {
+      "id": "90c04f88fddb995-755f7aa7972d120",
+      "title": "Lens chart switching transitions from pie chart to treemap chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 107,
+        "column": 13
+      }
+    },
+    {
+      "id": "90c04f88fddb995-cfe150c3ffb8112",
+      "title": "Lens chart switching creates a pie chart and switches to datatable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 122,
+        "column": 13
+      }
+    },
+    {
+      "id": "90c04f88fddb995-857a3188ac9ce95",
+      "title": "Lens chart switching creates a heatmap chart and transitions to bar chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel_tests/chart_switching.spec.ts",
+        "line": 154,
+        "column": 13
+      }
     }
   ]
 }

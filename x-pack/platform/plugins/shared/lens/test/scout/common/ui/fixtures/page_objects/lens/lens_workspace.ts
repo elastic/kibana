@@ -13,6 +13,8 @@ import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 interface LensWorkspaceDeps {
   closeDimensionEditorButton: Locator;
   waitForLensApp: () => Promise<void>;
+  waitForKibanaLoading: () => Promise<void>;
+  waitForFieldListReady: (sampleField?: string) => Promise<void>;
   waitForVisualization: (chartTestSubj: string) => Promise<void>;
   getFormulaModelIndex: () => Promise<number>;
   getCodeEditorValue: (modelIndex: number) => Promise<string>;
@@ -69,7 +71,22 @@ export class LensWorkspace {
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
+    await this.deps.waitForKibanaLoading();
     await this.deps.waitForLensApp();
+    // Kibana applies `_g` (time/filters) after the shell `load` event. Interacting before
+    // that hash settles remounts Lens to empty Create mid-configureDimension.
+    await this.page.waitForURL(
+      (url) => url.pathname.includes('/app/lens') && /#\/(\?|_g=|edit\/)/.test(url.hash),
+      { timeout: 30_000 }
+    );
+    await this.deps.waitForFieldListReady();
+    // Wait until the default XY empty dimension is interactive — returning on `lnsApp`
+    // alone races configureDimension against the field list / layer panel still mounting.
+    await this.page.testSubj
+      .locator('lnsXY_yDimensionPanel > lns-empty-dimension')
+      .waitFor({ state: 'visible', timeout: 20_000 });
+    // Absorb a trailing chrome remount after the field list first paints.
+    await this.deps.waitForKibanaLoading();
   }
 
   /**
@@ -84,6 +101,7 @@ export class LensWorkspace {
    */
   async openEditor(id: string, chartTestSubj: string) {
     await this.page.gotoApp('lens', { hash: `/edit/${id}` });
+    await this.deps.waitForKibanaLoading();
     await this.deps.waitForVisualization(chartTestSubj);
   }
 

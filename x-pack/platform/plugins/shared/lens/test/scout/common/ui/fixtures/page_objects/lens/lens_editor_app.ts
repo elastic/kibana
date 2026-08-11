@@ -6,6 +6,7 @@
  */
 
 import { createLazyPageObject, LensApp, type ScoutPage } from '@kbn/scout';
+import { LensChartSwitch } from './lens_chart_switch';
 import { LensDatatable } from './lens_datatable';
 import { LensDimensions } from './lens_dimensions';
 import { LensDragDrop } from './lens_drag_drop';
@@ -36,6 +37,8 @@ export class LensEditorApp extends LensApp {
    * (geo, extra drop types, reorder, keyboard DnD, data-panel switch).
    */
   public readonly dragDrop: LensDragDrop;
+  /** Chart-switch warning / popover helpers. */
+  public readonly chartSwitch: LensChartSwitch;
 
   constructor(page: ScoutPage) {
     super(page);
@@ -50,6 +53,8 @@ export class LensEditorApp extends LensApp {
     this.workspace = createLazyPageObject(LensWorkspace, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),
+      waitForKibanaLoading: () => this.waitForKibanaLoading(),
+      waitForFieldListReady: (sampleField?: string) => this.waitForFieldListReady(sampleField),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
       getFormulaModelIndex: () => this.getFormulaModelIndex(),
       getCodeEditorValue: (modelIndex: number) => this.codeEditor.getCodeEditorValue(modelIndex),
@@ -61,5 +66,19 @@ export class LensEditorApp extends LensApp {
       html5DragAndDrop: (from: string, to: string) => this.html5DragAndDrop(from, to),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
+    this.chartSwitch = createLazyPageObject(LensChartSwitch, page);
+  }
+
+  /**
+   * FTR `switchToVisualization` always activates `layerIndex` before opening the
+   * chart switcher. After `createLayer`, the new layer is selected — without this,
+   * a bare `switchToVisualization('line')` changes layer 1 and leaves layer 0 as Bar.
+   */
+  async switchToVisualization(
+    visType: string,
+    options?: { search?: string; layerIndex?: number }
+  ) {
+    await this.layers.ensureLayerTabIsActive(options?.layerIndex ?? 0);
+    await super.switchToVisualization(visType, options);
   }
 }
