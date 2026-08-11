@@ -10,6 +10,7 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   customContentStateSchema,
 } from '@kbn/custom-content-common';
@@ -43,6 +44,15 @@ export const customContentPanelConfigSchema = customContentStateSchema.extend({
   template: z
     .string()
     .max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH)
+    .check((ctx) => {
+      if (Buffer.byteLength(ctx.value, 'utf8') > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
+        ctx.issues.push({
+          code: 'custom',
+          message: `Template exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`,
+          input: ctx.value,
+        });
+      }
+    })
     .optional()
     .describe(
       'LiquidJS HTML template to render directly. No JavaScript (<script> tags are rejected). When `esqlQuery` is set, each row is accessible as `{{ row["field_name"].value }}`.'
