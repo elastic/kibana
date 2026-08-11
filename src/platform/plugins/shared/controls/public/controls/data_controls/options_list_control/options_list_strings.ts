@@ -276,7 +276,7 @@ export const OptionsListStrings = {
       }),
     getPartialResultsTitle: () =>
       i18n.translate('controls.optionsList.popover.footer.partialResultsTitle', {
-        defaultMessage: 'Some values may be missing.',
+        defaultMessage: 'Some values might be missing',
       }),
     getPartialResultsTooltip: (viewMode: ViewMode) =>
       viewMode === 'edit'
