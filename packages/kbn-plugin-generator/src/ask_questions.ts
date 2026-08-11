@@ -73,7 +73,7 @@ export const QUESTIONS = [
   {
     name: 'description',
     message: 'Provide a description for your plugin.',
-    default: '',
+    default: undefined,
   },
   {
     name: 'ownerName',
