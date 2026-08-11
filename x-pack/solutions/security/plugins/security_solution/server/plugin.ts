@@ -291,6 +291,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger,
         isServerless: this.isServerless,
       },
+      this.productFeaturesService,
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true

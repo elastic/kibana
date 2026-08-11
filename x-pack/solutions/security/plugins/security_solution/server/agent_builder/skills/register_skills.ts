@@ -22,6 +22,7 @@ import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
+import { summarizeAutomaticMigrationSkill, startAutomaticMigrationSkill } from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
@@ -89,6 +90,16 @@ export const registerSkills = async ({
   }
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     await agentBuilder.skills.register(siemReadinessSkill);
+  }
+
+  // Automatic Migration sibling skills: gated by the Automatic Migration feature flag and the
+  // dedicated agent-builder experimental flag, so skills ship in lockstep with their tools.
+  if (
+    !experimentalFeatures.siemMigrationsDisabled &&
+    experimentalFeatures.siemMigrationsAgentBuilderEnabled
+  ) {
+    await agentBuilder.skills.register(summarizeAutomaticMigrationSkill);
+    await agentBuilder.skills.register(startAutomaticMigrationSkill);
   }
 
   if (experimentalFeatures.leadGenerationEnabled) {

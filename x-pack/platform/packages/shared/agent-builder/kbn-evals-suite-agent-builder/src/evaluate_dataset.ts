@@ -181,6 +181,26 @@ function configureExperiment({
         };
       },
     },
+    // Asserts a tool was NOT invoked in the turn — used by mutating-skill evals to enforce
+    // "no silent mutation" (e.g. start_rule_migration must not fire without user confirmation).
+    // Score 1 when the tool is absent; 0 when it was called. No-op when metadata is unset.
+    {
+      name: 'ShouldNotCallTool',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const shouldNotCallToolId = getStringMeta(metadata, 'shouldNotCallToolId');
+        if (!shouldNotCallToolId) return { score: 1 };
+
+        const toolCalls = getToolCallSteps(output as TaskOutput);
+        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const invoked = usedToolIds.includes(shouldNotCallToolId);
+
+        return {
+          score: invoked ? 0 : 1,
+          metadata: { shouldNotCallToolId, usedToolIds },
+        };
+      },
+    },
     {
       name: 'ToolUsageOnly',
       kind: 'CODE' as const,
@@ -275,10 +295,18 @@ function configureExperiment({
       evaluate: async ({ output, metadata }) => {
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
-        const skillName = expectedSkill ?? shouldNotActivate;
+        // Optional array form: assert NONE of these skills were invoked. Backward-compatible with
+        // the single `shouldNotActivateSkill` key; both may be present.
+        const shouldNotActivateRaw = metadata?.shouldNotActivateSkills;
+        const shouldNotActivateList = Array.isArray(shouldNotActivateRaw)
+          ? (shouldNotActivateRaw as unknown[]).filter(
+              (s): s is string => typeof s === 'string' && /^[a-zA-Z0-9_-]+$/.test(s)
+            )
+          : [];
 
-        if (!skillName) return { score: 1 };
-        if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+        const skillName = expectedSkill ?? shouldNotActivate;
+        if (!skillName && shouldNotActivateList.length === 0) return { score: 1 };
+        if (skillName && !/^[a-zA-Z0-9_-]+$/.test(skillName)) {
           return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
         }
 
@@ -298,32 +326,50 @@ function configureExperiment({
           };
         }
 
-        const query = `FROM traces-*
+        // Build the set of skill names to check: the expected/should-not single name, plus any
+        // from the array form. Each is queried against the trace separately.
+        const skillsToCheck = new Set<string>();
+        if (skillName) skillsToCheck.add(skillName);
+        for (const s of shouldNotActivateList) skillsToCheck.add(s);
+
+        const checkInvoked = async (name: string): Promise<boolean> => {
+          const query = `FROM traces-*
 | WHERE trace_id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*",
+        AND attributes.gen_ai.tool.call.arguments LIKE "*/${name}/SKILL.md*",
       1,
       NULL
     )
   )`;
-
-        try {
           const response = (await traceEsClient.esql.query({ query })) as unknown as {
             values: number[][];
           };
-          const invoked = (response.values?.[0]?.[0] ?? 0) > 0;
+          return (response.values?.[0]?.[0] ?? 0) > 0;
+        };
+
+        try {
+          const results = await Promise.all(
+            [...skillsToCheck].map(async (name) => [name, await checkInvoked(name)] as const)
+          );
+          const invokedMap = Object.fromEntries(results);
 
           if (expectedSkill) {
             return {
-              score: invoked ? 1 : 0,
-              metadata: { expectedSkill, invoked },
+              score: invokedMap[expectedSkill] ? 1 : 0,
+              metadata: { expectedSkill, invoked: invokedMap[expectedSkill] },
             };
           }
+          // shouldNotActivate (single or list): score 1 only when NONE were invoked.
+          const anyInvoked = Object.values(invokedMap).some((v) => v);
           return {
-            score: invoked ? 0 : 1,
-            metadata: { shouldNotActivateSkill: shouldNotActivate, invoked },
+            score: anyInvoked ? 0 : 1,
+            metadata: {
+              shouldNotActivateSkill: shouldNotActivate,
+              shouldNotActivateSkills: shouldNotActivateList,
+              invoked: invokedMap,
+            },
           };
         } catch (error) {
           log.warning(

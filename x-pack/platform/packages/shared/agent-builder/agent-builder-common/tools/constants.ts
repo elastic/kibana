@@ -39,6 +39,7 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listAiConnectors: platformCoreTool('list_ai_connectors'),
 } as const;
 
 const casesTool = <TName extends string>(

@@ -10,8 +10,15 @@ import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_d
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill, ALERT_TRIAGE_TOOL_ID } from './alert_triage';
+import { summarizeAutomaticMigrationSkill, startAutomaticMigrationSkill } from './siem_migration';
 
-const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill, alertTriageSkill];
+const ALL_SKILLS = [
+  threatHuntingSkill,
+  alertAnalysisSkill,
+  alertTriageSkill,
+  summarizeAutomaticMigrationSkill,
+  startAutomaticMigrationSkill,
+];
 
 describe('Security Skills', () => {
   describe('threat-hunting skill', () => {
@@ -131,6 +138,96 @@ describe('Security Skills', () => {
 
     it('content references alert-analysis for investigation', () => {
       expect(alertTriageSkill.content).toContain('alert-analysis');
+    });
+  });
+
+  describe('summarize-automatic-migration skill', () => {
+    it('validates successfully via validateSkillDefinition', async () => {
+      await expect(
+        validateSkillDefinition(summarizeAutomaticMigrationSkill)
+      ).resolves.toBeDefined();
+    });
+
+    it('has non-empty content', () => {
+      expect(summarizeAutomaticMigrationSkill.content.length).toBeGreaterThan(100);
+    });
+
+    it('has description under 1024 characters', () => {
+      expect(summarizeAutomaticMigrationSkill.description.length).toBeLessThanOrEqual(1024);
+    });
+
+    it('returns 5 registry tools (under 25 limit)', () => {
+      const tools = summarizeAutomaticMigrationSkill.getRegistryTools!();
+      expect(tools).toHaveLength(5);
+      expect((tools as string[]).length).toBeLessThanOrEqual(25);
+    });
+
+    it('has no inline tools', () => {
+      expect(summarizeAutomaticMigrationSkill.getInlineTools).toBeUndefined();
+    });
+
+    it('content includes the Automatic Migration capabilities block', () => {
+      expect(summarizeAutomaticMigrationSkill.content).toContain(
+        'Automatic Migration Capabilities'
+      );
+    });
+
+    it('content includes the name-never-id resolution policy', () => {
+      expect(summarizeAutomaticMigrationSkill.content).toContain('Name, Never Ask for an ID');
+    });
+
+    it('uses user-facing "Automatic Migration" naming, not "SIEM migration"', () => {
+      expect(summarizeAutomaticMigrationSkill.description).toContain('Automatic Migration');
+      expect(summarizeAutomaticMigrationSkill.description).not.toContain('SIEM migration');
+    });
+  });
+
+  describe('start-automatic-migration skill', () => {
+    it('validates successfully via validateSkillDefinition', async () => {
+      await expect(validateSkillDefinition(startAutomaticMigrationSkill)).resolves.toBeDefined();
+    });
+
+    it('has non-empty content', () => {
+      expect(startAutomaticMigrationSkill.content.length).toBeGreaterThan(100);
+    });
+
+    it('has description under 1024 characters', () => {
+      expect(startAutomaticMigrationSkill.description.length).toBeLessThanOrEqual(1024);
+    });
+
+    it('returns 7 registry tools (under 25 limit)', () => {
+      const tools = startAutomaticMigrationSkill.getRegistryTools!();
+      expect(tools).toHaveLength(7);
+      expect((tools as string[]).length).toBeLessThanOrEqual(25);
+    });
+
+    it('includes the start_rule_migration tool', () => {
+      const tools = startAutomaticMigrationSkill.getRegistryTools!();
+      expect(tools).toContain('security.siem_migration.start_rule_migration');
+    });
+
+    it('includes list_ai_connectors for connector resolution', () => {
+      const tools = startAutomaticMigrationSkill.getRegistryTools!();
+      expect(tools).toContain(platformCoreTools.listAiConnectors);
+    });
+
+    it('has no inline tools', () => {
+      expect(startAutomaticMigrationSkill.getInlineTools).toBeUndefined();
+    });
+
+    it('content includes the START vs REPROCESS vs RESUME decision matrix', () => {
+      expect(startAutomaticMigrationSkill.content).toContain('START vs REPROCESS vs RESUME');
+      expect(startAutomaticMigrationSkill.content).toContain('RESUME');
+    });
+
+    it('content mandates user confirmation before mutating', () => {
+      expect(startAutomaticMigrationSkill.content).toContain('confirm');
+      expect(startAutomaticMigrationSkill.content).toContain('No Silent Mutations');
+    });
+
+    it('uses user-facing "Automatic Migration" naming, not "SIEM migration"', () => {
+      expect(startAutomaticMigrationSkill.description).toContain('Automatic Migration');
+      expect(startAutomaticMigrationSkill.description).not.toContain('SIEM migration');
     });
   });
 
