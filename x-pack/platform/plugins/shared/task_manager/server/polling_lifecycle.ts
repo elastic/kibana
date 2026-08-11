@@ -373,18 +373,26 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
       async (tasks: TaskRunner[]) => {
-        // If a pause landed after tasks were claimed in this cycle, don't start
-        // them; they idle out via retryAt and are reclaimed once resumed.
-        if (this.executionControlService.getState().paused) {
+        const { paused, pausedTaskTypes } = this.executionControlService.getState();
+        // If a global pause landed after tasks were claimed in this cycle, don't
+        // start any of them; they idle out via retryAt and are reclaimed once resumed.
+        if (paused) {
           this.logger.debug(
             'Task Manager execution was paused mid-cycle; not running the tasks claimed in this cycle.'
           );
           return TaskPoolRunResult.NoTaskWereRan;
         }
+        // Likewise, if specific task types were paused mid-cycle, don't start the
+        // tasks of those types that were already claimed in this cycle.
+        const pausedTypes = new Set(pausedTaskTypes);
         const tasksToRun = [];
         const removeTaskPromises = [];
         for (const task of tasks) {
-          if (task.isAdHocTaskAndOutOfAttempts) {
+          if (pausedTypes.has(task.taskType)) {
+            this.logger.debug(
+              `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
+            );
+          } else if (task.isAdHocTaskAndOutOfAttempts) {
             this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
             removeTaskPromises.push(task.removeTask());
           } else {

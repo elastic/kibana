@@ -196,5 +196,21 @@ describe('executionControlRoutes', () => {
         pausedTaskTypes: ['bar'],
       });
     });
+
+    it('rejects unknown task types with a 400', async () => {
+      const { router, service } = setup();
+      const { handler } = getRoute(router, 'post', '/internal/task_manager/execution/_resume');
+      const [ctx, req, res] = mockHandlerArguments({}, { body: { task_types: ['nope'] } }, [
+        'ok',
+        'badRequest',
+      ]);
+
+      await handler(ctx, req, res);
+
+      expect(res.badRequest).toHaveBeenCalledWith({
+        body: 'Unknown task types: nope',
+      });
+      expect(service.update).not.toHaveBeenCalled();
+    });
   });
 });

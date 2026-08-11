@@ -165,6 +165,15 @@ export function executionControlRoutes(params: ExecutionControlRouteParams) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> => {
       const taskTypes = req.body?.task_types;
+      if (taskTypes) {
+        const unknownTypes = validateTaskTypes(taskTypes);
+        if (unknownTypes.length) {
+          return res.badRequest({
+            body: `Unknown task types: ${unknownTypes.join(', ')}`,
+          });
+        }
+      }
+
       const service = await getExecutionControlService();
       const username = await getUsername(req);
       const next = await service.update(
