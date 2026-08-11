@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PersistableStateAttachmentTypeSetup } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const getPersistableStateAttachmentServer = (): PersistableStateAttachmentTypeSetup => ({
-  id: '.test',
+export default createPlaywrightConfig({
+  testDir: './tests',
 });

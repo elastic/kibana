@@ -5,21 +5,9 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
-import {
-  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
-  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
-} from '../../common/constants';
-
-export const customContentStateSchema = lazySchema(() =>
-  z.object({
-    prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
-    esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-    template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
-  })
-);
+import { customContentStateSchema } from '@kbn/custom-content-common';
 
 export const customContentEmbeddableSchema = lazySchema(() =>
   z.object({
@@ -28,5 +16,4 @@ export const customContentEmbeddableSchema = lazySchema(() =>
   })
 );
 
-export type CustomContentState = z.output<typeof customContentStateSchema>;
 export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;

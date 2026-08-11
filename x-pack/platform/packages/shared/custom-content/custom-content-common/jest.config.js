@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/server/attachment_framework/types';
-
-export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
-  id: '.test',
-});
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/custom-content/custom-content-common'],
+};
