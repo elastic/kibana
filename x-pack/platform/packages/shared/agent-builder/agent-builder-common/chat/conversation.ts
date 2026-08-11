@@ -494,11 +494,7 @@ export interface Conversation {
   origin?: ConversationOrigin;
   /** Whether the conversation has been pinned by the user. */
   pinned?: boolean;
-  /**
-   * Whether the conversation's history is presented as frozen in the UI: the rounds are shown
-   * but no message input is offered. Purely presentational — it carries no authorization
-   * meaning, and a read-only conversation can still be continued through the API.
-   */
+  /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
   read_only?: boolean;
 }
 
