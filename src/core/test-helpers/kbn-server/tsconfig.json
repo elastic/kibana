@@ -16,11 +16,12 @@
     "@kbn/config",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/core-root-server-internal",
-    "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/es",
     "@kbn/dev-utils",
     "@kbn/safer-lodash-set",
+    "@kbn/repo-info",
+    "@kbn/utils",
   ],
   "exclude": [
     "target/**/*",

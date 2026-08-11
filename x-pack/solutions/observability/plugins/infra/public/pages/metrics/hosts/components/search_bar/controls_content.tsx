@@ -5,19 +5,30 @@
  * 2.0.
  */
 
-import type {
-  ControlGroupRendererApi,
-  ControlGroupRuntimeState,
-  DataControlApi,
-} from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+  type ControlGroupRuntimeState,
+} from '@kbn/control-group-renderer';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildCustomFilter, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query-constants';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Subscription } from 'rxjs';
-import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataControlApi } from '@kbn/controls-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { Subscription, of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  DATASTREAM_DATASET,
+  findInventoryModel,
+  type DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
+import { NOT_AVAILABLE_LABEL } from '@kbn/observability-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
@@ -46,6 +57,34 @@ export const ControlsContent = ({
   schemas,
 }: Props) => {
   const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
+  const schemaFilters = useMemo(() => {
+    if (!schema || !dataView?.id) return [];
+    const inventoryModel = findInventoryModel('host');
+    const nodeFilterQueries = inventoryModel.nodeFilter?.({ schema }) ?? [];
+
+    const apmDatasetFilter: Record<string, object> =
+      schema === 'ecs'
+        ? { prefix: { [DATASTREAM_DATASET]: { value: 'apm.transaction.' } } }
+        : { wildcard: { [DATASTREAM_DATASET]: { value: 'transaction.*.otel' } } };
+
+    const shouldClauses = [...nodeFilterQueries, apmDatasetFilter];
+
+    return [
+      buildCustomFilter(
+        dataView.id!,
+        {
+          bool: {
+            should: shouldClauses,
+            minimum_should_match: 1,
+          },
+        },
+        false,
+        false,
+        null,
+        FilterStateStore.APP_STATE
+      ),
+    ];
+  }, [schema, dataView?.id]);
   const [controlPanels, setControlPanels] = useControlPanels(controlConfigs.controls, dataView);
   const controlGroupAPI = useRef<ControlGroupRendererApi | undefined>();
   const subscriptions = useRef<Subscription>(new Subscription());
@@ -54,35 +93,22 @@ export const ControlsContent = ({
 
   const isLoading = isPending(status);
 
+  // Forward the active CPS (cross-project search) scope so options list suggestions
+  // query the same projects as the wrapped infra HTTP client (`x-project-routing`).
+  const { services } = useKibana<{ cps?: CPSPluginStart }>();
+  const cpsManager = services.cps?.cpsManager;
+  const projectRouting = useObservable(
+    useMemo(() => cpsManager?.getProjectRouting$() ?? of(undefined), [cpsManager]),
+    cpsManager?.getProjectRouting()
+  );
+
   const getInitialInput = useCallback(async () => {
-    const initialInput: Partial<ControlGroupRuntimeState> = {
-      chainingSystem: 'HIERARCHICAL',
-      labelPosition: 'oneLine',
-      initialChildControlState: controlPanels,
+    const initialInput: ControlGroupRuntimeState = {
+      initialChildControlState: controlPanels as ControlPanelsState,
     };
 
     return { initialState: initialInput };
   }, [controlPanels]);
-
-  useEffect(() => {
-    const current = controlGroupAPI.current;
-    if (!current || !controlConfigs.replace) {
-      return;
-    }
-
-    Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
-      current.replacePanel(key, {
-        panelType: replaceable.control.type,
-        maybePanelId: replaceable.key,
-        serializedState: {
-          rawState: {
-            ...replaceable.control,
-            dataViewId: dataView?.id,
-          },
-        },
-      });
-    });
-  }, [schema, controlConfigs, dataView?.id]);
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupRendererApi) => {
@@ -90,22 +116,26 @@ export const ControlsContent = ({
 
       controlGroupAPI.current = controlGroup;
 
-      controlGroup.untilInitialized().then(() => {
-        subscriptions.current.add(
-          controlGroup.children$.subscribe((children) => {
-            Object.keys(children).map((childId) => {
-              const child = children[childId] as DataControlApi;
-
-              child.CustomPrependComponent = () => (
-                <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
-              );
-            });
-          })
-        );
-      });
+      subscriptions.current.unsubscribe();
+      subscriptions.current = new Subscription();
 
       subscriptions.current.add(
-        controlGroup.filters$.subscribe((newFilters = []) => {
+        controlGroup.children$.subscribe((children) => {
+          Object.keys(children).map((childId) => {
+            const child = children[childId] as DataControlApi;
+
+            child.CustomPrependComponent = () => (
+              <ControlTitle
+                title={child.title$?.getValue() ?? NOT_AVAILABLE_LABEL}
+                embeddableId={childId}
+              />
+            );
+          });
+        })
+      );
+
+      subscriptions.current.add(
+        controlGroup.appliedFilters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );
@@ -120,10 +150,8 @@ export const ControlsContent = ({
   );
 
   useEffect(() => {
-    const currentSubscriptions = subscriptions.current;
-
     return () => {
-      currentSubscriptions.unsubscribe();
+      subscriptions.current.unsubscribe();
     };
   }, []);
 
@@ -134,17 +162,18 @@ export const ControlsContent = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
+        key={schema ?? 'default'}
         getCreationOptions={getInitialInput}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
         query={query}
-        filters={filters}
+        filters={[...filters, ...schemaFilters]}
+        projectRouting={projectRouting}
       />
       <SchemaSelector
-        isHostsView
         onChange={onPreferredSchemaChange}
         schemas={schemas}
-        value={schema ?? 'semconv'}
+        value={schema ?? DEFAULT_SCHEMA}
         isLoading={isLoading}
       />
     </ControlGroupContainer>
@@ -152,9 +181,14 @@ export const ControlsContent = ({
 };
 
 const ControlGroupContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  gap: ${(props) => props.theme.euiTheme.size.s};
+  flex-wrap: wrap;
+  min-height: ${(props) => props.theme.euiTheme.size.xxl};
+
   .controlGroup {
-    min-height: ${(props) => props.theme.euiTheme.size.xxl};
-    align-items: start;
-    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
+    display: contents;
   }
 `;

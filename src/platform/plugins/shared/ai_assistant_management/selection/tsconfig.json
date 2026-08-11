@@ -23,7 +23,10 @@
     "@kbn/cloud-plugin",
     "@kbn/licensing-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/ai-assistant-common",
+    "@kbn/management-settings-ids",
+    "@kbn/shared-ux-ai-components"
   ],
   "exclude": ["target/**/*"]
 }

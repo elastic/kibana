@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { groupBy } from 'lodash';
+import { chunk, groupBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
@@ -20,6 +20,10 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import {
+  removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
@@ -37,13 +41,15 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
-const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
-const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
+export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
-const includeUnenrolled = (kuery?: string) =>
+export const includeUnenrolled = (kuery?: string) =>
   kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
 
 export function _joinFilters(
@@ -81,7 +87,7 @@ export function _joinFilters(
 }
 
 export function removeSOAttributes(kuery: string) {
-  return kuery.replace(/attributes\./g, '').replace(/fleet-agents\./g, '');
+  return kuery.replace(/\.attributes\./g, '.').replace(/fleet-agents\./g, '');
 }
 
 export type GetAgentsOptions =
@@ -175,7 +181,12 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
   try {
     const result = await retryTransientEsErrors(() =>
       esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
@@ -224,6 +235,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
+  pit?: string;
   statusSummary?: Record<AgentStatus, number>;
   aggregations?: Record<string, estypes.AggregationsAggregate>;
 }> {
@@ -244,7 +256,7 @@ export async function getAgentsByKuery(
     aggregations,
     spaceId,
   } = options;
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -261,7 +273,9 @@ export async function getAgentsByKuery(
     });
     if (agentlessPolicies.items.length > 0) {
       filters.push(
-        `NOT policy_id: (${agentlessPolicies.items.map((policy) => `"${policy.id}"`).join(' or ')})`
+        `NOT policy_id: (${agentlessPolicies.items
+          .map((policy) => `"${escapeQuotes(policy.id)}"`)
+          .join(' or ')})`
       );
     }
   }
@@ -276,7 +290,13 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...SIGNALS_RUNTIME_FIELD,
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -294,7 +314,9 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  const initialPitId =
+    pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+  let currentPitId = initialPitId;
 
   const queryAgents = async (
     queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
@@ -334,10 +356,10 @@ export async function getAgentsByKuery(
       fields: Object.keys(runtimeFields),
       sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitIdToUse
+      ...(currentPitId
         ? {
             pit: {
-              id: pitIdToUse,
+              id: currentPitId,
               keep_alive: pitKeepAlive,
             },
           }
@@ -361,6 +383,8 @@ export async function getAgentsByKuery(
     throw err;
   }
 
+  currentPitId = res.pit_id ?? currentPitId;
+
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
@@ -372,6 +396,7 @@ export async function getAgentsByKuery(
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
       const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
+      currentPitId = response.pit_id ?? currentPitId;
       agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
@@ -404,7 +429,7 @@ export async function getAgentsByKuery(
     total,
     ...(searchAfter ? { page: 0 } : { page }),
     perPage,
-    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
+    ...(initialPitId ? { pit: currentPitId } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
@@ -442,7 +467,11 @@ export async function getAllAgentsByKuery(
 export async function fetchAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  options: ListWithKuery & { spaceId?: string }
+  options: ListWithKuery & {
+    spaceId?: string;
+    runtimeFields?: estypes.SearchRequest['runtime_mappings'];
+    showInactive?: boolean;
+  }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
     kuery = '',
@@ -450,15 +479,26 @@ export async function fetchAllAgentsByKuery(
     sortField = 'enrolled_at',
     sortOrder = 'desc',
     spaceId,
+    showInactive = true,
   } = options;
 
-  const filters = await _getSpaceAwarenessFilter(spaceId);
+  const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {
     filters.push(kuery);
   }
+  if (showInactive === false) {
+    filters.push(ACTIVE_AGENT_CONDITION);
+  }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+    ...options.runtimeFields,
+  };
+
   const sort = getSortConfig(sortField, sortOrder);
 
   try {
@@ -566,7 +606,12 @@ async function _filterAgents(
   perPage: number;
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = {
+    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(appContextService.getExperimentalFeatures().enableOpAMP
+      ? PIPELINE_CONFIG_RUNTIME_FIELD
+      : {}),
+  };
   const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;
@@ -609,19 +654,33 @@ export async function getAgentsById(
     return [];
   }
 
-  const idsQuery = {
-    terms: {
-      _id: agentIds,
-    },
-  };
-  const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
-    perPage: agentIds.length,
-  });
+  // Each search must keep from + size <= index.max_result_window (default 10_000).
+  // _filterAgents uses from: (page - 1) * perPage with page 1, so perPage must not exceed SO_SEARCH_LIMIT.
+  const idBatches = chunk(agentIds, SO_SEARCH_LIMIT);
+  const agentsById = new Map<string, Agent>();
+
+  if (idBatches.length > 1) {
+    appContextService
+      .getLogger()
+      .debug(`Querying agents in ${idBatches.length} batches because agentIds.length is > 10k`);
+  }
+
+  for (const batch of idBatches) {
+    const idsQuery = {
+      terms: {
+        _id: batch,
+      },
+    };
+    const { agents } = await _filterAgents(esClient, soClient, idsQuery, {
+      perPage: batch.length,
+    });
+    for (const agent of agents) {
+      agentsById.set(agent.id, agent);
+    }
+  }
 
   // return agents in the same order as agentIds
-  return agentIds.map(
-    (agentId) => agents.find((agent) => agent.id === agentId) || { id: agentId, notFound: true }
-  );
+  return agentIds.map((agentId) => agentsById.get(agentId) || { id: agentId, notFound: true });
 }
 
 // given a list of agentPolicyIds, return a map of agent version => count of agents
@@ -647,13 +706,7 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
-              },
-            ],
+            filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
           },
         },
         index: AGENTS_INDEX,
@@ -661,7 +714,14 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
+    );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
       const versionCounts: Record<string, number> = {};
@@ -729,6 +789,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }
@@ -839,7 +900,7 @@ export async function getAgentPolicyForAgents(
   return agentPolicies;
 }
 
-async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+export async function getSpaceAwarenessFilterForAgents(spaceId: string | undefined) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
   if (!useSpaceAwareness || !spaceId) {
     return [];

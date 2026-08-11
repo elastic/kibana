@@ -56,12 +56,16 @@ export const renderApp = ({
     observabilityRuleTypeRegistry,
     dataViews: pluginsStart.dataViews,
     unifiedSearch: pluginsStart.unifiedSearch,
+    kql: pluginsStart.kql,
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
-    share: pluginsSetup.share,
+    agentBuilder: pluginsStart.agentBuilder,
+    observabilityAgentBuilder: pluginsStart.observabilityAgentBuilder,
+    share: pluginsStart.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,
+    metricsDataAccess: pluginsStart.metricsDataAccess,
   };
   const queryClient = new QueryClient();
 

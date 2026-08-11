@@ -10,56 +10,69 @@ import * as i18n from '../translations';
 import type { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../../common/constants';
-
-const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `${HOSTS_PATH}/name/${hostName}/${tabName}`;
+import { getTabsOnHostDetailsUrl } from '../../../../common/components/link_to';
 
 export const navTabsHostDetails = ({
   hasMlUserPermissions,
   hostName,
   isEnterprise,
+  entityId,
+  identityFields,
+  urlStateQuery = '',
 }: {
   hostName: string;
   hasMlUserPermissions: boolean;
   isEnterprise?: boolean;
+  entityId?: string;
+  identityFields?: Record<string, string>;
+  /** Current location.search (timerange, timeline, entityId, identityFields, …) */
+  urlStateQuery?: string;
 }): HostDetailsNavTab => {
+  const getTabHref = (tabName: HostsTableType) =>
+    `${HOSTS_PATH}${getTabsOnHostDetailsUrl(
+      hostName,
+      tabName,
+      urlStateQuery,
+      entityId,
+      identityFields
+    )}`;
   const hiddenTabs = [];
 
   const hostDetailsNavTabs = {
     [HostsTableType.events]: {
       id: HostsTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
+      href: getTabHref(HostsTableType.events),
       disabled: false,
     },
     [HostsTableType.authentications]: {
       id: HostsTableType.authentications,
       name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.authentications),
+      href: getTabHref(HostsTableType.authentications),
       disabled: false,
     },
     [HostsTableType.uncommonProcesses]: {
       id: HostsTableType.uncommonProcesses,
       name: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.uncommonProcesses),
+      href: getTabHref(HostsTableType.uncommonProcesses),
       disabled: false,
     },
     [HostsTableType.anomalies]: {
       id: HostsTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.anomalies),
+      href: getTabHref(HostsTableType.anomalies),
       disabled: false,
     },
     [HostsTableType.risk]: {
       id: HostsTableType.risk,
       name: i18n.NAVIGATION_HOST_RISK_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.risk),
+      href: getTabHref(HostsTableType.risk),
       disabled: false,
     },
     [HostsTableType.sessions]: {
       id: HostsTableType.sessions,
       name: i18n.NAVIGATION_SESSIONS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.sessions),
+      href: getTabHref(HostsTableType.sessions),
       disabled: false,
       isBeta: false,
     },

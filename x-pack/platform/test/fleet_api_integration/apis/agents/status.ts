@@ -220,6 +220,24 @@ export default function ({ getService }: FtrProviderContext) {
           audit_unenrolled_reason: 'orphaned',
         },
       });
+      // 1 agent offline due to disconnected last_checkin_status
+      await es.create({
+        id: 'agent14',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host-disconnected' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:17:25Z',
+          last_checkin: new Date().toISOString(),
+          last_checkin_status: 'disconnected',
+        },
+      });
     });
     after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
@@ -232,10 +250,10 @@ export default function ({ getService }: FtrProviderContext) {
           events: 0,
           other: 0,
           online: 2,
-          active: 10,
-          all: 13,
+          active: 11,
+          all: 14,
           error: 2,
-          offline: 1,
+          offline: 2,
           updating: 3,
           inactive: 2,
           unenrolled: 1,
@@ -243,6 +261,16 @@ export default function ({ getService }: FtrProviderContext) {
           uninstalled: 1,
         },
       });
+    });
+
+    it('should return offline status for agent with disconnected last_checkin_status', async () => {
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:host-disconnected`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+      expect(apiResponse.items.length).to.eql(1);
+      expect(apiResponse.items[0].status).to.eql('offline');
+      expect(apiResponse.items[0].last_checkin_status).to.eql('disconnected');
     });
 
     it('should not perform inactivity check if there are too many agent policies with inactivity timeout', async () => {
@@ -274,10 +302,10 @@ export default function ({ getService }: FtrProviderContext) {
           events: 0,
           other: 0,
           online: 3,
-          active: 12,
-          all: 13,
+          active: 13,
+          all: 14,
           error: 2,
-          offline: 1,
+          offline: 2,
           updating: 4,
           inactive: 0,
           unenrolled: 1,

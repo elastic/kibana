@@ -3,16 +3,17 @@
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Breadcrumb button content correctly 1`] = `
 <div>
   <div
-    class="css-ned1bf-Breadcrumb"
+    class="css-1k5fyt8"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Cluster breadcrumb"
@@ -29,11 +30,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Namespace breadcrumb"
@@ -50,11 +53,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Pod breadcrumb"
@@ -71,11 +76,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Container Image breadcrumb"
@@ -93,6 +100,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
         </span>
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
@@ -102,7 +110,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -118,16 +126,17 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should display cluster icon button when no cluster name is provided 1`] = `
 <div>
   <div
-    class="css-ned1bf-Breadcrumb"
+    class="css-1k5fyt8"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Cluster breadcrumb"
@@ -144,11 +153,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Namespace breadcrumb"
@@ -165,11 +176,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Pod breadcrumb"
@@ -186,11 +199,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Container Image breadcrumb"
@@ -208,6 +223,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
         </span>
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
@@ -217,7 +233,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -233,16 +249,17 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render breadcrumb icons 1`] = `
 <div>
   <div
-    class="css-ned1bf-Breadcrumb"
+    class="css-1k5fyt8"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Cluster breadcrumb"
@@ -259,11 +276,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Namespace breadcrumb"
@@ -280,11 +299,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Node breadcrumb"
@@ -301,11 +322,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Pod breadcrumb"
@@ -322,11 +345,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Container Image breadcrumb"
@@ -344,6 +369,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         </span>
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
@@ -353,7 +379,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>
@@ -369,16 +395,17 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
 exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render last  breadcrumb content only 1`] = `
 <div>
   <div
-    class="css-ned1bf-Breadcrumb"
+    class="css-1k5fyt8"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-m-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem emotion-euiFlexItem-grow-1-Breadcrumb"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Cluster breadcrumb"
@@ -395,11 +422,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Node breadcrumb"
@@ -416,11 +445,13 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
-          data-euiicon-type="arrowRight"
+          data-euiicon-type="chevronSingleRight"
         />
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             aria-label="Click Container Image breadcrumb"
@@ -438,6 +469,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
         </span>
         <span
           class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+          id="generated-id-wrapper"
         >
           <button
             class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
@@ -447,7 +479,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
               class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate euiButtonEmpty__text"
+                class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
               >
                 selected image
               </span>

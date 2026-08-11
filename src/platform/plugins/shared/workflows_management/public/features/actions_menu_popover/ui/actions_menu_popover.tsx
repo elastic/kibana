@@ -16,7 +16,14 @@ import type { ActionsMenuProps } from './actions_menu';
 
 interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
 
-export function ActionsMenuPopover({ onActionSelected, ...props }: ActionsMenuPopoverProps) {
+export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
+  onActionSelected,
+  commands,
+  jumpToStepEntries,
+  onCommandSelected,
+  onJumpToStep,
+  ...props
+}: ActionsMenuPopoverProps) {
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -28,7 +35,13 @@ export function ActionsMenuPopover({ onActionSelected, ...props }: ActionsMenuPo
       initialFocus="[name='actions-menu-search']"
       {...props}
     >
-      <ActionsMenu onActionSelected={onActionSelected} />
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={commands}
+        jumpToStepEntries={jumpToStepEntries}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />
     </EuiPopover>
   );
-}
+});

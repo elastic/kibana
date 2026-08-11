@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { v1 as uuidv1 } from 'uuid';
 
 import type { Case } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -25,6 +24,10 @@ import {
   createCasesClientMockSearchRequest,
 } from '../mocks';
 import { search } from './search';
+
+jest.mock('@kbn/spaces-plugin/server/lib/utils/namespace', () => ({
+  spaceIdToNamespace: jest.fn().mockReturnValue('space1'),
+}));
 
 describe('search', () => {
   const configureMock = [
@@ -54,93 +57,166 @@ describe('search', () => {
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 
-  describe('constructSearch', () => {
+  describe('search', () => {
     const clientArgs = createCasesClientMockArgs();
     const casesMap = new Map<string, Case>(
       mockCases.map((obj) => {
         return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
       })
     );
-    clientArgs.services.caseService.findCasesGroupedByID.mockResolvedValue({
+    clientArgs.services.caseService.searchCasesGroupedByID.mockResolvedValue({
       page: 1,
       perPage: 10,
       total: casesMap.size,
       casesMap,
-    });
-    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
-      open: 1,
-      'in-progress': 2,
-      closed: 3,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
     });
 
     afterEach(() => {
       jest.clearAllMocks();
     });
 
-    it('search by uuid updates search term and adds rootSearchFields', async () => {
-      const searchId = uuidv1();
-      const findRequest = createCasesClientMockSearchRequest({ search: searchId });
-
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
-
-      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
-
-      expect(call.caseOptions.search).toBe(`"${searchId}" "cases:${searchId}"`);
-      expect(call.caseOptions).toHaveProperty('rootSearchFields', ['_id']);
-    });
-
-    it('regular search term does not cause rootSearchFields to be appended', async () => {
+    it('calls searchCasesGroupedByID with correct parameters', async () => {
       const searchTerm = 'foobar';
-      const findRequest = createCasesClientMockSearchRequest({ search: searchTerm });
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      const searchRequest = createCasesClientMockSearchRequest({ search: searchTerm });
+      await search(searchRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.searchCasesGroupedByID).toHaveBeenCalled();
 
-      const call = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
 
       expect(call.caseOptions.search).toBe(searchTerm);
-      expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
+      expect(call.namespaces).toEqual(['space1']);
+    });
+
+    it('requests stats alongside the search and returns them in the response', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'foobar' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats filter is provided (status clause stripped) so counts and MTTR are computed
+      // with the same query as the case list.
+      expect(call).toHaveProperty('statsOptions');
+
+      expect(res.count_open_cases).toBe(1);
+      expect(res.count_in_progress_cases).toBe(2);
+      expect(res.count_closed_cases).toBe(3);
+      expect(res.mttr).toBe(120);
+    });
+
+    it('strips the status clause from the stats query so all three status counts populate under a single-status filter', async () => {
+      const searchRequest = createCasesClientMockSearchRequest({ status: [CaseStatuses.open] });
+      await search(searchRequest, clientArgs, casesClientMock);
+
+      const call = clientArgs.services.caseService.searchCasesGroupedByID.mock.calls[0][0];
+
+      // The stats query is built with `status: undefined` so open/in-progress/closed counts are all
+      // computed even when the list itself is filtered to a single status. The serialized filter
+      // must therefore not mention the requested status.
+      const statsFilter = JSON.stringify(call.statsOptions?.filter ?? null);
+      expect(statsFilter).not.toContain('status');
+    });
+
+    it('returns mttr: null (not 0) when the search yields no stats', async () => {
+      clientArgs.services.caseService.searchCasesGroupedByID.mockResolvedValueOnce({
+        page: 1,
+        perPage: 10,
+        total: 0,
+        casesMap: new Map<string, Case>(),
+        searchStats: {
+          statusStats: { open: 0, 'in-progress': 0, closed: 0 },
+          mttr: null,
+        },
+      });
+
+      const searchRequest = createCasesClientMockSearchRequest({ search: 'no-matches' });
+      const res = await search(searchRequest, clientArgs, casesClientMock);
+
+      expect(res.mttr).toBeNull();
+      expect(res.count_open_cases).toBe(0);
+      expect(res.count_in_progress_cases).toBe(0);
+      expect(res.count_closed_cases).toBe(0);
+    });
+
+    it('fetches global field definitions for search when templates are enabled', async () => {
+      const argsWithTemplates = {
+        ...clientArgs,
+        config: {
+          ...clientArgs.config,
+          templates: { enabled: true },
+        },
+      };
+      const searchRequest = createCasesClientMockSearchRequest({
+        search: 'team',
+        owner: 'cases',
+      });
+      await search(searchRequest, argsWithTemplates, casesClientMock);
+
+      expect(
+        argsWithTemplates.services.fieldDefinitionsService.getGlobalFieldDefinitionsForSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
+      expect(
+        argsWithTemplates.services.templatesService.getTemplateVersionsForExtendedFieldSearch
+      ).toHaveBeenCalledWith({ owner: ['cases'] });
     });
 
     it('search with single custom field', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
         owner: 'cases',
       });
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      await search(searchRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.searchCasesGroupedByID).toHaveBeenCalled();
     });
 
     it('search with single custom field with multiple values', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true, null] },
         owner: ['cases'],
       });
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      await search(searchRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.searchCasesGroupedByID).toHaveBeenCalled();
     });
 
     it('search with multiple custom fields', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true], third_key: [true] },
         owner: ['cases'],
       });
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      await search(searchRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.searchCasesGroupedByID).toHaveBeenCalled();
     });
 
     it('search with null custom fields', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [null] },
         owner: 'cases',
       });
-      await search(findRequest, clientArgs, casesClientMock);
-      await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+      await search(searchRequest, clientArgs, casesClientMock);
+      await expect(clientArgs.services.caseService.searchCasesGroupedByID).toHaveBeenCalled();
     });
   });
 
   describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
+    const casesMap = new Map<string, Case>(
+      mockCases.map((obj) => {
+        return [obj.id, flattenCaseSavedObject({ savedObject: obj, totalComment: 2 })];
+      })
+    );
+    clientArgs.services.caseService.searchCasesGroupedByID.mockResolvedValue({
+      page: 1,
+      perPage: 10,
+      total: casesMap.size,
+      casesMap,
+      searchStats: {
+        statusStats: { open: 1, 'in-progress': 2, closed: 3 },
+        mttr: 120,
+      },
+    });
     casesClientMock.configure.get = jest.fn().mockResolvedValue(configureMock);
 
     beforeEach(() => {
@@ -149,12 +225,12 @@ describe('search', () => {
 
     it('when foo:bar attribute in request payload', async () => {
       const searchTerm = 'sample_text';
-      const findRequest = createCasesClientMockSearchRequest({ search: searchTerm });
+      const searchRequest = createCasesClientMockSearchRequest({ search: searchTerm });
       await expect(
         // @ts-expect-error foo is an invalid field
-        search({ ...findRequest, foo: 'bar' }, clientArgs)
+        search({ ...searchRequest, foo: 'bar' }, clientArgs, casesClientMock)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"title\\",\\"description\\",\\"incremental_id.text\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
+        `"Failed to find cases: {\\"search\\":\\"sample_text\\",\\"searchFields\\":[\\"cases.title\\",\\"cases.description\\",\\"cases.incremental_id.text\\",\\"cases-comments.comment\\"],\\"severity\\":\\"low\\",\\"assignees\\":[],\\"reporters\\":[],\\"status\\":\\"open\\",\\"tags\\":[],\\"owner\\":[],\\"sortField\\":\\"createdAt\\",\\"sortOrder\\":\\"desc\\",\\"customFields\\":{},\\"foo\\":\\"bar\\"}: Error: invalid keys \\"foo\\""`
       );
     });
 
@@ -162,9 +238,9 @@ describe('search', () => {
       const searchFields = ['foobar'];
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockSearchRequest({ searchFields });
+      const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
       );
     });
@@ -173,9 +249,9 @@ describe('search', () => {
       const searchFields = 'foobar';
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockSearchRequest({ searchFields });
+      const searchRequest = createCasesClientMockSearchRequest({ searchFields });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "searchFields"'
       );
     });
@@ -184,9 +260,9 @@ describe('search', () => {
       const sortField = 'foobar';
 
       // @ts-expect-error
-      const findRequest = createCasesClientMockSearchRequest({ sortField });
+      const searchRequest = createCasesClientMockSearchRequest({ sortField });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         'Error: Invalid value "foobar" supplied to "sortField"'
       );
     });
@@ -194,9 +270,9 @@ describe('search', () => {
     it(`throws an error when the category array has ${MAX_CATEGORY_FILTER_LENGTH} items`, async () => {
       const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockSearchRequest({ category });
+      const searchRequest = createCasesClientMockSearchRequest({ category });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrow(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrow(
         `Error: The length of the field category is too long. Array must be of length <= ${MAX_CATEGORY_FILTER_LENGTH}`
       );
     });
@@ -204,9 +280,9 @@ describe('search', () => {
     it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
       const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockSearchRequest({ tags });
+      const searchRequest = createCasesClientMockSearchRequest({ tags });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
@@ -214,9 +290,9 @@ describe('search', () => {
     it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
       const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockSearchRequest({ assignees });
+      const searchRequest = createCasesClientMockSearchRequest({ assignees });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
@@ -224,105 +300,105 @@ describe('search', () => {
     it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
       const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
 
-      const findRequest = createCasesClientMockSearchRequest({ reporters });
+      const searchRequest = createCasesClientMockSearchRequest({ reporters });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
 
     it('Invalid total items results in error', async () => {
-      const findRequest = createCasesClientMockSearchRequest({ page: 209, perPage: 100 });
+      const searchRequest = createCasesClientMockSearchRequest({ page: 209, perPage: 100 });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
 
     it('Invalid perPage items results in error', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         page: 1,
         perPage: MAX_CASES_PER_PAGE + 1,
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
 
     it('throws error when search with customFields and no owner', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
 
     it('throws error when search with customFields and owner as empty string array', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
         owner: [''],
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
 
     it('throws error when search with customFields and multiple owners', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
         owner: ['cases', 'observability'],
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
 
     it('throws error when no customField is not same as configuration', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { test_custom_field_key: [true] },
         owner: 'cases',
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Invalid custom field key: test_custom_field_key.`
       );
     });
 
     it('throws error when search with non filterable custom field', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { first_key: ['hello'] },
         owner: 'cases',
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Filtering by custom field of type text is not allowed.`
       );
     });
 
     it('throws error when search with invalid value', async () => {
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: ['hello'] },
         owner: 'cases',
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: Unsupported filtering value for custom field of type toggle.`
       );
     });
 
     it('throws error when no customFields in configuration', async () => {
       casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
-      const findRequest = createCasesClientMockSearchRequest({
+      const searchRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
         owner: 'cases',
       });
 
-      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+      await expect(search(searchRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: No custom fields configured.`
       );
     });

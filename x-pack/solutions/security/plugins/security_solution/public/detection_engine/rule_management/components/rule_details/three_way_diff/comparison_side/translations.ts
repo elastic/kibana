@@ -95,3 +95,10 @@ export const DIFF_FORMAT_AND_COLORS_EXPLANATION = i18n.translate(
       "Differences are shown in JSON and color-coded or bolded. Lines that are highlighted in green were added. Lines that are highlighted in red were removed. Text that's bolded was changed.",
   }
 );
+
+export const VERSION_COMPARISON_HELP_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.versionComparisonHelpAriaLabel',
+  {
+    defaultMessage: 'Version comparison help',
+  }
+);

@@ -55,65 +55,82 @@ export const simpleClientExample = async (
     throw new Error('Client not initialized properly');
   }
   // correct usage example
-  await client.index({
-    document: {
-      name: 'John Doe',
-      age: 30,
-      isActive: true,
-      '@timestamp': new Date().toISOString(),
-    },
-  });
-
-  await client.index({
-    // @ts-expect-error - index is not a valid property of ClientIndexRequest
-    index: dataStreamDefinition.name,
-    document: {
-      name: 'John Doe',
-      age: 30,
-      isActive: true,
-      '@timestamp': +new Date(), // number is also valid as date inferred from schema is string | number
-    },
-  });
-
-  await client.index({
-    document: {
-      name: 'John Doe',
-      age: 30,
-      // @ts-expect-error - unknown field
-      unknownField: 'not defined in the schema',
-      '@timestamp': new Date().toISOString(),
-    },
-  });
-
-  await client.index({
-    index: dataStreamDefinition.name,
-    document: {
-      name: 'John Doe',
-      age: 30,
-      // @ts-expect-error - isActive must be a boolean
-      isActive: 'must be a bool value',
-      '@timestamp': new Date().toISOString(),
-    },
-  });
-
-  await client.bulk({
-    operations: [
+  await client.create({
+    documents: [
       {
-        index: {},
-        doc: { '@timestamp': new Date().toISOString() },
-      },
-      {
-        delete: { _id: '123' },
+        name: 'John Doe',
+        age: 30,
+        isActive: true,
+        '@timestamp': new Date().toISOString(),
       },
     ],
   });
 
-  await client.bulk({
-    // @ts-expect-error - index is not a valid property of ClientBulkRequest
+  await client.create({
+    // @ts-expect-error - index is not a valid property of ClientCreateRequest
     index: dataStreamDefinition.name,
-    operations: [
+    documents: [
       {
-        delete: { _id: '123' },
+        name: 'John Doe',
+        age: 30,
+        isActive: true,
+        '@timestamp': +new Date(), // number is also valid as date inferred from schema is string | number
+      },
+    ],
+  });
+
+  await client.create({
+    documents: [
+      {
+        name: 'John Doe',
+        age: 30,
+        // @ts-expect-error - unknown field
+        unknownField: 'not defined in the schema',
+        '@timestamp': new Date().toISOString(),
+      },
+    ],
+  });
+
+  await client.create({
+    index: dataStreamDefinition.name,
+    documents: [
+      {
+        name: 'John Doe',
+        age: 30,
+        // @ts-expect-error - isActive must be a boolean
+        isActive: 'must be a bool value',
+        '@timestamp': new Date().toISOString(),
+      },
+    ],
+  });
+
+  await client.create({
+    documents: [
+      {
+        name: 'Jane Doe',
+        age: 25,
+        isActive: false,
+        '@timestamp': new Date().toISOString(),
+      },
+      {
+        _id: 'custom-id-123',
+        name: 'Bob Smith',
+        age: 35,
+        isActive: true,
+        '@timestamp': new Date().toISOString(),
+      },
+    ],
+  });
+
+  await client.create({
+    // @ts-expect-error - index is not a valid property of ClientCreateRequest
+    index: dataStreamDefinition.name,
+    documents: [
+      {
+        name: 'Alice',
+        age: 28,
+        isActive: true,
+        '@timestamp': new Date().toISOString(),
       },
     ],
   });

@@ -7,22 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Lazy import to avoid bundling large generated file in main plugin bundle
+import { getElasticsearchConnectors } from '../spec/elasticsearch';
+import type { RequestOptions } from '../types/latest';
 
 /**
  * Builds an Elasticsearch request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
  */
-export function buildRequestFromConnector(
+// eslint-disable-next-line complexity
+export function buildElasticsearchRequest(
   stepType: string,
   params: Record<string, unknown>
-): {
-  method: string;
-  path: string;
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  headers?: Record<string, string>;
-} {
+): RequestOptions {
   // console.log('DEBUG - Input params:', JSON.stringify(params, null, 2));
 
   // Special case: elasticsearch.request type uses raw API format at top level
@@ -37,12 +33,10 @@ export function buildRequestFromConnector(
   }
 
   // Lazy load the generated connectors to avoid main bundle bloat
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { GENERATED_ELASTICSEARCH_CONNECTORS } = require('./generated/elasticsearch_connectors');
+  const esConnectors = getElasticsearchConnectors();
 
   // Find the connector definition for this step type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const connector = GENERATED_ELASTICSEARCH_CONNECTORS.find((c: any) => c.type === stepType);
+  const connector = esConnectors.find((c) => c.type === stepType);
 
   if (connector && connector.patterns && connector.methods) {
     // Use explicit parameter type metadata (no hardcoded keys!)
@@ -50,7 +44,7 @@ export function buildRequestFromConnector(
     const bodyParamKeys = new Set<string>(connector.parameterTypes?.bodyParams || []);
 
     // Determine method (allow user override)
-    const method = params.method || connector.methods[0]; // User can override method
+    const method = typeof params.method === 'string' ? params.method : connector.methods[0]; // User can override method
 
     // Choose the best pattern based on available parameters
     let selectedPattern = selectBestPattern(connector.patterns, params);
@@ -78,7 +72,8 @@ export function buildRequestFromConnector(
     }
 
     // Build body and query parameters
-    const body: Record<string, unknown> = {};
+    let body: Record<string, unknown> = {};
+    let bulkBody: Array<Record<string, unknown>> | undefined;
     const queryParams: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
@@ -111,11 +106,21 @@ export function buildRequestFromConnector(
       }
     }
 
-    const result = {
+    if (stepType === 'elasticsearch.index' && 'document' in params) {
+      body = params.document as Record<string, unknown>;
+    }
+
+    if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
+      bulkBody = buildBulkBody(params.operations as Array<Record<string, unknown>>);
+      body = {};
+    }
+
+    const result: RequestOptions = {
       method,
       path: `/${selectedPattern}`,
       body: Object.keys(body).length > 0 ? body : undefined,
-      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+      bulkBody: bulkBody ?? undefined,
     };
 
     // console.log('DEBUG - Final request:', JSON.stringify(result, null, 2));
@@ -171,4 +176,24 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
   }
 
   return bestPattern;
+}
+
+const OPERATION_TYPES = ['index', 'create', 'update', 'delete'];
+function buildBulkBody(operations: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  // check if all operations are documents, not operation rows like index, create, update, delete
+  const isDocuments = operations.every(
+    (operation) => !Object.keys(operation).every((key) => OPERATION_TYPES.includes(key))
+  );
+  // backward compatibility with the old format
+  if (isDocuments) {
+    return operations.flatMap((doc) => {
+      return [
+        {
+          index: {},
+        },
+        doc,
+      ];
+    });
+  }
+  return operations;
 }

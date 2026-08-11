@@ -22,6 +22,7 @@ import {
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { InvalidGrantError } from '../../errors';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -65,6 +66,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -113,6 +115,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -151,6 +154,70 @@ describe('OIDCAuthenticationProvider', () => {
         method: 'POST',
         path: '/_security/oidc/prepare',
         body: { realm: 'oidc1' },
+      });
+    });
+
+    describe('returns "NotHandled" result if ES realm does not match provider', () => {
+      it('when initiated by the User', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          realm: 'other-realm',
+          redirect:
+            'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+        });
+
+        await expect(
+          provider.login(request, {
+            type: OIDCLogin.LoginInitiatedByUser,
+            redirectURL: '/mock-server-basepath/app/super-kibana#some-hash',
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: { realm: 'oidc1' },
+        });
+      });
+
+      it('when initiated by 3rd party', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          realm: 'other-realm',
+          redirect:
+            'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+        });
+
+        await expect(
+          provider.login(request, {
+            type: OIDCLogin.LoginInitiatedBy3rdParty,
+            iss: 'some-issuer',
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: { iss: 'some-issuer' },
+        });
       });
     });
 
@@ -194,12 +261,18 @@ describe('OIDCAuthenticationProvider', () => {
         });
 
         await expect(
-          provider.login(request, attempt, {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirectURL: '/base-path/some-path',
-            realm: 'oidc1',
-          })
+          provider.login(
+            request,
+            attempt,
+            sessionMock.createValue({
+              state: {
+                state: 'statevalue',
+                nonce: 'noncevalue',
+                redirectURL: '/base-path/some-path',
+                realm: 'oidc1',
+              },
+            })
+          )
         ).resolves.toEqual(
           AuthenticationResult.redirectTo('/base-path/some-path', {
             userProfileGrant: { type: 'accessToken', accessToken: 'some-token' },
@@ -229,7 +302,13 @@ describe('OIDCAuthenticationProvider', () => {
         const { request, attempt } = getMocks();
 
         await expect(
-          provider.login(request, attempt, { redirectURL: '/base-path/some-path', realm: 'oidc1' })
+          provider.login(
+            request,
+            attempt,
+            sessionMock.createValue({
+              state: { redirectURL: '/base-path/some-path', realm: 'oidc1' },
+            })
+          )
         ).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
@@ -245,11 +324,13 @@ describe('OIDCAuthenticationProvider', () => {
         const { request, attempt } = getMocks();
 
         await expect(
-          provider.login(request, attempt, {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            realm: 'oidc1',
-          })
+          provider.login(
+            request,
+            attempt,
+            sessionMock.createValue({
+              state: { state: 'statevalue', nonce: 'noncevalue', realm: 'oidc1' },
+            })
+          )
         ).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
@@ -264,7 +345,7 @@ describe('OIDCAuthenticationProvider', () => {
       it('fails if session state is not presented.', async () => {
         const { request, attempt } = getMocks();
 
-        await expect(provider.login(request, attempt, {} as any)).resolves.toEqual(
+        await expect(provider.login(request, attempt, sessionMock.createValue())).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.badRequest(
               'Response session state does not have corresponding state or nonce parameters or redirect URL.'
@@ -287,12 +368,18 @@ describe('OIDCAuthenticationProvider', () => {
         mockOptions.client.asInternalUser.transport.request.mockRejectedValue(failureReason);
 
         await expect(
-          provider.login(request, attempt, {
-            state: 'statevalue',
-            nonce: 'noncevalue',
-            redirectURL: '/base-path/some-path',
-            realm: 'oidc1',
-          })
+          provider.login(
+            request,
+            attempt,
+            sessionMock.createValue({
+              state: {
+                state: 'statevalue',
+                nonce: 'noncevalue',
+                redirectURL: '/base-path/some-path',
+                realm: 'oidc1',
+              },
+            })
+          )
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
         expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
@@ -311,7 +398,13 @@ describe('OIDCAuthenticationProvider', () => {
       it('fails if realm from state is different from the realm provider is configured with.', async () => {
         const { request, attempt } = getMocks();
 
-        await expect(provider.login(request, attempt, { realm: 'other-realm' })).resolves.toEqual(
+        await expect(
+          provider.login(
+            request,
+            attempt,
+            sessionMock.createValue({ state: { realm: 'other-realm' } })
+          )
+        ).resolves.toEqual(
           AuthenticationResult.failed(
             Boom.unauthorized(
               'State based on realm "other-realm", but provider with the name "oidc" is configured to use realm "oidc1".'
@@ -392,6 +485,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -444,7 +538,10 @@ describe('OIDCAuthenticationProvider', () => {
       const authorization = `Bearer ${tokenPair.accessToken}`;
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         AuthenticationResult.succeeded(mockUser, { authHeaders: { authorization } })
       );
@@ -473,11 +570,16 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       await expect(
-        provider.authenticate(request, {
-          accessToken: 'some-valid-token',
-          refreshToken: 'some-valid-refresh-token',
-          realm: 'oidc1',
-        })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({
+            state: {
+              accessToken: 'some-valid-token',
+              refreshToken: 'some-valid-refresh-token',
+              realm: 'oidc1',
+            },
+          })
+        )
       ).resolves.toEqual(AuthenticationResult.notHandled());
 
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
@@ -498,7 +600,10 @@ describe('OIDCAuthenticationProvider', () => {
       mockScopedClusterClient.asCurrentUser.security.authenticate.mockRejectedValue(failureReason);
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(AuthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.asScoped).toHaveBeenCalledWith({ headers: { authorization } });
@@ -521,7 +626,10 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         AuthenticationResult.succeeded(mockUser, {
           authHeaders: { authorization: 'Bearer new-access-token' },
@@ -555,7 +663,10 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.tokens.refresh.mockRejectedValue(refreshFailureReason);
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(AuthenticationResult.failed(refreshFailureReason as any));
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -583,7 +694,10 @@ describe('OIDCAuthenticationProvider', () => {
       );
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
           '/mock-server-basepath/internal/security/capture-url?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%3Fauth_provider_hint%3Doidc',
@@ -622,7 +736,10 @@ describe('OIDCAuthenticationProvider', () => {
       );
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         AuthenticationResult.failed(
           Boom.badRequest(
@@ -655,7 +772,10 @@ describe('OIDCAuthenticationProvider', () => {
       );
 
       await expect(
-        provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
+        provider.authenticate(
+          request,
+          sessionMock.createValue({ state: { ...tokenPair, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         AuthenticationResult.failed(
           Boom.badRequest(
@@ -674,7 +794,9 @@ describe('OIDCAuthenticationProvider', () => {
 
     it('fails if realm from state is different from the realm provider is configured with.', async () => {
       const request = httpServerMock.createKibanaRequest();
-      await expect(provider.authenticate(request, { realm: 'other-realm' })).resolves.toEqual(
+      await expect(
+        provider.authenticate(request, sessionMock.createValue({ state: { realm: 'other-realm' } }))
+      ).resolves.toEqual(
         AuthenticationResult.failed(
           Boom.unauthorized(
             'State based on realm "other-realm", but provider with the name "oidc" is configured to use realm "oidc1".'
@@ -685,27 +807,25 @@ describe('OIDCAuthenticationProvider', () => {
   });
 
   describe('`logout` method', () => {
-    it('returns `notHandled` if state is not presented.', async () => {
+    it('returns `notHandled` if session is not presented.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(provider.logout(request, undefined as any)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
-      );
+      await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
       expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('redirects to logged out view if state is `null` or does not include access token.', async () => {
+    it('redirects to logged out view if session is `null` or does not include access token.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       await expect(provider.logout(request, null)).resolves.toEqual(
         DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
       );
-      await expect(provider.logout(request, { nonce: 'x', realm: 'oidc1' })).resolves.toEqual(
-        DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request))
-      );
+      await expect(
+        provider.logout(request, sessionMock.createValue({ state: { nonce: 'x', realm: 'oidc1' } }))
+      ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
@@ -724,7 +844,10 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockRejectedValue(failureReason);
 
       await expect(
-        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+        provider.logout(
+          request,
+          sessionMock.createValue({ state: { accessToken, refreshToken, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(DeauthenticationResult.failed(failureReason));
 
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
@@ -743,7 +866,10 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({ redirect: null });
 
       await expect(
-        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+        provider.logout(
+          request,
+          sessionMock.createValue({ state: { accessToken, refreshToken, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(DeauthenticationResult.redirectTo(mockOptions.urls.loggedOut(request)));
 
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
@@ -764,7 +890,10 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       await expect(
-        provider.logout(request, { accessToken, refreshToken, realm: 'oidc1' })
+        provider.logout(
+          request,
+          sessionMock.createValue({ state: { accessToken, refreshToken, realm: 'oidc1' } })
+        )
       ).resolves.toEqual(
         DeauthenticationResult.redirectTo('http://fake-idp/logout&id_token_hint=thehint')
       );

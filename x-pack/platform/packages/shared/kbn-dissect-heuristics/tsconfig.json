@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/grok-heuristics",
     "@kbn/zod",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/streamlang"
   ]
 }

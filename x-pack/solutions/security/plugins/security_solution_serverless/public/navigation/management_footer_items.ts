@@ -6,11 +6,17 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 
-export const createManagementFooterItemsTree = (): NodeDefinition => ({
+export const createManagementFooterItemsTree = (
+  core: CoreStart,
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
   breadcrumbStatus: 'hidden',
@@ -54,6 +60,10 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
             },
             {
               breadcrumbStatus: 'hidden',
+              link: 'management:data_federation',
+            },
+            {
+              breadcrumbStatus: 'hidden',
               link: 'management:transform',
             },
             {
@@ -84,6 +94,10 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             {
+              link: 'management:application_connections',
+              breadcrumbStatus: 'hidden',
+            },
+            {
               link: 'management:roles',
               breadcrumbStatus: 'hidden',
             },
@@ -101,11 +115,13 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
             },
           ],
         },
+        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           breadcrumbStatus: 'hidden',
           children: [
             {
+              id: 'stackRules',
               link: 'management:triggersActions',
               breadcrumbStatus: 'hidden',
             },
@@ -121,9 +137,16 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
               id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
+          ],
+        },
+        {
+          title: i18nStrings.projectPerformance.title,
+          breadcrumbStatus: 'hidden',
+          children: [
             {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
+              link: 'management:queryActivity',
+              breadcrumbStatus: 'hidden',
+              badgeType: 'new',
             },
           ],
         },
@@ -138,18 +161,42 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
           ],
         },
         {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.ai.title,
           breadcrumbStatus: 'hidden',
-          children: [
-            {
-              link: 'management:genAiSettings',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:securityAiAssistantManagement',
-              breadcrumbStatus: 'hidden',
-            },
-          ],
+          children:
+            chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:securityAiAssistantManagement',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ]
+              : [
+                  {
+                    link: 'management:genAiSettings',
+                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:evals',
+                    breadcrumbStatus: 'hidden',
+                  },
+                ],
         },
         {
           title: i18nStrings.stackManagement.content.title,
@@ -180,7 +227,6 @@ export const createManagementFooterItemsTree = (): NodeDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             { link: 'maps' },
-            { link: 'visualize' },
           ],
         },
         {

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CreateSLOInput, GetSLOResponse, Indicator, UpdateSLOInput } from '@kbn/slo-schema';
+import type {
+  CreateSLOInput,
+  GetSLOResponse,
+  Indicator,
+  SLOTemplateResponse,
+  UpdateSLOInput,
+} from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { cloneDeep } from 'lodash';
@@ -24,7 +30,7 @@ import {
 } from '../constants';
 import type { CreateSLOForm } from '../types';
 
-export function transformSloResponseToCreateSloForm(
+export function transformSloResponseToFormState(
   values?: GetSLOResponse
 ): CreateSLOForm | undefined {
   if (!values) return undefined;
@@ -53,6 +59,7 @@ export function transformSloResponseToCreateSloForm(
     tags: values.tags,
     settings: {
       preventInitialBackfill: values.settings?.preventInitialBackfill ?? false,
+      preventCrossProjectSearch: values.settings?.preventCrossProjectSearch ?? false,
       syncDelay: values.settings?.syncDelay
         ? toMinutes(toDuration(values.settings.syncDelay))
         : SETTINGS_DEFAULT_VALUES.syncDelay,
@@ -92,6 +99,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
+      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -127,6 +135,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
     groupBy: [values.groupBy].flat(),
     settings: {
       preventInitialBackfill: values.settings.preventInitialBackfill,
+      preventCrossProjectSearch: values.settings.preventCrossProjectSearch,
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
@@ -188,9 +197,12 @@ function transformPartialIndicatorState(
   }
 }
 
-export function transformPartialSLOStateToFormState(
-  values: RecursivePartial<CreateSLOInput>
-): CreateSLOForm {
+export function transformPartialSLODataToFormState(
+  values?: RecursivePartial<CreateSLOInput> | SLOTemplateResponse
+): CreateSLOForm | undefined {
+  if (!values) {
+    return undefined;
+  }
   let state: CreateSLOForm;
   const indicator = transformPartialIndicatorState(values.indicator);
 
@@ -247,6 +259,9 @@ export function transformPartialSLOStateToFormState(
     if (values.settings.preventInitialBackfill) {
       state.settings.preventInitialBackfill = values.settings.preventInitialBackfill;
     }
+    if (values.settings.preventCrossProjectSearch !== undefined) {
+      state.settings.preventCrossProjectSearch = values.settings.preventCrossProjectSearch;
+    }
     if (values.settings.syncDelay) {
       state.settings.syncDelay = toMinutes(toDuration(values.settings.syncDelay));
     }
@@ -256,6 +271,12 @@ export function transformPartialSLOStateToFormState(
     if (values.settings.syncField) {
       state.settings.syncField = values.settings.syncField;
     }
+  }
+
+  if (values.artifacts?.dashboards) {
+    state.artifacts = {
+      dashboards: values.artifacts.dashboards.filter((d) => !!d?.id) as { id: string }[],
+    };
   }
 
   return state;

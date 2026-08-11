@@ -9,10 +9,14 @@ import type {
   ObltPageObjects,
   ObltTestFixtures,
   ObltWorkerFixtures,
+  ObltApiServicesFixture,
   KibanaUrl,
   BrowserAuthFixture,
 } from '@kbn/scout-oblt';
-import { test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import { mergeTests, test as base, createLazyPageObject } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+import { ServiceFlyoutPage } from './page_objects/service_flyout';
 import { ServiceMapPage } from './page_objects/service_map';
 import { ServiceInventoryPage } from './page_objects/service_inventory';
 import { StorageExplorerPage } from './page_objects/storage_explorer';
@@ -24,7 +28,22 @@ import { AgentConfigurationsPage } from './page_objects/agent_configurations';
 import { AgentExplorerPage } from './page_objects/agent_explorer';
 import { AgentKeysPage } from './page_objects/agent_keys';
 import { AnomalyDetectionPage } from './page_objects/anomaly_detection';
+import { ErrorsPage } from './page_objects/errors';
+import { TransactionsOverviewPage } from './page_objects/transactions_overview';
+import { TransactionDetailsPage } from './page_objects/transaction_details';
+import { ServiceDetailsPage } from './page_objects/service_details/service_details';
+import { DependenciesInventoryPage } from './page_objects/dependencies_inventory';
 import { APM_ROLES } from './constants';
+import { DependencyDetailsPage } from './page_objects/dependency_details/dependency_details';
+import { AlertDetailsPage } from './page_objects/alert_details';
+import { AlertsControls } from './page_objects/alerts_controls/alerts_controls';
+import { NavigationPage } from './page_objects/navigation';
+import { MobileTransactionsPage } from './page_objects/mobile_transactions';
+import { DiagnosticsPage } from './page_objects/diagnostics';
+import { OnboardingPage } from './page_objects/onboarding';
+import { FeatureControlsPage } from './page_objects/feature_controls';
+import { CorrelationsPage } from './page_objects/correlations';
+import { getServiceGroupsApiService, type ServiceGroupsApiService } from './apis/service_groups';
 
 export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
   loginAsApmAllPrivilegesWithoutWriteSettings: () => Promise<void>;
@@ -34,6 +53,7 @@ export interface ApmBrowserAuthFixture extends BrowserAuthFixture {
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
+    serviceFlyoutPage: ServiceFlyoutPage;
     serviceMapPage: ServiceMapPage;
     serviceInventoryPage: ServiceInventoryPage;
     storageExplorerPage: StorageExplorerPage;
@@ -45,11 +65,38 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     agentExplorerPage: AgentExplorerPage;
     agentKeysPage: AgentKeysPage;
     anomalyDetectionPage: AnomalyDetectionPage;
+    errorsPage: ErrorsPage;
+    transactionsOverviewPage: TransactionsOverviewPage;
+    transactionDetailsPage: TransactionDetailsPage;
+    serviceDetailsPage: ServiceDetailsPage;
+    dependenciesInventoryPage: DependenciesInventoryPage;
+    dependencyDetailsPage: DependencyDetailsPage;
+    alertDetailsPage: AlertDetailsPage;
+    alertsControls: AlertsControls;
+    navigationPage: NavigationPage;
+    mobileTransactionsPage: MobileTransactionsPage;
+    diagnosticsPage: DiagnosticsPage;
+    onboardingPage: OnboardingPage;
+    featureControlsPage: FeatureControlsPage;
+    correlationsPage: CorrelationsPage;
   };
   browserAuth: ApmBrowserAuthFixture;
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ObltApiServicesFixture & {
+    apm: {
+      serviceGroups: ServiceGroupsApiService;
+    };
+  };
+}
+
+const baseWithSynthtrace = mergeTests(base, synthtraceFixture);
+
+export const test = baseWithSynthtrace.extend<
+  ExtendedScoutTestFixtures,
+  ExtendedScoutWorkerFixtures & SynthtraceFixture
+>({
   pageObjects: async (
     {
       pageObjects,
@@ -64,6 +111,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
+      serviceFlyoutPage: createLazyPageObject(ServiceFlyoutPage, page),
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
       serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
       storageExplorerPage: createLazyPageObject(StorageExplorerPage, page, kbnUrl),
@@ -75,6 +123,20 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       agentExplorerPage: createLazyPageObject(AgentExplorerPage, page, kbnUrl),
       agentKeysPage: createLazyPageObject(AgentKeysPage, page, kbnUrl),
       anomalyDetectionPage: createLazyPageObject(AnomalyDetectionPage, page, kbnUrl),
+      errorsPage: createLazyPageObject(ErrorsPage, page, kbnUrl),
+      transactionsOverviewPage: createLazyPageObject(TransactionsOverviewPage, page, kbnUrl),
+      transactionDetailsPage: createLazyPageObject(TransactionDetailsPage, page, kbnUrl),
+      serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
+      dependenciesInventoryPage: createLazyPageObject(DependenciesInventoryPage, page, kbnUrl),
+      dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
+      alertDetailsPage: createLazyPageObject(AlertDetailsPage, page),
+      alertsControls: createLazyPageObject(AlertsControls, page),
+      navigationPage: createLazyPageObject(NavigationPage, page, kbnUrl),
+      mobileTransactionsPage: createLazyPageObject(MobileTransactionsPage, page, kbnUrl),
+      diagnosticsPage: createLazyPageObject(DiagnosticsPage, page, kbnUrl),
+      onboardingPage: createLazyPageObject(OnboardingPage, page, kbnUrl),
+      featureControlsPage: createLazyPageObject(FeatureControlsPage, page, kbnUrl),
+      correlationsPage: createLazyPageObject(CorrelationsPage, page),
     };
 
     await use(extendedPageObjects);
@@ -95,6 +157,19 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       loginAsApmReadPrivilegesWithWriteSettings,
       loginAsApmMonitor,
     });
+  },
+  apiServices: async (
+    { apiServices, kbnClient },
+    use: (apiServices: ExtendedScoutWorkerFixtures['apiServices']) => Promise<void>
+  ) => {
+    const extendedApiServices: ExtendedScoutWorkerFixtures['apiServices'] = {
+      ...apiServices,
+      apm: {
+        serviceGroups: getServiceGroupsApiService({ kbnClient }),
+      },
+    };
+
+    await use(extendedApiServices);
   },
 });
 

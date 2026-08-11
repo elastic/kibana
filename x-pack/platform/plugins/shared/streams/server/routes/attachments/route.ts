@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
 import { ATTACHMENT_TYPES } from '../../lib/streams/attachments/types';
-import { assertAttachmentsAccess } from '../utils/assert_attachments_access';
-
 export interface ListAttachmentsResponse {
   attachments: Attachment[];
 }
@@ -36,8 +34,9 @@ const listAttachmentsRoute = createServerRoute({
     access: 'public',
     summary: 'Get stream attachments',
     description:
-      'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.',
+      'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment types, search query, and tags.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -66,6 +65,10 @@ const listAttachmentsRoute = createServerRoute({
                         type: 'dashboard',
                         title: 'My Dashboard',
                         tags: ['monitoring', 'production'],
+                        description: 'Dashboard for monitoring production services',
+                        createdAt: '2023-02-23T16:15:47.275Z',
+                        updatedAt: '2023-03-24T14:39:17.636Z',
+                        streamNames: ['logs.awsfirehose', 'logs.nginx'],
                       },
                     ],
                   },
@@ -83,7 +86,13 @@ const listAttachmentsRoute = createServerRoute({
     }),
     query: z
       .object({
-        attachmentType: z.optional(attachmentTypeSchema).describe('Filter by attachment type'),
+        query: z.optional(z.string()).describe('Search query to filter attachments by title'),
+        attachmentTypes: z
+          .optional(z.union([attachmentTypeSchema, z.array(attachmentTypeSchema)]))
+          .describe('Filter by attachment types (single value or array)'),
+        tags: z
+          .optional(z.union([z.string(), z.array(z.string())]))
+          .describe('Filter by tags (single value or array)'),
       })
       .optional(),
   }),
@@ -93,10 +102,9 @@ const listAttachmentsRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListAttachmentsResponse> {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
     await streamsClient.ensureStream(params.path.streamName);
 
     const {
@@ -104,8 +112,21 @@ const listAttachmentsRoute = createServerRoute({
       query,
     } = params;
 
+    // Normalize single values to arrays for consistent handling
+    const attachmentTypes = query?.attachmentTypes
+      ? Array.isArray(query.attachmentTypes)
+        ? query.attachmentTypes
+        : [query.attachmentTypes]
+      : undefined;
+
+    const tags = query?.tags ? (Array.isArray(query.tags) ? query.tags : [query.tags]) : undefined;
+
     return {
-      attachments: await attachmentClient.getAttachments(streamName, query?.attachmentType),
+      attachments: await attachmentClient.getAttachments(streamName, {
+        query: query?.query,
+        attachmentTypes,
+        tags,
+      }),
     };
   },
 });
@@ -118,6 +139,7 @@ const linkAttachmentRoute = createServerRoute({
     description:
       'Links an attachment to a stream. Noop if the attachment is already linked to the stream.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -163,10 +185,9 @@ const linkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     const {
       path: { attachmentId, attachmentType, streamName },
@@ -194,6 +215,7 @@ const unlinkAttachmentRoute = createServerRoute({
     description:
       'Unlinks an attachment from a stream. Noop if the attachment is not linked to the stream.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -239,10 +261,9 @@ const unlinkAttachmentRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     await streamsClient.ensureStream(params.path.streamName);
 
@@ -274,6 +295,7 @@ const bulkAttachmentsRoute = createServerRoute({
     description:
       'Bulk update attachments linked to a stream. Can link new attachments and delete existing ones. Supports mixed attachment types in a single request.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -349,10 +371,9 @@ const bulkAttachmentsRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<BulkUpdateAttachmentsResponse> => {
-    const { attachmentClient, streamsClient, uiSettingsClient } = await getScopedClients({
+    const { attachmentClient, streamsClient } = await getScopedClients({
       request,
     });
-    await assertAttachmentsAccess({ uiSettingsClient });
 
     const {
       path: { streamName },

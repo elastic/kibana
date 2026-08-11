@@ -33,7 +33,7 @@ export const getBooleanFieldsStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap } = params;
+  const { index, query, runtimeFieldMap, projectRouting } = params;
 
   const size = 0;
   const aggs: Aggs = {};
@@ -59,6 +59,7 @@ export const getBooleanFieldsStatsRequest = (
     index,
     size,
     ...searchBody,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 };
 

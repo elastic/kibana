@@ -36,8 +36,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
-import type { MlFeatures } from '../../../common/constants/app';
 import type {
   DFAModelItem,
   ExistingModelBase,
@@ -46,8 +44,8 @@ import type {
   TrainedModelItem,
   TrainedModelUIItem,
   TrainedModelWithPipelines,
-} from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { isBuiltInModel, isExistingModel } from '@kbn/ml-common-types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -55,7 +53,9 @@ import {
   type ModelDownloadState,
   type PipelineDefinition,
   type TrainedModelConfigResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import type { MlFeatures } from '../../../common/constants/app';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';
@@ -519,10 +519,10 @@ export class ModelsProvider {
           const id = processor.inference?.model_id;
           if (modelIdsMap.has(id)) {
             const obj = modelIdsMap.get(id);
-            if (obj === null) {
-              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition });
+            if (obj == null) {
+              modelIdsMap.set(id, { [pipelineName]: pipelineDefinition as PipelineDefinition });
             } else {
-              obj![pipelineName] = pipelineDefinition;
+              obj[pipelineName] = pipelineDefinition as PipelineDefinition;
             }
           }
         }

@@ -10,53 +10,66 @@
 import { join } from 'path';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { fileToJson } from '../../util';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import type { ModelVersionFixtures } from './types';
 import { FIXTURES_BASE_PATH } from './constants';
 import { createFixtureFile } from './create_fixture_file';
 import { isValidFixtureFile } from './is_valid_fixture_file';
 
+export function getFixturesBasePath(type: string, modelVersion: string): string {
+  return join(FIXTURES_BASE_PATH, type, `${modelVersion}.json`);
+}
+
 export async function getTypeFixtures({
+  path,
   type,
   previous,
   current,
   generate,
 }: {
+  path: string;
   type: SavedObjectsType<any>;
   previous: string;
   current: string;
   generate: boolean;
 }) {
   const name = type.name;
-  const fixturesPath = join(FIXTURES_BASE_PATH, name, `${current}.json`);
-  const fixtures = (await fileToJson(fixturesPath)) as ModelVersionFixtures;
+  const fixtures = (await fileToJson(path)) as ModelVersionFixtures;
   if (!fixtures) {
     if (generate) {
       await createFixtureFile({
         type,
-        path: fixturesPath,
+        path,
         current,
         previous,
       });
-      throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for '${current}'. Please populate sample data on '${fixturesPath}'.`
-      );
+      throw new SavedObjectsCheckError({
+        ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_MISSING,
+        severity: 'error',
+        typeName: name,
+        message: `'${name}' SO type is missing test fixtures for '${current}'.`,
+        fixHint: `The template file '${path}' has been generated. Populate it with sample documents.`,
+        docsAnchor: '#defining-model-versions',
+      });
     } else {
-      throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for the new modelVersion '${current}'. Please run with --fix to generate '${fixturesPath}' and then add sample data.`
-      );
+      throw new SavedObjectsCheckError({
+        ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_MISSING,
+        severity: 'error',
+        typeName: name,
+        message: `'${name}' SO type is missing test fixtures for the new modelVersion '${current}'.`,
+        fixHint: `Run with --fix to generate the template file '${path}', then populate it with sample documents.`,
+        docsAnchor: '#defining-model-versions',
+      });
     }
   } else if (!isValidFixtureFile(fixtures, previous, current)) {
-    throw new Error(
-      `❌ The contents of '${fixturesPath}' are invalid. Please ensure it:
-{
-  "${previous}": [
-    // has one or more documents of type ${name} on version ${previous}
-  ],
-  "${current}": [
-    // what the documents above should look like after migrating them to ${current}
-  ],
-}`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_INVALID,
+      severity: 'error',
+      typeName: name,
+      message: `The contents of '${path}' are invalid.`,
+      fixHint: `Ensure the file contains a JSON object with a '${previous}' key (documents of type '${name}' on version ${previous}) and a '${current}' key (those documents after migration to ${current}), each holding a non-empty array.`,
+      docsAnchor: '#defining-model-versions',
+    });
   } else {
     return fixtures;
   }

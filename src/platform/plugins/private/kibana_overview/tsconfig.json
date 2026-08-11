@@ -6,10 +6,12 @@
   "include": [
     "public/**/*",
     "common/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "test/scout/**/*",
+    "test/scout_shared_ux_no_data/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/scout",
     "@kbn/navigation-plugin",
     "@kbn/home-plugin",
     "@kbn/newsfeed-plugin",

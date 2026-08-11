@@ -20,10 +20,8 @@
       "kibanaUtils",
       "licensing",
       "taskManager",
-      "kibanaReact",
       "management",
-      "esUiShared",
-      "unifiedSearch",
+      "kql",
       "embeddable"
     ],
     "optionalPlugins": [
@@ -32,9 +30,9 @@
       "monitoringCollection",
       "spaces",
       "serverless",
-      "maintenanceWindows"
+      "maintenanceWindows",
+      "cps"
     ],
-    "requiredBundles": ["maintenanceWindows"],
     "extraPublicDirs": ["common", "common/parse_duration"]
   }
 }

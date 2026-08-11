@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -24,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDocLinks } from '@kbn/doc-links';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
@@ -34,9 +36,14 @@ export function AiAssistantSelectionPage() {
     buildFlavor,
     kibanaBranch,
     securityAIAssistantEnabled,
+    chatExperience$,
   } = useAppContext();
 
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
+  const chatExperience = useObservable(chatExperience$, AIChatExperience.Classic);
+
+  const observabilityAIAssistantEnabled =
+    capabilities.observabilityAIAssistant?.show && chatExperience !== AIChatExperience.Agent;
+
   const securityAIAssistantVisibility = Boolean(
     capabilities.securitySolutionAssistant['ai-assistant']
   );
@@ -157,10 +164,10 @@ export function AiAssistantSelectionPage() {
                 justifyContent="center"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xxl" type="logoObservability" />
+                  <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -234,7 +241,7 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoSecurity" />}
+            icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
             isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',

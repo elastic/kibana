@@ -7,9 +7,7 @@
       "pretty": "__flag__",
       "dry_run": "__flag__",
       "explain": "__flag__",
-      "metric": [
-        "all"
-      ],
+      "metric": [],
       "retry_failed": "__flag__",
       "master_timeout": [
         "30s",
@@ -20,6 +18,56 @@
         "30s",
         "-1",
         "0"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "commands": [
+        {
+          "cancel": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "allow_primary": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "move": {
+            "index": "",
+            "shard": "",
+            "from_node": "",
+            "to_node": ""
+          },
+          "allocate_replica": {
+            "index": "",
+            "shard": "",
+            "node": ""
+          },
+          "allocate_stale_primary": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "accept_data_loss": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "allocate_empty_primary": {
+            "index": "",
+            "shard": "",
+            "node": "",
+            "accept_data_loss": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        }
       ]
     },
     "methods": [

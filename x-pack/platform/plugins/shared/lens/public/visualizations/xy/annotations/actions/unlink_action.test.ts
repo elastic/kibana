@@ -8,7 +8,7 @@
 import type {
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
@@ -45,7 +45,7 @@ describe('annotation group unlink actions', () => {
     },
   };
 
-  const state: XYState = {
+  const state: XYVisualizationState = {
     layers: [byRefLayer],
     legend: { isVisible: false, position: 'bottom' },
     preferredSeriesType: 'area',

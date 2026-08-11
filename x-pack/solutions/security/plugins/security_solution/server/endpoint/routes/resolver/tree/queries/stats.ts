@@ -38,9 +38,17 @@ export class StatsQuery extends BaseResolverQuery {
     indexPatterns,
     timeRange,
     isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
     agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, agentId });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -50,6 +58,7 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },
@@ -93,6 +102,7 @@ export class StatsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.id]: nodes },
             },

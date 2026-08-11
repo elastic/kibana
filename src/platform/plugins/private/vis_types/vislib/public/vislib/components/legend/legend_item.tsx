@@ -62,7 +62,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter for {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       'data-test-subj': `legend-${item.label}-filterIn`,
     },
     {
@@ -71,7 +71,7 @@ const VisLegendItemComponent = ({
         defaultMessage: 'Filter out {legendDataLabel}',
         values: { legendDataLabel: item.label },
       }),
-      iconType: 'minusInCircle',
+      iconType: 'minusCircle',
       'data-test-subj': `legend-${item.label}-filterOut`,
     },
   ];
@@ -123,6 +123,7 @@ const VisLegendItemComponent = ({
       <EuiIcon
         size="l"
         type="dot"
+        aria-hidden={true}
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
       />
@@ -132,6 +133,10 @@ const VisLegendItemComponent = ({
 
   const renderDetails = () => (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVislib.vislib.legend.toggleOptionsPopoverAriaLabel', {
+        defaultMessage: '{legendDataLabel}, legend options',
+        values: { legendDataLabel: item.label },
+      })}
       display="block"
       button={button}
       isOpen={selected}

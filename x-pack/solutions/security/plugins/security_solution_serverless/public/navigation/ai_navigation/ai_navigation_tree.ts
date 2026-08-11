@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { AiNavigationIcon } from './icon';
 
@@ -19,7 +23,12 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Elastic AI SOC Engine' }
 );
 
-export const createAiNavigationTree = (): NavigationTreeDefinition => ({
+export const createAiNavigationTree = (
+  core: CoreStart,
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  workflowsUiEnabled: boolean = false,
+  showAgentBuilderNavAtTop: boolean = false
+): NavigationTreeDefinition => ({
   body: [
     {
       id: 'ease_home',
@@ -28,6 +37,14 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       icon: AiNavigationIcon,
       renderAs: 'home',
     },
+    ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
+      ? [
+          {
+            icon: 'productAgent',
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.alertSummary,
       link: securityLink(SecurityPageName.alertSummary),
@@ -45,7 +62,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
         {
           id: SecurityPageName.configurations,
           link: securityLink(SecurityPageName.configurations),
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           children: [
             {
               id: SecurityPageName.configurationsIntegrations,
@@ -55,10 +72,14 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
               id: SecurityPageName.configurationsBasicRules,
               link: securityLink(SecurityPageName.configurationsBasicRules),
             },
-            {
-              id: SecurityPageName.configurationsAiSettings,
-              link: securityLink(SecurityPageName.configurationsAiSettings),
-            },
+            ...(chatExperience !== AIChatExperience.Agent
+              ? [
+                  {
+                    id: SecurityPageName.configurationsAiSettings,
+                    link: securityLink(SecurityPageName.configurationsAiSettings),
+                  },
+                ]
+              : []),
           ],
         },
       ],
@@ -67,8 +88,23 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          link: 'discover',
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'mail',
         },
+        {
+          link: 'discover' as AppDeepLinkId,
+          icon: 'productDiscover',
+        },
+        // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+        ...(chatExperience === AIChatExperience.Agent && !showAgentBuilderNavAtTop
+          ? [
+              {
+                icon: 'productAgent',
+                link: 'agent_builder' as AppDeepLinkId,
+              },
+            ]
+          : []),
+        ...(workflowsUiEnabled ? getWorkflowsNavPanel(core) : []),
         {
           id: SecurityPageName.aiValue,
           link: securityLink(SecurityPageName.aiValue),
@@ -76,17 +112,21 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
         },
       ],
     },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
+    },
   ],
   footer: [
     {
       id: SecurityPageName.landing,
       link: securityLink(SecurityPageName.landing),
-      icon: 'launch',
+      icon: 'rocket',
     },
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       title: i18nStrings.ingestAndManageData.title,
@@ -126,7 +166,11 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       children: [
         {
           title: i18nStrings.stackManagementV2.access.title,
-          children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+          children: [
+            { link: 'management:api_keys' },
+            { link: 'management:application_connections' },
+            { link: 'management:roles' },
+          ],
         },
         {
           title: i18nStrings.stackManagementV2.organization.title,
@@ -140,6 +184,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
             },
           ],
         },
+        ...getAlertingV2ManagementNavPanel(core),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
           children: [
@@ -156,6 +201,14 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
             {
               link: 'management:trained_models',
             },
+          ],
+        },
+        {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
           ],
         },
         {

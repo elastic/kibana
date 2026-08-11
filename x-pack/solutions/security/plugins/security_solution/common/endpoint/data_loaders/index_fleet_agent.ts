@@ -15,7 +15,7 @@ import type { FleetServerAgent } from '@kbn/fleet-plugin/common';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
@@ -205,6 +205,7 @@ export const deleteIndexedFleetAgents = async (
       .deleteByQuery({
         index: `${indexedData.fleetAgentsIndex}-*`,
         wait_for_completion: true,
+        conflicts: 'proceed',
         query: {
           bool: {
             filter: [

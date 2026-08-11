@@ -12,10 +12,9 @@ import { render } from '@testing-library/react';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleStatusFailedCallOut } from './rule_status_failed_callout';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { of } from 'rxjs';
-import { MockAssistantProviderComponent } from '../../../../common/mock/mock_assistant_provider';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -23,27 +22,10 @@ const TEST_ID = 'ruleStatusFailedCallOut';
 const DATE = '2022-01-27T15:03:31.176Z';
 const MESSAGE = 'This rule is attempting to query data but...';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-  logger: {
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: () => {},
-  },
-});
-
 const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MockAssistantProviderComponent>{children}</MockAssistantProviderComponent>
-    </QueryClientProvider>
-  );
+  return <TestProviders>{children}</TestProviders>;
 };
 
 describe('RuleStatusFailedCallOut', () => {

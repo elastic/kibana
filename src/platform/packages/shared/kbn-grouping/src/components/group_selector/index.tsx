@@ -13,6 +13,7 @@ import type {
 } from '@elastic/eui';
 import { useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { UiCounterMetricType } from '@kbn/analytics';
@@ -20,6 +21,41 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
 import { StyledContextMenu } from '../styles';
+import type { GroupSettings } from '../../hooks/types';
+import { NONE_GROUP_KEY } from '../types';
+
+/**
+ * Checks if a group is enforced
+ * @param groupKey - Group key to check
+ * @param enforcedGroups - Array of enforced group keys
+ * @returns True if the group is enforced, false otherwise
+ */
+const isEnforcedGroup = (groupKey?: string, enforcedGroups?: string[]) =>
+  Boolean(groupKey && enforcedGroups?.includes(groupKey));
+
+/**
+ * Checks if 'none' option should be disabled
+ * 'none' should be disabled when only enforced groups are selected
+ * @param enforcedGroups - Array of enforced group keys
+ * @param selectedGroups - Array of selected group keys
+ * @returns True if 'none' should be disabled, false otherwise
+ */
+const shouldDisableNone = ({
+  enforcedGroups,
+  selectedGroups,
+}: {
+  enforcedGroups?: string[];
+  selectedGroups: string[];
+}) => {
+  if (!enforcedGroups || enforcedGroups.length === 0) {
+    return false;
+  }
+  // Check if only enforced groups are selected
+  return (
+    selectedGroups.length === enforcedGroups.length &&
+    selectedGroups.every((g) => enforcedGroups.includes(g))
+  );
+};
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
@@ -35,6 +71,7 @@ export interface GroupSelectorProps {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  settings?: GroupSettings;
 }
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
@@ -45,7 +82,15 @@ const GroupSelectorComponent = ({
   title = i18n.GROUP_BY,
   maxGroupingLevels = 1,
   onOpenTracker,
+  settings,
 }: GroupSelectorProps) => {
+  const {
+    hideNoneOption,
+    hideCustomFieldOption,
+    hideOptionsTitle,
+    popoverButtonLabel,
+    enforcedGroups,
+  } = settings ?? {};
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isGroupSelected = useCallback(
     (groupKey: string) =>
@@ -57,26 +102,47 @@ const GroupSelectorComponent = ({
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const isOptionDisabled = (key?: string) => {
-      // Do not disable when maxGroupingLevels is 1 to allow toggling between groups
+      // If the group is enforced, always disable it to prevent deselection (takes precedence)
+      // Note: Validation prevents enforced groups when maxGroupingLevels === 1, so this check
+      // will never conflict with toggle mode
+      if (isEnforcedGroup(key, enforcedGroups)) {
+        return true;
+      }
+
+      // Do not disable when maxGroupingLevels is 1 to allow toggling (applies to all options)
       if (maxGroupingLevels === 1) {
         return false;
       }
+
+      if (!key) {
+        // Custom field option
+        // Disable all non selected options when the maxGroupingLevels is reached
+        return groupsSelected.length === maxGroupingLevels;
+      }
+
       // Disable all non selected options when the maxGroupingLevels is reached
-      return groupsSelected.length === maxGroupingLevels && (key ? !isGroupSelected(key) : true);
+      return groupsSelected.length === maxGroupingLevels && !isGroupSelected(key);
     };
+
+    const topLevelTitle =
+      maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels);
 
     return [
       {
         id: 'firstPanel',
-        title:
-          maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels),
+        title: hideOptionsTitle ? null : topLevelTitle,
         items: [
-          {
-            'data-test-subj': 'panel-none',
-            name: i18n.NONE,
-            icon: isGroupSelected('none') ? 'check' : 'empty',
-            onClick: () => onGroupChange('none'),
-          },
+          ...(hideNoneOption
+            ? []
+            : [
+                {
+                  'data-test-subj': 'panel-none',
+                  name: i18n.NONE,
+                  icon: isGroupSelected(NONE_GROUP_KEY) ? 'check' : 'empty',
+                  disabled: shouldDisableNone({ enforcedGroups, selectedGroups: groupsSelected }),
+                  onClick: () => onGroupChange(NONE_GROUP_KEY),
+                } as EuiContextMenuPanelItemDescriptor,
+              ]),
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
             disabled: isOptionDisabled(o.key),
@@ -84,14 +150,18 @@ const GroupSelectorComponent = ({
             onClick: () => onGroupChange(o.key),
             icon: isGroupSelected(o.key) ? 'check' : 'empty',
           })),
-          {
-            'data-test-subj': `panel-custom`,
-            name: i18n.CUSTOM_FIELD,
-            icon: 'empty',
-            disabled: isOptionDisabled(),
-            panel: 'customPanel',
-            hasPanel: true,
-          },
+          ...(hideCustomFieldOption
+            ? []
+            : [
+                {
+                  'data-test-subj': `panel-custom`,
+                  name: i18n.CUSTOM_FIELD,
+                  icon: 'empty',
+                  disabled: isOptionDisabled(),
+                  panel: 'customPanel',
+                  hasPanel: true,
+                } as EuiContextMenuPanelItemDescriptor,
+              ]),
         ],
       },
       {
@@ -110,7 +180,18 @@ const GroupSelectorComponent = ({
         ),
       },
     ];
-  }, [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
+  }, [
+    fields,
+    isGroupSelected,
+    maxGroupingLevels,
+    onGroupChange,
+    options,
+    hideNoneOption,
+    hideCustomFieldOption,
+    hideOptionsTitle,
+    enforcedGroups,
+    groupsSelected,
+  ]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]
@@ -130,7 +211,7 @@ const GroupSelectorComponent = ({
 
   const button = useMemo(() => {
     // need to use groupsSelected to ensure proper selection order (selectedOptions does not handle selection order)
-    const buttonLabel = isGroupSelected('none')
+    const buttonLabel = isGroupSelected(NONE_GROUP_KEY)
       ? i18n.NONE
       : groupsSelected.reduce((optionsTitle, o) => {
           const selection = selectedOptions.find((opt) => opt.key === o);
@@ -145,19 +226,20 @@ const GroupSelectorComponent = ({
         flush="both"
         iconSide="right"
         iconSize="s"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         title={buttonLabel}
         size="xs"
       >
-        {`${title}: ${buttonLabel}`}
+        {popoverButtonLabel ?? `${title}: ${buttonLabel}`}
       </EuiButtonEmpty>
     );
-  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title]);
+  }, [groupsSelected, isGroupSelected, onButtonClick, selectedOptions, title, popoverButtonLabel]);
 
   return (
     <EuiPopover
       data-test-subj={dataTestSubj ?? 'groupByPopover'}
+      aria-label={i18nCore.translate('grouping.selector.groupBy', { defaultMessage: 'Group by' })}
       button={button}
       closePopover={closePopover}
       isOpen={isPopoverOpen}

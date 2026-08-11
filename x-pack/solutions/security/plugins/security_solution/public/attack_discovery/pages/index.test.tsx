@@ -10,7 +10,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -23,10 +23,8 @@ import { UpsellingProvider } from '../../common/components/upselling_provider';
 import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymization_fields_response';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
-import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
-import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
-import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 const mockConnectors: unknown[] = [
   {
@@ -35,13 +33,6 @@ const mockConnectors: unknown[] = [
     actionTypeId: '.gen-ai',
   },
 ];
-
-const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
-  attackDiscoveryPublicApiEnabled: false,
-});
-jest.mock('./use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
 
 jest.mock('react-use/lib/useLocalStorage', () =>
   jest.fn().mockImplementation((key, defaultValue) => {
@@ -71,7 +62,7 @@ jest.mock(
   })
 );
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors', () => ({
+jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(() => ({
     isFetched: true,
     data: mockConnectors,
@@ -85,7 +76,7 @@ jest.mock(
   })
 );
 
-const mockSecurityCapabilities = [`${SECURITY_FEATURE_ID}.show`];
+const mockSecurityCapabilities = [SECURITY_UI_SHOW_PRIVILEGE];
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: () =>
@@ -105,9 +96,6 @@ jest.mock('./use_attack_discovery', () => ({
     isLoading: false,
   }),
 }));
-
-jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
-const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -175,6 +163,7 @@ const mockUseKibanaReturnValue = {
       get: jest.fn(),
       set: jest.fn(),
     },
+    telemetry: { reportEvent: jest.fn() },
     theme: {
       getTheme: jest.fn().mockReturnValue({ darkMode: false }),
     },
@@ -228,8 +217,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
   });
 
   describe('page layout', () => {
@@ -321,9 +308,15 @@ describe('AttackDiscovery', () => {
     });
   });
 
-  describe('`attacksAlertsAlignmentEnabled` feature', () => {
-    it('renders callout about new Attacks page when feature is enabled', () => {
+  describe('workflows insufficient privileges callout', () => {
+    afterEach(() => {
+      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(false);
+    });
+
+    it('renders the insufficient privileges callout when workflows are enabled but privileges are missing', async () => {
       mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
+      mockUseKibanaReturnValue.services.uiSettings.get.mockReturnValue(true);
 
       render(
         <TestProviders>
@@ -335,10 +328,12 @@ describe('AttackDiscovery', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Insufficient privileges')).toBeInTheDocument();
+      });
     });
 
-    it('does not render callout about new Attacks page when feature is disabled', () => {
+    it('does not render the insufficient privileges callout when workflows are disabled', () => {
       mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
 
       render(
@@ -351,7 +346,7 @@ describe('AttackDiscovery', () => {
         </TestProviders>
       );
 
-      expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
+      expect(screen.queryByText('Insufficient privileges')).not.toBeInTheDocument();
     });
   });
 });

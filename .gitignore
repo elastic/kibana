@@ -1,4 +1,9 @@
+.artifacts
+docs/**/.artifacts
+docs-dev/**/.artifacts
+/.superset
 .aws-config.json
+.bk.yaml
 .signing-config.json
 .ackrc
 /.es
@@ -19,15 +24,24 @@ target
 /build
 .jruby
 .idea
-.claude
-.cursor
+.claude/*.local.json
+.claude/worktrees/
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
+!x-pack/solutions/security/.cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
-claude.md
 *.iml
 *.log
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+.codex/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build
@@ -68,6 +82,7 @@ webpackstats.json
 !/config/serverless.yml
 !/config/serverless.es.yml
 !/config/serverless.workplaceai.yml
+!/config/serverless.vectordb.yml
 !/config/serverless.oblt.yml
 !/config/serverless.oblt.complete.yml
 !/config/serverless.oblt.logs_essentials.yml
@@ -81,6 +96,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn
@@ -97,20 +113,24 @@ npm-debug.log*
 .vagrant
 .envrc
 
+# @kbn/evals vault config (local-only; never commit real secrets)
+/x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
 ## Snyk
 .dccache
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
 /apm-diagnostics*.json
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
-/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
-
 # transpiled cypress config
 x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.js
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
 x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
 x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
 x-pack/platform/plugins/shared/osquery/cypress.config.js
 x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
@@ -171,14 +191,9 @@ oas_docs/output/kibana.serverless.tmp*.yaml
 oas_docs/output/kibana.tmp*.yaml
 oas_docs/output/kibana.new.yaml
 oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
 
-# Security Solution Playwright
-x-pack/solutions/security/test/security_solution_playwright/test-results/
-x-pack/solutions/security/test/security_solution_playwright/playwright-report/
-x-pack/solutions/security/test/security_solution_playwright/blob-report/
-x-pack/solutions/security/test/security_solution_playwright/playwright/.cache/
-x-pack/solutions/security/test/security_solution_playwright/.auth/
-x-pack/solutions/security/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
 
@@ -186,3 +201,16 @@ x-pack/solutions/security/test/security_solution_playwright/.env
 src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker
+
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/
+
+# Parallel step internal working notes (kept locally, not committed)
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_gaps.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_red_flags.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_p1_scope_brief.md
+src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested_flow_control_tradeoff.md

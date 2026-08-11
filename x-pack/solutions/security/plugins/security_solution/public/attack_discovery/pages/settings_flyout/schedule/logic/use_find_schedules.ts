@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import {
-  ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
   transformAttackDiscoveryScheduleFromApi,
 } from '@kbn/elastic-assistant-common';
@@ -18,8 +17,6 @@ import * as i18n from './translations';
 import { findAttackDiscoverySchedule } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
-import { toAttackDiscoveryScheduleArray } from './schedule_type_guards';
 
 export const useFindAttackDiscoverySchedules = (params?: {
   page?: number;
@@ -29,30 +26,23 @@ export const useFindAttackDiscoverySchedules = (params?: {
   disableToast?: boolean;
 }) => {
   const { addError } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const { disableToast, ...restParams } = params ?? {};
 
-  const route = attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_SCHEDULES_FIND
-    : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND;
-
   return useQuery(
-    ['GET', route, params],
+    ['GET', ATTACK_DISCOVERY_SCHEDULES_FIND, params],
     async ({ signal }) => {
       const response = await findAttackDiscoverySchedule({
-        attackDiscoveryPublicApiEnabled,
         signal,
         ...restParams,
       });
 
-      // Public API returns snake_case and needs transformation to camelCase
-      // Internal API returns camelCase
-      const normalizedSchedules: AttackDiscoverySchedule[] = attackDiscoveryPublicApiEnabled
-        ? response.data.map(transformAttackDiscoveryScheduleFromApi)
-        : toAttackDiscoveryScheduleArray(response.data);
+      // Transform from API snake_case to frontend camelCase
+      const schedules: AttackDiscoverySchedule[] = response.data.map(
+        transformAttackDiscoveryScheduleFromApi
+      );
 
-      return { schedules: normalizedSchedules, total: response.total };
+      return { schedules, total: response.total };
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
@@ -73,19 +63,14 @@ export const useFindAttackDiscoverySchedules = (params?: {
  */
 export const useInvalidateFindAttackDiscoverySchedule = () => {
   const queryClient = useQueryClient();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   return useCallback(() => {
-    const route = attackDiscoveryPublicApiEnabled
-      ? ATTACK_DISCOVERY_SCHEDULES_FIND
-      : ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND;
-
     /**
      * Invalidate all queries that start with ATTACK_DISCOVERY_SCHEDULES_FIND. This
      * includes the in-memory query cache and paged query cache.
      */
-    queryClient.invalidateQueries(['GET', route], {
+    queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_SCHEDULES_FIND], {
       refetchType: 'active',
     });
-  }, [attackDiscoveryPublicApiEnabled, queryClient]);
+  }, [queryClient]);
 };

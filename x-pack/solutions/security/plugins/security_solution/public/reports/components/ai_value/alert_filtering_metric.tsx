@@ -17,23 +17,39 @@ import { VisualizationContextMenuActions } from '../../../common/components/visu
 import { getAlertFilteringMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
+import { SampleMetric } from './sample_metric';
+import { SAMPLE_VALUE_METRICS } from './sample_data';
+import { formatPercent } from './metrics';
 
 interface Props {
+  isSample: boolean;
   attackAlertIds: string[];
   from: string;
   to: string;
   totalAlerts: number;
 }
 const ID = 'AlertFilteringMetricQuery';
-const AlertFilteringMetricComponent: React.FC<Props> = ({
+
+const VISUALIZATION_ACTIONS = [
+  VisualizationContextMenuActions.addToExistingCase,
+  VisualizationContextMenuActions.addToNewCase,
+  VisualizationContextMenuActions.inspect,
+];
+
+interface LiveContentProps {
+  attackAlertIds: string[];
+  from: string;
+  to: string;
+  totalAlerts: number;
+}
+
+const LiveAlertFilteringMetricContent: React.FC<LiveContentProps> = ({
   attackAlertIds,
   from,
   to,
   totalAlerts,
 }) => {
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
   const extraVisualizationOptions = useMemo(
     () => ({
       filters: getExcludeAlertsFilters(attackAlertIds),
@@ -46,6 +62,42 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
     [signalIndexName, totalAlerts]
   );
   return (
+    <VisualizationEmbeddable
+      data-test-subj="alert-filtering-metric"
+      extraOptions={extraVisualizationOptions}
+      getLensAttributes={getLensAttributes}
+      timerange={{ from, to }}
+      id={`${ID}-area-embeddable`}
+      inspectTitle={i18n.FILTERING_RATE}
+      scopeId={PageScope.alerts}
+      withActions={VISUALIZATION_ACTIONS}
+    />
+  );
+};
+
+const SampleAlertFilteringMetricContent: React.FC = () => (
+  <SampleMetric
+    id={`${ID}-sample`}
+    title={i18n.FILTERING_RATE}
+    value={SAMPLE_VALUE_METRICS.filteredAlertsPerc}
+    valueFormatter={formatPercent}
+    icon="chartLine"
+  />
+);
+
+const AlertFilteringMetricComponent: React.FC<Props> = ({
+  isSample,
+  attackAlertIds,
+  from,
+  to,
+  totalAlerts,
+}) => {
+  const {
+    euiTheme: { colors },
+  } = useEuiTheme();
+  const aiValueExportContext = useAIValueExportContext();
+  const isExportMode = aiValueExportContext?.isExportMode === true;
+  return (
     <div
       css={css`
         height: 100%;
@@ -53,7 +105,10 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
           height: 100% !important;
         }
         .echMetricText__icon .euiIcon {
-          fill: ${colors.vis.euiColorVis4};
+          ${isExportMode ? 'display: none;' : `fill: ${colors.vis.euiColorVis4};`}
+        }
+        .echMetricText__valueBlock {
+          grid-row-start: 3 !important;
         }
         .echMetricText {
           padding: 8px 16px 60px;
@@ -79,20 +134,16 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         }
       `}
     >
-      <VisualizationEmbeddable
-        data-test-subj="alert-filtering-metric"
-        extraOptions={extraVisualizationOptions}
-        getLensAttributes={getLensAttributes}
-        timerange={{ from, to }}
-        id={`${ID}-area-embeddable`}
-        inspectTitle={i18n.FILTERING_RATE}
-        scopeId={PageScope.alerts}
-        withActions={[
-          VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
-          VisualizationContextMenuActions.inspect,
-        ]}
-      />
+      {isSample ? (
+        <SampleAlertFilteringMetricContent />
+      ) : (
+        <LiveAlertFilteringMetricContent
+          attackAlertIds={attackAlertIds}
+          from={from}
+          to={to}
+          totalAlerts={totalAlerts}
+        />
+      )}
     </div>
   );
 };

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { uniq } from 'lodash/fp';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import {
+  ALERTS_API_ALL,
+  ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { SetAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -15,7 +17,9 @@ import {
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { validateAlertTagsArrays } from './helpers';
+import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
+import { updateAlertsTags } from '../common/operations/update_alerts_tags';
+import { withSiemErrorHandling } from '../with_siem_error_handling';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -24,7 +28,9 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [
+            { anyRequired: [ALERTS_API_ALL, ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE] },
+          ],
         },
       },
     })
@@ -38,82 +44,25 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response) => {
-        const { tags, ids } = request.body;
-        const core = await context.core;
-        const securitySolution = await context.securitySolution;
-        const esClient = core.elasticsearch.client.asCurrentUser;
-        const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
-        const validationErrors = validateAlertTagsArrays(tags, ids);
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
+        const { ids, tags } = request.body;
 
+        const validationErrors = validateAlertTagsArrays(tags, ids);
         if (validationErrors.length) {
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
 
-        if (!siemClient) {
+        const securitySolution = await context.securitySolution;
+        if (securitySolution?.getAppClient() == null) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const tagsToAdd = uniq(tags.tags_to_add);
-        const tagsToRemove = uniq(tags.tags_to_remove);
+        const spaceId = securitySolution.getSpaceId() ?? 'default';
+        const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-        const painlessScript = {
-          params: { tagsToAdd, tagsToRemove },
-          source: `List newTagsArray = [];
-        if (ctx._source["kibana.alert.workflow_tags"] != null) {
-          for (tag in ctx._source["kibana.alert.workflow_tags"]) {
-            if (!params.tagsToRemove.contains(tag)) {
-              newTagsArray.add(tag);
-            }
-          }
-          for (tag in params.tagsToAdd) {
-            if (!newTagsArray.contains(tag)) {
-              newTagsArray.add(tag)
-            }
-          }
-          ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
-        } else {
-          ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
-        }
-        `,
-          lang: 'painless',
-        };
-
-        const bulkUpdateRequest = [];
-        for (const id of ids) {
-          bulkUpdateRequest.push(
-            {
-              update: {
-                _index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-                _id: id,
-              },
-            },
-            {
-              script: painlessScript,
-            }
-          );
-        }
-
-        try {
-          const body = await esClient.updateByQuery({
-            index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-            refresh: true,
-            script: painlessScript,
-            query: {
-              bool: {
-                filter: { terms: { _id: ids } },
-              },
-            },
-          });
-          return response.ok({ body });
-        } catch (err) {
-          const error = transformError(err);
-          return siemResponse.error({
-            body: error.message,
-            statusCode: error.statusCode,
-          });
-        }
+        return withSiemErrorHandling(response, () =>
+          updateAlertsTags({ context, index, ids, tags })
+        );
       }
     );
 };

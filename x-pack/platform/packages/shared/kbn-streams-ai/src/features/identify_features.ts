@@ -4,186 +4,233 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DocumentAnalysis } from '@kbn/ai-tools';
-import { formatDocumentAnalysis } from '@kbn/ai-tools';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+
+import { compact, uniqBy } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import {
-  isFeatureWithFilter,
-  type Feature,
-  type Streams,
-  type SystemFeature,
-} from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
+  type BaseFeature,
+  type IgnoredFeature,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
+} from '@kbn/significant-events-schema';
 import { withSpan } from '@kbn/apm-utils';
-import { IdentifySystemsPrompt } from './prompt';
-import { clusterLogs } from '../cluster_logs/cluster_logs';
-import conditionSchemaText from '../shared/condition_schema.text';
-import { generateStreamDescription } from '../description/generate_description';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
+import { createIdentifyFeaturesPrompt } from './prompt';
+import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
-export interface IdentifyFeaturesOptions {
-  stream: Streams.all.Definition;
-  features?: Feature[];
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
-  inferenceClient: BoundInferenceClient;
-  logger: Logger;
-  signal: AbortSignal;
-  analysis: DocumentAnalysis;
+/**
+ * Mirrors the "2–5 evidence strings" guidance in the system prompt. Capping here rather than
+ * with `maxItems` in the finalize schema keeps an over-long array from failing tool-call
+ * validation, which would retry the whole generation and then drop the batch.
+ */
+const MAX_EVIDENCE_ITEMS = 5;
+
+export interface PreviouslyIdentifiedFeature {
+  id: string;
+  type: string;
+  subtype?: string;
+  title?: string;
+  description?: string;
+  properties: Record<string, unknown>;
 }
 
-/**
- * Identifies features in a stream, by:
- * - describing the dataset (via sampled documents)
- * - clustering docs together on similarity
- * - asking the LLM to identify features by creating
- * queries and validating the resulting clusters
- */
-export async function identifySystemFeatures({
-  stream,
-  features,
-  start,
-  end,
-  esClient,
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
+export type { IgnoredFeature } from '@kbn/significant-events-schema';
+
+export interface ExcludedFeatureSummary {
+  id: string;
+  type: string;
+  subtype?: string;
+  title?: string;
+  description?: string;
+  properties: Record<string, unknown>;
+}
+
+export interface SearchSimilarFeaturesArguments {
+  candidate_id: string;
+  title: string;
+  description: string;
+  type: string;
+}
+
+export interface SimilarFeatureHit {
+  id: string;
+  title: string;
+  description: string;
+  confidence: number;
+}
+
+export interface IdentifyFeaturesOptions {
+  streamName: string;
+  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  excludedFeatures?: ExcludedFeatureSummary[];
+  inferenceClient: BoundInferenceClient;
+  systemPrompt: string;
+  logger: Logger;
+  signal: AbortSignal;
+  previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
+  knownFeatureIds?: string;
+  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
+}
+
+export async function identifyFeatures({
+  streamName,
+  sampleDocuments,
+  excludedFeatures,
+  systemPrompt,
   inferenceClient,
   logger,
   signal,
-  analysis,
-  dropUnmapped = false,
-  maxSteps: initialMaxSteps,
-}: IdentifyFeaturesOptions & {
-  dropUnmapped?: boolean;
-  maxSteps?: number;
-}): Promise<{ features: SystemFeature[]; tokensUsed: ChatCompletionTokenCount }> {
-  logger.debug(`Identifying system features for stream ${stream.name}`);
-
-  logger.trace('Performing initial clustering of logs for system feature identification');
-  const initialClustering = await withSpan('initial_log_clustering', () =>
-    clusterLogs({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      partitions:
-        features?.filter(isFeatureWithFilter).map((feature) => {
-          return {
-            name: feature.name,
-            condition: feature.filter,
-          };
-        }) ?? [],
-      logger,
-      dropUnmapped,
-    })
+  previouslyIdentifiedFeatures = [],
+  knownFeatureIds = '',
+  searchSimilarFeatures,
+  additionalTools,
+  additionalToolCallbacks,
+}: IdentifyFeaturesOptions): Promise<{
+  features: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
+  tokensUsed: ChatCompletionTokenCount;
+}> {
+  const formattedDocuments = compact(
+    sampleDocuments.map((hit) =>
+      formatRawDocument({
+        hit,
+        shouldNotTruncate(key: string) {
+          return key.includes('tags');
+        },
+      })
+    )
   );
 
-  logger.trace('Invoking reasoning agent to identify system features');
-  const response = await withSpan('invoke_reasoning_agent', () =>
-    executeAsReasoningAgent({
-      maxSteps: initialMaxSteps,
-      input: {
-        stream: {
-          name: stream.name,
-          description: stream.description || 'This stream has no description.',
-        },
-        dataset_analysis: JSON.stringify(
-          formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
-        ),
-        initial_clustering: JSON.stringify(initialClustering),
-        condition_schema: conditionSchemaText,
-      },
-      prompt: IdentifySystemsPrompt,
-      inferenceClient,
-      finalToolChoice: {
-        function: 'finalize_systems',
-      },
-      toolCallbacks: {
-        validate_systems: async (toolCall) => {
-          const clustering = await clusterLogs({
-            start,
-            end,
-            esClient,
-            index: stream.name,
-            logger,
-            partitions: toolCall.function.arguments.systems.map((system) => {
-              return {
-                name: system.name,
-                condition: system.filter as Condition,
-              };
-            }),
-            dropUnmapped,
-          });
+  const previousFeaturesContext =
+    previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
 
-          return {
-            response: {
-              systems: clustering.map((cluster) => {
-                return {
-                  name: cluster.name,
-                  clustering: cluster.clustering,
-                };
-              }),
-            },
-          };
+  const response = await withSpan('invoke_prompt', () =>
+    executeAsReasoningAgent({
+      input: {
+        sample_documents: JSON.stringify(formattedDocuments),
+        previously_identified_features: previousFeaturesContext,
+        known_feature_ids: knownFeatureIds,
+        excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
+      },
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt, additionalTools }),
+      inferenceClient,
+      maxSteps: additionalToolCallbacks ? 6 : 4,
+      toolCallbacks: {
+        ...(additionalToolCallbacks ?? {}),
+        search_similar_features: async (toolCall) => {
+          if (!searchSimilarFeatures) {
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: 'Semantic feature search is unavailable.',
+              },
+            };
+          }
+
+          try {
+            const features = await searchSimilarFeatures(toolCall.function.arguments);
+            return {
+              response: {
+                features,
+                count: features.length,
+              },
+            };
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.warn(`Failed to search similar features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          }
         },
-        finalize_systems: async (toolCall) => {
-          return {
-            response: {},
-          };
-        },
+        finalize_features: async () => ({ response: { finalized: true } }),
+      },
+      finalToolChoice: {
+        type: 'function',
+        function: 'finalize_features',
       },
       abortSignal: signal,
     })
   );
 
-  logger.trace('Generating descriptions for identified system features');
-  let tokensUsed: ChatCompletionTokenCount = {
-    prompt: 0,
-    completion: 0,
-    total: 0,
-    cached: 0,
-  };
-  const systems: SystemFeature[] = await withSpan('generate_system_feature_descriptions', () =>
-    Promise.all(
-      response.toolCalls
-        .flatMap((toolCall) =>
-          toolCall.function.arguments.systems.map((args) => {
-            const feature = {
-              ...args,
-              filter: args.filter as Condition,
-              type: 'system' as const,
-            };
-            return feature;
-          })
-        )
-        .map(async (feature) => {
-          const { description, tokensUsed: descriptionTokensUsed } =
-            await generateStreamDescription({
-              stream,
-              start,
-              end,
-              esClient,
-              inferenceClient,
-              feature: { ...feature, description: '' },
-              signal,
-              logger,
-            });
+  if (response.toolCalls.length === 0) {
+    throw new Error('Feature identification did not call finalize_features');
+  }
 
-          tokensUsed = sumTokens(tokensUsed, descriptionTokensUsed);
+  const finalizedFeatures: BaseFeature[] = [];
+  const ignoredFeatures: IgnoredFeature[] = [];
+  for (const toolCall of response.toolCalls) {
+    const { features, ignored_features: ignored = [] } = toolCall.function.arguments;
+    if (!Array.isArray(features)) {
+      throw new Error('Feature identification returned invalid finalize_features output');
+    }
 
-          return {
-            ...feature,
-            description,
-          };
-        })
-    )
-  );
+    for (const feature of features) {
+      const candidate = {
+        ...feature,
+        stream_name: streamName,
+        filter: tryParseFilter(feature.filter),
+        ...(Array.isArray(feature.evidence)
+          ? { evidence: feature.evidence.slice(0, MAX_EVIDENCE_ITEMS) }
+          : {}),
+      };
+      const result = identifiedFeatureSchema.safeParse(candidate);
+      if (!result.success || Object.keys(result.data.properties).length === 0) {
+        continue;
+      }
+      finalizedFeatures.push(result.data);
+    }
 
-  logger.debug(`Identified ${systems.length} system features for stream ${stream.name}`);
+    for (const item of Array.isArray(ignored) ? ignored : []) {
+      const result = ignoredFeatureSchema.safeParse(item);
+      if (result.success) {
+        ignoredFeatures.push(result.data);
+      }
+    }
+  }
 
   return {
-    features: systems,
-    tokensUsed: sumTokens(tokensUsed, response.tokens),
+    features: uniqBy(finalizedFeatures, (feature) => feature.id),
+    ignoredFeatures,
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
+}
+
+function tryParseFilter(maybeFilter: unknown): Condition | undefined {
+  if (!maybeFilter) {
+    return undefined;
+  }
+
+  const result = conditionSchema.safeParse(maybeFilter);
+  if (!result.success) {
+    return undefined;
+  }
+
+  return isConditionComplete(result.data) ? result.data : undefined;
 }

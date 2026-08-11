@@ -38,14 +38,14 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
 
     expect(location).toMatchObject({
       app: 'dashboards',
       path: '#/create?_g=(time:(from:now-15m,mode:relative,to:now))',
       state: {
-        timeRange: {
+        time_range: {
           from: 'now-15m',
           mode: 'relative',
           to: 'now',
@@ -60,8 +60,8 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
-      refreshInterval: { pause: false, value: 300 },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+      refresh_interval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [
         {
@@ -84,7 +84,7 @@ describe('dashboard locator', () => {
           },
         },
       ],
-      query: { query: 'bye', language: 'kuery' },
+      query: { query: 'bye', language: 'kql' },
     });
 
     expect(location).toMatchObject({
@@ -117,14 +117,14 @@ describe('dashboard locator', () => {
           },
         ],
         query: {
-          language: 'kuery',
           query: 'bye',
+          language: 'kql',
         },
-        refreshInterval: {
+        refresh_interval: {
           pause: false,
           value: 300,
         },
-        timeRange: {
+        time_range: {
           from: 'now-15m',
           mode: 'relative',
           to: 'now',
@@ -139,11 +139,11 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
-      refreshInterval: { pause: false, value: 300 },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
+      refresh_interval: { pause: false, value: 300 },
       dashboardId: '123',
       filters: [],
-      query: { query: 'bye', language: 'kuery' },
+      query: { query: 'bye', language: 'kql' },
       searchSessionId: '__sessionSearchId__',
     });
 
@@ -153,14 +153,14 @@ describe('dashboard locator', () => {
       state: {
         filters: [],
         query: {
-          language: 'kuery',
           query: 'bye',
+          language: 'kql',
         },
-        refreshInterval: {
+        refresh_interval: {
           pause: false,
           value: 300,
         },
-        timeRange: {
+        time_range: {
           from: 'now-15m',
           mode: 'relative',
           to: 'now',
@@ -193,7 +193,7 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
 
     expect(location.path.indexOf('relative')).toBe(-1);
@@ -205,7 +205,7 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: true,
     });
 
@@ -218,7 +218,7 @@ describe('dashboard locator', () => {
       getDashboardFilterFields: async (dashboardId: string) => [],
     });
     const location = await definition.getLocation({
-      timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
+      time_range: { to: 'now', from: 'now-15m', mode: 'relative' },
       useHash: false,
     });
 

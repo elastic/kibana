@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with fallback on failure', () => {
@@ -88,7 +88,10 @@ steps:
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-        expect(workflowExecutionDoc?.error).toBe('Error: Constantly failing connector');
+        expect(workflowExecutionDoc?.error).toEqual({
+          message: 'Error: Constantly failing connector',
+          type: 'Error',
+        });
         expect(workflowExecutionDoc?.scopeStack).toEqual([]);
       });
 
@@ -102,18 +105,32 @@ steps:
         );
         expect(failingStepExecutions.length).toBe(1);
         expect(failingStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
-        expect(failingStepExecutions[0].error).toBe('Error: Constantly failing connector');
+        expect(failingStepExecutions[0].error).toEqual({
+          message: 'Error: Constantly failing connector',
+          type: 'Error',
+        });
       });
 
-      // Note: Fallback steps are currently not executed when a step fails without retry
-      // This is a known limitation and will be addressed in the future
-      // The following tests document the current behavior
-      it('should execute fallback step', async () => {
+      it('should set workflow error to the failing step error (regression guard)', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        const failingStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter(
+          (se) =>
+            se.stepId === 'constantlyFailingStep' &&
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+        );
+        expect(failingStepExecutions.length).toBe(1);
+        expect(workflowExecutionDoc?.error).toEqual(failingStepExecutions[0].error);
+      });
+
+      it('should execute fallback step once after step failure', async () => {
         const fallbackStepExecutions = Array.from(
           workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepType === 'fallback');
-
-        // Currently, fallback is not executed without retry
         expect(fallbackStepExecutions.length).toBe(1);
       });
 

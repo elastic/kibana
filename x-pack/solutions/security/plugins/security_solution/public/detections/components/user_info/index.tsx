@@ -13,8 +13,6 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import { useSignalIndex } from '../../containers/detection_engine/alerts/use_signal_index';
 
 export interface State {
-  canUserCRUD: boolean | null;
-  canUserREAD: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexWrite: boolean | null;
@@ -29,8 +27,6 @@ export interface State {
 }
 
 export const initialState: State = {
-  canUserCRUD: null,
-  canUserREAD: null,
   hasIndexManage: null,
   hasIndexMaintenance: null,
   hasIndexWrite: null,
@@ -85,14 +81,6 @@ export type Action =
   | {
       type: 'updateSignalIndexMappingOutdated';
       signalIndexMappingOutdated: boolean | null;
-    }
-  | {
-      type: 'updateCanUserCRUD';
-      canUserCRUD: boolean | null;
-    }
-  | {
-      type: 'updateCanUserREAD';
-      canUserREAD: boolean | null;
     };
 
 export const userInfoReducer = (state: State, action: Action): State => {
@@ -163,18 +151,6 @@ export const userInfoReducer = (state: State, action: Action): State => {
         signalIndexMappingOutdated: action.signalIndexMappingOutdated,
       };
     }
-    case 'updateCanUserCRUD': {
-      return {
-        ...state,
-        canUserCRUD: action.canUserCRUD,
-      };
-    }
-    case 'updateCanUserREAD': {
-      return {
-        ...state,
-        canUserREAD: action.canUserREAD,
-      };
-    }
     default:
       return state;
   }
@@ -197,8 +173,6 @@ export const ManageUserInfo = ({ children }: ManageUserInfoProps) => (
 export const useUserInfo = (): State => {
   const [
     {
-      canUserCRUD,
-      canUserREAD,
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
@@ -222,8 +196,6 @@ export const useUserInfo = (): State => {
     hasIndexUpdateDelete: hasApiIndexUpdateDelete,
     hasIndexWrite: hasApiIndexWrite,
     hasIndexRead: hasApiIndexRead,
-    hasKibanaCRUD,
-    hasKibanaREAD,
   } = useAlertsPrivileges();
   const {
     loading: indexNameLoading,
@@ -232,18 +204,6 @@ export const useUserInfo = (): State => {
     signalIndexMappingOutdated: apiSignalIndexMappingOutdated,
     createDeSignalIndex: createSignalIndex,
   } = useSignalIndex();
-
-  useEffect(() => {
-    if (!loading && canUserCRUD !== hasKibanaCRUD) {
-      dispatch({ type: 'updateCanUserCRUD', canUserCRUD: hasKibanaCRUD });
-    }
-  }, [dispatch, loading, canUserCRUD, hasKibanaCRUD]);
-
-  useEffect(() => {
-    if (!loading && canUserREAD !== hasKibanaREAD) {
-      dispatch({ type: 'updateCanUserREAD', canUserREAD: hasKibanaREAD });
-    }
-  }, [dispatch, loading, canUserREAD, hasKibanaREAD]);
 
   useEffect(() => {
     if (loading !== (privilegeLoading || indexNameLoading)) {
@@ -359,8 +319,6 @@ export const useUserInfo = (): State => {
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
-      canUserCRUD,
-      canUserREAD,
       hasIndexManage,
       hasIndexMaintenance,
       hasIndexWrite,
@@ -370,8 +328,6 @@ export const useUserInfo = (): State => {
       signalIndexMappingOutdated,
     }),
     [
-      canUserCRUD,
-      canUserREAD,
       hasEncryptionKey,
       hasIndexMaintenance,
       hasIndexManage,

@@ -68,6 +68,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
+    cost: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // apiKey: {
     //   type: 'binary',
@@ -78,12 +81,19 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         apiKeyId: {
           type: 'keyword',
         },
+        uiamApiKeyId: {
+          type: 'keyword',
+        },
         // NO NEED TO BE INDEXED
         // apiKeyCreatedByUser: {
         //   type: 'boolean',
         // },
         // spaceId: {
         //   type: 'keyword',
+        // },
+        // userProfileId: {
+        //   type: 'keyword',
+        //   ignore_above: 1024,
         // },
       },
     },
@@ -97,6 +107,18 @@ export const backgroundTaskNodeMapping: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     last_seen: {
+      type: 'date',
+    },
+  },
+};
+
+export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    apiKeyId: {
+      type: 'keyword',
+    },
+    createdAt: {
       type: 'date',
     },
   },

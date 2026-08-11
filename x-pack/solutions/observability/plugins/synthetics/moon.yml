@@ -4,26 +4,28 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthetics-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-ux-management-team'
-toolchain:
+  defaultOwner: '@elastic/actionable-obs-team'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/synthetics-plugin'
+  title: '@kbn/synthetics-plugin'
   description: Moon project for @kbn/synthetics-plugin
   channel: ''
-  owner: '@elastic/obs-ux-management-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/synthetics
+  owner: '@elastic/actionable-obs-team'
+  sourceRoot: x-pack/solutions/observability/plugins/synthetics
 dependsOn:
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
   - '@kbn/alerting-plugin'
   - '@kbn/ml-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/unified-search-plugin'
+  - '@kbn/kql'
   - '@kbn/i18n'
   - '@kbn/core'
   - '@kbn/config-schema'
@@ -33,7 +35,6 @@ dependsOn:
   - '@kbn/discover-plugin'
   - '@kbn/home-plugin'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/data-plugin'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/inspector-plugin'
@@ -75,6 +76,7 @@ dependsOn:
   - '@kbn/alerts-as-data-utils'
   - '@kbn/exploratory-view-plugin'
   - '@kbn/observability-shared-plugin'
+  - '@kbn/observability-utils-common'
   - '@kbn/core-http-server'
   - '@kbn/std'
   - '@kbn/core-saved-objects-server-mocks'
@@ -86,7 +88,6 @@ dependsOn:
   - '@kbn/securitysolution-io-ts-types'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/serverless'
-  - '@kbn/repo-info'
   - '@kbn/index-management-plugin'
   - '@kbn/license-management-plugin'
   - '@kbn/react-kibana-mount'
@@ -94,9 +95,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/search-types'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/ui-actions-browser'
   - '@kbn/presentation-publishing'
-  - '@kbn/presentation-containers'
   - '@kbn/ui-actions-plugin'
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-application-browser'
@@ -104,7 +103,7 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/slo-schema'
   - '@kbn/alerting-types'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/slo-plugin'
   - '@kbn/ebt-tools'
   - '@kbn/alerting-types'
@@ -118,7 +117,6 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/response-ops-rule-form'
   - '@kbn/fields-metadata-plugin'
-  - '@kbn/alerts-ui-shared'
   - '@kbn/core-lifecycle-server'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/field-formats-plugin'
@@ -128,7 +126,17 @@ dependsOn:
   - '@kbn/observability-synthetics-test-data'
   - '@kbn/connector-schemas'
   - '@kbn/react-query'
+  - '@kbn/content-management-utils'
+  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/zod'
   - '@kbn/maintenance-windows-plugin'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/scout-oblt'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/zod-helpers'
+  - '@kbn/core-spaces-common'
+  - '@kbn/expect'
 tags:
   - plugin
   - prod
@@ -142,17 +150,9 @@ fileGroups:
     - scripts/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scenarios/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

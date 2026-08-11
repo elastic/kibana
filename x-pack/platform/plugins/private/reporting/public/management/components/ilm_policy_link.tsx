@@ -29,7 +29,7 @@ export const IlmPolicyLink: FunctionComponent<Props> = ({ locator }) => {
     <EuiButtonEmpty
       data-test-subj="ilmPolicyLink"
       size="s"
-      iconType="popout"
+      iconType="external"
       onClick={() => {
         const url = locator.getRedirectUrl({
           page: 'policy_edit',

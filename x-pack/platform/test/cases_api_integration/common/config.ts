@@ -22,6 +22,7 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
   publicBaseUrl?: boolean;
   indexRefreshInterval?: string | false;
+  kbnServerArgs?: string[];
 }
 
 const enabledActionTypes = [
@@ -120,6 +121,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
           '--xpack.cases.analytics.index.enabled=true',
+          // Registers the unified `security.entity` attachment type so the cases
+          // attachment tests exercise it (gated behind this experimental flag).
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'entityAttachmentsEnabled',
+          ])}`,
+          ...(options.kbnServerArgs ?? []),
         ],
       },
       indexRefreshInterval: options.indexRefreshInterval,

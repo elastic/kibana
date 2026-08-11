@@ -13,6 +13,7 @@ import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/h
 
 import { AgentNotFoundError } from '../..';
 
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
@@ -29,7 +30,9 @@ import {
   updateAgent,
   _joinFilters,
   getByIds,
+  getAgentsById,
   fetchAllAgentsByKuery,
+  getAgentVersionsForAgentPolicyIds,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -81,9 +84,11 @@ describe('Agents CRUD test', () => {
     ids: string[],
     total: number,
     status: AgentStatus,
-    generateSource: (id: string) => Partial<Agent> = () => ({})
+    generateSource: (id: string) => Partial<Agent> = () => ({}),
+    pitId?: string
   ) {
     return {
+      ...(pitId ? { pit_id: pitId } : {}),
       hits: {
         total,
         hits: ids.map((id: string) => ({
@@ -175,6 +180,38 @@ describe('Agents CRUD test', () => {
   });
 
   describe('getAgentsByKuery', () => {
+    it('should roll forward PIT id from search responses', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online', () => ({}), 'pit-2'));
+
+      const firstRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: 'pit-1',
+      });
+
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-1' }),
+        })
+      );
+      expect(firstRes.pit).toBe('pit-2');
+
+      searchMock.mockResolvedValueOnce(getEsResponse(['2'], 1, 'online', () => ({}), 'pit-3'));
+
+      const secondRes = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        pitId: firstRes.pit,
+      });
+
+      expect(searchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pit: expect.objectContaining({ id: 'pit-2' }),
+        })
+      );
+      expect(secondRes.pit).toBe('pit-3');
+    });
+
     it('should return upgradeable on first page', async () => {
       searchMock
         .mockImplementationOnce(() =>
@@ -565,6 +602,34 @@ describe('Agents CRUD test', () => {
         expect(searchMock).toHaveBeenCalledTimes(1);
       });
     });
+
+    describe('kuery replace attributes', () => {
+      beforeEach(() => {
+        searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
+      });
+
+      it('should replace .attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({ 'agent.agent.id': 'agent1' });
+      });
+
+      it('should not replace identifying_attributes in kuery', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showInactive: true,
+          kuery: 'agent.identifying_attributes.agent.id:agent1',
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.filter[0].bool.should[0].match).toEqual({
+          'agent.identifying_attributes.agent.id': 'agent1',
+        });
+      });
+    });
   });
 
   describe('update', () => {
@@ -578,6 +643,18 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'User updated agent [id=test-agent-id]',
       });
+    });
+
+    it('should use retry_on_conflict', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.update.mockResolvedValueOnce({} as any);
+
+      await updateAgent(esClient, 'test-agent-id', { tags: ['new-tag'] });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 5 })
+      );
     });
   });
 
@@ -604,6 +681,47 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User closing point in time query [pitId=test-pit]`,
       });
+    });
+  });
+
+  describe('getAgentsById()', () => {
+    beforeEach(() => {
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+    });
+
+    it('chunks requests so each search stays within max_result_window (10k)', async () => {
+      const overflow = 400;
+      const firstBatch = Array.from({ length: SO_SEARCH_LIMIT }, (_, i) => `agent-${i}`);
+      const secondBatch = Array.from(
+        { length: overflow },
+        (_, i) => `agent-${SO_SEARCH_LIMIT + i}`
+      );
+      const agentIds = [...firstBatch, ...secondBatch];
+
+      searchMock
+        .mockResolvedValueOnce(
+          getEsResponse(firstBatch, firstBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        )
+        .mockResolvedValueOnce(
+          getEsResponse(secondBatch, secondBatch.length, 'online', (id) => ({
+            id,
+            namespaces: ['foo'],
+          }))
+        );
+
+      const result = await getAgentsById(esClientMock, soClientMock, agentIds);
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(searchMock.mock.calls[0][0].size).toBe(SO_SEARCH_LIMIT);
+      expect(searchMock.mock.calls[1][0].size).toBe(overflow);
+      expect(result).toHaveLength(agentIds.length);
+      expect(result[0]).toEqual(expect.objectContaining({ id: 'agent-0' }));
+      expect(result[SO_SEARCH_LIMIT]).toEqual(
+        expect.objectContaining({ id: `agent-${SO_SEARCH_LIMIT}` })
+      );
     });
   });
 
@@ -687,5 +805,81 @@ describe('Agents CRUD test', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(3);
     });
+  });
+});
+
+describe('getAgentVersionsForAgentPolicyIds', () => {
+  it('returns an empty array when no policy ids are provided', async () => {
+    const searchMock = jest.fn();
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      []
+    );
+
+    expect(result).toEqual([]);
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
+  it('queries with a term-or-variant filter and rolls up version-specific variants under their base policy id', async () => {
+    const searchMock = jest.fn().mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              policy_id: 'policy-a',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+          {
+            // version-specific variant of policy-a — must roll up under 'policy-a'
+            _source: {
+              policy_id: 'policy-a#8.16',
+              local_metadata: { elastic: { agent: { version: '8.16.0' } } },
+            },
+          },
+          {
+            _source: {
+              policy_id: 'policy-b',
+              local_metadata: { elastic: { agent: { version: '8.15.0' } } },
+            },
+          },
+        ],
+      },
+    });
+    const esClientMock = { search: searchMock } as unknown as ElasticsearchClient;
+
+    const result = await getAgentVersionsForAgentPolicyIds(
+      esClientMock,
+      savedObjectsClientMock.create(),
+      ['policy-a', 'policy-b']
+    );
+
+    expect(searchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [
+              expect.objectContaining({
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([
+                    { terms: { policy_base_id: ['policy-a', 'policy-b'] } },
+                  ]),
+                }),
+              }),
+            ],
+          },
+        },
+      })
+    );
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        { policyId: 'policy-a', versionCounts: { '8.15.0': 1, '8.16.0': 1 } },
+        { policyId: 'policy-b', versionCounts: { '8.15.0': 1 } },
+      ])
+    );
   });
 });

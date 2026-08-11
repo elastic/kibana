@@ -7,7 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsMaxAggregate,
+  AggregationsAggregationContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
@@ -15,9 +18,37 @@ import {
 import type { RulesClientContext } from '../../../../rules_client';
 import type { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import {
+  hasMatchedGapFillStatus,
+  RULE_GAP_AGGREGATIONS,
+  extractGapDurationSums,
+  calculateHighestPriorityGapFillStatus,
+  type GapDurationBucket,
+  buildExhaustedRetryGapsAgg,
+  getExhaustedRetryGapsInfo,
+} from '../utils';
+import { gapFillStatus } from '../../../../../common';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
+import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
+/**
+ * Returns rule ids that have gaps within the requested time range.
+ *
+ * Parameters:
+ * - statuses: Direct per-gap status filter applied to event log gap documents
+ *   before aggregation. This corresponds to gap-level statuses
+ *   (e.g. 'unfilled' | 'partially_filled' | 'filled') and controls which
+ *   gaps are considered in the aggregations and latest timestamp query.
+ *
+ * - highestPriorityGapFillStatuses: Computed, per-rule status filter applied after
+ *   aggregation. For each rule we compute an aggregated status from the
+ *   summed gap durations with precedence: error > unfilled > in_progress > filled.
+ *   The 'error' status requires a schedulerId to be provided and indicates gaps
+ *   that have exhausted all auto-fill retry attempts while still being unfilled.
+ *   Only rules whose computed aggregated status matches one of the provided
+ *   values ('error' | 'unfilled' | 'in_progress' | 'filled') are returned.
+ */
 const MAX_RULES_TO_FETCH = 10000;
 export async function getRuleIdsWithGaps(
   context: RulesClientContext,
@@ -46,7 +77,21 @@ export async function getRuleIdsWithGaps(
       throw error;
     }
 
-    const { start, end, statuses, sortOrder, ruleTypes } = params;
+    const {
+      start,
+      end,
+      statuses,
+      sortOrder,
+      ruleTypes,
+      ruleIds: ruleIdsFilter,
+      highestPriorityGapFillStatuses = [],
+      schedulerId,
+    } = params;
+
+    const schedulerContext = schedulerId
+      ? await getSchedulerContextInternal(context.unsecuredSavedObjectsClient, schedulerId)
+      : null;
+
     const eventLogClient = await context.getEventLogClient();
 
     let filter = buildGapsFilter({
@@ -56,6 +101,7 @@ export async function getRuleIdsWithGaps(
       hasUnfilledIntervals: params.hasUnfilledIntervals,
       hasInProgressIntervals: params.hasInProgressIntervals,
       hasFilledIntervals: params.hasFilledIntervals,
+      excludedReasons: params.excludedReasons,
     });
 
     if (ruleTypes?.length) {
@@ -68,10 +114,21 @@ export async function getRuleIdsWithGaps(
       filter = `${filter} AND (${ruleTypesFilter})`;
     }
 
+    if (ruleIdsFilter?.length) {
+      const ruleIdsFilterKql = [...new Set(ruleIdsFilter)]
+        .map((ruleId) => `rule.id: "${ruleId}"`)
+        .join(' OR ');
+      filter = `${filter} AND (${ruleIdsFilterKql})`;
+    }
+
     const perBucketAgg: Record<string, AggregationsAggregationContainer> =
       sortOrder === 'desc'
         ? { newest_gap_timestamp: { max: { field: '@timestamp' } } }
         : { oldest_gap_timestamp: { min: { field: '@timestamp' } } };
+
+    const exhaustedRetryAgg = schedulerContext?.enabled
+      ? buildExhaustedRetryGapsAgg(schedulerContext)
+      : {};
 
     const aggs = await eventLogClient.aggregateEventsWithAuthFilter(
       RULE_SAVED_OBJECT_TYPE,
@@ -84,7 +141,7 @@ export async function getRuleIdsWithGaps(
               field: '@timestamp',
             },
           },
-          unique_rule_ids: {
+          by_rule: {
             terms: {
               field: 'rule.id',
               size: params.maxRulesToFetch ?? MAX_RULES_TO_FETCH,
@@ -93,29 +150,93 @@ export async function getRuleIdsWithGaps(
                   ? { newest_gap_timestamp: 'desc' }
                   : { oldest_gap_timestamp: 'asc' },
             },
-            aggs: perBucketAgg,
+            aggs: {
+              ...perBucketAgg,
+              ...RULE_GAP_AGGREGATIONS,
+              ...exhaustedRetryAgg,
+            },
           },
         },
       }
     );
 
-    interface UniqueRuleIdsAgg {
-      buckets: Array<{ key: string }>;
-    }
+    const byRuleAgg = aggs.aggregations?.by_rule as {
+      buckets: Array<GapDurationBucket & Record<string, unknown>>;
+    };
+    const buckets = byRuleAgg?.buckets ?? [];
 
-    const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
-    const latestGapTimestampAgg = aggs.aggregations?.latest_gap_timestamp as { value: number };
+    const ruleIds: string[] = [];
 
-    const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
-
-    const ruleIds = resultBuckets.map((bucket) => bucket.key) ?? [];
-
-    const result: GetRuleIdsWithGapsResponse = {
-      total: ruleIds?.length,
-      ruleIds,
-      latestGapTimestamp: latestGapTimestampAgg?.value,
+    // Initialize summary totals
+    const summary = {
+      totalUnfilledDurationMs: 0,
+      totalInProgressDurationMs: 0,
+      totalFilledDurationMs: 0,
+      totalErrorDurationMs: 0,
+      totalDurationMs: 0,
+      rulesByGapFillStatus: {
+        unfilled: 0,
+        inProgress: 0,
+        filled: 0,
+        error: 0,
+      },
     };
 
+    for (const b of buckets) {
+      const sums = extractGapDurationSums(b);
+      const exhaustedInfo = schedulerContext?.enabled
+        ? getExhaustedRetryGapsInfo(b)
+        : { hasExhaustedRetryGaps: false, exhaustedRetryUnfilledDurationMs: 0 };
+      const ruleGapFillStatus = calculateHighestPriorityGapFillStatus(
+        sums,
+        exhaustedInfo.hasExhaustedRetryGaps
+      );
+
+      if (
+        highestPriorityGapFillStatuses.length === 0 ||
+        hasMatchedGapFillStatus(
+          b,
+          highestPriorityGapFillStatuses,
+          exhaustedInfo.hasExhaustedRetryGaps
+        )
+      ) {
+        ruleIds.push(b.key);
+
+        // Aggregate durations for summary
+        // When a rule has error status, its exhausted-retry unfilled duration
+        // goes to totalErrorDurationMs; the remainder stays in totalUnfilledDurationMs
+        if (ruleGapFillStatus === gapFillStatus.ERROR) {
+          summary.totalErrorDurationMs += exhaustedInfo.exhaustedRetryUnfilledDurationMs;
+          summary.totalUnfilledDurationMs +=
+            sums.totalUnfilledDurationMs - exhaustedInfo.exhaustedRetryUnfilledDurationMs;
+        } else {
+          summary.totalUnfilledDurationMs += sums.totalUnfilledDurationMs;
+        }
+        summary.totalInProgressDurationMs += sums.totalInProgressDurationMs;
+        summary.totalFilledDurationMs += sums.totalFilledDurationMs;
+        summary.totalDurationMs += sums.totalDurationMs;
+
+        // Count rules by gap fill status
+        if (ruleGapFillStatus === gapFillStatus.ERROR) {
+          summary.rulesByGapFillStatus.error++;
+        } else if (ruleGapFillStatus === gapFillStatus.UNFILLED) {
+          summary.rulesByGapFillStatus.unfilled++;
+        } else if (ruleGapFillStatus === gapFillStatus.IN_PROGRESS) {
+          summary.rulesByGapFillStatus.inProgress++;
+        } else if (ruleGapFillStatus === gapFillStatus.FILLED) {
+          summary.rulesByGapFillStatus.filled++;
+        }
+      }
+    }
+
+    const latestGapTimestampAgg = aggs.aggregations
+      ?.latest_gap_timestamp as AggregationsMaxAggregate;
+    const result: GetRuleIdsWithGapsResponse = {
+      total: ruleIds.length,
+      ruleIds,
+      latestGapTimestamp: latestGapTimestampAgg.value ?? undefined,
+      summary,
+    };
     return result;
   } catch (err) {
     const errorMessage = `Failed to find rules with gaps`;

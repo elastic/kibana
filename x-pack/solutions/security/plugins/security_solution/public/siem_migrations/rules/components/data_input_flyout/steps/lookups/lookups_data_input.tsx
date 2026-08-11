@@ -24,26 +24,35 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../types';
-import * as i18n from './translations';
-import { DataInputStep } from '../constants';
 import { useMissingLookupsListStep } from './sub_steps/missing_lookups_list';
 import { useLookupsFileUploadStep } from './sub_steps/lookups_file_upload';
+import {
+  MigrationSource,
+  SplunkDataInputStep,
+  type MigrationStepProps,
+} from '../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 interface LookupsDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
   missingLookups: string[];
   onAllLookupsCreated: OnResourcesCreated;
 }
-interface LookupsDataInputProps
-  extends Omit<LookupsDataInputSubStepsProps, 'migrationStats' | 'missingLookups'> {
-  dataInputStep: DataInputStep;
-  migrationStats?: RuleMigrationTaskStats;
-  missingLookups?: string[];
-}
-export const LookupsDataInput = React.memo<LookupsDataInputProps>(
-  ({ dataInputStep, migrationStats, missingLookups, onAllLookupsCreated }) => {
+
+export const LookupsDataInput = React.memo<MigrationStepProps>(
+  ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+    const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.SPLUNK);
+    const missingLookups = useMemo(
+      () => missingResourcesIndexed?.lookups,
+      [missingResourcesIndexed]
+    );
+
+    const onAllLookupsCreated = useCallback(() => {
+      setDataInputStep(SplunkDataInputStep.End);
+    }, [setDataInputStep]);
+
     const dataInputStatus = useMemo(
-      () => getEuiStepStatus(DataInputStep.Lookups, dataInputStep),
+      () => getEuiStepStatus(SplunkDataInputStep.Lookups, dataInputStep),
       [dataInputStep]
     );
 
@@ -56,13 +65,13 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
                 <EuiStepNumber
                   data-test-subj="lookupsUploadStepNumber"
                   titleSize="xs"
-                  number={DataInputStep.Lookups}
+                  number={SplunkDataInputStep.Lookups}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs" data-test-subj="lookupsUploadTitle">
-                  <b>{i18n.LOOKUPS_DATA_INPUT_TITLE}</b>
+                  <b>{resourceDataInputStep.title}</b>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -71,7 +80,7 @@ export const LookupsDataInput = React.memo<LookupsDataInputProps>(
             <>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj="lookupsUploadDescription">
-                  {i18n.LOOKUPS_DATA_INPUT_DESCRIPTION}
+                  {resourceDataInputStep.description}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -115,8 +124,11 @@ export const LookupsDataInputSubSteps = React.memo<LookupsDataInputSubStepsProps
     // Copy query step
     const onCopied = useCallback(() => {
       setSubStep(2);
-      telemetry.reportSetupLookupNameCopied({ migrationId: migrationStats.id });
-    }, [telemetry, migrationStats.id]);
+      telemetry.reportSetupLookupNameCopied({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+      });
+    }, [telemetry, migrationStats.id, migrationStats.vendor]);
 
     const copyStep = useMissingLookupsListStep({
       status: getEuiStepStatus(1, subStep),

@@ -14,12 +14,13 @@ import type { ProjectRouting } from '@kbn/es-query';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { PROJECT_ROUTING } from '../constants';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { ProjectPicker } from './project_picker';
+import { ProjectPickerContent } from './project_picker_content';
 
 describe('ProjectPicker', () => {
-  const mockFetchProjects = jest.fn().mockResolvedValue({
-    origin: {
+  const mockProjects = {
+    originProject: {
       _id: 'origin',
       _alias: 'Origin CPSProject',
       _type: 'observability',
@@ -39,12 +40,15 @@ describe('ProjectPicker', () => {
         _organisation: 'test-org',
       },
     ],
-  });
+    isLoading: false,
+    error: null,
+  };
 
   const defaultProps = {
     projectRouting: undefined as ProjectRouting | undefined,
     onProjectRoutingChange: jest.fn(),
-    fetchProjects: mockFetchProjects,
+    projects: mockProjects,
+    totalProjectCount: 2,
   };
 
   const renderProjectPicker = async (props: Partial<typeof defaultProps> = {}) => {
@@ -103,7 +107,7 @@ describe('ProjectPicker', () => {
   });
 
   describe('projectRouting change events', () => {
-    it('should call onProjectRoutingChange with ALL when "All projects" is clicked', async () => {
+    it('should call onProjectRoutingChange with PROJECT_ROUTING.ALL when "All projects" is clicked', async () => {
       const onProjectRoutingChange = jest.fn();
       await renderProjectPicker({
         projectRouting: PROJECT_ROUTING.ORIGIN,
@@ -212,7 +216,111 @@ describe('ProjectPicker', () => {
       // Press Enter to open popover
       await userEvent.keyboard('{Enter}');
 
-      expect(screen.getByText('Cross-project search scope')).toBeInTheDocument();
+      expect(screen.getByText('Cross-project search (CPS) scope')).toBeInTheDocument();
     });
+  });
+});
+
+describe('ProjectPickerContent', () => {
+  const mockProjects = {
+    originProject: {
+      _id: 'origin',
+      _alias: 'Origin CPSProject',
+      _type: 'observability',
+      _organisation: 'test-org',
+    },
+    linkedProjects: [
+      {
+        _id: 'linked1',
+        _alias: 'Linked CPSProject 1',
+        _type: 'security',
+        _organisation: 'test-org',
+      },
+    ],
+    isLoading: false,
+    error: null,
+  };
+
+  it('can hide project routing controls and show only the project list', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent projects={mockProjects} controlsState="hidden" />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.queryByText('All projects')).not.toBeInTheDocument();
+    expect(screen.queryByText('This project')).not.toBeInTheDocument();
+    expect(screen.getByText('Origin CPSProject')).toBeInTheDocument();
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
+
+  it('can render a linked-only project list', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                ...mockProjects,
+                originProject: null,
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Linked CPSProject 1')).toBeInTheDocument();
+  });
+
+  it('shows loading state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: true,
+                error: null,
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(screen.getByText('Searching across 0 projects')).toBeInTheDocument();
+  });
+
+  it('shows error state without projects', async () => {
+    await act(async () => {
+      render(
+        <I18nProvider>
+          <EuiThemeProvider>
+            <ProjectPickerContent
+              projects={{
+                originProject: null,
+                linkedProjects: [],
+                isLoading: false,
+                error: new Error('Failed to load projects'),
+              }}
+              controlsState="hidden"
+            />
+          </EuiThemeProvider>
+        </I18nProvider>
+      );
+    });
+
+    expect(
+      screen.getByText('Failed to load projects. Try refreshing the page.')
+    ).toBeInTheDocument();
   });
 });

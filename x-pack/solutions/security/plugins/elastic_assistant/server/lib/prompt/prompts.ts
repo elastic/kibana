@@ -188,31 +188,29 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
-export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
-  ### Format  
-  Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
-    The result must be a list of bullet points, nothing more.
-    Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
-      - Risk score: Summarize the entity's risk score and the main factors contributing to it.
-      - Criticality: Note the entity's criticality level and its impact on the risk score.
-      - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
-      - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
-    The generated data **MUST** follow this pattern:
-  """- **{title1}**: {description1}
-  - **{title2}**: {description2}
-  ...
-  - **{titleN}**: {descriptionN}
-  
-  **Recommended action**: {description}"""
-  
-    **Strict rules**:
-      _ Only reply with the required sections, and nothing else.
-      - Limit your total response to 500 characters.
-      - Never return an section which there is no data available in the context.
-      - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
-      - Recommended action title should be bold and text should be inline.    
-      - **Do not** include any extra explanation, reasoning or text.
-    `;
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for an entity so a Security analyst can act. Your response must take all important elements of the entity context into consideration.
+
+Generate a list of highlight items, each with a title and text. Keep each highlight to 1 sentence — at most 2, and only when an anomaly needs the extra clause for a MITRE ATT&CK / Kill Chain mapping. Aim to keep the highlights section under 600 characters total.
+
+Only include a highlight when that signal is present and non-empty in the context:
+  - Risk score: Include only when a risk score is present. State the score and describe the dominant threat pattern — do not list individual rules or alerts. Only mention a specific rule if it clearly accounts for the majority of the score.
+  - Criticality: Include only when an assigned asset criticality level is present. State the level and how it affects the overall risk. Do not treat an empty criticality list as Unassigned or as a criticality record.
+  - Anomalies: Include only when anomalies are present. Identify the most significant pattern across anomalies rather than listing them. Only if one or more ML job results clearly correspond to a known attack technique, map it to the relevant MITRE ATT&CK tactic (e.g. \`Execution\`, \`Lateral Movement\`) or Lockheed Martin Kill Chain phase (e.g. \`Exploitation\`, \`Command & Control\`) in the same highlight. If the anomalies are ambiguous or look benign, omit the mapping rather than guessing.
+  - Vulnerabilities: Include only when vulnerabilities are present. State the most critical vulnerability present and why it matters.
+
+If risk score, criticality, anomalies, and vulnerabilities are all missing or empty, return an empty highlights list and omit recommended actions. Do not invent filler such as "no risk score", "no criticality", or "no anomalies detected".
+
+When signals are present, provide up to 3 actionable recommendations for the security analyst, prioritised by urgency. Each must be 1 sentence. Omit recommended actions when there is nothing concrete to recommend from the available signals.
+
+**Guidelines**:
+  - Only include highlight items for which information is available in the context.
+  - Only use values that are explicitly present in the provided context. Do not infer, extrapolate, or fabricate any values, scores, CVEs, job names, or attack-technique mappings that are not present in the context.
+  - Prefer human-readable entity names from the context when referring to the entity. Do not treat raw entity ids / EUIDs as display names.
+  - You must always use inline code (backticks) for all technical values — criticality levels, risk scores, job names, CVE IDs, CVSS scores, process names, file paths, package versions. Never use single quotes or plain text for these values.
+  - Round all numeric values to 2 decimal places (e.g. \`72.00\`, \`26.62\`).
+  - Synthesise — do not list. If multiple signals point to the same pattern, say what the pattern is.
+  - **Do not** include any extra explanation, reasoning or text.
+`;
 
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
@@ -291,7 +289,7 @@ Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
-export const starterPromptIcon2 = 'launch';
+export const starterPromptIcon2 = 'rocket';
 export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.
@@ -333,7 +331,7 @@ export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
 
 export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
-export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown, no more than 500 characters. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
 
 \`\`\`
 - Between July 18 and August 18, daily cost savings **averaged around $135K**

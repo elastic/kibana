@@ -182,6 +182,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map(),
     });
   });
 
@@ -207,7 +208,112 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map(),
     });
+  });
+
+  test('initializeExecution() should set snooze config on active alerts with a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = {
+      instanceId: '1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(setSnoozeConfigSpy).toHaveBeenCalledTimes(1);
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('initializeExecution() should set snooze config on recovered alerts with a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = {
+      instanceId: 'r1',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      activeAlertsFromState: {},
+      recoveredAlertsFromState: { r1: testAlert1 },
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(setSnoozeConfigSpy).toHaveBeenCalledTimes(1);
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozeConfig);
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('initializeExecution() should not set snooze config on alerts without a matching snoozed instance', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      snoozedInstances: [
+        { instanceId: 'no-match', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' },
+      ],
+    });
+
+    expect(setSnoozeConfigSpy).not.toHaveBeenCalled();
+    setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('factory().create() should pass snoozedInstancesMap to createAlertFactory so new alerts get snooze config set', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = {
+      instanceId: 'new-alert',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      activeAlertsFromState: {},
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(createAlertFactory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        snoozedInstancesMap: new Map([['new-alert', snoozeConfig]]),
+      })
+    );
   });
 
   test('factory() should call getPublicAlertFactory on alert factory', async () => {
@@ -358,7 +464,7 @@ describe('Legacy Alerts Client', () => {
     });
   });
 
-  test('processAlerts() should set maintenance windows IDs on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
+  test('processAlerts() should set maintenance windows IDs and names on new alerts and remove the expired maintenance windows from the active and recovered alerts', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [
         {
@@ -367,6 +473,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id1',
+          title: 'Maintenance Window 1',
         },
         {
           ...getMockMaintenanceWindow(),
@@ -374,6 +481,7 @@ describe('Legacy Alerts Client', () => {
           eventEndTime: new Date().toISOString(),
           status: MaintenanceWindowStatus.Running,
           id: 'test-id5',
+          title: 'Maintenance Window 5',
         },
       ],
       maintenanceWindowsWithoutScopedQueryIds: ['test-id1', 'test-id5'],
@@ -384,6 +492,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'bar',
         maintenanceWindowIds: ['test-id1', 'test-id2'],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 2'],
       },
     };
 
@@ -392,6 +501,7 @@ describe('Legacy Alerts Client', () => {
       meta: {
         uuid: 'ghi',
         maintenanceWindowIds: ['test-id1', `test-id3`],
+        maintenanceWindowNames: ['Maintenance Window 1', 'Maintenance Window 3'],
       },
     };
 
@@ -436,11 +546,21 @@ describe('Legacy Alerts Client', () => {
       'test-id1',
       'test-id5',
     ]);
+    expect(alertsClient.getProcessedAlerts('new')['1'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+      'Maintenance Window 5',
+    ]);
     expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
     ]);
+    expect(alertsClient.getProcessedAlerts('active')['2'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
+    ]);
     expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowIds()).toEqual([
       'test-id1',
+    ]);
+    expect(alertsClient.getProcessedAlerts('recovered')['3'].getMaintenanceWindowNames()).toEqual([
+      'Maintenance Window 1',
     ]);
   });
 
@@ -536,13 +656,14 @@ describe('Legacy Alerts Client', () => {
 
     expect(determineDelayedAlerts).toHaveBeenCalledWith({
       newAlerts: {},
+      delayedAlerts: {},
       activeAlerts: {},
       trackedActiveAlerts: {},
       recoveredAlerts: {},
       trackedRecoveredAlerts: {},
       alertDelay: 5,
-      ruleRunMetricsStore,
       startedAt: null,
+      ruleRunMetricsStore,
     });
 
     expect(alertsClient.getProcessedAlerts('active')).toEqual({

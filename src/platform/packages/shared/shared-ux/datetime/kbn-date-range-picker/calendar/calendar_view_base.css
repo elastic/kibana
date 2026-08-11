@@ -1,0 +1,3 @@
+@layer rdp-base {
+  @import 'react-day-picker/style.css';
+}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { StreamType } from '@kbn/streams-schema';
+
 interface StreamEndpointLatencyProps {
   name: string;
   endpoint: string;
@@ -20,4 +22,23 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-export { type StreamEndpointLatencyProps, type StreamsStateErrorProps };
+interface StreamsProcessingPipelineSuggestedProps {
+  duration_ms: number;
+  steps_used: number;
+  success: boolean;
+  stream_name: string;
+  stream_type: StreamType;
+}
+
+interface StreamsAgentToolEventCreateProps {
+  success: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+export {
+  type StreamEndpointLatencyProps,
+  type StreamsStateErrorProps,
+  type StreamsProcessingPipelineSuggestedProps,
+  type StreamsAgentToolEventCreateProps,
+};

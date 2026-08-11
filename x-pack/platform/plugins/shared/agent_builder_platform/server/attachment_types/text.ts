@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { TextAttachmentData } from '@kbn/onechat-common/attachments';
-import { AttachmentType, textAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { TextAttachmentData } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, textAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 
 /**
  * Creates the definition for the `text` attachment type.
@@ -32,6 +32,10 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
           return { type: 'text', value: attachment.data.content };
         },
       };
+    },
+    getAgentDescription: () => {
+      return `A text attachment contains plain text content.
+      Rendering it inline displays the text content as a plain text block in the conversation UI.`;
     },
     getTools: () => [],
   };

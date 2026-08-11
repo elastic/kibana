@@ -18,10 +18,10 @@ import type {
   QueryDslQueryContainer,
   StoredScript,
 } from '@elastic/elasticsearch/lib/api/types';
-import { fullJitterBackoffFactory } from '../common/retry_service/full_jitter_backoff';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { scheduleCAIBackfillTask } from './tasks/backfill_task';
 
-jest.mock('../common/retry_service/full_jitter_backoff');
+jest.mock('@kbn/response-ops-retry-service/full_jitter_backoff');
 jest.mock('./tasks/backfill_task');
 
 const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;

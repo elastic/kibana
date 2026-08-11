@@ -49,6 +49,8 @@ export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
       return 'Discover';
+    case 'ai_value_report':
+      return 'Value report';
     default:
       return capitalize(type);
   }
@@ -65,10 +67,6 @@ const isCustomRrule = (rRule: Rrule) => {
   const freq = rRule.freq;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
-    return true;
-  }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
     return true;
   }
   // frequency is weekly and there are multiple weekdays selected

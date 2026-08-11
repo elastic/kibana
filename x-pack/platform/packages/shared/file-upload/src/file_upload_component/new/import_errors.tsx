@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { useFileUploadContext } from '../../..';
+import { useFileUploadContext } from '../../use_file_upload';
 
 export const ImportErrors: FC = () => {
   const { uploadStatus } = useFileUploadContext();
@@ -18,7 +18,7 @@ export const ImportErrors: FC = () => {
       {uploadStatus.errors.map((error, index) => (
         <React.Fragment key={index}>
           <EuiSpacer size="m" />
-          <EuiCallOut title={error.title} color="danger" iconType="alert">
+          <EuiCallOut title={error.title} color="danger" iconType="warning">
             <p>{JSON.stringify(error)}</p>
           </EuiCallOut>
         </React.Fragment>

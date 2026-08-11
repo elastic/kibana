@@ -26,8 +26,6 @@ export class InterceptUserInteractionService {
   private savedObjectRef = interceptInteractionUserRecordSavedObject;
 
   setup(core: CoreSetup, logger: Logger) {
-    core.savedObjects.registerType(this.savedObjectRef);
-
     const router = core.http.createRouter<RequestHandlerContext>();
 
     router.get(
@@ -35,7 +33,7 @@ export class InterceptUserInteractionService {
         path: TRIGGER_USER_INTERACTION_METADATA_API_ROUTE,
         validate: {
           params: schema.object({
-            triggerId: schema.string(),
+            triggerId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
         },
         security: {
@@ -67,7 +65,7 @@ export class InterceptUserInteractionService {
         path: TRIGGER_USER_INTERACTION_METADATA_API_ROUTE,
         validate: {
           params: schema.object({
-            triggerId: schema.string(),
+            triggerId: schema.string({ minLength: 1, maxLength: 256 }),
           }),
           body: schema.object({
             lastInteractedInterceptId: schema.number(),

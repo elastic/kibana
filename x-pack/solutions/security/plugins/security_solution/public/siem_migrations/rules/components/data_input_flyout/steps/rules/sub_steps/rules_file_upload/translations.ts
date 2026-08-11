@@ -11,8 +11,3 @@ export const RULES_DATA_INPUT_FILE_UPLOAD_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.title',
   { defaultMessage: 'Update exported rules' }
 );
-
-export const RULES_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.prompt',
-  { defaultMessage: 'Select or drag and drop the exported JSON file' }
-);

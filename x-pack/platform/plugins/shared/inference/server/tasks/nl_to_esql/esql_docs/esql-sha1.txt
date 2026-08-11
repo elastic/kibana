@@ -1,0 +1,24 @@
+# SHA1
+
+The SHA1 command computes the SHA1 hash of the input value.
+
+## Syntax
+
+`SHA1(input)`
+
+### Parameters
+
+#### input
+
+The value to hash.
+
+## Examples
+
+Calculates the SHA1 hash of the `message` column for all rows except those where the message is "Connection error", and displays both the original message and its hash.
+
+```esql
+FROM sample_data
+| WHERE message != "Connection error"
+| EVAL sha1 = sha1(message)
+| KEEP message, sha1
+```

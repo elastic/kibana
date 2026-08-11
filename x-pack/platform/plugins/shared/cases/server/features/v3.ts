@@ -19,6 +19,7 @@ import {
   CASES_CREATE_COMMENT_SUB_PRIVILEGE_ID,
   CASES_REOPEN_SUB_PRIVILEGE_ID,
   CASES_ASSIGN_SUB_PRIVILEGE_ID,
+  CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
 } from './constants';
 
 /**
@@ -211,6 +212,33 @@ export const getV3 = (): KibanaFeatureConfig => {
                   assign: [APP_ID],
                 },
                 ui: capabilities.assignCase,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureName', {
+          defaultMessage: 'Manage templates',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: CASES_MANAGE_TEMPLATES_SUB_PRIVILEGE_ID,
+                name: i18n.translate('xpack.cases.features.manageTemplatesSubFeatureDetails', {
+                  defaultMessage: 'Manage case templates',
+                }),
+                includeIn: 'all',
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                cases: {
+                  manageTemplates: [APP_ID],
+                },
+                ui: capabilities.manageTemplates,
               },
             ],
           },

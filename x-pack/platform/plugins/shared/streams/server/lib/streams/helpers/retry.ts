@@ -6,6 +6,7 @@
  */
 
 import { setTimeout } from 'timers/promises';
+import type { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
@@ -22,13 +23,16 @@ export const retryTransientEsErrors = async <T>(
   try {
     return await esCall();
   } catch (e) {
-    if (attempt < MAX_ATTEMPTS && isRetryableEsClientError(e)) {
+    if (
+      attempt < MAX_ATTEMPTS &&
+      isRetryableEsClientError(e as EsErrors.ElasticsearchClientError)
+    ) {
       const retryCount = attempt + 1;
       const retryDelaySec = Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
 
       logger?.warn(
-        `Retrying Elasticsearch operation after [${retryDelaySec}s] due to error: ${e.toString()} ${
-          e.stack
+        `Retrying Elasticsearch operation after [${retryDelaySec}s] due to error: ${
+          e instanceof Error ? `${e.message} ${e.stack}` : String(e)
         }`
       );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EuiBreadcrumb, EuiThemeComputed } from '@elastic/eui';
 import type { Index } from './types';
@@ -30,9 +30,22 @@ export type IndexDetailsTabId = IndexDetailsSection | string;
 export interface IndexDetailsTab {
   // a unique key to identify the tab
   id: IndexDetailsTabId;
-  // a text that is displayed on the tab label, usually a Formatted message component
-  name: ReactNode;
-  // a function that renders the content of the tab
+  // a string displayed on the tab label
+  name: string;
+  /**
+   * A function that renders the content of the tab.
+   *
+   * IMPORTANT: This expects an arrow function that returns JSX, NOT a component passed directly.
+   *
+   * @example
+   * // Correct - arrow function returning JSX:
+   * renderTabContent: ({ index, getUrlForApp }) => (
+   *   <MyTabComponent index={index} getUrlForApp={getUrlForApp} />
+   * )
+   *
+   * // Wrong - passing a component directly will break if it uses hooks:
+   * renderTabContent: MyTabComponent
+   */
   renderTabContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];

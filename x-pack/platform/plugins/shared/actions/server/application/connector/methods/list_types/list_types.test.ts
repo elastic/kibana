@@ -27,10 +27,14 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionsClient } from '../../../../actions_client/actions_client';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
 
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 let actionTypeRegistry: ActionTypeRegistry;
+let authTypeRegistry: AuthTypeRegistry;
 
 describe('listTypes()', () => {
   let actionsClient: ActionsClient;
@@ -55,11 +59,13 @@ describe('listTypes()', () => {
       inMemoryConnectors: [],
     };
     actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+    authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
     actionsClient = new ActionsClient({
       logger: loggingSystemMock.create().get(),
       kibanaIndices: ['.kibana'],
       scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       inMemoryConnectors: [],
       actionExecutor: actionExecutorMock.create(),
@@ -68,6 +74,9 @@ describe('listTypes()', () => {
       authorization: actionsAuthorizationMock.create() as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient: jest.fn(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      isESOCanEncrypt: true,
+      getAxiosInstanceWithAuth: jest.fn(),
     });
   });
 
@@ -95,6 +104,8 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
+        isTestable: false,
       },
     ]);
   });
@@ -132,6 +143,8 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
+        isTestable: false,
       },
       {
         id: 'my-connector-type-2',
@@ -143,6 +156,8 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
+        isTestable: false,
       },
     ]);
   });
@@ -173,6 +188,8 @@ describe('listTypes()', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
         isDeprecated: false,
+        source: 'stack',
+        isTestable: false,
       },
       {
         id: '.cases',
@@ -184,6 +201,8 @@ describe('listTypes()', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         isDeprecated: false,
+        source: 'stack',
+        isTestable: false,
       },
     ]);
   });

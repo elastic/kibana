@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonGroup, EuiFormRow, type EuiButtonGroupOptionProps } from '@elastic/eui';
-import type { OverviewMode } from './types';
+import type { OverviewMode } from '../../../../common/embeddables/overview/types';
 
 const overviewModeOptions: EuiButtonGroupOptionProps[] = [
   {

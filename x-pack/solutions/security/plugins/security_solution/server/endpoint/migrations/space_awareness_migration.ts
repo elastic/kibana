@@ -7,8 +7,8 @@
 
 /* eslint-disable require-atomic-updates */
 
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { UpdateExceptionListItemOptions } from '@kbn/lists-plugin/server';
 import pMap from 'p-map';
 import { type Logger } from '@kbn/core/server';
@@ -238,7 +238,10 @@ const migrateArtifactsToSpaceAware = async (
             };
 
             // Ensure that Endpoint Exceptions all have the `global` tag if no assignment tag is currently assigned to the artifact
-            if (artifact.list_id === ENDPOINT_LIST_ID && !hasGlobalOrPerPolicyTag(artifact)) {
+            if (
+              artifact.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
+              !hasGlobalOrPerPolicyTag(artifact)
+            ) {
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               artifactUpdate.tags!.push(GLOBAL_ARTIFACT_TAG);
             }
@@ -617,8 +620,8 @@ class AgentPolicyInfoBuilder {
     if (!agentPolicyIdPromise) {
       const fleetServices = this.endpointService.getInternalFleetServices(undefined, true);
 
-      agentPolicyIdPromise = fleetServices.agent
-        .getAgent(agentId)
+      agentPolicyIdPromise = fleetServices
+        .fetchAgent(agentId)
         .then((agent) => {
           if (!agent.policy_id) {
             throw new EndpointError(

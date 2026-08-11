@@ -24,6 +24,7 @@ import 'monaco-editor/esm/vs/editor/contrib/inlineCompletions/browser/inlineComp
 import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
+import 'monaco-editor/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js'; // Needed for document highlight (occurrences)
 import 'monaco-editor/esm/vs/editor/contrib/links/browser/links.js'; // Needed for clickable links with Cmd/Ctrl+Click
 
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeAction.js';
@@ -38,10 +39,18 @@ import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Nee
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
 import 'monaco-editor/esm/vs/editor/contrib/contextmenu/browser/contextmenu.js'; // Needed for enabling custom Monaco context menu
 
+// Register services required by contributions that may be loaded elsewhere (e.g. editor.all).
+// Without these, CodeLensContribution, InlayHintsController, and DropIntoEditorController
+// fail with "depends on UNKNOWN service" when StandaloneServices.initialize() already ran.
+import 'monaco-editor/esm/vs/editor/contrib/codelens/browser/codeLensCache.js';
+import 'monaco-editor/esm/vs/editor/contrib/inlayHints/browser/inlayHintsController.js';
+import 'monaco-editor/esm/vs/editor/common/services/treeViewsDndService.js';
+
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
+import 'monaco-editor/esm/vs/basic-languages/liquid/liquid.contribution.js'; // Needed for liquid template support
 
 // config for supported base languages
 export {

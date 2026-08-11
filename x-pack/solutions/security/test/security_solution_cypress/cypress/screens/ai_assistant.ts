@@ -10,7 +10,7 @@ export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
 export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
-export const CHAT_ICON = '[data-test-subj="newChat"]';
+export const CHAT_ICON = '[data-test-subj="plusCircle"]';
 export const CHAT_ICON_SM = '[data-test-subj="newChatByTitle"]';
 export const CLEAR_CHAT = '[data-test-subj="clear-chat"]';
 export const CLEAR_SYSTEM_PROMPT = '[data-test-subj="clearSystemPrompt"]';
@@ -18,6 +18,8 @@ export const CONFIRM_CLEAR_CHAT = '[data-test-subj="confirmModalConfirmButton"]'
 export const CONNECTOR_MISSING_CALLOUT = '[data-test-subj="connectorMissingCallout"]';
 export const CONNECTOR_SELECT = (c: string) => `[data-test-subj="connector-${c}"]`;
 export const CONNECTOR_SELECTOR = '[data-test-subj="connector-selector"]';
+export const CONNECTOR_SELECTOR_LIST =
+  '[data-test-subj="aiAssistantConnectorSelector"] .euiSelectableList__list';
 export const CONVERSATION_MESSAGE = '[data-test-subj="messageText"]';
 export const CONVERSATION_MESSAGE_ERROR =
   '[data-test-subj="errorComment"] [data-test-subj="messageText"]';

@@ -7,8 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
+import type { z } from '@kbn/zod';
+import type { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 
-export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
-export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
+import type {
+  legacySearchRequestParamsSchema,
+  legacySearchResponseBodySchema,
+  searchResponseBodySchema,
+} from './schemas';
+
+/** The request parameters for searching dashboards */
+export type DashboardSearchRequestParams = z.output<typeof asCodeSearchRequestSchema>;
+/** The response body type for searching dashboards. */
+export type DashboardSearchResponseBody = z.output<typeof searchResponseBodySchema>;
+
+/** LEGACY **/
+/** The request parameters for searching dashboards */
+export type LegacyDashboardSearchRequestParams = z.output<typeof legacySearchRequestParamsSchema>;
+/** The response body type for searching dashboards. */
+export type LegacyDashboardSearchResponseBody = z.output<typeof legacySearchResponseBodySchema>;

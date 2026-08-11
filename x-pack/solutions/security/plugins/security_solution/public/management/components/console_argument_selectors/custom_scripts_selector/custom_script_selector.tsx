@@ -18,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
@@ -60,7 +61,7 @@ export const CustomScriptSelector = memo<
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
-    if (agentType === 'sentinel_one' && platform) {
+    if (platform && (agentType === 'sentinel_one' || agentType === 'endpoint')) {
       return { osType: platform };
     }
 
@@ -88,7 +89,7 @@ export const CustomScriptSelector = memo<
 
   useEffect(() => {
     // If the argument selector should not be rendered, then at least set the `value` to a string
-    // so that the normal com,and argument validations can be invoked if the user still ENTERs the command
+    // so that the normal command, and argument validations can be invoked if the user still ENTERs the command
     if (!shouldRender && value !== '') {
       onChange({
         value: '',
@@ -100,7 +101,7 @@ export const CustomScriptSelector = memo<
       // might be getting initialized from either console input history or from a user's past action.
       // Ensure that we set `selectedOption` once we get the list of scripts
       shouldRender &&
-      agentType === 'sentinel_one' &&
+      (agentType === 'sentinel_one' || agentType === 'endpoint') &&
       value &&
       !state?.selectedOption &&
       data.length > 0
@@ -208,6 +209,10 @@ export const CustomScriptSelector = memo<
       closePopover={handleClosePopover}
       panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       panelPaddingSize="s"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.endpoint.customScriptSelector.popover.ariaLabel',
+        { defaultMessage: 'Select script' }
+      )}
       button={
         <EuiToolTip content={CUSTOM_SCRIPTS_CONFIG.tooltipText} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none" tabIndex={0}>
@@ -258,7 +263,7 @@ export const CustomScriptSelector = memo<
     </EuiPopover>
   ) : (
     <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-      <EuiIcon type="warning" size="s" color="subdued" />{' '}
+      <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.securitySolution.endpoint.customScriptSelector.noMultipleArgs"
         defaultMessage="Argument is only supported once per command"

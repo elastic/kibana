@@ -23,8 +23,10 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
+import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { AxiosInstance } from 'axios';
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -53,8 +55,16 @@ export interface ConnectorMetadata {
   displayName: string;
   icon?: string;
   description: string;
+  /**
+   * Documentation URL for this connector type. Set it when the id-based derivation
+   * wouldn't resolve to the published page (e.g. a differing slug or a third-party site).
+   * Use an empty string when the connector has no dedicated page: it resolves to the
+   * connectors index via the doc-links service. When omitted, the URL is derived from
+   * the connector id.
+   */
   docsUrl?: string;
   minimumLicense: LicenseType;
+  isTechnicalPreview?: boolean;
   supportedFeatureIds: Array<
     | 'alerting'
     | 'cases'
@@ -65,6 +75,8 @@ export interface ConnectorMetadata {
     | 'generativeAIForSearchPlayground'
     | 'endpointSecurity'
     | 'workflows'
+    | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -75,25 +87,58 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
-
-export interface GetTokenOpts {
+// oauth authz code and client credentials with client secret
+export interface OAuthGetTokenOpts {
+  authType: 'oauth';
   tokenUrl: string;
   scope?: string;
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
+  accessTokenPath?: string;
+  tokenTypePath?: string;
+  tokenType?: string;
 }
+
+export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
+  authType: 'oauth_client_credentials_private_key_jwt';
+  tokenUrl: string;
+  scope?: string;
+  clientId: string;
+}
+
+export interface EarsGetTokenOpts {
+  authType: 'ears';
+  provider: string;
+  scope?: string;
+}
+
+export type GetTokenOpts =
+  | OAuthGetTokenOpts
+  | OAuthClientCredsPrivateKeyJWTGetTokenOpts
+  | EarsGetTokenOpts;
 
 export interface AuthContext {
+  getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
   getToken: (opts: GetTokenOpts) => Promise<string | null>;
   logger: Logger;
+  proxySettings?: ProxySettings;
+  sslSettings: SSLSettings;
 }
 
-export interface AuthTypeSpec<T extends Record<string, unknown>> {
+export type AuthMode = 'per-user' | 'shared';
+
+export interface AuthTypeDefinition {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
+  authMode?: AuthMode;
+}
+
+export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -103,7 +148,6 @@ export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 // ============================================================================
 // - OAuth2 (clientId, clientSecret, token refresh)
 // - SSL/mTLS (certificate-based authentication)
-// - AWS SigV4 (AWS service authentication)
 // - Custom (connector-specific auth flows)
 
 // ============================================================================
@@ -181,10 +225,27 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   description?: string;
   actionGroup?: string;
   supportsStreaming?: boolean;
+  /**
+   * HTTP response header that advertises response size for this action.
+   * The generated executor reads this header from Axios errors when the Actions
+   * response-size limit is exceeded. Defaults to `content-length`.
+   */
+  responseSizeHeader?: string;
 }
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -215,13 +276,23 @@ export interface Transformations {
 // TESTING
 // ============================================================================
 
+export const TEST_CONNECTOR_SUB_ACTION = '_test';
+
+/**
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
+ */
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
+
 export interface ConnectorTest {
-  handler: (ctx: ActionContext) => Promise<{
-    ok: boolean;
-    message?: string;
-    [key: string]: unknown;
-  }>;
+  /**
+   * Test-tab handler. Return data (use `{}` when there's nothing to report); throw on failure.
+   * A resolved value is treated as success by the executor.
+   */
+  handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  enabled: boolean;
 }
 
 // ============================================================================
@@ -230,8 +301,15 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  /** When true, renders a "Recommended" badge in the picker to highlight the preferred auth option. */
+  isRecommended?: boolean;
+  /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
+  isLegacy?: boolean;
+  isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
+    /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+    label?: string;
     meta?: Record<string, Record<string, unknown>>;
     // can override other Zod fields here in the future if needed
   };
@@ -239,7 +317,10 @@ export interface AuthTypeDef {
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
-  authTypes?: Array<string | AuthTypeDef>;
+  auth?: {
+    types: Array<string | AuthTypeDef>;
+    headers?: Record<string, AxiosHeaderValue>;
+  };
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
@@ -251,11 +332,17 @@ export interface ConnectorSpec {
 
   policies?: ConnectorPolicies;
 
-  actions: Record<string, ActionDefinition>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
+  actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
 
   transformations?: Transformations;
+
+  // Optional skill content for Agent Builder. When present, this string is
+  // included in the connector's agent attachment representation so the LLM
+  // has richer context about how to use the connector's sub-actions.
+  skill?: string;
 }
 
 // ============================================================================

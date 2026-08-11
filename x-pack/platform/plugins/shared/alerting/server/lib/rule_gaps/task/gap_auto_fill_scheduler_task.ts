@@ -16,14 +16,19 @@ import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_ga
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
-import { gapStatus } from '../../../../common/constants';
+import {
+  gapStatus,
+  GAP_AUTO_FILL_STATUS,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
+  DEFAULT_EXCLUDED_GAP_REASONS,
+} from '../../../../common/constants';
+import type { GapReasonType } from '../../../../common/constants/gap_reason';
 import type { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
   DEFAULT_RULES_BATCH_SIZE,
   DEFAULT_GAPS_PER_PAGE,
   DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-  GAP_AUTO_FILL_STATUS,
 } from '../../../application/gaps/types/scheduler';
 import { backfillInitiator } from '../../../../common/constants';
 import type { RulesClientContext } from '../../../rules_client/types';
@@ -62,7 +67,7 @@ interface ProcessGapsForRulesResult {
 type LoggerMessageBuilder = (message: string) => string;
 
 export async function processRuleBatches({
-  abortController,
+  signal,
   gapsPerPage,
   gapFetchMaxIterations,
   logger,
@@ -77,8 +82,10 @@ export async function processRuleBatches({
   startISO,
   endISO,
   taskInstanceId,
+  numRetries,
+  excludedReasons,
 }: {
-  abortController: AbortController;
+  signal: AbortSignal;
   gapsPerPage: number;
   gapFetchMaxIterations: number;
   logger: Logger;
@@ -93,6 +100,8 @@ export async function processRuleBatches({
   startISO: string;
   endISO: string;
   taskInstanceId: string;
+  numRetries: number;
+  excludedReasons?: GapReasonType[];
 }): Promise<ProcessRuleBatchesResult> {
   let aggregatedByRule = new Map<string, AggregatedByRuleEntry>();
 
@@ -101,7 +110,7 @@ export async function processRuleBatches({
       return { aggregatedByRule, state: SchedulerLoopState.CAPACITY_EXHAUSTED };
     }
 
-    if (isCancelled(abortController)) {
+    if (isCancelled(signal)) {
       return { aggregatedByRule, state: SchedulerLoopState.CANCELLED };
     }
 
@@ -122,7 +131,7 @@ export async function processRuleBatches({
     }
 
     const gapsResult = await processGapsForRules({
-      abortController,
+      signal,
       aggregatedByRule,
       endISO,
       gapsPerPage,
@@ -136,6 +145,8 @@ export async function processRuleBatches({
       startISO,
       taskInstanceId,
       toProcessRuleIds,
+      numRetries,
+      excludedReasons,
     });
 
     aggregatedByRule = gapsResult.aggregatedByRule;
@@ -153,7 +164,7 @@ export async function processRuleBatches({
 }
 
 export async function processGapsForRules({
-  abortController,
+  signal,
   aggregatedByRule,
   endISO,
   gapsPerPage,
@@ -167,8 +178,10 @@ export async function processGapsForRules({
   startISO,
   taskInstanceId,
   toProcessRuleIds,
+  numRetries,
+  excludedReasons,
 }: {
-  abortController: AbortController;
+  signal: AbortSignal;
   aggregatedByRule: Map<string, AggregatedByRuleEntry>;
   endISO: string;
   gapsPerPage: number;
@@ -182,6 +195,8 @@ export async function processGapsForRules({
   startISO: string;
   taskInstanceId: string;
   toProcessRuleIds: string[];
+  numRetries: number;
+  excludedReasons?: GapReasonType[];
 }): Promise<ProcessGapsForRulesResult> {
   let aggregated = new Map(aggregatedByRule);
 
@@ -198,7 +213,7 @@ export async function processGapsForRules({
     }
     gapFetchIterationCount++;
 
-    if (isCancelled(abortController)) {
+    if (isCancelled(signal)) {
       return {
         aggregatedByRule: aggregated,
         remainingBackfills,
@@ -224,6 +239,8 @@ export async function processGapsForRules({
         searchAfter,
         pitId,
         hasUnfilledIntervals: true,
+        failedAutoFillAttemptsLessThan: numRetries + 1,
+        excludedReasons,
       },
     });
 
@@ -243,12 +260,15 @@ export async function processGapsForRules({
     if (filteredGaps.length) {
       const sortedGaps = filteredGaps.sort((a, b) => a.range.gte.getTime() - b.range.gte.getTime());
 
-      const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
-        gapsBatch: sortedGaps,
-        range: { start: startISO, end: endISO },
-        initiator: backfillInitiator.SYSTEM,
-        initiatorId: taskInstanceId,
-      });
+      const { results: chunkResults, truncatedRuleIds } = await processGapsBatch(
+        rulesClientContext,
+        {
+          gapsBatch: sortedGaps,
+          range: { start: startISO, end: endISO },
+          initiator: backfillInitiator.SYSTEM,
+          initiatorId: taskInstanceId,
+        }
+      );
 
       aggregated = addChunkResultsToAggregation(aggregated, chunkResults);
 
@@ -266,6 +286,20 @@ export async function processGapsForRules({
             remainingBackfills,
             state: SchedulerLoopState.CAPACITY_EXHAUSTED,
           };
+        }
+      }
+
+      const completedRuleIds = new Set(truncatedRuleIds);
+      for (const result of chunkResults) {
+        if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
+          completedRuleIds.add(result.ruleId);
+        }
+      }
+
+      if (completedRuleIds.size > 0) {
+        toProcessRuleIds = toProcessRuleIds.filter((id) => !completedRuleIds.has(id));
+        if (toProcessRuleIds.length === 0) {
+          break;
         }
       }
     }
@@ -352,7 +386,7 @@ export function registerGapAutoFillSchedulerTask({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
       timeout: schedulerConfig?.timeout ?? DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-      createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
+      createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
         return {
           async run() {
             const loggerMessage = (message: string) =>
@@ -368,6 +402,7 @@ export function registerGapAutoFillSchedulerTask({
               schedule: { interval: string };
               maxBackfills: number;
               ruleTypes: Array<{ type: string; consumer: string }>;
+              excludedReasons?: GapReasonType[];
             };
             let logEvent: ReturnType<typeof createGapAutoFillSchedulerEventLogger>;
             try {
@@ -391,10 +426,20 @@ export function registerGapAutoFillSchedulerTask({
 
             try {
               const now = new Date();
-              const startDate: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
-              if (!startDate) {
+              const parsedStart: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
+              if (!parsedStart) {
                 throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
               }
+
+              const BACKFILL_LOOKBACK_SAFETY_MARGIN_MS = 5 * 60 * 1000; // 5 minutes
+              const minAllowedStart = new Date(
+                now.getTime() -
+                  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS +
+                  BACKFILL_LOOKBACK_SAFETY_MARGIN_MS
+              );
+              const startDate = new Date(
+                Math.max(parsedStart.getTime(), minAllowedStart.getTime())
+              );
               const startISO = startDate.toISOString();
               const endISO = now.toISOString();
 
@@ -435,17 +480,19 @@ export function registerGapAutoFillSchedulerTask({
               const remainingBackfills = capacityCheckInitial.remainingCapacity;
               // newest gap first
               const sortOrder = 'desc';
+              const excludedReasons = config.excludedReasons ?? DEFAULT_EXCLUDED_GAP_REASONS;
               const { ruleIds } = await rulesClient.getRuleIdsWithGaps({
                 start: startISO,
                 end: endISO,
                 sortOrder,
                 hasUnfilledIntervals: true,
                 ruleTypes: config.ruleTypes,
+                excludedReasons,
               });
 
               if (!ruleIds.length) {
                 await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SKIPPED,
+                  status: GAP_AUTO_FILL_STATUS.NO_GAPS,
                   results: [],
                   message: 'Skipped execution: no rules with gaps',
                 });
@@ -454,7 +501,7 @@ export function registerGapAutoFillSchedulerTask({
 
               // Step 4: Process rules in batches
               const gapFillsResult = await processRuleBatches({
-                abortController,
+                signal,
                 gapsPerPage: DEFAULT_GAPS_PER_PAGE,
                 gapFetchMaxIterations: GAP_FETCH_MAX_ITERATIONS,
                 logger,
@@ -469,34 +516,12 @@ export function registerGapAutoFillSchedulerTask({
                 startISO,
                 endISO,
                 taskInstanceId: taskInstance.id,
+                numRetries: config.numRetries,
+                excludedReasons,
               });
 
               const aggregatedByRule = gapFillsResult.aggregatedByRule;
               const consolidated = resultsFromMap(aggregatedByRule);
-
-              if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                  results: consolidated,
-                  message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${
-                    capacityCheckInitial.maxBackfills
-                  } gap backfills at a time, and existing backfills must finish before new ones can be scheduled. | ${formatConsolidatedSummary(
-                    consolidated
-                  )}`,
-                });
-                return { state: {} };
-              }
-
-              if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
-                await logEvent({
-                  status: GAP_AUTO_FILL_STATUS.SUCCESS,
-                  results: consolidated,
-                  message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${formatConsolidatedSummary(
-                    consolidated
-                  )}`,
-                });
-                return { state: {} };
-              }
 
               // Step 5: Finalize and log results
               const { status: outcomeStatus, message: outcomeMessage } =
@@ -504,11 +529,30 @@ export function registerGapAutoFillSchedulerTask({
               const summary = consolidated.length
                 ? ` | ${formatConsolidatedSummary(consolidated)}`
                 : '';
+              const summaryMessage = `${outcomeMessage}${summary}`;
+
+              if (gapFillsResult.state === SchedulerLoopState.CAPACITY_EXHAUSTED) {
+                await logEvent({
+                  status: outcomeStatus,
+                  results: consolidated,
+                  message: `Stopped early: gap auto-fill capacity limit reached. This task can schedule at most ${capacityCheckInitial.maxBackfills} gap backfills at a time, and existing backfills must finish before new ones can be scheduled. | ${summaryMessage}`,
+                });
+                return { state: {} };
+              }
+
+              if (gapFillsResult.state === SchedulerLoopState.CANCELLED) {
+                await logEvent({
+                  status: outcomeStatus,
+                  results: consolidated,
+                  message: `Gap Auto Fill Scheduler cancelled by timeout | Results: ${summaryMessage}`,
+                });
+                return { state: {} };
+              }
 
               await logEvent({
                 status: outcomeStatus,
                 results: consolidated,
-                message: `${outcomeMessage}${summary}`,
+                message: summaryMessage,
               });
 
               return { state: {} };

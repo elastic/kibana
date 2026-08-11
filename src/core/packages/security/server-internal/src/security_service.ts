@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type { CoreSecurityDelegateContract, FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Observable, Subscription } from 'rxjs';
 import type { Config } from '@kbn/config';
 import { isFipsEnabled, checkFipsConfig } from './fips/fips';
@@ -19,12 +19,14 @@ import type {
 } from './internal_contracts';
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import { createCoreUiamService } from './uiam';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
+  private fakeRequestEnricherAcquired = false;
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -46,7 +48,7 @@ export class SecurityService
 
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
-    const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+    const securityConfig: SecurityServiceConfigType | undefined = config.get(['xpack', 'security']);
     const elasticsearchConfig: PKCS12ConfigType = config.get(['elasticsearch']);
     const serverConfig: PKCS12ConfigType = config.get(['server']);
 
@@ -59,9 +61,31 @@ export class SecurityService
         }
         this.securityApi = api;
       },
+      acquireFakeRequestEnricher: (): FakeRequestEnricher => {
+        if (this.fakeRequestEnricherAcquired) {
+          throw new Error(
+            'acquireFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
+          );
+        }
+        this.fakeRequestEnricherAcquired = true;
+
+        // Returned eagerly at setup but invoked at task-run time, by which point
+        // the security delegate has been registered.
+        return (request, user) => {
+          if (!this.securityApi) {
+            throw new Error(
+              'Cannot enrich a fake request before the security delegate has been registered.'
+            );
+          }
+          this.securityApi.fakeRequestEnricher(request, user);
+        };
+      },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      uiam: securityConfig?.uiam?.enabled
+        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
+        : null,
     };
   }
 

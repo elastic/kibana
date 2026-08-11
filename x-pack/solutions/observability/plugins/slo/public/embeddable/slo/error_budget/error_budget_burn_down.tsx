@@ -39,7 +39,7 @@ export function SloErrorBudget({
     };
   }, [reloadSubject]);
 
-  const kqlQuery = `slo.id:"${sloId}" and slo.instanceId:"${sloInstanceId}"`;
+  const kqlQuery = `slo.id:"${sloId}" and slo.instanceId:"${sloInstanceId ?? ALL_VALUE}"`;
 
   const { data: sloList } = useFetchSloList({
     kqlQuery,
@@ -100,7 +100,7 @@ export function SloErrorBudget({
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
-              'The SLO has been deleted. You can safely delete the widget from the dashboard.',
+              'Unable to find SLO. You can safely delete the widget from the dashboard.',
           })}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -108,6 +108,7 @@ export function SloErrorBudget({
   }
 
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
+
   return (
     <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">

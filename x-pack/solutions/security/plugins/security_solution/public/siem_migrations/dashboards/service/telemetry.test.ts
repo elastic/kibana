@@ -12,6 +12,7 @@ import { SiemMigrationsDashboardEventTypes } from '../../../common/lib/telemetry
 import { migrationDashboards } from '../__mocks__/migration_dashboard';
 import { SiemDashboardMigrationsTelemetry } from './telemetry';
 import { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import { MigrationSource } from '../../common/types';
 
 describe('SiemDashboardMigrationsTelemetry', () => {
   let telemetryService: jest.Mocked<Pick<TelemetryServiceStart, 'reportEvent'>>;
@@ -53,6 +54,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     telemetry.reportSetupMigrationOpenResources({
       migrationId: 'abc',
       missingResourcesCount: 5,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationOpenResources,
@@ -60,13 +62,18 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         eventName:
           siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMigrationOpenResources],
         migrationId: 'abc',
+        vendor: MigrationSource.SPLUNK,
         missingResourcesCount: 5,
       }
     );
   });
 
   it('reports setup migration created', () => {
-    telemetry.reportSetupMigrationCreated({ migrationId: 'def', count: 10 });
+    telemetry.reportSetupMigrationCreated({
+      migrationId: 'def',
+      count: 10,
+      vendor: MigrationSource.SPLUNK,
+    });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationCreated,
       {
@@ -74,6 +81,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         migrationId: 'def',
         count: 10,
         result: 'success',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
@@ -84,12 +92,14 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       migrationId: 'def',
       count: 10,
       error,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationCreated,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMigrationCreated],
         migrationId: 'def',
+        vendor: MigrationSource.SPLUNK,
         count: 10,
         result: 'failed',
         errorMessage: 'test error',
@@ -98,20 +108,25 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   });
 
   it('reports setup migration deleted', () => {
-    telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi' });
+    telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationDeleted,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMigrationDeleted],
         migrationId: 'ghi',
         result: 'success',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports setup migration deleted with error', () => {
     const error = new Error('delete error');
-    telemetry.reportSetupMigrationDeleted({ migrationId: 'ghi', error });
+    telemetry.reportSetupMigrationDeleted({
+      migrationId: 'ghi',
+      error,
+      vendor: MigrationSource.SPLUNK,
+    });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMigrationDeleted,
       {
@@ -119,6 +134,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         migrationId: 'ghi',
         result: 'failed',
         errorMessage: 'delete error',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
@@ -128,6 +144,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       migrationId: 'jkl',
       type: 'macro',
       count: 3,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupResourcesUploaded,
@@ -135,6 +152,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         eventName:
           siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupResourcesUploaded],
         migrationId: 'jkl',
+        vendor: MigrationSource.SPLUNK,
         type: 'macro',
         count: 3,
         result: 'success',
@@ -149,6 +167,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       type: 'macro',
       count: 3,
       error,
+      vendor: MigrationSource.SPLUNK,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupResourcesUploaded,
@@ -156,6 +175,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         eventName:
           siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupResourcesUploaded],
         migrationId: 'jkl',
+        vendor: MigrationSource.SPLUNK,
         type: 'macro',
         count: 3,
         result: 'failed',
@@ -165,35 +185,38 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   });
 
   it('reports setup rules query copied', () => {
-    telemetry.reportSetupQueryCopied({ migrationId: 'mno' });
+    telemetry.reportSetupQueryCopied({ migrationId: 'mno', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupQueryCopied,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupQueryCopied],
         migrationId: 'mno',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports setup macros query copied', () => {
-    telemetry.reportSetupMacrosQueryCopied({ migrationId: 'pqr' });
+    telemetry.reportSetupMacrosQueryCopied({ migrationId: 'pqr', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupMacrosQueryCopied,
       {
         eventName:
           siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupMacrosQueryCopied],
         migrationId: 'pqr',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports setup lookup name copied', () => {
-    telemetry.reportSetupLookupNameCopied({ migrationId: 'stu' });
+    telemetry.reportSetupLookupNameCopied({ migrationId: 'stu', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.SetupLookupNameCopied,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.SetupLookupNameCopied],
         migrationId: 'stu',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
@@ -201,6 +224,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   it('reports start dashboard migration', () => {
     telemetry.reportStartTranslation({
       migrationId: 'vwx',
+      vendor: MigrationSource.SPLUNK,
       settings: {
         connectorId: 'test-connector',
       },
@@ -210,6 +234,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.StartMigration],
         migrationId: 'vwx',
+        vendor: MigrationSource.SPLUNK,
         connectorId: 'test-connector',
         isRetry: false,
         skipPrebuiltRulesMatching: false,
@@ -221,6 +246,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   it('reports retry dashboard migration', () => {
     telemetry.reportStartTranslation({
       migrationId: 'yza',
+      vendor: MigrationSource.SPLUNK,
       settings: {
         connectorId: 'test-connector',
       },
@@ -231,6 +257,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.StartMigration],
         migrationId: 'yza',
+        vendor: MigrationSource.SPLUNK,
         connectorId: 'test-connector',
         isRetry: true,
         skipPrebuiltRulesMatching: false,
@@ -244,6 +271,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const error = new Error('start error');
     telemetry.reportStartTranslation({
       migrationId: 'bcd',
+      vendor: MigrationSource.SPLUNK,
       settings: {
         connectorId: 'test-connector',
       },
@@ -259,17 +287,19 @@ describe('SiemDashboardMigrationsTelemetry', () => {
         skipPrebuiltRulesMatching: false,
         result: 'failed',
         errorMessage: 'start error',
+        vendor: MigrationSource.SPLUNK,
       }
     );
   });
 
   it('reports stop dashboard migration', () => {
-    telemetry.reportStopTranslation({ migrationId: 'efg' });
+    telemetry.reportStopTranslation({ migrationId: 'efg', vendor: MigrationSource.SPLUNK });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.StopMigration,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.StopMigration],
         migrationId: 'efg',
+        vendor: MigrationSource.SPLUNK,
         result: 'success',
       }
     );
@@ -277,12 +307,13 @@ describe('SiemDashboardMigrationsTelemetry', () => {
 
   it('reports stop dashboard migration with error', () => {
     const error = new Error('stop error');
-    telemetry.reportStopTranslation({ migrationId: 'hij', error });
+    telemetry.reportStopTranslation({ migrationId: 'hij', vendor: MigrationSource.SPLUNK, error });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.StopMigration,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.StopMigration],
         migrationId: 'hij',
+        vendor: MigrationSource.SPLUNK,
         result: 'failed',
         errorMessage: 'stop error',
       }
@@ -291,12 +322,15 @@ describe('SiemDashboardMigrationsTelemetry', () => {
 
   it('reports translated dashboard update', () => {
     const migrationDashboard = migrationDashboards[0];
-    telemetry.reportTranslatedItemUpdate({ migrationItem: migrationDashboard });
+    telemetry.reportTranslatedItemUpdate({
+      migrationItem: migrationDashboard,
+    });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
       SiemMigrationsDashboardEventTypes.TranslatedItemUpdate,
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedItemUpdate],
         migrationId: 'mig-1',
+        vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         result: 'success',
       }
@@ -315,6 +349,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedItemUpdate],
         migrationId: 'mig-1',
+        vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         result: 'failed',
         errorMessage: 'update error',
@@ -333,6 +368,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedItemInstall],
         migrationId: 'mig-1',
+        vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         author: 'custom',
         enabled: true,
@@ -354,6 +390,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedItemInstall],
         migrationId: 'mig-1',
+        vendor: MigrationSource.SPLUNK,
         ruleMigrationId: '1',
         author: 'custom',
         enabled: true,
@@ -366,6 +403,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
   it('reports translated dashboard bulk install', () => {
     telemetry.reportTranslatedItemBulkInstall({
       migrationId: 'klm',
+      vendor: MigrationSource.SPLUNK,
       count: 5,
       enabled: true,
     });
@@ -374,6 +412,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedBulkInstall],
         migrationId: 'klm',
+        vendor: MigrationSource.SPLUNK,
         count: 5,
         enabled: true,
         result: 'success',
@@ -385,6 +424,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
     const error = new Error('bulk install error');
     telemetry.reportTranslatedItemBulkInstall({
       migrationId: 'nop',
+      vendor: MigrationSource.SPLUNK,
       count: 3,
       enabled: false,
       error,
@@ -394,6 +434,7 @@ describe('SiemDashboardMigrationsTelemetry', () => {
       {
         eventName: siemMigrationEventNames[SiemMigrationsDashboardEventTypes.TranslatedBulkInstall],
         migrationId: 'nop',
+        vendor: MigrationSource.SPLUNK,
         count: 3,
         enabled: false,
         result: 'failed',

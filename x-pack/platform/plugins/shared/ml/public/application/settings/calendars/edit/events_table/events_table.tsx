@@ -171,7 +171,7 @@ export const EventsTable: FC<Props> = ({
         key="ml_new_event"
         data-test-subj="mlCalendarNewEventButton"
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={showNewEventModal}
       >
         <FormattedMessage
@@ -184,7 +184,7 @@ export const EventsTable: FC<Props> = ({
         key="ml_import_event"
         data-test-subj="mlCalendarImportEventsButton"
         size="s"
-        iconType="importAction"
+        iconType="download"
         onClick={showImportModal}
       >
         <FormattedMessage
@@ -214,6 +214,9 @@ export const EventsTable: FC<Props> = ({
           },
         }}
         search={showSearchBar ? search : undefined}
+        tableCaption={i18n.translate('xpack.ml.calendarsEdit.eventsTable.tableCaption', {
+          defaultMessage: 'Calendar events',
+        })}
         data-test-subj="mlCalendarEventsTable"
         rowProps={(item) => ({
           'data-test-subj': `mlCalendarEventListRow row-${item.description}`,

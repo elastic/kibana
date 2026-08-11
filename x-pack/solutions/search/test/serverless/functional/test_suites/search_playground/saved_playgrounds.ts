@@ -11,12 +11,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'searchPlayground',
-    'solutionNavigation',
-  ]);
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'searchPlayground']);
 
   const esArchiver = getService('esArchiver');
 
@@ -30,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testPlaygroundName = 'FTR Search Playground';
   const updatedPlaygroundName = 'Test Search Playground';
 
-  describe('Search Playground - Saved Playgrounds', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/246083
+  describe.skip('Search Playground - Saved Playgrounds', function () {
     before(async () => {
       await createIndices();
 
@@ -53,6 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToUrl('searchPlayground');
 
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();
+        await pageObjects.searchPlayground.expectDeprecationNoticeToExist();
         await pageObjects.searchPlayground.PlaygroundListPage.clickNewPlaygroundButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundSetupPage();
         // Add a connector to the playground
@@ -89,11 +86,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
           testPlaygroundName
         );
-        const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: testPlaygroundName,
-        });
       });
       it.skip('should be able to search index', async () => {
         await pageObjects.searchPlayground.expectPageModeToBeSelected('chat');
@@ -151,7 +143,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
       });
     });
-    describe('Update Saved Playground', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/242276
+    describe.skip('Update Saved Playground', function () {
       before(async () => {
         await pageObjects.common.navigateToUrl('searchPlayground');
         await pageObjects.searchPlayground.PlaygroundListPage.expectPlaygroundListPageComponentsToExist();

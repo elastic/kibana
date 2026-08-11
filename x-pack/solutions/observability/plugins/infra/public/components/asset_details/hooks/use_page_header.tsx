@@ -11,7 +11,10 @@ import {
   type EuiBreadcrumbsProps,
   type EuiPageHeaderProps,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { enableInfrastructureAssetCustomDashboards } from '@kbn/observability-plugin/common';
 import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { capitalize, isEmpty } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -42,6 +45,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
   const {
     services: {
       application: { navigateToApp },
+      chrome,
     },
   } = useKibanaContextForPlugin();
 
@@ -57,6 +61,11 @@ export const useTemplateHeaderBreadcrumbs = () => {
     e.preventDefault();
   };
 
+  // The compatibility Back only renders when Chrome Next is active in the project layout.
+  if (chrome.next.isEnabled && chrome.getChromeStyle() === 'project') {
+    return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
+  }
+
   const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] =
     // If there is a state object in location, it's persisted in case the page is opened in a new tab or after page refresh
     // With that, we can show the return button. Otherwise, it will be hidden (ex: the user opened a shared URL or opened the page from their bookmarks)
@@ -65,10 +74,10 @@ export const useTemplateHeaderBreadcrumbs = () => {
           {
             text: (
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem>
-                  <EuiIcon size="s" type="arrowLeft" />
+                <EuiFlexItem grow={false}>
+                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />
                 </EuiFlexItem>
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.infra.assetDetails.header.return"
                     defaultMessage="Return"
@@ -76,10 +85,12 @@ export const useTemplateHeaderBreadcrumbs = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
+            'aria-label': i18n.translate('xpack.infra.assetDetails.header.returnAriaLabel', {
+              defaultMessage: 'Return',
+            }),
             color: 'primary',
             'aria-current': false,
             'data-test-subj': 'infraAssetDetailsReturnButton',
-            href: '#',
             onClick,
           },
         ]
@@ -115,6 +126,9 @@ const useConditionalTabs = () => {
   const { isTopbarMenuVisible } = useInfraMLCapabilitiesContext();
   const { featureFlags } = usePluginConfig();
   const isProfilingPluginEnabled = useProfilingPluginSetting();
+  const isInfrastructureAssetCustomDashboardsEnabled = useUiSetting<boolean>(
+    enableInfrastructureAssetCustomDashboards
+  );
   const { schema } = useAssetDetailsRenderPropsContext();
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
@@ -122,8 +136,15 @@ const useConditionalTabs = () => {
       [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled) && schema === 'ecs',
       [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
       [ContentTabIds.ANOMALIES]: isTopbarMenuVisible,
+      [ContentTabIds.DASHBOARDS]: isInfrastructureAssetCustomDashboardsEnabled,
     }),
-    [featureFlags.osqueryEnabled, isProfilingPluginEnabled, isTopbarMenuVisible, schema]
+    [
+      featureFlags.osqueryEnabled,
+      isProfilingPluginEnabled,
+      isTopbarMenuVisible,
+      schema,
+      isInfrastructureAssetCustomDashboardsEnabled,
+    ]
   );
 
   const isTabEnabled = useCallback(

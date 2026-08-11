@@ -8,8 +8,20 @@
  */
 
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+
+jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
+  getESQLAdHocDataview: jest.fn(),
+}));
+
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.MockedFunction<
+  typeof getESQLAdHocDataview
+>;
+
 import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
@@ -199,6 +211,161 @@ describe('createFiltersFromClickEvent', () => {
 
       expect(filter.length).toBe(1);
     });
+
+    describe('raw columns (createFilterFromRawColumnsESQL)', () => {
+      const mockFieldByName = jest.fn();
+      const mockDataView = createStubDataView({
+        spec: {
+          id: 'mock-dataview-id',
+          title: 'logs*',
+        },
+      });
+
+      mockDataView.getFieldByName = mockFieldByName;
+
+      beforeEach(() => {
+        mockFieldByName.mockReset();
+        mockGetESQLAdHocDataview.mockReset();
+        mockGetESQLAdHocDataview.mockResolvedValue(mockDataView);
+
+        table.columns[0] = {
+          name: 'message',
+          id: '1-1',
+          meta: {
+            type: 'string',
+            sourceParams: {
+              indexPattern: 'logs*',
+              sourceField: 'message',
+            },
+          },
+        };
+        table.rows[0]['1-1'] = 'test message';
+      });
+
+      test('should return empty array when field is not found in dataview', async () => {
+        mockFieldByName.mockReturnValue(null);
+        const filter = await createFilterESQL(table, 0, 0);
+        expect(filter).toEqual([]);
+      });
+
+      test('should return empty array when field is not filterable', async () => {
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: false,
+        });
+        const filter = await createFilterESQL(table, 0, 0);
+        expect(filter).toEqual([]);
+      });
+
+      test('should create phrase filter for string value using sourceField for index field name', async () => {
+        const mockFilterableField = {
+          name: 'message',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toHaveLength(1);
+        expect(filter[0]).toEqual(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              match_phrase: expect.objectContaining({
+                message: 'test message',
+              }),
+            }),
+          })
+        );
+      });
+
+      test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
+        table.columns[0].isComputedColumn = true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledTimes(1);
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+        // Renaming the dimension via the Appearance section only changes column.name/label; it
+        // must not make an EVAL-computed column look like a genuine RENAME of the real field.
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.isSourceFieldFilterable =
+          true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+      });
+
+      test('should create phrases filter for array value using sourceField for index field name', async () => {
+        const mockFilterableField = {
+          name: 'tags',
+          filterable: true,
+        };
+        mockFieldByName.mockReturnValue(mockFilterableField);
+        table.columns[0].name = 'tags';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.sourceField = 'tags';
+        table.columns[0].meta.type = 'string';
+        table.rows[0]['1-1'] = ['tag1', 'tag2', 'tag3'];
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('tags');
+        expect(filter).toHaveLength(1);
+        expect(filter[0]).toEqual(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                should: expect.arrayContaining([
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag1',
+                    }),
+                  }),
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag2',
+                    }),
+                  }),
+                  expect.objectContaining({
+                    match_phrase: expect.objectContaining({
+                      tags: 'tag3',
+                    }),
+                  }),
+                ]),
+              }),
+            }),
+          })
+        );
+      });
+    });
   });
 
   describe('appendFilterToESQLQueryFromValueClickAction', () => {
@@ -323,6 +490,55 @@ AND \`columnB\` == "2048"`);
 
       expect(queryString).toEqual(`from meow
 | WHERE \`columnA\` != "2048"`);
+    });
+
+    describe('null value handling', () => {
+      beforeEach(() => {
+        dataPoints = [
+          {
+            table: {
+              columns: [
+                {
+                  name: 'columnA',
+                  id: 'columnA',
+                  meta: {
+                    type: 'string',
+                  },
+                },
+              ],
+              rows: [
+                {
+                  columnA: null,
+                },
+              ],
+            },
+            column: 0,
+            row: 0,
+            value: 'test',
+          },
+        ];
+      });
+
+      test('should filter for null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is null`);
+      });
+
+      test('should filter out null values', () => {
+        const queryString = appendFilterToESQLQueryFromValueClickAction({
+          data: dataPoints,
+          query: { esql: 'from meow' },
+          negate: true,
+        });
+
+        expect(queryString).toEqual(`from meow
+| WHERE \`columnA\` is not null`);
+      });
     });
   });
 });

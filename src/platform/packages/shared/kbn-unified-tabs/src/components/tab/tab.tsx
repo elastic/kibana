@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MouseEvent, KeyboardEvent } from 'react';
+import type { MouseEvent, KeyboardEvent, CSSProperties } from 'react';
 import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -38,8 +38,11 @@ import { useTabLabelWidth } from './use_tab_label_width';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  selectedItemId?: string;
   isUnsaved?: boolean;
   isDragging?: boolean;
+  hideRightSeparator?: boolean;
+  onHoverChange?: (itemId: string, isHovered: boolean) => void;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
@@ -67,8 +70,11 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    selectedItemId,
     isUnsaved,
     isDragging,
+    hideRightSeparator,
+    onHoverChange,
     dragHandleProps,
     tabContentId,
     tabsSizeConfig,
@@ -89,6 +95,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
+  const prevSelectedItemIdRef = useRef<string | undefined>(selectedItemId);
   const previewData = useMemo(() => getPreviewData?.(item), [getPreviewData, item]);
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
@@ -177,9 +184,12 @@ export const Tab: React.FC<TabProps> = (props) => {
     [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
 
+  const fontWeight = isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
+
   const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
     item,
     tabsSizeConfig,
+    fontWeight,
   });
 
   useEffect(() => {
@@ -188,8 +198,18 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
+  // dismisses action popover when the selected tab changes
+  useEffect(() => {
+    if (prevSelectedItemIdRef.current !== selectedItemId && !isSelected && isActionPopoverOpen) {
+      setActionPopover(false);
+    }
+    prevSelectedItemIdRef.current = selectedItemId;
+  }, [selectedItemId, isSelected, isActionPopoverOpen]);
+
+  const isLoading = previewData?.status === TabStatus.RUNNING;
+
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, fontWeight, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -200,6 +220,12 @@ export const Tab: React.FC<TabProps> = (props) => {
         tabIndex={isSelected ? 0 : -1}
         aria-haspopup={!isInlineEditActive}
         aria-selected={isSelected}
+        css={css`
+          &:focus,
+          &:focus-visible {
+            outline: none;
+          }
+        `}
         onClick={isInlineEditActive ? undefined : onClick}
         onDoubleClick={isInlineEditActive ? undefined : onDoubleClick}
         onKeyDown={isInlineEditActive ? undefined : onKeyDownEvent}
@@ -216,8 +242,20 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {previewData?.status === TabStatus.RUNNING && (
-                <EuiProgress size="xs" color="accent" position="absolute" />
+              {isLoading && (
+                <EuiProgress
+                  size="xs"
+                  color="primary"
+                  position="absolute"
+                  css={css`
+                    // Pull the bar up by the tab's top border width so it sits on top of the
+                    // border edge instead of below it.
+                    top: -${euiTheme.border.width.thick};
+                    // we can't simply use overflow: hidden; because then curved notches are not visible
+                    border-top-left-radius: ${euiTheme.border.radius.small};
+                    border-top-right-radius: ${euiTheme.border.radius.small};
+                  `}
+                />
               )}
               <EuiFlexGroup
                 ref={tabLabelRef}
@@ -226,7 +264,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                 justifyContent="spaceBetween"
                 wrap={false}
                 responsive={false}
-                style={{ width: tabLabelWidth }}
+                style={{ width: tabLabelWidth, fontWeight }}
               >
                 <EuiText
                   id={tabLabelId}
@@ -264,6 +302,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                     item={item}
                     getTabMenuItems={getTabMenuItems}
                     isPopoverOpen={isActionPopoverOpen}
+                    isSelected={isSelected}
                     setPopover={onToggleActionsMenu}
                     onEnterRenaming={onEnterRenaming}
                   />
@@ -273,14 +312,14 @@ export const Tab: React.FC<TabProps> = (props) => {
             )}
             {!disableCloseButton && !!onClose && (
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                <EuiToolTip content={closeButtonLabel}>
+                <EuiToolTip content={closeButtonLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
+                    aria-label={closeButtonLabel}
                     color="text"
                     data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
                     iconType="cross"
                     onClick={onCloseEvent}
+                    tabIndex={isSelected ? 0 : -1}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -296,7 +335,11 @@ export const Tab: React.FC<TabProps> = (props) => {
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
       isDragging={isDragging}
+      isLoading={isLoading}
+      hideRightSeparator={hideRightSeparator}
       services={services}
+      onMouseEnter={() => onHoverChange?.(item.id, true)}
+      onMouseLeave={() => onHoverChange?.(item.id, false)}
     >
       {mainTabContent}
     </TabWithBackground>
@@ -323,6 +366,7 @@ function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
   isSelected: boolean,
+  fontWeight: CSSProperties['fontWeight'],
   isDragging?: boolean
 ) {
   // TODO: remove the usage of deprecated colors
@@ -334,7 +378,7 @@ function getTabContainerCss(
 
     .unifiedTabs__tabActions {
       position: absolute;
-      top: ${euiTheme.size.xs};
+      top: ${euiTheme.size.s};
       right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
@@ -342,11 +386,20 @@ function getTabContainerCss(
 
     .unifiedTabs__tabLabelText {
       color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
+      font-weight: ${fontWeight};
     }
 
     &:hover .unifiedTabs__tabLabelText {
       color: ${euiTheme.colors.text};
     }
+
+    ${!isSelected
+      ? `
+      &:hover .unifiedTabs__tabLabelText {
+        color: ${euiTheme.colors.primary};
+      }
+    `
+      : ''}
 
     &:hover,
     &:focus-within {
@@ -371,7 +424,7 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
     display: inline-flex;
     align-items: center;
     width: 100%;
-    height: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xxl};
     padding-inline: ${euiTheme.size.xs};
   `;
 }

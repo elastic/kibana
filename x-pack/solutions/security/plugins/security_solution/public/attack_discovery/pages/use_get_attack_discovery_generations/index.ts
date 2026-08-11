@@ -6,11 +6,7 @@
  */
 
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import {
-  API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATIONS,
-  ATTACK_DISCOVERY_GENERATIONS_INTERNAL,
-} from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
 import type {
   GetAttackDiscoveryGenerationsRequestQuery,
   GetAttackDiscoveryGenerationsResponse,
@@ -18,7 +14,6 @@ import type {
 import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -46,11 +41,11 @@ export const useGetAttackDiscoveryGenerations = ({
   end,
   http,
   isAssistantEnabled,
+  scheduled,
   size,
   start,
   refetchOnWindowFocus = false,
 }: Props): UseGetAttackDiscoveryGenerations => {
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
   const { addError } = useAppToasts();
   const abortController = useRef(new AbortController());
 
@@ -60,32 +55,26 @@ export const useGetAttackDiscoveryGenerations = ({
   }, []);
 
   const queryFn = useCallback(async () => {
-    const route = attackDiscoveryPublicApiEnabled
-      ? ATTACK_DISCOVERY_GENERATIONS
-      : ATTACK_DISCOVERY_GENERATIONS_INTERNAL;
+    const response = await http.fetch<GetAttackDiscoveryGenerationsResponse>(
+      ATTACK_DISCOVERY_GENERATIONS,
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          end,
+          scheduled,
+          size,
+          start,
+        },
+        signal: abortController.current.signal,
+      }
+    );
 
-    const version = attackDiscoveryPublicApiEnabled
-      ? API_VERSIONS.public.v1
-      : API_VERSIONS.internal.v1;
-
-    return http.fetch<GetAttackDiscoveryGenerationsResponse>(route, {
-      method: 'GET',
-      version,
-      query: {
-        end,
-        size,
-        start,
-      },
-      signal: abortController.current.signal,
-    });
-  }, [attackDiscoveryPublicApiEnabled, end, http, size, start]);
-
-  const routeKey = attackDiscoveryPublicApiEnabled
-    ? ATTACK_DISCOVERY_GENERATIONS
-    : ATTACK_DISCOVERY_GENERATIONS_INTERNAL;
+    return response;
+  }, [end, http, scheduled, size, start]);
 
   const { data, error, isLoading, refetch, status } = useQuery(
-    ['GET', routeKey, end, isAssistantEnabled, size, start],
+    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, scheduled, size, start],
     queryFn,
     {
       enabled: isAssistantEnabled,
@@ -115,15 +104,10 @@ export const useGetAttackDiscoveryGenerations = ({
  */
 export const useInvalidateGetAttackDiscoveryGenerations = () => {
   const queryClient = useQueryClient();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   return useCallback(() => {
-    const routeKey = attackDiscoveryPublicApiEnabled
-      ? ATTACK_DISCOVERY_GENERATIONS
-      : ATTACK_DISCOVERY_GENERATIONS_INTERNAL;
-
-    queryClient.invalidateQueries(['GET', routeKey], {
+    queryClient.invalidateQueries(['GET', ATTACK_DISCOVERY_GENERATIONS], {
       refetchType: 'all',
     });
-  }, [queryClient, attackDiscoveryPublicApiEnabled]);
+  }, [queryClient]);
 };

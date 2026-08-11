@@ -12,6 +12,7 @@ export type WritableData = string | NodeJS.ArrayBufferView;
 export interface ArchiveMetadata {
   commitSha: string;
   prNumber?: string | null;
+  fileHashes?: Record<string, string>;
 }
 
 export interface PullRequestArchiveMetadata {

@@ -12,6 +12,9 @@
     "@kbn/es-query",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/slo-schema",
+    "@kbn/unified-doc-viewer",
+    "@kbn/core-execution-context-common",
   ]
 }

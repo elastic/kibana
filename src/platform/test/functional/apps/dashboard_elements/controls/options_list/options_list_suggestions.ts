@@ -7,39 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
+export default function ({ getPageObjects }: FtrProviderContext) {
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
-  const { dashboardControls, dashboard, header } = getPageObjects([
-    'dashboardControls',
-    'dashboard',
-    'header',
-  ]);
-
+  /**
+   * Purpose: Suggestions smoke test
+   *
+   * Migration: See if can be broken into unit tests and API tests
+   */
   describe('Dashboard options list suggestions', () => {
     let controlId: string;
 
     before(async () => {
-      await dashboard.ensureDashboardIsInEditMode();
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'animals-*',
-        fieldName: 'sound.keyword',
-      });
+      await dashboard.loadDashboardInEditMode('Test Options List Control');
       controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboard.clickQuickSave();
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await dashboardControls.deleteAllControls();
-      await dashboard.clickQuickSave();
+      await dashboard.clickDiscardChanges();
     });
 
     describe('sorting', () => {
@@ -110,12 +100,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('non-default sort value should cause unsaved changes', async () => {
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('returning to default sort value should remove unsaved changes', async () => {
         await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('can sort numeric options lists suggestions', async () => {
@@ -135,6 +125,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('searching', () => {
+      it('wildcard searching works as expected', async () => {
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('r');
+        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+          (result, [key, docCount]) => {
+            if (key.includes('r')) return { ...result, [key]: docCount };
+            return { ...result };
+          },
+          {}
+        );
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          {
+            suggestions: containsR,
+            invalidSelections: [],
+          },
+          true
+        );
+        await dashboardControls.optionsListPopoverClearSearch();
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+
+      it('prefix searching causes unsaved changes', async () => {
+        await dashboardControls.editExistingControl(controlId);
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.controlEditorSave();
+        await dashboard.ensureHasUnsavedChangesNotification();
+      });
+
       it('prefix searching works as expected', async () => {
         await dashboardControls.optionsListOpenPopover(controlId);
         await dashboardControls.optionsListPopoverSearchForOption('G');
@@ -150,35 +169,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           controlId,
           {
             suggestions: startsWithG,
-            invalidSelections: [],
-          },
-          true
-        );
-        await dashboardControls.optionsListPopoverClearSearch();
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
-      });
-
-      it('wildcard searching causes unsaved changes', async () => {
-        await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
-        await dashboardControls.controlEditorSave();
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-      });
-
-      it('wildcard searching works as expected', async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverSearchForOption('r');
-        const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
-          (result, [key, docCount]) => {
-            if (key.includes('r')) return { ...result, [key]: docCount };
-            return { ...result };
-          },
-          {}
-        );
-        await dashboardControls.ensureAvailableOptionsEqual(
-          controlId,
-          {
-            suggestions: containsR,
             invalidSelections: [],
           },
           true
@@ -204,9 +194,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('returning to default search technique should remove unsaved changes', async () => {
         await dashboardControls.editExistingControl(controlId);
-        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+        await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
         await dashboardControls.controlEditorSave();
-        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureMissingUnsavedChangesNotification();
       });
 
       it('can search numeric options list', async () => {

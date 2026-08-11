@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
-import { ENABLE_ESQL_RISK_SCORING } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
@@ -16,7 +16,6 @@ import type {
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculationResults } from './calculate_and_persist_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
@@ -28,6 +27,7 @@ import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { ResetToZeroDependencies } from './reset_to_zero';
 import { resetToZero } from './reset_to_zero';
 import { createPrivilegedUsersCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+import { getIsIdBasedRiskScoringEnabled } from './is_id_based_risk_scoring_enabled';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -58,6 +58,7 @@ export interface RiskScoreServiceFactoryParams {
   refresh?: 'wait_for';
   experimentalFeatures: ExperimentalFeatures;
   uiSettingsClient: IUiSettingsClient;
+  crudClient?: EntityStoreCRUDClient;
 }
 
 export const riskScoreServiceFactory = ({
@@ -69,6 +70,7 @@ export const riskScoreServiceFactory = ({
   spaceId,
   experimentalFeatures,
   uiSettingsClient,
+  crudClient,
 }: RiskScoreServiceFactoryParams): RiskScoreService => {
   const privmonUserCrudService = createPrivilegedUsersCrudService({
     index: getPrivilegedMonitorUsersIndex(spaceId),
@@ -77,14 +79,7 @@ export const riskScoreServiceFactory = ({
   });
   return {
     calculateScores: async (params) => {
-      const isESQLRiskScoringAdvancedSettingEnabled = await uiSettingsClient.get<boolean>(
-        ENABLE_ESQL_RISK_SCORING
-      );
-      const calculate =
-        !experimentalFeatures.disableESQLRiskScoring && isESQLRiskScoringAdvancedSettingEnabled
-          ? calculateScoresWithESQL
-          : calculateRiskScores;
-      return calculate({
+      return calculateScoresWithESQL({
         ...params,
         assetCriticalityService,
         privmonUserCrudService,
@@ -114,7 +109,8 @@ export const riskScoreServiceFactory = ({
 
       const alertSampleSizePerShard =
         savedObjectConfig.alertSampleSizePerShard ??
-        entityAnalyticsConfig.riskEngine.alertSampleSizePerShard;
+        entityAnalyticsConfig?.riskEngine?.alertSampleSizePerShard ??
+        10000;
 
       return {
         ...savedObjectConfig,
@@ -124,13 +120,18 @@ export const riskScoreServiceFactory = ({
     resetToZero: async (
       deps: Pick<ResetToZeroDependencies, 'refresh' | 'entityType' | 'excludedEntities'>
     ) => {
+      const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
       const results = await resetToZero({
         ...deps,
+        idBasedRiskScoringEnabled,
         esClient,
         dataClient: riskScoreDataClient,
         spaceId,
         assetCriticalityService,
+        privmonUserCrudService,
+        experimentalFeatures,
         logger,
+        crudClient,
       });
       return results;
     },

@@ -6,10 +6,26 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { z as z4 } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 import type { ActionTypeConfig, ValidatorType } from '../../types';
+import { getAllowedHostsKeysFromShape, validateAllowedHostsKeys } from './allowed_hosts_validation';
 
 export const generateConfigSchema = (
   schema: ConnectorSpec['schema']
-): ValidatorType<ActionTypeConfig> => ({ schema: schema ?? z4.object({}) });
+): ValidatorType<ActionTypeConfig> => {
+  const authType = z.string().optional();
+  const configSchema = schema ? schema.extend({ authType }) : z.object({ authType });
+  const allowedHostsKeys = getAllowedHostsKeysFromShape(configSchema.shape);
+
+  return {
+    schema: configSchema,
+    customValidator: (config, { configurationUtilities }) => {
+      validateAllowedHostsKeys(
+        config as Record<string, unknown>,
+        allowedHostsKeys,
+        configurationUtilities
+      );
+    },
+  };
+};

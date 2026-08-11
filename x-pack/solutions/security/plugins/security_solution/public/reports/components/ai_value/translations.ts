@@ -22,6 +22,13 @@ export const COST_SAVINGS_TREND = i18n.translate(
   }
 );
 
+export const COST_SAVINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavingsTitle',
+  {
+    defaultMessage: 'Cost Savings',
+  }
+);
+
 export const INSIGHTS_ERROR = i18n.translate(
   'xpack.securitySolution.reports.aiValue.insightsError',
   {
@@ -65,13 +72,20 @@ export const ATTACK_DISCOVERY_COUNT = i18n.translate(
 );
 
 export const EXPORT_REPORT = i18n.translate('xpack.securitySolution.reports.aiValue.exportReport', {
-  defaultMessage: 'Export report',
+  defaultMessage: 'Export PDF',
 });
 
 export const FILTERING_RATE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.filteringRate',
   {
     defaultMessage: 'Alert filtering rate',
+  }
+);
+
+export const FILTERING_RATE_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.filteringRateInlineDescription',
+  {
+    defaultMessage: 'alert filtering rate',
   }
 );
 
@@ -107,17 +121,17 @@ export const TIME_SAVED = i18n.translate('xpack.securitySolution.reports.aiValue
   defaultMessage: 'Analyst time saved',
 });
 
-export const TIME_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const TIME_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.timeSavedInlineDescription',
   {
-    defaultMessage: 'Time saved in hours',
+    defaultMessage: 'time saved in hours',
   }
 );
 
-export const COST_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const COST_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavedInlineDescription',
   {
-    defaultMessage: 'Cost saved in dollars',
+    defaultMessage: 'cost saved in dollars',
   }
 );
 
@@ -166,9 +180,49 @@ export const FILTERED_ALERTS_2 = i18n.translate('xpack.securitySolution.aiValue.
     ' were automatically filtered out by AI, meaning analysts didn’t have to review them manually. This drastically cuts down noise and routine triage work',
 });
 
+export const FILTERED_ALERTS_2_NONE = i18n.translate(
+  'xpack.securitySolution.aiValue.filteredAlerts2None',
+  {
+    defaultMessage:
+      ' were automatically filtered out by AI, meaning analysts reviewed no alerts manually.',
+  }
+);
+
+export const FILTERED_ALERTS_2_ALL = i18n.translate(
+  'xpack.securitySolution.aiValue.filteredAlerts2All',
+  {
+    defaultMessage:
+      ' were automatically filtered out by AI, meaning analysts reviewed all alerts manually.',
+  }
+);
+
 export const ESCALATED_ALERTS_1 = ({ percentage, count }: { percentage: string; count: string }) =>
   i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1', {
     defaultMessage: 'Focused escalations: Only {percentage} of alerts ({count})',
+    values: { percentage, count },
+  });
+
+export const ESCALATED_ALERTS_1_ALL = ({
+  percentage,
+  count,
+}: {
+  percentage: string;
+  count: string;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1All', {
+    defaultMessage: 'Focused escalations: {percentage} of alerts ({count})',
+    values: { percentage, count },
+  });
+
+export const ESCALATED_ALERTS_1_NONE = ({
+  percentage,
+  count,
+}: {
+  percentage: string;
+  count: string;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1None', {
+    defaultMessage: 'Focused escalations: {percentage} of alerts ({count})',
     values: { percentage, count },
   });
 
@@ -177,6 +231,22 @@ export const ESCALATED_ALERTS_2 = i18n.translate(
   {
     defaultMessage:
       ' were escalated for analyst review — highlighting that Elastic’s Attack Discovery surfaces only the alerts that matter and are more likely tied to actual threats',
+  }
+);
+
+export const ESCALATED_ALERTS_2_ALL = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedAlerts2All',
+  {
+    defaultMessage:
+      ' were escalated for analyst review — indicating that Elastic’s Attack Discovery surfaced all alerts for investigation in this period',
+  }
+);
+
+export const ESCALATED_ALERTS_2_NONE = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedAlerts2None',
+  {
+    defaultMessage:
+      ' were escalated for analyst review — indicating that Elastic’s Attack Discovery did not escalate any alerts in this period',
   }
 );
 export const AI_FILTERED = i18n.translate('xpack.securitySolution.reports.aiValue.aiFiltered', {
@@ -206,6 +276,13 @@ export const COST_CALCULATION = ({
 export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValue.changeRate', {
   defaultMessage: 'Change rate in advanced settings',
 });
+
+export const CHANGE_RATE_EXPORT_MODE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.exportMode.changeRate',
+  {
+    defaultMessage: 'Value report rates configured in advanced settings.',
+  }
+);
 
 export const EDIT_TITLE = i18n.translate('xpack.securitySolution.reports.aiValue.editTitle', {
   defaultMessage: 'Edit title inline',
@@ -265,5 +342,74 @@ export const EXECUTIVE_SUMMARY_SECONDARY_TEXT = i18n.translate(
   {
     defaultMessage:
       'By reducing the manual burden of high-volume alert review, the AI SOC enhances efficiency, lowers operational costs, and enables teams to focus on higher-value security work. At the same time, it increases threat detection coverage — helping organizations respond faster, with fewer resources.',
+  }
+);
+
+export const TOTAL_ALERTS_PROCESSED = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
+  {
+    defaultMessage: 'Total alerts processed',
+  }
+);
+
+export const SAMPLE_DATA_BADGE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleDataBadge',
+  {
+    defaultMessage: 'Sample data',
+  }
+);
+
+export const SAMPLE_REPORT_DATE_PICKER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.sampleReportDatePickerDisabledTooltip',
+  {
+    defaultMessage: 'Disabled for sample report',
+  }
+);
+
+export const WHAT_REPORT_WILL_LOOK_LIKE_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.whatReportWillLookLike',
+  {
+    defaultMessage: 'What your report will look like',
+  }
+);
+
+export const RUN_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.runAttackDiscoveryText',
+  {
+    defaultMessage: 'Run Attack Discovery to unlock your report',
+  }
+);
+
+export const GET_STARTED_ATTACK_DISCOVERY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.getStartedAttackDiscoveryText',
+  {
+    defaultMessage:
+      "Value Reports show how much time and money Elastic's AI SOC saves your team. Run your first Attack Discovery to populate savings, time reclaimed, and threat findings.",
+  }
+);
+
+export const ATTACK_DISCOVERY_LINK = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.attackDiscoveryLink',
+  {
+    defaultMessage: 'Go to Attack discovery',
+  }
+);
+
+export const ATTACKS_LINK = i18n.translate('xpack.securitySolution.reports.aiValue.attacksLink', {
+  defaultMessage: 'Go to Attacks',
+});
+
+export const NO_RESULTS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateTitle',
+  {
+    defaultMessage: 'No results for the selected time range',
+  }
+);
+
+export const NO_RESULTS_BODY = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateBody',
+  {
+    defaultMessage:
+      'Adjust the time range in the top bar to see available results for the Value Report.',
   }
 );

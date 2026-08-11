@@ -6,10 +6,8 @@
  */
 
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
-import {
-  OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
-  observabilityAlertFeatureIds,
-} from '../../../../common/constants';
+import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { observabilityAlertFeatureIds } from '../../../../common/constants';
 import type { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../../utils/kibana_react';
 import { getBuildRelatedAlertsQuery } from './related_alerts/get_build_related_alerts_query';

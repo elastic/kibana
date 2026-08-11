@@ -33,17 +33,17 @@ describe('ConvertToLookupIndexModal', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the modal correctly and populate it with default values', () => {
+  it('should render the modal correctly and populate it with default values', async () => {
     const { getByTestId } = renderModal();
 
     // Check if the modal is rendered
     expect(getByTestId('convertToLookupIndexModal')).toBeInTheDocument();
 
-    // Check if the source index name is populated
-    expect(getByTestId('sourceIndexName')).toHaveValue('my-index');
-
-    // Check if the lookup index name is populated
-    expect(getByTestId('lookupIndexName')).toHaveValue('lookup-my-index');
+    // Form state/validation can update asynchronously; wait for the inputs to settle.
+    await waitFor(() => {
+      expect(getByTestId('sourceIndexName')).toHaveValue('my-index');
+      expect(getByTestId('lookupIndexName')).toHaveValue('lookup-my-index');
+    });
   });
 
   it('should display an error and disable the convert button when the lookup index name input is empty', async () => {
@@ -59,20 +59,23 @@ describe('ConvertToLookupIndexModal', () => {
     expect(getByTestId('convertButton')).toBeDisabled();
   });
 
-  it('should enable the convert button when lookup index name', () => {
+  it('should enable the convert button when lookup index name', async () => {
     const { getByTestId } = renderModal();
 
     // Clear the lookup index name input
     fireEvent.change(getByTestId('lookupIndexName'), { target: { value: '' } });
 
-    // Check if the convert button is disabled
-    expect(getByTestId('convertButton')).toBeDisabled();
+    // Validation state updates asynchronously via hook form lib.
+    await waitFor(() => {
+      expect(getByTestId('convertButton')).toBeDisabled();
+    });
 
     // Provide lookup index name
     fireEvent.change(getByTestId('lookupIndexName'), { target: { value: 'lookup-my-index' } });
 
-    // Check if the convert button is disabled
-    expect(getByTestId('convertButton')).toBeEnabled();
+    await waitFor(() => {
+      expect(getByTestId('convertButton')).toBeEnabled();
+    });
   });
 
   it('should call onCloseModal when the cancel button is clicked', () => {

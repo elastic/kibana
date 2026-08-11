@@ -8,9 +8,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
-import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,6 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
+  parseRuleCircuitBreakerErrorMessage,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
@@ -32,8 +38,10 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
   getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import type {
   BulkEditActions,
   Pagination,
@@ -70,10 +78,9 @@ import { runRule } from '../../../lib/run_rule';
 import { ALERT_STATUS_LICENSE_ERROR, getConfirmDeletionModalWarningText } from '../translations';
 import { BulkSnoozeModalWithApi as BulkSnoozeModal } from './bulk_snooze_modal';
 import { BulkSnoozeScheduleModalWithApi as BulkSnoozeScheduleModal } from './bulk_snooze_schedule_modal';
-import { CreateRuleButton } from './create_rule_button';
 import { ManageLicenseModal } from './manage_license_modal';
 import { RulesListClearRuleFilterBanner } from './rules_list_clear_rule_filter_banner';
-import { RulesListDocLink } from './rules_list_doc_link';
+import { RulesListUiamApiKeyBanner } from './rules_list_uiam_api_key_banner';
 import { RulesListPrompts } from './rules_list_prompts';
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 
@@ -83,7 +90,6 @@ import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import {
@@ -118,9 +124,9 @@ export interface RulesListProps {
   onStatusFilterChange?: (status: RuleStatus[]) => void;
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   navigateToEditRuleForm?: (ruleId: string) => void;
+  navigateToCreateRuleForm?: (ruleTypeId: string) => void;
 }
 
 export const percentileFields = {
@@ -161,25 +167,28 @@ export const RulesList = ({
   onStatusFilterChange,
   onTypeFilterChange,
   onRefresh,
-  setHeaderActions,
   navigateToEditRuleForm,
+  navigateToCreateRuleForm,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToApp },
+    application,
     http,
+    cps,
     kibanaFeatures,
     notifications: { toasts },
     ruleTypeRegistry,
     ...startServices
   } = kibanaServices;
 
+  const { capabilities, navigateToApp } = application;
+
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.DISABLED, { application, cps });
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
-  const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -245,6 +254,8 @@ export const RulesList = ({
       searchFilter,
       typeFilter,
     });
+
+  const [inputText, setInputText] = useState<string>(filters.searchText ?? searchFilter ?? '');
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -446,7 +457,11 @@ export const RulesList = ({
   }, [ruleParamFilter]);
 
   useEffect(() => {
-    if (typeof searchFilter === 'string') {
+    if (
+      typeof searchFilter === 'string' &&
+      searchFilter !== filters.searchText &&
+      searchFilter.trim() !== ''
+    ) {
       updateFilters({ filter: 'searchText', value: searchFilter });
     }
   }, [searchFilter]);
@@ -648,33 +663,31 @@ export const RulesList = ({
       const RuleCloned = await cloneRule({ http, ruleId });
       cloneRuleId.current = RuleCloned.id;
       await loadRules();
-    } catch {
+    } catch (error) {
       cloneRuleId.current = null;
       setIsCloningRule(false);
-      toasts.addDanger(
-        i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
-          defaultMessage: 'Unable to clone rule',
-        })
-      );
+
+      const parsedError = parseRuleCircuitBreakerErrorMessage(error.body?.message ?? '');
+      if (!!parsedError.details) {
+        toasts.addDanger({
+          title: parsedError.summary,
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>,
+            startServices
+          ),
+        });
+      } else {
+        toasts.addDanger(
+          i18n.translate('xpack.triggersActionsUI.sections.rulesList.cloneFailed', {
+            defaultMessage: 'Unable to clone rule',
+          })
+        );
+      }
     }
   };
 
   const openRuleTypeModal = useCallback(() => {
     setRuleTypeModalVisibility(true);
-  }, []);
-
-  useEffect(() => {
-    setHeaderActions?.([
-      ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink
-        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-      />,
-      <RulesListDocLink />,
-    ]);
-  }, [authorizedToCreateAnyRules]);
-
-  useEffect(() => {
-    return () => setHeaderActions?.();
   }, []);
 
   const [isDeleteModalFlyoutVisible, setIsDeleteModalVisibility] = useState<boolean>(false);
@@ -762,6 +775,9 @@ export const RulesList = ({
 
   return (
     <>
+      {kibanaServices.isServerless && config.apiKeyType === 'uiam' ? (
+        <RulesListUiamApiKeyBanner />
+      ) : null}
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
@@ -954,11 +970,18 @@ export const RulesList = ({
                   _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
                 return isLicenseError || hasErrorMessage ? (
-                  <EuiButtonIcon
-                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
-                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={itemIdToExpandedRowMap[rule.id] ? 'arrowUp' : 'arrowDown'}
-                  />
+                  <EuiToolTip
+                    content={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                      aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                      iconType={
+                        itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                      }
+                    />
+                  </EuiToolTip>
                 ) : null;
               }}
               renderSelectAllDropdown={() => {
@@ -1018,14 +1041,28 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
+              if (navigateToCreateRuleForm) {
+                navigateToCreateRuleForm(ruleTypeId);
+              } else {
+                navigateToApp('management', {
+                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                });
+              }
+            }}
+            onSelectTemplate={(templateId) => {
+              // For templates, we need to extract the ruleTypeId or handle it differently
+              // For now, fall back to default behavior
               navigateToApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
               });
             }}
             http={http}
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
+            cps={cps}
           />
         )}
       </EuiPageTemplate.Section>

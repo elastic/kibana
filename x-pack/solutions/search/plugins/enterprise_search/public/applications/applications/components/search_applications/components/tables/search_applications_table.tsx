@@ -159,6 +159,9 @@ export const SearchApplicationsListTable: React.FC<SearchApplicationsListTablePr
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('xpack.enterpriseSearch.searchApplications.list.table.caption', {
+        defaultMessage: 'Search applications list',
+      })}
       items={searchApplications}
       columns={columns}
       pagination={{ ...pageToPagination(meta), showPerPageOptions: false }}

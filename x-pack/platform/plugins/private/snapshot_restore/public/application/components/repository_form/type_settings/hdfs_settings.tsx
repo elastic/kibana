@@ -12,10 +12,11 @@ import {
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFormPrepend,
   EuiFormRow,
   EuiSwitch,
-  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { CodeEditor } from '@kbn/code-editor';
@@ -30,12 +31,16 @@ interface Props {
     replaceSettings?: boolean
   ) => void;
   settingErrors: RepositorySettingsValidation;
+  isReadOnlyToggleDisabled?: boolean;
+  readOnlyToggleDisabledTooltipContent?: React.ReactNode;
 }
 
 export const HDFSSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
   settingErrors,
+  isReadOnlyToggleDisabled,
+  readOnlyToggleDisabledTooltipContent,
 }) => {
   const {
     name,
@@ -59,6 +64,28 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
       [settingName]: value,
     });
   };
+
+  const readOnlyTooltipContent = isReadOnlyToggleDisabled
+    ? readOnlyToggleDisabledTooltipContent
+    : undefined;
+  const readOnlySwitchControl = (
+    <EuiSwitch
+      label={
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyLabel"
+          defaultMessage="Read-only repository"
+        />
+      }
+      checked={!!readonly}
+      disabled={Boolean(isReadOnlyToggleDisabled)}
+      onChange={(e) => {
+        updateRepositorySettings({
+          readonly: e.target.checked,
+        });
+      }}
+      data-test-subj="readOnlyToggle"
+    />
+  );
 
   const [additionalConf, setAdditionalConf] = useState<string>(JSON.stringify(rest, null, 2));
   const [isConfInvalid, setIsConfInvalid] = useState<boolean>(false);
@@ -98,12 +125,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         >
           <EuiFieldText
             isInvalid={Boolean(hasErrors && settingErrors.uri)}
-            prepend={
-              <EuiText size="s" id="hdfsRepositoryUriProtocolDescription">
-                {/* Wrap as string due to prettier not parsing `//` inside JSX correctly (prettier/prettier#2347) */}
-                {'hdfs://'}
-              </EuiText>
-            }
+            prepend={<EuiFormPrepend id="hdfsRepositoryUriProtocolPrepend" label={'hdfs://'} />}
             defaultValue={uri ? uri.split('hdfs://')[1] : ''}
             fullWidth
             onChange={(e) => {
@@ -432,21 +454,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           isInvalid={Boolean(hasErrors && settingErrors.readonly)}
           error={settingErrors.readonly}
         >
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyLabel"
-                defaultMessage="Read-only repository"
-              />
-            }
-            checked={!!readonly}
-            onChange={(e) => {
-              updateRepositorySettings({
-                readonly: e.target.checked,
-              });
-            }}
-            data-test-subj="readOnlyToggle"
-          />
+          {readOnlyTooltipContent ? (
+            <EuiToolTip content={readOnlyTooltipContent}>{readOnlySwitchControl}</EuiToolTip>
+          ) : (
+            readOnlySwitchControl
+          )}
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </Fragment>

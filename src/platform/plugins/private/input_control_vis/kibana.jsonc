@@ -17,11 +17,11 @@
       "visDefaultEditor",
       "visualizations",
       "unifiedSearch",
+      "kql",
       "uiActions"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "embeddable"
+      "kibanaReact"
     ]
   }
 }

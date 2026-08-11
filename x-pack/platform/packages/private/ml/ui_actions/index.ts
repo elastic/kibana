@@ -7,13 +7,9 @@
 
 export {
   CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION,
-  CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER,
+  UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
   type CreateCategorizationADJobContext,
+  type UpdateADJobsProjectRoutingContext,
 } from './src/ml/ui_actions';
 
-export {
-  ACTION_CATEGORIZE_FIELD,
-  CATEGORIZE_FIELD_TRIGGER,
-  categorizeFieldTrigger,
-  type CategorizeFieldContext,
-} from './src/aiops/ui_actions';
+export { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from './src/aiops/ui_actions';

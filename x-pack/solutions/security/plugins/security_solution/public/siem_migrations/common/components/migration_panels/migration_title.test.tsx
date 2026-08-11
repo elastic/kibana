@@ -15,6 +15,7 @@ import { useDeleteMigration } from '../../hooks/use_delete_migrations';
 import type { RuleMigrationStats } from '../../../rules/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { MigrationSource } from '../../types';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -31,6 +32,7 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
+  vendor: MigrationSource.SPLUNK,
 };
 
 const mockMigrationStatsRunning: RuleMigrationStats = {
@@ -119,7 +121,7 @@ describe('MigrationPanelTitle', () => {
   });
 
   describe('Rename functionality', () => {
-    it('should enter edit mode when rename is clicked', () => {
+    it('should enter edit mode when rename is clicked', async () => {
       renderMigrationPanelTitle(mockMigrationStatsReady);
 
       const optionsButton = screen.getByTestId('openMigrationOptionsButton');
@@ -128,7 +130,9 @@ describe('MigrationPanelTitle', () => {
       const renameButton = screen.getByTestId('renameMigrationItem');
       fireEvent.click(renameButton);
 
-      expect(screen.getByLabelText('Migration name')).toBeInTheDocument();
+      const input = screen.getByLabelText('Migration name');
+      expect(input).toBeInTheDocument();
+      await waitFor(() => expect(input).toHaveFocus());
     });
 
     it('should save new name when edit is confirmed', async () => {

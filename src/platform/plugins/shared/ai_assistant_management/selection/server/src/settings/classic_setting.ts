@@ -17,17 +17,17 @@ import {
   OBSERVABILITY_IN_OTHER_APPS,
   SECURITY_IN_OTHER_APPS,
   HIDE_ALL_ASSISTANTS,
-  TITLE,
+  AI_ASSISTANT_VISIBILITY_TITLE,
 } from './translations';
 
 // Define the classicSetting with proper typing
 export const classicSetting: Omit<UiSettingsParams<AIAssistantType>, 'value'> = {
-  name: TITLE,
+  name: AI_ASSISTANT_VISIBILITY_TITLE,
   description: i18n.translate(
     'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
     {
       defaultMessage:
-        'Choose where and which AI Assistants are available. You can limit the AI Assistants to their own solutions, show either the Observability and Search AI Assistants or the Security AI Assistant in other Kibana apps, or hide AI Assistants entirely.',
+        'Configure AI Assistant availability for each solution. You can make them appear only in their own solutions, make a specific one appear throughout Kibana, or hide them completely.',
     }
   ),
   schema: schema.oneOf(

@@ -10,8 +10,9 @@ import React, { useEffect, useState } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibana } from '../../hooks/use_kibana';
 
-export interface TourCalloutProps
+interface TourCalloutBaseProps
   extends Pick<
     EuiTourStepProps,
     | 'title'
@@ -21,17 +22,26 @@ export interface TourCalloutProps
     | 'anchorPosition'
     | 'minWidth'
     | 'maxWidth'
-    | 'footerAction'
     | 'hasArrow'
     | 'subtitle'
     | 'maxWidth'
   > {
   children: ReactElement;
   isOpen?: boolean;
-  footerButtonLabel: string;
+  footerButtonLabel?: string;
   zIndex?: number;
   dismissTour?: () => void;
 }
+
+export type TourCalloutProps =
+  | (TourCalloutBaseProps & {
+      footerAction?: undefined;
+      footerButtonLabel: string;
+    })
+  | (TourCalloutBaseProps & {
+      footerAction: EuiTourStepProps['footerAction'];
+      footerButtonLabel?: string;
+    });
 
 export const TourCallout = ({
   title,
@@ -47,8 +57,12 @@ export const TourCallout = ({
   footerButtonLabel,
   zIndex,
   dismissTour,
+  footerAction,
   ...rest
 }: TourCalloutProps) => {
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
+
   const [isStepOpen, setIsStepOpen] = useState<boolean>(false);
 
   const handleFinish = () => {
@@ -76,13 +90,15 @@ export const TourCallout = ({
     };
   }, [isOpen]);
 
+  if (!isTourEnabled) return <>{children}</>;
+
   return (
     <EuiTourStep
       title={title}
       subtitle={subtitle}
       content={
         <EuiText
-          size="m"
+          size="s"
           css={css`
             line-height: 1.5;
           `}
@@ -100,9 +116,11 @@ export const TourCallout = ({
       maxWidth={maxWidth}
       zIndex={zIndex}
       footerAction={
-        <EuiButtonEmpty size="s" color="text" onClick={handleFinish}>
-          {footerButtonLabel}
-        </EuiButtonEmpty>
+        footerAction ?? (
+          <EuiButtonEmpty size="s" color="text" onClick={handleFinish}>
+            {footerButtonLabel}
+          </EuiButtonEmpty>
+        )
       }
       {...rest}
     >

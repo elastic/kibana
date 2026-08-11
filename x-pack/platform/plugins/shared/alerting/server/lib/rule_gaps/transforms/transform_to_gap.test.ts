@@ -8,6 +8,7 @@
 import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { transformToGap } from './transform_to_gap';
 import { Gap } from '../gap';
+import { gapReasonType } from '../../../../common/constants';
 
 describe('transformToGap', () => {
   const timestamp = '2023-01-01T00:00:00.000Z';
@@ -207,5 +208,156 @@ describe('transformToGap', () => {
     });
     const result = transformToGap(events);
     expect(result).toHaveLength(0);
+  });
+
+  describe('failed_auto_fill_attempts', () => {
+    it('should set failedAutoFillAttempts to 0 when gap field is not present', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should correctly set failedAutoFillAttempts when gap field is 0', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: 0,
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+
+    it('should correctly set failedAutoFillAttempts when value is positive', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: 5,
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(5);
+    });
+
+    it('should default to 0 when failed_auto_fill_attempts is not a number', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              failed_auto_fill_attempts: '5', // invalid type
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result[0].failedAutoFillAttempts).toBe(0);
+    });
+  });
+
+  describe('reason', () => {
+    it('should set reason to RULE_DISABLED when type is rule_disabled', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              reason: { type: gapReasonType.RULE_DISABLED },
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].reason).toEqual({ type: gapReasonType.RULE_DISABLED });
+    });
+
+    it('should set reason to RULE_DID_NOT_RUN when type is rule_did_not_run', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              reason: { type: gapReasonType.RULE_DID_NOT_RUN },
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    it('should default to RULE_DID_NOT_RUN when reason is undefined', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
+
+    it('should default to RULE_DID_NOT_RUN when reason type is invalid', () => {
+      const events = createMockEvent({
+        alert: {
+          rule: {
+            gap: {
+              range: validInterval,
+              filled_intervals: [validInterval],
+              in_progress_intervals: [validInterval],
+              reason: { type: 'invalid_reason' },
+            },
+          },
+        },
+      });
+      const result = transformToGap(events);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].reason).toEqual({ type: gapReasonType.RULE_DID_NOT_RUN });
+    });
   });
 });

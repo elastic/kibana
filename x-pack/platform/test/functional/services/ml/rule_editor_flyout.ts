@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   return {
     async assertExists() {
@@ -17,6 +18,10 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
 
     async assertNotExists() {
       await testSubjects.missingOrFail('mlRuleEditorFlyout');
+    },
+
+    async dismissToasts() {
+      await toasts.dismissAllWithChecks();
     },
 
     async enableScope() {
@@ -39,11 +44,20 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
       await testSubjects.click('mlRuleEditorSaveButton');
     },
 
-    async closeIfOpen() {
-      if (await testSubjects.exists('euiFlyoutCloseButton')) {
-        await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('mlRuleEditorFlyout');
-      }
+    async selectFilter(scopeFieldName: string) {
+      await testSubjects.click(`mlScopeCheckbox_${scopeFieldName}`);
+    },
+
+    async deleteRule() {
+      await testSubjects.click('deleteRuleModalLink');
+    },
+
+    async confirmModalConfirmButton() {
+      await testSubjects.click('confirmModalConfirmButton');
+    },
+
+    async assertEditRulesTitleIsVisible() {
+      await testSubjects.existOrFail('mlRuleEditorEditRulesTitle');
     },
   };
 }

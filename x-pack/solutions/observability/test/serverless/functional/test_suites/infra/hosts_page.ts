@@ -73,9 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         after(async () => {
-          await retry.try(async () => {
-            await pageObjects.infraHome.clickCloseFlyoutButton();
-          });
+          await pageObjects.infraHome.closeFlyoutWithEscape();
         });
 
         describe('Overview Tab', () => {

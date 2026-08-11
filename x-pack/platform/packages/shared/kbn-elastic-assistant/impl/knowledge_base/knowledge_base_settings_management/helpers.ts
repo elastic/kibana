@@ -10,7 +10,7 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { isArray } from 'lodash';
 
 export const isSystemEntry = (

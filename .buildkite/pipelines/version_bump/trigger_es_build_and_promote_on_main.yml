@@ -1,0 +1,55 @@
+steps:
+  - name: mock build es snapshot
+    key: mock-build-es-snapshot
+    if: build.env("DRY_RUN") == "true"
+    command: sleep 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+
+  - name: mock promote es snapshot
+    if: build.env("DRY_RUN") == "true"
+    depends_on: mock-build-es-snapshot
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    command: |
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Mock Promote ES Snapshot trigger'
+          command: sleep 10
+
+      PIPELINE
+
+  - key: build-es-snapshot
+    label: Build ES Snapshot
+    trigger: kibana-elasticsearch-snapshot-build
+    async: false
+    if: build.env("DRY_RUN") != "true"
+    build:
+      branch: main
+      env:
+        PARENT_TRIGGER_JOB_ID: '${BUILDKITE_JOB_ID}'
+
+  - key: promote-es-snapshot
+    label: 'Upload promote step'
+    depends_on: build-es-snapshot
+    if: build.env("DRY_RUN") != "true"
+    command: |
+      ES_SNAPSHOT_MANIFEST="$(buildkite-agent meta-data get es_snapshot_manifest)"
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - label: 'Promote ES Snapshot'
+          trigger: kibana-elasticsearch-snapshot-promote
+          async: false
+          build:
+            branch: 'main'
+            env:
+              ES_SNAPSHOT_MANIFEST: '$${ES_SNAPSHOT_MANIFEST}'
+      PIPELINE

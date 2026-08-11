@@ -13,9 +13,10 @@ import type {
   OpenFileUploadLiteContext,
   ResultLinks,
 } from '@kbn/file-upload-common';
-import { FileUploadManager, useFileUpload, FileUploadContext } from '../../..';
+import { FileUploadManager } from '../../../file_upload_manager';
 import { FileUploadLiteView } from './file_upload_lite_view';
 import type { FileUploadStartDependencies } from '../kibana_context';
+import { useFileUpload, FileUploadContext } from '../../use_file_upload';
 
 export interface Props {
   dependencies: FileUploadStartDependencies;
@@ -51,6 +52,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
           fileUpload,
           http: dependencies.http,
           notifications: dependencies.notifications,
+          capabilities: application.capabilities,
         },
         autoAddInference ?? null,
         autoCreateDataView,
@@ -70,6 +72,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
       fileUpload,
       indexSettings,
       location,
+      application.capabilities,
     ]
   );
 

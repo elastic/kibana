@@ -26,12 +26,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { useTrainedModelsApiService } from '../../../../services/ml_api_service/trained_models';
 import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_service/data_frame_analytics';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
 import { useMlApi } from '../../../../contexts/kibana';
-import type { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
 
 export interface AnalyticsSelectorIds {
   model_id?: string;
@@ -243,6 +243,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.jobsTableCaption', {
+            defaultMessage: 'Analytics jobs available for selection',
+          })}
         />
       ),
     },
@@ -263,6 +266,9 @@ export function AnalyticsIdSelector({
           pagination={pagination}
           sorting={true}
           selection={selectionValue}
+          tableCaption={i18n.translate('xpack.ml.analyticsSelector.modelsTableCaption', {
+            defaultMessage: 'Trained models available for selection',
+          })}
         />
       ),
     });

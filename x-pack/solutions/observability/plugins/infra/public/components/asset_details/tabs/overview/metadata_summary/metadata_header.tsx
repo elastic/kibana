@@ -74,7 +74,21 @@ export const MetadataHeader = ({ metadataValue }: MetadataSummaryProps) => {
           {columnTitles[metadataValue.field as MetadataFields]}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <Popover icon="info" data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton">
+          <Popover
+            icon="info"
+            data-test-subj="infraAssetDetailsMetadataSummaryPopoverButton"
+            aria-label={i18n.translate(
+              'xpack.infra.assetDetails.overview.metadataSummaryPopoverButtonAriaLabel',
+              {
+                defaultMessage: '{fieldName} information',
+                values: {
+                  fieldName:
+                    columnTitles[metadataValue.field as keyof typeof columnTitles] ??
+                    metadataValue.tooltipFieldLabel,
+                },
+              }
+            )}
+          >
             <EuiText size="xs">
               {metadataValue.tooltipLink ? (
                 <FormattedMessage

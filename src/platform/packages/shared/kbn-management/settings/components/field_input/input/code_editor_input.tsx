@@ -57,13 +57,16 @@ export const CodeEditorInput = ({
   const updateValue = useCallback(
     async (newValue: string, onUpdateFn: typeof onUpdate) => {
       let parsedValue;
+      let valueToSave = newValue;
 
       // Validate JSON syntax
       if (field.type === 'json') {
         try {
           const isJsonArray = Array.isArray(JSON.parse(defaultValue || 'null'));
-          parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+          // Normalize empty or whitespace-only strings to the appropriate empty JSON structure
+          parsedValue = newValue.trim() || (isJsonArray ? '[]' : '{}');
           JSON.parse(parsedValue);
+          valueToSave = parsedValue;
         } catch (e) {
           onUpdateFn({
             type: field.type,
@@ -77,7 +80,7 @@ export const CodeEditorInput = ({
         }
       }
 
-      const validationResponse = await validateChange(field.id, parsedValue);
+      const validationResponse = await validateChange(field.id, valueToSave);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({
           type: field.type,
@@ -86,7 +89,7 @@ export const CodeEditorInput = ({
           error: validationResponse.errorMessage,
         });
       } else {
-        onUpdateFn({ type: field.type, unsavedValue: newValue });
+        onUpdateFn({ type: field.type, unsavedValue: valueToSave });
       }
     },
     [validateChange, field.id, field.type, defaultValue]

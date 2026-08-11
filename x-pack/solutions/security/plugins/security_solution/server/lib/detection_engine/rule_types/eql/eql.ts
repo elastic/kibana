@@ -38,6 +38,7 @@ import {
   bulkCreateSuppressedSequencesInMemory,
 } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../utils/get_data_stream_namespace_filter';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
@@ -84,6 +85,10 @@ export const eqlExecutor = async ({
       uiSettingsClient: services.uiSettingsClient,
     });
 
+    const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
+
     const isSequenceQuery = isEqlSequenceQuery(ruleParams.query);
 
     const request = buildEqlSearchRequest({
@@ -92,13 +97,13 @@ export const eqlExecutor = async ({
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
-      filters: [...(ruleParams.filters || []), ...dataTiersFilters],
+      filters: [...(ruleParams.filters || []), ...dataTiersFilters, ...dataStreamNamespaceFilters],
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
     });
 
-    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
+    ruleExecutionLogger.trace(`EQL query to execute\n${JSON.stringify(request)}`);
     const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
@@ -140,6 +145,10 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (events) {
+        // Collect rule execution metrics
+        result.totalEventsFound = events.length;
+        result.alertsCandidateCount = events.length;
+
         if (
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
@@ -157,6 +166,10 @@ export const eqlExecutor = async ({
           newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
         }
       } else if (sequences) {
+        // Collect rule execution metrics
+        result.totalEventsFound = sequences.length;
+        result.alertsCandidateCount = sequences.length;
+
         if (
           isAlertSuppressionActive &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)

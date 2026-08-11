@@ -44,6 +44,7 @@ import type {
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type {
+  AlertFormatter,
   ValidationResult,
   UserConfiguredActionConnector,
   ActionConnector,
@@ -107,10 +108,6 @@ type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
 };
 type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;
 
-type RuleTemplate = Pick<
-  Rule,
-  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
->;
 type ResolvedRule = Omit<
   ResolvedSanitizedRule<RuleTypeParams>,
   'alertTypeId' | 'actions' | 'systemActions'
@@ -177,7 +174,6 @@ export type {
   RuleTagBadgeProps,
   RuleTagFilterProps,
   RuleTaskState,
-  RuleTemplate,
   RuleType,
   RuleTypeIndex,
   RuleTypeMetaData,
@@ -321,6 +317,11 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<any>>;
   isInternallyManaged?: boolean;
+  /**
+   * Optional formatter for alert-level context (reason, deep link URL).
+   * Used to generate "View in App" links for individual alerts.
+   */
+  format?: AlertFormatter;
 }
 
 export interface IErrorObject {

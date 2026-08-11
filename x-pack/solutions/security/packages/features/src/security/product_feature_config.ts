@@ -14,7 +14,7 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     privileges: {
       all: {
         ui: ['entity-analytics'],
-        api: [`${APP_ID}-entity-analytics`],
+        api: [`${APP_ID}-entity-analytics`, `${APP_ID}-entity-analytics-manage`],
       },
       read: {
         ui: ['entity-analytics'],
@@ -22,34 +22,15 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       },
     },
   },
-
-  [ProductFeatureSecurityKey.externalDetections]: {
-    privileges: {
-      all: {
-        ui: ['external_detections'],
-        api: [],
-      },
-      read: {
-        ui: ['external_detections'],
-        api: [],
-      },
-    },
-  },
   [ProductFeatureSecurityKey.detections]: {
     privileges: {
       all: {
         ui: ['detections'],
-        api: [
-          'cloud-security-posture-all',
-          'cloud-security-posture-read',
-          'cloud-defend-all',
-          'cloud-defend-read',
-          'bulkGetUserProfiles',
-        ],
+        api: ['cloud-security-posture-all', 'cloud-security-posture-read', 'bulkGetUserProfiles'],
       },
       read: {
         ui: ['detections'],
-        api: ['cloud-security-posture-read', 'cloud-defend-read', 'bulkGetUserProfiles'],
+        api: ['cloud-security-posture-read', 'bulkGetUserProfiles'],
       },
     },
   },
@@ -115,8 +96,16 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     subFeatureIds: [SecuritySubFeatureId.trustedDevices],
   },
 
+  [ProductFeatureSecurityKey.endpointCustomYaraSignatures]: {
+    subFeatureIds: [SecuritySubFeatureId.customYaraSignatures],
+  },
+
   [ProductFeatureSecurityKey.endpointPolicyManagement]: {
     subFeatureIds: [SecuritySubFeatureId.policyManagement],
+  },
+
+  [ProductFeatureSecurityKey.endpointScriptsManagement]: {
+    subFeatureIds: [SecuritySubFeatureId.scriptsManagement],
   },
 
   // Adds no additional kibana feature controls

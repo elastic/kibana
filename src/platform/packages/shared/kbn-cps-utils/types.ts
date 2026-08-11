@@ -22,6 +22,13 @@ export enum ProjectRoutingAccess {
   EDITABLE = 'editable',
 }
 
+/**
+ * Function that determines the project picker access level for a given location.
+ * Apps register one of these via `registerAppAccess` to control picker behavior
+ * based on runtime conditions (feature flags, config values, route patterns, etc.).
+ */
+export type CPSAppAccessResolver = (location: string) => ProjectRoutingAccess;
+
 export interface CPSProject {
   _id: string;
   _alias: string;
@@ -42,17 +49,20 @@ export interface ProjectsData {
   linkedProjects: CPSProject[];
 }
 
-export interface ProjectPickerAccessInfo {
-  access: ProjectRoutingAccess;
-  readonlyMessage?: string;
-}
-
 export interface ICPSManager {
-  fetchProjects(): Promise<ProjectsData | null>;
-  refresh(): Promise<ProjectsData | null>;
+  whenReady(): Promise<void>;
+  fetchProjects(projectRouting?: ProjectRouting): Promise<ProjectsData | null>;
+  getTotalProjectCount(): number;
+  hasLinkedProjects(): boolean;
   getProjectRouting$(): Observable<ProjectRouting | undefined>;
   setProjectRouting(projectRouting: ProjectRouting | undefined): void;
-  getProjectRouting(): ProjectRouting | undefined;
+  /**
+   * Returns an explicit override value when provided, regardless of picker access mode.
+   * Otherwise resolves routing based on current picker access and CPS state.
+   */
+  getProjectRouting(overrideValue?: ProjectRouting): ProjectRouting | undefined;
   getDefaultProjectRouting(): ProjectRouting;
-  getProjectPickerAccess$(): Observable<ProjectPickerAccessInfo>;
+  updateDefaultProjectRouting(projectRouting?: ProjectRouting): void;
+  getProjectPickerAccess$(): Observable<ProjectRoutingAccess>;
+  registerAppAccess(appId: string, resolver: CPSAppAccessResolver): void;
 }

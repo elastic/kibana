@@ -124,14 +124,15 @@ Object {
 exports[`Metric Custom Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.5",
+    "index": ".slo-observability.sli-v3.6",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",
@@ -273,14 +274,15 @@ Object {
 exports[`Metric Custom Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
   "_meta": Object {
+    "deletion_protected": true,
     "managed": true,
     "managed_by": "observability",
-    "version": 3.5,
+    "version": 3.6,
   },
   "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v3.5",
+    "index": ".slo-observability.sli-v3.6",
     "pipeline": ".slo-observability.sli.pipeline-irrelevant-1",
   },
   "frequency": "1m",

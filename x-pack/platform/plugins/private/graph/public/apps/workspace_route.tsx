@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Workspace } from '../types';
@@ -34,7 +34,7 @@ export const WorkspaceRoute = ({
     capabilities,
     storage,
     data,
-    unifiedSearch,
+    kql,
     getBasePath,
     addBasePath,
     setHeaderActionMenu,
@@ -69,12 +69,12 @@ export const WorkspaceRoute = ({
       appName: 'graph',
       storage,
       data,
-      unifiedSearch,
+      kql,
       savedObjectsManagement,
       contentManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch, savedObjectsManagement, contentManagement]
+    [coreStart, data, storage, kql, savedObjectsManagement, contentManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =

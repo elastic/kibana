@@ -55,14 +55,13 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  it('Assistant message /content and /toolCalls/*/function/arguments', () => {
+  it('Assistant message /content and /toolCalls/*/function/arguments (toolCallId excluded)', () => {
     const msg: Message = {
       role: MessageRole.Assistant,
       content: 'See results',
       toolCalls: [
         {
-          id: 'call-1',
-          type: 'function',
+          toolCallId: 'call-1',
           function: {
             name: 'doThing',
             arguments: 'a@example.com',

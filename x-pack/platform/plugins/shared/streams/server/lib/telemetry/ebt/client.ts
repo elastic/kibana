@@ -6,8 +6,18 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
-import { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT } from './constants';
+import type {
+  StreamEndpointLatencyProps,
+  StreamsStateErrorProps,
+  StreamsProcessingPipelineSuggestedProps,
+  StreamsAgentToolEventCreateProps,
+} from './types';
+import {
+  STREAMS_ENDPOINT_LATENCY_EVENT,
+  STREAMS_STATE_ERROR_EVENT,
+  STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+} from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/processing/_simulate 2023-10-31',
@@ -15,7 +25,6 @@ const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/_fork 2023-10-31',
   'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
   'PUT /api/streams/{name} 2023-10-31',
-  'PUT /api/streams/{name}/_group 2023-10-31',
   'PUT /api/streams/{name}/_ingest 2023-10-31',
   'DELETE /api/streams/{name} 2023-10-31',
   'POST /api/streams/_enable 2023-10-31',
@@ -52,5 +61,13 @@ export class EbtTelemetryClient {
     };
 
     this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
+  }
+
+  public trackProcessingPipelineSuggested(params: StreamsProcessingPipelineSuggestedProps) {
+    this.analytics.reportEvent(STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE, params);
+  }
+
+  public trackAgentToolEventCreate(params: StreamsAgentToolEventCreateProps) {
+    this.analytics.reportEvent(STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params);
   }
 }

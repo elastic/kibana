@@ -9,9 +9,9 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
-  DeleteEntityEngineRequestQuery,
+  DeleteMonitoringEngineRequestQuery,
   type DeleteMonitoringEngineResponse,
 } from '../../../../../common/api/entity_analytics';
 import {
@@ -21,6 +21,7 @@ import {
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createEngineCrudService } from '../engine/crud_service';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const deletePrivilegeMonitoringEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -47,33 +48,35 @@ export const deletePrivilegeMonitoringEngineRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(DeleteEntityEngineRequestQuery),
+            query: buildRouteValidationWithZod(DeleteMonitoringEngineRequestQuery),
           },
         },
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<DeleteMonitoringEngineResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<DeleteMonitoringEngineResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-
-        try {
-          const dataClient = secSol.getPrivilegeMonitoringDataClient();
-          const soClient = dataClient.getScopedSoClient(request);
-          const service = createEngineCrudService(dataClient, soClient);
-          const body = await service.delete(request.query.data);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error deleting privilege monitoring engine: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const dataClient = secSol.getPrivilegeMonitoringDataClient();
+            const soClient = dataClient.getScopedSoClient(request);
+            const service = createEngineCrudService(dataClient, soClient);
+            const body = await service.delete(request.query.data);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error deleting privilege monitoring engine: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

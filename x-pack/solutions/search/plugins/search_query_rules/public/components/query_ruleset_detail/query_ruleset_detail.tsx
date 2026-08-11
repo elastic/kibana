@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiPopover,
   EuiTitle,
+  EuiToolTip,
   EuiTourStep,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -51,7 +52,7 @@ export interface QueryRulesetDetailProps {
 export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMode = false }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application, http, history, overlays },
+    services: { application, http, history, notifications, overlays },
   } = useKibana();
   const { rulesetId = '' } = useParams<{
     rulesetId?: string;
@@ -102,6 +103,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const splitButtonPopoverActionsId = useGeneratedHtmlId({
     prefix: 'splitButtonPopoverActionsId',
   });
+  const isTourEnabled = notifications.tours.isEnabled();
   const TOUR_QUERY_RULES_STORAGE_KEY = 'queryRules.tour';
 
   const tourConfig = {
@@ -205,7 +207,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     createRuleset({
       rulesetId,
       forceWrite: true,
-      rules,
+      rules: unfilteredRules,
     });
   };
 
@@ -240,7 +242,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             {
               text: (
                 <>
-                  <EuiIcon size="s" type="arrowLeft" />{' '}
+                  <EuiIcon size="s" type="chevronSingleLeft" aria-hidden />{' '}
                   {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
                     defaultMessage: 'Back',
                   })}
@@ -256,7 +258,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             },
           ]}
           restrictWidth
-          color="primary"
           data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup
@@ -286,7 +287,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               <EuiFlexItem grow={false}>
                 <EuiTourStep
                   content={<p>{tourStepsInfo[0].content}</p>}
-                  isStepOpen={tourState.isTourActive && tourState.currentTourStep === 1}
+                  isStepOpen={
+                    isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
+                  }
                   minWidth={tourState.tourPopoverWidth}
                   onFinish={finishTour}
                   step={1}
@@ -375,23 +378,42 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.queryRules.queryRulesetDetail.actionsPopover.ariaLabel',
+                      { defaultMessage: 'Ruleset actions' }
+                    )}
                     id={splitButtonPopoverActionsId}
                     button={
-                      <EuiButtonIcon
-                        disabled={createMode || isInitialLoading || rules.length === 0}
-                        data-test-subj="searchQueryRulesQueryRulesetActionsButton"
-                        size="m"
-                        iconType="boxesVertical"
-                        aria-label="More"
-                        onClick={() => setPopoverActions(!isPopoverActionsOpen)}
-                      />
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                          {
+                            defaultMessage: 'More',
+                          }
+                        )}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          disabled={createMode || isInitialLoading || rules.length === 0}
+                          data-test-subj="searchQueryRulesQueryRulesetActionsButton"
+                          size="m"
+                          iconType="boxesVertical"
+                          aria-label={i18n.translate(
+                            'xpack.queryRules.queryRulesetDetail.contextMenuPanel.ariaLabel',
+                            {
+                              defaultMessage: 'More',
+                            }
+                          )}
+                          onClick={() => setPopoverActions(!isPopoverActionsOpen)}
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={isPopoverActionsOpen}
                     closePopover={() => setPopoverActions(false)}
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="s" items={items} />
+                    <EuiContextMenuPanel items={items} />
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -421,7 +443,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               <EuiTourStep
                 anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
                 content={<p>{tourStepsInfo[1].content}</p>}
-                isStepOpen={tourState.isTourActive && tourState.currentTourStep === 2}
+                isStepOpen={
+                  isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 2
+                }
                 maxWidth={tourState.tourPopoverWidth}
                 onFinish={finishTour}
                 step={1}

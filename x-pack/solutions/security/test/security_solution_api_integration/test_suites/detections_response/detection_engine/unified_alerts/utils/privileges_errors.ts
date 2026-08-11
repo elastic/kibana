@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-export const getMissingSecurityKibanaPrivilegesError = ({
+export const getMissingAlertsReadPrivilegesError = ({ routeDetails }: { routeDetails: string }) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [alerts-read]`,
+    statusCode: 403,
+  };
+};
+
+export const getMissingAlertsUpdatePrivilegesError = ({
   routeDetails,
 }: {
   routeDetails: string;
 }) => {
   return {
     error: 'Forbidden',
-    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution]`,
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [alerts-all,alerts-signal-update-deprecated-privilege]`,
     statusCode: 403,
   };
 };

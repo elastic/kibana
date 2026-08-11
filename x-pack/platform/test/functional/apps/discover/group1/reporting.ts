@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/x_pack_reporting/reporting.ts
 import expect from '@kbn/expect';
 import type { DurationInputArg2 } from 'moment';
 import moment from 'moment';
@@ -16,7 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
   const { reporting, common, discover, timePicker, exports } = getPageObjects([
@@ -101,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
-
     await exports.clickExportTopNavButton();
     await retry.waitFor('the popover to be opened', async () => {
       return await exports.isExportPopoverOpen();
@@ -112,7 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     await reporting.clickGenerateReportButton();
     await exports.closeExportFlyout();
-    await exports.clickExportTopNavButton();
 
     const url = await reporting.getReportURL(timeout);
     const res = await reporting.getResponse(url ?? '');
@@ -164,7 +162,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
 
       it('becomes available when saved', async () => {
@@ -175,22 +172,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await exports.isExportPopoverOpen();
         });
         expect(await exports.isPopoverItemEnabled('CSV')).to.be(true);
-        await reporting.openExportPopover();
       });
     });
 
     describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
-        /**
-         *  Important: `esArchiver.emptyKibanaIndex()` above also resets the
-         * Kibana time zone setting, so we're re-applying it here.
-         * The serverless version of the test uses
-         * `kibanaServer.savedObjects.cleanStandardList` instead,
-         * which does not reset the time zone setting,
-         * so we don't need to re-apply it in these tests.
-         */
-        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       after(async () => {

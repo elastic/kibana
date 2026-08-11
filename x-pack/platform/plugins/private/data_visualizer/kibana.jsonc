@@ -29,11 +29,13 @@
       "home",
       "lens",
       "dataViewFieldEditor",
+      "dataViewEditor",
+      "contentManagement",
       "customIntegrations",
-      "cloud"
+      "cloud",
+      "cps"
     ],
     "requiredBundles": [
-      "dataViews",
       "kibanaReact",
       "kibanaUtils",
       "maps",
@@ -41,6 +43,7 @@
       "uiActions",
       "lens",
       "esql",
+      "savedObjectsFinder"
     ]
   }
 }

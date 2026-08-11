@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -55,6 +57,7 @@ const taskManager = taskManagerMock.createStart();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const rulesClientContext: RulesClientContext = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -64,6 +67,7 @@ const rulesClientContext: RulesClientContext = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -81,8 +85,9 @@ const rulesClientContext: RulesClientContext = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
-  fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const MOCK_API_KEY_1 = Buffer.from('123:abc').toString('base64');
@@ -130,6 +135,7 @@ const existingDecryptedRule: SavedObject<RawRule> = {
     ...existingRule.attributes,
     apiKey: MOCK_API_KEY_1,
     apiKeyCreatedByUser: false,
+    uiamApiKey: 'uiam-key',
   },
 };
 
@@ -314,13 +320,13 @@ describe('bulkEditRules', () => {
     ).rejects.toThrow('More than 10000 rules matched for bulk edit');
   });
 
-  test('should throw error if no aggregation buckets found', async () => {
+  test('throws error if no aggregation buckets found', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: { alertTypeId: {} },
       saved_objects: [],
       per_page: 0,
       page: 0,
-      total: 1,
+      total: 0,
     });
     await expect(
       bulkEditRules(rulesClientContext, {
@@ -349,7 +355,7 @@ describe('bulkEditRules', () => {
   });
 
   test('should throw error if rule type is not authorized for user', async () => {
-    authorization.ensureAuthorized.mockImplementationOnce(() => {
+    authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
       throw new Error('Unauthorized');
     });
     await expect(
@@ -362,15 +368,14 @@ describe('bulkEditRules', () => {
       })
     ).rejects.toThrow('Unauthorized');
 
-    expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenLastCalledWith({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
       operation: 'bulkEdit',
-      ruleTypeId: 'myType',
+      entity: 'rule',
     });
   });
 
-  test('should call ensureAuthorized once for each unique rule type and with the required permission from the method call', async () => {
+  test('should call bulkEnsureAuthorized once with all rule type consumer pairs and with the required permission from the method call', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: {
         alertTypeId: {
@@ -393,18 +398,14 @@ describe('bulkEditRules', () => {
       auditAction: RuleAuditAction.BULK_EDIT,
     });
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(1, {
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'myType', consumers: ['myApp'] },
+        { ruleTypeId: 'myOtherType', consumers: ['myApp'] },
+      ],
       operation: 'bulkEditParams',
-      ruleTypeId: 'myType',
-    });
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(2, {
-      consumer: 'myApp',
       entity: 'rule',
-      operation: 'bulkEditParams',
-      ruleTypeId: 'myOtherType',
     });
   });
 
@@ -472,6 +473,66 @@ describe('bulkEditRules', () => {
     );
   });
 
+  test('should call bulkMarkApiKeysForInvalidation with UIAM API keys if there are any', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+        rules.push(existingDecryptedRule);
+        apiKeysMap.set('1', {
+          oldApiKey: MOCK_API_KEY_1,
+          oldApiKeyCreatedByUser: false,
+          oldUiamApiKey: '111:essu_old-uia-key',
+        });
+      }),
+      shouldInvalidateApiKeys: true,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [MOCK_API_KEY_1, '111:essu_old-uia-key'],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
+  test('should invalidate the new keys when creation fails', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failed to save'));
+
+    try {
+      await bulkEditRules(rulesClientContext, {
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+          rules.push(existingDecryptedRule);
+          apiKeysMap.set('1', {
+            oldApiKey: MOCK_API_KEY_1,
+            oldApiKeyCreatedByUser: false,
+            oldUiamApiKey: '111:essu_old-uia-key',
+            newApiKey: 'new-api-key',
+            newUiamApiKey: '333:essu_new-uia-key',
+          });
+        }),
+        shouldInvalidateApiKeys: true,
+        requiredAuthOperation: ReadOperations.BulkEditParams,
+        auditAction: RuleAuditAction.BULK_EDIT,
+      });
+    } catch (e) {
+      /* expected */
+    }
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['333:essu_new-uia-key', 'new-api-key'],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
   test('should return updated rules formatted for the public API', async () => {
     const result = await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
@@ -512,6 +573,7 @@ describe('bulkEditRules', () => {
             lastExecutionDate: new Date(existingRule.attributes.executionStatus.lastExecutionDate),
             status: 'pending',
           },
+          isSnoozedUntil: null,
           snoozeSchedule: [],
           systemActions: [],
           createdAt: expect.any(Date),
@@ -526,6 +588,116 @@ describe('bulkEditRules', () => {
       ],
       total: 1,
     });
+  });
+
+  test('should log audit event for each successfully updated rule', async () => {
+    const decryptedRule1 = {
+      ...existingDecryptedRule,
+      attributes: { ...existingDecryptedRule.attributes, enabled: true },
+    };
+    const decryptedRule2 = {
+      ...existingDecryptedRule,
+      id: '2',
+      attributes: {
+        ...existingDecryptedRule.attributes,
+        name: 'my other rule',
+        apiKey: MOCK_API_KEY_2,
+        enabled: true,
+      },
+    };
+    mockCreatePointInTimeFinderAsInternalUser({
+      saved_objects: [decryptedRule1, decryptedRule2],
+    });
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        existingRule,
+        {
+          ...existingRule,
+          id: '2',
+          attributes: { ...existingRule.attributes, name: 'my other rule' },
+        },
+      ],
+    });
+
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ rules }) => {
+        rules.push(decryptedRule1);
+        rules.push(decryptedRule2);
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: WriteOperations.BulkEdit,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(2);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
+    expect(auditLogger.log).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '2', name: 'my other rule' },
+        }),
+      })
+    );
+  });
+
+  test('should log audit event with BULK_EDIT_PARAMS action for read-auth operations', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEditRuleParams`,
+      updateFn: jest.fn().mockImplementation(({ rules }) => {
+        rules.push(existingDecryptedRule);
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT_PARAMS,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_bulk_edit_params',
+          outcome: 'success',
+        }),
+        kibana: expect.objectContaining({
+          saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'my rule name' },
+        }),
+      })
+    );
+  });
+
+  test('should not log audit event for skipped rules', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ skipped }) => {
+        skipped.push({
+          id: 'skip-1',
+          name: 'skip-1',
+          skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason,
+        });
+      }),
+      shouldInvalidateApiKeys: false,
+      requiredAuthOperation: WriteOperations.BulkEdit,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
   });
 
   describe('internally managed rule types', () => {

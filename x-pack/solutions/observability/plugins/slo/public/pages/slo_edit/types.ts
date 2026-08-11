@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { BudgetingMethod, Indicator, TimeWindowType } from '@kbn/slo-schema';
+import type {
+  BudgetingMethod,
+  Indicator,
+  TimeWindowType,
+  IndicatorType as IndicatorTypeSchema,
+} from '@kbn/slo-schema';
 
 export interface CreateSLOForm<IndicatorType = Indicator> {
   name: string;
@@ -25,6 +30,7 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   groupBy: string[] | string;
   settings: {
     preventInitialBackfill: boolean;
+    preventCrossProjectSearch: boolean;
     syncDelay: number; // in minutes
     frequency: number; // in minutes
     syncField: string | null;
@@ -32,4 +38,9 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   artifacts?: {
     dashboards?: { id: string }[];
   };
+}
+
+export interface FormSettings {
+  isEditMode?: boolean;
+  allowedIndicatorTypes?: IndicatorTypeSchema[];
 }

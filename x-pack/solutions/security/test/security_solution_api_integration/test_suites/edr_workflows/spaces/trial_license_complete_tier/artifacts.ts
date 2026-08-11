@@ -17,14 +17,13 @@ import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
   ExceptionListItemSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
@@ -50,13 +49,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
   //                    and tests below are currently creating a new role/user
-  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
 
-    let artifactManagerRole: Role;
-    let globalArtifactManagerRole: Role;
     let supertestArtifactManager: TestAgent;
     let supertestGlobalArtifactManager: TestAgent;
     let spaceOnePolicy: PolicyTestResourceInfo;
@@ -65,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       // For testing, we're using the `t3_analyst` role which already has All privileges
       // to all artifacts and manipulating that role definition to create two new roles/users
-      artifactManagerRole = Object.assign(
+      const artifactManagerRole = Object.assign(
         rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
         { name: 'artifactManager' }
       );
@@ -79,7 +76,10 @@ export default function ({ getService }: FtrProviderContext) {
         siemFeatureId
       ].filter((privilege) => privilege !== 'global_artifact_management_all');
 
-      globalArtifactManagerRole = Object.assign(
+      // Custom YARA signatures privilege is not added to pre-defined roles yet
+      artifactManagerRole.kibana[0].feature[siemFeatureId].push('custom_yara_signatures_all');
+
+      const globalArtifactManagerRole = Object.assign(
         rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
         { name: 'globalArtifactManager' }
       );
@@ -94,20 +94,17 @@ export default function ({ getService }: FtrProviderContext) {
         );
       }
 
-      const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([
-        rolesUsersProvider.loader.create(artifactManagerRole),
-        rolesUsersProvider.loader.create(globalArtifactManagerRole),
-      ]);
+      // Custom YARA signatures privilege is not added to pre-defined roles yet
+      globalArtifactManagerRole.kibana[0].feature[siemFeatureId].push('custom_yara_signatures_all');
 
-      supertestArtifactManager = await utils.createSuperTest(
-        artifactManagerUser.username,
-        artifactManagerUser.password
-      );
-      supertestGlobalArtifactManager = await utils.createSuperTest(
-        globalArtifactManagerUser.username,
-        globalArtifactManagerUser.password
-      );
-
+      supertestArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'artifactManager',
+        privileges: artifactManagerRole,
+      });
+      supertestGlobalArtifactManager = await utils.createSuperTestWithCustomRole({
+        name: 'globalArtifactManager',
+        privileges: globalArtifactManagerRole,
+      });
       await Promise.all([
         ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
@@ -128,17 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
       // @ts-expect-error
       spaceTwoPolicy = undefined;
 
-      if (artifactManagerRole) {
-        await rolesUsersProvider.loader.delete(artifactManagerRole.name);
-        // @ts-expect-error
-        artifactManagerRole = undefined;
-      }
-
-      if (globalArtifactManagerRole) {
-        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
-        // @ts-expect-error
-        globalArtifactManagerRole = undefined;
-      }
+      await utils.cleanUpCustomRoles();
     });
 
     afterEach(async () => {

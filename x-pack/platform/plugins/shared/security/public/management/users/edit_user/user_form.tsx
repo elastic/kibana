@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
@@ -30,7 +31,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Role, User } from '../../../../common';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 import { isRoleDeprecated } from '../../../../common/model';
-import { DocLink } from '../../../components/doc_link';
 import type { ValidationErrors } from '../../../components/use_form';
 import { useForm } from '../../../components/use_form';
 import { RoleComboBox } from '../../role_combo_box';
@@ -91,7 +91,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { password, confirm_password, ...rest } = values;
       const user = isNewUser ? { password, ...rest } : rest;
       try {
@@ -413,12 +412,12 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 ))}
               </EuiTextColor>
             ) : (
-              <DocLink app="elasticsearch" doc="built-in-roles.html">
+              <EuiLink href={services.docLinks!.links.security.roles} target="_blank" external>
                 <FormattedMessage
                   id="xpack.security.management.users.userForm.rolesHelpText"
                   defaultMessage="Learn what privileges individual roles grant."
                 />
-              </DocLink>
+              </EuiLink>
             )
           }
         >

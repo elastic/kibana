@@ -6,11 +6,15 @@
  */
 
 import type { RuleMigrationsDataClient } from '../../../../data/rule_migrations_data_client';
+import { getResourceByTypeTool } from '../../../../../common/task/agent/tools';
 import { getRulesByNameTool } from './rules_by_name';
 
 export const getQradarRulesMigrationTools = (
   migrationId: string,
   rulesClient: RuleMigrationsDataClient
 ) => {
-  return { ...getRulesByNameTool(migrationId, rulesClient) };
+  return {
+    ...getRulesByNameTool(migrationId, rulesClient),
+    ...getResourceByTypeTool(migrationId, rulesClient.resources),
+  };
 };

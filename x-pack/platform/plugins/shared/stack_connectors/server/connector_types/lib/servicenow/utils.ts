@@ -17,13 +17,16 @@ import type {
   ServiceNowSecretConfigurationType,
   ServiceNowPublicConfigurationType,
 } from '@kbn/connector-schemas/servicenow';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
   ResponseError,
-  ServiceNowError,
+  ErrorMessageFormat,
+  RequestContext,
 } from './types';
+import { ServiceNowApiError } from './types';
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
@@ -44,25 +47,107 @@ export const prepareIncident = (
 
   return { ...additionalFields, ...baseFields };
 };
+/**
+ * Extracts error information from ServiceNow API errors.
+ *
+ * Handles 3 formats:
+ * 1. Table API: error.response.data = { error: { message?: string, detail?: string }, status?: string }
+ * 2. OAuth: error.message is JSON like {"error": "invalid_grant", "error_description"?: "User not found"}
+ * 3. Plain message like Incident id is empty
+ */
+const createErrorMessage = (error: ResponseError): ErrorMessageFormat => {
+  // 1. Standard ServiceNow Table API error (error.response.data exists)
+  const data = error.response?.data;
 
-const createErrorMessage = (errorResponse?: ServiceNowError): string => {
-  if (errorResponse == null) {
-    return 'unknown: errorResponse was null';
+  if (data) {
+    const snErrorMessage = data.error?.message;
+    const snErrorDetail = data.error?.detail;
+
+    const reason = snErrorMessage
+      ? snErrorDetail
+        ? `${snErrorMessage}: ${snErrorDetail}`
+        : snErrorMessage
+      : 'unknown: no error in error response';
+
+    return {
+      error: error.message,
+      reason,
+    };
   }
 
-  const { error } = errorResponse;
-  return error != null
-    ? `${error?.message}: ${error?.detail}`
-    : 'unknown: no error in error response';
+  // 2. OAuth error (error.message is JSON)
+  // Example: {"error":"invalid_grant","error_description":"User not found"}
+  if (error.message) {
+    try {
+      const parsed = JSON.parse(error.message);
+      if (typeof parsed?.error === 'string') {
+        const reason = parsed.error_description || '';
+        return { error: parsed.error, reason };
+      }
+    } catch {
+      // JSON parsing failed - not an OAuth error, use error.message as-is
+    }
+
+    // Plain error
+    return { error: error.message, reason: '' };
+  }
+
+  return { error: '', reason: '' };
 };
 
-export const addServiceMessageToError = (error: ResponseError, message: string): AxiosError => {
-  error.message = getErrorMessage(
-    i18n.SERVICENOW,
-    `${message}. Error: ${error.message} Reason: ${createErrorMessage(error.response?.data)}`
-  );
+export const isServiceNowApiError = (err: unknown): err is ServiceNowApiError =>
+  err instanceof ServiceNowApiError;
+
+const isMaxContentLengthError = (error: AxiosError | Error): boolean => {
+  if (!('isAxiosError' in error) || !error.isAxiosError) {
+    return false;
+  }
+  if (error.code !== 'ERR_BAD_RESPONSE') {
+    return false;
+  }
+
+  // Axios internal error message format - no typed error code is exposed for this case,
+  // so matching the message is the only reliable detection method.
+  return typeof error.message === 'string' && error.message.includes('maxContentLength');
+};
+export const addServiceMessageToError = (
+  error: ResponseError,
+  message: string,
+  context?: RequestContext
+): AxiosError => {
+  const { error: errorPart, reason } = createErrorMessage(error);
+
+  const parts = [`${message}.`, 'Error:', errorPart];
+  if (reason) parts.push('Reason:', reason);
+
+  if (context) {
+    const status =
+      error.response?.status ??
+      (isServiceNowApiError(error) ? error.status : undefined) ??
+      error.code ??
+      'none';
+    parts.push(`[status=${status}]`);
+    if (context.method) {
+      parts.push(`[method=${context.method}]`);
+    }
+    parts.push(`[endpoint=${context.endpoint}]`);
+  }
+
+  error.message = getErrorMessage(i18n.SERVICENOW, parts.join(' '));
+  if (isMaxContentLengthError(error)) {
+    createTaskRunError(error, TaskErrorSource.USER);
+  }
   return error;
 };
+
+export const createServiceNowApiError = (
+  message: string,
+  options: { status: number; body?: unknown }
+): ServiceNowApiError =>
+  createTaskRunError(
+    new ServiceNowApiError(message, options),
+    TaskErrorSource.USER
+  ) as ServiceNowApiError;
 
 export const getPushedDate = (timestamp?: string) => {
   if (timestamp != null) {

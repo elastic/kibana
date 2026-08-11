@@ -35,7 +35,7 @@ export interface FetchEsQueryOpts {
     logger: Logger;
     ruleResultService?: PublicRuleResultService;
   };
-  alertLimit?: number;
+  alertLimit: number;
   dateStart: string;
   dateEnd: string;
   sourceFields: EsQuerySourceFields;
@@ -61,13 +61,7 @@ export async function fetchEsQuery({
   const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
-  const {
-    query,
-    fields,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    runtime_mappings,
-    _source,
-  } = getParsedQuery(params);
+  const { query, fields, runtime_mappings, _source } = getParsedQuery(params);
 
   const filter =
     timestamp && params.excludeHitsFromPreviousRun

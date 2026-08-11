@@ -41,16 +41,17 @@ export default function searchSolutionNavigation({
     it('renders expected side nav items', async () => {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting started' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
     });
 
     it('has expected navigation', async () => {
+      // Navigate to the home page to account for the getting started page redirect
+      await searchSpace.navigateTo(`${spaceCreated.id}/app/elasticsearch/home`);
       const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
-
       // check side nav links
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
@@ -58,32 +59,30 @@ export default function searchSolutionNavigation({
 
       const sideNavTestCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
-        breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
         {
           link: { deepLinkId: 'discover' },
-          breadcrumbs: ['Discover'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { deepLinkId: 'dashboards' },
-          breadcrumbs: ['Dashboards'],
           pageTestSubject: 'noDataViewsPrompt',
         },
         {
           link: { navId: 'agent_builder' },
-          breadcrumbs: [],
           pageTestSubject: 'agentBuilderWrapper',
         },
         {
-          link: { deepLinkId: 'searchPlayground' },
-          breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'playgroundsUnlicensed',
+          link: { deepLinkId: 'searchGettingStarted' },
+          pageTestSubject: 'gettingStartedHeader',
+        },
+        {
+          link: { deepLinkId: 'searchGettingStarted' },
+          pageTestSubject: 'gettingStartedHeader',
         },
         {
           link: { deepLinkId: 'dev_tools' },
-          breadcrumbs: ['Developer Tools'],
           pageTestSubject: 'console',
         },
       ];
@@ -92,9 +91,6 @@ export default function searchSolutionNavigation({
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await testSubjects.existOrFail(testCase.pageTestSubject);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        for (const breadcrumb of testCase.breadcrumbs) {
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
       }
 
       await expectNoPageReload();
@@ -109,8 +105,9 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           'agent_builder',
-          'searchPlayground',
+          'workflows',
           'machine_learning',
+          'search_getting_started',
           'dev_tools',
           'data_management',
           'stack_management',

@@ -15,19 +15,17 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 import type { Query } from '@kbn/es-query';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  IUnifiedSearchPluginServices,
-  UnifiedSearchPublicPluginStart,
-} from '@kbn/unified-search-plugin/public/types';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 import { css } from '@emotion/react';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import type { GraphState, IndexpatternDatasource } from '../state_management';
@@ -110,16 +108,14 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
   const { services, overlays } = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
-      unifiedSearch: UnifiedSearchPublicPluginStart;
+      kql: KqlPluginStart;
     }
   >();
 
   const {
     uiSettings,
     appName,
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
     contentManagement,
   } = services;
   if (!overlays) return null;

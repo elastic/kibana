@@ -28,16 +28,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const ebtUIHelper = getService('kibana_ebt_ui');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const toasts = getService('toasts');
+  const performanceMetricTimeoutMs = 1500;
 
   describe('telemetry', () => {
     describe('context', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );
@@ -60,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -80,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+          withTimeoutMs: performanceMetricTimeoutMs,
         });
 
         expect(events[events.length - 1].context.discoverProfiles).to.eql([
@@ -132,9 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('contextual profiles', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded(
-          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );
@@ -399,6 +394,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
 
         // event 3
+        // preventing flakiness in this case, there were 2 toasts displayed, covering the cell in the flaky case
+        await toasts.dismissAll();
         await dataGrid.clickFieldActionInFlyout('log.level', 'addFilterOutValueButton');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
@@ -433,16 +430,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('trackSubmittingQuery telemetry', () => {
       beforeEach(async () => {
+        await discover.resetQueryMode();
         await common.navigateToApp('discover');
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await ebtUIHelper.setOptIn(true);
       });
 
       it('should track field usage for KQL queries', async () => {
         await queryBar.setQuery('agent.name: "java" and log.level : "debug"');
         await queryBar.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -461,7 +458,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'from my-example-* | where agent.name == "java" and log.level == "debug"'
         );
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -480,7 +477,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'from my-example-* | where agent.name == "java" and KQL("""log.level:"debug" """)'
         );
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],
@@ -496,7 +493,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should track free text search as __FREE_TEXT__ placeholder', async () => {
         await queryBar.setQuery('error occurred');
         await queryBar.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         const [event] = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
           eventTypes: ['discover_query_fields_usage'],

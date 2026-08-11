@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
 import { createStreamsStorageClient } from './storage/streams_storage_client';
-import type { AssetClient } from './assets/asset_client';
-import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import type { FeatureClient } from './feature/feature_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 
 export class StreamsService {
@@ -22,37 +21,41 @@ export class StreamsService {
     private readonly isDev: boolean
   ) {}
 
-  async getClientWithRequest({
-    request,
-    assetClient,
+  async getClient({
     attachmentClient,
-    queryClient,
-    featureClient: featureClient,
+    getKnowledgeIndicatorClient,
+    esClient,
+    esClientAsInternalUser,
+    uiSettingsClient,
+    isSecurityEnabled,
   }: {
-    request: KibanaRequest;
-    assetClient: AssetClient;
     attachmentClient: AttachmentClient;
-    queryClient: QueryClient;
-    featureClient: FeatureClient;
+    getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
+    esClient: ElasticsearchClient;
+    esClientAsInternalUser: ElasticsearchClient;
+    uiSettingsClient: IUiSettingsClient;
+    isSecurityEnabled: boolean;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
-    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
+    const isWiredStreamViewsEnabled = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
+    );
 
     return new StreamsClient({
-      assetClient,
       attachmentClient,
-      queryClient,
-      featureClient,
+      getKnowledgeIndicatorClient,
       logger,
-      scopedClusterClient,
+      esClient,
+      esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: createStreamsStorageClient(scopedClusterClient.asInternalUser, logger),
-      request,
+      storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
+      isSecurityEnabled,
+      isWiredStreamViewsEnabled,
       isDev: this.isDev,
     });
   }

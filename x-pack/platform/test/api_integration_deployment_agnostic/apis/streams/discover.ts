@@ -56,14 +56,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       expect(status).to.eql(200);
-
+      expect(stream).not.to.be(undefined);
       expect(stream).to.eql({
+        type: 'classic',
         name: TEST_STREAM_NAME,
         description: '',
+        updated_at: stream!.updated_at,
         ingest: {
           lifecycle: { inherit: {} },
           settings: {},
-          processing: { steps: [] },
+          processing: {
+            steps: [],
+            updated_at: (stream as Streams.ClassicStream.Definition).ingest.processing.updated_at,
+          },
           classic: {},
           failure_store: { inherit: {} },
         },
@@ -74,7 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const doc = {
         message: '2023-01-01T00:00:10.000Z error test',
       };
-      const response = await indexDocument(esClient, 'logs', doc);
+      const response = await indexDocument(esClient, 'logs.otel', doc);
 
       expect(response.result).to.eql('created');
 
@@ -91,7 +96,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(status).to.eql(200);
 
-      expect(stream?.name).to.eql('logs');
+      expect(stream?.name).to.eql('logs.otel');
     });
 
     it('endpoint is returning nothing for regular index', async () => {

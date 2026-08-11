@@ -17,7 +17,6 @@ import type {
   CheckUserProfilesPrivileges,
   CheckUserProfilesPrivilegesPayload,
   CheckUserProfilesPrivilegesResponse,
-  HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
 } from '@kbn/security-plugin-types-server';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
@@ -107,8 +106,8 @@ export function checkPrivilegesFactory(
         { requireLoginAction }
       );
 
-      const clusterClient = await getClusterClient();
-      const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+      const clusterClient = (await getClusterClient()).asScoped(request);
+      const hasPrivilegesResponse = await clusterClient.asCurrentUser.security.hasPrivileges({
         cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
         index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
           ([name, indexPrivileges]) => ({
@@ -118,8 +117,6 @@ export function checkPrivilegesFactory(
         ),
         application: [applicationPrivilegesCheck],
       });
-
-      const hasPrivilegesResponse: HasPrivilegesResponse = body;
 
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,

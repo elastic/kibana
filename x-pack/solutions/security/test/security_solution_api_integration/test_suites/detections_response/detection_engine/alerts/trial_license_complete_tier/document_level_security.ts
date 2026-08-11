@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  ALERTS_FEATURE_ID,
+  RULES_FEATURE_ID,
   SECURITY_FEATURE_ID,
 } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllAlerts } from '@kbn/detections-response-ftr-services';
@@ -29,6 +31,8 @@ const roleToAccessSecuritySolution = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },
@@ -52,6 +56,8 @@ const roleToAccessSecuritySolutionWithDls = {
       {
         feature: {
           [SECURITY_FEATURE_ID]: ['all'],
+          [RULES_FEATURE_ID]: ['all'],
+          [ALERTS_FEATURE_ID]: ['all'],
         },
         spaces: ['*'],
       },

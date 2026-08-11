@@ -90,8 +90,9 @@ interface FillPoolRawStat extends JsonObject {
 }
 
 interface ResultFrequency extends JsonObject {
+  // NOTE: TaskRunResult.Success and TaskRunResult.SuccessRescheduled share the value 'Success',
+  // so they collapse to a single key here.
   [TaskRunResult.Success]: number;
-  [TaskRunResult.SuccessRescheduled]: number;
   [TaskRunResult.RetryScheduled]: number;
   [TaskRunResult.Failed]: number;
 }
@@ -346,12 +347,9 @@ export function summarizeTaskRunStat(
   logger: Logger,
   {
     polling: {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_successful_poll,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       last_polling_delay,
       duration: pollingDuration,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       claim_duration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
@@ -360,7 +358,6 @@ export function summarizeTaskRunStat(
       persistence: pollingPersistence,
     },
     drift,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     drift_by_type,
     load,
     execution: {

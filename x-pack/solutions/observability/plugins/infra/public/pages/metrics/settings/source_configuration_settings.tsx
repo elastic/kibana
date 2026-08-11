@@ -26,6 +26,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
+
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
   http?: HttpSetup;
@@ -35,11 +36,14 @@ export const SourceConfigurationSettings = ({
   shouldAllowEdit,
   http,
 }: SourceConfigurationSettingsProps) => {
-  useMetricsBreadcrumbs([
-    {
-      text: settingsTitle,
-    },
-  ]);
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: settingsTitle,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   const [numberOfInfraRules, setNumberOfInfraRules] = useState(0);
 
@@ -155,6 +159,7 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
+      <EuiSpacer />
       {errors.length > 0 ? (
         <>
           <EuiCallOut announceOnMount color="danger">

@@ -14,9 +14,10 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { MonitoringEngineDescriptor } from '../common.gen';
 
+export const DisableMonitoringEngineResponse = lazySchema(() => MonitoringEngineDescriptor);
 export type DisableMonitoringEngineResponse = z.infer<typeof DisableMonitoringEngineResponse>;
-export const DisableMonitoringEngineResponse = MonitoringEngineDescriptor;

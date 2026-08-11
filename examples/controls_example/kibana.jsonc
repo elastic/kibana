@@ -9,14 +9,13 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "controls",
       "data",
       "developerExamples",
       "embeddable",
       "navigation",
-      "presentationUtil",
       "uiActions",
       "dataViews"
-    ]
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }

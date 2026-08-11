@@ -10,11 +10,13 @@ import { differenceBy, chunk } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '@kbn/core/server';
-
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  SavedObjectsUtils,
+  SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 import minVersion from 'semver/ranges/min-version';
 
 import pMap from 'p-map';
@@ -50,7 +52,7 @@ import { auditLoggingService } from '../../audit_logging';
 import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
-
+import { deleteEsqlViews } from '../elasticsearch/esql_views/remove';
 import type { PackageSpecConditions } from '../../../../common';
 
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
@@ -58,6 +60,77 @@ import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 
 const MAX_ASSETS_TO_DELETE = 1000;
+
+/**
+ * Removes package dependencies that were installed for the given package (listed in is_dependency_of)
+ * and that have no other dependants after removing this package.
+ */
+export async function cleanupDependenciesStep(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  installation: Installation;
+  esClient: ElasticsearchClient;
+  force?: boolean;
+  installSource?: InstallSource;
+}): Promise<void> {
+  const { savedObjectsClient, pkgName, installation, esClient, force, installSource } = options;
+  const parentRef = { name: pkgName, version: installation.version };
+
+  if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
+    return;
+  }
+
+  const dependencies = installation.dependencies ?? [];
+  if (!dependencies.length) {
+    return;
+  }
+
+  for (const dep of dependencies) {
+    const depInstallation = await getInstallation({ savedObjectsClient, pkgName: dep.name });
+    if (!depInstallation) {
+      continue;
+    }
+
+    const isDependencyOf = depInstallation.is_dependency_of ?? [];
+
+    if (isDependencyOf.length > 0) {
+      const updated = isDependencyOf.filter(
+        (p) => !(p.name === parentRef.name && p.version === parentRef.version)
+      );
+      // If there are still dependencies, update the package's is_dependency_of
+      if (updated.length > 0) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: pkgName,
+          name: pkgName,
+          savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+        });
+        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, dep.name, {
+          is_dependency_of: updated,
+        });
+        continue;
+      }
+      if (!depInstallation.installed_as_dependency) {
+        appContextService
+          .getLogger()
+          .info(
+            `Skipping removal of dependency ${dep.name}@${dep.version} because it was manually installed`
+          );
+        continue;
+      }
+      appContextService.getLogger().info(`Removing dependency ${dep.name}@${dep.version}`);
+      // If this was the last dependency, remove the package
+      await removeInstallation({
+        savedObjectsClient,
+        pkgName: dep.name,
+        pkgVersion: dep.version,
+        esClient,
+        force,
+        installSource,
+      });
+    }
+  }
+}
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -72,6 +145,16 @@ export async function removeInstallation(options: {
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
   }
+
+  await cleanupDependenciesStep({
+    savedObjectsClient,
+    pkgName,
+    installation,
+    esClient,
+    force: options.force,
+    installSource: options.installSource,
+  });
+
   const { total, items } = await packagePolicyService.list(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     {
@@ -154,11 +237,13 @@ export async function deleteKibanaAssets({
   packageSpecConditions?: PackageSpecConditions;
   spaceId?: string;
 }) {
-  const savedObjectsClient = new SavedObjectsClient(
-    appContextService
-      .getSavedObjects()
-      .createInternalRepository([KibanaSavedObjectType.alertingRuleTemplate])
-  );
+  const savedObjectsClient = appContextService.getSavedObjects().getUnsafeInternalClient({
+    includedHiddenTypes: [
+      KibanaSavedObjectType.alertingRuleTemplate,
+      KibanaSavedObjectType.sloTemplate,
+    ],
+    excludedExtensions: [SPACES_EXTENSION_ID],
+  });
 
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   if (namespace) {
@@ -190,7 +275,8 @@ export async function deleteKibanaAssets({
     }
 
     const foundObjects = resolvedObjects.filter(
-      ({ saved_object: savedObject }) => savedObject?.error?.statusCode !== 404
+      ({ saved_object: savedObject }) =>
+        !isSavedObjectErrorResult(savedObject) || savedObject.error.statusCode !== 404
     );
 
     // in the case of a partial install, it is expected that some assets will be not found
@@ -246,6 +332,8 @@ export const deleteESAsset = async (
     return deleteIlms(esClient, [id]);
   } else if (assetType === ElasticsearchAssetType.mlModel) {
     return deleteMlModel(esClient, [id]);
+  } else if (assetType === ElasticsearchAssetType.esqlView) {
+    return deleteEsqlViews(esClient, [id]);
   }
 };
 
@@ -506,6 +594,16 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+export function cleanupEsqlViews(
+  installedObjects: EsAssetReference[],
+  esClient: ElasticsearchClient
+) {
+  const idsToDelete = installedObjects
+    .filter((asset) => asset.type === ElasticsearchAssetType.esqlView)
+    .map((asset) => asset.id);
+  return deleteEsqlViews(esClient, idsToDelete);
 }
 
 /**

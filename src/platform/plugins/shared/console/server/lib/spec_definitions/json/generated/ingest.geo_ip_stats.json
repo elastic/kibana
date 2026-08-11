@@ -13,6 +13,7 @@
       "_ingest/geoip/stats"
     ],
     "documentation": "https://www.elastic.co/docs/reference/enrich-processor/geoip-processor",
+    "documentation_serverless": "https://www.elastic.co/docs/reference/enrich-processor/geoip-processor",
     "availability": {
       "stack": true,
       "serverless": false

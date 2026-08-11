@@ -1,0 +1,50 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createTextAttachmentExample:
+          description: "Example request for creating a text attachment"
+          value:
+            type: text
+            data: "This is the content of my text attachment"
+            description: "Meeting notes"
+        createJsonAttachmentExample:
+          description: "Example request for creating a JSON attachment with custom ID"
+          value:
+            id: custom-attachment-id
+            type: json
+            data:
+              configuration:
+                enabled: true
+                threshold: 50
+              metadata:
+                source: "user_input"
+            description: "Application settings"
+        createHiddenAttachmentExample:
+          description: "Example request for creating a hidden attachment"
+          value:
+            type: text
+            data: "Internal system data"
+            description: "System context"
+            hidden: true
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createAttachmentResponseExample:
+            description: "Example response returning the created attachment"
+            value:
+              attachment:
+                id: att-abc123
+                type: text
+                current_version: 1
+                versions:
+                  - version: 1
+                    data: "This is the content of my text attachment"
+                    created_at: "2025-01-06T10:00:00.000Z"
+                    content_hash: "sha256-xyz"
+                    estimated_tokens: 12
+                description: "Meeting notes"
+                active: true

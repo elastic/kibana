@@ -9,25 +9,50 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { capitalize } from 'lodash';
 
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR } from '../common/utils';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_strategy';
+
+/** When true, use entity store v2 index and entity.risk.* fields instead of risk-score.risk-score-* */
+const ENTITY_STORE_V2_RISK_SCORE_FIELD = 'entity.risk.calculated_score_norm';
+
+const getEntityStoreV2IndexPattern = (spaceId?: string) =>
+  getEntitiesAlias(ENTITY_LATEST, spaceId ?? 'default');
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
   riskEntity: EntityType;
+  entityId?: string;
+  dataSource?: 'auto' | 'entity_store' | 'risk_index';
+  metricLabel?: string;
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
-) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
+) => LensAttributes = ({
+  spaceId,
+  query,
+  severity,
+  riskEntity,
+  entityId,
+  dataSource = 'auto',
+  metricLabel,
+}) => {
   const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
   const internalReferenceId = `internal-reference-id-${uuidv4()}`;
   const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
-  const sourceField = EntityTypeToScoreField[riskEntity];
+  const useEntityStoreSource =
+    dataSource === 'entity_store' || (dataSource === 'auto' && !!entityId);
+  const sourceField = useEntityStoreSource
+    ? ENTITY_STORE_V2_RISK_SCORE_FIELD
+    : EntityTypeToScoreField[riskEntity];
+  const dataViewIndexPattern = useEntityStoreSource
+    ? getEntityStoreV2IndexPattern(spaceId)
+    : `risk-score.risk-score-${spaceId ?? 'default'}`;
   return {
     title: 'Risk score summary',
     description: '',
@@ -77,7 +102,7 @@ export const getRiskScoreSummaryAttributes: (
             [layerIds[0]]: {
               columns: {
                 [columnIds[0]]: {
-                  label: `${capitalize(riskEntity)} Risk`,
+                  label: metricLabel ?? `${capitalize(riskEntity)} Risk`,
                   dataType: 'number',
                   operationType: 'last_value',
                   isBucketed: false,
@@ -172,14 +197,14 @@ export const getRiskScoreSummaryAttributes: (
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `risk-score.risk-score-${spaceId ?? 'default'}`,
+          title: dataViewIndexPattern,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `risk-score.risk-score-${spaceId ?? 'default'}`,
+          name: dataViewIndexPattern,
         },
       },
     },

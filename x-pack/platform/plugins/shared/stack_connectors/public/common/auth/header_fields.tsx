@@ -8,25 +8,27 @@
 import React from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiPanel,
-  EuiSuperSelect,
-  useEuiTheme,
   EuiFormRow,
-  EuiText,
-  EuiBadge,
   EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { UseArray, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { css } from '@emotion/react';
+import { get, isEmpty } from 'lodash';
 import * as i18n from './translations';
 import { headerTypeOptions } from './header_type_options';
 
@@ -34,10 +36,11 @@ const { emptyField } = fieldValidators;
 
 interface Props {
   readOnly: boolean;
-  maxHeaders: number;
+  maxHeaders?: number;
+  required?: boolean;
 }
 
-export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
+export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required = true }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -49,7 +52,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
 
       <UseArray path="__internal__.headers" initialNumberOfItems={1}>
         {({ addItem, items, removeItem }) => {
-          const limitOfHeaderExceeded = items.length >= maxHeaders;
+          const limitOfHeaderExceeded = maxHeaders ? items.length >= maxHeaders : false;
 
           return (
             <>
@@ -60,7 +63,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                 <EuiFlexItem grow={false}>
                   {!limitOfHeaderExceeded && (
                     <EuiButton
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={addItem}
                       data-test-subj="webhookAddHeaderButton"
                     >
@@ -70,13 +73,13 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              {limitOfHeaderExceeded && (
+              {limitOfHeaderExceeded && maxHeaders && (
                 <EuiText size="s" color="subdued" style={{ marginTop: 8 }}>
                   {i18n.MAX_HEADERS_LIMIT(maxHeaders)}
                 </EuiText>
               )}
               <EuiSpacer size="s" />
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <UseField
                   key={item.id}
                   path={`${item.path}.type`}
@@ -86,7 +89,11 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                     const headerTypeValue = typeField.value;
 
                     return (
-                      <EuiFlexGroup direction="column" gutterSize="s">
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="s"
+                        data-test-subj={`webhookHeaderRow-${index}`}
+                      >
                         {headerTypeValue === 'secret' && (
                           <EuiFlexGroup>
                             <EuiFlexItem grow={false}>
@@ -136,7 +143,18 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                                   label: i18n.KEY_LABEL,
                                   validations: [
                                     {
-                                      validator: emptyField(i18n.HEADER_MISSING_KEY_ERROR),
+                                      validator: (validatorArgs) => {
+                                        const { formData, path } = validatorArgs;
+                                        const headerValue = get(
+                                          formData,
+                                          path.replace('.key', '.value')
+                                        );
+                                        // Key must exist if value is present
+                                        if (!required && isEmpty(headerValue)) return;
+                                        return emptyField(i18n.HEADER_MISSING_KEY_ERROR)(
+                                          validatorArgs
+                                        );
+                                      },
                                     },
                                     {
                                       validator: ({ value, form, path }) => {
@@ -175,7 +193,18 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                                   label: i18n.VALUE_LABEL,
                                   validations: [
                                     {
-                                      validator: emptyField(i18n.HEADER_MISSING_VALUE_ERROR),
+                                      validator: (validatorArgs) => {
+                                        const { formData, path } = validatorArgs;
+                                        const headerKey = get(
+                                          formData,
+                                          path.replace('.value', '.key')
+                                        );
+                                        // Value must exist if key is present
+                                        if (!required && isEmpty(headerKey)) return;
+                                        return emptyField(i18n.HEADER_MISSING_VALUE_ERROR)(
+                                          validatorArgs
+                                        );
+                                      },
                                     },
                                   ],
                                 }}
@@ -198,24 +227,25 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders }) => {
                                   options={headerTypeOptions}
                                   valueOfSelected={headerTypeValue}
                                   onChange={(val) => typeField.setValue(val)}
-                                  hasDividers
                                   fullWidth
                                   data-test-subj="webhookHeaderTypeSelect"
                                 />
                               </EuiFormRow>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                color="danger"
-                                onClick={() => removeItem(item.id)}
-                                iconType="minusInCircle"
-                                aria-label={i18n.DELETE_BUTTON}
-                                data-test-subj="webhookRemoveHeaderButton"
-                                css={{
-                                  marginTop: '28px',
-                                  background: euiTheme.colors.backgroundBaseDanger,
-                                }}
-                              />
+                              <EuiToolTip content={i18n.DELETE_BUTTON} disableScreenReaderOutput>
+                                <EuiButtonIcon
+                                  color="danger"
+                                  onClick={() => removeItem(item.id)}
+                                  iconType="minusCircle"
+                                  aria-label={i18n.DELETE_BUTTON}
+                                  data-test-subj="webhookRemoveHeaderButton"
+                                  css={{
+                                    marginTop: '28px',
+                                    background: euiTheme.colors.backgroundBaseDanger,
+                                  }}
+                                />
+                              </EuiToolTip>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiPanel>

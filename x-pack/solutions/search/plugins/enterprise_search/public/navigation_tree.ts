@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import { lazy } from 'react';
-
+import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-
-const LazyIconAgents = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/robot').then((m) => ({ default: m.iconRobot }))
-);
-
-const LazyIconPlayground = lazy(() =>
-  import('@kbn/search-shared-ui/src/v2_icons/playground').then((m) => ({
-    default: m.iconPlayground,
-  }))
-);
 
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
@@ -41,14 +33,34 @@ const title = i18n.translate(
 );
 const icon = 'logoElasticsearch';
 
+/**
+ * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
+ * we need to maintain proper navigation state when users edit visualizations accessed
+ * from the Dashboards' Visualizations tab. This keeps the Dashboards nav item active during editing.
+ */
+function isEditingFromDashboard(
+  location: Location,
+  pathNameSerialized: string,
+  prepend: (path: string) => string
+): boolean {
+  const vizApps = ['/app/visualize', '/app/maps', '/app/lens'];
+  const isVizApp = vizApps.some((app) => pathNameSerialized.startsWith(prepend(app)));
+  const hasOriginatingApp =
+    location.search.includes('originatingApp=dashboards') ||
+    location.hash.includes('originatingApp=dashboards');
+  return isVizApp && hasOriginatingApp;
+}
+
 export const getNavigationTreeDefinition = ({
+  core,
   dynamicItems$,
+  isCloudEnabled,
 }: {
+  core: CoreStart;
   dynamicItems$: Observable<DynamicSideNavItems>;
+  isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    dataTestSubj: 'searchSideNav',
-    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -57,48 +69,60 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              link: SEARCH_HOMEPAGE,
-              title,
               icon,
+              link: SEARCH_HOMEPAGE,
               renderAs: 'home',
+              title,
             },
             {
-              link: 'discover',
-            },
-            {
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-              },
-              link: 'dashboards',
-            },
-            {
-              badgeType: 'techPreview',
-              icon: LazyIconAgents,
+              icon: 'productAgent',
               link: 'agent_builder',
             },
             {
-              badgeType: 'techPreview' as const,
-              link: 'workflows',
+              icon: 'sparkles',
+              link: 'context_engine',
             },
             {
-              breadcrumbStatus: 'hidden',
-              icon: LazyIconPlayground,
-              link: 'searchPlayground',
+              icon: 'productDiscover',
+              link: 'discover',
             },
             {
-              icon: 'machineLearningApp',
-              id: 'machine_learning',
-              renderAs: 'panelOpener',
-              title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {
-                defaultMessage: 'Machine Learning',
-              }),
+              getIsActive: ({ pathNameSerialized, prepend, location }) =>
+                pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
+                isEditingFromDashboard(location, pathNameSerialized, prepend),
+              icon: 'productDashboard',
+              link: 'dashboards',
+            },
+            ...getWorkflowsNavPanel(core),
+            {
               children: [
                 {
+                  children: [
+                    { link: 'ml:overview' },
+                    { link: 'ml:dataVisualizer' },
+                    { link: 'ml:dataDrift', sideNavStatus: 'hidden' },
+                    { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
+                    { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
+                    { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
+                  ],
                   id: 'ml_overview',
                   title: '',
-                  children: [{ link: 'ml:overview' }, { link: 'ml:dataVisualizer' }],
                 },
                 {
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    {
+                      link: 'management:anomaly_detection',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection.manageJobs',
+                        {
+                          defaultMessage: 'Manage jobs',
+                        }
+                      ),
+                    },
+                    { link: 'ml:anomalyExplorer' },
+                    { link: 'ml:singleMetricViewer' },
+                  ],
                   id: 'category-anomaly_detection',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.anomalyDetection',
@@ -106,10 +130,10 @@ export const getNavigationTreeDefinition = ({
                       defaultMessage: 'Anomaly detection',
                     }
                   ),
-                  breadcrumbStatus: 'hidden',
-                  children: [{ link: 'ml:anomalyExplorer' }, { link: 'ml:singleMetricViewer' }],
                 },
                 {
+                  breadcrumbStatus: 'hidden',
+                  children: [{ link: 'ml:resultExplorer' }, { link: 'ml:analyticsMap' }],
                   id: 'category-data_frame analytics',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.dataFrameAnalytics',
@@ -117,10 +141,17 @@ export const getNavigationTreeDefinition = ({
                       defaultMessage: 'Data frame analytics',
                     }
                   ),
-                  breadcrumbStatus: 'hidden',
-                  children: [{ link: 'ml:resultExplorer' }, { link: 'ml:analyticsMap' }],
                 },
                 {
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    { link: 'ml:logRateAnalysis' },
+                    { link: 'ml:logRateAnalysisPage', sideNavStatus: 'hidden' },
+                    { link: 'ml:logPatternAnalysis' },
+                    { link: 'ml:logPatternAnalysisPage', sideNavStatus: 'hidden' },
+                    { link: 'ml:changePointDetections' },
+                    { link: 'ml:changePointDetectionsPage', sideNavStatus: 'hidden' },
+                  ],
                   id: 'category-aiops_labs',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.machineLearning.aiops_labs',
@@ -128,50 +159,21 @@ export const getNavigationTreeDefinition = ({
                       defaultMessage: 'AIOps labs',
                     }
                   ),
-                  breadcrumbStatus: 'hidden',
-                  children: [
-                    { link: 'ml:logRateAnalysis' },
-                    { link: 'ml:logPatternAnalysis' },
-                    { link: 'ml:changePointDetections' },
-                  ],
                 },
               ],
-            },
-          ],
-          footer: [
-            {
-              icon: 'launch',
-              id: 'search_getting_started',
-              link: 'searchGettingStarted',
-            },
-            {
-              getIsActive: ({ pathNameSerialized, prepend }) => {
-                return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-              },
-              icon: 'code',
-              id: 'dev_tools',
-              link: 'dev_tools',
-              title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                defaultMessage: 'Developer Tools',
+              icon: 'productML',
+              id: 'machine_learning',
+              renderAs: 'panelOpener',
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {
+                defaultMessage: 'Machine Learning',
               }),
             },
             {
               children: [
                 {
                   children: [
-                    {
-                      getIsActive: ({ pathNameSerialized, prepend }) => {
-                        return (
-                          pathNameSerialized.startsWith(
-                            prepend('/app/elasticsearch/index_management/indices')
-                          ) ||
-                          pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management')
-                          )
-                        );
-                      },
-                      link: 'management:index_management',
-                    },
+                    { link: 'management:index_management' },
+                    { link: 'management:data_federation' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -191,7 +193,11 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
+                  children: [
+                    { link: 'searchSynonyms:synonyms' },
+                    { link: 'searchQueryRules' },
+                    { link: 'searchPlayground' },
+                  ],
                   id: 'search_relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.relevance.title', {
                     defaultMessage: 'Relevance',
@@ -199,14 +205,31 @@ export const getNavigationTreeDefinition = ({
                 },
               ],
               icon: 'database',
-              id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
+              id: DATA_MANAGEMENT_NAV_ID,
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
                 defaultMessage: 'Data management',
               }),
             },
+          ],
+          footer: [
             {
-              icon: 'managementApp',
+              icon: 'rocket',
+              id: 'search_getting_started',
+              link: 'searchGettingStarted',
+            },
+            {
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+              },
+              icon: 'code',
+              id: 'dev_tools',
+              link: 'dev_tools',
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                defaultMessage: 'Developer Tools',
+              }),
+            },
+            {
               children: [
                 {
                   children: [
@@ -215,20 +238,26 @@ export const getNavigationTreeDefinition = ({
                       // https://github.com/elastic/kibana/issues/241518
                       // And that the sidenav panel opens when user lands to legacy management landing page
                       // https://github.com/elastic/kibana/issues/240275
+                      breadcrumbStatus: 'hidden',
                       link: 'management',
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.management.home', {
                         defaultMessage: 'Home',
                       }),
-                      breadcrumbStatus: 'hidden',
                     },
-                    {
-                      id: 'monitoring',
-                      link: 'monitoring',
-                    },
+                    // Only show Cloud Connect in on-prem deployments (not cloud)
+                    ...(isCloudEnabled
+                      ? []
+                      : [
+                          {
+                            id: 'cloud_connect' as const,
+                            link: 'cloud_connect' as const,
+                          },
+                        ]),
                   ],
                   id: 'stack_management_home',
                   title: '',
                 },
+                ...getAlertingV2ManagementNavPanel(core),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -245,10 +274,23 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
-                    { link: 'management:trained_models' },
                     {
-                      link: 'searchInferenceEndpoints:inferenceEndpoints',
+                      id: 'monitoring',
+                      link: 'monitoring',
                     },
+                    { badgeType: 'new', link: 'management:queryActivity' },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.clusterPerformance',
+                    {
+                      defaultMessage: 'Cluster performance',
+                    }
+                  ),
+                },
+                {
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:trained_models' },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },
                   ],
@@ -261,8 +303,27 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    {
+                      link: 'management:elastic_inference_service',
+                    },
+                    {
+                      link: 'management:inference_endpoints',
+                    },
+                    {
+                      link: 'management:model_settings',
+                    },
+                  ],
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.searchNav.management.modelManagement',
+                    {
+                      defaultMessage: 'Model Management',
+                    }
+                  ),
+                },
+                {
+                  children: [
                     { link: 'management:genAiSettings' },
-                    { link: 'management:agentBuilder' },
+                    { link: 'management:evals' },
                     { link: 'management:aiAssistantManagementSelection' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.ai', {
@@ -293,7 +354,6 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:dataViews' },
                     { link: 'management:filesManagement' },
-                    { link: 'visualize' },
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
@@ -314,6 +374,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
               ],
+              icon: 'managementApp',
               id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
               renderAs: 'panelOpener',
               title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

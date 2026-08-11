@@ -10,6 +10,8 @@ import { kubernetesOnboardingRouteRepository } from './kubernetes/route';
 import { firehoseOnboardingRouteRepository } from './firehose/route';
 import { otelHostOnboardingRouteRepository } from './otel_host/route';
 import { otelApmOnboardingRouteRepository } from './otel_apm/route';
+import { cloudforwarderOnboardingRouteRepository } from './cloudforwarder/route';
+import { apiEndpointsRouteRepository } from './api_endpoints/route';
 
 function getTypedObservabilityOnboardingServerRouteRepository() {
   const repository = {
@@ -18,6 +20,8 @@ function getTypedObservabilityOnboardingServerRouteRepository() {
     ...firehoseOnboardingRouteRepository,
     ...otelHostOnboardingRouteRepository,
     ...otelApmOnboardingRouteRepository,
+    ...cloudforwarderOnboardingRouteRepository,
+    ...apiEndpointsRouteRepository,
   };
 
   return repository;

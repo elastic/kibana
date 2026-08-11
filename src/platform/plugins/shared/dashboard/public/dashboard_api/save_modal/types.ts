@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { DashboardState } from '../../../common';
 
 export interface DashboardSaveOptions {
@@ -17,23 +17,21 @@ export interface DashboardSaveOptions {
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
-  onTitleDuplicate: () => void;
-  isTitleDuplicateConfirmed: boolean;
+  newAccessMode?: SavedObjectAccessControl['accessMode'];
+  newProjectRoutingRestore: boolean;
 }
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export interface SaveDashboardProps {
   dashboardState: DashboardState;
-  references: Reference[];
   saveOptions: SavedDashboardSaveOpts;
-  searchSourceReferences?: Reference[];
   lastSavedId?: string;
+  accessMode?: SavedObjectAccessControl['accessMode'];
 }
 
 export interface SaveDashboardReturn {
   id?: string;
   error?: string;
-  references?: Reference[];
   redirectRequired?: boolean;
 }

@@ -7,6 +7,5 @@
 
 export { sloDataFixture } from './slo_data';
 export type { SloDataFixture } from './slo_data';
-
 export { profilingSetupFixture } from './profiling';
 export type { ProfilingSetupFixture } from './profiling';

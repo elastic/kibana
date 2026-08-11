@@ -16,8 +16,8 @@ import type {
 } from '../../../../../../common/siem_migrations/resources';
 import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
 import type { SiemMigrationResource } from '../../../../../../common/siem_migrations/model/common.gen';
-import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import type { ItemDocument } from '../../types';
+import type { ResourceRetrieverDeps } from './types';
 
 type SupportedSiemMigrationResourceType =
   SiemMigrationResourceTypeByVendor[ResourceSupportedVendor];
@@ -45,12 +45,12 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
 
   constructor(
     protected readonly migrationId: string,
-    protected readonly resourcesDataClient: SiemMigrationsDataResourcesClient,
-    protected readonly ResourceIdentifier: ResourceIdentifierConstructor<I>
+    protected readonly ResourceIdentifier: ResourceIdentifierConstructor<I>,
+    protected readonly deps: ResourceRetrieverDeps
   ) {}
 
   public async initialize(): Promise<void> {
-    const batches = this.resourcesDataClient.searchBatches<MigrationDefinedResource>(
+    const batches = this.deps.resourcesDataClient.searchBatches<MigrationDefinedResource>(
       this.migrationId,
       { filters: { hasContent: true } } // filters out missing (undefined) content resources, empty strings content will be included
     );
@@ -79,7 +79,9 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
       throw new Error('initialize must be called before calling getResources');
     }
 
-    const resourceIdentifier = new this.ResourceIdentifier(originalItem.vendor);
+    const resourceIdentifier = new this.ResourceIdentifier(originalItem.vendor, {
+      experimentalFeatures: this.deps.experimentalFeatures,
+    });
     const resourcesIdentifiedFromRule = await resourceIdentifier.fromOriginal(originalItem);
 
     const macrosFound = new Map<string, MigrationDefinedResource>();
@@ -105,16 +107,18 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
 
     let nestedResourcesFound = resourcesFound;
     do {
-      const nestedResourcesIdentified = resourceIdentifier.fromResources(nestedResourcesFound);
+      const nestedResourcesIdentified = await resourceIdentifier.fromResources(
+        nestedResourcesFound
+      );
+      const nextNestedResources: MigrationDefinedResource[] = [];
 
-      nestedResourcesFound = [];
-      nestedResourcesIdentified.forEach((resource) => {
+      nestedResourcesIdentified.forEach((resource, index) => {
         if (resource.type !== 'macro' && resource.type !== 'lookup') {
           return;
         }
         const existingResource = existingResources[resource.type][resource.name];
         if (existingResource) {
-          nestedResourcesFound.push(existingResource);
+          nextNestedResources.push(existingResource);
           if (resource.type === 'macro') {
             macrosFound.set(resource.name, existingResource);
           } else if (resource.type === 'lookup') {
@@ -122,6 +126,7 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
           }
         }
       });
+      nestedResourcesFound = nextNestedResources;
     } while (nestedResourcesFound.length > 0);
 
     return {

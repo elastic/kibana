@@ -6,11 +6,13 @@
  */
 
 export const processVertexStreamMock = jest.fn();
+export const processVertexResponseMock = jest.fn();
 
 jest.doMock('./process_vertex_stream', () => {
   const actual = jest.requireActual('./process_vertex_stream');
   return {
     ...actual,
     processVertexStream: processVertexStreamMock,
+    processVertexResponse: processVertexResponseMock,
   };
 });

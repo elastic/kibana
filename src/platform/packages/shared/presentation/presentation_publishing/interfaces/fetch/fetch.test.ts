@@ -82,6 +82,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: false,
         query: {
           language: 'kquery',
@@ -184,6 +185,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: true,
         query: {
           language: 'kquery',
@@ -234,6 +236,7 @@ describe('onFetchContextChanged', () => {
       const fetchContext = onFetchMock.mock.calls[0][0];
       expect(fetchContext).toEqual({
         filters: [],
+        isApproximate: false,
         isReload: false,
         query: {
           language: 'kquery',
@@ -375,6 +378,152 @@ describe('onFetchContextChanged', () => {
         });
         subscription.unsubscribe();
       });
+    });
+  });
+
+  describe('isApproximate', () => {
+    test('propagates isApproximate from parent API', async () => {
+      const api = {
+        parentApi: {
+          ...parentApi,
+          isApproximate$: new BehaviorSubject<boolean>(true),
+        },
+      };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.isApproximate).toBe(true);
+      subscription.unsubscribe();
+    });
+
+    test('isApproximate is false when parent API does not publish it', async () => {
+      const subscription = fetch$({ parentApi }).subscribe(onFetchMock);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.isApproximate).toBe(false);
+      subscription.unsubscribe();
+    });
+
+    test('emits a new fetch context when isApproximate toggles', async () => {
+      const isApproximate$ = new BehaviorSubject<boolean>(false);
+      const api = { parentApi: { ...parentApi, isApproximate$ } };
+      const subscription = fetch$(api).subscribe(onFetchMock);
+      await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(1));
+      isApproximate$.next(true);
+      await waitFor(() => expect(onFetchMock).toHaveBeenCalledTimes(2));
+      expect(onFetchMock.mock.calls[1][0].isApproximate).toBe(true);
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('filter / variable meta data', () => {
+    test('does not receive its own filters', async () => {
+      const subscription = fetch$({
+        uuid: 'ignore me',
+        parentApi,
+      })
+        .pipe(skip(1))
+        .subscribe(onFetchMock);
+      await waitForSearchSession();
+      expect(onFetchMock).not.toHaveBeenCalled();
+
+      parentApi.filters$.next([
+        { meta: { controlledBy: 'keep me' } },
+        { meta: { controlledBy: 'ignore me' } },
+      ]);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.filters).toEqual([{ meta: { controlledBy: 'keep me' } }]);
+
+      subscription.unsubscribe();
+    });
+
+    test('ignores filters when they are scoped to a different section', async () => {
+      const api = {
+        uuid: 'ignore me',
+        parentApi: {
+          ...parentApi,
+          getPanelSection: () => undefined,
+          panelSection$: () => new BehaviorSubject(undefined), // global panel
+        },
+      };
+      const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+      await waitForSearchSession();
+      expect(onFetchMock).not.toHaveBeenCalled();
+
+      api.parentApi.filters$.next([
+        { meta: { group: 'some section' } },
+        { meta: { controlledBy: 'keep me' } },
+      ]);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.filters).toEqual([{ meta: { controlledBy: 'keep me' } }]);
+
+      subscription.unsubscribe();
+    });
+
+    test('receives global and local filters', async () => {
+      const api = {
+        uuid: 'ignore me',
+        parentApi: {
+          ...parentApi,
+          getPanelSection: () => 'some section',
+          panelSection$: () => new BehaviorSubject('some section'),
+        },
+      };
+      const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+      await waitForSearchSession();
+      expect(onFetchMock).not.toHaveBeenCalled();
+
+      const filters = [{ meta: { group: 'some section' } }, { meta: { controlledBy: 'keep me' } }];
+      api.parentApi.filters$.next(filters);
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.filters).toEqual(filters);
+
+      subscription.unsubscribe();
+    });
+
+    test('updates filters when sections change', async () => {
+      const panelSection$ = new BehaviorSubject<string | undefined>(undefined);
+      const api = {
+        uuid: 'ignore me',
+        parentApi: {
+          ...parentApi,
+          filters$: new BehaviorSubject([
+            { meta: { group: 'some section' } },
+            { meta: { controlledBy: 'keep me' } },
+            { meta: { controlledBy: 'ignore me', group: 'some section' } },
+          ]),
+          panelSection$: () => panelSection$,
+          getPanelSection: () => panelSection$.getValue(),
+        },
+      };
+      const subscription = fetch$(api).pipe(skip(1)).subscribe(onFetchMock);
+      await waitForSearchSession();
+      expect(onFetchMock).not.toHaveBeenCalled();
+
+      panelSection$.next('some section');
+      await waitFor(() => {
+        expect(onFetchMock).toHaveBeenCalledTimes(1);
+      });
+      const fetchContext = onFetchMock.mock.calls[0][0];
+      expect(fetchContext.filters).toEqual([
+        { meta: { group: 'some section' } },
+        { meta: { controlledBy: 'keep me' } },
+      ]);
+
+      subscription.unsubscribe();
     });
   });
 });

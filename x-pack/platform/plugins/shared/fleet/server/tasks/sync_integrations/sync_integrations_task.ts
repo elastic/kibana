@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -19,7 +19,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { outputService } from '../../services';
+import { appContextService, outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
@@ -69,14 +69,14 @@ export class SyncIntegrationsTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -121,7 +121,7 @@ export class SyncIntegrationsTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
@@ -144,18 +144,18 @@ export class SyncIntegrationsTask {
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
+      await this.updateSyncedIntegrationsData(esClient, soClient, signal);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        abortController,
+        signal,
         this.logger
       );
 
@@ -196,8 +196,8 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient,
-    abortController: AbortController
+    soClient: SavedObjectsClientContract,
+    signal: AbortSignal
   ) => {
     const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
@@ -277,7 +277,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        abortController,
+        signal,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -295,7 +295,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: abortController.signal }
+      { signal }
     );
   };
 }

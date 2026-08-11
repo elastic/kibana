@@ -1,0 +1,67 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkCreateRequest:
+          summary: Create multiple saved objects (partial success)
+          value:
+            - type: dashboard
+              id: example-dashboard-1
+              attributes:
+                title: Example dashboard 1
+              references: []
+            - type: dashboard
+              id: example-dashboard-2
+              attributes:
+                title: Example dashboard 2
+              references: []
+responses:
+  '200':
+    description: A bulk create response.
+    content:
+      application/json:
+        examples:
+          bulkCreateResponse:
+            summary: A bulk create response with one conflict
+            value:
+              saved_objects:
+                - id: example-dashboard-1
+                  type: dashboard
+                  attributes:
+                    title: Example dashboard 1
+                  references: []
+                  namespaces:
+                    - default
+                  managed: false
+                  updated_at: '2026-04-17T12:00:00.000Z'
+                  version: WzEsMV0=
+                - id: example-dashboard-2
+                  type: dashboard
+                  error:
+                    statusCode: 409
+                    error: Conflict
+                    message: Saved object [dashboard/example-dashboard-2] conflict
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Unsupported saved object type(s): unknownType'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/_bulk_create?overwrite=false" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '[{"type":"dashboard","id":"example-dashboard-1","attributes":{"title":"Example dashboard 1"},"references":[]},{"type":"dashboard","id":"example-dashboard-2","attributes":{"title":"Example dashboard 2"},"references":[]}]'
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/_bulk_create?overwrite=false
+      [{"type":"dashboard","id":"example-dashboard-1","attributes":{"title":"Example dashboard 1"},"references":[]},{"type":"dashboard","id":"example-dashboard-2","attributes":{"title":"Example dashboard 2"},"references":[]}]

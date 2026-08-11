@@ -39,6 +39,11 @@ const loginWithPrivilegeNone = (privilegePrefix: string) => {
 const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
   const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
 
+  const siemVersion =
+    Object.keys(endpointSecurityPolicyManagerRole.kibana[0].feature).find((feature) =>
+      feature.startsWith('siem')
+    ) ?? SECURITY_FEATURE_ID;
+
   return {
     ...endpointSecurityPolicyManagerRole,
     kibana: [
@@ -46,9 +51,9 @@ const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
         ...endpointSecurityPolicyManagerRole.kibana[0],
         feature: {
           ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: endpointSecurityPolicyManagerRole.kibana[0].feature[
-            SECURITY_FEATURE_ID
-          ].filter((privilege) => privilege !== `${privilegePrefix}all`),
+          [siemVersion]: endpointSecurityPolicyManagerRole.kibana[0].feature[siemVersion].filter(
+            (privilege) => privilege !== `${privilegePrefix}all`
+          ),
         },
       },
     ],
@@ -127,6 +132,7 @@ describe(
               cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
               cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+              cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('not.exist');
             }
           );
 
@@ -135,6 +141,7 @@ describe(
             visitArtifactTab(testData.tabId);
 
             cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
+            cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('exist');
 
             cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
 

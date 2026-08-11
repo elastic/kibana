@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DASHBOARD_API_PATH } from '@kbn/dashboard-plugin/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -57,25 +58,21 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${ATestSpace} space`, async () => {
       await supertest
-        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
-        .post(`/s/${ATestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${ATestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest
@@ -99,14 +96,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`returns content summary for ${BTestSpace} space`, async () => {
       await supertest
-        .post(`/s/${BTestSpace}/api/dashboards/dashboard`)
+        .post(`/s/${BTestSpace}${DASHBOARD_API_PATH}`)
         .set('kbn-xsrf', 'xxx')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('elastic-api-version', '1')
+        .set('elastic-api-version', '2023-10-31')
         .send({
-          data: {
-            title: 'Sample dashboard',
-          },
+          title: 'Sample dashboard',
         });
 
       await supertest

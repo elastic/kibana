@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/apm-plugin",
-  "owner": ["@elastic/obs-ux-infra_services-team"],
+  "owner": ["@elastic/obs-signals-traces-team"],
   "group": "observability",
   "visibility": "private",
   "description": "The user interface for Elastic APM",
@@ -30,6 +30,7 @@
       "triggersActionsUi",
       "share",
       "unifiedSearch",
+      "kql",
       "dataViews",
       "lens",
       "maps",
@@ -37,7 +38,8 @@
       "logsDataAccess",
       "savedSearch",
       "fieldsMetadata",
-      "discoverShared"
+      "discoverShared",
+      "apmShared"
     ],
     "optionalPlugins": [
       "actions",
@@ -51,6 +53,7 @@
       "home",
       "ml",
       "security",
+      "slo",
       "spaces",
       "serverless",
       "taskManager",
@@ -59,9 +62,21 @@
       "licenseManagement",
       "profilingDataAccess",
       "observabilityAIAssistant",
-      "share",
-      "onechat"
+      "observabilityAgentBuilder",
+      "agentBuilder",
+      "slo",
+      "cps",
     ],
-    "requiredBundles": ["fleet", "kibanaReact", "kibanaUtils", "ml", "observability", "maps"]
+    "requiredBundles": [
+      "fleet",
+      "kibanaReact",
+      "kibanaUtils",
+      "ml",
+      "observability",
+      "maps",
+      "observabilityAgentBuilder",
+      "unifiedDocViewer",
+      "presentationUtil"
+    ]
   }
 }

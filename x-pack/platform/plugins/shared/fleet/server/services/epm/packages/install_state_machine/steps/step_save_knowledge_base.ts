@@ -7,11 +7,16 @@
 
 import path from 'path';
 
+import type { Logger } from '@kbn/core/server';
+
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+
 import { FleetError } from '../../../../../errors';
 import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
 } from '../../knowledge_base_index';
+import { getPackageKnowledgeBase } from '../../get';
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
@@ -21,10 +26,10 @@ import {
   type ArchiveEntry,
 } from '../../../../../../common/types/models/epm';
 import type { EsAssetReference } from '../../../../../types';
-import { updateEsAssetReferences } from '../../es_assets_reference';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
 import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
 import { licenseService } from '../../../../license';
-import { appContextService } from '../../../../app_context';
+import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
 export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 export const DOCS_PATH_PATTERN = '/docs/';
 export const KNOWLEDGE_BASE_FOLDER = 'knowledge_base/';
@@ -82,17 +87,18 @@ export async function stepSaveKnowledgeBase(
   const { packageInstallContext, esClient, savedObjectsClient, logger } = context;
   const { packageInfo, archiveIterator } = packageInstallContext;
 
-  let esReferences = context.esReferences ?? [];
+  const esReferences = context.esReferences ?? [];
 
   logger.debug(
     `Knowledge base step: Starting for package ${packageInfo.name}@${packageInfo.version}`
   );
 
-  // Check if knowledge base installation is enabled via experimental feature flag
-  const experimentalFeatures = appContextService.getExperimentalFeatures();
-  if (!experimentalFeatures.installIntegrationsKnowledge) {
+  const integrationKnowledgeEnabled = await getIntegrationKnowledgeSetting(savedObjectsClient);
+
+  // Check if knowledge base installation is enabled via user setting
+  if (!integrationKnowledgeEnabled) {
     logger.debug(
-      `Knowledge base step: Skipping knowledge base save - installIntegrationsKnowledge experimental feature is disabled`
+      `Knowledge base step: Skipping knowledge base save - integration knowledge enabled setting is disabled`
     );
     return { esReferences };
   }
@@ -104,6 +110,49 @@ export async function stepSaveKnowledgeBase(
     return { esReferences };
   }
 
+  const existing = await getPackageKnowledgeBase({ esClient, pkgName: packageInfo.name });
+  if (
+    existing?.items.length &&
+    existing.items.every((item) => item.version === packageInfo.version)
+  ) {
+    logger.debug(
+      `Knowledge base already indexed for ${packageInfo.name}@${packageInfo.version}, skipping re-index`
+    );
+
+    // The content is already current, so skip the (expensive) re-indexing. But still ensure the
+    // es asset references are present: they may be missing if the epm-packages saved object was
+    // reset while the indexed content survived (e.g. after an install rollback).
+    const knowledgeBaseAssetRefs = existing.items.map((item) => ({
+      id: `${packageInfo.name}-${item.fileName}`,
+      type: ElasticsearchAssetType.knowledgeBase,
+    }));
+    const updatedEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      knowledgeBaseAssetRefs
+    );
+    return { esReferences: updatedEsReferences };
+  }
+
+  return await indexKnowledgeBase(
+    esReferences,
+    savedObjectsClient,
+    esClient,
+    logger,
+    packageInfo,
+    archiveIterator
+  );
+}
+
+export async function indexKnowledgeBase(
+  esReferences: EsAssetReference[],
+  savedObjectsClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  packageInfo: { name: string; version: string },
+  archiveIterator: ArchiveIterator,
+  signal?: AbortSignal
+): Promise<{ esReferences: EsAssetReference[] }> {
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
     archiveIterator,
@@ -111,7 +160,9 @@ export async function stepSaveKnowledgeBase(
     packageInfo.version
   );
 
-  logger.debug(`Knowledge base step: Found ${knowledgeBaseItems.length} items to process`);
+  logger.debug(
+    `Knowledge base step: Found ${knowledgeBaseItems.length} items to process for package ${packageInfo.name}@${packageInfo.version}`
+  );
 
   // Save knowledge base content if present
   if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
@@ -123,9 +174,12 @@ export async function stepSaveKnowledgeBase(
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
+        signal,
       });
 
-      logger.debug(`Knowledge base step: Saved ${documentIds.length} documents to index`);
+      logger.debug(
+        `Knowledge base step: Saved ${documentIds.length} documents to index for package ${packageInfo.name}@${packageInfo.version}`
+      );
 
       // Add knowledge base asset references using the ES-generated document IDs
       const knowledgeBaseAssetRefs = documentIds.map((docId) => ({
@@ -133,14 +187,13 @@ export async function stepSaveKnowledgeBase(
         type: ElasticsearchAssetType.knowledgeBase,
       }));
 
-      // Update ES asset references to include knowledge base assets
-      esReferences = await updateEsAssetReferences(
+      // Use optimistic concurrency control to safely merge KB refs with
+      // any refs that may have been added concurrently (e.g. by policy creation
+      // for input packages), since this step runs asynchronously.
+      esReferences = await optimisticallyAddEsAssetReferences(
         savedObjectsClient,
         packageInfo.name,
-        esReferences,
-        {
-          assetsToAdd: knowledgeBaseAssetRefs,
-        }
+        knowledgeBaseAssetRefs
       );
     } catch (error) {
       throw new FleetError(`Error saving knowledge base content: ${error}`);

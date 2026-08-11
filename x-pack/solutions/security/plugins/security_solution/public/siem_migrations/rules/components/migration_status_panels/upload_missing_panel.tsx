@@ -23,6 +23,7 @@ import { useGetMissingResources } from '../../../common/hooks/use_get_missing_re
 import * as i18n from './translations';
 import { useMigrationDataInputContext } from '../../../common/components';
 import type { RuleMigrationStats } from '../../types';
+import { useRuleMigrationVendorCopy } from '../../hooks/use_rule_migration_vendor_copy';
 
 interface RuleMigrationsUploadMissingPanelProps {
   migrationStats: RuleMigrationStats;
@@ -62,12 +63,16 @@ const RuleMigrationsUploadMissingPanelContent =
       const { euiTheme } = useEuiTheme();
       const { telemetry } = useKibana().services.siemMigrations.rules;
       const { openFlyout } = useMigrationDataInputContext();
+      const { missingResources: missingResourcesCopy } = useRuleMigrationVendorCopy(
+        migrationStats.vendor
+      );
 
       const onOpenFlyout = useCallback(() => {
         openFlyout(migrationStats);
         telemetry.reportSetupMigrationOpenResources({
           migrationId: migrationStats.id,
           missingResourcesCount: missingResources.length,
+          vendor: migrationStats.vendor,
         });
       }, [migrationStats, openFlyout, missingResources, telemetry]);
 
@@ -87,7 +92,7 @@ const RuleMigrationsUploadMissingPanelContent =
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <PanelText data-test-subj="uploadMissingPanelTitle" size="s" semiBold>
-                  {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                  {missingResourcesCopy.uploadTitle}
                 </PanelText>
               </EuiFlexItem>
               <EuiFlexItem>

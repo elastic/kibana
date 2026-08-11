@@ -43,6 +43,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   AttachmentUI,
+  AttachmentUIV2,
   CaseUICustomField,
   CasesConfigurationUICustomField,
   CasesConfigurationUITemplate,
@@ -61,7 +62,7 @@ import type {
   PersistableStateAttachmentType,
 } from '../client/attachment_framework/types';
 import type {
-  CasesFindResponse,
+  CasesSearchResponse,
   CasesSimilarResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
@@ -95,6 +96,21 @@ export const basicComment: AttachmentUI = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const basicCommentUnified: AttachmentUIV2 = {
+  id: basicCommentId,
+  type: 'comment',
+  owner: SECURITY_SOLUTION_OWNER,
+  data: { content: 'Solve this fast!' },
+  metadata: null,
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
   updatedAt: null,
@@ -153,57 +169,6 @@ export const eventComment: EventAttachmentUI = {
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
-};
-
-export const hostIsolationComment = (overrides?: Record<string, unknown>): AttachmentUI => {
-  return {
-    type: AttachmentType.actions,
-    comment: 'I just isolated the host!',
-    id: 'isolate-comment-id',
-    actions: {
-      targets: [
-        {
-          hostname: 'host1',
-          endpointId: '001',
-        },
-      ],
-      type: 'isolate',
-    },
-    createdAt: basicCreatedAt,
-    createdBy: elasticUser,
-    owner: SECURITY_SOLUTION_OWNER,
-    pushedAt: null,
-    pushedBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    version: 'WzQ3LDFc',
-    ...overrides,
-  };
-};
-
-export const hostReleaseComment: () => AttachmentUI = () => {
-  return {
-    type: AttachmentType.actions,
-    comment: 'I just released the host!',
-    id: 'isolate-comment-id',
-    actions: {
-      targets: [
-        {
-          hostname: 'host1',
-          endpointId: '001',
-        },
-      ],
-      type: 'unisolate',
-    },
-    createdAt: basicCreatedAt,
-    createdBy: elasticUser,
-    owner: SECURITY_SOLUTION_OWNER,
-    pushedAt: null,
-    pushedBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    version: 'WzQ3LDFc',
-  };
 };
 
 export const externalReferenceAttachment: ExternalReferenceAttachmentUI = {
@@ -278,6 +243,11 @@ export const basicCase: CaseUI = {
   incrementalId: undefined,
 };
 
+export const basicCaseWithUnifiedComments: CaseUI = {
+  ...basicCase,
+  comments: [basicCommentUnified],
+};
+
 export const basicFileMock: FileJSON = {
   id: '7d47d130-bcec-11ed-afa1-0242ac120002',
   name: 'my-super-cool-screenshot',
@@ -329,7 +299,6 @@ export const basicCaseNumericValueFeatures: SingleCaseMetricsFeature[] = [
   CaseMetricsFeature.ALERTS_COUNT,
   CaseMetricsFeature.ALERTS_USERS,
   CaseMetricsFeature.ALERTS_HOSTS,
-  CaseMetricsFeature.ACTIONS_ISOLATE_HOST,
   CaseMetricsFeature.CONNECTORS,
 ];
 
@@ -348,12 +317,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
     users: {
       total: 1,
       values: [{ name: 'Jon', count: 12 }],
-    },
-  },
-  actions: {
-    isolateHost: {
-      isolate: { total: 5 },
-      unisolate: { total: 3 },
     },
   },
   connectors: { total: 1 },
@@ -500,6 +463,7 @@ export const allCases: CasesFindResponseUI = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+  mttr: 2000,
 };
 
 export const similarCases: CasesSimilarResponseUI = {
@@ -667,7 +631,7 @@ export const casesSnake: Cases = [
   caseWithRegisteredAttachmentsSnake,
 ];
 
-export const allCasesSnake: CasesFindResponse = {
+export const allCasesSnake: CasesSearchResponse = {
   cases: casesSnake,
   page: 1,
   per_page: 5,
@@ -675,6 +639,7 @@ export const allCasesSnake: CasesFindResponse = {
   count_closed_cases: 130,
   count_in_progress_cases: 40,
   count_open_cases: 20,
+  mttr: 2000,
 };
 
 export const similarCasesSnake: CasesSimilarResponse = {
@@ -962,24 +927,6 @@ export const getEventUserAction = (
   ...overrides,
 });
 
-export const getHostIsolationUserAction = (
-  overrides?: Record<string, unknown>
-): SnakeToCamelCase<UserActionWithResponse<CommentUserAction>> => ({
-  ...getUserAction(UserActionTypes.comment, UserActionActions.create),
-  id: 'isolate-action-id',
-  type: UserActionTypes.comment,
-  commentId: 'isolate-comment-id',
-  payload: {
-    comment: {
-      type: AttachmentType.actions,
-      comment: 'a comment',
-      actions: { targets: [], type: 'test' },
-      owner: SECURITY_SOLUTION_OWNER,
-    },
-  },
-  ...overrides,
-});
-
 export const caseUserActions: UserActionUI[] = [
   getUserAction('description', UserActionActions.create),
   getUserAction('comment', UserActionActions.create),
@@ -1040,7 +987,9 @@ export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
   total: 20,
   totalDeletions: 0,
   totalComments: 10,
+  totalCommentCreations: 10,
   totalCommentDeletions: 0,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 10,
   totalOtherActionDeletions: 0,
 };

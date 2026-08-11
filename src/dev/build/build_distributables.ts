@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import execa from 'execa';
 import chalk from 'chalk';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -40,12 +41,26 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetServerlessPlatforms: boolean;
+  skipServerless: boolean;
+  tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
+  if (process.env.KBN_USE_RSPACK === undefined) {
+    process.env.KBN_USE_RSPACK = 'true';
+  }
+
+  if (options.tarZstd) {
+    try {
+      await execa('zstd', ['--version']);
+    } catch {
+      throw new Error('--tar-zstd requires zstd to be installed.');
+    }
+  }
+
   log.verbose('building distributables with options:', options);
 
   log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
@@ -76,7 +91,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
     await globalRun(Tasks.ReplaceFavicon);
-    await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    // [rspack-transition] Use Rspack by default, with an explicit legacy webpack opt-out.
+    // When legacy is removed, keep only Tasks.BuildRspackBundles.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      await globalRun(Tasks.BuildRspackBundles);
+    } else {
+      await globalRun(Tasks.BuildKibanaPlatformPlugins);
+    }
     await globalRun(Tasks.CreatePackageJson);
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
@@ -88,10 +109,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateXPackNoticeFile);
 
     await globalRun(Tasks.DeletePackagesFromBuildRoot);
+
     await globalRun(Tasks.UpdateLicenseFile);
     await globalRun(Tasks.RemovePackageJsonDeps);
     await globalRun(Tasks.CleanPackageManagerRelatedFiles);
     await globalRun(Tasks.CleanExtraFilesFromModules);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }
@@ -167,16 +190,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', null));
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'workplaceai'));
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'observability'));
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'search'));
-    artifactTasks.push(Tasks.CreateDockerServerless('x64', 'security'));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', null));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'workplaceai'));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'observability'));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'search'));
-    artifactTasks.push(Tasks.CreateDockerServerless('aarch64', 'security'));
+    artifactTasks.push(Tasks.CreateDockerServerless('x64'));
+    artifactTasks.push(Tasks.CreateDockerServerless('aarch64'));
   }
 
   if (options.createDockerFIPS) {

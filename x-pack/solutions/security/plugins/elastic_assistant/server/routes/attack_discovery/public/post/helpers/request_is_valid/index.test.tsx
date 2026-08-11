@@ -6,13 +6,14 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AttackDiscoveryPostInternalRequestBody } from '@kbn/elastic-assistant-common';
+import type { PostAttackDiscoveryGenerateRequestBody } from '@kbn/elastic-assistant-common';
 
-import { mockAnonymizationFields } from '../../../../../../lib/defend_insights/graphs/default_defend_insights_graph/mock/mock_anonymization_fields';
+import { getMockAnonymizationFieldResponse } from '../../../../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymization_fields';
 import { requestIsValid } from '.';
 
 describe('requestIsValid', () => {
   const alertsIndexPattern = '.alerts-security.alerts-default';
+  const mockAnonymizationFields = getMockAnonymizationFieldResponse();
   const replacements = { uuid: 'original_value' };
   const size = 20;
   const request = {
@@ -25,7 +26,7 @@ describe('requestIsValid', () => {
       size,
       subAction: 'invokeAI',
     },
-  } as unknown as KibanaRequest<unknown, unknown, AttackDiscoveryPostInternalRequestBody>;
+  } as unknown as KibanaRequest<unknown, unknown, PostAttackDiscoveryGenerateRequestBody>;
 
   it('returns false when the request is missing required anonymization parameters', () => {
     const requestMissingAnonymizationParams = {
@@ -34,7 +35,7 @@ describe('requestIsValid', () => {
         isEnabledKnowledgeBase: false,
         size: 20,
       },
-    } as unknown as KibanaRequest<unknown, unknown, AttackDiscoveryPostInternalRequestBody>;
+    } as unknown as KibanaRequest<unknown, unknown, PostAttackDiscoveryGenerateRequestBody>;
 
     const params = {
       alertsIndexPattern,

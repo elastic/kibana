@@ -9,11 +9,8 @@ import React from 'react';
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
-import type { IHttpFetchError } from '@kbn/core/public';
-
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
-
-import type { UseQueryResult } from '@kbn/react-query';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import type { UseLoadConnectorsResult } from '@kbn/inference-connectors';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -23,12 +20,20 @@ import type { FetchCurrentUserConversations } from './api';
 import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { welcomeConvo } from '../mock/conversation';
+import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
+  DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
+  STREAMING_LOCAL_STORAGE_KEY,
+} from '../assistant_context/constants';
 
-jest.mock('../connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../connectorland/connector_setup');
 jest.mock('react-use/lib/useLocalStorage');
 jest.mock('react-use/lib/useSessionStorage');
@@ -141,21 +146,34 @@ describe('Assistant', () => {
         actionTypeId: '.gen-ai',
       },
     ];
+
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
       isFetchedAfterMount: true,
       data: connectors,
-    } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+    } as unknown as UseLoadConnectorsResult);
 
     jest
       .mocked(useFetchCurrentUserConversations)
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
+
     jest.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
-    jest
-      .mocked(useLocalStorage)
-      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
-        typeof useLocalStorage
-      >);
+
+    const localStorageDefaults: Array<[string, unknown]> = [
+      [LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY, mockData.welcome_id],
+      [LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY, mockData.welcome_id.id],
+      [SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY, false],
+      [CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY, true],
+      [STREAMING_LOCAL_STORAGE_KEY, true],
+      [KNOWLEDGE_BASE_LOCAL_STORAGE_KEY, DEFAULT_KNOWLEDGE_BASE_SETTINGS],
+    ];
+
+    jest.mocked(useLocalStorage).mockImplementation((key, initialValue) => {
+      const match = localStorageDefaults.find(([storageKey]) => key.includes(storageKey));
+      const value = match ? match[1] : initialValue;
+      return [value, persistToLocalStorage] as unknown as ReturnType<typeof useLocalStorage>;
+    });
+
     jest
       .mocked(useSessionStorage)
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
@@ -277,6 +295,76 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenCalled();
       expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: mockData.welcome_id.id });
+    });
+  });
+
+  describe('when no connectors exist and user can create them', () => {
+    it('enables header controls while chat stays disabled', async () => {
+      const noConnectorConversation = {
+        ...welcomeConvo,
+        id: 'welcome_id',
+        title: welcomeConvo.title,
+        category: welcomeConvo.category,
+        messages: welcomeConvo.messages,
+        replacements: welcomeConvo.replacements,
+        createdBy: welcomeConvo.createdBy,
+        users: welcomeConvo.users,
+        createdAt: welcomeConvo.createdAt,
+        apiConfig: { ...welcomeConvo.apiConfig, connectorId: '' },
+        isConversationOwner: true,
+      };
+
+      const noConnectorData = {
+        welcome_id: noConnectorConversation,
+      };
+
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: [],
+      } as unknown as UseLoadConnectorsResult);
+
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
+        data: noConnectorData,
+      } as unknown as FetchCurrentUserConversations);
+
+      render(
+        <TestProviders>
+          <Assistant
+            lastConversation={{ id: 'welcome_id' }}
+            chatHistoryVisible={true}
+            setChatHistoryVisible={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const addConnectorButton = await screen.findByTestId('addNewConnectorButton');
+      expect(addConnectorButton).toBeEnabled();
+      expect(screen.getByTestId('chat-context-menu')).toBeEnabled();
+      expect(screen.getByTestId('prompt-textarea')).toBeDisabled();
+    });
+  });
+
+  describe('when connectors exist', () => {
+    it('shows the connector selector instead of add button', async () => {
+      const connectors: unknown[] = [
+        {
+          id: 'connector-1',
+          name: 'OpenAI connector',
+          actionTypeId: '.gen-ai',
+        },
+      ];
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: connectors,
+      } as unknown as UseLoadConnectorsResult);
+
+      await renderAssistant();
+
+      expect(screen.queryByTestId('addNewConnectorButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('connector-selector')).toBeEnabled();
     });
   });
 

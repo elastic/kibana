@@ -21,6 +21,7 @@ import { difference } from 'lodash';
 import React, { Component } from 'react';
 
 import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ import type { SpacesManager } from '../../spaces_manager';
 import { UnauthorizedPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
+import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
@@ -53,6 +55,7 @@ interface Props {
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  isCpsTierEligible: boolean;
 }
 
 interface State {
@@ -92,6 +95,10 @@ export class CreateSpacePage extends Component<Props, State> {
   public async componentDidMount() {
     if (!this.props.capabilities.spaces.manage) {
       return;
+    }
+
+    if (this.canEditProjectRouting()) {
+      this.setDefaultProjectRouting();
     }
 
     const { spaceId, getFeatures, notifications } = this.props;
@@ -141,6 +148,26 @@ export class CreateSpacePage extends Component<Props, State> {
     if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
       await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
     }
+  }
+
+  private canEditProjectRouting(): boolean {
+    return (
+      this.props.capabilities.project_routing?.manage_space_default === true &&
+      this.props.isCpsTierEligible === true
+    );
+  }
+
+  private setDefaultProjectRouting() {
+    if (this.state.space.projectRouting != null) {
+      return;
+    }
+
+    this.setState(({ space }) => ({
+      space: {
+        ...space,
+        projectRouting: PROJECT_ROUTING.ALL,
+      },
+    }));
   }
 
   public render() {
@@ -222,6 +249,13 @@ export class CreateSpacePage extends Component<Props, State> {
         />
 
         <EuiSpacer />
+
+        {this.canEditProjectRouting() && (
+          <>
+            <CustomizeCps space={this.state.space} onChange={this.onSpaceChange} />
+            <EuiSpacer />
+          </>
+        )}
 
         {this.getChangeImpactWarning()}
 
@@ -309,7 +343,7 @@ export class CreateSpacePage extends Component<Props, State> {
     );
   };
 
-  private onSolutionViewChange = (space: Partial<Space>) => {
+  private onSolutionViewChange = (space: CustomizeSpaceFormValues) => {
     this.setState((state) => ({ ...state, solution: space.solution }));
     this.onSpaceChange(space);
   };
@@ -393,6 +427,7 @@ export class CreateSpacePage extends Component<Props, State> {
       imageUrl,
       avatarType,
       solution,
+      projectRouting,
     } = this.state.space;
 
     const params = {
@@ -400,10 +435,11 @@ export class CreateSpacePage extends Component<Props, State> {
       id,
       description,
       initials: avatarType !== 'image' ? initials : '',
-      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
+      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : undefined, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
       solution,
+      projectRouting,
     };
 
     const { spacesManager, eventTracker } = this.props;

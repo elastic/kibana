@@ -21,12 +21,12 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 
 import type { AppDependencies } from '../app_dependencies';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 
@@ -96,10 +96,10 @@ const appDependencies: AppDependencies = {
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  kql: kqlPluginMock.createStartContract(),
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
   settings: settingsServiceMock.createStartContract(),
   savedSearch: savedSearchPluginMock.createStartContract(),
-  contentManagement: contentManagementMock.createStartContract(),
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
 };
 

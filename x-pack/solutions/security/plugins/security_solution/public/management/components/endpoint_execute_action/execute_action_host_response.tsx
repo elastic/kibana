@@ -6,6 +6,7 @@
  */
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+import { EndpointHostExecutionResponseOutput } from '../endpoint_host_execution_response_output/endpoint_host_execution_response_output';
 import type {
   ActionDetails,
   MaybeImmutable,
@@ -16,7 +17,6 @@ import type {
 } from '../../../../common/endpoint/types';
 import { EXECUTE_FILE_LINK_TITLE } from '../endpoint_response_actions_list/translations';
 import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
-import { ExecuteActionHostResponseOutput } from './execute_action_host_response_output';
 
 export interface ExecuteActionHostResponseProps {
   action: MaybeImmutable<
@@ -62,7 +62,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
         {outputContent && (
           <>
             <EuiSpacer size="l" />
-            <ExecuteActionHostResponseOutput
+            <EndpointHostExecutionResponseOutput
               outputContent={outputContent}
               data-test-subj={`${dataTestSubj}-executeResponseOutput`}
               textSize={textSize}

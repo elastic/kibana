@@ -13,15 +13,11 @@ import { default as MarkdownIt } from 'markdown-it';
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import {
-  getNodeSSLOptions,
-  getSSLSettingsFromConfig,
-} from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from '@kbn/actions-utils';
 import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
-  ProxySettings,
 } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import type { Attachment } from '@kbn/connector-schemas/email';
@@ -63,6 +59,7 @@ export interface Routing {
   to: string[];
   cc: string[];
   bcc: string[];
+  replyTo?: string[];
 }
 
 export interface Content {
@@ -82,7 +79,6 @@ export async function sendEmail(
   const attachments = options.attachments ?? [];
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
-
   if (transport.service === AdditionalEmailServices.EXCHANGE) {
     return await sendEmailWithExchange(
       logger,
@@ -126,6 +122,7 @@ export async function sendEmailWithExchange(
     logger,
     configurationUtilities,
     credentials: {
+      type: 'client_secret',
       config: {
         clientId: clientId as string,
       },
@@ -180,7 +177,8 @@ async function sendEmailWithNodemailer(
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
-  const { from, to, cc, bcc } = routing;
+  const { from, to, cc, bcc, replyTo } = routing;
+
   const { subject, message } = content;
 
   const email = {
@@ -189,6 +187,7 @@ async function sendEmailWithNodemailer(
     to,
     cc,
     bcc,
+    ...(replyTo && replyTo.length ? { replyTo } : {}),
     // email content
     subject,
     html: messageHTML,
@@ -221,6 +220,10 @@ function htmlFromMarkdown(logger: Logger, markdown: string) {
       linkify: true,
     });
 
+    md.renderer.rules.table_open = () => '<table style="border-collapse: collapse;">';
+    md.renderer.rules.th_open = () => '<th style="border: 1px solid; padding: 0 4px;">';
+    md.renderer.rules.td_open = () => '<td style="border: 1px solid; padding: 0 4px;">';
+
     return md.render(markdown);
   } catch (err) {
     logger.debug(`error rendering markdown to html: ${err.message}`);
@@ -236,7 +239,6 @@ function getTransportConfig(
   hasAuth: boolean
 ) {
   const { service, host, port, secure, user, password } = transport;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();

@@ -11,7 +11,7 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -28,6 +28,15 @@
     "@kbn/visualization-utils",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/ml-agg-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/unified-search-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

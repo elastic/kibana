@@ -19,8 +19,15 @@ describe('mute alert instance', () => {
   const ruleTypeRegistryMock = { ensureRuleTypeEnabled: jest.fn() };
   const getAlertIndicesAliasMock = jest.fn();
   const alertsServiceMock = {
-    isExistingAlert: jest.fn().mockResolvedValue(true),
+    isExistingAlert: jest.fn(),
+    muteAlertInstance: jest.fn(),
   };
+
+  beforeEach(() => {
+    getAlertIndicesAliasMock.mockReturnValue(['alert-index-1']);
+    alertsServiceMock.isExistingAlert.mockResolvedValue(true);
+    alertsServiceMock.muteAlertInstance.mockResolvedValue(undefined);
+  });
 
   afterEach(() => {
     jest.resetAllMocks();
@@ -82,10 +89,11 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).not.toHaveBeenCalled();
+    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
     expect(alertsServiceMock.isExistingAlert).not.toHaveBeenCalled();
+    expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
@@ -145,10 +153,11 @@ describe('mute alert instance', () => {
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
     expect(authorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
-    expect(actionsAuthorizationMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(actionsAuthorizationMock.ensureAuthorized).not.toHaveBeenCalled();
     expect(ruleTypeRegistryMock.ensureRuleTypeEnabled).toHaveBeenCalledTimes(1);
-    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(1);
+    expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
     expect(alertsServiceMock.isExistingAlert).toHaveBeenCalledTimes(1);
+    expect(alertsServiceMock.muteAlertInstance).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
 
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(

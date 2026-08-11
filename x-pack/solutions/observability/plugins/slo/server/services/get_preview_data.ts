@@ -55,15 +55,20 @@ export class GetPreviewData {
     private dataViewService: DataViewsService
   ) {}
 
-  private async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
-    let dataView: DataView | undefined;
-    if (dataViewId) {
-      try {
-        dataView = await this.dataViewService.get(dataViewId);
-      } catch (e) {
-        // If the data view is not found, we will continue without it
-      }
+  private async getDataView(dataViewId?: string): Promise<DataView | undefined> {
+    if (!dataViewId) {
+      return undefined;
     }
+    try {
+      return await this.dataViewService.get(dataViewId);
+    } catch (e) {
+      // If the data view is not found, we will continue without it
+      return undefined;
+    }
+  }
+
+  private async buildRuntimeMappings({ dataViewId }: { dataViewId?: string }) {
+    const dataView = await this.getDataView(dataViewId);
     return dataView?.getRuntimeMappings?.() ?? {};
   }
 
@@ -101,6 +106,7 @@ export class GetPreviewData {
     indicator: APMTransactionDurationIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
+    const dataView = await this.getDataView(indicator.params.dataViewId);
     const filter: estypes.QueryDslQueryContainer[] = [];
     const groupingFilters = this.getGroupingFilters(options);
     if (groupingFilters) {
@@ -123,7 +129,7 @@ export class GetPreviewData {
         match: { 'transaction.type': indicator.params.transactionType },
       });
     if (!!indicator.params.filter)
-      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
 
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
@@ -227,6 +233,7 @@ export class GetPreviewData {
     indicator: APMTransactionErrorRateIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
+    const dataView = await this.getDataView(indicator.params.dataViewId);
     const filter: estypes.QueryDslQueryContainer[] = [];
     const groupingFilters = this.getGroupingFilters(options);
     if (groupingFilters) {
@@ -249,7 +256,7 @@ export class GetPreviewData {
         match: { 'transaction.type': indicator.params.transactionType },
       });
     if (!!indicator.params.filter)
-      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
+      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -345,8 +352,12 @@ export class GetPreviewData {
     indicator: HistogramIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
-    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
+    const dataView = await this.getDataView(indicator.params.dataViewId);
+    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
+      indicator,
+      dataView
+    );
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter, dataView);
     const timestampField = indicator.params.timestampField;
 
     const filter: estypes.QueryDslQueryContainer[] = [
@@ -447,9 +458,14 @@ export class GetPreviewData {
     indicator: MetricCustomIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
+    const dataView = await this.getDataView(indicator.params.dataViewId);
     const timestampField = indicator.params.timestampField;
-    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
-    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter, dataView);
+
+    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(
+      indicator,
+      dataView
+    );
 
     const filter: estypes.QueryDslQueryContainer[] = [
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
@@ -549,10 +565,12 @@ export class GetPreviewData {
     indicator: TimesliceMetricIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
+    const dataView = await this.getDataView(indicator.params.dataViewId);
     const timestampField = indicator.params.timestampField;
-    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter, dataView);
     const getCustomMetricIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(
-      indicator
+      indicator,
+      dataView
     );
 
     const filter: estypes.QueryDslQueryContainer[] = [
@@ -629,9 +647,11 @@ export class GetPreviewData {
     indicator: KQLCustomIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
-    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
-    const goodQuery = getElasticsearchQueryOrThrow(indicator.params.good);
-    const totalQuery = getElasticsearchQueryOrThrow(indicator.params.total);
+    const dataView = await this.getDataView(indicator.params.dataViewId);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter, dataView);
+    const goodQuery = getElasticsearchQueryOrThrow(indicator.params.good, dataView);
+    const totalQuery = getElasticsearchQueryOrThrow(indicator.params.total, dataView);
+
     const timestampField = indicator.params.timestampField;
     const filter: estypes.QueryDslQueryContainer[] = [
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
@@ -682,9 +702,10 @@ export class GetPreviewData {
       response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = bucket.good?.doc_count ?? 0;
         const total = bucket.total?.doc_count ?? 0;
+        const sliValue = computeSLIForPreview(good, total);
         return {
           date: bucket.key_as_string,
-          sliValue: computeSLIForPreview(good, total),
+          sliValue,
           events: {
             good,
             bad: total - good,

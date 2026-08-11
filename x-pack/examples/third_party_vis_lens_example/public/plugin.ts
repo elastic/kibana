@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Plugin, CoreSetup } from '@kbn/core/public';
@@ -101,7 +101,7 @@ export class EmbeddedLensExamplePlugin
             const defaultDataView = await dataViews.getDefault();
             lensStart.navigateToPrefilledEditor({
               id: '',
-              timeRange: {
+              time_range: {
                 from: 'now-5d',
                 to: 'now',
               },
@@ -126,7 +126,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

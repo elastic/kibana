@@ -21,15 +21,17 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { FunctionComponent, PropsWithChildren } from 'react';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { ChartSectionConfiguration } from '@kbn/unified-histogram/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  ChartSectionProps,
+  UnifiedHistogramTopPanelHeightContext,
+} from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
-import type { TabState } from '../application/main/state_management/redux';
+
+export type UpdateESQLQueryFn = (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 
 /**
  * Supports extending the Discover app menu
@@ -72,16 +74,6 @@ export interface FieldListExtension {
  */
 export interface AppMenuExtensionParams {
   /**
-   * Available actions for the app menu
-   */
-  actions: {
-    /**
-     * Updates the ad hoc data views list
-     * @param adHocDataViews The new ad hoc data views to set
-     */
-    updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-  };
-  /**
    * True if Discover is in ESQL mode
    */
   isEsqlMode: boolean;
@@ -99,22 +91,51 @@ export interface AppMenuExtensionParams {
   authorizedRuleTypeIds: string[];
 }
 
-export interface ChartSectionConfigurationExtensionParams {
+/**
+ * Parameters passed to the open in new tab action
+ */
+export interface OpenInNewTabParams {
   /**
-   * Available actions for the chart section configuration
+   * The query to open in the new tab
    */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  };
+  query?: Query | AggregateQuery;
+  /**
+   * The label of the new tab
+   */
+  tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
+  timeRange?: TimeRange;
 }
+
+/**
+ * Supports customizing the chart (UnifiedHistogram) section in Discover
+ */
+export type ChartSectionConfiguration<T extends object = object> =
+  | {
+      /**
+       * The render function for the chart section
+       */
+      renderChartSection: (
+        props: ChartSectionProps & RestorableStateProviderProps<T>
+      ) => React.ReactElement;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
+      replaceDefaultChart: true;
+      /**
+       * Prefix for the local storage key used to store the chart section state, when not set, it will use the default Discover key
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The default chart section height
+       */
+      defaultTopPanelHeight?: UnifiedHistogramTopPanelHeightContext;
+    }
+  | {
+      replaceDefaultChart: false;
+    };
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -130,26 +151,25 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
+  /**
+   * Optional render function to display a custom footer section at the bottom of the flyout.
+   * The footer is always visible while scrolling through the flyout content.
+   * @param props The doc view render props
+   * @returns A React element to render at the bottom of the flyout
+   */
+  renderFooter?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
  * Parameters passed to the doc viewer extension
  */
 export interface DocViewerExtensionParams {
-  /**
-   * Available actions for the doc viewer extension
-   */
-  actions: {
-    /**
-     * Opens a new tab
-     * @param params The parameters for the open in new tab action
-     */
-    openInNewTab?: (params: OpenInNewTabParams) => void;
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  };
   /**
    * The record being displayed in the doc viewer
    */
@@ -213,6 +233,24 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+  /**
+   * The state for data table visibility toggle
+   */
+  hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
+}
+
+/**
+ * Supports setting a default ES|QL query when Discover starts in ES|QL mode
+ */
+export interface DefaultEsqlQueryConfig {
+  /**
+   * The ES|QL query string to use as the default
+   */
+  query: string;
 }
 
 /**
@@ -229,15 +267,6 @@ export interface ModifiedVisAttributesExtensionParams {
  * Parameters passed to the cell renderers extension
  */
 export interface CellRenderersExtensionParams {
-  /**
-   * Available actions for cell renderers
-   */
-  actions: {
-    /**
-     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
-     */
-    addFilter?: DocViewFilterFn;
-  };
   /**
    * The current data view
    */
@@ -257,21 +286,6 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
-   * Available actions for row controls
-   */
-  actions: {
-    /**
-     * Updates the current ES|QL query
-     */
-    updateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-    /**
-     * Sets the expanded document, which is displayed in a flyout
-     * @param record - The record to display in the flyout
-     * @param options.initialTabId - The tabId to display in the flyout
-     */
-    setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
-  };
-  /**
    * The current data view
    */
   dataView: DataView;
@@ -280,11 +294,6 @@ export interface RowControlsExtensionParams {
    */
   query?: DiscoverAppState['query'];
 }
-
-/**
- * The Discover cell actions trigger
- */
-export const DISCOVER_CELL_ACTIONS_TRIGGER: Trigger = { id: 'DISCOVER_CELL_ACTIONS_TRIGGER_ID' };
 
 /**
  * Metadata passed to Discover cell actions
@@ -364,21 +373,52 @@ export interface AdditionalCellAction {
 }
 
 /**
- * Parameters passed to the open in new tab action
+ * Parameters passed to the deep-analysis playbook extension
  */
-export interface OpenInNewTabParams {
+export interface DeepAnalysisPlaybookExtensionParams {
   /**
-   * The query to open in the new tab
+   * The current data view, if any
    */
-  query?: TabState['appState']['query'];
+  dataView: DataView | undefined;
   /**
-   * The label of the new tab
+   * The current query
    */
-  tabLabel?: string;
+  query: AggregateQuery | Query | undefined;
   /**
-   * The time range to open in the new tab
+   * The columns of the current ES|QL query result, if any
    */
-  timeRange?: TabState['globalState']['timeRange'];
+  columns?: Array<{ name: string; type?: string }>;
+}
+
+/**
+ * A per-shape contribution to the agent-builder deep-analysis playbook.
+ * Returning `undefined` means "no contribution" — the server playbook
+ * falls back to inferring analysis strategy from column names and types.
+ */
+export interface DeepAnalysisPlaybookExtension {
+  /**
+   * Stable shape identifier, e.g. 'logs' | 'traces' | 'metrics'
+   */
+  shapeId: string;
+  /**
+   * Human-readable shape label, e.g. "Application & infrastructure logs"
+   */
+  shapeLabel: string;
+  /**
+   * Field names that characterize this shape. Intersected against the
+   * actual attachment columns server-side so the agent never sees
+   * fields that don't exist in the result.
+   */
+  characteristicFields: string[];
+  /**
+   * Short guidance (≤600 chars) describing what "deep analysis" means for
+   * this shape — what to group by, what to avoid, what's interesting.
+   */
+  guidance: string;
+  /**
+   * Optional short bullets (≤5 entries) to seed the Drill-Down Queries section.
+   */
+  interestingSignals?: string[];
 }
 
 /**
@@ -389,14 +429,6 @@ export interface Profile {
   /**
    * Lifecycle
    */
-
-  /**
-   * Render a custom wrapper component around the Discover application,
-   * e.g. to allow using profile specific context providers
-   * @param props The app wrapper props
-   * @returns The custom app wrapper component
-   */
-  getRenderAppWrapper: FunctionComponent<PropsWithChildren<{}>>;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved
@@ -415,6 +447,16 @@ export interface Profile {
   >;
 
   /**
+   * Gets the default ES|QL query that should be used when Discover starts in ES|QL mode.
+   *
+   * This extension point is evaluated on Discover app initialization and is resolved from the
+   * root profile only.
+   *
+   * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
+   */
+  getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
+
+  /**
    * Chart
    */
 
@@ -431,9 +473,7 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: (
-    params: ChartSectionConfigurationExtensionParams
-  ) => ChartSectionConfiguration;
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 
   /**
    * Data grid
@@ -479,16 +519,51 @@ export interface Profile {
   getPaginationConfig: () => PaginationConfigExtension;
 
   /**
+   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
+   * Example use case is to overwrite the column header display name or to add icons to the column headers.
+   */
+  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
+
+  /**
+   * Field list
+   */
+
+  /**
+   * Allows passing additional fields (recommended fields) to the field list area.
+   * @returns The additional fields to display in the Field List under Recommended fields section
+   */
+  getRecommendedFields: () => FieldListExtension;
+
+  /**
    * Document viewer flyout
    */
 
   /**
    * Supports customizing the behaviour of the Discover document
-   * viewer flyout, such as the flyout title and available tabs
+   * viewer flyout, such as the flyout title and available tabs.
+   *
+   * To add restorable state to your custom doc viewer tabs, see:
+   * {@link /src/platform/plugins/shared/unified_doc_viewer/README.md#using-restorable-state-in-doc-viewer-tabs}
+   *
    * @param params The doc viewer extension parameters
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * Deep analysis (agent-builder)
+   */
+
+  /**
+   * Contributes per-shape guidance to the Discover deep-analysis agent-builder skill.
+   * The contribution is attached to the ES|QL query results sent to the agent so
+   * the playbook can prioritise shape-relevant fields and aggregations.
+   * @param params The deep-analysis playbook extension parameters
+   * @returns The shape-specific playbook contribution, or `undefined` for the default behaviour
+   */
+  getDeepAnalysisPlaybook: (
+    params: DeepAnalysisPlaybookExtensionParams
+  ) => DeepAnalysisPlaybookExtension | undefined;
 
   /**
    * App Menu (Top Nav actions)
@@ -505,16 +580,4 @@ export interface Profile {
    * @returns The app menu extension
    */
   getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
-
-  /**
-   * Allows overwriting the default columns configuration used in the data grid.customGridColumnsConfiguration
-   * Example use case is to overwrite the column header display name or to add icons to the column headers.
-   */
-  getColumnsConfiguration: () => CustomGridColumnsConfiguration;
-
-  /**
-   * Allows passing additional fields (recommended fields) to the field list area.
-   * @returns The additional fields to display in the Field List under Recommended fields section
-   */
-  getRecommendedFields: () => FieldListExtension;
 }

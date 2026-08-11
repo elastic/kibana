@@ -6,11 +6,11 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { DATA_CONNECTORS_SHORT_TITLE } from '@kbn/data-connectors-plugin/common';
-import agentsIcon from './assets/robot.svg';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-export const createNavigationTree = (): NavigationTreeDefinition => {
+export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition => {
   return {
     body: [
       {
@@ -20,28 +20,20 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
         breadcrumbStatus: 'hidden',
       },
       {
-        icon: agentsIcon, // Temp svg until we have icon in EUI
+        icon: 'productAgent',
         link: 'agent_builder',
-        badgeType: 'techPreview',
       },
-      {
-        link: 'data_connectors',
-        title: DATA_CONNECTORS_SHORT_TITLE,
-        icon: 'plugs',
-        badgeType: 'techPreview',
-      },
-      {
-        link: 'workflows',
-        badgeType: 'techPreview' as const,
-      },
+      ...getWorkflowsNavPanel(core),
       {
         link: 'dashboards',
+        icon: 'productDashboard',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
       },
       {
         link: 'discover',
+        icon: 'productDiscover',
       },
     ],
     footer: [
@@ -51,7 +43,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
           defaultMessage: 'Developer tools',
         }),
         link: 'dev_tools',
-        icon: 'editorCodeBlock',
+        icon: 'code',
       },
       {
         id: 'management',
@@ -100,7 +92,7 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             }),
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
-              { link: 'management:agentBuilder', breadcrumbStatus: 'hidden' },
+              { link: 'management:evals', breadcrumbStatus: 'hidden' },
               {
                 link: 'management:observabilityAiAssistantManagement',
                 breadcrumbStatus: 'hidden',
@@ -128,14 +120,6 @@ export const createNavigationTree = (): NavigationTreeDefinition => {
             children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
           },
         ],
-      },
-      {
-        id: 'cloudLinkUserAndRoles',
-        cloudLink: 'userAndRoles',
-      },
-      {
-        id: 'cloudLinkBilling',
-        cloudLink: 'billingAndSub',
       },
     ],
   };

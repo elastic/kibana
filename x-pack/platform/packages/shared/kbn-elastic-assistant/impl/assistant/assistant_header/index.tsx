@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiSkeletonTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -30,8 +31,6 @@ import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
-import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
   conversationSharedState: ConversationSharedState;
@@ -171,14 +170,16 @@ export const AssistantHeader: React.FC<Props> = ({
 
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.CLOSE}
-                data-test-subj="euiFlyoutCloseButton"
-                iconType="cross"
-                color="text"
-                size="xs"
-                onClick={onCloseFlyout}
-              />
+              <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  aria-label={i18n.CLOSE}
+                  data-test-subj="euiFlyoutCloseButton"
+                  iconType="cross"
+                  color="text"
+                  size="xs"
+                  onClick={onCloseFlyout}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -235,20 +236,14 @@ export const AssistantHeader: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems={'center'} justifyContent="spaceBetween">
               <EuiFlexItem>
-                <ElasticLLMCostAwarenessTour
-                  isDisabled={isDisabled}
+                <ConnectorSelectorInline
+                  isDisabled={
+                    isDisabled || selectedConversation === undefined || !isConversationOwner
+                  }
                   selectedConnectorId={selectedConnectorId}
-                  storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
-                >
-                  <ConnectorSelectorInline
-                    isDisabled={
-                      isDisabled || selectedConversation === undefined || !isConversationOwner
-                    }
-                    selectedConnectorId={selectedConnectorId}
-                    selectedConversation={selectedConversation}
-                    onConnectorSelected={onConversationChange}
-                  />
-                </ElasticLLMCostAwarenessTour>
+                  selectedConversation={selectedConversation}
+                  onConnectorSelected={onConversationChange}
+                />
               </EuiFlexItem>
               {!isNewConversation && (
                 <EuiFlexItem>

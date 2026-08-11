@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
@@ -19,6 +19,7 @@ import {
   SLO_BURN_RATE_EMBEDDABLE_ID,
 } from '../embeddable/slo/burn_rate/constants';
 import type { SLORepositoryClient } from '../types';
+import { isValidLicense } from './is_valid_license';
 
 export function createBurnRatePanelAction(
   coreStart: CoreStart,
@@ -29,9 +30,9 @@ export function createBurnRatePanelAction(
     id: ADD_BURN_RATE_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 20,
-    getIconType: () => 'visGauge',
+    getIconType: () => 'chartGauge',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
@@ -44,9 +45,11 @@ export function createBurnRatePanelAction(
         embeddable.addNewPanel(
           {
             panelType: SLO_BURN_RATE_EMBEDDABLE_ID,
-            serializedState: { rawState: initialState },
+            serializedState: initialState,
           },
-          true
+          {
+            displaySuccessMessage: true,
+          }
         );
       } catch (e) {
         return Promise.reject();

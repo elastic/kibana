@@ -17,6 +17,7 @@ export const FleetSetupLoading: React.FunctionComponent = () => (
       </h2>
     }
     titleSize="m"
+    data-test-subj="fleetSetupLoading"
     body={<EuiLoadingSpinner size="xl" />}
   />
 );

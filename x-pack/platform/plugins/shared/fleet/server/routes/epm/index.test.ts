@@ -191,6 +191,7 @@ describe('schema validation', () => {
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
         alerting_rule_template: [],
+        slo_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -214,6 +215,7 @@ describe('schema validation', () => {
         data_stream_ilm_policy: [],
         ml_model: [],
         knowledge_base: [],
+        esql_view: [],
       },
     };
     packageInfo = {
@@ -508,6 +510,59 @@ describe('schema validation', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: expectedResponse,
     });
+    const validationResp = GetInputsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('get inputs template with OTelCollectorConfig fields should return valid response', () => {
+    const expectedResponse = {
+      inputs: [
+        {
+          id: 'log-input-1',
+          type: 'logfile',
+          streams: [
+            {
+              id: 'stream-1',
+              data_stream: { dataset: 'mypackage.logs', type: 'logs' },
+            },
+          ],
+        },
+      ],
+      extensions: {
+        health_check: {},
+      },
+      receivers: {
+        otlp: {
+          protocols: { grpc: {}, http: {} },
+        },
+      },
+      processors: {
+        batch: {},
+      },
+      connectors: {
+        some_connector: { config: {} },
+      },
+      exporters: {
+        elasticsearch: {
+          hosts: ['https://localhost:9200'],
+        },
+      },
+      service: {
+        extensions: ['health_check'],
+        pipelines: {
+          logs: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+          metrics: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+        },
+      },
+    };
     const validationResp = GetInputsResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });

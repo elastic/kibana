@@ -63,3 +63,29 @@ export const resolveTarEnvironment = (): NodeJS.ProcessEnv => {
 
   return env;
 };
+
+export function doHashesMatch({
+  currentFileHashes,
+  storedFileHashes,
+}: {
+  currentFileHashes?: Record<string, string | null | undefined>;
+  storedFileHashes?: Record<string, string | null | undefined>;
+}): { result: boolean; message: string } {
+  if (!currentFileHashes || !storedFileHashes) {
+    return { result: true, message: 'No file hashes to compare.' };
+  }
+
+  const currentHashKeys = Object.keys(currentFileHashes);
+  const storedHashKeys = Object.keys(storedFileHashes);
+  const allKeys = new Set([...currentHashKeys, ...storedHashKeys]);
+
+  for (const key of allKeys) {
+    if (currentFileHashes[key] !== storedFileHashes[key]) {
+      return {
+        result: false,
+        message: `Hash mismatch for file "${key}": current hash is "${currentFileHashes[key]}", stored hash is "${storedFileHashes[key]}"`,
+      };
+    }
+  }
+  return { result: true, message: 'All file hashes match.' };
+}

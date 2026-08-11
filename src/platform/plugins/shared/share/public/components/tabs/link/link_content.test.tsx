@@ -33,7 +33,7 @@ const mockShareContext: IShareContext = {
     title: 'title',
     config: {},
   },
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
 };
 
 const renderComponent = (
@@ -266,5 +266,53 @@ describe('LinkContent', () => {
     expect(draftModeCallout).toBeInTheDocument();
     const saveButton = screen.queryByRole('button', { name: 'Save changes' });
     expect(saveButton).not.toBeInTheDocument();
+  });
+
+  it('should show toggle when time range is relative', () => {
+    const shareableUrlLocatorParams = {
+      locator: new MockLocatorDefinition('TEST_LOCATOR'),
+      params: {
+        timeRange: { from: 'now-15m', to: 'now' },
+      },
+    };
+
+    renderComponent({
+      objectType: 'dashboard',
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+      // @ts-expect-error Test mock - MockLocatorDefinition is sufficient for testing but doesn't match full LocatorPublic type
+      shareableUrlLocatorParams,
+    });
+
+    const toggle = screen.getByTestId('timeRangeSwitch');
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).not.toBeChecked();
+  });
+
+  it('should not show toggle and show callout when time range is absolute', () => {
+    const shareableUrlLocatorParams = {
+      locator: new MockLocatorDefinition('TEST_LOCATOR'),
+      params: {
+        timeRange: {
+          from: '2024-01-01T00:00:00.000Z',
+          to: '2024-01-02T00:00:00.000Z',
+        },
+      },
+    };
+
+    renderComponent({
+      objectType: 'dashboard',
+      isDirty: false,
+      shareableUrl,
+      shortUrlService,
+      allowShortUrl: false,
+      // @ts-expect-error Test mock - MockLocatorDefinition is sufficient for testing but doesn't match full LocatorPublic type
+      shareableUrlLocatorParams,
+    });
+
+    expect(screen.queryByTestId('timeRangeSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('relativeTimeCallout')).toBeInTheDocument();
   });
 });

@@ -26,14 +26,14 @@ export const useExplorerChartTooltipStyles = () => {
         },
       }),
       title: css({
-        color: euiTheme.colors.ghost,
+        color: euiTheme.colors.textGhost,
         fontSize: euiFontSizeXS,
         fontWeight: 'normal',
         whiteSpace: 'nowrap',
         gridColumnStart: 1,
       }),
       description: css({
-        color: euiTheme.colors.ghost,
+        color: euiTheme.colors.textGhost,
         fontSize: euiFontSizeXS,
         fontWeight: 'bold',
         paddingLeft: euiTheme.size.s,

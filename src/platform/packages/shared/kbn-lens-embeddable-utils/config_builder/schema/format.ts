@@ -7,119 +7,110 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
+import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
 
-const numericFormatSchema = schema.object({
-  type: schema.oneOf([schema.literal('number'), schema.literal('percent')]),
-  /**
-   * Number of decimals
-   */
-  decimals: schema.number({
-    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-    meta: {
-      description: 'Number of decimals',
-    },
-  }),
-  /**
-   * Suffix
-   */
-  suffix: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Suffix',
-      },
-    })
-  ),
-  /**
-   * Whether to use compact notation
-   */
-  compact: schema.boolean({
-    defaultValue: LENS_FORMAT_COMPACT_DEFAULT,
-    meta: {
-      description: 'Whether to use compact notation',
-    },
-  }),
-});
+const numericFormatSchema = z
+  .object({
+    type: z.enum(['number', 'percent']).meta({
+      description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
+    }),
+    /**
+     * Number of decimals
+     */
+    decimals: z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+      description: 'Number of decimal places to display.',
+    }),
+    /**
+     * Suffix
+     */
+    suffix: z.string().optional().meta({
+      description: 'Suffix appended to the formatted value.',
+    }),
+    /**
+     * Whether to use compact notation
+     */
+    compact: z.boolean().default(LENS_FORMAT_COMPACT_DEFAULT).meta({
+      description:
+        'When `true`, uses compact notation (for example, 1.2k instead of 1,200). Defaults to `false`.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'numericFormat',
+    title: 'Numeric Format',
+    description:
+      'Number or percentage format with optional decimal places, suffix, and compact notation.',
+  });
 
-const byteFormatSchema = schema.object({
-  type: schema.oneOf([schema.literal('bits'), schema.literal('bytes')]),
-  /**
-   * Number of decimals
-   */
-  decimals: schema.number({
-    defaultValue: LENS_FORMAT_NUMBER_DECIMALS_DEFAULT,
-    meta: {
-      description: 'Number of decimals',
-    },
-  }),
-  /**
-   * Suffix
-   */
-  suffix: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Suffix',
-      },
-    })
-  ),
-});
+const byteFormatSchema = z
+  .object({
+    type: z
+      .union([z.literal('bits'), z.literal('bytes')])
+      .meta({ description: 'Data size unit: `bits` or `bytes`.' }),
+    /**
+     * Number of decimals
+     */
+    decimals: z.number().default(LENS_FORMAT_NUMBER_DECIMALS_DEFAULT).meta({
+      description: 'Number of decimal places to display.',
+    }),
+    /**
+     * Suffix
+     */
+    suffix: z.string().optional().meta({
+      description: 'Suffix appended to the formatted value.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'byteFormat',
+    title: 'Byte Format',
+    description: 'Data size format in bits or bytes, with optional decimal places and suffix.',
+  });
 
-const durationFormatSchema = schema.object({
-  type: schema.literal('duration'),
-  /**
-   * From
-   */
-  from: schema.string({
-    meta: {
-      description: 'From',
-    },
-  }),
-  /**
-   * To
-   */
-  to: schema.string({
-    meta: {
-      description: 'To',
-    },
-  }),
-  /**
-   * Suffix
-   */
-  suffix: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Suffix',
-      },
-    })
-  ),
-});
-
-const customFormatSchema = schema.object({
-  type: schema.literal('custom'),
-  /**
-   * Pattern
-   */
-  pattern: schema.string({
-    meta: {
-      description: 'Pattern',
-    },
-  }),
-});
+const customFormatSchema = z
+  .object({
+    type: z.literal('custom'),
+    /**
+     * Pattern
+     */
+    pattern: z.string().meta({
+      description: 'Kibana field format pattern string.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'customFormat',
+    title: 'Custom Format',
+    description: 'Custom format using a Kibana field format pattern string.',
+  });
 
 /**
- * Format configuration
+ * Format configuration for dimension values.
+ * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
+ * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
+ * `asCode.useGASchemas` feature flag.
  */
-export const formatTypeSchema = schema.oneOf([
-  numericFormatSchema,
-  byteFormatSchema,
-  durationFormatSchema,
-  customFormatSchema,
-]);
+export const formatTypeSchema = z
+  .union([
+    numericFormatSchema,
+    byteFormatSchema,
+    durationFormatSchema,
+    legacyDurationFormatSchema,
+    customFormatSchema,
+  ])
+  .meta({
+    id: 'formatType',
+    title: 'Format Type',
+    description: 'Number display format for the dimension value.',
+  });
 
-export const formatSchema = {
-  /**
-   * Format configuration
-   */
-  format: schema.maybe(formatTypeSchema),
-};
+export const formatSchema = z
+  .object({
+    /**
+     * Format configuration
+     */
+    format: formatTypeSchema.optional(),
+  })
+  .strict();

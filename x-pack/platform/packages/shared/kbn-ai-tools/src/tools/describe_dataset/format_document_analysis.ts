@@ -45,7 +45,7 @@ export function formatDocumentAnalysis(
 
 function getFieldKey(field: DocumentAnalysis['fields'][number]): string {
   if (!field.types.length) {
-    return `${field.name} (unmapped)`;
+    return `${field.name} (unmapped - no type)`;
   }
 
   return `${field.name} (${field.types.join(', ')})`;

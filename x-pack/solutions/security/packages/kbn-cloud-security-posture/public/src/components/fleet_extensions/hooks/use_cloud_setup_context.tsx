@@ -62,44 +62,19 @@ export interface CloudSetupContextValue {
   elasticStackId?: string;
 }
 
-/**
- * Extracts the cloud provider from the cloud host URL
- * @param cloudHost - The cloud host URL (e.g., 'westeurope.azure.elastic-cloud.com')
- * @returns The cloud provider ('aws', 'gcp', or 'azure'), or undefined if not found
- */
-const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
 const isCloudConnectorEnabledForProvider = ({
   provider,
   config,
   packageInfo,
   cloudConnectorsFeatureEnabled,
-  cloud,
 }: {
   provider: CloudProviders;
   config: CloudSetupConfig;
   packageInfo: PackageInfo;
   cloudConnectorsFeatureEnabled: boolean;
-  cloud: CloudSetup;
 }) => {
   const providerConfig = config.providers[provider];
   const cloudConnectorEnabledVersion = providerConfig.cloudConnectorEnabledVersion;
-
-  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
-
-  // Cloud connector availability rules:
-  // - AWS: Only available on AWS host
-  // - GCP: Not enabled yet (always disabled)
-  // - Azure: Available on any cloud host
-  if (!hostProvider) return false;
-
-  if (provider === AWS_PROVIDER && hostProvider !== AWS_PROVIDER) return false;
-  if (provider === GCP_PROVIDER) return false; // GCP cloud connectors not enabled yet
-  // Azure is allowed on any host
 
   return !!(
     cloudConnectorsFeatureEnabled &&
@@ -202,7 +177,6 @@ const buildCloudSetupState = ({
       config,
       packageInfo,
       cloudConnectorsFeatureEnabled,
-      cloud,
     }),
     azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
     isAzureCloudConnectorEnabled: isCloudConnectorEnabledForProvider({
@@ -210,7 +184,6 @@ const buildCloudSetupState = ({
       config,
       packageInfo,
       cloudConnectorsFeatureEnabled,
-      cloud,
     }),
     azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
     azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
@@ -223,7 +196,6 @@ const buildCloudSetupState = ({
       config,
       packageInfo,
       cloudConnectorsFeatureEnabled,
-      cloud,
     }),
     gcpOverviewPath: getProviderDetails(GCP_PROVIDER).overviewPath,
     gcpPolicyType: getProviderDetails(GCP_PROVIDER).policyType,

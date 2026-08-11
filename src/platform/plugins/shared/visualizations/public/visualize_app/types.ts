@@ -13,6 +13,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
 import type {
   CoreStart,
@@ -38,13 +39,13 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { Vis, VisualizeEmbeddableContract, VisSavedObject, PersistedState } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
@@ -83,6 +84,7 @@ export type VisualizeAppStateContainer = ReduxLikeStateContainer<
 >;
 
 export interface VisualizeServices extends CoreStart {
+  isScreenshotMode: boolean;
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
@@ -111,16 +113,17 @@ export interface VisualizeServices extends CoreStart {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedSearch: SavedSearchPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
   listingViewRegistry: ListingViewRegistry;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
   contentManagement: ContentManagementPublicStart;
+  cps?: CPSPluginStart;
 }
 
 export interface VisInstance {

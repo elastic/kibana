@@ -87,7 +87,7 @@ test('creates an unauthorized maintenance window client', async () => {
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
-  factory.create(request);
+  factory.createWithoutAuthorization(request);
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
@@ -99,6 +99,30 @@ test('creates an unauthorized maintenance window client', async () => {
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
     savedObjectsClient,
+    getUserName: expect.any(Function),
+  });
+});
+
+test('creates an internal maintenance window client', async () => {
+  const factory = new MaintenanceWindowClientFactory();
+  factory.initialize(maintenanceWindowClientFactoryParams);
+  const request = mockRouter.createKibanaRequest();
+  const mockRepository = savedObjectsService.createInternalRepository([
+    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  ]);
+  savedObjectsService.createInternalRepository.mockReturnValue(mockRepository);
+
+  factory.createInternal(request);
+
+  expect(savedObjectsService.createInternalRepository).toHaveBeenCalledWith([
+    MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  ]);
+
+  const { MaintenanceWindowClient } = jest.requireMock('./client');
+
+  expect(MaintenanceWindowClient).toHaveBeenCalledWith({
+    logger: maintenanceWindowClientFactoryParams.logger,
+    savedObjectsClient: mockRepository,
     getUserName: expect.any(Function),
   });
 });

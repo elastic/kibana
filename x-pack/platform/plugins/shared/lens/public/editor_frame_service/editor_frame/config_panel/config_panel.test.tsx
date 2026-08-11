@@ -86,12 +86,12 @@ describe('ConfigPanel', () => {
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           query: query as Query,
           visualization: {
             activeId: 'testVis',
@@ -117,12 +117,12 @@ describe('ConfigPanel', () => {
     }
   ) {
     frame.datasourceLayers = {
-      first: datasourceMap.testDatasource.publicAPIMock,
+      first: datasourceMap.formBased.publicAPIMock,
     };
     return {
       activeVisualizationId: 'testVis',
       visualizationMap,
-      activeDatasourceId: 'testDatasource',
+      activeDatasourceId: 'formBased',
       datasourceMap,
       activeVisualization: {
         ...visualizationMap.testVis,
@@ -143,7 +143,7 @@ describe('ConfigPanel', () => {
         },
       } as Visualization,
       datasourceStates: {
-        testDatasource: {
+        formBased: {
           isLoading: false,
           state: 'state',
         },
@@ -168,6 +168,7 @@ describe('ConfigPanel', () => {
   // in what case is this test needed?
   it('should fail to render layerPanels if the public API is out of date', async () => {
     const props = getDefaultProps();
+    props.framePublicAPI.datasourceLayers = {};
     const { instance } = await prepareAndMountComponent(props, undefined, undefined, null);
     expect(instance.find(LayerPanel).exists()).toBe(false);
   });
@@ -178,17 +179,23 @@ describe('ConfigPanel', () => {
     const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
 
     const newDatasourceState = 'updated';
-    updateDatasource('testDatasource', newDatasourceState);
+    updateDatasource('formBased', newDatasourceState);
     await waitMs(0);
     expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
     expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
       'updated'
     );
 
-    updateAll('testDatasource', newDatasourceState, props.visualizationState);
+    updateAll({
+      datasourceId: 'formBased',
+      newDatasourceState,
+      layerId: 'first',
+      groupId: 'a',
+      columnId: 'col1',
+    });
     // wait for one tick so async updater has a chance to trigger
     await waitMs(0);
-    expect(lensStore.dispatch).toHaveBeenCalledTimes(3);
+    expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
     expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
       'updated'
     );
@@ -219,14 +226,14 @@ describe('ConfigPanel', () => {
           ],
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
 
       await clickToAddDimension(instance);
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
 
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+      expect(datasourceMap.formBased.initializeDimension).toHaveBeenCalledWith(
         'state',
         'first',
         frame.dataViews.indexPatterns,
@@ -234,6 +241,7 @@ describe('ConfigPanel', () => {
           groupId: 'a',
           columnId: 'newId',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -261,7 +269,7 @@ describe('ConfigPanel', () => {
           label: 'Reference layer',
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance } = await prepareAndMountComponent(props, {}, { esql: 'from "foo"' });

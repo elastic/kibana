@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/event-annotation-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/event-annotation-plugin'
+  title: '@kbn/event-annotation-plugin'
   description: Moon project for @kbn/event-annotation-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/plugins/private/event_annotation
+  sourceRoot: src/platform/plugins/private/event_annotation
 dependsOn:
   - '@kbn/core'
   - '@kbn/expressions-plugin'
@@ -28,7 +27,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/saved-objects-tagging-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/visualization-ui-components'
   - '@kbn/i18n-react'
@@ -56,16 +54,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

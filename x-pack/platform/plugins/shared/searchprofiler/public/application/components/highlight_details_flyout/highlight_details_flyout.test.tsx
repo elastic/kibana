@@ -5,41 +5,43 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { within } from '@testing-library/dom';
 import type { Props } from '.';
 import { HighlightDetailsFlyout } from '.';
 
 describe('Highlight Details Flyout', () => {
-  it('renders', async () => {
+  it('renders', () => {
     const props: Props = {
       onClose: () => {},
       shardName: '[test][test]',
       operation: {
         breakdown: [
           {
-            color: 'test',
-            key: 'test',
+            color: 'default',
+            key: 'breakdown-1',
             relative: 100,
-            tip: 'test',
+            tip: 'tip-1',
             time: 100,
           },
           {
-            color: 'test',
-            key: 'test',
+            color: 'default',
+            key: 'breakdown-2',
             relative: 100,
-            tip: 'test',
+            tip: 'tip-2',
             time: 100,
           },
           {
-            color: 'test',
-            key: 'test',
+            color: 'default',
+            key: 'breakdown-3',
             relative: 100,
-            tip: 'test',
+            tip: 'tip-3',
             time: 100,
           },
         ],
-        lucene: 'test',
-        query_type: 'test',
+        lucene: 'lucene-query',
+        query_type: 'test-query-type',
         selfTime: 100,
         time: 100,
         timePercentage: '100',
@@ -47,10 +49,20 @@ describe('Highlight Details Flyout', () => {
         visible: true,
         absoluteColor: '123',
       },
-      indexName: 'test',
+      indexName: 'test-index',
     };
 
-    const init = registerTestBed(HighlightDetailsFlyout);
-    await init(props);
+    render(<HighlightDetailsFlyout {...props} />);
+
+    const flyout = screen.getByRole('dialog');
+    expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+
+    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Timing breakdown')).toBeInTheDocument();
+
+    expect(within(flyout).getByText('test-index')).toBeInTheDocument();
+    expect(within(flyout).getByText('[test][test]')).toBeInTheDocument();
+    expect(within(flyout).getByText('test-query-type')).toBeInTheDocument();
+    expect(within(flyout).getByText('lucene-query')).toBeInTheDocument();
   });
 });

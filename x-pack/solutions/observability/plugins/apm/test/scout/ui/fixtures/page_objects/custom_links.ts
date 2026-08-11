@@ -6,7 +6,9 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
+import { waitForApmAppMenuReady } from '../page_helpers';
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
   public saveButton: Locator;
@@ -16,7 +18,7 @@ export class CustomLinksPage {
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/custom-links`);
-    return this.page.waitForLoadingIndicatorHidden();
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getCreateCustomLinkButton() {
@@ -47,20 +49,95 @@ export class CustomLinksPage {
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
   }
 
   async clickDelete() {
+    await expect(this.page.getByTestId('apmDeleteButtonDeleteButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
+    await this.page.getByTestId('apmDeleteButtonDeleteButton').waitFor({ state: 'hidden' });
   }
 
   async getEditCustomLinkButton() {
     return this.page.testSubj.locator('editCustomLink');
   }
 
+  getCustomLinkRow(labelText: string): Locator {
+    return this.page.testSubj.locator(`customLinkRow-${labelText}`);
+  }
+
   async clickEditCustomLinkForRow(labelText: string) {
+    // EuiBasicTable adds aria-busy="true" when loading
+    const table = this.page.testSubj.locator('customLinksTable').locator('table');
+    await expect(table).not.toHaveAttribute('aria-busy', 'true', { timeout: EXTENDED_TIMEOUT });
+
     // Click edit button for a specific custom link by finding its row first
-    const row = this.page.locator(`tr:has-text("${labelText}")`);
-    const editButton = row.locator('[data-test-subj="editCustomLink"]');
+    const row = this.getCustomLinkRow(labelText);
+    // Wait for the row to be visible before clicking to avoid race conditions
+    await row.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    // Wait for the edit button to be visible and stable before clicking
+    const editButton = row.getByTestId('editCustomLink');
+    await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
+    await expect(this.page.getByTestId('apmCustomLinkFlyoutFooterCloseButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
+  }
+
+  /**
+   * Explicitly adds a new filter row by clicking the "Add another filter" button.
+   * Throws an error if the button is disabled.
+   */
+  async addNewFilterRow() {
+    const addFilterButton = this.page.getByTestId(
+      'apmCustomLinkAddFilterButtonAddAnotherFilterButton'
+    );
+    await addFilterButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(addFilterButton).toBeEnabled();
+    await addFilterButton.click();
+  }
+
+  /**
+   * Fills an existing empty filter row with the given key and value.
+   * Uses the explicit data-test-subj attribute for empty filter rows.
+   * Throws an error if no empty filter row is found.
+   */
+  async fillEmptyFilter(key: string, value: string) {
+    const emptyFilterSelect = this.page.getByTestId('apmCustomLinkFilterSelectEmpty');
+    await emptyFilterSelect.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await emptyFilterSelect.selectOption(key);
+
+    const valueInput = this.page.getByTestId(`${key}.value`);
+    await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    // SuggestionsSelect pulls options from `/internal/apm/suggestions`; on serverless terms_enum is
+    // stubbed and aggregation can return empty under load, leaving no clickable option (#262047).
+    // setCustomSelectedOptions types the value and commits it via onCreateOption (Enter); we can't
+    // rely on a clickable suggestion existing here (see the #262047 note above).
+    await this.page.components
+      .comboBox(`${key}.value`)
+      .setCustomSelectedOptions([value], { timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Adds the first filter by filling the existing empty filter row.
+   * Use this when the form has just been opened and contains one empty filter row.
+   * This method does NOT click the "Add another filter" button.
+   */
+  async addFirstFilter(key: string, value: string) {
+    await this.fillEmptyFilter(key, value);
+  }
+
+  /**
+   * Adds an additional filter by explicitly clicking the "Add another filter" button,
+   * then filling the newly created empty filter row.
+   * Use this when you need to add a second, third, etc. filter.
+   */
+  async addAdditionalFilter(key: string, value: string) {
+    await this.addNewFilterRow();
+    await this.fillEmptyFilter(key, value);
   }
 }

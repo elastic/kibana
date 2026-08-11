@@ -16,12 +16,15 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import type {
+  ExpressionsServerSetup,
+  ExpressionsServerStart,
+} from '@kbn/expressions-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ReportingServerPluginSetup } from '@kbn/reporting-server';
+import type { ReportingSetup } from '@kbn/reporting-plugin/server';
 import { getCanvasFeature } from './feature';
 import { initRoutes } from './routes';
 import { registerCanvasUsageCollector } from './collectors';
@@ -29,32 +32,34 @@ import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
-import { getUISettings } from './ui_settings';
 import type { CanvasRouteHandlerContext } from './workpad_route_context';
 import { createWorkpadRouteContext } from './workpad_route_context';
+import { setKibanaServices } from './kibana_services';
 
-interface PluginsSetup {
+interface SetupDeps {
   expressions: ExpressionsServerSetup;
   embeddable: EmbeddableSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   data: DataPluginSetup;
-  reporting?: ReportingServerPluginSetup;
+  reporting?: ReportingSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
-interface PluginsStart {
+export interface StartDeps {
   data: DataPluginStart;
+  embeddable: EmbeddableStart;
+  expressions: ExpressionsServerStart;
 }
 
-export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
+export class CanvasPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   private readonly logger: Logger;
 
   constructor(public readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup) {
+  public setup(coreSetup: CoreSetup<StartDeps>, plugins: SetupDeps) {
     const expressionsFork = plugins.expressions.fork('canvas');
     const expressionsSetup = expressionsFork.setup();
     setupInterpreter(expressionsSetup, {
@@ -66,15 +71,13 @@ export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsSta
     });
 
     const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsSetup };
-    coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType(deps));
     coreSetup.savedObjects.registerType(workpadTypeFactory(deps));
     coreSetup.savedObjects.registerType(workpadTemplateType(deps));
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 
-    const expressionsStart = expressionsFork.start();
-    const contextProvider = createWorkpadRouteContext({ expressions: expressionsStart });
+    const contextProvider = createWorkpadRouteContext();
     coreSetup.http.registerRouteHandlerContext<CanvasRouteHandlerContext, 'canvas'>(
       'canvas',
       contextProvider
@@ -95,8 +98,10 @@ export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsSta
     registerCanvasUsageCollector(plugins.usageCollection, getIndexForType);
   }
 
-  public start(coreStart: CoreStart) {
+  public start(coreStart: CoreStart, plugins: StartDeps) {
     const client = coreStart.savedObjects.createInternalRepository();
+    setKibanaServices(plugins, this.logger);
+
     initializeTemplates(client).catch(() => {});
   }
 

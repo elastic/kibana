@@ -6,6 +6,7 @@
  */
 import { buildGapsFilter } from './build_gaps_filter';
 import { gapStatus } from '../../../common/constants/gap_status';
+import { gapReasonType } from '../../../common/constants/gap_reason';
 
 const BASE_GAPS_FILTER =
   'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true';
@@ -134,6 +135,77 @@ describe('buildGapsFilter', () => {
           'kibana.alert.rule.gap.unfilled_intervals: * AND ' +
           'NOT kibana.alert.rule.gap.in_progress_intervals: * AND ' +
           'kibana.alert.rule.gap.filled_intervals: *'
+      );
+    });
+  });
+
+  describe('failedAutoFillAttemptsLessThan filter', () => {
+    it('should build filter with failedAutoFillAttemptsLessThan when value provided', () => {
+      expect(buildGapsFilter({ failedAutoFillAttemptsLessThan: 3 })).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          '(NOT kibana.alert.rule.gap.failed_auto_fill_attempts:* OR ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts:*  AND ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts < 3)'
+      );
+    });
+
+    it('should not add failedAutoFillAttemptsLessThan filter when undefined', () => {
+      expect(buildGapsFilter({ failedAutoFillAttemptsLessThan: undefined })).toBe(BASE_GAPS_FILTER);
+    });
+
+    it('should build filter combining failedAutoFillAttemptsLessThan with other filters', () => {
+      expect(
+        buildGapsFilter({
+          statuses: [gapStatus.UNFILLED],
+          failedAutoFillAttemptsLessThan: 10,
+        })
+      ).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          '(kibana.alert.rule.gap.status : unfilled) AND ' +
+          '(NOT kibana.alert.rule.gap.failed_auto_fill_attempts:* OR ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts:*  AND ' +
+          'kibana.alert.rule.gap.failed_auto_fill_attempts < 10)'
+      );
+    });
+  });
+
+  describe('excludedReasons filter', () => {
+    it('should build filter excluding a single reason', () => {
+      expect(buildGapsFilter({ excludedReasons: [gapReasonType.RULE_DISABLED] })).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          `NOT (kibana.alert.rule.gap.reason.type: "${gapReasonType.RULE_DISABLED}")`
+      );
+    });
+
+    it('should build filter excluding multiple reasons', () => {
+      expect(
+        buildGapsFilter({
+          excludedReasons: [gapReasonType.RULE_DISABLED, gapReasonType.RULE_DID_NOT_RUN],
+        })
+      ).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          `NOT (kibana.alert.rule.gap.reason.type: "${gapReasonType.RULE_DISABLED}" OR kibana.alert.rule.gap.reason.type: "${gapReasonType.RULE_DID_NOT_RUN}")`
+      );
+    });
+
+    it('should not add excludedReasons filter when empty array', () => {
+      expect(buildGapsFilter({ excludedReasons: [] })).toBe(BASE_GAPS_FILTER);
+    });
+
+    it('should not add excludedReasons filter when undefined', () => {
+      expect(buildGapsFilter({ excludedReasons: undefined })).toBe(BASE_GAPS_FILTER);
+    });
+
+    it('should combine excludedReasons with other filters', () => {
+      expect(
+        buildGapsFilter({
+          statuses: [gapStatus.UNFILLED],
+          excludedReasons: [gapReasonType.RULE_DISABLED],
+        })
+      ).toBe(
+        `${BASE_GAPS_FILTER} AND ` +
+          '(kibana.alert.rule.gap.status : unfilled) AND ' +
+          `NOT (kibana.alert.rule.gap.reason.type: "${gapReasonType.RULE_DISABLED}")`
       );
     });
   });

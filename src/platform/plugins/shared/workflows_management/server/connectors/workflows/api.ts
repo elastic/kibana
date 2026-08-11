@@ -27,9 +27,72 @@ const run = async ({
     };
   }
 
-  const { workflowId, spaceId, inputs } = params;
-  const res = await externalService.runWorkflow({ workflowId, spaceId, inputs });
-  return { workflowRunId: res.workflowRunId, status: res.status };
+  const { workflowId, spaceId, inputs, summaryMode = true } = params;
+  const originalEvent = inputs.event;
+  const { rule, ruleUrl, spaceId: eventSpaceId } = originalEvent;
+
+  // Summary mode: execute workflow once with all alerts
+  if (summaryMode) {
+    const res = await externalService.runWorkflow({ workflowId, spaceId, inputs });
+    return { workflowRunId: res.workflowRunId, status: res.status };
+  }
+
+  // Per-alert mode: schedule workflow for each alert individually
+  let successCount = 0;
+  let errorCount = 0;
+
+  for (let i = 0; i < alerts.length; i++) {
+    const singleAlert = alerts[i];
+    try {
+      // Create a new event structure with a single alert
+      const singleAlertEvent = {
+        event: {
+          alerts: [singleAlert],
+          rule,
+          ruleUrl,
+          spaceId: eventSpaceId,
+        },
+      };
+
+      const workflowRunId = await externalService.scheduleWorkflow({
+        workflowId,
+        spaceId,
+        inputs: singleAlertEvent,
+      });
+
+      successCount++;
+
+      logger.debug(
+        `[WorkflowsConnector][run] Scheduled workflow for alert ${i + 1}/${
+          alerts.length
+        }, workflowRunId: ${workflowRunId}`
+      );
+    } catch (error) {
+      errorCount++;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      logger.error(
+        `[WorkflowsConnector][run] Failed to schedule workflow for alert ${i + 1}/${
+          alerts.length
+        }: ${errorMessage}`
+      );
+    }
+  }
+
+  if (errorCount > 0) {
+    logger.warn(
+      `[WorkflowsConnector][run] Completed per-alert scheduling with ${errorCount} error(s) out of ${alerts.length} alert(s)`
+    );
+    return {
+      workflowRunId: `per-alert-scheduling-${successCount}-success-${errorCount}-errors`,
+      status: errorCount === alerts.length ? 'failed' : 'partial',
+    };
+  }
+
+  return {
+    workflowRunId: `per-alert-scheduling-${successCount}-success`,
+    status: 'scheduled',
+  };
 };
 
 export const api = {

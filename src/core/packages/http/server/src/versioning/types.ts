@@ -22,6 +22,7 @@ import type {
   RouteSecurity,
 } from '../..';
 import type { RouteDeprecationInfo } from '../router/route';
+import type { RequestValidationErrorHandler } from '../router/route_validator';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -36,7 +37,6 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
 > & {
   options?: Pick<
     RouteConfigOptions<Method>,
-    | 'authRequired'
     | 'xsrfRequired'
     | 'tags'
     | 'body'
@@ -325,6 +325,12 @@ export interface VersionedRouteValidation<P, Q, B> {
    * @public
    */
   response?: VersionedRouteResponseValidation;
+  /**
+   * Handler that allows mapping request validation failures to custom responses.
+   *
+   * @public
+   */
+  onRequestValidationError?: RequestValidationErrorHandler;
 }
 
 /**

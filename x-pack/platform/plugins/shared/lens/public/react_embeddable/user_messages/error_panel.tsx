@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import type { UserMessage } from '@kbn/lens-common';
 import { getLongMessage } from '../../user_messages_utils';
 
@@ -25,53 +25,68 @@ export function VisualizationErrorPanel({
   const showMore = errors.length > 1;
   const canFixInLens = canEdit && errors.some(({ fixableInEditor }) => fixableInEditor);
   return (
-    <div
-      className="lnsEmbeddedError"
-      css={css`
-        flex-grow: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: auto;
-      `}
-    >
-      <EuiEmptyPrompt
-        iconType="warning"
-        iconColor="danger"
-        data-test-subj="embeddable-lens-failure"
-        body={
-          <>
-            {errors.length ? (
-              <>
-                <p>{getLongMessage(errors[0]) || errors[0].shortMessage}</p>
-                {showMore && !canFixInLens ? (
-                  <p>
-                    <FormattedMessage
-                      id="xpack.lens.moreErrors"
-                      defaultMessage="Edit in Lens editor to see more errors"
-                    />
-                  </p>
-                ) : null}
-                {canFixInLens ? (
-                  <p>
-                    <FormattedMessage
-                      id="xpack.lens.fixErrors"
-                      defaultMessage="Edit in Lens editor to fix the error"
-                    />
-                  </p>
-                ) : null}
-              </>
-            ) : (
-              <p>
-                <FormattedMessage
-                  id="xpack.lens.failure"
-                  defaultMessage="Visualization couldn't be displayed"
-                />
-              </p>
-            )}
-          </>
-        }
+    <>
+      <Global
+        styles={css`
+          /** Overwrite the default embeddable error handling for uses outside of Dashboard */
+          .kbnBody:not(:has(.dashboardViewport)) {
+            .embPanel__content--hidden {
+              display: block !important;
+            }
+            .embeddableError {
+              display: none !important;
+            }
+          }
+        `}
       />
-    </div>
+      <div
+        className="lnsEmbeddedError"
+        css={css`
+          flex-grow: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: auto;
+        `}
+      >
+        <EuiEmptyPrompt
+          iconType="warning"
+          iconColor="danger"
+          data-test-subj="embeddable-lens-failure"
+          body={
+            <>
+              {errors.length ? (
+                <>
+                  <p>{getLongMessage(errors[0]) || errors[0].shortMessage}</p>
+                  {showMore && !canFixInLens ? (
+                    <p>
+                      <FormattedMessage
+                        id="xpack.lens.moreErrors"
+                        defaultMessage="Edit in Lens editor to see more errors"
+                      />
+                    </p>
+                  ) : null}
+                  {canFixInLens ? (
+                    <p>
+                      <FormattedMessage
+                        id="xpack.lens.fixErrors"
+                        defaultMessage="Edit in Lens editor to fix the error"
+                      />
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.lens.failure"
+                    defaultMessage="Visualization couldn't be displayed"
+                  />
+                </p>
+              )}
+            </>
+          }
+        />
+      </div>
+    </>
   );
 }

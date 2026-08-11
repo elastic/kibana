@@ -16,6 +16,7 @@ import * as i18n from './translations';
 import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { installMigrationRules } from '../api';
+import type { SiemMigrationTaskStats } from '../../../../server/lib/siem_migrations/common/data/types';
 
 export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
@@ -25,7 +26,7 @@ interface InstallMigrationRulesParams {
 }
 
 export const useInstallMigrationRules = (
-  migrationId: string,
+  migrationStats: SiemMigrationTaskStats,
   translationStats?: RuleMigrationTranslationStats
 ) => {
   const { addError, addSuccess } = useAppToasts();
@@ -34,16 +35,22 @@ export const useInstallMigrationRules = (
   const reportTelemetry = useCallback(
     ({ ids, enabled = false }: InstallMigrationRulesParams, error?: Error) => {
       const count = ids?.length ?? translationStats?.rules.success.installable ?? 0;
-      telemetry.reportTranslatedItemBulkInstall({ migrationId, enabled, count, error });
+      telemetry.reportTranslatedItemBulkInstall({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        enabled,
+        count,
+        error,
+      });
     },
-    [migrationId, telemetry, translationStats?.rules.success.installable]
+    [migrationStats, telemetry, translationStats?.rules.success.installable]
   );
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();
   const invalidateGetMigrationTranslationStats = useInvalidateGetMigrationTranslationStats();
 
   return useMutation<InstallMigrationRulesResponse, Error, InstallMigrationRulesParams>(
-    ({ ids, enabled }) => installMigrationRules({ migrationId, ids, enabled }),
+    ({ ids, enabled }) => installMigrationRules({ migrationId: migrationStats.id, ids, enabled }),
     {
       mutationKey: INSTALL_MIGRATION_RULES_MUTATION_KEY,
       onSuccess: ({ installed }, variables) => {
@@ -55,8 +62,8 @@ export const useInstallMigrationRules = (
         reportTelemetry(variables, error);
       },
       onSettled: () => {
-        invalidateGetRuleMigrations(migrationId);
-        invalidateGetMigrationTranslationStats(migrationId);
+        invalidateGetRuleMigrations(migrationStats.id);
+        invalidateGetMigrationTranslationStats(migrationStats.id);
       },
     }
   );

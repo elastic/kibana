@@ -13,7 +13,7 @@ import type { DashboardCreationOptions } from '../..';
 import { createDashboardEditUrl } from '../../utils/urls';
 import { screenshotModeService, spacesService } from '../../services/kibana_services';
 import { useDashboardMountContext } from './dashboard_mount_context';
-import type { DashboardReadResponseBody } from '../../../server';
+import type { ReadBodyWithResolve } from '../../dashboard_client/dashboard_client';
 
 export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
@@ -24,18 +24,18 @@ export const useDashboardOutcomeValidation = () => {
   const scopedHistory = getScopedHistory?.();
 
   const validateOutcome: DashboardCreationOptions['validateLoadedSavedObject'] = useCallback(
-    (result: DashboardReadResponseBody) => {
-      if (result.meta.outcome === 'aliasMatch' && result.meta.aliasTargetId) {
-        const path = scopedHistory.location.hash.replace(result.id, result.meta.aliasTargetId);
+    (result: ReadBodyWithResolve) => {
+      if (result.resolve.outcome === 'aliasMatch' && result.resolve.aliasTargetId) {
+        const path = scopedHistory.location.hash.replace(result.id, result.resolve.aliasTargetId);
         if (screenshotModeService.isScreenshotMode()) {
           scopedHistory.replace(path); // redirect without the toast when in screenshot mode.
         } else {
-          spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose: result.meta.aliasPurpose });
+          spacesService?.ui.redirectLegacyUrl({ path, aliasPurpose: result.resolve.aliasPurpose });
         }
         return 'redirected'; // redirected. Stop loading dashboard.
       }
-      setAliasId(result.meta.aliasTargetId);
-      setOutcome(result.meta.outcome);
+      setAliasId(result.resolve.aliasTargetId);
+      setOutcome(result.resolve.outcome);
       setSavedObjectId(result.id);
       return 'valid';
     },

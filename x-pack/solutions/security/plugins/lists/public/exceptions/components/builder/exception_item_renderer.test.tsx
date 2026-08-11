@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { fields } from '@kbn/data-plugin/common/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
@@ -20,7 +20,7 @@ import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = kqlPluginMock.createStartContract();
 
 describe('BuilderExceptionListItemComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
@@ -36,7 +36,7 @@ describe('BuilderExceptionListItemComponent', () => {
         entries: [getEntryMatchMock(), getEntryMatchMock()],
       };
       const wrapper = mount(
-        <EuiThemeProvider>
+        <EuiProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -57,7 +57,7 @@ describe('BuilderExceptionListItemComponent', () => {
             setWarningsExist={jest.fn()}
             showValueListModal={MockedShowValueListModal}
           />
-        </EuiThemeProvider>
+        </EuiProvider>
       );
 
       expect(
@@ -69,7 +69,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
-        <EuiThemeProvider>
+        <EuiProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -90,7 +90,7 @@ describe('BuilderExceptionListItemComponent', () => {
             setWarningsExist={jest.fn()}
             showValueListModal={MockedShowValueListModal}
           />
-        </EuiThemeProvider>
+        </EuiProvider>
       );
 
       expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeTruthy();
@@ -100,7 +100,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <EuiThemeProvider>
+        <EuiProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={true}
@@ -121,7 +121,7 @@ describe('BuilderExceptionListItemComponent', () => {
             setWarningsExist={jest.fn()}
             showValueListModal={MockedShowValueListModal}
           />
-        </EuiThemeProvider>
+        </EuiProvider>
       );
 
       expect(
@@ -133,7 +133,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <EuiThemeProvider>
+        <EuiProvider>
           <BuilderExceptionListItemComponent
             allowLargeValueLists={true}
             andLogicIncluded={false}
@@ -154,7 +154,7 @@ describe('BuilderExceptionListItemComponent', () => {
             setWarningsExist={jest.fn()}
             showValueListModal={MockedShowValueListModal}
           />
-        </EuiThemeProvider>
+        </EuiProvider>
       );
 
       expect(

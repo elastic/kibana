@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, HttpStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from './types';
@@ -19,6 +19,8 @@ export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
+
+export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http', false);
 
 export const [getSearchService, setSearchService] =
   createGetterSetter<DataPublicPluginStart['search']>('Search');

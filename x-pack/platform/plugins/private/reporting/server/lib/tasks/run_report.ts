@@ -16,21 +16,22 @@ import {
   CancellationToken,
   KibanaShuttingDownError,
   MissingAuthenticationError,
-  QueueTimeoutError,
   numberToDuration,
+  QueueTimeoutError,
 } from '@kbn/reporting-common';
 import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
+  ReportSource,
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
 import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
+  throwRetryableError,
   TaskErrorSource,
   createTaskRunError,
-  throwRetryableError,
   type ConcreteTaskInstance,
   type RunContext,
   type TaskManagerStartContract,
@@ -40,11 +41,11 @@ import {
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
-import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import { FORCE_TIMEOUT_GRACE_PERIOD, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import type { ReportingCore } from '../..';
 import type { EventTracker } from '../../usage';
 import type { SavedReport } from '../store';
@@ -229,6 +230,32 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     return Math.ceil(this.getQueueTimeout().asSeconds()) + 's';
   }
 
+  /**
+   * Re-fetches the report doc's current `_seq_no`/`_primary_term` and updates `report` in place.
+   * A prior attempt can advance the doc's `seq_no` (e.g. via `ContentStream#writeHead`) before
+   * failing; without this refresh the next write reuses the stale value and Elasticsearch rejects
+   * it with a `version_conflict_engine_exception` (#255230, #234877).
+   */
+  private async refreshReportSeqNo(report: SavedReport): Promise<void> {
+    try {
+      const { asInternalUser: client } = await this.opts.reporting.getEsClient();
+      const document = await client.get<ReportSource>({
+        index: report._index,
+        id: report._id,
+      });
+      if (document._seq_no == null || document._primary_term == null) {
+        throw new Error(`Report doc ${report._id} is missing _seq_no/_primary_term!`);
+      }
+      report._seq_no = document._seq_no;
+      report._primary_term = document._primary_term;
+    } catch (err) {
+      // Non-fatal: fall back to the in-memory values (the subsequent write may still conflict).
+      errorLogger(this.logger, `Error refreshing report doc state for ${report._id}`, err, [
+        report._id,
+      ]);
+    }
+  }
+
   private async saveExecutionError(
     report: SavedReport,
     failedToExecuteErr: Error,
@@ -236,9 +263,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
     const errorParsed = parseError(failedToExecuteErr);
-    const logger = this.logger.get(report._id);
     // log the error
-    errorLogger(logger, message, failedToExecuteErr);
+    errorLogger(this.logger, message, failedToExecuteErr, [report._id]);
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -276,8 +302,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput,
     message: string
   ): Promise<UpdateResponse<ReportDocument>> {
-    const logger = this.logger.get(report._id);
-    logger.warn(message);
+    this.logger.warn(message, { tags: [report._id] });
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -364,21 +389,14 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     spaceId: string | undefined,
     logger = this.logger
   ): KibanaRequest {
+    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      logger.info(`Generating request for space: ${spaceId}`);
+    }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
+      spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
     };
-    const fakeRequest = kibanaRequestFactory(rawRequest);
-
-    const setupDeps = this.opts.reporting.getPluginSetupDeps();
-    const spacesService = setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-    return fakeRequest;
+    return kibanaRequestFactory(rawRequest);
   }
 
   protected async performJob({
@@ -408,8 +426,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // because task manager does not retry recurring tasks.
     let jobTimedOut: boolean = false;
     const timerId = setTimeout(() => {
-      cancellationToken.cancel();
       jobTimedOut = true;
+      try {
+        cancellationToken.cancel();
+      } catch (err) {
+        errorLogger(this.logger, 'Error cancelling timed-out report', err);
+      }
     }, this.queueTimeout);
 
     const runTaskPromise = exportType.runTask({
@@ -419,13 +441,36 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       taskInstanceFields,
       cancellationToken,
       stream,
+      useInternalUser: task.useInternalUser,
+    });
+
+    // Hard timeout fallback: the cooperative timer above only cancels the token, so a runTask that
+    // ignores it would hang this run forever. Force-fail a grace period after the cancel.
+    let forceTimerId: ReturnType<typeof setTimeout> | undefined;
+    const forceTimeoutPromise = new Promise<never>((_, reject) => {
+      forceTimerId = setTimeout(() => {
+        errorLogger(
+          this.logger,
+          `Report ${task.id} did not honor the cancellation token within the grace period; force-failing the run.`
+        );
+        reject(new QueueTimeoutError());
+      }, this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD);
     });
 
     try {
-      const result = await runTaskPromise;
+      const result = await Promise.race([runTaskPromise, forceTimeoutPromise]);
       return { result, timedOut: jobTimedOut };
+    } catch (err) {
+      // Surface the timeout even when runTask rejects on cancel instead of resolving with partial data like CSV does.
+      if (jobTimedOut) {
+        throw new QueueTimeoutError();
+      }
+      throw err;
     } finally {
       clearTimeout(timerId);
+      clearTimeout(forceTimerId);
+      // If the force timeout won the race, runTask may still reject later; catch to prevent unhandled rejection.
+      runTaskPromise.catch(() => {});
     }
   }
 
@@ -435,9 +480,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
-    const logger = this.logger.get(report._id);
 
-    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`, { tags: [report._id] });
 
     const completedTime = moment();
     const docOutput = this.formatOutput(output);
@@ -451,7 +495,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     const resp = await store.setReportCompleted(report, doc);
 
-    logger.info(`Saved ${report.jobtype} job ${docId}`);
+    this.logger.info(`Saved ${report.jobtype} job ${docId}`, { tags: [report._id] });
     report._seq_no = resp._seq_no!;
     report._primary_term = resp._primary_term!;
 
@@ -500,7 +544,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // Keep a separate local stack for each task run
     return ({ taskInstance, fakeRequest }: RunContext) => {
       let jobId: string;
-      let output: PerformJobResults;
+      let output: PerformJobResults | undefined;
       let cancellationToken: CancellationToken | undefined;
       const { retryAt: taskRetryAt, startedAt: taskStartedAt } = taskInstance;
 
@@ -533,27 +577,25 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
           if (!report || !task) {
             this.opts.reporting.untrackReport(jobId);
-
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
-            errorLogger(this.logger, errorMessage);
-
             // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
+            throw new Error(`Job ${jobId} could not be claimed. Exiting...`);
           }
 
           const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
+            this.logger.debug(
+              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`,
+              { tags: [jobId] }
             );
           } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
+            this.logger.debug(`Starting ${jobType} report ${jobId}.`, { tags: [jobId] });
           }
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+            tags: [jobId],
+          });
 
           const eventLog = this.opts.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -568,8 +610,17 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               report,
               operation: async (rep: SavedReport) => {
                 cancellationToken = new CancellationToken();
+                // Reset per attempt so a later attempt that rejects before performJob returns
+                // can't read a prior attempt's result when classifying the failure.
+                output = undefined;
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
+
+                // Retries only: a prior attempt may have advanced the doc's seq_no before failing.
+                if (isNumber(atmpts) && atmpts > 1) {
+                  await this.refreshReportSeqNo(rep);
+                }
+
                 const jobContentEncoding = this.getJobContentEncoding(jobType);
                 const stream = await getContentStream(
                   this.opts.reporting,
@@ -585,26 +636,58 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 );
                 eventLog.logExecutionStart();
 
-                output = await Promise.race<PerformJobResults>([
-                  this.performJob({
-                    task,
-                    fakeRequest,
-                    taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
-                    cancellationToken: cancellationToken!,
-                    stream,
-                  }),
-                  this.throwIfKibanaShutsDown(),
-                ]);
+                // Listen for stream errors so they and reject to prevent unhandled rejections
+                let streamErrorReject: (err: Error) => void;
+                const rejectIfStreamError = new Promise<never>((_, reject) => {
+                  streamErrorReject = reject;
+                  stream.once('error', reject);
+                });
 
-                if (output.timedOut) {
-                  throw new QueueTimeoutError();
+                const performJobPromise = this.performJob({
+                  task,
+                  fakeRequest,
+                  taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                  cancellationToken,
+                  stream,
+                });
+
+                try {
+                  output = await Promise.race<PerformJobResults>([
+                    performJobPromise,
+                    this.throwIfKibanaShutsDown(),
+                    rejectIfStreamError,
+                  ]);
+
+                  if (output.timedOut) {
+                    throw new QueueTimeoutError();
+                  }
+                } catch (raceErr) {
+                  stream.removeListener('error', streamErrorReject!);
+                  // performJob may still reject after losing the race; swallow it to avoid an
+                  // unhandled rejection.
+                  performJobPromise.catch(() => {});
+                  // Swallow errors from the abandoned stream so an unhandled 'error' can't crash
+                  // the process. `on`, not `once`, in case it errors more than once.
+                  stream.on('error', () => {});
+                  // Stop the abandoned stream so it can't keep writing to the report doc
+                  // concurrently with the next attempt.
+                  stream.destroy();
+                  throw raceErr;
                 }
+
+                // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
+                // and don't cause unhandled rejections
+                stream.removeListener('error', streamErrorReject!);
 
                 stream.end();
 
-                logger.debug(`Begin waiting for the stream's pending callbacks...`);
+                this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+                  tags: [jobId],
+                });
                 await finishedWithNoPendingCallbacks(stream);
-                logger.info(`The stream's pending callbacks have completed.`);
+                this.logger.info(`The stream's pending callbacks have completed.`, {
+                  tags: [jobId],
+                });
 
                 rep._seq_no = stream.getSeqNo()!;
                 rep._primary_term = stream.getPrimaryTerm()!;
@@ -613,7 +696,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 eventLog.logExecutionComplete({ ...(output.result.metrics ?? {}), byteSize });
 
                 if (output.result) {
-                  logger.debug(`Job output size: ${byteSize} bytes.`);
+                  this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
                   // Update the job status to "completed"
                   report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
                     ...output.result,
@@ -630,16 +713,27 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   );
                 }
 
-                logger.debug(`Stopping ${jobId}.`);
+                this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
               },
             });
           } catch (failedToExecuteErr) {
             const isLastAttempt = taskAttempts ? taskAttempts >= maxAttempts.maxTaskAttempts : true;
             eventLog.logError(failedToExecuteErr);
 
+            // A prior attempt may have advanced the doc's seq_no before failing; refresh so the
+            // failure-status write doesn't hit a version conflict.
+            if (report) {
+              await this.refreshReportSeqNo(report);
+            }
+
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
-                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+                errorLogger(
+                  this.logger,
+                  `Error in saving execution error ${jobId}`,
+                  failedToSaveError,
+                  [jobId]
+                );
               }
             );
 
@@ -649,11 +743,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             if (isLastAttempt) {
               this.logger.info(
-                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             } else {
               this.logger.info(
-                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             }
 
@@ -669,7 +765,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           } finally {
             // untrack the report for concurrency awareness
             this.opts.reporting.untrackReport(jobId);
-            logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+            this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+              tags: [jobId],
+            });
           }
         },
 
@@ -679,7 +777,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
          */
         cancel: async () => {
           if (jobId) {
-            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
+            this.logger.warn(`Cancelling job ${jobId}...`, { tags: [jobId] });
           }
           if (cancellationToken) {
             cancellationToken.cancel();

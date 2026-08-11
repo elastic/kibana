@@ -16,7 +16,6 @@ import type { Observable } from 'rxjs';
 import {
   interval,
   of,
-  from,
   BehaviorSubject,
   map,
   distinctUntilChanged,
@@ -28,6 +27,8 @@ import {
   shareReplay,
   retry,
   timer,
+  defer,
+  combineLatest,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -46,6 +47,8 @@ export interface PollEsNodesVersionOptions {
   ignoreVersionMismatch: boolean;
   /** @default 2500ms */
   healthCheckInterval: number;
+  /** @default ${healthCheckInterval} */
+  healthCheckFailureInterval?: number;
   healthCheckStartupInterval?: number;
   /** @default 3 */
   healthCheckRetry: number;
@@ -101,10 +104,17 @@ export function mapNodesVersionCompatibility(
       nodesInfoRequestError: nodesInfoResponse.nodesInfoRequestError,
     };
   }
+
+  // Sort by version first, then by IP for stable ordering
+  const sortNodes = (a: NodeInfo, b: NodeInfo) => {
+    const versionCompare = a.version.localeCompare(b.version);
+    return versionCompare !== 0 ? versionCompare : a.ip.localeCompare(b.ip);
+  };
+
   const nodes = Object.keys(nodesInfoResponse.nodes)
-    .sort() // Sorting ensures a stable node ordering for comparison
     .map((key) => nodesInfoResponse.nodes[key])
-    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }));
+    .map((node) => Object.assign({}, node, { name: getHumanizedNodeName(node) }))
+    .sort(sortNodes); // Sorting ensures stable ordering for comparison
 
   // Aggregate incompatible ES nodes.
   const incompatibleNodes = nodes.filter(
@@ -155,6 +165,7 @@ function compareNodesInfoErrorMessages(
 // Returns true if two NodesVersionCompatibility entries match
 function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompatibility) {
   const nodesEqual = (n: NodeInfo, m: NodeInfo) => n.ip === m.ip && n.version === m.version;
+
   return (
     curr.isCompatible === prev.isCompatible &&
     curr.incompatibleNodes.length === prev.incompatibleNodes.length &&
@@ -172,6 +183,7 @@ export const pollEsNodesVersion = ({
   kibanaVersion,
   ignoreVersionMismatch,
   healthCheckInterval,
+  healthCheckFailureInterval,
   healthCheckStartupInterval,
   healthCheckRetry,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
@@ -181,13 +193,23 @@ export const pollEsNodesVersion = ({
     healthCheckStartupInterval !== undefined && healthCheckStartupInterval !== healthCheckInterval;
 
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
+  const isCheckFailing$ = new BehaviorSubject(false);
 
   let currentInterval = 0;
-  const checkInterval$ = isStartup$.pipe(
-    distinctUntilChanged(),
-    map((useStartupInterval) =>
-      useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
-    ),
+  const checkInterval$ = combineLatest([isStartup$, isCheckFailing$]).pipe(
+    distinctUntilChanged((prev, curr) => prev[0] === curr[0] && prev[1] === curr[1]),
+    map(([isStartup, isCheckFailing]) => {
+      // on startup always use the startup interval
+      if (isStartup) {
+        return healthCheckStartupInterval!;
+      }
+      // on failure always use the failure interval
+      if (isCheckFailing) {
+        return healthCheckFailureInterval || healthCheckInterval;
+      }
+      // otherwise use the normal interval
+      return healthCheckInterval;
+    }),
     tap((ms) => (currentInterval = ms))
   );
 
@@ -195,16 +217,16 @@ export const pollEsNodesVersion = ({
     switchMap((checkInterval) => interval(checkInterval)),
     startWith(0),
     exhaustMap(() => {
-      return from(
-        internalClient.nodes.info(
+      return defer(() => {
+        return internalClient.nodes.info(
           {
             node_id: '_all',
             metric: '_none',
             filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
           },
           { requestTimeout: HEALTH_CHECK_REQUEST_TIMEOUT }
-        )
-      ).pipe(
+        );
+      }).pipe(
         retry({
           count: healthCheckRetry,
           delay: (e) => {
@@ -228,6 +250,9 @@ export const pollEsNodesVersion = ({
       if (nodesVersionCompatibility.isCompatible) {
         isStartup$.next(false);
       }
+
+      const hasErrors = !!nodesVersionCompatibility.nodesInfoRequestError;
+      isCheckFailing$.next(hasErrors);
     }),
     shareReplay({ refCount: true, bufferSize: 1 })
   );

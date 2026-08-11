@@ -105,19 +105,26 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
 
     public async openDatePickerQuickMenu() {
       log.debug('openDatePickerQuickMenu');
-      let button: WebElementWrapper | undefined;
-      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
-        button = await this.findDatePickerQuickMenuButton();
-        return Boolean(button);
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('superDatePickerQuickMenu', { timeout: 1000 }))) {
+          const button = await this.findDatePickerQuickMenuButton();
+          if (button) {
+            await button.click();
+          }
+        }
+        await testSubjects.existOrFail('superDatePickerQuickMenu');
       });
-      if (button) {
-        await button.click();
-      }
     }
 
     public async clickCommonlyUsedTimeRange(time: CommonlyUsed) {
       log.debug('clickCommonlyUsedTimeRange', time);
-      await testSubjects.click(`superDatePickerCommonlyUsed_${time}`);
+      const testSubj = `superDatePickerCommonlyUsed_${time}`;
+      await retry.try(async () => {
+        if (!(await testSubjects.exists(testSubj, { timeout: 1000 }))) {
+          await this.openDatePickerQuickMenu();
+        }
+        await testSubjects.click(testSubj);
+      });
     }
 
     public async clickToggleHidePanelTitle() {

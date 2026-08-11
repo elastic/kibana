@@ -6,15 +6,16 @@
  */
 
 import apm from 'elastic-apm-node';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { AdHocRunStatus } from '../../common/constants';
 import { adHocRunStatus } from '../../common/constants';
 import type { RuleRunnerErrorStackTraceLog, RunRuleResult, TaskRunnerContext } from './types';
@@ -53,14 +54,16 @@ import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { ActionScheduler } from './action_scheduler';
 import { transformAdHocRunToAdHocRunData } from '../application/backfill/transforms/transform_ad_hoc_run_to_backfill_result';
 
-interface ConstructorParams {
+export interface AdHocTaskRunnerConstructorParams {
   context: TaskRunnerContext;
   internalSavedObjectsRepository: ISavedObjectsRepository;
   taskInstance: ConcreteTaskInstance;
+  executionUuid: string;
 }
 
 interface RunParams {
   adHocRunData: AdHocRun;
+  effectiveApiKey: string | null;
   fakeRequest: KibanaRequest;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
@@ -75,6 +78,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private adHocRunSchedule: AdHocRunSchedule[] = [];
   private adHocRange: { start: string; end: string | undefined } | null = null;
+  private adHocRunData: AdHocRun | null = null;
   private alertingEventLogger: AlertingEventLogger;
   private cancelled = false;
   private logger: Logger;
@@ -99,11 +103,16 @@ export class AdHocTaskRunner implements CancellableTask {
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null = null;
   private taskRunning: AdHocTaskRunningHandler;
   private timer: TaskRunnerTimer;
-  private apiKeyToUse: string | null = null;
+  private fakeRequest: KibanaRequest | null = null;
 
-  constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorParams) {
+  constructor({
+    context,
+    internalSavedObjectsRepository,
+    taskInstance,
+    executionUuid,
+  }: AdHocTaskRunnerConstructorParams) {
     this.context = context;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.taskInstance = taskInstance;
@@ -165,6 +174,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private async runRule({
     adHocRunData,
+    effectiveApiKey,
     fakeRequest,
     scheduleToRun,
     validatedParams: params,
@@ -174,20 +184,24 @@ export class AdHocTaskRunner implements CancellableTask {
       return ruleRunMetricsStore.getMetrics();
     }
 
-    const { rule, apiKeyToUse, apiKeyId } = adHocRunData;
+    const { rule, apiKeyId } = adHocRunData;
     const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
+    // spaceId is persisted on the ad-hoc run saved object, written by validated
+    // request handlers. Brand it once here at the SO load boundary.
+    const spaceId = brandSpaceId(adHocRunData.spaceId);
 
     const ruleLabel = `${ruleType.id}:${rule.id}: '${rule.name}'`;
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
-      namespace: this.context.spaceIdToNamespace(adHocRunData.spaceId),
+      namespace: this.context.spaceIdToNamespace(spaceId),
       logger: this.logger,
       request: fakeRequest,
       ruleId: rule.id,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
-      spaceId: adHocRunData.spaceId,
+      spaceId,
       isServerless: this.context.isServerless,
+      shouldGrantUiam: this.context.shouldGrantUiam,
     };
     const alertsClient = await initializeAlertsClient<
       RuleTypeParams,
@@ -209,6 +223,8 @@ export class AdHocTaskRunner implements CancellableTask {
         consumer: rule.consumer,
         revision: rule.revision,
         params: rule.params,
+        muteAll: false,
+        mutedInstanceIds: [],
       },
       ruleType,
       runTimestamp: this.runDate,
@@ -227,7 +243,7 @@ export class AdHocTaskRunner implements CancellableTask {
         name: rule.name,
         alertTypeId: rule.alertTypeId,
         id: rule.id,
-        spaceId: adHocRunData.spaceId,
+        spaceId,
       },
       ruleTaskTimeout: ruleType.ruleTaskTimeout,
     });
@@ -278,7 +294,7 @@ export class AdHocTaskRunner implements CancellableTask {
       taskRunnerContext: this.context,
       taskInstance: this.taskInstance,
       ruleRunMetricsStore,
-      apiKey: apiKeyToUse,
+      apiKey: effectiveApiKey,
       apiKeyId,
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
@@ -361,7 +377,6 @@ export class AdHocTaskRunner implements CancellableTask {
           adHocRunSO,
           isSystemAction: (connectorId: string) =>
             this.context.actionsPlugin.isSystemActionConnector(connectorId),
-          omitGeneratedActionValues: false,
         });
       } catch (err) {
         const errorSource = SavedObjectsErrorHelpers.isNotFoundError(err)
@@ -374,8 +389,8 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
-      this.apiKeyToUse = apiKeyToUse;
+      const { rule, apiKeyToUse, uiamApiKey, schedule, start, end } = adHocRunData;
+      this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -391,10 +406,15 @@ export class AdHocTaskRunner implements CancellableTask {
       this.ruleId = rule.id;
       this.alertingEventLogger.addOrUpdateRuleData({
         id: rule.id,
+        uuid:
+          ruleType.solution === 'security' && typeof rule.params.ruleId === 'string'
+            ? rule.params.ruleId
+            : undefined,
         type: ruleType,
         name: rule.name,
         consumer: rule.consumer,
         revision: rule.revision,
+        tags: rule.tags,
       });
 
       try {
@@ -421,16 +441,17 @@ export class AdHocTaskRunner implements CancellableTask {
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Backfill for Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: rule.id,
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: rule.id,
+        alerting_rule_consumer: rule.consumer,
+        alerting_rule_name: rule.name,
+        alerting_rule_tags: rule.tags.join(', '),
+        alerting_rule_type_id: rule.alertTypeId,
+        alerting_rule_params: JSON.stringify(rule.params),
+      });
 
       if (startedAt) {
         // Capture how long it took for the task to start running after being claimed
@@ -458,11 +479,27 @@ export class AdHocTaskRunner implements CancellableTask {
         );
       }
 
-      // Generate fake request with API key
-      const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse);
+      // Generate fake request with API key. Threading the UIAM key (and owner
+      // metadata) mirrors the regular rule runner so backfills authenticate with
+      // the UIAM key in UIAM deployments instead of falling back to the ES key.
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        this.context,
+        spaceId,
+        apiKeyToUse,
+        {
+          uiamApiKey,
+          apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+          apiKeyOwner: rule.apiKeyOwner,
+          ruleId: rule.id,
+        }
+      );
+      // Stash the built request so the cleanup path (updateGapsAfterBackfillComplete)
+      // reuses the exact same credentials instead of rebuilding it from scratch.
+      this.fakeRequest = fakeRequest;
 
       return {
         adHocRunData,
+        effectiveApiKey,
         fakeRequest,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
@@ -478,83 +515,100 @@ export class AdHocTaskRunner implements CancellableTask {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const { executionStatus: execStatus, executionMetrics: execMetrics } =
-      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
-        const { executionStatus, executionMetrics, outcome } = processRunResults({
-          result: this.ruleResult,
-          runDate: this.runDate,
-          runRuleResult,
-        });
-
-        if (!isOk(runRuleResult)) {
-          const error = this.stackTraceLog ? this.stackTraceLog.message : runRuleResult.error;
-          const stack = this.stackTraceLog
-            ? this.stackTraceLog.stackTrace
-            : runRuleResult.error.stack;
-          const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
-            error
-          )} - ${stack ?? ''}`;
-          const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
-          if (this.ruleTypeId.length > 0) {
-            tags.push(this.ruleTypeId);
-          }
-          if (this.ruleId.length > 0) {
-            tags.push(this.ruleId);
-          }
-          this.logger.error(message, { tags, error: { stack_trace: stack } });
-        }
-
-        if (apm.currentTransaction) {
-          apm.currentTransaction.setOutcome(outcome);
-        }
-
-        // set start and duration based on event log
-        const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-        if (null != start) {
-          executionStatus.lastExecutionDate = start;
-        }
-        if (null != duration) {
-          executionStatus.lastDuration = nanosToMillis(duration);
-        }
-
-        if (this.scheduleToRunIndex > -1) {
-          let updatedStatus: AdHocRunStatus = adHocRunStatus.COMPLETE;
-          if (this.cancelled) {
-            updatedStatus = adHocRunStatus.TIMEOUT;
-          } else if (outcome === 'failure') {
-            updatedStatus = adHocRunStatus.ERROR;
-          }
-          this.adHocRunSchedule[this.scheduleToRunIndex].status = updatedStatus;
-        }
-
-        // If execution failed due to decrypt error, we should stop running the task
-        // If the user wants to rerun it, they can reschedule
-        // In the future, we can consider saving the task in an error state when we
-        // have one or both of the following abilities
-        // - ability to rerun a failed ad hoc run
-        // - ability to clean up failed ad hoc runs (either manually or automatically)
-        this.shouldDeleteTask =
-          executionStatus.status === 'error' &&
-          (executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Decrypt ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Read ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
-
-        await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
-          ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
-          ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
-        });
-
-        if (startedAt) {
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
-
-        return { executionStatus, executionMetrics };
+    const result = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+      const { executionStatus, executionMetrics, outcome } = processRunResults({
+        result: this.ruleResult,
+        runDate: this.runDate,
+        runRuleResult,
       });
+
+      if (!isOk(runRuleResult)) {
+        const error = this.stackTraceLog ? this.stackTraceLog.message : runRuleResult.error;
+        const stack = this.stackTraceLog
+          ? this.stackTraceLog.stackTrace
+          : runRuleResult.error.stack;
+        const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
+          error
+        )} - ${stack ?? ''}`;
+        const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
+        if (this.ruleTypeId.length > 0) {
+          tags.push(this.ruleTypeId);
+        }
+        if (this.ruleId.length > 0) {
+          tags.push(this.ruleId);
+        }
+        this.logger.error(message, { tags, error: { stack_trace: stack } });
+      }
+
+      if (apm.currentTransaction) {
+        apm.currentTransaction.setOutcome(outcome);
+        apm.setCustomContext({
+          execution_outcome: {
+            ...this.ruleMonitoring.getExecutorMetrics(),
+            error: executionStatus.error,
+            warning: executionStatus.warning,
+          },
+        });
+      }
+
+      // set start and duration based on event log
+      const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+      if (null != start) {
+        executionStatus.lastExecutionDate = start;
+      }
+      if (null != duration) {
+        executionStatus.lastDuration = nanosToMillis(duration);
+      }
+
+      if (executionMetrics) {
+        this.ruleMonitoring.addFrameworkMetrics({
+          total_search_duration_ms: executionMetrics.totalSearchDurationMs,
+        });
+      }
+
+      if (this.scheduleToRunIndex > -1) {
+        let updatedStatus: AdHocRunStatus = adHocRunStatus.COMPLETE;
+        if (this.cancelled) {
+          updatedStatus = adHocRunStatus.TIMEOUT;
+        } else if (outcome === 'failure') {
+          updatedStatus = adHocRunStatus.ERROR;
+        }
+        this.adHocRunSchedule[this.scheduleToRunIndex].status = updatedStatus;
+      }
+
+      // If execution failed due to decrypt error, we should stop running the task
+      // If the user wants to rerun it, they can reschedule
+      // In the future, we can consider saving the task in an error state when we
+      // have one or both of the following abilities
+      // - ability to rerun a failed ad hoc run
+      // - ability to clean up failed ad hoc runs (either manually or automatically)
+      this.shouldDeleteTask =
+        executionStatus.status === 'error' &&
+        (executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Decrypt ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Read ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
+
+      await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
+        ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
+        ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
+      });
+
+      if (startedAt) {
+        // Capture how long it took for the rule to run after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+      }
+
+      return {
+        executionStatus,
+        executionMetrics,
+        consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+      };
+    });
     this.alertingEventLogger.done({
-      status: execStatus,
-      metrics: execMetrics,
+      status: result.executionStatus,
+      metrics: result.executionMetrics,
+      consumerMetrics: result.consumerExecutionMetrics,
       // in the future if we have other types of ad hoc runs (like preview)
       // we can differentiate and pass in different info
       backfill: {
@@ -664,16 +718,12 @@ export class AdHocTaskRunner implements CancellableTask {
   }
 
   private async updateGapsAfterBackfillComplete() {
-    if (this.scheduleToRunIndex < 0 || !this.adHocRange) return null;
+    if (this.scheduleToRunIndex < 0 || !this.adHocRange || !this.fakeRequest) return null;
 
-    const fakeRequest = getFakeKibanaRequest(
-      this.context,
-      this.taskInstance.params.spaceId,
-      this.apiKeyToUse
+    const eventLogClient = await this.context.getEventLogClient(this.fakeRequest);
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(
+      this.fakeRequest
     );
-
-    const eventLogClient = await this.context.getEventLogClient(fakeRequest);
-    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     return updateGaps({
       ruleId: this.ruleId,
       start: new Date(this.adHocRange.start),
@@ -685,6 +735,7 @@ export class AdHocTaskRunner implements CancellableTask {
       savedObjectsRepository: this.internalSavedObjectsRepository,
       backfillClient: this.context.backfillClient,
       actionsClient,
+      initiator: this.adHocRunData?.initiator,
     });
   }
 

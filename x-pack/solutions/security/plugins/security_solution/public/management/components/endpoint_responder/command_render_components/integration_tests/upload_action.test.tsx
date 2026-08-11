@@ -218,6 +218,7 @@ describe.skip('When using `upload` response action', () => {
   });
 
   it.each([
+    'ra_upload_error_canceled',
     'ra_upload_error_failure',
     'ra_upload_error_already-exists',
     'ra_upload_error_not-found',
@@ -237,6 +238,7 @@ describe.skip('When using `upload` response action', () => {
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['not found'],
         completedAt: new Date().toISOString(),
       },

@@ -7,14 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import { ExperimentalFeaturesService } from '../../../../../../../../common/experimental_features_service';
 import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
 import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
 import { DashboardResourceIdentifier } from '../../../../../../../../../common/siem_migrations/dashboards/resources';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { OnResourcesCreated } from '../../../../types';
 import { MacrosFileUpload } from './macros_file_upload';
 import * as i18n from './translations';
+import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export interface DashboardsFileUploadStepProps {
   status: EuiStepStatus;
@@ -32,11 +33,13 @@ export const useMacrosFileUploadStep = ({
   const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
 
   const upsertMigrationResources = useCallback(
-    (macrosFromFile: SiemMigrationResourceData[]) => {
+    async (macrosFromFile: SiemMigrationResourceData[]) => {
       const macrosIndexed: Record<string, SiemMigrationResourceData> = Object.fromEntries(
         macrosFromFile.map((macro) => [macro.name, macro])
       );
-      const resourceIdentifier = new DashboardResourceIdentifier('splunk');
+      const resourceIdentifier = new DashboardResourceIdentifier('splunk', {
+        experimentalFeatures: ExperimentalFeaturesService.get(),
+      });
       const macrosToUpsert: SiemMigrationResourceData[] = [];
       let missingMacrosIt: string[] = missingMacros;
 
@@ -52,23 +55,27 @@ export const useMacrosFileUploadStep = ({
         });
         macrosToUpsert.push(...macros);
 
-        missingMacrosIt = resourceIdentifier
-          .fromResources(macros)
-          .reduce<string[]>((acc, resource) => {
-            if (resource.type === 'macro') {
-              acc.push(resource.name);
-            }
-            return acc;
-          }, []);
+        const identifiedMissingMacros = await resourceIdentifier.fromResources(macros);
+
+        missingMacrosIt = identifiedMissingMacros.reduce<string[]>((acc, resource) => {
+          if (resource.type === 'macro') {
+            acc.push(resource.name);
+          }
+          return acc;
+        }, []);
       }
 
       if (macrosToUpsert.length === 0) {
         addWarning({ title: i18n.NO_MISSING_MACROS_PROVIDED });
         return; // No missing macros provided
       }
-      upsertResources(migrationStats.id, macrosToUpsert);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: macrosToUpsert,
+      });
     },
-    [missingMacros, upsertResources, migrationStats.id, addWarning]
+    [missingMacros, upsertResources, migrationStats.id, migrationStats.vendor, addWarning]
   );
 
   const uploadStepStatus = useMemo(() => {

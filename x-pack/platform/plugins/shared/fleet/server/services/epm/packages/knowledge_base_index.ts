@@ -22,11 +22,13 @@ export async function saveKnowledgeBaseContentToIndex({
   pkgName,
   pkgVersion,
   knowledgeBaseContent,
+  signal,
 }: {
   esClient: ElasticsearchClient;
   pkgName: string;
   pkgVersion: string;
   knowledgeBaseContent: KnowledgeBaseItem[];
+  signal?: AbortSignal;
 }): Promise<string[]> {
   // Always delete existing documents for this package (regardless of version)
   // This ensures we only have one set of docs per package
@@ -62,10 +64,13 @@ export async function saveKnowledgeBaseContentToIndex({
   if (operations.length > 0) {
     const bulkResponse = await retryTransientEsErrors(
       async () =>
-        esClient.bulk({
-          operations,
-          refresh: 'wait_for',
-        }),
+        esClient.bulk(
+          {
+            operations,
+            refresh: 'wait_for',
+          },
+          signal ? { signal } : undefined
+        ),
       { logger: appContextService.getLogger() }
     ).catch((error) => {
       const logger = appContextService.getLogger();
@@ -111,18 +116,22 @@ export async function saveKnowledgeBaseContentToIndex({
 
 export async function getPackageKnowledgeBaseFromIndex(
   esClient: ElasticsearchClient,
-  pkgName: string
+  pkgName: string,
+  signal?: AbortSignal
 ): Promise<KnowledgeBaseItem[]> {
   try {
     const query = {
       match: { package_name: pkgName },
     };
 
-    const response = await esClient.search({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-      query,
-      size: DEFAULT_SIZE,
-    });
+    const response = await esClient.search(
+      {
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        query,
+        size: DEFAULT_SIZE,
+      },
+      signal ? { signal } : undefined
+    );
 
     return response.hits.hits.map((hit: any) => ({
       fileName: hit._source.filename,
@@ -139,16 +148,23 @@ export async function getPackageKnowledgeBaseFromIndex(
   }
 }
 
-export async function deletePackageKnowledgeBase(esClient: ElasticsearchClient, pkgName: string) {
+export async function deletePackageKnowledgeBase(
+  esClient: ElasticsearchClient,
+  pkgName: string,
+  signal?: AbortSignal
+) {
   const query = {
     match: { package_name: pkgName },
   };
 
   await esClient
-    .deleteByQuery({
-      index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-      query,
-    })
+    .deleteByQuery(
+      {
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+        query,
+      },
+      signal ? { signal } : undefined
+    )
     .catch((error) => {
       const logger = appContextService.getLogger();
       logger.error('Delete operation failed', error);

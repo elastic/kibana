@@ -122,14 +122,18 @@ describe('entity risk score calculation route', () => {
       const request = buildRequest({ identifier_type: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('identifier_type: Required');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'identifier_type: Invalid option: expected one of "host"|"user"|"service"|"generic"'
+      );
     });
 
     it('requires a parameter for the entity identifier', async () => {
       const request = buildRequest({ identifier: undefined });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('identifier: Required');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'identifier: Invalid input: expected string, received undefined'
+      );
     });
 
     it('returns an error if no entity analytics configuration is found', async () => {

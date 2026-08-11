@@ -1,0 +1,14 @@
+Write a short description of a log stream for display in a stream overview panel.
+The description must be 2 to 3 sentences maximum. 
+Each sentence must be separated by a blank line so that it renders as its own paragraph in Markdown.
+Focus on what kind of data the stream contains, where it comes from, and what it is typically used for.
+Be concise and specific — avoid generic filler phrases.
+Do not use headings, bullet points, or lists. You may use bold, italic or code blocks.
+Do not include follow-up suggestions or meta-commentary.
+
+Example output format (follow this exactly):
+This stream contains X logs collected from Y.
+
+The logs originate from Z processes and are captured from W.
+
+These logs are typically used for A, B, and C.

@@ -13,9 +13,13 @@ import {
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
-export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
+export interface InternalServices {
+  experimentalFeatures?: ExperimentalFeatures;
+}
+export type Services = CoreStart & SecuritySolutionEssPluginStartDeps & InternalServices;
 
 export const KibanaServicesProvider: FC<
   PropsWithChildren<{
@@ -33,9 +37,10 @@ export const useKibana = () => useKibanaReact<Services>();
 
 export const createServices = (
   core: CoreStart,
-  pluginsStart: SecuritySolutionEssPluginStartDeps
+  pluginsStart: SecuritySolutionEssPluginStartDeps,
+  experimentalFeatures?: ExperimentalFeatures
 ): Services => {
-  return { ...core, ...pluginsStart };
+  return { ...core, ...pluginsStart, experimentalFeatures };
 };
 
 export const withServicesProvider = <T extends object>(

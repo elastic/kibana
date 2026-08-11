@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { API_BASE_PATH } from '../../../common/constants';
 import type { Cluster } from '../../../common/lib';
 
 type HttpMethod = 'GET' | 'DELETE';
+
+const resolvePath = (pathOrOptions: string | HttpFetchOptionsWithPath): string =>
+  typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
 
 export interface ResponseError {
   statusCode: number;
@@ -29,11 +33,9 @@ const registerHttpRequestMockHelpers = (
   const mockMethodImplementation = (method: HttpMethod, path: string) =>
     mockResponses.get(method)?.get(path) ?? Promise.resolve({});
 
-  httpSetup.get.mockImplementation((path) =>
-    mockMethodImplementation('GET', path as unknown as string)
-  );
+  httpSetup.get.mockImplementation((path) => mockMethodImplementation('GET', resolvePath(path)));
   httpSetup.delete.mockImplementation((path) =>
-    mockMethodImplementation('DELETE', path as unknown as string)
+    mockMethodImplementation('DELETE', resolvePath(path))
   );
 
   const mockResponse = (method: HttpMethod, path: string, response?: unknown, error?: unknown) => {
@@ -47,8 +49,10 @@ const registerHttpRequestMockHelpers = (
       .set(path, error ? defuse(Promise.reject({ body: error })) : Promise.resolve(response));
   };
 
-  const setLoadRemoteClustersResponse = (response: Cluster[], error?: ResponseError) =>
-    mockResponse('GET', API_BASE_PATH, response, error);
+  const setLoadRemoteClustersResponse = (
+    response: Array<Partial<Cluster>>,
+    error?: ResponseError
+  ) => mockResponse('GET', API_BASE_PATH, response, error);
 
   const setDeleteRemoteClusterResponse = (
     clusterName: string,

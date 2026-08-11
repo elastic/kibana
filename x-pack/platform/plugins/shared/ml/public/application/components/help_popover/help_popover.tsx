@@ -9,7 +9,14 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { useHelpPopoverStyles } from './help_popover_styles';
 
@@ -18,15 +25,22 @@ export const HelpPopoverButton: FC<{
   styles?: SerializedStyles;
 }> = ({ onClick, styles }) => {
   return (
-    <EuiButtonIcon
-      size="s"
-      iconType="question"
-      aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
         defaultMessage: 'Help',
       })}
-      onClick={onClick}
-      css={styles}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="s"
+        iconType="question"
+        aria-label={i18n.translate('xpack.ml.helpPopover.ariaLabel', {
+          defaultMessage: 'Help',
+        })}
+        onClick={onClick}
+        css={styles}
+      />
+    </EuiToolTip>
   );
 };
 
@@ -44,6 +58,7 @@ export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { helpPopoverPanel, helpPopoverContent } = useHelpPopoverStyles();
+  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <EuiPopover
@@ -59,8 +74,19 @@ export const HelpPopover: FC<PropsWithChildren<HelpPopoverProps>> = ({
       ownFocus
       panelProps={{ css: helpPopoverPanel }}
       panelPaddingSize="none"
+      {...(title
+        ? { 'aria-labelledby': popoverTitleId }
+        : {
+            'aria-label': i18n.translate('xpack.ml.helpPopover.popoverAriaLabel', {
+              defaultMessage: 'Help',
+            }),
+          })}
     >
-      {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
+      {title && (
+        <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+          {title}
+        </EuiPopoverTitle>
+      )}
 
       <EuiText css={helpPopoverContent} size="s" tabIndex={0}>
         {children}

@@ -98,7 +98,7 @@ export const WorkflowInsightsIncompatibleAntivirusResult = ({
       >
         <EuiFlexGroup alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="securityApp" size="l" color="warning" />
+            <EuiIcon type="securityApp" size="l" color="warning" aria-hidden={true} />
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -132,7 +132,7 @@ export const WorkflowInsightsIncompatibleAntivirusResult = ({
                 data-test-subj={`workflowInsightsResult-${index}-remediation`}
                 isDisabled={!canWriteTrustedApplications}
                 aria-label={ariaLabel}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
                 onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();

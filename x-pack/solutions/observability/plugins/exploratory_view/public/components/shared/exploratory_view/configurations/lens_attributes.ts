@@ -31,7 +31,7 @@ import type {
   TermsIndexPatternColumn,
   TypedLensByValueInput,
   XYCurveType,
-  XYState,
+  XYVisualizationState,
   YAxisMode,
   HeatmapVisualizationState,
   MetricState,
@@ -154,14 +154,14 @@ export interface LayerConfig {
 
 export class LensAttributes {
   layers: Record<string, PersistedIndexPatternLayer>;
-  visualization?: XYState | HeatmapVisualizationState | MetricState;
+  visualization?: XYVisualizationState | HeatmapVisualizationState | MetricState;
   layerConfigs: LayerConfig[] = [];
   isMultiSeries?: boolean;
   seriesReferenceLines: Record<
     string,
     {
       layerData: PersistedIndexPatternLayer;
-      layerState: XYState['layers'];
+      layerState: XYVisualizationState['layers'];
       dataView: DataView;
     }
   >;
@@ -1053,7 +1053,7 @@ export class LensAttributes {
     };
   }
 
-  getXyState(): XYState {
+  getXyState(): XYVisualizationState {
     return {
       legend: {
         isVisible: true,
@@ -1080,7 +1080,7 @@ export class LensAttributes {
     };
   }
 
-  getDataLayers(): XYState['layers'] {
+  getDataLayers(): XYVisualizationState['layers'] {
     const dataLayers = this.layerConfigs.map((layerConfig, index) => {
       const { sourceField } = layerConfig.seriesConfig.yAxisColumns[0];
 
@@ -1126,7 +1126,7 @@ export class LensAttributes {
         ...(layerConfig.breakdown &&
         layerConfig.breakdown !== PERCENTILE &&
         layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-          ? { splitAccessor: `breakdown-column-layer${index}` }
+          ? { splitAccessors: [`breakdown-column-layer${index}`] }
           : {}),
         ...(this.layerConfigs[0].seriesConfig.yTitle
           ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
@@ -1134,7 +1134,7 @@ export class LensAttributes {
       };
     });
 
-    const referenceLineLayers: XYState['layers'] = [];
+    const referenceLineLayers: XYVisualizationState['layers'] = [];
 
     Object.entries(this.seriesReferenceLines).forEach(([_id, { layerState }]) => {
       referenceLineLayers.push(layerState[0]);
@@ -1167,7 +1167,7 @@ export class LensAttributes {
     fieldName: string,
     referenceLineLayerId: string,
     seriesConfig: SeriesConfig
-  ): XYState['layers'] {
+  ): XYVisualizationState['layers'] {
     const columns = this.getThresholdColumns(fieldName, referenceLineLayerId, seriesConfig);
 
     return [

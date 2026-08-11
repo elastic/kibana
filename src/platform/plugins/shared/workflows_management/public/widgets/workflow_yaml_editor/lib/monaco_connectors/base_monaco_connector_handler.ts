@@ -8,9 +8,11 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import type { StabilityLevel } from '@kbn/workflows';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
+import { getCachedAllConnectors } from '../connectors_cache';
+import { getStabilityBadgeHtml } from '../get_stability_note';
 import type {
-  ActionContext,
-  ActionInfo,
   ConnectorExamples,
   HoverContext,
   MonacoConnectorHandler,
@@ -51,11 +53,6 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
   abstract generateHoverContent(context: HoverContext): Promise<monaco.IMarkdownString | null>;
 
   /**
-   * Generate floating action buttons for the connector - must be implemented by subclasses
-   */
-  abstract generateActions(context: ActionContext): Promise<ActionInfo[]>;
-
-  /**
    * Get examples for the connector type - must be implemented by subclasses
    */
   abstract getExamples(connectorType: string): ConnectorExamples | null;
@@ -68,29 +65,6 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
       value: content,
       isTrusted: true,
       supportHtml: true,
-    };
-  }
-
-  /**
-   * Helper method to create action info objects
-   */
-  protected createActionInfo(
-    id: string,
-    label: string,
-    handler: () => void | Promise<void>,
-    options: {
-      icon?: string;
-      tooltip?: string;
-      priority?: number;
-    } = {}
-  ): ActionInfo {
-    return {
-      id,
-      label,
-      handler,
-      icon: options.icon,
-      tooltip: options.tooltip || label,
-      priority: options.priority || 0,
     };
   }
 
@@ -167,6 +141,30 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Prepends the stability badge to hover body lines (top-left, same as trigger hovers).
+   */
+  protected prependStabilityBadgeToContent(
+    stability: StabilityLevel | undefined,
+    bodyLines: string[]
+  ): string {
+    const badge = getStabilityBadgeHtml(stability);
+    if (!badge) {
+      return bodyLines.join('\n');
+    }
+    return [badge, '', ...bodyLines].join('\n');
+  }
+
+  protected getConnectorStabilityFromCache(connectorType: string): StabilityLevel | undefined {
+    const mapStability = getCachedAllConnectorsMap()?.get(connectorType)?.stability;
+    const listStability = getCachedAllConnectors().find((c) => c.type === connectorType)?.stability;
+    const stability = mapStability ?? listStability;
+    if (stability === 'tech_preview' || stability === 'beta') {
+      return stability;
+    }
+    return undefined;
   }
 
   /**

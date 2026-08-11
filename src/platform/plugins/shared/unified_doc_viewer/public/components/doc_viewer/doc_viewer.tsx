@@ -8,25 +8,32 @@
  */
 
 import React, { forwardRef, useMemo } from 'react';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import type { DocViewerApi, DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DocViewer } from '@kbn/unified-doc-viewer';
 
 import { getUnifiedDocViewerServices } from '../../plugin';
 
-export const UnifiedDocViewer = forwardRef<DocViewerApi, DocViewRenderProps>(
-  ({ docViewsRegistry, ...props }, ref) => {
-    const { unifiedDocViewer } = getUnifiedDocViewerServices();
+export const UnifiedDocViewer = forwardRef<
+  DocViewerApi,
+  Omit<DocViewerProps, 'docViews' | 'reportEvent'>
+>(({ docViewsRegistry, ...props }, ref) => {
+  const { unifiedDocViewer, analytics } = getUnifiedDocViewerServices();
 
-    const registry = useMemo(() => {
-      if (docViewsRegistry) {
-        return typeof docViewsRegistry === 'function'
-          ? docViewsRegistry(unifiedDocViewer.registry.clone())
-          : docViewsRegistry;
-      }
-      return unifiedDocViewer.registry;
-    }, [docViewsRegistry, unifiedDocViewer.registry]);
+  const registry = useMemo(() => {
+    if (docViewsRegistry) {
+      return typeof docViewsRegistry === 'function'
+        ? docViewsRegistry(unifiedDocViewer.registry.clone())
+        : docViewsRegistry;
+    }
+    return unifiedDocViewer.registry;
+  }, [docViewsRegistry, unifiedDocViewer.registry]);
 
-    return <DocViewer ref={ref} docViews={registry.getAll()} {...props} />;
-  }
-);
+  return (
+    <DocViewer
+      ref={ref}
+      docViews={registry.getAll()}
+      reportEvent={analytics.reportEvent}
+      {...props}
+    />
+  );
+});

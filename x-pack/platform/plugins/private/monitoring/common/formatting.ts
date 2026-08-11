@@ -16,14 +16,15 @@ export const LARGE = '0,0';
 export const ROUNDED_FLOAT = '00.[00]';
 
 /**
- * Format the {@code date} in the user's expected date/time format using their <em>guessed</em> local time zone.
+ * Format the {@code date} in the user's expected date/time format using the provided time zone.
+ * If {@code timezone} is unset, {@code null}, or {@code 'Browser'}, this uses the browser's guessed time zone.
  * @param date Either a numeric Unix timestamp or a {@code Date} object
+ * @param timezone The user's configured time zone (e.g. {@code 'UTC'}, {@code 'Asia/Seoul'}, {@code 'Browser'})
  * @returns The date formatted using 'LL LTS'
  */
-export function formatDateTimeLocal(date: number | Date, useUTC = false, timezone = null) {
-  return useUTC
-    ? moment.utc(date).format('LL LTS')
-    : moment.tz(date, timezone || moment.tz.guess()).format('LL LTS');
+export function formatDateTimeLocal(date: number | Date, timezone?: string | null): string {
+  const resolvedTz = !timezone || timezone === 'Browser' ? moment.tz.guess() : timezone;
+  return moment.tz(date, resolvedTz).format('LL LTS');
 }
 
 /**

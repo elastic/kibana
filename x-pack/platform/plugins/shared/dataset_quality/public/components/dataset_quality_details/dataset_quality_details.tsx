@@ -8,6 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
@@ -20,15 +22,31 @@ const QualityIssueFlyout = dynamic(() => import('./quality_issue_flyout'));
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DatasetQualityDetails() {
-  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view } =
-    useDatasetQualityDetailsState();
+  const { onPageReady } = usePerformanceContext();
   const { startTracking } = useDatasetDetailsTelemetry();
+
+  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view, timeRange } =
+    useDatasetQualityDetailsState();
+
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
   const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   useEffect(() => {
     startTracking();
   }, [startTracking]);
+
+  useEffect(() => {
+    onPageReady({
+      customMetrics: {
+        key1: 'isIndexNotFoundError',
+        value1: isIndexNotFoundError ? 1 : 0,
+        key2: 'queryRangeSeconds',
+        value2: queryRangeSeconds,
+      },
+    });
+  }, [isIndexNotFoundError, onPageReady, queryRangeSeconds]);
+
   return isIndexNotFoundError ? (
     <DataStreamNotFoundPrompt dataStream={dataStream} />
   ) : (

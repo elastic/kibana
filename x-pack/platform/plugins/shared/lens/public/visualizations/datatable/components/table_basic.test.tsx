@@ -33,6 +33,27 @@ jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   };
 });
 
+// EuiDataGrid's react-window virtualized body produces NaN height values in JSDOM
+// because elements have no real dimensions. This is harmless and internal to EUI.
+beforeAll(() => {
+  // eslint-disable-next-line no-console
+  const originalError = console.error;
+  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('NaN') &&
+      args[0].includes('css style property')
+    ) {
+      return;
+    }
+    originalError(...args);
+  });
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
 const { theme: setUpMockTheme } = coreMock.createSetup();
 
 function sampleArgs() {
@@ -128,14 +149,13 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
       }),
       paletteService: chartPluginMock.createPaletteRegistry(),
       theme: setUpMockTheme,
-      renderMode: 'edit' as const,
       interactive: true,
       syncColors: false,
       renderComplete,
@@ -183,8 +203,8 @@ describe('DatatableComponent', () => {
     });
   });
 
-  test('it should render hide, reset, and sort actions on header even when it is in read only mode', async () => {
-    renderDatatableComponent({ renderMode: 'view' });
+  test('it should render hide, reset, and sort actions on header', async () => {
+    renderDatatableComponent();
     await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-a'));
     const actionPopover = screen.getByRole('dialog');
     const actions = within(actionPopover)
@@ -351,6 +371,60 @@ describe('DatatableComponent', () => {
     );
   });
 
+  test('it sorts rows ascending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'asc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'apple',
+      '1588024800001',
+      '1',
+      'banana',
+      '1588024800000',
+      '2',
+      'cherry',
+      '1588024800002',
+      '3',
+    ]);
+  });
+
+  test('it sorts rows descending by the specified string column', () => {
+    data.rows = [
+      { a: 'banana', b: 1588024800000, c: 2 },
+      { a: 'apple', b: 1588024800001, c: 1 },
+      { a: 'cherry', b: 1588024800002, c: 3 },
+    ];
+    renderDatatableComponent({
+      args: {
+        ...args,
+        sortingColumnId: 'a',
+        sortingDirection: 'desc',
+      },
+    });
+    const cells = screen.queryAllByRole('gridcell').map((cell) => cell.textContent);
+    expect(cells).toEqual([
+      'cherry',
+      '1588024800002',
+      '3',
+      'banana',
+      '1588024800000',
+      '2',
+      'apple',
+      '1588024800001',
+      '1',
+    ]);
+  });
+
   test('it does not render a hidden column', () => {
     renderDatatableComponent({
       args: {
@@ -392,6 +466,33 @@ describe('DatatableComponent', () => {
       'lnsTableCell--center', // set via args
       'lnsTableCell--center', // set via args
     ]);
+  });
+
+  test('it normalizes unsupported center alignment for progress columns at render time', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          {
+            columnId: 'c',
+            alignment: 'center',
+            type: 'lens_datatable_column',
+            colorMode: 'progress',
+            fillStyle: JSON.stringify({ fillMode: 'single' }),
+          },
+        ],
+      },
+    });
+
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames[0]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[1]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[2]).toContain('lnsTableCell--right');
   });
 
   test('it adds default alignment data to context', () => {
@@ -566,7 +667,7 @@ describe('DatatableComponent', () => {
       });
       await userEvent.click(screen.getByTestId('tablePaginationPopoverButton'));
       const sizeToChangeTo = 100;
-      fireEvent.click(screen.getByRole('button', { name: `${sizeToChangeTo} rows` }));
+      fireEvent.click(screen.getByRole('menuitem', { name: `${sizeToChangeTo} rows` }));
 
       expect(onDispatchEvent).toHaveBeenCalledTimes(1);
       expect(onDispatchEvent).toHaveBeenCalledWith({
@@ -816,6 +917,61 @@ describe('DatatableComponent', () => {
         },
       });
       expect(table).toHaveClass(/cellPadding-s-fontSize-s/);
+    });
+  });
+
+  describe('row numbers', () => {
+    it('should show row numbers when enabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+      });
+
+      const rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells).toHaveLength(1);
+      expect(rowNumberCells[0]).toHaveTextContent('1');
+    });
+
+    it('should not show row numbers when disabled', () => {
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: false,
+        },
+      });
+
+      expect(screen.queryByRole('gridcell', { name: '' })).not.toBeInTheDocument();
+    });
+
+    it('should show correct row numbers with pagination', async () => {
+      const rowNumbers = 13;
+      const pageSize = 4;
+      data.rows = new Array(rowNumbers).fill({
+        a: 'shoes',
+        b: 1588024800000,
+        c: faker.number.int(),
+      });
+
+      args.pageSize = pageSize;
+
+      renderDatatableComponent({
+        args: {
+          ...args,
+          showRowNumbers: true,
+        },
+        data,
+      });
+
+      // Page 1
+      let rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
+
+      // Page 2
+      await userEvent.click(screen.getByRole('link', { name: `Page 2 of 4` }));
+      rowNumberCells = screen.getAllByTestId('lnsDataTable-rowNumber');
+      expect(rowNumberCells.map((cell) => cell.textContent)).toEqual(['1', '2', '3', '4']);
     });
   });
 });

@@ -50,7 +50,7 @@ export {
   InvalidJSONProperty,
   DuplicateField,
 } from './errors';
-export { AbortError, abortSignalToPromise } from './abort_utils';
+export { AbortError, AbortReason, abortSignalToPromise } from './abort_utils';
 export type { Get, Set } from './create_getter_setter';
 export { createGetterSetter } from './create_getter_setter';
 export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';

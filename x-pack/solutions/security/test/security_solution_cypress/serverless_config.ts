@@ -34,16 +34,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           { product_line: 'endpoint', product_tier: 'complete' },
           { product_line: 'cloud', product_tier: 'complete' },
         ])}`,
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'bulkEditAlertSuppressionEnabled',
-          'doesNotMatchForIndicatorMatchRuleEnabled',
-        ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
         '--xpack.fleet.agentless.enabled=true',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
+      },
+    },
+    uiSettings: {
+      globalDefaults: {
+        hideAnnouncements: true,
       },
     },
     testRunner: SecuritySolutionConfigurableCypressTestRunner,

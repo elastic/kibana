@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
-import type { AssetClient } from '../assets/asset_client';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../storage/streams_storage_client';
-import type { QueryClient } from '../assets/query/query_client';
-import type { FeatureClient } from '../feature/feature_client';
 import type { AttachmentClient } from '../attachments/attachment_client';
 
 interface StreamUpsertChange {
@@ -32,11 +30,12 @@ export interface StateDependencies {
   lockManager: LockManagerService;
   streamsClient: StreamsClient;
   storageClient: StreamsStorageClient;
-  scopedClusterClient: IScopedClusterClient;
-  assetClient: AssetClient;
+  esClient: ElasticsearchClient;
   attachmentClient: AttachmentClient;
-  featureClient: FeatureClient;
-  queryClient: QueryClient;
+  getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
   isServerless: boolean;
+  isSecurityEnabled: boolean;
+  isWiredStreamViewsEnabled: boolean;
   isDev: boolean;
+  deferRootDataStreamMaterialization?: boolean;
 }

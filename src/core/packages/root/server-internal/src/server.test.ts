@@ -79,6 +79,42 @@ afterEach(() => {
   mockEnsureValidConfiguration.mockReset();
 });
 
+test('sets service.version global context to kibana version on traditional', () => {
+  const loggingSystem = loggingSystemMock.create();
+  const traditionalEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({ cliArgs: { serverless: false } })
+  );
+
+  new Server(rawConfigService, traditionalEnv, loggingSystem);
+
+  expect(traditionalEnv.packageInfo.buildFlavor).toBe('traditional');
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+    service: { state: 'initializing', type: 'kibana', version: traditionalEnv.packageInfo.version },
+  });
+});
+
+test('sets service.version global context to build sha short on serverless', () => {
+  const loggingSystem = loggingSystemMock.create();
+  const serverlessEnv = Env.createDefault(
+    REPO_ROOT,
+    getEnvOptions({ cliArgs: { serverless: true } })
+  );
+
+  new Server(rawConfigService, serverlessEnv, loggingSystem);
+
+  expect(serverlessEnv.packageInfo.buildFlavor).toBe('serverless');
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledTimes(1);
+  expect(loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+    service: {
+      state: 'initializing',
+      type: 'kibana',
+      version: serverlessEnv.packageInfo.buildShaShort,
+    },
+  });
+});
+
 test('preboot services on "preboot"', async () => {
   const server = new Server(rawConfigService, env, logger);
 

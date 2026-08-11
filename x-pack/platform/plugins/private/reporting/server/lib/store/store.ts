@@ -192,7 +192,6 @@ export class ReportingStore {
       report.updateWithEsDoc(await this.indexReport(report));
       return report as SavedReport;
     } catch (err) {
-      this.reportingCore.getEventLogger(report).logError(err);
       this.logError(`Error in adding a report!`, err, report);
       throw err;
     }
@@ -241,9 +240,9 @@ export class ReportingStore {
     } catch (err) {
       this.logger.error(
         `Error in finding the report from the scheduled task info! ` +
-          `[id: ${taskJson.id}] [index: ${taskJson.index}]`
+          `[id: ${taskJson.id}] [index: ${taskJson.index}]`,
+        { error: { stack_trace: err.stack } }
       );
-      this.logger.error(err);
       this.reportingCore.getEventLogger({ _id: taskJson.id }).logError(err);
       throw err;
     }
@@ -276,8 +275,7 @@ export class ReportingStore {
   }
 
   private logError(message: string, err: Error, report: Report) {
-    this.logger.error(message);
-    this.logger.error(err);
+    this.logger.error(message, { error: { stack_trace: err.stack } });
     this.reportingCore.getEventLogger(report).logError(err);
   }
 

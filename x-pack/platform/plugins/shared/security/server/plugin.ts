@@ -13,6 +13,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
   CoreStart,
+  ISavedObjectTypeRegistry,
   KibanaRequest,
   Logger,
   Plugin,
@@ -183,6 +184,8 @@ export class SecurityPlugin
   private readonly fipsService: FipsService;
   private fipsServiceSetup?: FipsServiceSetupInternal;
 
+  private elasticsearchUrl?: string;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -212,7 +215,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    { features, licensing, taskManager, usageCollection, spaces, cloud }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -243,6 +246,10 @@ export class SecurityPlugin
       features.registerElasticsearchFeature(securityFeature)
     );
 
+    if (cloud?.cloudId) {
+      this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
+    }
+
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
@@ -264,6 +271,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
@@ -292,13 +300,27 @@ export class SecurityPlugin
     this.fipsServiceSetup = this.fipsService.setup({ config, license });
     this.fipsServiceSetup.validateLicenseForFips();
 
+    let getTypeRegistrySync: (() => ISavedObjectTypeRegistry) | undefined;
+    void core.getStartServices().then(([coreStart]) => {
+      getTypeRegistrySync = () => coreStart.savedObjects.getTypeRegistry();
+    });
+
     setupSpacesClient({
       spaces,
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       getCurrentUser,
-      getTypeRegistry: () =>
-        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getTypeRegistry()),
+      getTypeRegistry: () => {
+        /**
+         * The setup spaces client just registers the callback during setup using `registerClientWrapper` but doesn't invoke it.
+         * When `createSpacesClient` is run during `start`, startServices is guaranteed to be passed in
+         * and we can use the type registry from there.
+         */
+        if (!getTypeRegistrySync) {
+          throw new Error('Type registry is not available');
+        }
+        return getTypeRegistrySync();
+      },
     });
 
     setupSavedObjects({
@@ -313,7 +335,10 @@ export class SecurityPlugin
     core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        getSession: this.getSession,
         audit: this.auditSetup,
+        config,
+        logger: this.logger,
       })
     );
     core.userProfile.registerUserProfileDelegate(
@@ -339,9 +364,12 @@ export class SecurityPlugin
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
+      serverlessProjectId: cloud?.serverless?.projectId,
+      serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
       docLinks: core.docLinks,
+      i18n: core.i18n,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -390,7 +418,11 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
+    this.userProfileStart = this.userProfileService.start({
+      clusterClient,
+      session,
+      getCurrentUser: core.security.authc.getCurrentUser,
+    });
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =
@@ -399,6 +431,13 @@ export class SecurityPlugin
         : undefined;
 
     const config = this.getConfig();
+
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
+    const kibanaServerResourceURL =
+      config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
@@ -409,13 +448,18 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       session,
       uiam: config.uiam?.enabled
-        ? new UiamService(this.logger.get('uiam'), config.uiam)
+        ? new UiamService(this.logger.get('uiam'), config.uiam, {
+            kibanaServerResourceURL,
+            elasticsearchUrl: this.elasticsearchUrl,
+            kibanaVersion: this.initializerContext.env.packageInfo.version,
+          })
         : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      userActivity: core.userActivity,
     });
 
     this.authorizationService.start({
@@ -427,14 +471,16 @@ export class SecurityPlugin
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
       clusterClient,
-      basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
+
+    // Destructure to exclude 'uiam' from the public API
+    const { uiam: _uiam, ...publicApiKeys } = this.authenticationStart.apiKeys;
 
     return Object.freeze<SecurityPluginStart>({
       authc: {
         getCurrentUser: this.authenticationStart.getCurrentUser,
-        apiKeys: this.authenticationStart.apiKeys,
+        apiKeys: publicApiKeys,
       },
       authz: {
         actions: this.authorizationSetup!.actions,
@@ -447,6 +493,7 @@ export class SecurityPlugin
       },
       userProfiles: {
         getCurrent: this.userProfileStart.getCurrent,
+        getCurrentProfileId: this.userProfileStart.getCurrentProfileId,
         bulkGet: this.userProfileStart.bulkGet,
         suggest: this.userProfileStart.suggest,
       },
@@ -486,6 +533,36 @@ export class SecurityPlugin
       license,
       logger,
       packageInfo: this.initializerContext.env.packageInfo,
+      docLinks: core.docLinks,
     });
+  }
+
+  private decodeElasticsearchUrlFromCloudId(cloudId: string): string | undefined {
+    this.logger.debug(`CloudId: ${cloudId}`);
+
+    const id = cloudId.split(':').pop();
+    if (!id) {
+      return undefined;
+    }
+
+    try {
+      const decoded = Buffer.from(id, 'base64').toString('utf8');
+      const parts = decoded.split('$');
+      if (parts.length < 2) {
+        return undefined;
+      }
+
+      const [hostWithPort, esIdWithPort] = parts;
+      const [host, defaultPort = '443'] = hostWithPort.split(':');
+      const [esId, esPort = defaultPort] = esIdWithPort.split(':');
+
+      const esHost = esId ? `${esId}.${host}` : host;
+      const endpoint = `https://${esHost}:${esPort}`;
+      this.logger.debug(`Endpoint: ${endpoint}`);
+      return endpoint;
+    } catch {
+      this.logger.debug(`Failed to decode cloud.id: ${cloudId}`);
+      return undefined;
+    }
   }
 }

@@ -12,8 +12,8 @@ import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 
 const bodySchema = schema.object({
-  indexName: schema.string(),
-  indexMode: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
+  indexMode: schema.maybe(schema.string({ maxLength: 1000 })),
 });
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
@@ -34,9 +34,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
 
       const params: IndicesCreateRequest = {
         index: indexName,
-        settings: {
-          mode: indexMode,
-        },
+        ...(indexMode ? { settings: { mode: indexMode } } : {}),
       };
 
       try {

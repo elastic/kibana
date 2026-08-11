@@ -11,7 +11,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { SchedulesFlyout } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   ATTACK_DISCOVERY_SCHEDULE,
   ATTACK_DISCOVERY_SETTINGS,
@@ -19,7 +18,6 @@ import {
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -28,28 +26,22 @@ jest.mock('react-router-dom', () => ({
   withRouter: jest.fn(),
 }));
 
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../../../attack_discovery/pages/use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const defaultProps = {
   onClose: jest.fn(),
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 
 const setupMocks = () => {
   mockUseKibana.mockReturnValue({
     services: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
+      telemetry: { reportEvent: jest.fn() },
       uiSettings: {
         get: jest.fn(),
       },
@@ -60,11 +52,6 @@ const setupMocks = () => {
       },
     },
   } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-  mockUseSourcererDataView.mockReturnValue({
-    sourcererDataView: {},
-    loading: false,
-  } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 };
 
 const renderComponent = (props = defaultProps) => {

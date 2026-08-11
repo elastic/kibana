@@ -15,6 +15,7 @@ import {
   setPolicy,
   createBootstrapIndex,
 } from '@kbn/securitysolution-es-utils';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import type { CreateAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type {
   SecuritySolutionApiRequestHandlerContext,
@@ -42,7 +43,7 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
         },
       },
     })
@@ -206,7 +207,11 @@ const addIndexAliases = async ({
   index: string;
   aadIndexAliasName: string;
 }) => {
-  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  const indices = await esClient.indices.getAlias({
+    index: `${index}-*`,
+    name: index,
+    expand_wildcards: ['open', 'hidden'],
+  });
   const aliasActions = {
     actions: Object.keys(indices).map((concreteIndexName) => {
       return {
@@ -234,7 +239,11 @@ const getReIndexedV8IndexPatterns = async ({
   index: string;
 }): Promise<string[]> => {
   const V8_PREFIX = '.reindexed-v8-';
-  const indices = await esClient.indices.getAlias({ index: `${index}-*`, name: index });
+  const indices = await esClient.indices.getAlias({
+    index: `${index}-*`,
+    name: index,
+    expand_wildcards: ['open', 'hidden'],
+  });
   return Object.keys(indices).reduce<string[]>((acc, concreteIndexName) => {
     if (concreteIndexName.startsWith(V8_PREFIX)) {
       acc.push(`${V8_PREFIX}${index.replace(/^\./, '')}-*`);

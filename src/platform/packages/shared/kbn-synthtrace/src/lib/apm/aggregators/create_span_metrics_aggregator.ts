@@ -23,6 +23,12 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.target.type',
 ];
 
+/**
+ * Simulates multiple spans aggregated into a single service_destination metric document.
+ * Import this constant in tests to calculate expected values.
+ */
+export const SPANS_PER_DESTINATION_METRIC = 5;
+
 export function createSpanMetricsAggregator(flushInterval: string) {
   return createApmMetricAggregator(
     {
@@ -45,17 +51,17 @@ export function createSpanMetricsAggregator(flushInterval: string) {
           'processor.name': 'metric',
           'span.destination.service.response_time.count': 0,
           'span.destination.service.response_time.sum.us': 0,
+          _doc_count: 0,
         };
       },
     },
     (metric, event) => {
-      metric['span.destination.service.response_time.count'] += 1;
-      metric['span.destination.service.response_time.sum.us'] += event['span.duration.us']!;
+      metric['span.destination.service.response_time.count'] += SPANS_PER_DESTINATION_METRIC;
+      metric['span.destination.service.response_time.sum.us'] += event['span.duration.us']
+        ? event['span.duration.us'] * SPANS_PER_DESTINATION_METRIC
+        : 0;
+      metric._doc_count += 1;
     },
-    (metric) => {
-      // @ts-expect-error
-      metric._doc_count = metric['span.destination.service.response_time.count'];
-      return metric;
-    }
+    (metric) => metric
   );
 }

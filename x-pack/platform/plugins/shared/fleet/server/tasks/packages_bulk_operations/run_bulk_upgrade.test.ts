@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../../services';
@@ -52,13 +53,13 @@ describe('Bulk upgrade task', () => {
   describe('_runBulkUpgradeTask', () => {
     it('should work for successfull upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
           packages: [{ name: 'test_valid' }],
-          authorizationHeader: null,
         },
+        request: {} as KibanaRequest,
       });
 
       expect(installPackage).toBeCalled();
@@ -68,7 +69,7 @@ describe('Bulk upgrade task', () => {
 
     it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
@@ -78,8 +79,8 @@ describe('Bulk upgrade task', () => {
             { name: 'test_valid_2' },
             { name: 'test_invalid_2' },
           ],
-          authorizationHeader: null,
         },
+        request: {} as KibanaRequest,
       });
 
       expect(installPackage).toBeCalledTimes(4);
@@ -101,14 +102,14 @@ describe('Bulk upgrade task', () => {
 
     it('should work for successful upgrade with package policies upgrade', async () => {
       const res = await _runBulkUpgradeTask({
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
         logger: loggingSystemMock.createLogger(),
         taskParams: {
           type: 'bulk_upgrade',
           packages: [{ name: 'test_valid' }],
-          authorizationHeader: null,
           upgradePackagePolicies: true,
         },
+        request: {} as KibanaRequest,
       });
 
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
@@ -122,7 +123,7 @@ describe('Bulk upgrade task', () => {
       abortController.abort();
       await expect(() =>
         _runBulkUpgradeTask({
-          abortController,
+          signal: abortController.signal,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
             type: 'bulk_upgrade',
@@ -132,8 +133,8 @@ describe('Bulk upgrade task', () => {
               { name: 'test_valid_2' },
               { name: 'test_invalid_2' },
             ],
-            authorizationHeader: null,
           },
+          request: {} as KibanaRequest,
         })
       ).rejects.toThrow(/Task was aborted/);
 

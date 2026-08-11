@@ -70,6 +70,8 @@ export const createVegaFn = (
       visParams: { spec: args.spec },
       searchSessionId: context.getSearchSessionId(),
       executionContext: context.getExecutionContext(),
+      projectRouting: context.getSearchContext().projectRouting,
+      isApproximate: context.getSearchContext().isApproximate ?? false,
     });
 
     return {

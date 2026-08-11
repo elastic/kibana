@@ -14,6 +14,8 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
+import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { MlClient } from '../ml_client';
 import type { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
@@ -25,7 +27,6 @@ import {
   ALL_JOBS_SELECTION,
   HEALTH_CHECK_NAMES,
 } from '../../../common/constants/alerts';
-import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
@@ -46,7 +47,7 @@ import {
   jobAuditMessagesProvider,
   type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { ServerlessInfo } from '../../types';
 
 export interface TestResult {
   name: string;
@@ -76,8 +77,8 @@ export function jobsHealthServiceProvider(
     const dateFormat = fieldFormatsRegistry.deserialize({ id: 'date' });
     const bytesFormat = fieldFormatsRegistry.deserialize({ id: 'bytes' });
 
-    const dateFormatter = dateFormat.convert.bind(dateFormat);
-    const bytesFormatter = bytesFormat.convert.bind(bytesFormat);
+    const dateFormatter = (v: unknown) => dateFormat.convertToText(v);
+    const bytesFormatter = (v: unknown) => bytesFormat.convertToText(v);
 
     return {
       dateFormatter,
@@ -553,7 +554,7 @@ export function jobsHealthServiceProvider(
 
 export type JobsHealthService = ReturnType<typeof jobsHealthServiceProvider>;
 
-export function getJobsHealthServiceProvider(getGuards: GetGuards) {
+export function getJobsHealthServiceProvider(getGuards: GetGuards, serverless: ServerlessInfo) {
   return {
     jobsHealthServiceProvider(
       savedObjectsClient: SavedObjectsClientContract,
@@ -571,8 +572,8 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
-                annotationServiceProvider(scopedClient),
-                jobAuditMessagesProvider(scopedClient, mlClient),
+                annotationServiceProvider(scopedClient, mlClient, serverless),
+                jobAuditMessagesProvider(scopedClient, mlClient, serverless),
                 getFieldsFormatRegistry,
                 logger
               ).getTestsResults(...args)

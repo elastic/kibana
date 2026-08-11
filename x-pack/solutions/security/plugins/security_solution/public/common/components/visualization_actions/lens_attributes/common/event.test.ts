@@ -24,15 +24,6 @@ jest.mock('uuid', () => ({
     .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
 }));
 
-jest.mock('../../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
@@ -101,6 +92,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -161,6 +157,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -234,6 +235,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -332,6 +338,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -398,6 +409,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -478,6 +494,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -525,7 +546,7 @@ describe('getEventsHistogramLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+          expect.objectContaining({ splitAccessors: [stackByFieldAccessorId] }),
         ]),
       })
     );
@@ -543,7 +564,7 @@ describe('getEventsHistogramLensAttributes', () => {
     expect(result?.current?.state?.visualization).toEqual(
       expect.objectContaining({
         layers: expect.arrayContaining([
-          expect.not.objectContaining({ splitAccessor: stackByFieldAccessorId }),
+          expect.not.objectContaining({ splitAccessors: [stackByFieldAccessorId] }),
         ]),
       })
     );

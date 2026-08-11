@@ -25,6 +25,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     Test Org
                   </span>
@@ -60,6 +61,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     12345
                   </span>
@@ -74,7 +76,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
+exports[`Field Renderers #HostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <span
     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
@@ -103,6 +105,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
@@ -132,7 +135,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 </DocumentFragment>
 `;
 
-exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
+exports[`Field Renderers #HostNameRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
   <div
     data-test-subj="cellActions-renderContent-host.name"
@@ -151,6 +154,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiLink emotion-euiLink-primary"
@@ -194,6 +198,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     New York
                   </span>
@@ -225,6 +230,7 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
                 >
                   <span
                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                    id="generated-id-wrapper"
                   >
                     New York
                   </span>
@@ -245,6 +251,7 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
 <DocumentFragment>
   <span
     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+    id="generated-id-wrapper"
   >
     <a
       class="euiLink emotion-euiLink-primary"
@@ -255,8 +262,8 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="emotion-EuiExternalLinkIcon"
-        data-euiicon-type="popout"
+        class="css-1j75qc1"
+        data-euiicon-type="external"
         role="presentation"
       />
       <span

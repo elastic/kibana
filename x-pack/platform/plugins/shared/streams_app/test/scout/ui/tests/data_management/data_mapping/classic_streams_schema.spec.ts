@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
@@ -13,7 +14,7 @@ const CLASSIC_STREAM_NAME = 'logs-classic-test';
 
 test.describe(
   'Stream data mapping - schema editor - Classic Streams',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Create a classic stream
@@ -54,9 +55,7 @@ test.describe(
       ).toBeVisible();
 
       const targetFieldName = 'grouped_fields';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(targetFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(targetFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
       await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
 
@@ -72,9 +71,7 @@ test.describe(
       ).toBeVisible();
 
       const sourceFieldName = 'attributes.source_field';
-      await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-      await page.keyboard.type(sourceFieldName);
-      await page.keyboard.press('Enter');
+      await pageObjects.streams.typeFieldName(sourceFieldName);
       await pageObjects.streams.setFieldMappingType('keyword');
 
       // Expand advanced options and add copy_to
@@ -126,6 +123,43 @@ test.describe(
       const codeValue = await pageObjects.streams.advancedSettingsCodeBlock.getCodeValue();
       expect(codeValue).toContain('copy_to');
       expect(codeValue).toContain(targetFieldName);
+    });
+
+    test('allows mapping a field as geo_point', async ({ page, pageObjects }) => {
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await page.getByTestId('streamsAppContentAddFieldButton').click();
+      await expect(
+        page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutCloseButton')
+      ).toBeVisible();
+
+      const fieldName = 'attributes.geo_test';
+      await pageObjects.streams.typeFieldName(fieldName);
+      await pageObjects.streams.setFieldMappingType('geo_point');
+
+      await page.getByTestId('streamsAppSchemaEditorAddFieldButton').click();
+      await pageObjects.streams.reviewStagedFieldMappingChanges();
+      await pageObjects.streams.submitSchemaChanges();
+
+      await pageObjects.toasts.closeAll();
+      await pageObjects.streams.expectSchemaEditorTableVisible();
+
+      await pageObjects.streams.searchFields(fieldName);
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'name',
+        rowIndex: 0,
+        value: fieldName,
+      });
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'type',
+        rowIndex: 0,
+        value: 'geo_point',
+      });
+      await pageObjects.streams.expectCellValueContains({
+        columnName: 'status',
+        rowIndex: 0,
+        value: 'Mapped',
+      });
     });
   }
 );

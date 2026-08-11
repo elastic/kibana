@@ -4,27 +4,26 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/fleet-plugin-cypress'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/fleet'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/fleet-plugin-cypress'
+  title: '@kbn/fleet-plugin-cypress'
   description: Moon project for @kbn/fleet-plugin-cypress
   channel: ''
   owner: '@elastic/fleet'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/fleet/cypress
+  sourceRoot: x-pack/platform/plugins/shared/fleet/cypress
 dependsOn:
   - '@kbn/test'
   - '@kbn/axe-config'
-  - '@kbn/cypress-config'
   - '@kbn/rison'
   - '@kbn/actions-plugin'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/fleet-plugin'
+  - '@kbn/cypress-config'
 tags:
   - functional-tests
   - package

@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 # If cached snapshots are baked into the agent, move them into our workspace first
 # We are doing this rather than simply changing the ES base path because many workers
 #   run with the workspace mounted in memory or on a local ssd

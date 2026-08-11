@@ -1,11 +1,17 @@
-`stream.name`:
-{{{stream.name}}}
+{{#excluded_features}}
+`excluded_features`:
+{{{excluded_features}}}
+{{/excluded_features}}
 
-`stream.description`:
-{{{stream.description}}}
+{{#previously_identified_features}}
+`previously_identified_features`:
+{{{previously_identified_features}}}
+{{/previously_identified_features}}
 
-`dataset_analysis`:
-{{{dataset_analysis}}}
+{{#known_feature_ids}}
+`known_feature_ids`:
+{{{known_feature_ids}}}
+{{/known_feature_ids}}
 
-`initial_clustering`
-{{{initial_clustering}}}
+`sample_documents`:
+{{{sample_documents}}}

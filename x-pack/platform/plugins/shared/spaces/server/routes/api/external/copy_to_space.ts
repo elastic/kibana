@@ -65,6 +65,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 },
               }),
               {
+                maxSize: 100,
                 validate: (spaceIds) => {
                   if (_.uniq(spaceIds).length !== spaceIds.length) {
                     return 'duplicate space ids are not allowed';
@@ -82,6 +83,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 }),
               }),
               {
+                maxSize: 1000,
                 validate: (objects) => {
                   if (!areObjectsUnique(objects)) {
                     return 'duplicate objects are not allowed';
@@ -254,7 +256,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                       },
                     })
                   ),
-                })
+                }),
+                { maxSize: 1000 }
               )
             ),
             objects: schema.arrayOf(
@@ -263,6 +266,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
                 id: schema.string(),
               }),
               {
+                maxSize: 1000,
                 validate: (objects) => {
                   if (!areObjectsUnique(objects)) {
                     return 'duplicate objects are not allowed';

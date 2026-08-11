@@ -19,11 +19,10 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/dev-cli-runner",
     "@kbn/expect",
     "@kbn/tooling-log",
@@ -43,6 +42,11 @@
     "@kbn/zod",
     "@kbn/inference-tracing",
     "@kbn/core-ui-settings-common",
-    "@kbn/setup-node-env"
+    "@kbn/setup-node-env",
+    "@kbn/es-errors",
+    "@kbn/anonymization-plugin",
+    "@kbn/anonymization-common",
+    "@kbn/utility-types",
+    "@kbn/management-settings-ids",
   ]
 }

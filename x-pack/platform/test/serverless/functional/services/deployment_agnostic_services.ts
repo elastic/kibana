@@ -18,6 +18,7 @@ export const services = {
   canvasElement: functionalPlatformServices.canvasElement,
   cases: functionalPlatformServices.cases,
   comboBox: functionalPlatformServices.comboBox,
+  contentList: functionalPlatformServices.contentList,
   selectable: functionalPlatformServices.selectable,
   dashboardAddPanel: functionalPlatformServices.dashboardAddPanel,
   dashboardBadgeActions: functionalPlatformServices.dashboardBadgeActions,
@@ -68,4 +69,5 @@ export const services = {
   usageCollection: functionalPlatformServices.usageCollection,
   userMenu: functionalPlatformServices.userMenu,
   vegaDebugInspector: functionalPlatformServices.vegaDebugInspector,
+  searchSessions: functionalPlatformServices.searchSessions,
 };

@@ -50,7 +50,7 @@ const mockShareContext: IShareContext = {
     title: 'title',
     config: {},
   },
-  sharingData: { title: 'title', url: 'url' },
+  sharingData: { title: 'title', url: 'url', locatorParams: { id: 'test', params: {} } },
 };
 
 const renderComponent = (

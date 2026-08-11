@@ -86,7 +86,7 @@ export const TTYTextSizer = ({
             data-test-subj="sessionView:TTYZoomFit"
             aria-label={ZOOM_FIT}
             display={fit ? 'fill' : 'empty'}
-            iconType={fit ? 'expand' : 'minimize'}
+            iconType={fit ? 'maximize' : 'minimize'}
             onClick={onToggleFit}
             size="s"
             color="text"
@@ -101,7 +101,7 @@ export const TTYTextSizer = ({
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomOut"
             aria-label={ZOOM_OUT}
-            iconType="minusInCircle"
+            iconType="minusCircle"
             onClick={onZoomOut}
             {...commonButtonProps}
           />
@@ -115,7 +115,7 @@ export const TTYTextSizer = ({
           <EuiButtonIcon
             data-test-subj="sessionView:TTYZoomIn"
             aria-label={ZOOM_IN}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onZoomIn}
             {...commonButtonProps}
           />

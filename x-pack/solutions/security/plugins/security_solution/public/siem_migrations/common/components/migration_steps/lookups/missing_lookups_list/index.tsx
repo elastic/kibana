@@ -18,9 +18,9 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import * as i18n from './translations';
 import type { UploadedLookups } from '../../types';
+import { MigrationSource } from '../../../../types';
+import { useRuleMigrationVendorCopy } from '../../../../../rules/hooks/use_rule_migration_vendor_copy';
 
 const scrollPanelCss = css`
   max-height: 200px;
@@ -28,24 +28,26 @@ const scrollPanelCss = css`
 `;
 
 interface MissingLookupsListProps {
+  migrationSource?: MigrationSource;
   missingLookups: string[];
   uploadedLookups: UploadedLookups;
   omitLookup: (lookupsName: string) => void;
   onCopied: () => void;
 }
 export const MissingLookupsList = React.memo<MissingLookupsListProps>(
-  ({ missingLookups, uploadedLookups, omitLookup, onCopied }) => {
+  ({
+    migrationSource = MigrationSource.SPLUNK,
+    missingLookups,
+    uploadedLookups,
+    omitLookup,
+    onCopied,
+  }) => {
     const { euiTheme } = useEuiTheme();
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.copyExportQuery.description"
-              defaultMessage="Log in to your Splunk admin account, go to the {app}, download the following lookups individually and upload them below. You can also omit lookups that are empty or not needed, and they will be ignored in the translation."
-              values={{ app: <b>{i18n.LOOKUPS_SPLUNK_APP}</b> }}
-            />
-          </EuiText>
+          <EuiText size="s">{missingLookupsList.description}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder className={scrollPanelCss}>
@@ -62,9 +64,13 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     >
                       <EuiFlexItem grow={false}>
                         {uploadedLookups[lookupName] != null ? (
-                          <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+                          <EuiIcon
+                            type="checkCircleFill"
+                            color={euiTheme.colors.success}
+                            aria-hidden={true}
+                          />
                         ) : (
-                          <EuiIcon type="dot" />
+                          <EuiIcon type="dot" aria-hidden={true} />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -82,6 +88,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                               lookupName={lookupName}
                               onCopied={onCopied}
                               copy={copy}
+                              migrationSource={migrationSource}
                             />
                           )}
                         </EuiCopy>
@@ -91,6 +98,7 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                           lookupName={lookupName}
                           omitLookup={omitLookup}
                           isDisabled={isOmitted}
+                          migrationSource={migrationSource}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -110,21 +118,25 @@ interface CopyLookupNameButtonProps {
   lookupName: string;
   onCopied: () => void;
   copy: () => void;
+  migrationSource: MigrationSource;
 }
+
 const CopyLookupNameButton = React.memo<CopyLookupNameButtonProps>(
-  ({ lookupName, onCopied, copy }) => {
+  ({ lookupName, onCopied, copy, migrationSource }) => {
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     const onClick = useCallback(() => {
       copy();
       onCopied();
     }, [copy, onCopied]);
+
     return (
-      <EuiToolTip content={i18n.COPY_LOOKUP_NAME_TOOLTIP}>
+      <EuiToolTip content={missingLookupsList.copyNameTooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           onClick={onClick}
           iconType="copy"
           color="text"
-          aria-label={`${i18n.COPY_LOOKUP_NAME_TOOLTIP} ${lookupName}`}
-          data-test-subj="lookupNameCopy"
+          aria-label={`${missingLookupsList.copyNameTooltip} ${lookupName}`}
+          data-test-subj={missingLookupsList.copyNameTestId}
         />
       </EuiToolTip>
     );
@@ -136,10 +148,12 @@ interface OmitLookupButtonProps {
   lookupName: string;
   omitLookup: (lookupName: string) => void;
   isDisabled: boolean;
+  migrationSource: MigrationSource;
 }
 const OmitLookupButton = React.memo<OmitLookupButtonProps>(
-  ({ lookupName, omitLookup, isDisabled: isDisabledDefault }) => {
+  ({ lookupName, omitLookup, isDisabled: isDisabledDefault, migrationSource }) => {
     const [isDisabled, setIsDisabled] = useState(isDisabledDefault);
+    const { missingLookupsList } = useRuleMigrationVendorCopy(migrationSource);
     const onClick = useCallback(() => {
       setIsDisabled(true);
       omitLookup(lookupName);
@@ -147,21 +161,23 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
 
     const button = useMemo(
       () => (
-        <EuiButtonIcon
-          onClick={onClick}
-          iconType="cross"
-          color="text"
-          aria-label={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}
-          data-test-subj="lookupNameClear"
-          isDisabled={isDisabled}
-        />
+        <EuiToolTip content={missingLookupsList.clearEmptyTooltip} disableScreenReaderOutput>
+          <EuiButtonIcon
+            onClick={onClick}
+            iconType="cross"
+            color="text"
+            aria-label={missingLookupsList.clearEmptyTooltip}
+            data-test-subj={missingLookupsList.clearEmptyTestId}
+            isDisabled={isDisabled}
+          />
+        </EuiToolTip>
       ),
-      [onClick, isDisabled]
+      [onClick, missingLookupsList, isDisabled]
     );
     if (isDisabled) {
       return button;
     }
-    return <EuiToolTip content={i18n.CLEAR_EMPTY_LOOKUP_TOOLTIP}>{button}</EuiToolTip>;
+    return <EuiToolTip content={missingLookupsList.clearEmptyTooltip}>{button}</EuiToolTip>;
   }
 );
 OmitLookupButton.displayName = 'OmitLookupButton';

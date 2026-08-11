@@ -104,7 +104,7 @@ export const StepTabs = ({
       case 'console':
         return (
           <EuiCodeBlock isCopyable={true} overflowHeight="200px" language="javascript">
-            {getBrowserConsoles(1)?.join('\n')}
+            {getBrowserConsoles(step?.synthetics?.step?.index ?? 1)?.join('\n')}
           </EuiCodeBlock>
         );
       case 'stackTrace':

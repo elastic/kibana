@@ -8,7 +8,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, ProjectRouting, Query, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionRendererEvent,
   ExpressionRendererParams,
@@ -23,6 +23,8 @@ interface GetExpressionRendererPropsParams {
     filters?: Filter[];
     query?: Query | AggregateQuery;
   };
+  projectRouting?: ProjectRouting;
+  isApproximate: boolean;
   timeRange?: TimeRange;
   disableTriggers?: boolean;
   settings: {
@@ -45,6 +47,8 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   params: ExpressionRendererParams | null;
 }> = async ({
   unifiedSearch: { query, filters },
+  projectRouting,
+  isApproximate,
   settings: { syncColors = true, syncCursor = true, syncTooltips = false },
   disableTriggers = false,
   parentExecutionContext,
@@ -82,6 +86,8 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
       query,
       filters,
       disableWarningToasts: true,
+      projectRouting,
+      isApproximate,
     },
     variables: {
       embeddableTitle: vis.title,

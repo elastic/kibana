@@ -56,12 +56,27 @@ const migrationSchema = schema.object({
      *
      * Defaults to ["migrator"]
      */
+    // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
   /**
-   * Skip logging migration progress unless there are any errors.
+   * When enabled, migration progress logs are buffered and only emitted if the migration fails,
+   * which reduces log volume during successful startups at the cost of losing visibility while a
+   * migration is stuck or fails via FATAL / timeout (the buffer is only dumped on uncaught
+   * exceptions). Defaults to `false` so migration steps are logged continuously; Serverless
+   * re-enables it via config to keep startup logs quiet across its frequent releases.
    */
-  useCumulativeLogger: schema.boolean({ defaultValue: true }),
+  useCumulativeLogger: schema.boolean({ defaultValue: false }),
+  /**
+   * List of WIP (work-in-progress) saved object type names that Kibana is explicitly allowed to
+   * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered
+   * but absent from this list. Intended for development environments only; do not use in production.
+   *
+   * Intentionally optional so that migration internals, which do not need this field, are unaffected
+   * by its presence in the config type.
+   */
+  // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
+  allowWipTypes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
@@ -82,6 +97,7 @@ const soSchema = schema.object({
     schema.boolean({ defaultValue: true }),
     schema.boolean({ defaultValue: false })
   ),
+  enableAccessControl: schema.boolean({ defaultValue: true }),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
@@ -97,6 +113,7 @@ export class SavedObjectConfig {
   /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
   public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
+  public enableAccessControl: boolean;
 
   constructor(
     rawConfig: SavedObjectsConfigType,
@@ -106,5 +123,6 @@ export class SavedObjectConfig {
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
     this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
+    this.enableAccessControl = rawConfig.enableAccessControl;
   }
 }

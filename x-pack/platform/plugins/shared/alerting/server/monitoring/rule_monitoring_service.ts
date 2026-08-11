@@ -5,11 +5,26 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { getDefaultMonitoring, getExecutionDurationPercentiles } from '../lib/monitoring';
-import type { RuleMonitoring, RuleMonitoringHistory, PublicRuleMonitoringService } from '../types';
+import type {
+  RuleMonitoring,
+  RuleMonitoringHistory,
+  PublicRuleMonitoringService,
+  ConsumerExecutionMetrics,
+} from '../types';
+
+interface FrameworkMetrics {
+  total_search_duration_ms: number;
+}
 
 export class RuleMonitoringService {
+  // Mirrors rule's SO state
   private monitoring: RuleMonitoring = getDefaultMonitoring(new Date().toISOString());
+  // Metrics calculated by the framework
+  private frameworkMetrics: Partial<FrameworkMetrics> = {};
+  // Rule executor metrics. Essential metrics get written to rule's SO.
+  private metrics: Partial<ConsumerExecutionMetrics> = {};
 
   public setLastRunMetricsDuration(duration: number) {
     this.monitoring.run.last_run.metrics.duration = duration;
@@ -22,7 +37,27 @@ export class RuleMonitoringService {
   }
 
   public getMonitoring(): RuleMonitoring {
-    return this.monitoring;
+    const result = cloneDeep(this.monitoring);
+
+    Object.assign(result.run.last_run.metrics, {
+      total_search_duration_ms: this.frameworkMetrics.total_search_duration_ms ?? null,
+      total_indexing_duration_ms: this.metrics.total_indexing_duration_ms ?? null,
+      gap_duration_s: this.metrics.gap_duration_s ?? null,
+      gap_range: this.metrics.gap_range ?? null,
+      gap_reason: this.metrics.gap_reason ?? null,
+    });
+
+    return result;
+  }
+
+  public getExecutorMetrics(): Partial<ConsumerExecutionMetrics> | undefined {
+    if (Object.values(this.metrics).some((v) => v != null)) {
+      return this.metrics;
+    }
+  }
+
+  public addFrameworkMetrics(fwkMetrics: Partial<FrameworkMetrics>): void {
+    this.frameworkMetrics = fwkMetrics;
   }
 
   public addHistory({
@@ -54,41 +89,17 @@ export class RuleMonitoringService {
     };
   }
 
-  public getLastRunMetricsSetters(): PublicRuleMonitoringService {
+  public getSetters(): PublicRuleMonitoringService {
     return {
-      setLastRunMetricsTotalSearchDurationMs:
-        this.setLastRunMetricsTotalSearchDurationMs.bind(this),
-      setLastRunMetricsTotalIndexingDurationMs:
-        this.setLastRunMetricsTotalIndexingDurationMs.bind(this),
-      setLastRunMetricsTotalAlertsDetected: this.setLastRunMetricsTotalAlertsDetected.bind(this),
-      setLastRunMetricsTotalAlertsCreated: this.setLastRunMetricsTotalAlertsCreated.bind(this),
-      setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS.bind(this),
-      setLastRunMetricsGapRange: this.setLastRunMetricsGapRange.bind(this),
+      setMetric: this.setMetric.bind(this),
+      setMetrics: this.setMetrics.bind(this),
+      clearGap: this.clearGap.bind(this),
     };
   }
 
-  private setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs: number) {
-    this.monitoring.run.last_run.metrics.total_search_duration_ms = totalSearchDurationMs;
-  }
-
-  private setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs: number) {
-    this.monitoring.run.last_run.metrics.total_indexing_duration_ms = totalIndexingDurationMs;
-  }
-
-  private setLastRunMetricsTotalAlertsDetected(totalAlertDetected: number) {
-    this.monitoring.run.last_run.metrics.total_alerts_detected = totalAlertDetected;
-  }
-
-  private setLastRunMetricsTotalAlertsCreated(totalAlertCreated: number) {
-    this.monitoring.run.last_run.metrics.total_alerts_created = totalAlertCreated;
-  }
-
-  private setLastRunMetricsGapDurationS(gapDurationS: number) {
-    this.monitoring.run.last_run.metrics.gap_duration_s = gapDurationS;
-  }
-
-  private setLastRunMetricsGapRange(gap: { lte: string; gte: string } | null) {
-    this.monitoring.run.last_run.metrics.gap_range = gap;
+  private clearGap(): void {
+    delete this.metrics.gap_range;
+    delete this.metrics.gap_reason;
   }
 
   private buildExecutionSuccessRatio() {
@@ -99,5 +110,18 @@ export class RuleMonitoringService {
   private buildExecutionDurationPercentiles = () => {
     const { history } = this.monitoring.run;
     return getExecutionDurationPercentiles(history);
+  };
+
+  private setMetric = <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => {
+    this.metrics[metricName] = value;
+  };
+
+  private setMetrics = (metrics: Partial<ConsumerExecutionMetrics>) => {
+    for (const [metricName, value] of Object.entries(metrics)) {
+      this.setMetric(metricName as keyof ConsumerExecutionMetrics, value);
+    }
   };
 }

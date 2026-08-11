@@ -35,6 +35,7 @@
       "esUiShared",
       "remoteClusters"
     ],
-    "enabledOnAnonymousPages": true
+    "enabledOnAnonymousPages": true,
+    "extraPublicDirs": ["common/oauth"]
   }
 }

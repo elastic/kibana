@@ -13,15 +13,18 @@ import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
 import { SecurityPageName } from '../../../common';
 import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
 
 const DashboardToolBarComponent = ({
   dashboardContainer,
+  dashboardInternalApi,
   onLoad,
 }: {
   dashboardContainer: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
   onLoad?: (mode: ViewMode) => void;
 }) => {
   const { setHeaderActionMenu } = useKibana().services;
@@ -73,6 +76,7 @@ const DashboardToolBarComponent = ({
     <DashboardTopNav
       customLeadingBreadCrumbs={landingBreadcrumb}
       dashboardApi={dashboardContainer}
+      dashboardInternalApi={dashboardInternalApi}
       forceHideUnifiedSearch={true}
       embedSettings={embedSettings}
       redirectTo={redirectTo}

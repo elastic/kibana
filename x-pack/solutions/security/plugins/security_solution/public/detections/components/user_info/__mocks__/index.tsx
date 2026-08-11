@@ -10,8 +10,6 @@ export const initialState = {
   isSignalIndexExists: true,
   isAuthenticated: true,
   hasEncryptionKey: true,
-  canUserCRUD: true,
-  canUserREAD: true,
   hasIndexManage: true,
   hasIndexMaintenance: true,
   hasIndexWrite: true,

@@ -1231,6 +1231,63 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
     },
     serviceType: 'github',
   },
+  gitlab: {
+    configuration: {
+      token: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTBOX,
+        label: translate('searchConnectors.nativeConnectors.gitlab.token.label', {
+          defaultMessage: 'Personal Access Token',
+        }),
+        options: [],
+        order: 1,
+        required: true,
+        sensitive: true,
+        tooltip: translate('searchConnectors.nativeConnectors.gitlab.token.tooltip', {
+          defaultMessage:
+            'GitLab Personal Access Token with api, read_api, and read_repository scopes.',
+        }),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+      projects: {
+        default_value: null,
+        depends_on: [],
+        display: TEXTAREA,
+        label: translate('searchConnectors.nativeConnectors.gitlab.projects.label', {
+          defaultMessage: 'List of projects',
+        }),
+        options: [],
+        order: 2,
+        required: true,
+        sensitive: false,
+        tooltip: translate('searchConnectors.nativeConnectors.gitlab.projects.tooltip', {
+          defaultMessage:
+            "List of project paths (e.g., 'group/project'). Use '*' to sync all accessible projects.",
+        }),
+        type: LIST,
+        ui_restrictions: [],
+        validations: [],
+        value: '',
+      },
+    },
+    name: translate('searchConnectors.nativeConnectors.gitlab.name', {
+      defaultMessage: 'GitLab',
+    }),
+    features: {
+      [SYNC_RULES]: {
+        advanced: { enabled: false },
+        basic: { enabled: true },
+      },
+      [INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
+    },
+    serviceType: 'gitlab',
+  },
   gmail: {
     configuration: {
       service_account_credentials: {
@@ -2261,6 +2318,69 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ui_restrictions: ['advanced'],
         validations: [],
         value: false,
+      },
+      datetime_conversion: {
+        default_value: 'DATETIME',
+        depends_on: [],
+        display: DROPDOWN,
+        label: translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionLabel',
+          {
+            defaultMessage: 'Out-of-range date handling',
+          }
+        ),
+        options: [
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionRaiseLabel',
+              {
+                defaultMessage: 'Raise an error (legacy)',
+              }
+            ),
+            value: 'DATETIME',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionClampLabel',
+              {
+                defaultMessage: 'Clamp to the min/max date',
+              }
+            ),
+            value: 'DATETIME_CLAMP',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionAutoLabel',
+              {
+                defaultMessage: 'Out-of-range dates as epoch milliseconds',
+              }
+            ),
+            value: 'DATETIME_AUTO',
+          },
+          {
+            label: translate(
+              'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionMsLabel',
+              {
+                defaultMessage: 'All dates as epoch milliseconds',
+              }
+            ),
+            value: 'DATETIME_MS',
+          },
+        ],
+        order: 10,
+        required: false,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.mongodb.configuration.datetimeConversionTooltip',
+          {
+            defaultMessage:
+              "How to handle MongoDB dates outside the supported range (years 1-9999). 'Raise an error' is the legacy behavior; the other options let the sync continue by clamping or storing raw epoch milliseconds.",
+          }
+        ),
+        type: STRING,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: 'DATETIME',
       },
     },
     features: {

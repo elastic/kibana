@@ -8,6 +8,8 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getParsedFilterQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
+import type { AlertParams, PreviewChartResponse } from '@kbn/apm-api-shared';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
@@ -15,11 +17,9 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import type { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
-  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { averageOrPercentileAgg, getMultiTermsSortOrder } from './average_or_percentile_agg';

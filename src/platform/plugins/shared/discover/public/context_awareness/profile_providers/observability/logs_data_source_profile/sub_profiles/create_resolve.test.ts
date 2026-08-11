@@ -13,7 +13,7 @@ import type { DataSourceProfileProviderParams, RootContext } from '../../../../p
 import { SolutionType } from '../../../../profiles';
 import { createResolve } from './create_resolve';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import { RESOLUTION_MATCH } from '../__mocks__';
+import { RESOLUTION_MATCH } from '../__mocks__/logs_data_source_resolution_match';
 
 describe('createResolve', () => {
   const VALID_INDEX_PATTERN = 'valid';

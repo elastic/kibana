@@ -106,6 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
             createIncidentUrl: 'http://some.non.existent.com/',
             getIncidentResponseExternalTitleKey: 'key',
             hasAuth: true,
+            authType: 'webhook-authentication-basic',
             headers: { [`content-type`]: 'application/json' },
             viewIncidentUrl: 'http://some.non.existent.com/browse/{{{external.system.title}}}',
             getIncidentUrl: 'http://some.non.existent.com/{{{external.system.id}}}',

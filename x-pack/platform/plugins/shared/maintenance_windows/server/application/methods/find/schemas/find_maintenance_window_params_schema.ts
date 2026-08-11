@@ -21,4 +21,5 @@ export const findMaintenanceWindowsParamsSchema = schema.object({
   searchFields: schema.maybe(schema.arrayOf(schema.string())),
   perPage: schema.maybe(schema.number()),
   page: schema.maybe(schema.number()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });

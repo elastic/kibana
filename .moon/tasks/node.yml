@@ -1,4 +1,7 @@
-$schema: https://moonrepo.dev/schemas/tasks.json
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  toolchain: node
 
 fileGroups:
   sharedGlobals: [ ]
@@ -6,4 +9,26 @@ fileGroups:
     - '**/*'
   production: [ ]
 
-tasks: {}
+tasks:
+  # This task can be used to make a task depend on the source files in the workspace
+  source:
+    command: 'true'
+    inputs:
+      - '@group(src)'
+    options:
+      internal: true
+      runFromWorkspaceRoot: true
+
+  # This task can be used to make a task depend on the full upstream source files of a select project
+  source-upstream:
+    command: 'true'
+    inputs:
+      - '@group(src)'
+    deps:
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # transitive upstream source changes invalidate dependents (e.g. jest).
+      - target: '^:source-upstream'
+        cacheStrategy: hash
+    options:
+      internal: true
+      runFromWorkspaceRoot: true

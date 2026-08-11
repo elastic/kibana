@@ -6,12 +6,12 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../_mock_handler_arguments';
-import { listTypesRoute } from './list_types';
-import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { actionsClientMock } from '../../../mocks';
 import { createMockConnectorType } from '../../../application/connector/mocks';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { actionsClientMock } from '../../../mocks';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
+import { verifyAccessAndContext } from '../../verify_access_and_context';
+import { listTypesRoute } from './list_types';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -51,14 +51,19 @@ describe('listTypesRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": false,
+            "is_testable": false,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": "endpointSecurity",
             "supported_feature_ids": Array [
               "alerting",
@@ -81,6 +86,8 @@ describe('listTypesRoute', () => {
           is_system_action_type: false,
           sub_feature: 'endpointSecurity',
           is_deprecated: false,
+          source: 'stack',
+          is_testable: false,
         },
       ],
     });
@@ -121,14 +128,19 @@ describe('listTypesRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": false,
+            "is_testable": false,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": undefined,
             "supported_feature_ids": Array [
               "alerting",
@@ -159,6 +171,8 @@ describe('listTypesRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: false,
           is_deprecated: false,
+          source: 'stack',
+          is_testable: false,
         },
       ],
     });

@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './metrics_context_service';
+export {
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  type HistogramPercentile,
+  type MetricsGridSettings,
+  type SimpleAggregation,
+} from './metrics_grid_settings';

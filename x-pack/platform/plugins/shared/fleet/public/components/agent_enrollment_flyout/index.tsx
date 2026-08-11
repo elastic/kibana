@@ -51,6 +51,7 @@ export * from './agent_policy_selection';
 export * from './agent_policy_select_create';
 export * from './instructions';
 export * from './steps';
+export { usePollingAgentCount } from './confirm_agent_enrollment';
 
 export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
   onClose,
@@ -218,6 +219,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
             downloadSource={downloadSource}
             downloadSourceProxy={downloadSourceProxy}
             setSelectedPolicyId={setSelectedPolicyId}
+            selectedPolicyId={selectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
             agentPolicies={agentPolicies}

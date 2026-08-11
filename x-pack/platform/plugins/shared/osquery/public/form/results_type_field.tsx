@@ -58,6 +58,7 @@ interface ResultsTypeFieldProps {
 const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldProps = {} }) => {
   const [selectedOption, setSelectedOption] = useState(SNAPSHOT_OPTION.value);
   const { defaultValues } = useFormState();
+  const { isDisabled, ...restEuiFieldProps } = euiFieldProps;
 
   const {
     field: { onChange: onSnapshotChange, value: snapshotValue },
@@ -149,7 +150,8 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
         fullWidth
         valueOfSelected={selectedOption}
         onChange={handleChange}
-        {...euiFieldProps}
+        disabled={!!isDisabled}
+        {...restEuiFieldProps}
       />
     </EuiFormRow>
   );

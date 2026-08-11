@@ -18,7 +18,7 @@ import {
   RemoteElasticSearchSchema,
 } from './output';
 
-import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
+import { AgentPolicyNamespaceSchema, AgentPolicySchemaV3 } from './agent_policy';
 import {
   PackagePolicyNamespaceSchema,
   SimplifiedPackagePolicyPreconfiguredSchema,
@@ -31,7 +31,8 @@ const varsSchema = schema.maybe(
       type: schema.maybe(schema.string()),
       value: schema.maybe(schema.any()),
       frozen: schema.maybe(schema.boolean()),
-    })
+    }),
+    { maxSize: 1000 }
   )
 );
 
@@ -59,6 +60,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
   }),
   {
     defaultValue: [],
+    maxSize: 1000,
   }
 );
 
@@ -95,17 +97,25 @@ const PreconfiguredOutputBaseSchema = {
   id: schema.string(),
   config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   config_yaml: schema.never(),
-  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
 };
 
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  schema.oneOf([
-    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
-    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+  schema.discriminatedUnion('type', [
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_elasticsearch' },
+    }),
+    schema
+      .object({ ...LogstashSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_logstash' } }),
+    schema
+      .object({ ...KafkaSchema })
+      .extends(PreconfiguredOutputBaseSchema, { meta: { id: 'preconfigured_output_kafka' } }),
+    schema.object({ ...RemoteElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema, {
+      meta: { id: 'preconfigured_output_remote_elasticsearch' },
+    }),
   ]),
-  { defaultValue: [], validate: validatePreconfiguredOutputs }
+  { defaultValue: [], validate: validatePreconfiguredOutputs, maxSize: 100 }
 );
 
 export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
@@ -114,7 +124,8 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
     is_internal: schema.maybe(schema.boolean()),
-    host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+    allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
+    host_urls: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
     proxy_id: schema.nullable(schema.string()),
     secrets: schema.maybe(
       schema.object({
@@ -131,13 +142,17 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
       schema.oneOf([
         schema.literal(null),
         schema.object({
-          certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           certificate: schema.maybe(schema.string()),
           key: schema.maybe(schema.string()),
-          es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          es_certificate_authorities: schema.maybe(
+            schema.arrayOf(schema.string(), { maxSize: 10 })
+          ),
           es_certificate: schema.maybe(schema.string()),
           es_key: schema.maybe(schema.string()),
-          agent_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          agent_certificate_authorities: schema.maybe(
+            schema.arrayOf(schema.string(), { maxSize: 10 })
+          ),
           agent_certificate: schema.maybe(schema.string()),
           agent_key: schema.maybe(schema.string()),
           client_auth: schema.maybe(
@@ -151,7 +166,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
       ])
     ),
   }),
-  { defaultValue: [] }
+  { defaultValue: [], maxSize: 100 }
 );
 
 export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
@@ -169,12 +184,11 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
     certificate: schema.maybe(schema.string()),
     certificate_key: schema.maybe(schema.string()),
   }),
-  { defaultValue: [] }
+  { defaultValue: [], maxSize: 100 }
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
-  schema.object({
-    ...AgentPolicyBaseSchema,
+  AgentPolicySchemaV3.extends({
     space_id: schema.maybe(schema.string()),
     namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
@@ -221,20 +235,24 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
                         enabled: schema.maybe(schema.boolean()),
                         keep_enabled: schema.maybe(schema.boolean()),
                         vars: varsSchema,
-                      })
+                      }),
+                      { maxSize: 1000 }
                     )
                   ),
-                })
+                }),
+                { maxSize: 1000 }
               )
             ),
           }),
           SimplifiedPackagePolicyPreconfiguredSchema,
-        ])
+        ]),
+        { maxSize: 1000 }
       )
     ),
   }),
   {
     defaultValue: [],
+    maxSize: 1000,
   }
 );
 
@@ -249,11 +267,13 @@ export const PreconfiguredSpaceSettingsSchema = schema.arrayOf(
               return 'Must not contain -';
             }
           },
-        })
+        }),
+        { maxSize: 100 }
       )
     ),
   }),
   {
     defaultValue: [],
+    maxSize: 100,
   }
 );

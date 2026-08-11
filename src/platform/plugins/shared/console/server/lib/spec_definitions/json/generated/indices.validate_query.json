@@ -25,7 +25,14 @@
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
       "rewrite": "__flag__",
-      "q": ""
+      "q": "",
+      "routing": [],
+      "_slice": ""
+    },
+    "data_autocomplete_rules": {
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      }
     },
     "methods": [
       "GET",
@@ -36,6 +43,7 @@
       "{index}/_validate/query"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-validate-query",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-validate-query",
     "availability": {
       "stack": true,
       "serverless": true

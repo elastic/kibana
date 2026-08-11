@@ -7,9 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { DataGridDensity, PagingState, RowHeightMode, SortingState } from '@kbn/lens-common';
+import type {
+  DataGridDensity,
+  DatatableColumnResult,
+  PagingState,
+  RowHeightMode,
+  SortingState,
+} from '@kbn/lens-common';
 import type { FormatFactory } from '../../../types';
-import type { DatatableColumnResult } from '../../impl/datatable/datatable_column';
 import type { DatatableExpressionFunction } from './types';
 
 export interface DatatableArgs {
@@ -24,6 +29,7 @@ export interface DatatableArgs {
   headerRowHeightLines?: number;
   pageSize?: PagingState['size'];
   density?: DataGridDensity;
+  showRowNumbers?: boolean;
 }
 
 /**
@@ -89,6 +95,10 @@ export const getDatatable = (
     },
     density: {
       types: ['string'],
+      help: '',
+    },
+    showRowNumbers: {
+      types: ['boolean'],
       help: '',
     },
   },

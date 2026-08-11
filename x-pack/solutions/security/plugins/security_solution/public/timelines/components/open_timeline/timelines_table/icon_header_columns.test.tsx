@@ -8,16 +8,15 @@
 import { cloneDeep, omit } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { render } from '@testing-library/react';
 
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
 import type { TimelinesTableProps } from '.';
 import { TimelinesTable } from '.';
 import type { OpenTimelineResult } from '../types';
 import { getMockTimelinesTableProps } from './mocks';
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
+import { TestProvidersComponent } from '../../../../common/mock';
+import { getSuperTimelineQueryTypeColumn } from './icon_header_columns';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -30,9 +29,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the pinned events header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="pinned-event-header-icon"]').exists()).toBe(true);
@@ -44,9 +43,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with6Events),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="pinned-event-count"]').text()).toEqual('6');
@@ -54,9 +53,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the notes count header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="notes-count-header-icon"]').exists()).toBe(true);
@@ -68,9 +67,9 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(with4Notes),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="notes-count"]').text()).toEqual('4');
@@ -78,9 +77,9 @@ describe('#getActionsColumns', () => {
 
   test('it renders the favorites header icon', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...getMockTimelinesTableProps(mockResults)} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
     expect(wrapper.find('[data-test-subj="favorites-header-icon"]').exists()).toBe(true);
@@ -92,12 +91,12 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(undefinedFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is null', () => {
@@ -106,12 +105,12 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(nullFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is empty', () => {
@@ -120,12 +119,12 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(emptyFavorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has one entry', () => {
@@ -145,12 +144,12 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has more than one entry', () => {
@@ -174,11 +173,58 @@ describe('#getActionsColumns', () => {
       ...getMockTimelinesTableProps(favorite),
     };
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProvidersComponent>
         <TimelinesTable {...testProps} />
-      </ThemeProvider>
+      </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
+  });
+});
+
+describe('getSuperTimelineQueryTypeColumn', () => {
+  // Tests call the render function directly — no full component tree needed.
+  const column = getSuperTimelineQueryTypeColumn();
+  const renderCell = (savedSearchId: string | null | undefined, row: Partial<OpenTimelineResult>) =>
+    column.render!(savedSearchId, row as OpenTimelineResult);
+
+  it('renders the ES|QL incompatible icon when savedSearchId is set', () => {
+    const node = renderCell('some-saved-search-id', { savedSearchId: 'some-saved-search-id' });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-esql-incompatible-icon"]')
+    ).toBeInTheDocument();
+  });
+
+  it('renders the EQL incompatible icon when queryType.hasEql is true', () => {
+    const node = renderCell(null, { queryType: { hasEql: true, hasQuery: false } });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-eql-incompatible-icon"]')
+    ).toBeInTheDocument();
+  });
+
+  it('renders nothing for a plain KQL timeline (no savedSearchId, no EQL)', () => {
+    const node = renderCell(null, { queryType: { hasEql: false, hasQuery: true } });
+    expect(node).toBeNull();
+  });
+
+  it('renders nothing when queryType is undefined (defensive — list response may omit it)', () => {
+    const node = renderCell(null, { queryType: undefined });
+    expect(node).toBeNull();
+  });
+
+  it('ES|QL takes precedence when savedSearchId is set even if queryType.hasEql is also true', () => {
+    const node = renderCell('ss-id', {
+      savedSearchId: 'ss-id',
+      queryType: { hasEql: true, hasQuery: false },
+    });
+    const { container } = render(<>{node}</>);
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-esql-incompatible-icon"]')
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-test-subj="super-timeline-eql-incompatible-icon"]')
+    ).not.toBeInTheDocument();
   });
 });

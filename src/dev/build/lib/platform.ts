@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
-export type Variant = 'serverless' | null;
-export type Solution = KibanaSolution | null;
+export type Variant = 'serverless';
 
 export class Platform {
   constructor(
     private name: PlatformName,
     private architecture: PlatformArchitecture,
     private buildName: string,
-    private variant: Variant,
-    private solution: Solution
+    private variant?: Variant
   ) {}
 
   getName() {
@@ -43,10 +41,6 @@ export class Platform {
     return this.variant;
   }
 
-  getSolution() {
-    return this.solution;
-  }
-
   isWindows() {
     return this.name === 'win32';
   }
@@ -64,36 +58,22 @@ export class Platform {
   }
 
   toString() {
-    const variant = this.variant ? `-${this.variant}` : '';
-    const solution = this.solution ? `-${this.solution}` : '';
-    return `${this.name}-${this.architecture}${variant}${solution}`;
+    return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}`;
   }
 }
 
 export const DOWNLOAD_PLATFORMS = [
-  new Platform('linux', 'x64', 'linux-x86_64', null, null),
-  new Platform('linux', 'arm64', 'linux-aarch64', null, null),
-  new Platform('darwin', 'x64', 'darwin-x86_64', null, null),
-  new Platform('darwin', 'arm64', 'darwin-aarch64', null, null),
-  new Platform('win32', 'x64', 'windows-x86_64', null, null),
-  new Platform('win32', 'arm64', 'windows-arm64', null, null),
+  new Platform('linux', 'x64', 'linux-x86_64'),
+  new Platform('linux', 'arm64', 'linux-aarch64'),
+  new Platform('darwin', 'x64', 'darwin-x86_64'),
+  new Platform('darwin', 'arm64', 'darwin-aarch64'),
+  new Platform('win32', 'x64', 'windows-x86_64'),
+  new Platform('win32', 'arm64', 'windows-arm64'),
 ];
 
 export const SERVERLESS_PLATFORMS = [
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', null),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', null),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'workplaceai'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'workplaceai'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'observability'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'observability'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'search'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'search'),
-
-  new Platform('linux', 'x64', 'linux-x86_64', 'serverless', 'security'),
-  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless', 'security'),
+  new Platform('linux', 'x64', 'linux-x86_64', 'serverless'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
 ];
 
 export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];

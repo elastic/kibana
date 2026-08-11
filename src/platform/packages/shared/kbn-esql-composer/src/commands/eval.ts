@@ -13,6 +13,7 @@ import { append } from '../pipeline/append';
 /**
  * Appends an `EVAL` command to the ESQL composer pipeline.
  *
+ * @deprecated Migrate to `@kbn/esql-language` composer.
  * @param body The body of the `EVAL` command.
  * @param params The parameters to use in the `EVAL` command.
  * @returns A `QueryPipeline` instance with the `EVAL` command appended.

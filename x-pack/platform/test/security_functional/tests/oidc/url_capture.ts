@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const deployment = getService('deployment');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
+  const log = getService('log');
 
   describe('URL capture', function () {
     this.tags('includeFirefox');
@@ -58,6 +59,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .post('/authentication/app/setup')
         .send({ simulateUnauthorized: false })
         .expect(200);
+
+      const loginButton = await testSubjects.find('logInButton');
+      const href = await loginButton.getAttribute('href');
+      log.info(`loginButton href: ${href}`);
 
       await testSubjects.click('logInButton');
       await find.byCssSelector('[data-test-subj="testEndpointsAuthenticationApp"]', 20000);

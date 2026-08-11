@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RULES_UI_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { IconDashboards } from '../../../../../common/icons/dashboards';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
@@ -23,5 +24,8 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
         './dashboards_card'
       )
   ),
-  capabilitiesRequired: [['dashboard_v2.show', `${SECURITY_FEATURE_ID}.detections`]],
+  capabilitiesRequired: [
+    ['dashboard_v2.show', `${SECURITY_FEATURE_ID}.detections`],
+    ['dashboard_v2.show', RULES_UI_DETECTIONS_PRIVILEGE],
+  ],
 };

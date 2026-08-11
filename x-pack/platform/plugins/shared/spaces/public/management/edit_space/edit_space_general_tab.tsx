@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { getSpaceInitials } from '../../space_avatar';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
+import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
@@ -38,6 +44,11 @@ interface Props {
 
 export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history, ...props }) => {
   const imageAvatarSelected = Boolean(space.imageUrl);
+
+  const {
+    services: { cps },
+  } = useKibana<{ cps?: CPSPluginStart }>();
+
   const [formValues, setFormValues] = useState<CustomizeSpaceFormValues>({
     ...space,
     avatarType: imageAvatarSelected ? 'image' : 'initials',
@@ -54,10 +65,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
-  const { http, overlays, logger, notifications, navigateToUrl, spacesManager } =
+  const { http, overlays, logger, notifications, navigateToUrl, spacesManager, capabilities } =
     useEditSpaceServices();
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
+
+  const initialFeatureVisibilityRef = useRef<string[]>(space.disabledFeatures ?? []);
+  const storedFeatureVisibilityRef = useRef<string[] | undefined>(undefined);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
@@ -82,6 +96,33 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     }),
   });
 
+  useEffect(() => {
+    let unmounted = false;
+    if (!space.solution || space.solution === SOLUTION_VIEW_CLASSIC) {
+      storedFeatureVisibilityRef.current = space.disabledFeatures ?? [];
+      return;
+    }
+    (async () => {
+      try {
+        const res = await spacesManager.getPersistedFeatureVisibility(space.id);
+        const disabledFeatures = res.featureVisibility.disabledFeatures ?? [];
+        if (!unmounted) {
+          storedFeatureVisibilityRef.current = disabledFeatures;
+        }
+      } catch (error) {
+        logger.debug(`Failed to load persisted feature visibility for space "${space.id}"`, error);
+      }
+    })();
+    return () => {
+      unmounted = true;
+    };
+  }, [spacesManager, logger, space.id, space.solution, space.disabledFeatures]);
+
+  const isFeatureVisibilityModified = useMemo(() => {
+    const initialFeatureVisibility = initialFeatureVisibilityRef.current;
+    return !isEqual(formValues.disabledFeatures ?? [], initialFeatureVisibility);
+  }, [formValues.disabledFeatures]);
+
   const onChangeSpaceSettings = useCallback(
     (newFormValues: CustomizeSpaceFormValues) => {
       setFormValues({ ...formValues, ...newFormValues });
@@ -91,7 +132,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onChangeFeatures = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setFormValues({ ...formValues, ...updatedSpace });
       setIsDirty(true);
       setShowUserImpactWarning(true);
@@ -100,11 +141,31 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   );
 
   const onSolutionViewChange = useCallback(
-    (updatedSpace: Partial<Space>) => {
+    (updatedSpace: CustomizeSpaceFormValues) => {
       setSolution(updatedSpace.solution);
+
+      const storedFeatureVisibility = storedFeatureVisibilityRef.current;
+
+      // Restore feature visibility if user is switching back to classic solution view
+      if (
+        updatedSpace.solution === SOLUTION_VIEW_CLASSIC &&
+        storedFeatureVisibility &&
+        !isFeatureVisibilityModified
+      ) {
+        onChangeFeatures({ ...updatedSpace, disabledFeatures: storedFeatureVisibility });
+        return;
+      }
+
       onChangeFeatures(updatedSpace);
     },
-    [onChangeFeatures]
+    [onChangeFeatures, isFeatureVisibilityModified]
+  );
+
+  const onProjectRoutingChange = useCallback(
+    (updatedSpace: CustomizeSpaceFormValues) => {
+      onChangeSpaceSettings(updatedSpace);
+    },
+    [onChangeSpaceSettings]
   );
 
   const backToSpacesList = useCallback(() => {
@@ -114,12 +175,35 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
+    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 
   const onClickDeleteSpace = useCallback(() => {
     setShowConfirmDeleteModal(true);
   }, []);
+
+  const canReadProjectRouting = (): boolean => {
+    if (capabilities?.project_routing?.read_space_default !== true) {
+      return false;
+    }
+    // Show the section either when the project is on a CPS-eligible tier, or
+    // when the space already has a non-default project routing value so users
+    // who downgraded can still unset any custom routing expression.
+    return cps?.isTierEligible === true || isCustomProjectRouting(space.projectRouting);
+  };
+
+  const updateProjectPicker = useCallback(
+    async (updatedSpace: Partial<Space>) => {
+      if (
+        updatedSpace.projectRouting &&
+        updatedSpace.id === (await spacesManager.getActiveSpace()).id
+      ) {
+        cps?.cpsManager?.updateDefaultProjectRouting(updatedSpace.projectRouting);
+      }
+    },
+    [spacesManager, cps]
+  );
 
   const performSave = useCallback(
     async ({ requiresReload = false }) => {
@@ -132,6 +216,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       } = formValues;
 
       const spaceClone = structuredClone(partialSpace as Partial<Space>);
+
+      // Auto-generate color if needed
+      if (!spaceClone.color && !spaceClone.imageUrl) {
+        spaceClone.color = getSpaceColor(spaceClone);
+      }
       const { id, name } = spaceClone;
 
       if (!id) {
@@ -167,6 +256,8 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
           )
         );
 
+        updateProjectPicker(spaceClone);
+
         setIsDirty(false);
         backToSpacesList();
         if (requiresReload) {
@@ -185,7 +276,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, props]
+    [
+      backToSpacesList,
+      notifications.toasts,
+      formValues,
+      spacesManager,
+      logger,
+      props,
+      updateProjectPicker,
+    ]
   );
 
   const validator = useMemo(() => new SpaceValidator(), []);
@@ -248,10 +347,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       showUserImpactWarning && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="info"
+            size="s"
             title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {
@@ -307,6 +405,16 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         onChange={onChangeSpaceSettings}
         validator={validator}
       />
+
+      {canReadProjectRouting() && (
+        <>
+          <EuiSpacer />
+          <CustomizeCps
+            space={getSpaceFromFormValues(formValues)}
+            onChange={onProjectRoutingChange}
+          />
+        </>
+      )}
 
       {doShowUserImpactWarning()}
 

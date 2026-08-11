@@ -16,6 +16,9 @@ import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_
 import type { StartPlugins } from '../../types';
 import { getManagementFilteredLinks } from '../../management/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
 
 const mockGetManagementFilteredLinks = getManagementFilteredLinks as jest.MockedFunction<
   typeof getManagementFilteredLinks
@@ -32,6 +35,7 @@ const createMockLinkItem = (overrides: Partial<LinkItem> = {}): LinkItem => ({
 describe('getFilteredLinks', () => {
   const mockCore = createCoreStartMock();
   const mockPlugins = {} as StartPlugins;
+  const mockExperimentalFeatures = { ...allowedExperimentalValues };
   const mockManagementLinks = createMockLinkItem({
     id: SecurityPageName.administration,
     title: 'Management',
@@ -40,22 +44,28 @@ describe('getFilteredLinks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock uiSettings.get$ to return an observable that emits immediately
+    mockCore.uiSettings.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
-  it('returns filtered links including AI Value links', async () => {
+  it('returns filtered links including launchpad', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
-    expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.aiValue }));
     expect(result).toContainEqual(mockManagementLinks);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.launchpad }));
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(
+      mockCore,
+      mockPlugins,
+      mockExperimentalFeatures
+    );
   });
 
   it('includes all base links in the result', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     // Check that base links are included by checking the result has expected length
     expect(result.length).toBeGreaterThan(10);
@@ -66,13 +76,13 @@ describe('getFilteredLinks', () => {
     expect(resultIds).toContain('alerts');
     expect(resultIds).toContain('cases');
     expect(resultIds).toContain('configurations');
-    expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+    expect(resultIds).toContain('launchpad');
   });
 
   it('returns a frozen array', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    const result = await getFilteredLinks(mockCore, mockPlugins);
+    const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     expect(Object.isFrozen(result)).toBe(true);
   });
@@ -80,18 +90,22 @@ describe('getFilteredLinks', () => {
   it('calls management filter function with correct parameters', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-    await getFilteredLinks(mockCore, mockPlugins);
+    await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledTimes(1);
-    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(mockCore, mockPlugins);
+    expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(
+      mockCore,
+      mockPlugins,
+      mockExperimentalFeatures
+    );
   });
 
-  describe('`securitySolution.attacksAlertsAlignment` feature flag', () => {
-    it('includes correct base links in the result when feature flag is disabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(false);
+  describe('`securitySolution:enableAlertsAndAttacksAlignment` setting', () => {
+    it('includes correct base links in the result when setting is disabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(false);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins);
+      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);
@@ -103,14 +117,14 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('attack_discovery');
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad');
     });
 
-    it('includes all base links in the result when feature flag is enabled', async () => {
-      mockCore.featureFlags.getBooleanValue.mockReturnValue(true);
+    it('includes all base links in the result when setting is enabled', async () => {
+      mockCore.uiSettings.get.mockReturnValue(true);
       mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
-      const result = await getFilteredLinks(mockCore, mockPlugins);
+      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
       // Check that base links are included by checking the result has expected length
       expect(result.length).toBeGreaterThan(10);
@@ -119,10 +133,13 @@ describe('getFilteredLinks', () => {
       const resultIds = result.map((link) => link.id);
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
+      // Attack Discovery stays a normal top-level link even when alignment is enabled.
       expect(resultIds).toContain('attack_discovery');
+      const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
+      expect(attackDiscoveryLink?.sideNavDisabled).toBeUndefined();
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad');
     });
   });
 });

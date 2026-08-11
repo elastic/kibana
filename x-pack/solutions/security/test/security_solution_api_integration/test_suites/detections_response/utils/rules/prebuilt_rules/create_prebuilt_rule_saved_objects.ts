@@ -94,7 +94,7 @@ export const createPrebuiltRuleAssetSavedObjects = async (
       {
         index: {
           _index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-          _id: `security-rule:${doc['security-rule'].rule_id}`,
+          _id: `security-rule:${doc['security-rule'].rule_id}_${doc['security-rule'].version}`,
         },
       },
       doc,

@@ -6,7 +6,12 @@
  */
 
 import type { RootSchema } from '@elastic/ebt/client';
-import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
+import type {
+  StreamEndpointLatencyProps,
+  StreamsStateErrorProps,
+  StreamsProcessingPipelineSuggestedProps,
+  StreamsAgentToolEventCreateProps,
+} from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
   name: {
@@ -61,4 +66,71 @@ const streamsStateErrorSchema: RootSchema<StreamsStateErrorProps> = {
   },
 };
 
-export { streamsEndpointLatencySchema, streamsStateErrorSchema };
+const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
+  {
+    duration_ms: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the pipeline suggestion generation in milliseconds',
+      },
+    },
+    steps_used: {
+      type: 'long',
+      _meta: {
+        description: 'The number of reasoning steps the LLM took to generate the suggestion',
+      },
+    },
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the pipeline suggestion was generated successfully',
+      },
+    },
+    stream_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the stream: wired or classic',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+  };
+
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+export {
+  streamsEndpointLatencySchema,
+  streamsStateErrorSchema,
+  streamsProcessingPipelineSuggestedSchema,
+  streamsAgentToolEventCreateSchema,
+};

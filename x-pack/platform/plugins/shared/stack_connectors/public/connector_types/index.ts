@@ -30,6 +30,7 @@ import { getTeamsConnectorType } from './teams';
 import { getTinesConnectorType } from './tines';
 import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
+import { getHttpConnectorType } from './http';
 import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
@@ -38,6 +39,7 @@ import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
+import { getMcpConnectorType } from './mcp';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -62,6 +64,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getSwimlaneConnectorType());
   connectorTypeRegistry.register(getCasesWebhookConnectorType());
   connectorTypeRegistry.register(getWebhookConnectorType());
+  connectorTypeRegistry.register(getHttpConnectorType());
   connectorTypeRegistry.register(getXmattersConnectorType());
   connectorTypeRegistry.register(getServiceNowITSMConnectorType());
   connectorTypeRegistry.register(getServiceNowITOMConnectorType());
@@ -79,6 +82,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
   connectorTypeRegistry.register(getXSOARConnectorType());
+  connectorTypeRegistry.register(getMcpConnectorType());
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());

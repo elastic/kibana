@@ -127,6 +127,21 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    */
   readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
 
+  /**
+   * Vega may provide project routing overrides.
+   * This method should return an array of project routing values extracted from the vega spec.
+   */
+  readonly getProjectRoutingOverrides?: (
+    visParams: VisParams
+  ) => Promise<Array<{ name?: string; value: string }> | undefined>;
+
+  /**
+   * Some visualizations (e.g. Vega) can use ES|QL internally without exposing it as
+   * their top-level query. This method should report whether the current vis params
+   * make use of ES|QL, so dashboards can react to it (e.g. enabling ES|QL-only controls).
+   */
+  readonly usesEsql?: (visParams: VisParams) => boolean;
+
   readonly isAccessible?: boolean;
   /**
    * It is the visualization icon, displayed on the wizard.

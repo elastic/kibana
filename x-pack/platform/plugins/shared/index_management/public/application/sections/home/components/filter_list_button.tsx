@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiSelectable } from '@elastic/eui';
 
@@ -41,6 +42,8 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
     label: (item as Filter).name,
     checked: (item as Filter).checked,
     'data-test-subj': 'filterItem',
+    'aria-selected': (item as Filter).checked === 'on',
+    'aria-label': (item as Filter).name,
   }));
 
   const toggleFilter = (filter: T) => {
@@ -56,7 +59,7 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={Object.keys(filters).length}
@@ -78,8 +81,11 @@ export function FilterListButton<T extends string>({ onChange, filters }: Props<
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
         data-test-subj="filterList"
+        aria-label={i18n.translate('xpack.idxMgmt.indexTemplatesList.filterPopoverAriaLabel', {
+          defaultMessage: 'View filters',
+        })}
       >
         <EuiSelectable
           allowExclusions

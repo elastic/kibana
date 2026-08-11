@@ -17,7 +17,7 @@ exports[`AddItemPopover renders the popover 1`] = `
         Add item
         <span
           color="inherit"
-          data-euiicon-type="arrowDown"
+          data-euiicon-type="chevronSingleDown"
         />
       </span>
     </button>

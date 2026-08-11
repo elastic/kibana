@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { EuiComboBox } from '@elastic/eui';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ClusterPrivileges } from './cluster_privileges';
 import type { Role } from '../../../../../../common';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiComboBox: jest.fn((props: any) => <actual.EuiComboBox {...props} />),
+  };
+});
+
+const MockedEuiComboBox = EuiComboBox as unknown as jest.Mock;
+
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 test('it renders without crashing', () => {
   const role: Role = {
@@ -25,14 +38,14 @@ test('it renders without crashing', () => {
     kibana: [],
   };
 
-  const wrapper = shallow(
+  const { container } = renderWithIntl(
     <ClusterPrivileges
       role={role}
       onChange={jest.fn()}
       builtinClusterPrivileges={['all', 'manage', 'monitor']}
     />
   );
-  expect(wrapper).toMatchSnapshot();
+  expect(container.children[0]).toMatchSnapshot();
 });
 
 test('it renders fields as disabled when not editable', () => {
@@ -47,7 +60,8 @@ test('it renders fields as disabled when not editable', () => {
     kibana: [],
   };
 
-  const wrapper = shallow(
+  MockedEuiComboBox.mockClear();
+  renderWithIntl(
     <ClusterPrivileges
       role={role}
       onChange={jest.fn()}
@@ -55,7 +69,10 @@ test('it renders fields as disabled when not editable', () => {
       editable={false}
     />
   );
-  expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
+  expect(MockedEuiComboBox).toHaveBeenCalledWith(
+    expect.objectContaining({ isDisabled: true }),
+    expect.anything()
+  );
 });
 
 test('it allows for custom cluster privileges', () => {
@@ -71,7 +88,7 @@ test('it allows for custom cluster privileges', () => {
   };
 
   const onChange = jest.fn();
-  const wrapper = mountWithIntl(
+  renderWithIntl(
     <ClusterPrivileges
       role={role}
       onChange={onChange}
@@ -79,11 +96,9 @@ test('it allows for custom cluster privileges', () => {
     />
   );
 
-  const clusterPrivsSelect = wrapper.find(
-    'EuiComboBox[data-test-subj="cluster-privileges-combobox"]'
-  );
-
-  (clusterPrivsSelect.props() as any).onCreateOption('custom-cluster-privilege');
+  const input = screen.getByRole('combobox');
+  fireEvent.change(input, { target: { value: 'custom-cluster-privilege' } });
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
   expect(onChange).toHaveBeenCalledWith(['existing-custom', 'monitor', 'custom-cluster-privilege']);
 });

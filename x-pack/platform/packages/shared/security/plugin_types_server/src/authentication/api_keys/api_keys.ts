@@ -41,23 +41,27 @@ export const crossClusterApiKeySchema = schema.object({
   name: schema.string(),
   expiration: schema.maybe(schema.string()),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  certificate_identity: schema.maybe(schema.string({ maxLength: 1024 })),
   access: schema.object(
     {
       search: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
             query: schema.maybe(schema.any()),
             field_security: schema.maybe(schema.any()),
             allow_restricted_indices: schema.maybe(schema.boolean()),
-          })
+          }),
+          { maxSize: 100 }
         )
       ),
       replication: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
-          })
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
+          }),
+          { maxSize: 100 }
         )
       ),
     },
@@ -80,23 +84,28 @@ export const updateCrossClusterApiKeySchema = schema.object({
   type: schema.literal('cross_cluster'),
   expiration: schema.maybe(schema.string()),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  // `null` explicitly clears a previously assigned certificate identity.
+  certificate_identity: schema.maybe(schema.nullable(schema.string({ maxLength: 1024 }))),
   access: schema.object(
     {
       search: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
             query: schema.maybe(schema.any()),
             field_security: schema.maybe(schema.any()),
             allow_restricted_indices: schema.maybe(schema.boolean()),
-          })
+          }),
+          { maxSize: 100 }
         )
       ),
       replication: schema.maybe(
         schema.arrayOf(
           schema.object({
-            names: schema.arrayOf(schema.string()),
-          })
+            names: schema.arrayOf(schema.string(), { maxSize: 100 }),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
+          }),
+          { maxSize: 100 }
         )
       ),
     },

@@ -71,6 +71,7 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
+      preferCached: Joi.boolean().optional(),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
@@ -150,6 +151,16 @@ export const schema = Joi.object()
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
+        // Timeout for hooks (before/beforeEach/after/afterEach + FTR lifecycle triggers)
+        // Overridable per-config or inside a hook body via this.timeout().
+        hookTimeout: Joi.number().default(INSPECTING ? 360000 * 100 : 120_000),
+        // Abort the whole config run on the first Mocha timeout (test or hook) instead of
+        // running remaining tests and waiting out the full teardown cascade.
+        abortOnTimeout: Joi.boolean().default(true),
+        // Bound on final cleanup (service/lifecycle teardown) once aborting, so a hung
+        // handler (e.g. a WebDriver call against a dead browser/session) can't stall
+        // reclaiming the CI agent.
+        abortCleanupTimeout: Joi.number().default(20_000),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()
@@ -229,6 +240,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 
@@ -308,6 +320,7 @@ export const schema = Joi.object()
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
+        globalDefaults: Joi.object().unknown(true),
       })
       .default(),
 
@@ -352,6 +365,7 @@ export const schema = Joi.object()
           })
           .default(['superuser']),
         disableTestUser: Joi.boolean(),
+        cookieLogin: Joi.boolean().default(true),
       })
       .default(),
 

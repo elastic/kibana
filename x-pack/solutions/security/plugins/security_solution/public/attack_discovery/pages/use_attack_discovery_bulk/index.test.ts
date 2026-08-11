@@ -21,13 +21,6 @@ const mockAddError = jest.fn();
 const mockInvalidate = jest.fn();
 const mockHttpPost = jest.fn();
 
-const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
-  attackDiscoveryPublicApiEnabled: false,
-});
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
-
 const defaultIds = ['id1', 'id2'];
 const defaultStatus = 'closed';
 const defaultVisibility = 'shared';
@@ -52,189 +45,89 @@ describe('useAttackDiscoveryBulk', () => {
     });
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is false', () => {
-    beforeEach(() =>
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false })
-    );
+  it('returns a mutation that succeeds and calls addSuccess', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
 
-    it('returns a mutation that succeeds and calls addSuccess', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
       });
-
-      expect(mockAddSuccess).toHaveBeenCalled();
     });
 
-    it('does NOT include with_replacements in the request body for the internal route', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
-      });
-
-      // internal route should NOT include the `with_replacements` key at all
-      expect(mockHttpPost).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ body: expect.not.stringContaining('"with_replacements"') })
-      );
-    });
-
-    it('does NOT include enable_field_rendering in the request body for the internal route', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
-      });
-
-      // internal route should NOT include the `enable_field_rendering` key at all
-      expect(mockHttpPost).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ body: expect.not.stringContaining('"enable_field_rendering"') })
-      );
-    });
-
-    it('returns a mutation that calls addError on error', async () => {
-      mockHttpPost.mockRejectedValueOnce(new Error('fail'));
-      const { result } = getHook();
-
-      await act(async () => {
-        try {
-          await result.current.mutateAsync({
-            ids: defaultIds,
-            kibanaAlertWorkflowStatus: defaultStatus,
-            visibility: defaultVisibility,
-          });
-        } catch (e) {
-          // expected error
-        }
-      });
-
-      expect(mockAddError).toHaveBeenCalled();
-    });
-
-    it('calls invalidateFindAttackDiscoveries on success if status is set', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
-      });
-
-      expect(mockInvalidate).toHaveBeenCalled();
-    });
+    expect(mockAddSuccess).toHaveBeenCalled();
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    beforeEach(() =>
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true })
-    );
+  it('includes with_replacements: false in the request body', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
 
-    it('returns a mutation that succeeds and calls addSuccess', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
+      });
+    });
 
-      await act(async () => {
+    const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
+    const options = call[1] || {};
+    const parsed = JSON.parse(options.body ?? '{}');
+    expect(parsed.update).toHaveProperty('with_replacements', false);
+  });
+
+  it('includes enable_field_rendering: true in the request body', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
+      });
+    });
+
+    // public route should include `enable_field_rendering: true`
+    const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
+    const options = call[1] || {};
+    const parsed = JSON.parse(options.body ?? '{}');
+    expect(parsed.update).toHaveProperty('enable_field_rendering', true);
+  });
+
+  it('returns a mutation that calls addError on error', async () => {
+    mockHttpPost.mockRejectedValueOnce(new Error('fail'));
+    const { result } = getHook();
+
+    await act(async () => {
+      try {
         await result.current.mutateAsync({
           ids: defaultIds,
           kibanaAlertWorkflowStatus: defaultStatus,
           visibility: defaultVisibility,
         });
-      });
-
-      expect(mockAddSuccess).toHaveBeenCalled();
+      } catch (e) {
+        // expected error
+      }
     });
 
-    it('includes with_replacements: false in the request body for the public route', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
+    expect(mockAddError).toHaveBeenCalled();
+  });
 
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
+  it('calls invalidateFindAttackDiscoveries on success if status is set', async () => {
+    mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
+    const { result } = getHook();
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ids: defaultIds,
+        kibanaAlertWorkflowStatus: defaultStatus,
+        visibility: defaultVisibility,
       });
-
-      // public route should include `with_replacements: false`
-      const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
-      const options = call[1] || {};
-      const parsed = JSON.parse(options.body ?? '{}');
-      expect(parsed.update).toHaveProperty('with_replacements', false);
     });
 
-    it('includes enable_field_rendering: true in the request body for the public route', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
-      });
-
-      // public route should include `enable_field_rendering: true`
-      const call = mockHttpPost.mock.calls[mockHttpPost.mock.calls.length - 1];
-      const options = call[1] || {};
-      const parsed = JSON.parse(options.body ?? '{}');
-      expect(parsed.update).toHaveProperty('enable_field_rendering', true);
-    });
-
-    it('returns a mutation that calls addError on error', async () => {
-      mockHttpPost.mockRejectedValueOnce(new Error('fail'));
-      const { result } = getHook();
-
-      await act(async () => {
-        try {
-          await result.current.mutateAsync({
-            ids: defaultIds,
-            kibanaAlertWorkflowStatus: defaultStatus,
-            visibility: defaultVisibility,
-          });
-        } catch (e) {
-          // expected error
-        }
-      });
-
-      expect(mockAddError).toHaveBeenCalled();
-    });
-
-    it('calls invalidateFindAttackDiscoveries on success if status is set', async () => {
-      mockHttpPost.mockResolvedValueOnce({ data: [{ id: 'foo' }] });
-      const { result } = getHook();
-
-      await act(async () => {
-        await result.current.mutateAsync({
-          ids: defaultIds,
-          kibanaAlertWorkflowStatus: defaultStatus,
-          visibility: defaultVisibility,
-        });
-      });
-
-      expect(mockInvalidate).toHaveBeenCalled();
-    });
+    expect(mockInvalidate).toHaveBeenCalled();
   });
 });

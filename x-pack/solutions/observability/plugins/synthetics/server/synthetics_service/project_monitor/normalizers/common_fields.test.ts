@@ -9,6 +9,7 @@ import { ScheduleUnit } from '../../../../common/runtime_types';
 import type { NormalizedProjectProps } from './common_fields';
 import {
   flattenAndFormatObject,
+  getMaxAttempts,
   getMonitorSchedule,
   getNormalizeCommonFields,
   getUrlsField,
@@ -45,6 +46,34 @@ describe('getUrlsField', () => {
     expect(getUrlsField(['https://elastic.co?foo=bar,baz'])).toEqual([
       'https://elastic.co?foo=bar,baz',
     ]);
+  });
+});
+
+describe('getMaxAttempts', () => {
+  it('returns the default (2) when nothing is provided', () => {
+    expect(getMaxAttempts()).toBe(2);
+  });
+
+  it('returns the default (2) when retest_on_failure is true', () => {
+    expect(getMaxAttempts(true)).toBe(2);
+  });
+
+  it('returns 1 when retest_on_failure is false', () => {
+    expect(getMaxAttempts(false)).toBe(1);
+  });
+
+  // Regression for #243891: on update the merged payload still carries the
+  // previous max_attempts, which must not override an explicit disable request.
+  it('returns 1 when retest_on_failure is false even if a stale max_attempts is present', () => {
+    expect(getMaxAttempts(false, 2)).toBe(1);
+  });
+
+  it('returns the default (2) when retest_on_failure is true even if max_attempts is present', () => {
+    expect(getMaxAttempts(true, 1)).toBe(2);
+  });
+
+  it('falls back to max_attempts when retest_on_failure is not provided', () => {
+    expect(getMaxAttempts(undefined, 3)).toBe(3);
   });
 });
 
@@ -133,11 +162,18 @@ describe('getNormalizeCommonFields', () => {
               enabled: statusEnabled,
             },
           },
+          maintenanceWindows: ['mw-1', 'mw-2'],
         },
         namespace: 'test-namespace',
         version: '8.7.0',
+        maintenanceWindows: [
+          { id: 'mw-1', title: 'First maintenance window' },
+          { id: 'mw-2', title: 'Second maintenance window' },
+        ],
       };
-      const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+      const normalizedFields = getNormalizeCommonFields(
+        config as unknown as NormalizedProjectProps
+      ); // typecasting to allow testing of invalid user configs
       expect(normalizedFields).toEqual({
         errors: [],
         normalizedFields: {
@@ -175,7 +211,7 @@ describe('getNormalizeCommonFields', () => {
           params: '',
           max_attempts: 2,
           labels: {},
-          maintenance_windows: [],
+          maintenance_windows: ['mw-1', 'mw-2'],
           spaces: [],
         },
       });
@@ -201,11 +237,13 @@ describe('getNormalizeCommonFields', () => {
         urls: 'https://elastic.co',
         locations: ['us_central'],
         schedule: 3,
+        maintenanceWindows: ['mw-3'],
       },
       namespace: 'test-namespace',
       version: '8.7.0',
+      maintenanceWindows: [{ id: 'mw-3', title: 'Maintenance window' }],
     };
-    const normalizedFields = getNormalizeCommonFields(config as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
+    const normalizedFields = getNormalizeCommonFields(config as unknown as NormalizedProjectProps); // typecasting to allow testing of invalid user configs
     expect(normalizedFields).toEqual({
       errors: [],
       normalizedFields: {
@@ -243,10 +281,78 @@ describe('getNormalizeCommonFields', () => {
         params: '',
         max_attempts: 2,
         labels: {},
-        maintenance_windows: [],
+        maintenance_windows: ['mw-3'],
         spaces: [],
       },
     });
+  });
+});
+
+describe('getNormalizeCommonFields - maintenance windows', () => {
+  const baseConfig = {
+    locations: [{ label: 'US North America', id: 'us_central', isServiceManaged: true }],
+    privateLocations: [],
+    projectId: 'test-projectId',
+    namespace: 'test-namespace',
+    version: '8.7.0',
+  };
+
+  const baseMonitor = {
+    name: 'A monitor',
+    id: 'test-id',
+    type: 'http',
+    urls: 'https://elastic.co',
+    locations: ['us_central'],
+    schedule: 3,
+  };
+
+  const maintenanceWindows = [
+    { id: 'mw-id-1', title: 'Weekend window' },
+    { id: 'mw-id-2', title: 'Nightly Deploy' },
+  ];
+
+  it('keeps valid maintenance window ids', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1']);
+  });
+
+  it('resolves maintenance window names to ids', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['Weekend window', 'mw-id-2'] },
+      maintenanceWindows,
+    };
+    const { normalizedFields } = getNormalizeCommonFields(
+      config as unknown as NormalizedProjectProps
+    );
+    expect(normalizedFields.maintenance_windows).toEqual(['mw-id-1', 'mw-id-2']);
+  });
+
+  it('throws when a referenced maintenance window is unavailable', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['mw-id-1'] },
+      maintenanceWindows: [],
+    };
+    expect(() => getNormalizeCommonFields(config as NormalizedProjectProps)).toThrow(/mw-id-1/);
+  });
+
+  it('throws for an unresolved maintenance window reference', () => {
+    const config = {
+      ...baseConfig,
+      monitor: { ...baseMonitor, maintenanceWindows: ['does-not-exist'] },
+      maintenanceWindows,
+    };
+    expect(() => getNormalizeCommonFields(config as unknown as NormalizedProjectProps)).toThrow(
+      /does-not-exist/
+    );
   });
 });
 

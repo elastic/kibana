@@ -258,7 +258,7 @@ export const RolesGridPage: FC<Props> = ({
   };
 
   const onSearchChange = (args: EuiSearchBarOnChangeArgs) => {
-    if (!args.error) {
+    if (!args.error && args.query) {
       const newState = {
         ...tableState,
         query: args.query,
@@ -448,7 +448,7 @@ export const RolesGridPage: FC<Props> = ({
                   data-test-subj="createRoleButton"
                   {...reactRouterNavigate(history, getRoleManagementHref('edit'))}
                   fill
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                 >
                   <FormattedMessage
                     id="xpack.security.management.roles.createRoleButtonLabel"
@@ -460,7 +460,7 @@ export const RolesGridPage: FC<Props> = ({
                     href={cloudOrgUrl}
                     target="_blank"
                     iconSide="right"
-                    iconType="popout"
+                    iconType="external"
                   >
                     <FormattedMessage
                       id="xpack.security.management.roles.assignRolesLinkLabel"
@@ -513,6 +513,9 @@ export const RolesGridPage: FC<Props> = ({
           data-test-subj={`${!isLoading ? 'rolesTable' : 'rolesTableLoading'}`}
           itemId="name"
           columns={getColumnConfig()}
+          tableCaption={i18n.translate('xpack.security.management.roles.rolesTableCaption', {
+            defaultMessage: 'List of roles',
+          })}
           selection={
             readOnly
               ? undefined

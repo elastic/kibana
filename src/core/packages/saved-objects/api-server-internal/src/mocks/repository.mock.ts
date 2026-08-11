@@ -22,6 +22,7 @@ const createRepositoryMock = () => {
     bulkGet: jest.fn(),
     find: jest.fn(),
     search: jest.fn(),
+    esql: jest.fn(),
     get: jest.fn(),
     closePointInTime: jest.fn(),
     createPointInTimeFinder: jest.fn(),
@@ -36,6 +37,8 @@ const createRepositoryMock = () => {
     updateObjectsSpaces: jest.fn(),
     getCurrentNamespace: jest.fn(),
     asScopedToNamespace: jest.fn().mockImplementation(createRepositoryMock),
+    changeOwnership: jest.fn(),
+    changeAccessMode: jest.fn(),
   };
 
   return mock;

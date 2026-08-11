@@ -11,11 +11,11 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
@@ -31,6 +31,8 @@ import {
   MessageRole,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { concatenateChatCompletionChunks } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/common/functions/types';
 import type { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
@@ -71,9 +73,10 @@ const ParamsSchema = schema.object({
   prompts: schema.maybe(
     schema.arrayOf(
       schema.object({
-        statuses: schema.arrayOf(schema.string()),
+        statuses: schema.arrayOf(schema.string(), { maxSize: 3 }),
         message: schema.string({ minLength: 1 }),
-      })
+      }),
+      { maxSize: 3 }
     )
   ),
   status: schema.maybe(schema.string()),
@@ -188,6 +191,19 @@ async function executor(
   }
 
   const resources = await initResources(request);
+
+  const coreContext = await resources.context.core;
+  const chatExperience = await coreContext.uiSettings.client.get<AIChatExperience>(
+    AI_CHAT_EXPERIENCE_TYPE
+  );
+
+  if (chatExperience === AIChatExperience.Agent) {
+    execOptions.logger.debug(
+      'Skipping Observability AI Assistant rule connector execution because chat experience is set to Agents.'
+    );
+    return { actionId: execOptions.actionId, status: 'ok' };
+  }
+
   const client = await resources.service.getClient({ request, scopes: ['observability'] });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,

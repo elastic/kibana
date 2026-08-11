@@ -43,6 +43,7 @@ describe('listTypesWithSystemRoute', () => {
         supportedFeatureIds: ['alerting'],
         isSystemActionType: true,
         subFeature: 'endpointSecurity' as SubFeature,
+        source: 'stack',
       }),
     ];
 
@@ -54,14 +55,19 @@ describe('listTypesWithSystemRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": true,
+            "is_testable": false,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": "endpointSecurity",
             "supported_feature_ids": Array [
               "alerting",
@@ -84,6 +90,8 @@ describe('listTypesWithSystemRoute', () => {
           is_system_action_type: true,
           sub_feature: 'endpointSecurity',
           is_deprecated: false,
+          source: 'stack',
+          is_testable: false,
         },
       ],
     });
@@ -124,14 +132,19 @@ describe('listTypesWithSystemRoute', () => {
       Object {
         "body": Array [
           Object {
+            "allow_multiple_system_actions": undefined,
+            "description": undefined,
             "enabled": true,
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
             "is_deprecated": false,
+            "is_experimental": undefined,
             "is_system_action_type": false,
+            "is_testable": false,
             "minimum_license_required": "gold",
             "name": "name",
+            "source": "stack",
             "sub_feature": undefined,
             "supported_feature_ids": Array [
               "alerting",
@@ -163,6 +176,8 @@ describe('listTypesWithSystemRoute', () => {
           minimum_license_required: 'gold',
           is_system_action_type: false,
           is_deprecated: false,
+          source: 'stack',
+          is_testable: false,
         },
       ],
     });

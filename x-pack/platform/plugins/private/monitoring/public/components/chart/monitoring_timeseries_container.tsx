@@ -74,7 +74,7 @@ const zoomOutBtn = (zoomInfo?: ZoomInfo) => {
         <EuiButtonEmpty
           color="primary"
           size="s"
-          iconType="magnifyWithMinus"
+          iconType="magnifyMinus"
           onClick={zoomInfo.zoomOutHandler}
         >
           <FormattedMessage
@@ -94,7 +94,7 @@ const technicalPreviewBadge = (technicalPreview: boolean) => {
 
   return (
     <EuiFlexItem>
-      <EuiBadge color="hollow" iconType="cheer">
+      <EuiBadge color="hollow" iconType="popper">
         <FormattedMessage
           id="xpack.monitoring.chart.timeSeries.technicalPreview"
           defaultMessage="Technical Preview"

@@ -16,8 +16,6 @@ import { GENERATED_ALERT } from '../constants';
 import { logError } from '../utils';
 import type { UserActionVersion800 } from './types';
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 export function removeRuleInformation(
   doc: SavedObjectUnsanitizedDoc<UserActionVersion800>,
   context: SavedObjectMigrationContext

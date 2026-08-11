@@ -17,7 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/es-query",
-    "@kbn/safer-lodash-set",
-    "@kbn/utility-types",
+    "@kbn/std",
   ]
 }

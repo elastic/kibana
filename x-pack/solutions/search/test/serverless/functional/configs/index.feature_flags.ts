@@ -12,6 +12,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // add tests that require feature flags, defined in config.feature_flags.ts
     loadTestFile(require.resolve('../test_suites/agent_builder'));
     loadTestFile(require.resolve('../test_suites/search_playground/search_relevance'));
-    loadTestFile(require.resolve('../test_suites/search_getting_started'));
   });
 }

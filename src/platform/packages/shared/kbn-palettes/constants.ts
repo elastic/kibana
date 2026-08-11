@@ -17,6 +17,10 @@ const semantic = {
    * Log level palette
    */
   LogLevel: 'log_level' as const,
+  /**
+   * Severity palette
+   */
+  Severity: 'severity' as const,
 };
 
 const categorical = {
@@ -24,6 +28,10 @@ const categorical = {
    * Default kibana theme
    */
   Default: DEFAULT_FALLBACK_PALETTE,
+  /**
+   * Variant of Default palette optimized for line charts: dark tones first, red/yellow swapped.
+   */
+  ElasticLineOptimized: 'elastic_line_optimized' as const,
   /**
    * Neutral palette
    */

@@ -32,10 +32,9 @@ export function initializeInternalApi(
 ): LensInternalApi {
   const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
   const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
-  const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
-  if (apiHasAbortController(parentApi)) {
-    expressionAbortController$.next(parentApi.abortController);
-  }
+  const expressionAbortController$ = new BehaviorSubject<AbortController>(
+    apiHasAbortController(parentApi) ? parentApi.abortController : new AbortController()
+  );
   const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
@@ -74,6 +73,8 @@ export function initializeInternalApi(
     ? parentApi.esqlVariables$
     : new BehaviorSubject<ESQLControlVariable[]>([]);
 
+  const isEditingInProgress$ = new BehaviorSubject<boolean>(false);
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -91,6 +92,8 @@ export function initializeInternalApi(
     blockingError$,
     messages$,
     validationMessages$,
+    isEditingInProgress: () => isEditingInProgress$.getValue(),
+    updateEditingState: (inProgress: boolean) => isEditingInProgress$.next(inProgress),
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);
@@ -105,7 +108,7 @@ export function initializeInternalApi(
     updateDataLoading: (newDataLoading: boolean | undefined) => dataLoading$.next(newDataLoading),
     updateOverrides: (overrides: LensOverrides['overrides']) => overrides$.next(overrides),
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
-    updateAbortController: (abortController: AbortController | undefined) =>
+    updateAbortController: (abortController: AbortController) =>
       expressionAbortController$.next(abortController),
     updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
       disableTriggers$.next(disableTriggers),

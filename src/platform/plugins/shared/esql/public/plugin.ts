@@ -8,88 +8,114 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { type IndicesAutocompleteResult, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
-
-import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
+import {
+  registerESQLEditorAnalyticsEvents,
+  type ESQLEditorTelemetryService,
+} from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
-  esqlControlTrigger,
-} from './triggers/esql_controls/esql_control_trigger';
-import {
   UPDATE_ESQL_QUERY_TRIGGER,
-  updateESQLQueryTrigger,
-} from './triggers/update_esql_query/update_esql_query_trigger';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { cacheNonParametrizedAsyncFunction, cacheParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
+import { EnricherService } from './enricher_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
 interface EsqlPluginStartDependencies {
-  dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   // LOOKUP JOIN deps
   share: SharePluginStart;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
+  kql: KqlPluginStart;
+}
+
+export interface EsqlPluginSetup {
+  /**
+   * Register a function to enrich ES|QL source autocomplete suggestions.
+   * Multiple plugins can register enrichers; they are chained in registration order.
+   */
+  registerSourceEnricher(
+    enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+  ): void;
+  registerViewEnricher(enricher: (views: EsqlView[]) => Promise<EsqlView[]>): void;
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
-  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
-  getInferenceEndpointsAutocomplete?: (
-    taskType: InferenceTaskType
-  ) => Promise<InferenceEndpointsAutocompleteResult>;
   variablesService: EsqlVariablesService;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+  /**
+   * Lazily resolves the ES|QL editor telemetry service.
+   */
+  getTelemetryService: () => Promise<ESQLEditorTelemetryService>;
 }
 
-export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
+  private readonly sourceEnricherService: EnricherService<ESQLSourceResult>;
+  private readonly viewEnricherService: EnricherService<EsqlView>;
 
-  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
-    uiActions.registerTrigger(updateESQLQueryTrigger);
-    uiActions.registerTrigger(esqlControlTrigger);
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sourceEnricherService = new EnricherService<ESQLSourceResult>(
+      initContext.logger.get('sourceEnricher'),
+      'SourceEnricher'
+    );
+    this.viewEnricherService = new EnricherService<EsqlView>(
+      initContext.logger.get('viewEnricher'),
+      'ViewEnricher'
+    );
+  }
 
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
     registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
 
-    return {};
+    return {
+      registerSourceEnricher: (enricher) => {
+        this.sourceEnricherService.register(enricher);
+      },
+      registerViewEnricher: (enricher) => {
+        this.viewEnricherService.register(enricher);
+      },
+    };
   }
 
   public start(
     core: CoreStart,
     {
-      dataViews,
       data,
       uiActions,
       fieldsMetadata,
       usageCollection,
+      cps,
       licensing,
       fileUpload,
       fieldFormats,
       share,
+      kql,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -129,79 +155,40 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldFormats,
       fileUpload,
+      kql,
     });
 
     const variablesService = new EsqlVariablesService();
 
-    const getJoinIndicesAutocomplete = cacheParametrizedAsyncFunction(
-      async (remoteClusters?: string) => {
-        const query = remoteClusters ? { remoteClusters } : {};
-
-        const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/join/indices',
-          { query }
-        );
-
-        return result;
-      },
-      (remoteClusters?: string) => remoteClusters || '',
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
-
-    const getTimeseriesIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
-      async () => {
-        const result = await core.http.get<IndicesAutocompleteResult>(
-          '/internal/esql/autocomplete/timeseries/indices'
-        );
-
-        return result;
-      },
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
-
-    const getEditorExtensionsAutocomplete = async (
-      queryString: string,
-      activeSolutionId: SolutionId
-    ) => {
-      const encodedQuery = encodeURIComponent(queryString);
-      const result = await core.http.get(
-        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${encodedQuery}`
-      );
-      return result;
-    };
-
-    // Create a cached version of getEditorExtensionsAutocomplete
-    const cachedGetEditorExtensionsAutocomplete = cacheParametrizedAsyncFunction(
-      getEditorExtensionsAutocomplete,
-      (queryString, activeSolutionId) => `${queryString}-${activeSolutionId}`,
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
-
-    const getInferenceEndpointsAutocomplete = cacheParametrizedAsyncFunction(
-      async (taskType: InferenceTaskType) => {
-        return await core.http.get<InferenceEndpointsAutocompleteResult>(
-          `/internal/esql/autocomplete/inference_endpoints/${taskType}`
-        );
-      },
-      (taskType: InferenceTaskType) => taskType,
-      1000 * 60 * 5, // Keep the value in cache for 5 minutes
-      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
-    );
+    let telemetryServicePromise: Promise<ESQLEditorTelemetryService> | undefined;
 
     const start = {
       isServerless,
-      getJoinIndicesAutocomplete,
-      getTimeseriesIndicesAutocomplete,
-      getEditorExtensionsAutocomplete: cachedGetEditorExtensionsAutocomplete,
-      getInferenceEndpointsAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
+      enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
+      getTelemetryService: () => {
+        if (!telemetryServicePromise) {
+          telemetryServicePromise = import('@kbn/esql-editor').then(
+            ({ ESQLEditorTelemetryService }) => new ESQLEditorTelemetryService(core.analytics)
+          );
+        }
+        return telemetryServicePromise;
+      },
     };
 
-    setKibanaServices(start, core, data, storage, uiActions, fieldsMetadata, usageCollection);
+    setKibanaServices(
+      start,
+      core,
+      data,
+      storage,
+      uiActions,
+      kql,
+      fieldsMetadata,
+      usageCollection,
+      cps
+    );
 
     return start;
   }

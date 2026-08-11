@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { getReadResponseBodySchema } from './schemas';
 
-export type DashboardReadResponseBody = TypeOf<ReturnType<typeof getReadResponseBodySchema>>;
+/** The response body type for reading a dashboard. */
+export type DashboardReadResponseBody = z.output<ReturnType<typeof getReadResponseBodySchema>>;

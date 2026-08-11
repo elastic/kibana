@@ -6,20 +6,20 @@
  */
 
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
 import { uniq } from 'lodash/fp';
-import type { AIMessage } from '@langchain/core/messages';
 import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRulePartial,
   OriginalRule,
   RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../common/task/util/enrich_lookup_resources';
 
 export const migrateRuleState = Annotation.Root({
   id: Annotation<string>(),
   original_rule: Annotation<OriginalRule>(),
-  resources: Annotation<MigrationResources>(),
+  resources: Annotation<EnrichedMigrationResources>(),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
@@ -41,7 +41,7 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => '',
   }),
-  messages: Annotation<AIMessage[]>({
+  messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),

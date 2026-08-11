@@ -17,7 +17,7 @@ import React from 'react';
 import { act, fireEvent, waitFor, screen } from '@testing-library/react';
 import { syntheticsTestSubjects } from '../../../../../common/constants/data_test_subjects';
 import { apiService } from '../../../../utils/api_service';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 
 describe('SimpleMonitorForm', () => {
   const apiSpy = jest.spyOn(apiService, 'post');

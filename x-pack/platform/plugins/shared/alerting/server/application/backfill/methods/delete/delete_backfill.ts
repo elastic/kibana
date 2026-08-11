@@ -33,23 +33,6 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       id
     );
 
-    // Check for errors in the savedObjectClient result
-    if (result.error) {
-      const err = new Error(result.error.message);
-      context.auditLogger?.log(
-        adHocRunAuditEvent({
-          action: AdHocRunAuditAction.DELETE,
-          savedObject: {
-            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-            id,
-            name: `backfill for rule "${result.attributes.rule.name}"`,
-          },
-          error: new Error(result.error.message),
-        })
-      );
-      throw err;
-    }
-
     try {
       await context.authorization.ensureAuthorized({
         ruleTypeId: result.attributes.rule.alertTypeId,
@@ -115,6 +98,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
         shouldRefetchAllBackfills: true,
         backfillClient: context.backfillClient,
         actionsClient,
+        initiator: result.attributes.initiator,
       });
     }
 

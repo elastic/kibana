@@ -10,7 +10,6 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 
 import { findAttackDiscoveriesRoute } from './find_attack_discoveries';
 import * as helpers from '../../../helpers';
-import { getKibanaFeatureFlags } from '../../helpers/get_kibana_feature_flags';
 import { hasReadAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 import type { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
 import { getMockAttackDiscoveryFindResponse } from '../../../../__mocks__/attack_discovery_find_response';
@@ -27,10 +26,6 @@ jest.mock('../../helpers/index_privileges', () => {
     hasReadAttackDiscoveryAlertsPrivileges: jest.fn(),
   };
 });
-
-jest.mock('../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 const { context: mockContext } = requestContextMock.createTools();
 
@@ -65,9 +60,6 @@ describe('findAttackDiscoveriesRoute', () => {
     getHandler = addVersionMock.mock.calls[0][1];
     (hasReadAttackDiscoveryAlertsPrivileges as jest.Mock).mockResolvedValue({
       isSuccess: true,
-    });
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true, // enabled by default
     });
   });
 
@@ -143,47 +135,6 @@ describe('findAttackDiscoveriesRoute', () => {
     });
   });
 
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-      });
-
-      it('returns a 403 custom response when the public API is disabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.custom).toHaveBeenCalledWith({
-          body: Buffer.from(
-            JSON.stringify({
-              message: 'Attack discovery public API is disabled',
-              status_code: 403,
-            })
-          ),
-          headers: expect.any(Object),
-          statusCode: 403,
-        });
-      });
-    });
-
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-      });
-
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        await getHandler(mockContext, mockRequest, mockResponse);
-
-        expect(mockResponse.ok).toHaveBeenCalledWith({
-          body: mockAttackDiscoveryFindResponse,
-        });
-      });
-    });
-  });
-
   it('throws if response validation fails', async () => {
     mockDataClient.findAttackDiscoveryAlerts.mockResolvedValueOnce({ invalid: true });
 
@@ -195,6 +146,45 @@ describe('findAttackDiscoveriesRoute', () => {
     await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(throwValidationError).toHaveBeenCalled();
+  });
+
+  it('returns 400 if both shared and include_all_authors are provided', async () => {
+    const req = {
+      ...mockRequest,
+      query: {
+        ...(mockRequest.query as Record<string, unknown>),
+        shared: true,
+        include_all_authors: true,
+      },
+    };
+
+    await getHandler(mockContext, req, mockResponse);
+
+    expect(mockResponse.custom).toHaveBeenCalledWith({
+      body: Buffer.from(
+        JSON.stringify({
+          message: 'The parameters "shared" and "include_all_authors" are mutually exclusive.',
+          status_code: 400,
+        })
+      ),
+      headers: expect.any(Object),
+      statusCode: 400,
+    });
+  });
+
+  it('passes includeAllAuthors to the data client when the request provides include_all_authors', async () => {
+    const req = {
+      ...mockRequest,
+      query: {
+        ...(mockRequest.query as Record<string, unknown>),
+        include_all_authors: true,
+      },
+    };
+
+    await getHandler(mockContext, req, mockResponse);
+
+    const callArg = mockDataClient.findAttackDiscoveryAlerts.mock.calls[0][0];
+    expect(callArg.findAttackDiscoveryAlertsParams.includeAllAuthors).toBe(true);
   });
 
   it('passes withReplacements: true to the data client when the request provides with_replacements: true', async () => {

@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const LOOKUPS_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.lookupsFileUpload.prompt',
-  { defaultMessage: 'Select or drag and drop the exported lookup files' }
+export const SKIP_BUTTON = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButton',
+  { defaultMessage: 'Skip' }
+);
+
+export const SKIP_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.skipButtonAriaLabel',
+  { defaultMessage: 'Skip this step and continue without uploading all the items' }
 );

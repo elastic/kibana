@@ -385,7 +385,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         key="createNewPolicy"
         {...reactRouterNavigate(history, linkToAddPolicy())}
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="createPolicyButton"
       >
         <FormattedMessage
@@ -436,6 +436,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       })}
       cellProps={() => ({
         'data-test-subj': 'cell',
+      })}
+      tableCaption={i18n.translate('xpack.snapshotRestore.policyList.table.caption', {
+        defaultMessage: 'Snapshot lifecycle policies',
       })}
       data-test-subj="policyTable"
     />

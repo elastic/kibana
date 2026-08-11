@@ -10,13 +10,13 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { createSLO } from './fixtures/slo';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import * as compute_health from '../domain/services/compute_health';
 
 jest.spyOn(compute_health, 'computeHealth');
 
 describe('GetSLOHealth', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 

@@ -6,9 +6,9 @@
  */
 
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(200);
 
-          const cookie = parseCookie(response.headers['set-cookie'][0])!;
+          const cookie = findSessionCookie(response.headers['set-cookie']);
           const { body: profile } = await supertestWithoutAuth
             .get('/internal/security/user_profile')
             .set('Cookie', cookie.cookieString())
@@ -104,7 +104,13 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/internal/security/user_profile/_data')
             .set('kbn-xsrf', 'xxx')
             .set('Cookie', usersSessions.get(`user_${userPrefix}`)!.cookie.cookieString())
-            .send({ some: `data-${userPrefix}` })
+            .send({
+              avatar: {
+                initials: `some-initials-${userPrefix}`,
+                color: `#f3f3f3`,
+              },
+              userSettings: { darkMode: `dark`, contrastMode: `high` },
+            })
             .expect(200)
         )
       );
@@ -145,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           uids: [usersSessions.get('user_one')!.uid, usersSessions.get('user_two')!.uid],
-          dataPath: 'some',
+          dataPath: 'avatar',
         })
         .expect(200);
       expect(profiles.body).to.have.length(2);
@@ -155,7 +161,11 @@ export default function ({ getService }: FtrProviderContext) {
         Array [
           Object {
             "data": Object {
-              "some": "data-one",
+              "avatar": Object {
+                "color": "#f3f3f3",
+                "imageUrl": null,
+                "initials": "some-initials-one",
+              },
             },
             "user": Object {
               "email": "one@elastic.co",
@@ -165,7 +175,11 @@ export default function ({ getService }: FtrProviderContext) {
           },
           Object {
             "data": Object {
-              "some": "data-two",
+              "avatar": Object {
+                "color": "#f3f3f3",
+                "imageUrl": null,
+                "initials": "some-initials-two",
+              },
             },
             "user": Object {
               "email": "two@elastic.co",

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/uiam-api-keys-provisioning-status",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

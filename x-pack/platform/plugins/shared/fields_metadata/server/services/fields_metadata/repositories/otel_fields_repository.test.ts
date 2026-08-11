@@ -20,7 +20,7 @@ const mockOtelFields = {
   'service.version': {
     name: 'service.version',
     description:
-      'The version string of the service API or implementation. The format is not defined by these conventions.',
+      'The version string of the service component. The format is not defined by these conventions.',
     type: 'keyword',
     example: '2.0.0',
   },
@@ -71,7 +71,7 @@ describe('OtelFieldsRepository', () => {
 
       expect(() => {
         OtelFieldsRepository.create({
-          otelFields: invalidOtelFields as any,
+          otelFields: invalidOtelFields as unknown as OtelFieldsRepositoryDeps['otelFields'],
         });
       }).toThrow(/Invalid field data/);
     });
@@ -79,7 +79,7 @@ describe('OtelFieldsRepository', () => {
     it('should handle empty otel fields object', () => {
       const emptyOtelFields = {};
       const repository = OtelFieldsRepository.create({
-        otelFields: emptyOtelFields as any,
+        otelFields: emptyOtelFields as TOtelFields,
       });
 
       expect(repository).toBeInstanceOf(OtelFieldsRepository);
@@ -135,7 +135,7 @@ describe('OtelFieldsRepository', () => {
       } as const;
 
       const repository = OtelFieldsRepository.create({
-        otelFields: specialOtelFields as any,
+        otelFields: specialOtelFields as unknown as OtelFieldsRepositoryDeps['otelFields'],
       });
 
       const field = repository.getByName('field-with.special_chars');
@@ -248,7 +248,7 @@ describe('OtelFieldsRepository', () => {
 
       expect(field!.name).toBe('service.version');
       expect(field!.description).toBe(
-        'The version string of the service API or implementation. The format is not defined by these conventions.'
+        'The version string of the service component. The format is not defined by these conventions.'
       );
       expect(field!.type).toBe('keyword');
       expect(field!.example).toBe('2.0.0');

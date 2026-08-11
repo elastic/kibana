@@ -20,13 +20,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: jest.fn().mockReturnValue({
-    services: {
-      data: {
-        query: { timefilter: { timefilter: { getTime: () => ({ from: 'now-1h', to: 'now' }) } } },
-      },
-    },
-  }),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -137,7 +130,20 @@ describe('TraceLink', () => {
     );
   });
 
-  it('uses time range from data plugin when not provided in query', () => {
+  it('calculates time range from transaction when not provided in query', () => {
+    const transaction = {
+      '@timestamp': '2024-01-01T12:00:00.000Z',
+      service: { name: 'foo' },
+      transaction: { id: '456', name: 'bar', type: 'GET', duration: { us: 1000 } },
+      trace: { id: 123 },
+    };
+
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      data: { transaction },
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
+
     jest.spyOn(useApmParamsHooks as any, 'useApmParams').mockReturnValue({
       path: { traceId: '123' },
       query: {},
@@ -146,9 +152,10 @@ describe('TraceLink', () => {
     render(<TraceLink />, { wrapper: Wrapper });
 
     const link = screen.getByTestId('redirect-link');
+    // When no query params, dates are calculated from transaction timestamp (rounded to 5 min)
     expect(link).toHaveAttribute(
       'href',
-      '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-1h&rangeTo=now&waterfallItemId='
+      '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=2024-01-01T12%3A00%3A00.000Z&rangeTo=2024-01-01T12%3A05%3A00.000Z&waterfallItemId='
     );
   });
 });

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
-import https from 'https';
+import { Agent } from 'undici';
 import { merge } from 'lodash';
 
 import { KBN_CERT_PATH, KBN_KEY_PATH, CA_CERT_PATH } from '@kbn/dev-utils';
@@ -14,11 +13,9 @@ import { KBN_CERT_PATH, KBN_KEY_PATH, CA_CERT_PATH } from '@kbn/dev-utils';
 import type { UsageApiConfigSchema } from '../../config';
 import type { UsageRecord } from '../../types';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
 import { UsageReportingService } from './usage_reporting_service';
 
-jest.mock('node-fetch');
-const { Response } = jest.requireActual('node-fetch');
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('UsageReportingService', () => {
   let usageApiConfig: UsageApiConfigSchema;
@@ -67,12 +64,12 @@ describe('UsageReportingService', () => {
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
       const mockResponse = new Response(null, { status: 200 });
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(mockResponse);
+      mockedFetch.mockResolvedValue(mockResponse);
 
       const response = await service.reportUsage(records);
 
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(`${url}${USAGE_REPORTING_ENDPOINT}`, {
+      expect(mockedFetch).toHaveBeenCalledTimes(1);
+      expect(mockedFetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
         headers: {
@@ -119,20 +116,20 @@ describe('UsageReportingService', () => {
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
       const mockResponse = new Response(null, { status: 200 });
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(mockResponse);
+      mockedFetch.mockResolvedValueOnce(mockResponse);
 
       const response = await service.reportUsage(records);
-      const url = `${DEFAULT_CONFIG.url}${USAGE_REPORTING_ENDPOINT}`;
+      const url = DEFAULT_CONFIG.url;
 
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(url, {
+      expect(mockedFetch).toHaveBeenCalledTimes(1);
+      expect(mockedFetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': `Kibana/${kibanaVersion} node-fetch`,
         },
-        agent: expect.any(https.Agent),
+        dispatcher: expect.any(Agent),
       });
       expect(response).toBe(mockResponse);
     });
@@ -141,27 +138,20 @@ describe('UsageReportingService', () => {
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
       const mockResponse = new Response(null, { status: 200 });
-      (fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(mockResponse);
+      mockedFetch.mockResolvedValueOnce(mockResponse);
 
       const response = await service.reportUsage(records);
-      const url = `${DEFAULT_CONFIG.url}${USAGE_REPORTING_ENDPOINT}`;
+      const url = DEFAULT_CONFIG.url;
 
-      expect(fetch).toHaveBeenCalledTimes(1);
-      expect(fetch).toHaveBeenCalledWith(url, {
+      expect(mockedFetch).toHaveBeenCalledTimes(1);
+      expect(mockedFetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': `Kibana/${kibanaVersion} node-fetch`,
         },
-        agent: expect.objectContaining({
-          options: expect.objectContaining({
-            cert: expect.any(String),
-            key: expect.any(String),
-            ca: expect.arrayContaining([expect.any(String)]),
-            allowPartialTrustChain: true,
-          }),
-        }),
+        dispatcher: expect.any(Agent),
       });
       expect(response).toBe(mockResponse);
     });

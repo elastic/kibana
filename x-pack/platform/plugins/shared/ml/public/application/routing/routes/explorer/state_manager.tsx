@@ -8,27 +8,26 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlKibana } from '../../../contexts/kibana';
 
-import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
 import { useJobSelection } from '../../../components/job_selector/use_job_selection';
 import { useTableSeverity } from '../../../components/controls/select_severity';
-import { MlPageHeader } from '../../../components/page_header';
-import { PageTitle } from '../../../components/page_title';
-import { AnomalyResultsViewSelector } from '../../../components/anomaly_results_view_selector';
+import { MlAppHeader } from '../../../components/ml_app_header';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
 import { useMlJobService } from '../../../services/job_service';
+import { DatePicker } from '../../../components/ml_page/date_picker';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -118,24 +117,20 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   return (
     <div className="ml-explorer">
-      <MlPageHeader
-        leftSideItems={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <AnomalyResultsViewSelector viewId="explorer" selectedJobs={selectedJobs} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <PageTitle
-          title={i18n.translate('xpack.ml.explorer.pageTitle', {
-            defaultMessage: 'Anomaly Explorer',
-          })}
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.explorer.pageTitle', {
+          defaultMessage: 'Anomaly Explorer',
+        })}
+      />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <DatePicker />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (
-          <AnomalyDetectionEmptyState showDocsLink />
+          <AnomalyDetectionEmptyState showDocsLink iconSize="m" />
         ) : (
           <Explorer
             {...{

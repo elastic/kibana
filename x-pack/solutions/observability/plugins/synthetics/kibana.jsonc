@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/synthetics-plugin",
-  "owner": ["@elastic/obs-ux-management-team"],
+  "owner": ["@elastic/actionable-obs-team"],
   "group": "observability",
   "visibility": "private",
   "description": "This plugin visualizes data from Synthetics and Heartbeat, and integrates with other Observability solutions.",
@@ -35,7 +35,7 @@
       "usageCollection",
       "uiActions",
       "unifiedSearch",
-      "presentationUtil",
+      "kql",
       "charts",
       "fieldsMetadata"
     ],
@@ -52,7 +52,8 @@
       "telemetry",
       "licenseManagement",
       "observabilityAIAssistant",
-      "embeddableEnhanced",
+      "agentBuilder",
+      "observabilityAgentBuilder",
       "maintenanceWindows"
     ],
     "requiredBundles": [
@@ -61,8 +62,9 @@
       "kibanaReact",
       "kibanaUtils",
       "observability",
-      "spaces",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "observabilityAgentBuilder",
+      "presentationUtil"
     ]
   }
 }

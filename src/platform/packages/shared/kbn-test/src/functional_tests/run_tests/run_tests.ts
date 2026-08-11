@@ -16,24 +16,27 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
-import { applyFipsOverrides } from '../lib/fips_overrides';
+import { runKibanaServer } from '@kbn/test-kibana-server';
+import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   if (!process.env.CI) {
+    // [rspack-transition] When the legacy optimizer is removed, keep only the rspack script.
+    const buildScript =
+      process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1'
+        ? 'node scripts/build_rspack_bundles'
+        : 'node scripts/build_kibana_platform_plugins';
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
-    log.warning(
-      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
-    );
+    log.warning(`   Don't forget to use \`${buildScript}\` to build plugins you plan on testing`);
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
@@ -73,9 +76,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       }
 
       let config: Config;
-      if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
-      } else {
+      if (fipsIsEnabled()) {
         config = await readConfigFile(
           log,
           options.esVersion,
@@ -83,6 +84,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           settingOverrides,
           applyFipsOverrides
         );
+      } else {
+        config = await readConfigFile(log, options.esVersion, path, settingOverrides);
       }
 
       const hasTests = await checkForEnabledTestsInFtrConfig({
@@ -96,6 +99,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           log,
           config,
           esVersion: options.esVersion,
+          retry: options.retry,
         }).finally(() => {
           tx.end();
         });
@@ -183,6 +187,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               config,
               esVersion: options.esVersion,
               signal: abortCtrl.signal,
+              retry: options.retry,
             })
           );
 

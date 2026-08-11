@@ -17,10 +17,6 @@ export const OsqueryResponseActionsUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() => import('./pages/osquery_automated_response_actions'))
 );
 
-export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
-  lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
-);
-
 export const EntityAnalyticsUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('@kbn/security-solution-upselling/pages/entity_analytics').then(
@@ -63,6 +59,14 @@ export const AttackDiscoveryUpsellingPageLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/attack_discovery').then(({ AttackDiscoveryUpsellingPageServerless }) => ({
       default: AttackDiscoveryUpsellingPageServerless,
+    }))
+  )
+);
+
+export const AttacksUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/attacks').then(({ AttacksUpsellingPageServerless }) => ({
+      default: AttacksUpsellingPageServerless,
     }))
   )
 );

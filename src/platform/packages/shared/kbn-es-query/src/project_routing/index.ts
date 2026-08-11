@@ -14,6 +14,7 @@
  *
  * Examples:
  * - undefined - Search across all projects (default)
+ * - '_alias:*' - Search across all projects
  * - '_alias:_origin' - Search only in the current project
  *
  * @public

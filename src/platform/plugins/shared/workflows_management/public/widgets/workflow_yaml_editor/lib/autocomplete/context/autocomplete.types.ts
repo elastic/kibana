@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Scalar } from 'yaml';
+import type { Document, LineCounter, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { ConnectorTypeInfo } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
-import type { LineParseResult } from './parse_line_for_completion';
+import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import type { LineParseResult } from '@kbn/workflows-yaml';
+import type { z } from '@kbn/zod/v4';
+import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
   StepPropInfo,
 } from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import type { EsqlStepRegion } from '../../esql_validation/extract_esql_region';
 
-// TODO: see if we can reduce the number of properties in this interface and group them into smaller interfaces
 export interface AutocompleteContext {
   // what triggered the completion
   triggerCharacter: string | null;
@@ -39,20 +41,51 @@ export interface AutocompleteContext {
   contextSchema: z.ZodType;
   contextScopedToPath: string | null;
   yamlDocument: Document;
+  yamlLineCounter: LineCounter | null;
   scalarType: Scalar.Type | null;
 
   // kind of ast info
   isInLiquidBlock: boolean;
+  /** True when the cursor is in the scalar value for `triggers[i].on.condition`. */
+  isInTriggerConditionField: boolean;
+  /**
+   * When the cursor is in `on.condition` and `triggers[i].type` matches a trigger registered
+   * in workflows extensions, the public definition. Undefined for built-in types, unregistered
+   * ids, or missing `type` in YAML.
+   */
+  triggerConditionDefinition: PublicTriggerDefinition | undefined;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
+  isInWorkflowInputsContext: boolean;
+  /**
+   * True iff the cursor is inside the `with.query` scalar of an
+   * `elasticsearch.esql.query` step. Implies `esqlRegion !== null` and
+   * `esqlOffsetInQuery !== null`.
+   */
+  isInEsqlQueryField: boolean;
+  /**
+   * The ES|QL region the cursor is in, or `null` when outside any. Same
+   * shape the validator uses, so the cursor offset and ranges round-trip
+   * cleanly between the two pipelines.
+   */
+  esqlRegion: EsqlStepRegion | null;
+  /**
+   * Cursor offset relative to the start of the ES|QL content
+   * (`absoluteOffset - esqlRegion.contentStartInFile`), or `null`. This is
+   * what `@kbn/esql-language` `suggest()` expects.
+   */
+  esqlOffsetInQuery: number | null;
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+  workflows: WorkflowsResponse;
+  currentWorkflowId: string | null;
+  isCurrentWorkflowManaged: boolean;
+  workflowDefinition: WorkflowYaml | null;
 }
 
-// we don't want to pass model and position, but currently it's used in getWithBlockSuggestions
-// TODO: refactor this to not pass model and position
+// Extended context includes Monaco editor model and position for advanced autocompletion features
 export interface ExtendedAutocompleteContext extends AutocompleteContext {
   model: monaco.editor.ITextModel;
   position: monaco.Position;

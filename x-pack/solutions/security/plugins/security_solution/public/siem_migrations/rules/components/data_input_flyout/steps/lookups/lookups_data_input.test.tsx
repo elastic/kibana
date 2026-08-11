@@ -8,10 +8,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { LookupsDataInput } from './lookups_data_input';
-import { DataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -39,10 +39,13 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
 
 describe('LookupsDataInput', () => {
   const defaultProps = {
-    onAllLookupsCreated: jest.fn(),
-    dataInputStep: DataInputStep.Lookups,
+    dataInputStep: SplunkDataInputStep.Lookups,
+    migrationSource: MigrationSource.SPLUNK,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    missingLookups: ['lookup1', 'lookup2'],
+    setDataInputStep: jest.fn(),
+    onMigrationCreated: jest.fn(),
+    onMissingResourcesFetched: jest.fn(),
+    missingResourcesIndexed: { lookups: ['lookup1', 'lookup2'], macros: [] },
   };
 
   afterEach(() => {
@@ -84,7 +87,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when dataInputStep is not LookupsUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} dataInputStep={DataInputStep.Rules} />
+        <LookupsDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();
@@ -102,7 +105,7 @@ describe('LookupsDataInput', () => {
   it('does not render description when missingLookups is missing', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LookupsDataInput {...defaultProps} missingLookups={undefined} />
+        <LookupsDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByTestId('lookupsUploadDescription')).not.toBeInTheDocument();

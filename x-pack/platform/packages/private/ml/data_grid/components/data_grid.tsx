@@ -257,11 +257,13 @@ export const DataGrid: FC<Props> = memo(
                 <EuiCopy
                   beforeMessage={props.copyToClipboardDescription}
                   textToCopy={props.copyToClipboard}
+                  tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy: () => void) => (
+                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       onClick={copy}
-                      iconType="copyClipboard"
+                      iconType="copy"
                       aria-label={props.copyToClipboardDescription}
                     />
                   )}
@@ -340,7 +342,7 @@ export const DataGrid: FC<Props> = memo(
                                 }`}
                                 data-test-subj={`${dataTestSubj}HistogramButton`}
                                 size="xs"
-                                iconType="visBarVertical"
+                                iconType="chartBarVertical"
                                 color="text"
                                 onClick={toggleChartVisibility}
                                 disabled={chartsVisible === undefined}

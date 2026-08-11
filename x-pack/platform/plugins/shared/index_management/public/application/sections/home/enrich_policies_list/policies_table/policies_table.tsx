@@ -35,7 +35,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     <EuiButton
       key="createPolicy"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="createPolicyButton"
       {...reactRouterNavigate(history, '/enrich_policies/create')}
     >
@@ -187,6 +187,9 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       pagination={pagination}
       sorting={sorting}
       onTableChange={onTableChange}
+      tableCaption={i18n.translate('xpack.idxMgmt.enrichPolicies.table.caption', {
+        defaultMessage: 'Enrich policies',
+      })}
     />
   );
 };

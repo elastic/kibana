@@ -75,6 +75,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'revision'
   | 'snoozeSchedule'
   | 'alertDelay'
+  | 'lastEnabledAt'
 >;
 
 interface RunOpts<
@@ -187,6 +188,7 @@ export class RuleTypeRunner<
       revision,
       snoozeSchedule,
       alertDelay,
+      lastEnabledAt,
     } = rule;
 
     const { alertTypeState: ruleTypeState = {}, previousStartedAt } = state;
@@ -221,27 +223,57 @@ export class RuleTypeRunner<
               context.namespace ?? DEFAULT_NAMESPACE_STRING
             }] namespace`,
           };
+
+          let maintenanceWindowsPromise: Promise<{
+            ids: string[];
+            names: string[];
+          }> | null = null;
+
+          const getMaintenanceWindowsData = async () => {
+            if (!maintenanceWindowsPromise) {
+              maintenanceWindowsPromise = (async () => {
+                if (context.maintenanceWindowsService) {
+                  const { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds } =
+                    await context.maintenanceWindowsService.getMaintenanceWindows({
+                      eventLogger: context.alertingEventLogger,
+                      request: context.request,
+                      ruleTypeCategory: ruleType.category,
+                      spaceId: context.spaceId,
+                    });
+
+                  const ids = maintenanceWindowsWithoutScopedQueryIds ?? [];
+                  const maintenanceWindowNamesMap = new Map(
+                    (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+                  );
+                  const names = ids.map((id) => maintenanceWindowNamesMap.get(id) || id);
+
+                  return { ids, names };
+                }
+                return { ids: [], names: [] };
+              })();
+            }
+            return maintenanceWindowsPromise;
+          };
+
+          const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
+
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>
               ruleType.executor({
                 executionId,
+                cpsData,
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
                   actionsClient,
                   getDataViews: executorServices.getDataViews,
                   getMaintenanceWindowIds: async () => {
-                    if (context.maintenanceWindowsService) {
-                      const { maintenanceWindowsWithoutScopedQueryIds } =
-                        await context.maintenanceWindowsService.getMaintenanceWindows({
-                          eventLogger: context.alertingEventLogger,
-                          request: context.request,
-                          ruleTypeCategory: ruleType.category,
-                          spaceId: context.spaceId,
-                        });
-                      return maintenanceWindowsWithoutScopedQueryIds ?? [];
-                    }
-                    return [];
+                    const { ids } = await getMaintenanceWindowsData();
+                    return ids;
+                  },
+                  getMaintenanceWindowNames: async () => {
+                    const { names } = await getMaintenanceWindowsData();
+                    return names;
                   },
                   getSearchSourceClient: async () => {
                     if (!wrappedSearchSourceClient) {
@@ -294,6 +326,7 @@ export class RuleTypeRunner<
                   muteAll,
                   snoozeSchedule,
                   alertDelay,
+                  ...(lastEnabledAt ? { lastEnabledAt } : {}),
                 },
                 logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,

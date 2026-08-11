@@ -35,7 +35,7 @@ export function DashboardTile({
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
-  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
+  timeRange: NonNullable<DashboardLocatorParams['time_range']>;
 }) {
   const {
     services: {
@@ -55,13 +55,11 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
         <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
-          {/* Allowing both href and onClick to allow telemetry to be reported */}
-          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
             data-test-subj={`alertDetails_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
-              timeRange,
+              time_range: timeRange,
             })}
             target="_blank"
             onClick={() => {

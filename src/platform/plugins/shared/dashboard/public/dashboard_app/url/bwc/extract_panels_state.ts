@@ -39,13 +39,12 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
 
 export function extractPanelsState(state: { [key: string]: unknown }): {
   panels?: DashboardState['panels'];
-  savedObjectReferences?: DashboardState['references'];
+  savedObjectReferences?: Reference[];
 } {
-  const panels = Array.isArray(state.panels) ? state.panels : [];
-
-  if (panels.length === 0) {
+  if (!state.panels) {
     return {};
   }
+  const panels = Array.isArray(state.panels) ? state.panels : [];
 
   if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
@@ -57,6 +56,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     if (panel.panels) {
+      // this is a section, since it has its own panels
       const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
         extractPanelsState({ panels: panel.panels });
       savedObjectReferences.push(...(sectionPanelReferences ?? []));
@@ -81,16 +81,21 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       delete panel.gridData;
     }
 
-    // < 9.2 uid stored as panelIndex
+    // < 9.2 id stored as panelIndex
     if (panel?.panelIndex) {
-      panel.uid = panel.panelIndex;
-      delete panel.panelIndex;
-    }
+      /**
+       * <8.19 'id' (saved object id) stored as siblings to config;
+       * this is checked as part of the `panelIndex` check because...
+       * - <8.19 `id` refers to saved object id
+       * - >9.3  `id` refers to the unique panel index
+       */
+      if (panel.id && panel.config && typeof panel.config === 'object') {
+        panel.config.savedObjectId = panel.id;
+        delete panel.id;
+      }
 
-    // <8.19 'id' (saved object id) stored as siblings to config
-    if (panel.id && panel.config && typeof panel.config === 'object') {
-      panel.config.savedObjectId = panel.id;
-      delete panel.id;
+      panel.id = panel.panelIndex;
+      delete panel.panelIndex;
     }
 
     // <8.19 'title' stored as siblings to config
@@ -99,13 +104,19 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       delete panel.title;
     }
 
+    // < 9.4 `id` is stored as `uid`
+    if (panel.uid) {
+      panel.id = panel.uid;
+      delete panel.uid;
+    }
+
     // < 9.2 dashboard managed saved object refs for panels
     // Add saved object ref for panels that contain savedObjectId
     // TODO remove once all panels inject references in dashboard server api
-    const { config, uid, type } = panel;
-    if (uid && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
+    const { config, id, type } = panel;
+    if (id && type && config?.savedObjectId && typeof config?.savedObjectId === 'string') {
       savedObjectReferences.push(
-        ...prefixReferencesFromPanel(uid, [
+        ...prefixReferencesFromPanel(id, [
           {
             id: config.savedObjectId,
             name: SAVED_OBJECT_REF_NAME,
@@ -115,12 +126,12 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       );
     }
 
-    // <9.3 panel state included "i" in grid
+    // <9.4 panel state included "i" in grid
     if (panel.grid) {
       const { i, ...rest } = panel.grid;
       panel.grid = rest;
-      if (i && !panel.uid) {
-        panel.uid = i;
+      if (i && !panel.id) {
+        panel.id = i;
       }
     }
 

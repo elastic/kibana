@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { DefaultItemAction } from '@elastic/eui';
 import {
   EuiProvider,
@@ -129,6 +130,10 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
             direction: 'asc',
           },
         }}
+        tableCaption={i18n.translate('dataViewFieldEditorExample.fieldsTable.caption', {
+          defaultMessage: 'Fields in {dataViewTitle}',
+          values: { dataViewTitle: dataView.title },
+        })}
       />
     </>
   ) : (

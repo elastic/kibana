@@ -46,11 +46,7 @@ import {
 } from '@kbn/securitysolution-rules';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
-import type {
-  AgentClient,
-  AgentPolicyServiceInterface,
-  PackageService,
-} from '@kbn/fleet-plugin/server';
+import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
 
@@ -64,6 +60,7 @@ import {
   ruleExceptionListItemToTelemetryEvent,
   setClusterInfo,
   newTelemetryLogger,
+  withErrorMessage,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
 import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -113,6 +110,7 @@ import type {
   Processor,
   Totals,
 } from './ingest_pipelines_stats.types';
+import type { EndpointInternalFleetServicesInterface } from '../../endpoint/services/fleet';
 
 export interface ITelemetryReceiver {
   start(
@@ -290,8 +288,7 @@ export interface ITelemetryReceiver {
 
 export class TelemetryReceiver implements ITelemetryReceiver {
   private readonly logger: TelemetryLogger;
-  private agentClient?: AgentClient;
-  private agentPolicyService?: AgentPolicyServiceInterface;
+  private fleetServices?: EndpointInternalFleetServicesInterface;
   private _esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
   private soClient?: SavedObjectsClientContract;
@@ -325,8 +322,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   ) {
     this.getIndexForType = getIndexForType;
     this.alertsIndex = alertsIndex;
-    this.agentClient = endpointContextService?.getInternalFleetServices().agent;
-    this.agentPolicyService = endpointContextService?.getInternalFleetServices().agentPolicy;
+    this.fleetServices = endpointContextService?.getInternalFleetServices();
     this._esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
     this.packageService = packageService;
@@ -368,8 +364,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     return (
-      this.agentClient
-        ?.listAgents({
+      this.fleetServices
+        ?.fetchAgentList({
           perPage: this.maxRecords,
           showInactive: true,
           kuery: 'status:*', // include unenrolled agents
@@ -631,8 +627,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
-      } catch (e) {
-        this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      } catch (error) {
+        this.logger.warn('Error fetching alerts', withErrorMessage(error));
         fetchMore = false;
       }
 
@@ -662,7 +658,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       );
     }
 
-    return this.agentPolicyService?.get(this.soClient, id);
+    return this.fleetServices?.agentPolicy?.get(this.soClient, id);
   }
 
   public async fetchTrustedApplications() {
@@ -1017,10 +1013,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         yield alerts;
       }
-    } catch (e) {
+    } catch (error) {
       // to keep backward compatibility with the previous implementation, silent return
       // once we start using `paginate` this error should be managed downstream
-      this.logger.warn('Error fetching alerts', { error_message: e.message } as LogMeta);
+      this.logger.warn('Error fetching alerts', withErrorMessage(error));
       return;
     } finally {
       await this.closePointInTime(pitId);
@@ -1044,10 +1040,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient().closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.warn('Error trying to close point in time', {
-        pit: pitId,
-        error_message: error.message,
-      } as LogMeta);
+      this.logger.warn(
+        'Error trying to close point in time',
+        withErrorMessage(error, {
+          pit: pitId,
+        } as LogMeta)
+      );
     }
   }
 
@@ -1142,7 +1140,31 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this.processTreeFetcher.tree(request, true);
   }
 
+  async tierFilter() {
+    const excludeColdAndFrozenTiers = !!(await this.queryConfig?.excludeColdAndFrozenTiers());
+    if (excludeColdAndFrozenTiers) {
+      return [
+        {
+          bool: {
+            must_not: {
+              terms: {
+                _tier: ['data_frozen', 'data_cold'],
+              },
+            },
+          },
+        },
+      ];
+    }
+    return [];
+  }
+
   public async fetchTimelineEvents(nodeIds: string[]) {
+    const tierFilter = await this.tierFilter();
+
+    this.logger.debug('Fetching timeline events for node IDs', {
+      tierFilters: tierFilter,
+    } as LogMeta);
+
     const query: SearchRequest = {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
@@ -1172,6 +1194,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 'event.category': 'process',
               },
             },
+            ...tierFilter,
           ],
         },
       },
@@ -1287,8 +1310,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       })) as { license: ESLicense };
 
       return ret.license;
-    } catch (err) {
-      this.logger.warn('failed retrieving license', { error_message: err.message } as LogMeta);
+    } catch (error) {
+      this.logger.warn('failed retrieving license', withErrorMessage(error));
       return undefined;
     }
   }
@@ -1325,13 +1348,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     let queryOptions = {};
     let pageSize = -1;
     // kibana.yml configurations take precedence over CDN parameters
-    if (this.queryConfig !== undefined) {
+    if (this.queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: this.queryConfig.maxResponseSize,
         maxCompressedResponseSize: this.queryConfig.maxCompressedResponseSize,
       };
       pageSize = this.queryConfig.pageSize;
-    } else if (queryConfig !== undefined) {
+    } else if (queryConfig?.pageSize !== undefined) {
       queryOptions = {
         maxResponseSize: queryConfig.maxResponseSize,
         maxCompressedResponseSize: queryConfig.maxCompressedResponseSize,
@@ -1378,9 +1401,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         yield data;
       } while (esQuery.search_after !== undefined);
-    } catch (e) {
-      this.logger.warn('Error running paginated query', { error_message: e.message } as LogMeta);
-      throw e;
+    } catch (error) {
+      this.logger.warn('Error running paginated query', withErrorMessage(error));
+      throw error;
     } finally {
       await this.closePointInTime(pit.id);
     }
@@ -1439,7 +1462,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices', withErrorMessage(error));
         throw error;
       });
   }
@@ -1480,7 +1503,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching datastreams', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching datastreams', withErrorMessage(error));
         throw error;
       });
   }
@@ -1545,7 +1568,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IndexStats;
         }
       } catch (error) {
-        this.logger.warn('Error fetching indices stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching indices stats', withErrorMessage(error));
         throw error;
       }
     }
@@ -1583,7 +1606,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           yield entry;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm stats', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching ilm stats', withErrorMessage(error));
         throw error;
       }
     }
@@ -1632,7 +1655,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         })
       )
       .catch((error) => {
-        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        this.logger.warn('Error fetching index templates', withErrorMessage(error));
         throw error;
       });
   }
@@ -1688,9 +1711,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           } as IlmPolicy;
         }
       } catch (error) {
-        this.logger.warn('Error fetching ilm policies', {
-          error_message: error.message,
-        } as LogMeta);
+        this.logger.warn('Error fetching ilm policies', withErrorMessage(error));
         throw error;
       }
     }
@@ -1761,9 +1782,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         });
       })
       .catch((error) => {
-        this.logger.warn('Error fetching ingest pipelines stats', {
-          error_message: error,
-        } as LogMeta);
+        this.logger.warn('Error fetching ingest pipelines stats', withErrorMessage(error));
         throw error;
       });
   }

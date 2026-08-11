@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/// <reference path="./emotion.d.ts" />
+
 declare module '*.html' {
   const template: string;
   // eslint-disable-next-line import/no-default-export
@@ -54,6 +56,19 @@ declare module '*.mdx' {
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
+
+// Side-effect CSS/SCSS imports are routed through webpack/rspack loaders at
+// build time and have no JS exports. The empty `declare module` keeps TS 6's
+// `noUncheckedSideEffectImports` happy without falsely typing a default export.
+declare module '*.scss';
+declare module '*.css';
+declare module '*.sass';
+
+// `reflect-metadata/lite` ships types under its `exports` map; classic
+// (`moduleResolution: "node"`) resolution does not read `exports`. Declare it
+// as a side-effect-only module until A3 lands and we can switch to
+// `moduleResolution: "bundler"`.
+declare module 'reflect-metadata/lite';
 
 declare module '*?asUrl' {
   const content: string;

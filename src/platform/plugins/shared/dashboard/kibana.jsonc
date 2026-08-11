@@ -15,7 +15,6 @@
       "dataViewEditor",
       "embeddable",
       "fieldFormats",
-      "controls",
       "inspector",
       "navigation",
       "savedObjectsFinder",
@@ -25,7 +24,6 @@
       "screenshotMode",
       "uiActions",
       "urlForwarding",
-      "presentationUtil",
       "unifiedSearch"
     ],
     "optionalPlugins": [
@@ -40,13 +38,13 @@
       "noDataPage",
       "observabilityAIAssistant",
       "lens",
+      "security",
       "cps"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
-      "presentationPanel",
       "savedObjects"
     ]
   }

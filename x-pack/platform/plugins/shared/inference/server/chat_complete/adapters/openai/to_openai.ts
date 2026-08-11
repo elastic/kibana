@@ -19,20 +19,55 @@ import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-co
 import { MessageRole } from '@kbn/inference-common';
 import { OpenAiProviderType } from './types';
 
+/**
+ * Recursively processes a schema to ensure all array types have an `items` property.
+ * OpenAI requires `items` to be present for array types.
+ */
+function ensureArrayItems(schema: Record<string, unknown>): Record<string, unknown> {
+  if (typeof schema !== 'object' || schema === null) {
+    return schema;
+  }
+
+  const result = { ...schema };
+
+  if (result.type === 'array' && !('items' in result)) {
+    result.items = {};
+  }
+
+  if (result.items && typeof result.items === 'object') {
+    result.items = ensureArrayItems(result.items as Record<string, unknown>);
+  }
+
+  if (result.properties && typeof result.properties === 'object') {
+    const properties = result.properties as Record<string, unknown>;
+    result.properties = Object.fromEntries(
+      Object.entries(properties).map(([key, value]) => [
+        key,
+        ensureArrayItems(value as Record<string, unknown>),
+      ])
+    );
+  }
+
+  return result;
+}
+
 export function toolsToOpenAI(
   tools: ToolOptions['tools']
 ): OpenAI.ChatCompletionCreateParams['tools'] {
   return tools
     ? Object.entries(tools).map(([toolName, { description, schema }]) => {
+        const parameters = schema ?? {
+          type: 'object' as const,
+          properties: {},
+        };
         return {
           type: 'function',
           function: {
             name: toolName,
             description,
-            parameters: (schema ?? {
-              type: 'object' as const,
-              properties: {},
-            }) as unknown as Record<string, unknown>,
+            parameters: ensureArrayItems(
+              parameters as unknown as Record<string, unknown>
+            ) as unknown as Record<string, unknown>,
           },
         };
       })
@@ -94,63 +129,117 @@ export function messagesToOpenAI({
     ? { role: 'system', content: system }
     : undefined;
 
-  return [
-    ...(systemMessage ? [systemMessage] : []),
-    ...messages.map((message): ChatCompletionMessageParam => {
-      const role = message.role;
+  const converted = messages.map((message): ChatCompletionMessageParam => {
+    const role = message.role;
 
-      switch (role) {
-        case MessageRole.Assistant:
-          const assistantMessage: ChatCompletionAssistantMessageParam = {
-            role: 'assistant',
-            content: message.content ?? '',
-            tool_calls: message.toolCalls?.map((toolCall) => {
-              return {
-                function: {
-                  name: toolCall.function.name,
-                  arguments:
-                    'arguments' in toolCall.function
-                      ? JSON.stringify(toolCall.function.arguments)
-                      : '{}',
-                },
-                id: toolCall.toolCallId,
-                type: 'function',
-              };
-            }),
-          };
-          return assistantMessage;
+    switch (role) {
+      case MessageRole.Assistant:
+        const assistantMessage: ChatCompletionAssistantMessageParam = {
+          role: 'assistant',
+          content: message.content ?? '',
+          tool_calls: message.toolCalls?.map((toolCall) => {
+            return {
+              function: {
+                name: toolCall.function.name,
+                arguments:
+                  'arguments' in toolCall.function
+                    ? JSON.stringify(toolCall.function.arguments)
+                    : '{}',
+              },
+              id: toolCall.toolCallId,
+              type: 'function',
+            };
+          }),
+        };
+        return assistantMessage;
 
-        case MessageRole.User:
-          const userMessage: ChatCompletionUserMessageParam = {
-            role: 'user',
-            content:
-              typeof message.content === 'string'
-                ? message.content
-                : message.content.map((contentPart) => {
-                    if (contentPart.type === 'image') {
-                      return {
-                        type: 'image_url',
-                        image_url: {
-                          url: contentPart.source.data,
-                        },
-                      } satisfies ChatCompletionContentPartImage;
-                    }
+      case MessageRole.User:
+        const userMessage: ChatCompletionUserMessageParam = {
+          role: 'user',
+          content:
+            typeof message.content === 'string'
+              ? message.content
+              : message.content.map((contentPart) => {
+                  if (contentPart.type === 'image') {
                     return {
-                      text: contentPart.text,
-                      type: 'text',
-                    } satisfies ChatCompletionContentPartText;
-                  }),
-          };
-          return userMessage;
+                      type: 'image_url',
+                      image_url: {
+                        url: contentPart.source.data,
+                      },
+                    } satisfies ChatCompletionContentPartImage;
+                  }
+                  return {
+                    text: contentPart.text,
+                    type: 'text',
+                  } satisfies ChatCompletionContentPartText;
+                }),
+        };
+        return userMessage;
 
-        case MessageRole.Tool:
-          const toolMessage: ChatCompletionToolMessageParam = {
-            role: 'tool',
-            content: JSON.stringify(message.response),
-            tool_call_id: message.toolCallId,
-          };
-          return toolMessage;
+      case MessageRole.Tool:
+        const toolMessage: ChatCompletionToolMessageParam = {
+          role: 'tool',
+          content: JSON.stringify(message.response),
+          tool_call_id: message.toolCallId,
+        };
+        return toolMessage;
+    }
+  });
+
+  return [...(systemMessage ? [systemMessage] : []), ...mergeConsecutiveMessages(converted)];
+}
+
+/**
+ * Merges consecutive messages with the same role into a single message.
+ * - User messages: content is normalized to array format and parts are concatenated.
+ * - Assistant messages: content strings are joined with newline, tool_calls are combined.
+ * - Tool messages are never merged (each is tied to a specific tool_call_id).
+ * - System messages are not affected (prepended separately).
+ */
+function mergeConsecutiveMessages(
+  messages: ChatCompletionMessageParam[]
+): ChatCompletionMessageParam[] {
+  return messages.reduce<ChatCompletionMessageParam[]>((output, message) => {
+    const previous = output.length ? output[output.length - 1] : undefined;
+
+    if (
+      previous &&
+      previous.role === message.role &&
+      message.role !== 'tool' &&
+      message.role !== 'system'
+    ) {
+      if (message.role === 'user' && previous.role === 'user') {
+        const previousParts = normalizeUserContent(previous.content);
+        const currentParts = normalizeUserContent(message.content);
+        previous.content = [...previousParts, ...currentParts];
+      } else if (message.role === 'assistant' && previous.role === 'assistant') {
+        const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
+        const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
+        (previous as ChatCompletionAssistantMessageParam).content = [prevContent, curContent]
+          .filter(Boolean)
+          .join('\n');
+        const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
+        const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
+        if (curCalls?.length) {
+          (previous as ChatCompletionAssistantMessageParam).tool_calls = [
+            ...(prevCalls ?? []),
+            ...curCalls,
+          ];
+        }
       }
-    }),
-  ];
+    } else {
+      output.push(message);
+    }
+
+    return output;
+  }, []);
+}
+
+function normalizeUserContent(
+  content: ChatCompletionUserMessageParam['content']
+): Array<ChatCompletionContentPartText | ChatCompletionContentPartImage> {
+  if (typeof content === 'string') {
+    return [{ type: 'text', text: content }];
+  }
+  return content as Array<ChatCompletionContentPartText | ChatCompletionContentPartImage>;
 }

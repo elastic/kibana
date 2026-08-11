@@ -67,7 +67,7 @@ export function ReportDefinitionField({
           if (!values.includes(ALL_VALUES_SELECTED)) {
             const valueFilter = buildPhrasesFilter(fieldT, values, dataView)[0];
             if (valueFilter.query) {
-              filtersN.push(valueFilter.query);
+              filtersN.push(valueFilter.query as ESFilter);
             }
           }
         }

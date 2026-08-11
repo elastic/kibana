@@ -42,11 +42,11 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Machine Learning Detection Rules - Alert suppression',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
-    const jobId = 'v3_linux_anomalous_network_activity';
+    const jobId = 'v3_linux_anomalous_network_activity_ea';
     const suppressByFields = ['by_field_name', 'by_field_value'];
 
     beforeEach(() => {

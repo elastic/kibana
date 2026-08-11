@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ConversationWithOwner } from '../../api';
 import { DeleteConversationModal } from '../../conversations/delete_conversation_modal';
 import { DELETE_CONVERSATION } from '../../conversations/conversation_sidepanel/translations';
@@ -51,8 +52,6 @@ interface Params {
   selectedConversation?: Conversation;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation | undefined>>;
 }
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const ConditionalWrap = ({
   condition,
@@ -368,9 +367,10 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
 
     return (
       <>
-        <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
+        <EuiPopover
+          aria-label={i18n.CONVO_ASSISTANT_MENU}
+          button={
+            <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={i18n.CONVO_ASSISTANT_MENU}
                 isDisabled={isDisabled}
@@ -378,20 +378,20 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
                 onClick={onButtonClick}
                 data-test-subj="conversation-settings-menu"
               />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
-          >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
-        </EuiToolTip>
+            </EuiToolTip>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftUp"
+        >
+          <EuiContextMenuPanel
+            items={items}
+            css={css`
+              width: 280px;
+            `}
+          />
+        </EuiPopover>
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             aria-labelledby={confirmModalTitleId}

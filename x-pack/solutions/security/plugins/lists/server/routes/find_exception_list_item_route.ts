@@ -7,11 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   FindExceptionListItemsRequestQuery,
   FindExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 
@@ -24,7 +25,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
       path: `${EXCEPTION_LIST_ITEM_URL}/_find`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [EXCEPTIONS_API_READ],
         },
       },
     })
@@ -42,7 +43,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
         try {
           const exceptionLists = await getExceptionListClient(context);
           const {
-            filter,
+            filter: rawFilter,
             list_id: listId,
             namespace_type: namespaceType,
             page,
@@ -51,6 +52,8 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
             sort_field: sortField,
             sort_order: sortOrder,
           } = request.query;
+
+          const filter = rawFilter.filter(Boolean);
 
           if (listId.length !== namespaceType.length) {
             return siemResponse.error({

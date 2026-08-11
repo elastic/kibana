@@ -8,10 +8,10 @@
  */
 
 import { EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 interface FormattedValueProps {
-  value: string;
+  value: ReactNode;
   truncate?: boolean;
 }
 
@@ -21,8 +21,8 @@ export function FormattedValue({ value, truncate }: FormattedValueProps) {
       className={truncate ? 'eui-textTruncate' : 'eui-textBreakWord'}
       data-test-subj="ContentFrameworkTableFormattedValue"
       size="xs"
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
+    >
+      {value}
+    </EuiText>
   );
 }

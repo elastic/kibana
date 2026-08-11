@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EsQueryConfig } from '@kbn/es-query';
+import type { DataViewBase, EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
 import type {
@@ -31,6 +31,7 @@ export const checkMissingGroups = async (
   timeFieldName: string,
   groupBy: string | undefined | string[],
   searchConfiguration: SearchConfigurationType,
+  dataView: DataViewBase | undefined,
   logger: Logger,
   timeframe: { start: number; end: number },
   esQueryConfig: EsQueryConfig,
@@ -57,6 +58,7 @@ export const checkMissingGroups = async (
       currentTimeFrame,
       timeFieldName,
       searchConfiguration,
+      dataView,
       esQueryConfig,
       groupByQueries
     );

@@ -8,21 +8,18 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
-  ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_STATUS_UNTRACKED,
-  TIMESTAMP,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_SNOOZED,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
-import { flatMap, get, isEmpty, keys } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import type {
   MsearchRequestItem,
   MsearchResponseItem,
@@ -54,8 +51,7 @@ import type {
   DetermineDelayedAlertsOpts,
   AlertsToUpdateWithMaintenanceWindows,
   AlertsToUpdateWithLastScheduledActions,
-} from './types';
-import type {
+  TrackedAADAlerts,
   IAlertsClient,
   InitializeExecutionOpts,
   ReportedAlert,
@@ -65,20 +61,15 @@ import type {
   GetMaintenanceWindowScopedQueryAlertsParams,
 } from './types';
 import {
-  buildNewAlert,
-  buildOngoingAlert,
-  buildUpdatedRecoveredAlert,
-  buildRecoveredAlert,
   formatRule,
   getHitsWithCount,
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
-  isAlertImproving,
-  shouldCreateAlertsInAllSpaces,
+  AlertBuilder,
 } from './lib';
-import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { getTrackedAlerts, createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
@@ -114,15 +105,7 @@ export class AlertsClient<
   // Query for alerts from the previous execution in order to identify the
   // correct index to use if and when we need to make updates to existing active or
   // recovered alerts
-  private trackedAlerts: {
-    indices: Record<string, string>;
-    active: Record<string, Alert & AlertData>;
-    recovered: Record<string, Alert & AlertData>;
-    seqNo: Record<string, number | undefined>;
-    primaryTerm: Record<string, number | undefined>;
-    get: (uuid: string) => Alert & AlertData;
-    getById: (id: string) => (Alert & AlertData) | undefined;
-  };
+  private trackedAlerts: TrackedAADAlerts<AlertData>;
 
   private startedAtString: string | null = null;
   private runTimestampString: string | undefined;
@@ -133,6 +116,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private activeAlertsDataCache: Map<string, Record<string, unknown>> = new Map();
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -157,22 +141,7 @@ export class AlertsClient<
         ? this.options.namespace
         : DEFAULT_NAMESPACE_STRING,
     });
-    this.trackedAlerts = {
-      indices: {},
-      active: {},
-      recovered: {},
-      seqNo: {},
-      primaryTerm: {},
-      get(uuid: string) {
-        return this.active[uuid] ?? this.recovered[uuid];
-      },
-      getById(id: string) {
-        return (
-          Object.values(this.active).find((alert) => get(alert, ALERT_INSTANCE_ID) === id) ??
-          Object.values(this.recovered).find((alert) => get(alert, ALERT_INSTANCE_ID) === id)
-        );
-      },
-    };
+    this.trackedAlerts = createEmptyTrackedAlerts<AlertData>();
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
     this.ruleType = options.ruleType;
     this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
@@ -193,64 +162,18 @@ export class AlertsClient<
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
     if (this.ruleType.autoRecoverAlerts) {
-      const maxAlertLimit = this.legacyAlertsClient.getMaxAlertLimit();
-      const getTrackedAlerts = async () => {
-        // We can use inner_hits to get the alerts for the most recent executions
-        // but this may return too many alerts, therefore we make two queries:
-        // 1. Get the most recent execution UUIDs
-        // 2. Get the alerts for those execution UUIDs
-        // We can optimize this in the future once https://github.com/elastic/kibana/issues/235846 is
-        // implemented to allow filtering the ongoing recovered alerts. Then we can just query for
-        // the alerts of the latest execution by setting the size to 1 and adding inner_hits.
-        const executions = await this.search({
-          size: opts.flappingSettings.lookBackWindow,
-          query: {
-            bool: {
-              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-            },
-          },
-          collapse: {
-            field: ALERT_RULE_EXECUTION_UUID,
-          },
-          _source: false,
-          sort: [{ [TIMESTAMP]: { order: 'desc' } }],
-        });
-
-        const executionUuids = (executions.hits || [])
-          .map((hit) => get(hit.fields, ALERT_RULE_EXECUTION_UUID))
-          .flat();
-
-        const alerts = await this.search({
-          size: (maxAlertLimit || DEFAULT_MAX_ALERTS) * 2,
-          seq_no_primary_term: true,
-          query: {
-            bool: {
-              must: [{ term: { [ALERT_RULE_UUID]: this.options.rule.id } }],
-              must_not: [{ term: { [ALERT_STATUS]: ALERT_STATUS_UNTRACKED } }],
-              filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: executionUuids } }],
-            },
-          },
-        });
-        return alerts.hits;
-      };
-
       try {
-        const results = await getTrackedAlerts();
-
-        for (const hit of results) {
-          const alertHit = hit._source as Alert & AlertData;
-          const alertUuid = get(alertHit, ALERT_UUID);
-
-          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
-            this.trackedAlerts.active[alertUuid] = alertHit;
-          }
-          if (get(alertHit, ALERT_STATUS) === ALERT_STATUS_RECOVERED) {
-            this.trackedAlerts.recovered[alertUuid] = alertHit;
-          }
-          this.trackedAlerts.indices[alertUuid] = hit._index;
-          this.trackedAlerts.seqNo[alertUuid] = hit._seq_no;
-          this.trackedAlerts.primaryTerm[alertUuid] = hit._primary_term;
-        }
+        this.trackedAlerts = await getTrackedAlerts<AlertData>({
+          ruleId: this.options.rule.id,
+          lookBackWindow: opts.flappingSettings.lookBackWindow,
+          maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
+          activeAlertsFromState: opts.activeAlertsFromState,
+          recoveredAlertsFromState: opts.recoveredAlertsFromState,
+          search: (queryBody) => this.search(queryBody),
+          logger: this.options.logger,
+          ruleInfoMessage: this.ruleInfoMessage,
+          logTags: this.logTags,
+        });
       } catch (err) {
         this.options.logger.error(
           `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
@@ -353,12 +276,8 @@ export class AlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    const alert = this.trackedAlerts.getById(id);
-    const uuid = alert?.[ALERT_UUID];
-    if (uuid) {
-      return !!this.trackedAlerts.active[uuid];
-    }
-    return false;
+    const status = get(this.trackedAlerts.getById(id), ALERT_STATUS);
+    return status === ALERT_STATUS_ACTIVE || status === ALERT_STATUS_DELAYED;
   }
 
   public hasReachedAlertLimit(): boolean {
@@ -397,6 +316,17 @@ export class AlertsClient<
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
+  }
+
+  /**
+   * Returns the alert document for a given alert instance ID as it was
+   * constructed and indexed during `persistAlerts()` for this execution.
+   * Returns undefined when the alert was not indexed this execution.
+   */
+  public getBuiltActiveAlertDataByInstanceId(
+    instanceId: string
+  ): Record<string, unknown> | undefined {
+    return this.activeAlertsDataCache.get(instanceId);
   }
 
   public factory() {
@@ -472,152 +402,42 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const createAlertsInAllSpaces = shouldCreateAlertsInAllSpaces({
-      ruleTypeId: this.ruleType.id,
-      ruleTypeAlertDef: this.ruleType.alerts,
+    const alertBuilder = new AlertBuilder<
+      LegacyState,
+      LegacyContext,
+      ActionGroupIds,
+      RecoveryActionGroupId,
+      AlertData
+    >({
+      rule: this.rule,
+      reportedAlerts: this.reportedAlerts,
+      trackedAlerts: this.trackedAlerts,
+      legacyAlertsClient: this.legacyAlertsClient,
+      currentTime,
       logger: this.options.logger,
+      ruleType: this.ruleType,
+      alertRuleData: this.options.rule,
+      runTimestampString: this.runTimestampString,
+      kibanaVersion: this.options.kibanaVersion,
+      indexTemplateAndPattern: this.indexTemplateAndPattern,
+      ruleInfoMessage: this.ruleInfoMessage,
+      logTags: this.logTags,
+      isUsingDataStreams: this.isUsingDataStreams(),
     });
-    const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
-    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_ACTIVE);
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts(ALERT_STATUS_RECOVERED);
+    const alertsToIndex = alertBuilder.buildAlerts();
 
-    // TODO - Lifecycle alerts set some other fields based on alert status
-    // Example: workflow status - default to 'open' if not set
-    // event action: new alert = 'new', active alert: 'active', otherwise 'close'
-
-    const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawActiveAlerts)) {
-      // See if there's an existing active alert document
-      if (activeAlerts[id]) {
-        const trackedAlert = this.trackedAlerts.get(activeAlerts[id].getUuid());
-        if (!!trackedAlert && get(trackedAlert, ALERT_STATUS) === ALERT_STATUS_ACTIVE) {
-          const isImproving = isAlertImproving<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >(trackedAlert, activeAlerts[id], this.ruleType.actionGroups);
-          activeAlertsToIndex.push(
-            buildOngoingAlert<
-              AlertData,
-              LegacyState,
-              LegacyContext,
-              ActionGroupIds,
-              RecoveryActionGroupId
-            >({
-              alert: trackedAlert,
-              legacyAlert: activeAlerts[id],
-              rule: this.rule,
-              isImproving,
-              runTimestamp: this.runTimestampString,
-              timestamp: currentTime,
-              payload: this.reportedAlerts[id],
-              kibanaVersion: this.options.kibanaVersion,
-              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-            })
-          );
-        } else {
-          // skip writing the alert document if the number of consecutive
-          // active alerts is less than the rule alertDelay threshold
-          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
-            continue;
-          }
-          activeAlertsToIndex.push(
-            buildNewAlert<
-              AlertData,
-              LegacyState,
-              LegacyContext,
-              ActionGroupIds,
-              RecoveryActionGroupId
-            >({
-              legacyAlert: activeAlerts[id],
-              rule: this.rule,
-              runTimestamp: this.runTimestampString,
-              timestamp: currentTime,
-              payload: this.reportedAlerts[id],
-              kibanaVersion: this.options.kibanaVersion,
-              dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-            })
-          );
-        }
-      } else {
-        this.options.logger.error(
-          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts ${this.ruleInfoMessage}.`,
-          this.logTags
-        );
+    this.activeAlertsDataCache = new Map();
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
+      const status = get(alert, ALERT_STATUS) as string | undefined;
+      if (instanceId && status === ALERT_STATUS_ACTIVE) {
+        this.activeAlertsDataCache.set(instanceId, alert as Record<string, unknown>);
       }
     }
 
-    const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawRecoveredAlerts)) {
-      const trackedAlert = this.trackedAlerts.getById(id);
-      // See if there's an existing alert document
-      // If there is not, log an error because there should be
-      if (trackedAlert) {
-        recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<
-                AlertData,
-                LegacyState,
-                LegacyContext,
-                ActionGroupIds,
-                RecoveryActionGroupId
-              >({
-                alert: trackedAlert,
-                legacyAlert: recoveredAlerts[id],
-                rule: this.rule,
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                payload: this.reportedAlerts[id],
-                recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
-                kibanaVersion: this.options.kibanaVersion,
-                dangerouslyCreateAlertsInAllSpaces: createAlertsInAllSpaces,
-              })
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: trackedAlert,
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                rule: this.rule,
-              })
-        );
-      }
-    }
-
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
-      (alert: Alert & AlertData) => {
-        const alertUuid = get(alert, ALERT_UUID);
-        const alertIndex = this.trackedAlerts.indices[alertUuid];
-        if (!alertIndex) {
-          return true;
-        } else if (!isValidAlertIndexName(alertIndex)) {
-          this.options.logger.warn(
-            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported ${this.ruleInfoMessage}.`,
-            this.logTags
-          );
-          return false;
-        }
-        return true;
-      }
-    );
     if (alertsToIndex.length > 0) {
-      const bulkBody = flatMap(
-        alertsToIndex.map((alert: Alert & AlertData) => {
-          const alertUuid = get(alert, ALERT_UUID);
-          return [
-            getBulkMeta(
-              alertUuid,
-              this.trackedAlerts.indices[alertUuid],
-              this.trackedAlerts.seqNo[alertUuid],
-              this.trackedAlerts.primaryTerm[alertUuid],
-              this.isUsingDataStreams()
-            ),
-            alert,
-          ];
-        })
-      );
+      const bulkBody = alertBuilder.getBulkBody(alertsToIndex);
 
       try {
         const response = await esClient.bulk({
@@ -656,32 +476,58 @@ export class AlertsClient<
         throw err;
       }
     }
+  }
 
-    function getBulkMeta(
-      uuid: string,
-      index: string | undefined,
-      seqNo: number | undefined,
-      primaryTerm: number | undefined,
-      isUsingDataStreams: boolean
-    ) {
-      if (index && seqNo != null && primaryTerm != null) {
-        return {
-          index: {
-            _id: uuid,
-            _index: index,
-            if_seq_no: seqNo,
-            if_primary_term: primaryTerm,
-            require_alias: false,
-          },
-        };
+  /**
+   * After per-alert snooze condition evaluation, some instances may have their
+   * snooze lifted mid-execution. Their alert documents were already persisted
+   * with `kibana.alert.snoozed: true` (because evaluation happens after persist),
+   * so we need a follow-up update to correct the field for those documents.
+   */
+  public async clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void> {
+    if (!this.ruleType.alerts?.shouldWrite || conditionExpiredInstanceIds.length === 0) {
+      return;
+    }
+
+    const uuidsToUpdate: string[] = [];
+    for (const instanceId of conditionExpiredInstanceIds) {
+      const alertData = this.activeAlertsDataCache.get(instanceId);
+      if (alertData) {
+        const uuid = get(alertData, ALERT_UUID) as string | undefined;
+        if (uuid) {
+          uuidsToUpdate.push(uuid);
+          // Keep the in-memory cache consistent with what will be in ES
+          alertData[ALERT_SNOOZED] = false;
+        }
       }
+    }
 
-      return {
-        create: {
-          _id: uuid,
-          ...(isUsingDataStreams ? {} : { require_alias: true }),
-        },
-      };
+    if (uuidsToUpdate.length === 0) {
+      return;
+    }
+
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: { terms: { _id: uuidsToUpdate } },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            refresh: true,
+            script: {
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+              lang: 'painless',
+            },
+          }),
+        { logger: this.options.logger }
+      );
+    } catch (err) {
+      // Swallow the error
+      this.options.logger.error(
+        `Error clearing snoozed status for condition-expired alerts ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
     }
   }
 
@@ -828,6 +674,11 @@ export class AlertsClient<
         maintenanceWindows: maintenanceWindows ?? [],
         withScopedQuery: false,
       });
+
+      // Create a map of maintenance window IDs to names
+      const maintenanceWindowNamesMap = new Map(
+        (maintenanceWindows ?? []).map((mw) => [mw.id, mw.title])
+      );
       if (maintenanceWindowsWithScopedQuery.length === 0) {
         return {};
       }
@@ -863,8 +714,15 @@ export class AlertsClient<
             scopedQueryMaintenanceWindowId,
           ];
 
-          // Update in memory alert with new maintenance window IDs
-          newAlert.setMaintenanceWindowIds([...new Set(newMaintenanceWindowIds)]);
+          // Get corresponding names for the maintenance window IDs
+          const uniqueMaintenanceWindowIds = [...new Set(newMaintenanceWindowIds)];
+          const maintenanceWindowNames = uniqueMaintenanceWindowIds.map(
+            (id) => maintenanceWindowNamesMap.get(id) || id
+          );
+
+          // Update in memory alert with new maintenance window IDs and names
+          newAlert.setMaintenanceWindowIds(uniqueMaintenanceWindowIds);
+          newAlert.setMaintenanceWindowNames(maintenanceWindowNames);
 
           alertsAffectedByScopedQuery.push(alertId);
           appliedMaintenanceWindowIds.push(...newMaintenanceWindowIds);

@@ -15,6 +15,7 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
@@ -33,6 +34,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
@@ -46,6 +48,8 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   EVENT_ACTION,
@@ -57,9 +61,17 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_MUTED,
+  ALERT_SNOOZED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
+
+// ECS defines data_stream.* as constant_keyword, but alerts need them as regular keyword
+// since constant_keyword is excluded from ecsFieldMap (causes composite mapping conflicts).
+const DATA_STREAM_DATASET = 'data_stream.dataset' as const;
+const DATA_STREAM_NAMESPACE = 'data_stream.namespace' as const;
+const DATA_STREAM_TYPE = 'data_stream.type' as const;
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
@@ -93,6 +105,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_MAINTENANCE_WINDOW_IDS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_MAINTENANCE_WINDOW_NAMES]: {
     type: 'keyword',
     array: true,
     required: false,
@@ -200,6 +217,11 @@ export const alertFieldMap = {
     array: false,
     required: true,
   },
+  [ALERT_SEVERITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [ALERT_SEVERITY_IMPROVING]: {
     type: 'boolean',
     array: false,
@@ -277,6 +299,7 @@ export const alertFieldMap = {
     type: 'unmapped',
     required: false,
   },
+  // ignore_above values must match ECS definitions to prevent composite mapping conflicts
   [EVENT_ACTION]: {
     type: 'keyword',
     array: false,
@@ -289,21 +312,49 @@ export const alertFieldMap = {
     required: false,
     ignore_above: 1024,
   },
+  // 32766 is Lucene's max term byte length - prevents "immense term" indexing errors
   [EVENT_ORIGINAL]: {
     type: 'keyword',
     array: false,
     required: false,
-    ignore_above: 1024,
+    ignore_above: 32766,
+  },
+  [DATA_STREAM_TYPE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [DATA_STREAM_DATASET]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [DATA_STREAM_NAMESPACE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [SPACE_IDS]: {
     type: 'keyword',
     array: true,
     required: true,
   },
+  [CPS_SCOPE_EXPRESSION]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [CPS_SCOPE_LINKED_PROJECTS]: {
+    type: 'flattened',
+    array: true,
+    required: false,
+  },
+  // ignore_above: 1024 matches ECS definition to prevent composite mapping conflicts
   [TAGS]: {
     type: 'keyword',
     array: true,
     required: false,
+    ignore_above: 1024,
   },
   [TIMESTAMP]: {
     type: 'date',
@@ -317,6 +368,16 @@ export const alertFieldMap = {
   },
   [ALERT_INDEX_PATTERN]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_MUTED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_SNOOZED]: {
+    type: 'boolean',
     array: false,
     required: false,
   },

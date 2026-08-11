@@ -27,7 +27,7 @@ import type { Immutable } from '@kbn/security-solution-plugin/common/endpoint/ty
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '@kbn/fleet-plugin/public/services/pkg_key_from_package_info';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 const FLEET_API_ROOT = '/api/fleet';
@@ -156,6 +156,10 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     /**
      * Creates a Fleet Agent policy and adds to it the Endpoint Package Policy that
      * stores the Policy configuration data
+     *
+     * Creating Package policy results in installing prebuilt rules under the hood.
+     * Hence it is useful to call `installMockPrebuiltRulesPackage()` beforehand,
+     * if it's not already called in the test config, like in `config.base.edr_workflows.ts`.
      */
     async createPolicy({
       agentPolicyOverrides = {},

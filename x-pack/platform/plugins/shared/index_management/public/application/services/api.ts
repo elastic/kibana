@@ -7,7 +7,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ReindexService } from '@kbn/reindex-service-plugin/public';
@@ -40,17 +40,26 @@ import type {
   TemplateDeserialized,
   TemplateListItem,
   DataStream,
+  EsDataRetention,
   Index,
   IndexSettingsResponse,
+  MappingsResponse,
 } from '../../../common';
+import type { SnapshotRepositoriesInfo } from '../../../common/types/snapshot_repositories';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
+import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
+import { indexDataEnricher } from '../../services';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
+}
+
+interface SyntheticSourceStatus {
+  syntheticSourceFallbackToStoredSource: boolean;
 }
 
 // Temporary hack to provide the uiMetricService and reindexService instance to this file.
@@ -65,6 +74,20 @@ export const setReindexService = (_reindexService: ReindexService) => {
   reindexService = _reindexService;
 };
 // End hack
+
+export function useLoadSnapshotRepositories() {
+  return useRequest<SnapshotRepositoriesInfo>({
+    path: `${API_BASE_PATH}/snapshot_repositories`,
+    method: 'get',
+  });
+}
+
+export function loadSnapshotRepositories() {
+  return sendRequest<SnapshotRepositoriesInfo>({
+    path: `${API_BASE_PATH}/snapshot_repositories`,
+    method: 'get',
+  });
+}
 
 export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
@@ -117,12 +140,50 @@ export async function updateDataRetention(
   });
 }
 
+export async function updateDataLifecycle(
+  dataStreams: string[],
+  data: {
+    enabled?: boolean;
+    dataRetention?: string;
+    frozenAfter?: string;
+  }
+) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/data_lifecycle`,
+    method: 'put',
+    body: {
+      dataStreams,
+      enabled: data.enabled,
+      dataRetention: data.dataRetention,
+      frozenAfter: data.frozenAfter,
+    },
+  });
+}
+
+export async function updateDataStreamSettings(
+  dataStreams: string[],
+  settings: {
+    'index.lifecycle.name'?: string | null;
+    'index.lifecycle.prefer_ilm'?: boolean | null;
+  }
+) {
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/settings`,
+    method: 'put',
+    body: {
+      dataStreams,
+      settings,
+    },
+  });
+}
+
 export async function updateDSFailureStore(
   dataStreams: string[],
   data: {
     dsFailureStore: boolean;
-    customRetentionPeriod?: string;
+    customRetentionPeriod?: EsDataRetention;
     retentionDisabled?: boolean;
+    inheritFailureStore?: boolean;
   }
 ) {
   const body = {
@@ -130,6 +191,7 @@ export async function updateDSFailureStore(
     dataStreams,
     customRetentionPeriod: data.customRetentionPeriod,
     retentionDisabled: data.retentionDisabled,
+    inheritFailureStore: data.inheritFailureStore,
   };
 
   return sendRequest({
@@ -139,9 +201,93 @@ export async function updateDSFailureStore(
   });
 }
 
-export async function loadIndices() {
-  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return response.data ? response.data : response;
+export async function loadIndices(
+  onIndicesLoaded: (indices: Index[]) => void,
+  onEnrichmentError: (source: string) => void,
+  abortSignal: AbortSignal
+) {
+  const indicesPromise = httpService.httpClient.get<Record<string, Index>>(
+    `${API_BASE_PATH}/indices_get`,
+    {
+      signal: abortSignal,
+    }
+  );
+
+  // Run all requests in parallel
+  const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient, abortSignal);
+
+  // we'll wait for the main request to complete first so the index list has stability
+  const indices = await indicesPromise.catch((error) => {
+    if (error.name === 'AbortError') {
+      // return undefined and exit early if the request was aborted
+      return;
+    }
+    throw error;
+  });
+
+  if (!indices) {
+    return;
+  }
+
+  // Pre-compute an alias -> index names lookup for enrichers that return data keyed by alias.
+  const aliasToIndexNames = new Map<string, string[]>();
+  Object.entries(indices).forEach(([indexName, index]) => {
+    const aliases = index.aliases;
+    const aliasList = Array.isArray(aliases)
+      ? aliases
+      : typeof aliases === 'string' && aliases !== 'none'
+      ? [aliases]
+      : [];
+
+    aliasList.forEach((alias) => {
+      if (!alias) return;
+      const existing = aliasToIndexNames.get(alias);
+      if (existing) {
+        existing.push(indexName);
+      } else {
+        aliasToIndexNames.set(alias, [indexName]);
+      }
+    });
+  });
+
+  onIndicesLoaded(Object.values(indices));
+
+  // iterate over all the requests for additional info
+  enrichedPromises.forEach((enrichedPromise) => {
+    enrichedPromise.then((enriched) => {
+      // iterate over the array of additional data and merge it into the original index data
+      if (enriched.indices) {
+        enriched.indices.forEach((enrichedIndex) => {
+          const directMatch = indices[enrichedIndex.name];
+          if (directMatch) {
+            Object.assign(directMatch, enrichedIndex);
+            return;
+          }
+
+          if (enriched.applyToAliases) {
+            const targets = aliasToIndexNames.get(enrichedIndex.name);
+            if (targets && targets.length) {
+              // Don't overwrite the concrete index name with the alias name.
+
+              const { name, ...rest } = enrichedIndex;
+              targets.forEach((targetIndexName) => {
+                const target = indices[targetIndexName];
+                if (target) {
+                  Object.assign(target, rest);
+                }
+              });
+            }
+          }
+        });
+        onIndicesLoaded(Object.values(indices));
+      }
+
+      // If an enricher fails, keep the index list stable but surface the issue to the UI.
+      if (enriched.error) {
+        onEnrichmentError(enriched.source);
+      }
+    });
+  });
 }
 
 export async function reloadIndices(
@@ -247,6 +393,12 @@ export async function loadIndexSettings(indexName: string) {
   return response;
 }
 
+export async function loadSyntheticSourceStatus(): Promise<SyntheticSourceStatus> {
+  return await httpService.httpClient.get<SyntheticSourceStatus>(
+    `${API_BASE_PATH}/synthetic_source`
+  );
+}
+
 export async function updateIndexSettings(indexName: string, body: object) {
   const response = await sendRequest({
     path: `${API_BASE_PATH}/settings/${encodeURIComponent(indexName)}`,
@@ -304,6 +456,18 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
     query: {
       legacy: isLegacy,
     },
+  });
+}
+
+export interface FailureStoreClusterSettings {
+  enabled?: string[] | string;
+  defaultRetentionPeriod?: string;
+}
+
+export function useLoadFailureStoreSettings() {
+  return useRequest<FailureStoreClusterSettings>({
+    path: `${API_BASE_PATH}/data_streams/failure_store_settings`,
+    method: 'get',
   });
 }
 
@@ -442,8 +606,16 @@ export function loadIndex(indexName: string) {
   });
 }
 
+export async function loadIndexDocCount(indexName: string) {
+  return sendRequest<Record<string, number>>({
+    path: `${INTERNAL_API_BASE_PATH}/index_doc_count`,
+    method: 'post',
+    body: { indexNames: [indexName] },
+  });
+}
+
 export function useLoadIndexMappings(indexName: string) {
-  return useRequest<MappingTypeMapping>({
+  return useRequest<MappingsResponse>({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,
     method: 'get',
   });
@@ -463,7 +635,7 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string, indexMode: string) {
+export function createIndex(indexName: string, indexMode?: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',
@@ -471,6 +643,13 @@ export function createIndex(indexName: string, indexMode: string) {
       indexName,
       indexMode,
     }),
+  });
+}
+
+export function useLoadIndexDocumentsSample(indexName: string) {
+  return useRequest<{ results: SearchHit[] }>({
+    path: `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
+    method: 'get',
   });
 }
 
@@ -512,4 +691,11 @@ export const cancelReindex = (sourceIndexName: string) => {
 
 export const getReindexStatus = (sourceIndexName: string) => {
   return reindexService.getReindexStatus(sourceIndexName);
+};
+
+export const useUserPrivileges = (indexName: string) => {
+  return useRequest<UserStartPrivilegesResponse>({
+    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
 };

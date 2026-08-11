@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
-import type { SemVer } from 'semver';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 
 import type { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import type { ESConfigForProxy } from '../types';
-import type { ProxyConfigCollection } from '../lib';
 import type { handleEsError } from '../shared_imports';
 
 import { registerEsConfigRoute } from './api/console/es_config';
@@ -23,13 +21,12 @@ import { registerConvertRequestRoute } from './api/console/convert_request_to_la
 
 export interface ProxyDependencies {
   readLegacyESConfig: () => Promise<ESConfigForProxy>;
-  pathFilters?: RegExp[]; // Only present in 7.x
-  proxyConfigCollection?: ProxyConfigCollection; // Only present in 7.x
 }
 
 export interface RouteDependencies {
   router: IRouter;
   log: Logger;
+  getStartServices: CoreSetup['getStartServices'];
   proxy: ProxyDependencies;
   services: {
     esLegacyConfigService: EsLegacyConfigService;
@@ -38,7 +35,6 @@ export interface RouteDependencies {
   lib: {
     handleEsError: typeof handleEsError;
   };
-  kibanaVersion: SemVer;
 }
 
 export const registerRoutes = (dependencies: RouteDependencies) => {

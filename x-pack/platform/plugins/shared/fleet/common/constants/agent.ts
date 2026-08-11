@@ -10,6 +10,7 @@ export const AGENTS_PREFIX = 'fleet-agents';
 export const AGENT_TYPE_PERMANENT = 'PERMANENT';
 export const AGENT_TYPE_EPHEMERAL = 'EPHEMERAL';
 export const AGENT_TYPE_TEMPORARY = 'TEMPORARY';
+export const AGENT_TYPE_OPAMP = 'OPAMP';
 
 export const AGENT_POLLING_REQUEST_TIMEOUT_MS = 300000; // 5 minutes
 export const AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS = 20000; // 20s
@@ -60,6 +61,18 @@ export const ActiveAgentStatuses = [
   'orphaned',
 ]; // excluded: unenrolling, unenrolled, inactive, uninstalled
 
+// OTel (OpAMP) collectors in these states are not actively reporting telemetry.
+// Used in metric queries to prevent a newly enrolled collector on the same host from
+// leaking its live metrics to a stale/offline agent entry (same service.instance.id).
+// Must stay in sync across the server (agent_metrics.ts) and client (CollectorContext).
+// See https://github.com/elastic/kibana/issues/274843
+export const OPAMP_NON_REPORTING_STATUSES: ReadonlyArray<(typeof AgentStatuses)[number]> = [
+  'offline',
+  'inactive',
+  'unenrolled',
+  'uninstalled',
+];
+
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;
@@ -67,3 +80,10 @@ export const PRIVILEGED_AGENT_KUERY = `not ${AGENTS_PREFIX}.local_metadata.elast
 
 // Kuery to find fips agents
 export const FIPS_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.fips: true`;
+
+export const AGENT_STATUS_CHANGE_DATA_STREAM = {
+  type: 'logs',
+  dataset: 'elastic_agent.status_change',
+  namespace: 'default',
+};
+export const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;

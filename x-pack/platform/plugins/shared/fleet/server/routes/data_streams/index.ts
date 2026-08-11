@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import type { FleetAuthzRouter } from '../../services/security';
@@ -32,7 +34,8 @@ export const ListDataStreamsResponseSchema = schema.object({
         schema.object({
           id: schema.string(),
           title: schema.string(),
-        })
+        }),
+        { maxSize: 10000 }
       ),
       serviceDetails: schema.nullable(
         schema.object({
@@ -40,7 +43,8 @@ export const ListDataStreamsResponseSchema = schema.object({
           serviceName: schema.string(),
         })
       ),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -59,6 +63,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get data streams`,
+      description:
+        'List all Fleet-managed data streams with metadata including package, namespace, size, and last activity.',
       options: {
         tags: ['oas-tag:Data streams'],
       },
@@ -66,6 +72,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_data_streams.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -98,6 +107,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Check if Fleet-managed component templates are using deprecated ILM policies that require manual migration`,
+      description:
+        'Check if any Fleet-managed component templates are still using deprecated ILM policies that require manual migration to data stream lifecycle policies.',
       options: {
         tags: ['internal', 'oas-tag:Data streams'],
       },

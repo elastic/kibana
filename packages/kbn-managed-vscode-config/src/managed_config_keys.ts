@@ -39,6 +39,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     key: 'search.exclude',
     value: {
       ['**/api_docs']: true,
+      ['**/target']: true,
       ['**/tsconfig.tsbuildinfo']: true,
       ['**/*.map']: true,
     },
@@ -58,7 +59,7 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   },
   {
     key: 'typescript.tsserver.maxTsServerMemory',
-    value: 4096,
+    value: 12288,
   },
   {
     key: 'json.schemas',

@@ -6,7 +6,7 @@
  */
 import { isString, isEmpty } from 'lodash';
 
-import type { SSLSettings } from '@kbn/actions-plugin/server/types';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type {
   AuthTypeName,
   CAType,

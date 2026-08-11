@@ -17,6 +17,7 @@ import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Writable } from '@kbn/utility-types';
+import type { ProjectRoutingOverrides } from '@kbn/presentation-publishing';
 import { AbstractLayer } from '../layer';
 import type { IVectorStyle } from '../../styles/vector/vector_style';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -134,7 +135,9 @@ export interface IVectorLayer extends ILayer {
   getMasks(): Mask[];
 }
 
-export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const noResultsIcon = (
+  <EuiIcon size="m" color="subdued" type="minusCircle" aria-hidden={true} />
+);
 export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   icon: noResultsIcon,
   tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
@@ -321,7 +324,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getLayerTypeIconName() {
-    return 'vector';
+    return 'vectorSquare';
   }
 
   async hasLegendDetails() {
@@ -397,6 +400,35 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       }
     });
     return indexPatternIds;
+  }
+
+  async getProjectRoutingOverrides(): Promise<ProjectRoutingOverrides> {
+    const overrides: ProjectRoutingOverrides = [];
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getProjectRouting')) {
+      const projectRouting = source.getProjectRouting?.();
+      if (projectRouting) {
+        overrides.push({
+          name: await this.getDisplayName(),
+          value: projectRouting,
+        });
+      }
+    }
+
+    asyncForEach(this.getValidJoins(), async (join) => {
+      const joinSource = join.getRightJoinSource();
+      if (joinSource && hasESSourceMethod(joinSource, 'getProjectRouting')) {
+        const projectRouting = joinSource.getProjectRouting?.();
+        if (projectRouting) {
+          overrides.push({
+            name: await this.getDisplayName(),
+            value: projectRouting,
+          });
+        }
+      }
+    });
+
+    return overrides.length > 0 ? overrides : undefined;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {

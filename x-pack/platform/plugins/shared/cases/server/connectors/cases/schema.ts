@@ -6,14 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import dateMath from '@kbn/datemath';
-import { MAX_OPEN_CASES, DEFAULT_MAX_OPEN_CASES } from './constants';
 import {
   CASES_CONNECTOR_TIME_WINDOW_REGEX,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
   MAX_TITLE_LENGTH,
+  DEFAULT_MAX_OPEN_CASES,
+  ABSOLUTE_MAX_CASES_PER_RUN,
+  MAX_TEMPLATE_KEY_LENGTH,
+  MAX_TEMPLATE_VERSION_STRING_LENGTH,
 } from '../../../common/constants';
 
 const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
@@ -87,11 +90,11 @@ export const CasesConnectorSecretsSchema = z.object({}).strict();
 
 export const CasesConnectorRunParamsSchema = schema.object({
   alerts: schema.arrayOf(AlertSchema),
+  autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
   groupedAlerts: schema.nullable(
     schema.arrayOf(CasesGroupedAlertsSchema, {
       defaultValue: [],
       minSize: 0,
-      maxSize: MAX_OPEN_CASES,
     })
   ),
   groupingBy: GroupingSchema,
@@ -102,9 +105,12 @@ export const CasesConnectorRunParamsSchema = schema.object({
   maximumCasesToOpen: schema.number({
     defaultValue: DEFAULT_MAX_OPEN_CASES,
     min: 1,
-    max: MAX_OPEN_CASES,
+    max: ABSOLUTE_MAX_CASES_PER_RUN,
   }),
-  templateId: schema.nullable(schema.string()),
+  templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+  templateVersion: schema.nullable(
+    schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
+  ),
   internallyManagedAlerts: schema.nullable(schema.boolean({ defaultValue: false })),
 });
 
@@ -186,12 +192,8 @@ const ZReopenClosedCasesSchema = z.boolean().default(false);
 export const ZCasesConnectorRunParamsSchema = z
   .object({
     alerts: z.array(ZAlertSchema),
-    groupedAlerts: z
-      .array(ZCasesGroupedAlertsSchema)
-      .min(0)
-      .max(MAX_OPEN_CASES)
-      .default([])
-      .nullable(),
+    autoPushCase: z.boolean().nullable().default(false),
+    groupedAlerts: z.array(ZCasesGroupedAlertsSchema).min(0).default([]).nullable(),
     groupingBy: ZGroupingSchema,
     owner: z.string(),
     rule: ZRuleSchema,
@@ -200,9 +202,10 @@ export const ZCasesConnectorRunParamsSchema = z
     maximumCasesToOpen: z.coerce
       .number()
       .min(1)
-      .max(MAX_OPEN_CASES)
+      .max(ABSOLUTE_MAX_CASES_PER_RUN)
       .default(DEFAULT_MAX_OPEN_CASES),
-    templateId: z.string().nullable().default(null),
+    templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
+    templateVersion: z.string().max(MAX_TEMPLATE_VERSION_STRING_LENGTH).nullable().default(null),
     internallyManagedAlerts: z.boolean().default(false).nullable(),
   })
   .strict();
@@ -210,10 +213,21 @@ export const ZCasesConnectorRunParamsSchema = z
 export const CasesConnectorRuleActionParamsSchema = schema.object({
   subAction: schema.literal('run'),
   subActionParams: schema.object({
+    autoPushCase: schema.nullable(schema.boolean({ defaultValue: false })),
     groupingBy: GroupingSchema,
     reopenClosedCases: ReopenClosedCasesSchema,
     timeWindow: TimeWindowSchema,
-    templateId: schema.nullable(schema.string()),
+    templateId: schema.nullable(schema.string({ maxLength: MAX_TEMPLATE_KEY_LENGTH })),
+    templateVersion: schema.nullable(
+      schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
+    ),
+    maximumCasesToOpen: schema.nullable(
+      schema.number({
+        min: 1,
+        max: ABSOLUTE_MAX_CASES_PER_RUN,
+        defaultValue: DEFAULT_MAX_OPEN_CASES,
+      })
+    ),
   }),
 });
 

@@ -23,6 +23,7 @@ import type {
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
@@ -39,6 +40,7 @@ type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   owner: string[];
   permissions: CasesPermissions;
   basePath: string;
@@ -54,6 +56,7 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
+    | 'unifiedAttachmentTypeRegistry'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -73,6 +76,7 @@ export const CasesProvider: FC<
   value: {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
@@ -88,6 +92,7 @@ export const CasesProvider: FC<
     () => ({
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       owner,
       permissions: {
         all: permissions.all,
@@ -101,6 +106,7 @@ export const CasesProvider: FC<
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
         assign: permissions.assign,
+        manageTemplates: permissions.manageTemplates,
       },
       basePath,
       /**
@@ -133,6 +139,10 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      // Interim bug fix until we refactor this code to avoid passing objects in deps
+      // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
+      features.alerts?.all,
+      features.alerts?.read,
     ]
   );
 

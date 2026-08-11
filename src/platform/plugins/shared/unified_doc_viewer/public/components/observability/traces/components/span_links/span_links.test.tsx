@@ -19,16 +19,17 @@ import {
 } from '@kbn/discover-utils';
 
 // Mock dependencies
-jest.mock('../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'apm-traces-*' } },
   }),
 }));
-jest.mock('../../hooks/use_get_generate_discover_link', () => ({
+jest.mock('../../../../../hooks/use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: () => ({
     generateDiscoverLink: jest.fn(() => 'http://discover/link'),
   }),
-  toESQLParamName: jest.requireActual('../../hooks/use_get_generate_discover_link').toESQLParamName,
+  toESQLParamName: jest.requireActual('../../../../../hooks/use_generate_discover_link')
+    .toESQLParamName,
 }));
 jest.mock('./get_columns', () => ({
   getColumns: jest.fn(() => [{ field: 'duration', name: 'Duration' }]),
@@ -85,8 +86,9 @@ describe('SpanLinks', () => {
       error: new Error('BOOM'),
       value: { incomingSpanLinks: [], outgoingSpanLinks: [] },
     });
-    const { getByText } = render(<SpanLinks {...defaultProps} />);
-    expect(getByText(/An error happened when trying to fetch data/i)).toBeInTheDocument();
+    const { getByTestId, getByText } = render(<SpanLinks {...defaultProps} />);
+    expect(getByTestId('unifiedDocViewerSpanLinksFetchErrorCallout')).toBeInTheDocument();
+    expect(getByText(/Couldn't load span links for this span/i)).toBeInTheDocument();
   });
 
   it('renders incoming links and table', () => {

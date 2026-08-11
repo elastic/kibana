@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/synthetics-forge",
+  "owner": "@elastic/obs-ux-management-team",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

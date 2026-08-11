@@ -243,6 +243,9 @@ export const ParamsList = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiInMemoryTable<ListParamItem>
+        data-test-subj={
+          isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'
+        }
         itemId="id"
         loading={isLoading}
         tableCaption={PARAMS_TABLE}
@@ -278,6 +281,7 @@ export const ParamsList = () => {
           toolsRight: renderToolRight(),
           box: {
             incremental: true,
+            'data-test-subj': 'syntheticsParamsSearchInput',
           },
           filters: [
             {
@@ -293,7 +297,7 @@ export const ParamsList = () => {
             },
           ],
         }}
-        message={isLoading ? LOADING_TEXT : undefined}
+        noItemsMessage={isLoading ? LOADING_TEXT : undefined}
       />
       {isDeleteModalVisible && deleteParam && (
         <DeleteParam items={deleteParam} setIsDeleteModalVisible={setIsDeleteModalVisible} />

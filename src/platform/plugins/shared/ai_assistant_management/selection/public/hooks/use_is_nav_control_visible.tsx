@@ -12,15 +12,25 @@ import { combineLatest, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../common/ui_setting_keys';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../../common/ui_setting_keys';
 import { AIAssistantType } from '../../common/ai_assistant_type';
 
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
   isUntouchedUiSetting: boolean,
+  chatExperience: AIChatExperience,
   activeSpace?: Space
 ) {
+  // If AI Agents are enabled, hide the nav control
+  // AgentBuilderNavControl will be used instead
+  if (chatExperience === AIChatExperience.Agent) {
+    return false;
+  }
   const categoryId =
     (appId && applications.get(appId)?.category?.id) || DEFAULT_APP_CATEGORIES.kibana.id;
 
@@ -51,6 +61,10 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
     AIAssistantType.Default
   );
 
+  const chatExperience$ = coreStart.settings.client.get$<AIChatExperience>(
+    PREFERRED_CHAT_EXPERIENCE_SETTING_KEY
+  );
+
   const activeSpace$ = useMemo(
     () => spaces?.getActiveSpace$?.() ?? of<Space | undefined>(undefined),
     [spaces]
@@ -62,17 +76,27 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
       applications$,
       activeSpace$,
       uiSetting$,
+      chatExperience$,
     ]).subscribe({
-      next: ([appId, applications, activeSpace]) => {
+      next: ([appId, applications, activeSpace, _uiSetting, chatExperience]) => {
         const isUntouchedUiSetting = coreStart.settings.client.isDefault(
           PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
         );
-        setIsVisible(getVisibility(appId, applications, isUntouchedUiSetting, activeSpace));
+        setIsVisible(
+          getVisibility(appId, applications, isUntouchedUiSetting, chatExperience, activeSpace)
+        );
       },
     });
 
     return () => appSubscription.unsubscribe();
-  });
+  }, [
+    activeSpace$,
+    chatExperience$,
+    applications$,
+    coreStart.settings.client,
+    currentAppId$,
+    uiSetting$,
+  ]);
 
   return { isVisible };
 }

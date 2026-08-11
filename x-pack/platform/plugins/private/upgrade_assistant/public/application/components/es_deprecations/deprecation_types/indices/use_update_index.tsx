@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { UpdateIndexOperation } from '../../../../../../common/update_index';
 import type { CorrectiveAction } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
@@ -23,20 +23,37 @@ export interface UseUpdateIndexParams {
 }
 
 export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIndexParams) => {
+  const isMounted = useRef(false);
   const [failedState, setFailedState] = useState<boolean>(false);
   const [updateIndexState, setUpdateIndexState] = useState<UpdateIndexState>({
     failedBefore: false,
     status: 'incomplete',
   });
 
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const updateIndex = useCallback(async () => {
     const operations: UpdateIndexOperation[] =
       correctiveAction?.type === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
+
+    if (!isMounted.current) {
+      return;
+    }
 
     setUpdateIndexState({ status: 'inProgress', failedBefore: failedState });
     const res = await api.updateIndex(indexName, operations);
     const status = res.error ? 'failed' : 'complete';
     const failedBefore = failedState || status === 'failed';
+
+    if (!isMounted.current) {
+      return;
+    }
+
     setFailedState(failedBefore);
     setUpdateIndexState({
       status,

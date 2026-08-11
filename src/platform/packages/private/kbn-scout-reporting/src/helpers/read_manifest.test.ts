@@ -15,30 +15,71 @@ import {
   readKibanaModuleManifest,
 } from './read_manifest';
 
-jest.mock('fs');
-
 describe('read_manifest', () => {
   describe('getKibanaModulePath', () => {
-    it('should resolve the manifest path correctly for a valid config path', () => {
-      const configPath = '/plugins/my_plugin/test/scout/ui/playwright.config.ts';
+    it('should resolve the manifest path correctly for a valid Scout config path (plugin)', () => {
+      const configPath = path.join(
+        path.sep,
+        'plugins',
+        'my_plugin',
+        'test',
+        'scout',
+        'ui',
+        'playwright.config.ts'
+      );
+      const expectedPath = path.resolve(path.sep, 'plugins', 'my_plugin', 'kibana.jsonc');
+      expect(getKibanaModulePath(configPath)).toBe(expectedPath);
+    });
+
+    it('should resolve the manifest path correctly for a valid Scout config path (package)', () => {
+      const configPath = path.join(
+        path.sep,
+        'packages',
+        'my_package',
+        'test',
+        'scout',
+        'api',
+        'playwright.config.ts'
+      );
+      const expectedPath = path.resolve(path.sep, 'packages', 'my_package', 'kibana.jsonc');
+      expect(getKibanaModulePath(configPath)).toBe(expectedPath);
+    });
+
+    it('should resolve the manifest path correctly for a scout_* config path', () => {
+      const configPath = '/plugins/my_plugin/test/scout_custom_config/api/playwright.config.ts';
       const expectedPath = path.resolve('/plugins/my_plugin/kibana.jsonc');
       expect(getKibanaModulePath(configPath)).toBe(expectedPath);
     });
 
-    it(`should throw an error if 'scout' is not in the path`, () => {
-      const configPath = '/plugins/my_plugin/tests/playwright.config.ts';
+    it(`should throw an error if 'scout' or 'scout_*' is not in the path`, () => {
+      const configPath = path.join(
+        path.sep,
+        'plugins',
+        'my_plugin',
+        'tests',
+        'playwright.config.ts'
+      );
       expect(() => getKibanaModulePath(configPath)).toThrow(
-        /Invalid path: "scout" directory not found/
+        /Invalid path: "scout" or "scout_\*" directory not found/
       );
     });
   });
 
   describe('readKibanaModuleManifest', () => {
-    const pluginFilePath = '/plugins/my_plugin/kibana.jsonc';
-    const packageFilePath = '/packages/my_package/kibana.jsonc';
+    const pluginFilePath = path.join(path.sep, 'plugins', 'my_plugin', 'kibana.jsonc');
+    const packageFilePath = path.join(path.sep, 'packages', 'my_package', 'kibana.jsonc');
+
+    let existsSyncSpy: jest.SpyInstance;
+    let readFileSyncSpy: jest.SpyInstance;
 
     beforeEach(() => {
-      jest.clearAllMocks();
+      existsSyncSpy = jest.spyOn(fs, 'existsSync');
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+    });
+
+    afterEach(() => {
+      existsSyncSpy.mockRestore();
+      readFileSyncSpy.mockRestore();
     });
 
     it('should read and parse the manifest for plugin correctly', () => {
@@ -52,8 +93,8 @@ describe('read_manifest', () => {
           "plugin": { "id": "my_plugin" }
         }
       `;
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(fileContent);
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
 
       const result = readKibanaModuleManifest(pluginFilePath);
       expect(result).toEqual({
@@ -75,8 +116,8 @@ describe('read_manifest', () => {
           "owner": ["team"],
         }
       `;
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(fileContent);
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
 
       const result = readKibanaModuleManifest(packageFilePath);
       expect(result).toEqual({
@@ -89,13 +130,13 @@ describe('read_manifest', () => {
     });
 
     it('should throw an error if the file does not exist', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      existsSyncSpy.mockReturnValue(false);
       expect(() => readKibanaModuleManifest(pluginFilePath)).toThrow(/Manifest file not found/);
     });
 
     it('should throw an error if the file cannot be read', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockImplementation(() => {
         throw new Error('File read error');
       });
       expect(() => readKibanaModuleManifest(pluginFilePath)).toThrow(
@@ -104,11 +145,46 @@ describe('read_manifest', () => {
     });
 
     it('should throw an error for invalid JSON content', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('{ invalid json }');
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue('{ invalid json }');
       expect(() => readKibanaModuleManifest(pluginFilePath)).toThrow(
         /Invalid JSON format in manifest file/
       );
+    });
+
+    it('should normalize a string owner to an array', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "owner": "@elastic/kibana-core",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual(['@elastic/kibana-core']);
+    });
+
+    it('should default owner to empty array when missing', () => {
+      const fileContent = `
+        {
+          "id": "@kbn/example-plugin",
+          "type": "plugin",
+          "group": "platform",
+          "visibility": "private",
+          "plugin": { "id": "examplePlugin" }
+        }
+      `;
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
+
+      const result = readKibanaModuleManifest(pluginFilePath);
+      expect(result.owner).toEqual([]);
     });
 
     it('should throw an error for missing required fields', () => {
@@ -116,15 +192,31 @@ describe('read_manifest', () => {
         "group": "platform",
         "visibility": "public"
       }`;
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(fileContent);
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(fileContent);
       expect(() => readKibanaModuleManifest(pluginFilePath)).toThrow(/Invalid manifest structure/);
     });
   });
 
   describe('getKibanaModuleData', () => {
-    const configInPluginPath = '/plugins/my_plugin/test/scout/ui/playwright.config.ts';
-    const configInPackagePath = '/packages/my_package/test/scout/api/playwright.config.ts';
+    const configInPluginPath = path.join(
+      path.sep,
+      'plugins',
+      'my_plugin',
+      'test',
+      'scout',
+      'ui',
+      'playwright.config.ts'
+    );
+    const configInPackagePath = path.join(
+      path.sep,
+      'packages',
+      'my_package',
+      'test',
+      'scout',
+      'api',
+      'playwright.config.ts'
+    );
 
     const pluginManifestContent = `
       {
@@ -145,13 +237,22 @@ describe('read_manifest', () => {
       }
     `;
 
+    let existsSyncSpy: jest.SpyInstance;
+    let readFileSyncSpy: jest.SpyInstance;
+
     beforeEach(() => {
-      jest.clearAllMocks();
+      existsSyncSpy = jest.spyOn(fs, 'existsSync');
+      readFileSyncSpy = jest.spyOn(fs, 'readFileSync');
+    });
+
+    afterEach(() => {
+      existsSyncSpy.mockRestore();
+      readFileSyncSpy.mockRestore();
     });
 
     it('should resolve and parse the manifest data for plugin correctly', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(pluginManifestContent);
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(pluginManifestContent);
 
       const result = getKibanaModuleData(configInPluginPath);
       expect(result).toEqual({
@@ -164,8 +265,8 @@ describe('read_manifest', () => {
     });
 
     it('should resolve and parse the manifest data for package correctly', () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue(packageManifestContent);
+      existsSyncSpy.mockReturnValue(true);
+      readFileSyncSpy.mockReturnValue(packageManifestContent);
 
       const result = getKibanaModuleData(configInPackagePath);
       expect(result).toEqual({

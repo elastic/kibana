@@ -16,6 +16,7 @@
       "cloud",
       "data",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "dataViews",
       "dataVisualizer",
       "discover",
@@ -29,10 +30,10 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "savedObjectsManagement",
       "savedSearch",
       "contentManagement",
-      "presentationUtil",
       "fieldsMetadata",
       "fileUpload"
     ],
@@ -48,6 +49,8 @@
       "observabilityAIAssistant",
       "usageCollection",
       "cases",
+      "cps",
+      "agentBuilder"
     ],
     "requiredBundles": [
       "cases",
@@ -61,7 +64,8 @@
       "maps",
       "savedObjectsFinder",
       "usageCollection",
-      "alerting"
+      "alerting",
+      "presentationUtil"
     ],
     "extraPublicDirs": ["common"]
   }

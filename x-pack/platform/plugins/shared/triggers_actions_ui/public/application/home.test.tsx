@@ -7,7 +7,6 @@
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { createLocation, createMemoryHistory } from 'history';
@@ -17,6 +16,7 @@ import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_feat
 import type { MatchParams } from './home';
 import TriggersActionsUIHome from './home';
 import { hasShowActionsCapability } from './lib/capabilities';
+import { useKibana } from '../common/lib/kibana';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/get_experimental_features');
@@ -39,6 +39,7 @@ jest.mock('@kbn/ebt-tools', () => ({
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
   useGetRuleTypesPermissions: jest.fn().mockReturnValue({
     authorizedToReadAnyRules: true,
+    authorizedToCreateAnyRules: true,
   }),
 }));
 
@@ -46,7 +47,18 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
 
-const queryClient = new QueryClient();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+
+const renderHome = (props: RouteComponentProps<MatchParams>) =>
+  render(
+    <IntlProvider locale="en">
+      <Router history={props.history}>
+        <QueryClientProvider client={new QueryClient()}>
+          <TriggersActionsUIHome {...props} />
+        </QueryClientProvider>
+      </Router>
+    </IntlProvider>
+  );
 
 describe('home', () => {
   beforeEach(() => {
@@ -71,15 +83,7 @@ describe('home', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
     expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
@@ -101,16 +105,10 @@ describe('home', () => {
       },
     };
 
-    const home = mountWithIntl(
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
-      </Router>
-    );
+    renderHome(props);
 
     // Just rules and logs
-    expect(home.find('span.euiTab__content').length).toBe(2);
+    expect(screen.getAllByRole('tab').length).toBe(2);
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {
@@ -132,15 +130,76 @@ describe('home', () => {
       },
     };
 
-    const home = mountWithIntl(
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
-      </Router>
-    );
+    renderHome(props);
 
     // Just rules
-    expect(home.find('span.euiTab__content').length).toBe(1);
+    expect(screen.getAllByRole('tab').length).toBe(1);
+  });
+
+  describe('setHeaderActions', () => {
+    beforeEach(() => {
+      useKibanaMock().services.application.capabilities = {
+        ...useKibanaMock().services.application.capabilities,
+        rulesSettings: {
+          show: true,
+          readFlappingSettingsUI: true,
+          readQueryDelaySettingsUI: true,
+        },
+      };
+    });
+    it('should render the header actions correctly when the user is authorized to create rules', async () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: true,
+      });
+      const props: RouteComponentProps<MatchParams> = {
+        history: createMemoryHistory({
+          initialEntries: ['/rules'],
+        }),
+        location: createLocation('/rules'),
+        match: {
+          isExact: true,
+          path: `/rules`,
+          url: '',
+          params: {
+            section: 'rules',
+          },
+        },
+      };
+
+      renderHome(props);
+
+      expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
+      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
+      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+    });
+
+    it('should not render the create rule button when the user is not authorized to create rules', async () => {
+      useGetRuleTypesPermissions.mockReturnValue({
+        authorizedToReadAnyRules: true,
+        authorizedToCreateAnyRules: false,
+      });
+
+      const props: RouteComponentProps<MatchParams> = {
+        history: createMemoryHistory({
+          initialEntries: ['/rules'],
+        }),
+        location: createLocation('/rules'),
+        match: {
+          isExact: true,
+          path: `/rules`,
+          url: '',
+          params: {
+            section: 'rules',
+          },
+        },
+      };
+
+      renderHome(props);
+
+      expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
+      expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    });
   });
 });

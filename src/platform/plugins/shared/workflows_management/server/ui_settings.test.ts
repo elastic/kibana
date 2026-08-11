@@ -7,41 +7,130 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
+import {
+  WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+  WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID,
+} from '@kbn/workflows';
+import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
 describe('Workflows Management UI Settings', () => {
-  let mockUiSettings: jest.Mocked<UiSettingsServiceSetup>;
+  let coreSetupMock: ReturnType<typeof createCoreSetupMock>;
 
   beforeEach(() => {
-    mockUiSettings = {
-      register: jest.fn(),
-      registerGlobal: jest.fn(),
-      setAllowlist: jest.fn(),
-    };
+    coreSetupMock = createCoreSetupMock();
   });
 
-  it('should register the workflows UI setting', () => {
-    registerUISettings({ uiSettings: mockUiSettings });
+  it('should register workflows UI settings', () => {
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(mockUiSettings.register).toHaveBeenCalledWith({
-      [WORKFLOWS_UI_SETTING_ID]: {
-        description: expect.any(String),
-        name: expect.any(String),
-        schema: expect.any(Object),
-        value: false,
-        readonly: false,
-        technicalPreview: true,
-        requiresPageReload: true,
-        category: expect.any(Array),
-      },
-    });
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SETTING_ID]: {
+          description: expect.any(String),
+          name: expect.any(String),
+          schema: expect.any(Object),
+          value: true,
+          readonly: false,
+          requiresPageReload: true,
+          category: ['workflows'],
+        },
+        [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: {
+          description: expect.any(String),
+          name: expect.any(String),
+          schema: expect.any(Object),
+          value: false,
+          readonly: false,
+          category: ['workflows'],
+        },
+        [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+          description: expect.any(String),
+          name: expect.any(String),
+          schema: expect.any(Object),
+          value: false,
+          experimental: true,
+          requiresPageReload: true,
+          readonly: false,
+          category: ['workflows'],
+        },
+      })
+    );
   });
 
-  it('should register UI settings only once', () => {
-    registerUISettings({ uiSettings: mockUiSettings });
+  it('should register UI settings and global UI settings only once', () => {
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
 
-    expect(mockUiSettings.register).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledTimes(1);
+    expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
+          name: 'Workflow Template Library',
+          value: false,
+          readonly: true,
+          readonlyMode: 'ui',
+          requiresPageReload: true,
+        }),
+        [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: expect.objectContaining({
+          name: 'Workflow Executions view',
+          value: false,
+          readonly: true,
+          readonlyMode: 'ui',
+          requiresPageReload: true,
+        }),
+      })
+    );
+  });
+
+  it('should include license text if serverless is false', () => {
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
+
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
+          description: expect.stringContaining('Requires <b>enterprise</b> license'),
+        }),
+      })
+    );
+  });
+
+  it('should not include license text if serverless is true', () => {
+    registerUISettings(coreSetupMock, { serverless: {} } as WorkflowsServerPluginSetupDeps);
+
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SETTING_ID]: expect.objectContaining({
+          description: expect.not.stringContaining('Requires <b>enterprise</b> license'),
+        }),
+      })
+    );
+  });
+
+  it('should register managed workflow visibility setting copy', () => {
+    registerUISettings(coreSetupMock, {} as WorkflowsServerPluginSetupDeps);
+
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: expect.objectContaining({
+          name: 'Show managed workflows',
+          description: expect.stringContaining(
+            'Allows users with the required workflow privileges to display managed workflows and their executions in workflow experiences.'
+          ),
+        }),
+      })
+    );
+    expect(coreSetupMock.uiSettings.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: expect.objectContaining({
+          description: expect.stringContaining(
+            'Editing, disabling, or deleting them may cause unexpected behavior or break product functionality.'
+          ),
+        }),
+      })
+    );
   });
 });

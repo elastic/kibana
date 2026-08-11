@@ -92,7 +92,7 @@ export function generateSearchQuery(
             const hasExistingSparseMatch = acc.queryMatches.find(
               (x) =>
                 x?.text_expansion?.[elserField.field] &&
-                x?.sparse_vector?.inference_id === elserField?.model_id
+                x?.text_expansion?.[elserField.field]?.model_id === elserField?.model_id
             );
 
             if (hasExistingSparseMatch) {
@@ -237,7 +237,9 @@ export function generateSearchQuery(
     });
 
     const highlightSemanticFields = allMatches
-      .map((match) => ('semantic' in match && match.semantic ? match.semantic.field : null))
+      .map((match) =>
+        match && 'semantic' in match && match.semantic ? match.semantic.field : null
+      )
       .filter((field): field is string => !!field)
       .filter((field) => isFieldInSourceFields(field, sourceFields));
 

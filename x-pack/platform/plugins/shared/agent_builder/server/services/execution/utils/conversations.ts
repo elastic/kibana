@@ -1,0 +1,209 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import type { Observable } from 'rxjs';
+import { of, forkJoin, switchMap } from 'rxjs';
+import type {
+  Conversation,
+  ConversationAccessControl,
+  ConversationOrigin,
+  RoundCompleteEvent,
+  ConversationAction,
+} from '@kbn/agent-builder-common';
+import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
+import type { ConversationClient } from '../../conversation';
+import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+
+/**
+ * Persist a new conversation and emit the corresponding event
+ */
+export const createConversation$ = ({
+  conversation,
+  conversationClient,
+  title$,
+  roundCompletedEvents$,
+}: {
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
+  conversationClient: ConversationClient;
+  title$: Observable<string>;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+}) => {
+  return forkJoin({
+    title: title$,
+    roundCompletedEvent: roundCompletedEvents$,
+  }).pipe(
+    switchMap(({ title, roundCompletedEvent }) => {
+      return conversationClient.create({
+        id: conversation.id,
+        title,
+        agent_id: conversation.agent_id,
+        access_control: conversation.access_control,
+        origin: conversation.origin,
+        state: roundCompletedEvent.data.conversation_state,
+        status: roundCompletedEvent.data.round.status,
+        read: false,
+        rounds: [roundCompletedEvent.data.round],
+        ...(roundCompletedEvent.data.attachments
+          ? { attachments: roundCompletedEvent.data.attachments }
+          : {}),
+        ...(roundCompletedEvent.data.workspace_id
+          ? { workspace_id: roundCompletedEvent.data.workspace_id }
+          : {}),
+      });
+    }),
+    switchMap((createdConversation) => {
+      return of(createConversationCreatedEvent(createdConversation));
+    })
+  );
+};
+
+/**
+ * Update an existing conversation and emit the corresponding event
+ */
+export const updateConversation$ = ({
+  conversationClient,
+  conversation,
+  roundCompletedEvents$,
+  action,
+}: {
+  conversation: Conversation;
+  roundCompletedEvents$: Observable<RoundCompleteEvent>;
+  conversationClient: ConversationClient;
+  action?: ConversationAction;
+}) => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) => {
+      const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
+
+      // A resumed round keeps the pending round's id, so it is matched by id.
+      // Regenerate mints a new id, so it has to name the round it supersedes —
+      // an identity rather than stale data, so the snapshot is safe to read here.
+      const replacesRoundId =
+        action === 'regenerate' && !resumed
+          ? conversation.rounds[conversation.rounds.length - 1]?.id
+          : undefined;
+
+      return conversationClient.upsertRound(
+        {
+          id: conversation.id,
+          round,
+          replacesRoundId,
+          state: conversation_state,
+          ...(roundCompletedEvent.data.attachments
+            ? {
+                attachments: {
+                  snapshot: conversation.attachments ?? [],
+                  produced: roundCompletedEvent.data.attachments,
+                },
+              }
+            : {}),
+          workspaceId: roundCompletedEvent.data.workspace_id,
+        },
+        { access: 'converse' }
+      );
+    }),
+    switchMap((updatedConversation) => {
+      return of(createConversationUpdatedEvent(updatedConversation));
+    })
+  );
+};
+
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
+export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
+
+/**
+ * Resolves the conversation to update, or returns a placeholder for one to create.
+ * conversationId takes precedence over origin. When no conversationId is provided,
+ * origin is used to find an existing conversation before creating a new placeholder.
+ * autoCreateConversationWithId only applies when conversationId is provided: missing
+ * conversations are created with that ID when enabled, and rejected by get() otherwise.
+ * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
+ */
+export const getConversation = async ({
+  agentId,
+  conversationId,
+  autoCreateConversationWithId = false,
+  conversationClient,
+  accessControl,
+  origin,
+}: {
+  agentId: string;
+  conversationId: string | undefined;
+  autoCreateConversationWithId?: boolean;
+  conversationClient: ConversationClient;
+  accessControl?: ConversationAccessControl;
+  origin?: ConversationOrigin;
+}): Promise<ConversationWithOperation> => {
+  // Case 1: No conversation ID - create new with placeholder
+  if (!conversationId) {
+    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
+
+    if (conversation) {
+      return {
+        ...conversation,
+        operation: 'UPDATE',
+      };
+    }
+
+    return {
+      ...placeholderConversation({ agentId, accessControl, origin }),
+      operation: 'CREATE',
+    };
+  }
+
+  // Case 2: Conversation ID specified and autoCreate is false - update existing
+  if (!autoCreateConversationWithId) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  }
+
+  // Case 3: Conversation ID specified and autoCreate is true - check if exists
+  const exists = await conversationClient.exists(conversationId);
+
+  if (exists) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  } else {
+    return {
+      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+      operation: 'CREATE',
+    };
+  }
+};
+
+export const placeholderConversation = ({
+  agentId,
+  conversationId,
+  accessControl,
+  origin,
+}: {
+  agentId: string;
+  conversationId?: string;
+  accessControl?: ConversationAccessControl;
+  origin?: ConversationOrigin;
+}): Conversation => {
+  return {
+    id: conversationId ?? uuidv4(),
+    title: 'New conversation',
+    agent_id: agentId,
+    access_control: accessControl ?? getDefaultConversationAccessControl(),
+    rounds: [],
+    ...(origin ? { origin } : {}),
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    user: {
+      id: 'unknown',
+      username: 'unknown',
+    },
+  };
+};

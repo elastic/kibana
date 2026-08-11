@@ -6,6 +6,7 @@
  */
 
 export * from './unenroll';
+export * from './remove_collector';
 export * from './upgrade';
 export * from './status';
 export * from './crud';
@@ -17,6 +18,7 @@ export * from './action_status';
 export * from './request_diagnostics';
 export * from './migrate';
 export * from './change_privilege_level';
+export * from './rollback';
 export { getAgentUploads, getAgentUploadFile, deleteAgentUploadFile } from './uploads';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';

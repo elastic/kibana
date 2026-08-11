@@ -18,7 +18,6 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
-import { UrlOverflowUi } from './url_overflow_ui';
 
 interface Props {
   title?: string;
@@ -45,25 +44,10 @@ const ErrorPage: React.FC<Props> = ({ title, children }) => {
 };
 
 const ErrorApp: React.FC<{ basePath: IBasePath; history: History }> = ({ basePath, history }) => {
-  const [currentLocation, setCurrentLocation] = useState(history.location);
+  const [, setCurrentLocation] = useState(history.location);
   useLayoutEffect(() => {
     return history.listen((location) => setCurrentLocation(location));
   }, [history]);
-
-  const searchParams = new URLSearchParams(currentLocation.search);
-  const errorType = searchParams.get('errorType');
-
-  if (errorType === 'urlOverflow') {
-    return (
-      <ErrorPage
-        title={i18n.translate('core.ui.errorUrlOverflow.errorTitle', {
-          defaultMessage: "The URL for this object is too long, and we can't display it",
-        })}
-      >
-        <UrlOverflowUi basePath={basePath} />
-      </ErrorPage>
-    );
-  }
 
   return <ErrorPage />;
 };

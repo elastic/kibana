@@ -13,7 +13,7 @@ import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { unifiedSearchPluginMock as mockUnifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
-import { Expressions } from './expression';
+import { Expressions, getNoDataBehaviorValue } from './expression';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { ResolvedDataView } from '../../../utils/data_view';
@@ -121,5 +121,208 @@ describe('Expression', () => {
         aggType: 'cardinality',
       },
     ]);
+  });
+});
+
+describe('getNoDataBehaviorValue', () => {
+  const baseRuleParams = {
+    criteria: [],
+    groupBy: undefined,
+    filterQueryText: '',
+    sourceId: 'default',
+  };
+
+  describe('when noDataBehavior is set', () => {
+    it('should return the noDataBehavior value', () => {
+      expect(
+        getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'alertOnNoData' }, false)
+      ).toBe('alertOnNoData');
+      expect(getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'recover' }, true)).toBe(
+        'recover'
+      );
+      expect(
+        getNoDataBehaviorValue({ ...baseRuleParams, noDataBehavior: 'remainActive' }, false)
+      ).toBe('remainActive');
+    });
+
+    it('should ignore legacy params when noDataBehavior is set', () => {
+      expect(
+        getNoDataBehaviorValue(
+          { ...baseRuleParams, noDataBehavior: 'recover', alertOnNoData: true },
+          false
+        )
+      ).toBe('recover');
+      expect(
+        getNoDataBehaviorValue(
+          { ...baseRuleParams, noDataBehavior: 'alertOnNoData', alertOnGroupDisappear: false },
+          true
+        )
+      ).toBe('alertOnNoData');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'remainActive',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+          },
+          true
+        )
+      ).toBe('remainActive');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'remainActive',
+            alertOnNoData: false,
+            alertOnGroupDisappear: false,
+          },
+          false
+        )
+      ).toBe('remainActive');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'recover',
+            alertOnNoData: true,
+            alertOnGroupDisappear: true,
+          },
+          true
+        )
+      ).toBe('recover');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'alertOnNoData',
+            alertOnNoData: false,
+            alertOnGroupDisappear: true,
+          },
+          false
+        )
+      ).toBe('alertOnNoData');
+      expect(
+        getNoDataBehaviorValue(
+          {
+            ...baseRuleParams,
+            noDataBehavior: 'alertOnNoData',
+            alertOnNoData: false,
+            alertOnGroupDisappear: false,
+          },
+          true
+        )
+      ).toBe('alertOnNoData');
+    });
+  });
+
+  describe('when noDataBehavior is not set (legacy params)', () => {
+    describe('with groupBy', () => {
+      it('should return alertOnNoData when alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue({ ...baseRuleParams, alertOnGroupDisappear: true }, true)
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnGroupDisappear is false', () => {
+        expect(
+          getNoDataBehaviorValue({ ...baseRuleParams, alertOnGroupDisappear: false }, true)
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnGroupDisappear is undefined', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams }, true)).toBe('recover');
+      });
+
+      it('should return alertOnNoData when alertOnGroupDisappear is true and alertOnNoData is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: true, alertOnNoData: true },
+            true
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return alertOnNoData when alertOnGroupDisappear is true and alertOnNoData is false', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: true, alertOnNoData: false },
+            true
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnGroupDisappear is false and alertOnNoData is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: false, alertOnNoData: true },
+            true
+          )
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnGroupDisappear and alertOnNoData are undefined', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnGroupDisappear: undefined, alertOnNoData: undefined },
+            true
+          )
+        ).toBe('recover');
+      });
+    });
+
+    describe('without groupBy', () => {
+      it('should return alertOnNoData when alertOnNoData is true', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams, alertOnNoData: true }, false)).toBe(
+          'alertOnNoData'
+        );
+      });
+
+      it('should return recover when alertOnNoData is false', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams, alertOnNoData: false }, false)).toBe(
+          'recover'
+        );
+      });
+
+      it('should return recover when alertOnNoData is undefined', () => {
+        expect(getNoDataBehaviorValue({ ...baseRuleParams }, false)).toBe('recover');
+      });
+
+      it('should return alertOnNoData when alertOnNoData is true and alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: true, alertOnGroupDisappear: true },
+            false
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnNoData is false and alertOnGroupDisappear is true', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: false, alertOnGroupDisappear: true },
+            false
+          )
+        ).toBe('recover');
+      });
+
+      it('should return recover when alertOnNoData is true and alertOnGroupDisappear is false', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: true, alertOnGroupDisappear: false },
+            false
+          )
+        ).toBe('alertOnNoData');
+      });
+
+      it('should return recover when alertOnNoData and alertOnGroupDisappear are undefined', () => {
+        expect(
+          getNoDataBehaviorValue(
+            { ...baseRuleParams, alertOnNoData: undefined, alertOnGroupDisappear: undefined },
+            false
+          )
+        ).toBe('recover');
+      });
+    });
   });
 });

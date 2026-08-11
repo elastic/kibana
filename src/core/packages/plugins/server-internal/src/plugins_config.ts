@@ -22,7 +22,7 @@ const configSchema = schema.object({
   /**
    * Defines an array of directories where another plugin should be loaded from.
    */
-  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  paths: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
   /**
    * Defines an array of groups to include when loading plugins.
    * Plugins from all groups will be taken into account if the parameter is not provided.
@@ -33,7 +33,8 @@ const configSchema = schema.object({
         KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
           Type<KibanaGroup> // This cast is needed because it's different to Type<T>[] :sight:
         ]
-      )
+      ),
+      { maxSize: 50 }
     )
   ),
   /**
@@ -41,6 +42,14 @@ const configSchema = schema.object({
    * internal purposes.
    */
   forceEnableAllPlugins: schema.maybe(schema.boolean({ defaultValue: false })),
+
+  /**
+   * Internal config, not intended to be used by end users. When enabled, the
+   * browser exposes an inert `window.__kbnNavDependencies__()` bridge that
+   * reports cross-plugin navigation dependencies. Only consumed by the
+   * navigation dependency enforcement test.
+   */
+  exposeNavDependencies: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 type InternalPluginsConfigType = TypeOf<typeof configSchema>;

@@ -42,7 +42,8 @@ interface RequestOptions {
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeInterval, timeField, afterKey }: RequestOptions,
   query: QueryDslQueryContainer,
-  runtimeMappings: MappingRuntimeFields
+  runtimeMappings: MappingRuntimeFields,
+  projectRouting?: string
 ): SearchRequest {
   const timeSeriesAgg = {
     over_time: {
@@ -109,6 +110,7 @@ function getChangePointDetectionRequestBody(
     size: 0,
     ...(query ? { query } : {}),
     ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
     aggregations,
   } as SearchRequest;
 }
@@ -123,6 +125,7 @@ export function useChangePointResults(
     notifications: { toasts },
     usageCollection,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
 
   const { dataView } = useDataSource();
@@ -191,7 +194,8 @@ export function useChangePointResults(
             afterKey,
           },
           query,
-          runtimeMappings
+          runtimeMappings,
+          cps?.cpsManager?.getDefaultProjectRouting()
         );
 
         if (usageCollection?.reportUiCounter && embeddingOrigin) {
@@ -320,9 +324,10 @@ export function useChangePointResults(
       }
     },
     [
-      embeddingOrigin,
       isSingleMetric,
       totalAggPages,
+      metricFieldOptions,
+      splitFieldsOptions,
       dataView,
       fieldConfig.fn,
       fieldConfig.metricField,
@@ -330,11 +335,11 @@ export function useChangePointResults(
       requestParams.interval,
       requestParams.changePointType,
       query,
-      metricFieldOptions,
-      splitFieldsOptions,
+      cps?.cpsManager,
+      usageCollection,
+      embeddingOrigin,
       runRequest,
       toasts,
-      usageCollection,
     ]
   );
 

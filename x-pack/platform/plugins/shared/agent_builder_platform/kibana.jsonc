@@ -7,11 +7,17 @@
   "plugin": {
     "id": "agentBuilderPlatform",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": ["xpack", "agentBuilderPlatform"],
-    "requiredPlugins": ["onechat"],
+    "requiredPlugins": [
+      "actions",
+      "agentBuilder",
+      "agentBuilderSml",
+      "share",
+      "triggersActionsUi"
+    ],
     "requiredBundles": [],
-    "optionalPlugins": ["workflowsManagement"],
+    "optionalPlugins": ["cases", "esql", "llmTasks"],
     "extraPublicDirs": []
   }
 }

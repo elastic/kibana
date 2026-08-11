@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiModal,
   EuiPageTemplate,
   EuiSkeletonText,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +28,7 @@ import {
 
 import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
+import type { TransformFunction } from '../../../../common/constants';
 import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useEnabledFeatures } from '../../serverless_context';
@@ -42,12 +41,11 @@ import {
   useGetTransforms,
   useGetTransformNodes,
 } from '../../hooks';
-import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { SECTION_SLUG } from '../../common/constants';
 
-import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
@@ -57,16 +55,7 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { DanglingTasksWarning } from './components/dangling_task_warning/dangling_task_warning';
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    dialog: css`
-      width: calc(${euiTheme.size.l} * 30);
-      min-height: calc(${euiTheme.size.l} * 25);
-    `,
-  };
-};
+const CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY = 'transform.cpsUnsupportedCalloutDismissed';
 
 const getDefaultTransformListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -103,12 +92,22 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor } = useAppDependencies();
-  const styles = useStyles();
+  const { cps, storage } = useAppDependencies();
+  const history = useHistory();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
   );
+
+  const isCpsEnabled = Boolean(cps?.cpsManager);
+  const [isCpsUnsupportedCalloutDismissed, setIsCpsUnsupportedCalloutDismissed] = useState(() => {
+    return isCpsEnabled ? storage.get(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY) === true : false;
+  });
+
+  const onDismissCpsUnsupportedCallout = useCallback(() => {
+    setIsCpsUnsupportedCalloutDismissed(true);
+    storage.set(CPS_UNSUPPORTED_CALLOUT_STORAGE_KEY, true);
+  }, [storage]);
 
   const {
     isInitialLoading: transformNodesInitialLoading,
@@ -186,7 +185,7 @@ export const TransformManagement: FC = () => {
     return (
       <>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
@@ -196,45 +195,12 @@ export const TransformManagement: FC = () => {
     );
   }, [transforms, canStartStopTransform]);
 
-  const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
-  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
-
-  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
-
-  const onSearchSelected = useCallback((id: string, type: string) => {
-    setSavedObjectId(id);
-  }, []);
-
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditorRef = useRef<() => void | undefined>();
-
-  const createNewDataView = useCallback(() => {
-    onCloseModal();
-    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onSearchSelected(dataView.id, 'index-pattern');
-        }
-      },
-
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
-
-  useEffect(function cleanUpDataViewEditorFlyout() {
-    return () => {
-      // Close the editor when unmounting
-      if (closeDataViewEditorRef.current) {
-        closeDataViewEditorRef.current();
-      }
-    };
-  }, []);
-
-  if (savedObjectId !== null) {
-    return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
-  }
+  const onCreateTransform = useCallback(
+    (transformFunction: TransformFunction) => {
+      history.push(`/${SECTION_SLUG.CREATE_TRANSFORM}?transformFunction=${transformFunction}`);
+    },
+    [history]
+  );
 
   const docsLink = (
     <EuiButtonEmpty
@@ -321,6 +287,30 @@ export const TransformManagement: FC = () => {
             ) : null}
             <EuiSpacer size="s" />
 
+            {isCpsEnabled && !isCpsUnsupportedCalloutDismissed && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiCallOut
+                  title={i18n.translate('xpack.transform.cpsUnsupportedCallout.title', {
+                    defaultMessage: 'Cross-project search for transforms coming soon',
+                  })}
+                  iconType="info"
+                  onDismiss={onDismissCpsUnsupportedCallout}
+                  dismissButtonProps={{ 'data-test-subj': 'transformCpsUnsupportedCalloutDismiss' }}
+                  data-test-subj="transformCpsUnsupportedCallout"
+                  announceOnMount
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.transform.cpsUnsupportedCallout.description"
+                      defaultMessage="While we're working on this feature, all transform search scope will be limited to the current project."
+                    />
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
             <EuiSpacer size="s" />
 
@@ -329,7 +319,7 @@ export const TransformManagement: FC = () => {
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
-                  onCreateTransform={onOpenModal}
+                  onCreateTransform={onCreateTransform}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
@@ -343,26 +333,6 @@ export const TransformManagement: FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {isSearchSelectionVisible && (
-        <EuiModal
-          onClose={onCloseModal}
-          css={styles.dialog}
-          aria-label={i18n.translate(
-            'xpack.transform.transformList.createTransformSearchModalTitle',
-            {
-              defaultMessage: 'Create Transform - Select Data Source',
-            }
-          )}
-          data-test-subj="transformSelectSourceModal"
-        >
-          <SearchSelection
-            onSearchSelected={onSearchSelected}
-            canEditDataView={canEditDataView}
-            createNewDataView={createNewDataView}
-          />
-        </EuiModal>
-      )}
     </>
   );
 };

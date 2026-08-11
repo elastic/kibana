@@ -72,7 +72,7 @@ export function CommandsInstructionsCodeblock({
               aria-label={i18n.translate('xpack.apm.agentConfigInstructions.button.ariaLabel', {
                 defaultMessage: 'Copy commands',
               })}
-              iconType="copyClipboard"
+              iconType="copy"
               onClick={() => {
                 copyToClipboard(commandsWithSecrets);
               }}

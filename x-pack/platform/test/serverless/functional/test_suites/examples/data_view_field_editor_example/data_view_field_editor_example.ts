@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/examples/data_view_field_editor_example/data_view_field_editor_example.ts
 import expect from '@kbn/expect';
 // TODO: Changed from PluginFunctionalProviderContext to FtrProviderContext in Serverless
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -13,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const retry = getService('retry');
+  const flyout = getService('flyout');
 
   describe('data_view_field_editor_example', () => {
     it('finds a data view', async () => {
@@ -23,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
       await testSubjects.click('addField');
       await testSubjects.existOrFail('flyoutTitle');
       await retry.try(async () => {
-        await testSubjects.click('closeFlyoutButton');
+        await flyout.closeFlyout();
         await testSubjects.missingOrFail('flyoutTitle');
       });
     });

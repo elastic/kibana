@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { RuleUpdateCallout } from '../components/rule_details/rule_update_callout';
 
@@ -21,8 +22,9 @@ export const useRuleUpdateCallout = ({
   message,
   actionButton,
   onUpgrade,
-}: UseRuleUpdateCalloutProps): JSX.Element | null =>
-  !rule || rule.rule_source.type !== 'external' ? null : (
+}: UseRuleUpdateCalloutProps): JSX.Element | null => {
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  return !rule || rule.rule_source.type !== 'external' || !canEditRules ? null : (
     <RuleUpdateCallout
       actionButton={actionButton}
       message={message}
@@ -30,3 +32,4 @@ export const useRuleUpdateCallout = ({
       onUpgrade={onUpgrade}
     />
   );
+};

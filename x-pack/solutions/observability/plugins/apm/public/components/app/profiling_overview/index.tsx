@@ -9,12 +9,8 @@ import type { EuiTabbedContentProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableProfilingSearchBar,
-  ProfilingEmptyState,
-} from '@kbn/observability-shared-plugin/public';
+import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -22,22 +18,21 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { push } from '../../shared/links/url_helpers';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { ProfilingHostsCallout } from './profiling_hosts_callout';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
 import { ProfilingHostsTopNFunctions } from './profiling_hosts_top_functions';
 
+export { ProfilingHeaderSearchBar } from './profiling_header_search_bar';
+
 export function ProfilingOverview() {
-  const history = useHistory();
   const {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services/{serviceName}/profiling');
   const { isProfilingAvailable, isLoading } = useProfilingPlugin();
-  const { start, end, refreshTimeRange } = useTimeRange({ rangeFrom, rangeTo });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -150,30 +145,12 @@ export function ProfilingOverview() {
 
   return (
     <>
-      {isJavaAgent ? (
-        <SearchBar showTransactionTypeSelector />
-      ) : (
+      {!isJavaAgent && (
         <>
           <ProfilingHostsCallout serviceName={serviceName} />
           <EuiSpacer />
-          <EmbeddableProfilingSearchBar
-            kuery={kuery}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            onQuerySubmit={(next) => {
-              push(history, {
-                query: {
-                  kuery: next.query,
-                  rangeFrom: next.dateRange.from,
-                  rangeTo: next.dateRange.to,
-                },
-              });
-            }}
-            onRefresh={refreshTimeRange}
-          />
         </>
       )}
-      <EuiSpacer />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>
   );

@@ -8,8 +8,35 @@
 import type { HttpSetup } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../common/constants';
 
-export function putLicense(http: HttpSetup, license: string, acknowledge: boolean) {
-  return http.put(API_BASE_PATH, {
+export interface PutLicenseResponse {
+  error?: { reason: string };
+  acknowledged?: boolean;
+  license_status?: string;
+  acknowledge?: Record<string, string[]>;
+}
+
+export interface StartBasicResponse {
+  acknowledged: boolean;
+  basic_was_started: boolean;
+  error_message: string;
+  acknowledge: Record<string, string[]>;
+}
+
+export interface StartTrialResponse {
+  trial_was_started: boolean;
+  error_message: string;
+}
+
+export interface GetPermissionsResponse {
+  hasPermission: boolean;
+}
+
+export function putLicense(
+  http: HttpSetup,
+  license: string,
+  acknowledge: boolean
+): Promise<PutLicenseResponse> {
+  return http.put<PutLicenseResponse>(API_BASE_PATH, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
     },
@@ -21,8 +48,8 @@ export function putLicense(http: HttpSetup, license: string, acknowledge: boolea
   });
 }
 
-export function startBasic(http: HttpSetup, acknowledge: boolean) {
-  return http.post(`${API_BASE_PATH}/start_basic`, {
+export function startBasic(http: HttpSetup, acknowledge: boolean): Promise<StartBasicResponse> {
+  return http.post<StartBasicResponse>(`${API_BASE_PATH}/start_basic`, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
     },
@@ -34,8 +61,8 @@ export function startBasic(http: HttpSetup, acknowledge: boolean) {
   });
 }
 
-export function startTrial(http: HttpSetup) {
-  return http.post(`${API_BASE_PATH}/start_trial`, {
+export function startTrial(http: HttpSetup): Promise<StartTrialResponse> {
+  return http.post<StartTrialResponse>(`${API_BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
     },
@@ -43,8 +70,8 @@ export function startTrial(http: HttpSetup) {
   });
 }
 
-export function canStartTrial(http: HttpSetup) {
-  return http.get(`${API_BASE_PATH}/start_trial`, {
+export function canStartTrial(http: HttpSetup): Promise<boolean> {
+  return http.get<boolean>(`${API_BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
     },
@@ -52,8 +79,8 @@ export function canStartTrial(http: HttpSetup) {
   });
 }
 
-export function getPermissions(http: HttpSetup) {
-  return http.post(`${API_BASE_PATH}/permissions`, {
+export function getPermissions(http: HttpSetup): Promise<GetPermissionsResponse> {
+  return http.post<GetPermissionsResponse>(`${API_BASE_PATH}/permissions`, {
     headers: {
       contentType: 'application/json',
     },

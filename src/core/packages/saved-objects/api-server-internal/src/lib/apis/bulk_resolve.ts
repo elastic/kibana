@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkResolveError } from '@kbn/core-saved-objects-server';
-import { type SavedObject } from '@kbn/core-saved-objects-server';
+import {
+  type BulkResolveError,
+  errorContent,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
   SavedObjectsResolveOptions,
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { errorContent } from './utils';
 import type { ApiExecutionContext } from './types';
-import { internalBulkResolve, isBulkResolveError } from './internals/internal_bulk_resolve';
+import { internalBulkResolve } from './internals/internal_bulk_resolve';
 import { incrementCounterInternal } from './internals/increment_counter_internal';
 
 export interface PerformCreateParams<T = unknown> {
@@ -44,11 +46,11 @@ export const performBulkResolve = async <T>(
 
   const resolvedObjects = bulkResults.map<SavedObjectsResolveResponse<T>>((result) => {
     // extract payloads from saved object errors
-    if (isBulkResolveError(result)) {
+    if (SavedObjectsErrorHelpers.isBulkResolveError(result)) {
       const errorResult = result as BulkResolveError;
       const { type, id, error } = errorResult;
       return {
-        saved_object: { type, id, error: errorContent(error) } as unknown as SavedObject<T>,
+        saved_object: { type, id, error: errorContent(error) },
         outcome: 'exactMatch',
       };
     }

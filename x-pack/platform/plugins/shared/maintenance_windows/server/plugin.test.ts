@@ -11,11 +11,6 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { MaintenanceWindowsConfig } from './config';
-
-const maintenanceWindowsConfig = {
-  enabled: true,
-};
 
 describe('Maintenance Windows Plugin', () => {
   describe('setup()', () => {
@@ -30,8 +25,7 @@ describe('Maintenance Windows Plugin', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      const context =
-        coreMock.createPluginInitializerContext<MaintenanceWindowsConfig>(maintenanceWindowsConfig);
+      const context = coreMock.createPluginInitializerContext();
       plugin = new MaintenanceWindowsPlugin(context);
     });
 
@@ -65,8 +59,7 @@ describe('Maintenance Windows Plugin', () => {
 
   describe('start()', () => {
     test(`exposes getMaintenanceWindowClientWithAuth()`, async () => {
-      const context =
-        coreMock.createPluginInitializerContext<MaintenanceWindowsConfig>(maintenanceWindowsConfig);
+      const context = coreMock.createPluginInitializerContext();
       const plugin = new MaintenanceWindowsPlugin(context);
 
       plugin.setup(coreMock.createSetup(), {
@@ -99,9 +92,42 @@ describe('Maintenance Windows Plugin', () => {
       expect(client).toBeDefined();
     });
 
+    test(`exposes getMaintenanceWindowClientWithoutAuth()`, async () => {
+      const context = coreMock.createPluginInitializerContext();
+      const plugin = new MaintenanceWindowsPlugin(context);
+
+      plugin.setup(coreMock.createSetup(), {
+        licensing: licensingMock.createSetup(),
+        taskManager: taskManagerMock.createSetup(),
+        features: featuresPluginMock.createSetup(),
+      });
+
+      const startContract = plugin.start(coreMock.createStart(), {
+        taskManager: taskManagerMock.createStart(),
+      });
+
+      const fakeRequest = {
+        headers: {},
+        getBasePath: () => '',
+        path: '/',
+        route: { settings: {} },
+        url: {
+          href: '/',
+        },
+        raw: {
+          req: {
+            url: '/',
+          },
+        },
+        getSavedObjectsClient: jest.fn(),
+      } as unknown as KibanaRequest;
+
+      const client = startContract.getMaintenanceWindowClientWithoutAuth(fakeRequest);
+      expect(client).toBeDefined();
+    });
+
     test(`exposes getMaintenanceWindowClientInternal()`, async () => {
-      const context =
-        coreMock.createPluginInitializerContext<MaintenanceWindowsConfig>(maintenanceWindowsConfig);
+      const context = coreMock.createPluginInitializerContext();
       const plugin = new MaintenanceWindowsPlugin(context);
 
       plugin.setup(coreMock.createSetup(), {

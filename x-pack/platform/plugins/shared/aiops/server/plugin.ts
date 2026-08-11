@@ -19,6 +19,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { AIOPS_PLUGIN_ID } from '@kbn/aiops-common/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import { changePointChartEmbeddableStateSchema } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import { patternAnalysisEmbeddableStateSchema } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
+import { logRateAnalysisEmbeddableStateSchema } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { isActiveLicense } from './lib/license';
 import type {
   AiopsLicense,
@@ -30,9 +34,11 @@ import type {
 import { defineRoute as defineLogRateAnalysisFieldCandidatesRoute } from './routes/log_rate_analysis_field_candidates/define_route';
 import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
 import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
-import { registerCasesPersistableState } from './register_cases';
+import { registerCaseAttachments } from './register_cases';
 import type { ConfigSchema } from './config_schema';
 import { setupCapabilities } from './lib/capabilities';
+import { transformIn as changePointTransformIn } from '../common/embeddables/change_point_chart/transform_in';
+import { transformOut as changePointTransformOut } from '../common/embeddables/change_point_chart/transform_out';
 import { transformIn as logRateTransformIn } from '../common/embeddables/log_rate_analysis/transform_in';
 import { transformOut as logRateTransformOut } from '../common/embeddables/log_rate_analysis/transform_out';
 import { transformIn as patternAnalysisTransformIn } from '../common/embeddables/pattern_analysis/transform_in';
@@ -67,7 +73,7 @@ export class AiopsPlugin
       aiopsLicense.isActivePlatinumLicense = isActiveLicense('platinum', license);
 
       if (aiopsLicense.isActivePlatinumLicense) {
-        registerCasesPersistableState(plugins.cases, this.logger);
+        registerCaseAttachments(plugins.cases, this.logger);
       }
     });
 
@@ -80,16 +86,31 @@ export class AiopsPlugin
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });
 
-    plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
-      transformOutInjectsReferences: true,
-      transformIn: patternAnalysisTransformIn,
-      transformOut: patternAnalysisTransformOut,
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
+      title: 'Change point detection chart',
+      getSchema: () => changePointChartEmbeddableStateSchema,
+      getTransforms: () => ({
+        transformIn: changePointTransformIn,
+        transformOut: changePointTransformOut,
+      }),
     });
 
-    plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
-      transformOutInjectsReferences: true,
-      transformIn: logRateTransformIn,
-      transformOut: logRateTransformOut,
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
+      title: 'Pattern analysis',
+      getSchema: () => patternAnalysisEmbeddableStateSchema,
+      getTransforms: () => ({
+        transformIn: patternAnalysisTransformIn,
+        transformOut: patternAnalysisTransformOut,
+      }),
+    });
+
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
+      title: 'Log rate analysis',
+      getSchema: () => logRateAnalysisEmbeddableStateSchema,
+      getTransforms: () => ({
+        transformIn: logRateTransformIn,
+        transformOut: logRateTransformOut,
+      }),
     });
 
     return {};

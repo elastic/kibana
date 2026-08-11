@@ -15,14 +15,15 @@ import type {
   SchedulerSoAttributes,
   GapAutoFillSchedulerLogConfig,
 } from '../../../application/gaps/types/scheduler';
-import { backfillInitiator } from '../../../../common/constants';
+import {
+  backfillInitiator,
+  GAP_AUTO_FILL_STATUS,
+  type GapAutoFillStatus,
+} from '../../../../common/constants';
 import { GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import type { GapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
-import {
-  GAP_AUTO_FILL_STATUS,
-  type GapAutoFillStatus,
-} from '../../../application/gaps/types/scheduler';
+
 import type { Gap } from '../gap';
 import { getOverlap } from '../gap/interval_utils';
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
@@ -109,8 +110,8 @@ export function getGapAutoFillRunOutcome(consolidated: AggregatedByRuleEntry[]):
   };
 }
 
-export function isCancelled(abortController: AbortController): boolean {
-  return abortController.signal.aborted;
+export function isCancelled(signal: AbortSignal): boolean {
+  return signal.aborted;
 }
 
 export async function filterGapsWithOverlappingBackfills(
@@ -220,6 +221,7 @@ export async function initRun({
     schedule: soAttrs.schedule,
     maxBackfills: soAttrs.maxBackfills,
     ruleTypes: soAttrs.ruleTypes,
+    excludedReasons: soAttrs.excludedReasons,
   };
   const logEvent = createGapAutoFillSchedulerEventLogger({
     eventLogger,

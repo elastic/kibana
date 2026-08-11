@@ -28,7 +28,7 @@ export function inject(
     }).attributes;
     const { attributes: attributesWithInjectedIds } = injectReferences({
       attributes: attributesWithNoHardCodedIds,
-      references,
+      findReference: (targetName: string) => references.find(({ name }) => name === targetName),
     });
     return {
       ...state,

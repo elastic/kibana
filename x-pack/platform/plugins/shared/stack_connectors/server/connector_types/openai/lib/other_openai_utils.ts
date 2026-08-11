@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { SSLSettings } from '@kbn/actions-plugin/server';
+import type { SSLSettings } from '@kbn/actions-utils';
 import type { AxiosError } from 'axios';
 import type { Secrets } from '@kbn/connector-schemas/openai';
 
@@ -18,8 +18,8 @@ import type { Secrets } from '@kbn/connector-schemas/openai';
  * The stream parameter is accepted in the ChatCompletion
  * API and the Completion API only
  */
-export const sanitizeRequest = (body: string): string => {
-  return getRequestWithStreamOption(body, false);
+export const sanitizeRequest = (body: string, defaultModel?: string): string => {
+  return getRequestWithStreamOption(body, false, defaultModel);
 };
 
 /**

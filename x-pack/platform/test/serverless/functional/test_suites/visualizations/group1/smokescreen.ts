@@ -71,8 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      // 4th item is the other bucket
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
+      // 10th item is the other bucket (9 top values + Other)
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(10);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -322,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.assertLayerCount(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
-        'Top 5 values of geo.dest'
+        'Top 9 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -409,6 +409,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      // Switching chart type re-applies the target type's empty-rows default, so
+      // the datatable turns "Include empty rows" back on. Turn it off again to
+      // assert the populated buckets only.
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger');
+      await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');

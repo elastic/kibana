@@ -37,33 +37,40 @@ jest.mock('../../queries/helpers', () => {
   };
 });
 
-const mockedSourcererDataView = {
-  title: 'test-*',
-  fields: {},
-};
+const mockedIndexPattern = 'test-*';
+const mockedFields = {};
 
 describe('UserActivityPrivilegedUsersPanel', () => {
   it('renders panel title', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(screen.getByText('Privileged user activity')).toBeInTheDocument();
   });
 
   it('renders the toggle button group', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(
       screen.getByRole('group', { name: /Select a visualization to display/i })
     ).toBeInTheDocument();
   });
 
   it('renders the stack by select with options', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(screen.getByText('Stack by')).toBeInTheDocument();
     const privUserButton = screen.getByText('Privileged user');
@@ -78,17 +85,23 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the EsqlDashboardPanel', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(screen.getByTestId('esql-dashboard-panel')).toBeInTheDocument();
   });
 
   it('changes stack by option when select changes', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
     expect(screen.getByDisplayValue('privileged_user')).toBeInTheDocument(); // Assert that input value before change
 
     act(() => {
@@ -103,9 +116,12 @@ describe('UserActivityPrivilegedUsersPanel', () => {
   });
 
   it('renders the "View all events by privileged users" link', () => {
-    render(<UserActivityPrivilegedUsersPanel sourcererDataView={mockedSourcererDataView} />, {
-      wrapper: TestProviders,
-    });
+    render(
+      <UserActivityPrivilegedUsersPanel indexPattern={mockedIndexPattern} fields={mockedFields} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(screen.getByText('View all events')).toBeInTheDocument();
   });

@@ -6,7 +6,7 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import { removeInstallation } from '../../services/epm/packages';
 import { appContextService } from '../../services';
@@ -25,12 +25,12 @@ export interface BulkUninstallTaskParams extends BulkPackageOperationsTaskParams
 }
 
 export async function _runBulkUninstallTask({
-  abortController,
+  signal,
   taskParams,
   logger,
 }: {
   taskParams: BulkUninstallTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }) {
   const { packages, force } = taskParams;
@@ -40,7 +40,7 @@ export async function _runBulkUninstallTask({
 
   for (const pkg of packages) {
     // Throw between package uninstall if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {
@@ -70,7 +70,12 @@ export async function _runBulkUninstallTask({
 
 export async function scheduleBulkUninstall(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: Omit<BulkUninstallTaskParams, 'type'>
+  taskParams: Omit<BulkUninstallTaskParams, 'type'>,
+  request: KibanaRequest
 ) {
-  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_uninstall' });
+  return scheduleBulkOperationTask(
+    taskManagerStart,
+    { ...taskParams, type: 'bulk_uninstall' },
+    request
+  );
 }

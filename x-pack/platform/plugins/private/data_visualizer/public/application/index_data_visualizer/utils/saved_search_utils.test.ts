@@ -303,4 +303,17 @@ describe('getEsQueryFromSavedSearch()', () => {
       searchString: 'responsetime:>100',
     });
   });
+
+  it('should not throw an exception on receiving malformed input', () => {
+    const queryTestFn = () =>
+      getEsQueryFromSavedSearch({
+        dataView: mockDataView,
+        savedSearch: null,
+        uiSettings: mockUiSettings,
+        query: { query: 'agent.name : "nodejs', language: 'kuery' },
+      });
+
+    expect(queryTestFn).not.toThrow();
+    expect(queryTestFn()).toBeUndefined();
+  });
 });

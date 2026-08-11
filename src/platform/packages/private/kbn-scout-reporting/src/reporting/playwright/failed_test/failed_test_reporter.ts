@@ -21,23 +21,26 @@ import {
   getOwningTeamsForPath,
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import {
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
-  getRunTarget,
-  getTestIDForTitle,
+  getRunCommand,
+  getTestTargetFromProcessArguments,
   parseStdout,
   stripFilePath,
-  stripRunCommand,
 } from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
+import { getTestIdentity } from '../test_identity';
 import { ScoutFailureTracker } from './failure_tracking';
 
 /**
@@ -49,10 +52,11 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
+  private readonly testTarget: string;
   private failureTracker?: ScoutFailureTracker;
-
-  private target = 'undefined'; // when '--grep' is not provided in the command line
   private kibanaModule: TestFailure['kibanaModule'];
+  /** Root suite captured in `onBegin`; walked in `onEnd` to identify tests that ended up flaky. */
+  private suite?: Suite;
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
@@ -63,7 +67,9 @@ export class ScoutFailedTestReporter implements Reporter {
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -89,7 +95,7 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.target = getRunTarget();
+    this.suite = suite;
 
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
@@ -111,27 +117,45 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status !== 'failed') {
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
       return;
     }
 
+    const { id, filePath } = getTestIdentity(test);
+
+    const consoleErrorsAttachment = result.attachments.find(
+      (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
+    );
+    const consoleErrors = consoleErrorsAttachment?.body?.toString('utf-8');
+
     const testFailure: TestFailure = {
-      id: getTestIDForTitle(test.titlePath().join(' ')),
+      id,
       suite: test.parent.title,
       title: test.title,
-      target: this.target,
+      target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
-      owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
+      owner: this.getFileOwners(filePath),
       kibanaModule: this.kibanaModule,
       duration: result.duration,
       error: this.formatTestError(result),
       stdout: result.stdout ? parseStdout(result.stdout) : undefined,
-      attachments: result.attachments.map((attachment) => ({
-        name: attachment.name,
-        path: attachment.path,
-        contentType: attachment.contentType,
-      })),
+      consoleErrors,
+      attachments: result.attachments
+        .filter((a) => a.name !== BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        .map((attachment) => ({
+          name: attachment.name,
+          path: attachment.path,
+          contentType: attachment.contentType,
+        })),
+      // Zero-based attempt index; 0 is the first run, 1 the first retry.
+      attempt: result.retry,
     };
 
     this.report.logEvent(testFailure);
@@ -141,11 +165,21 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onEnd(result: FullResult) {
+    // A test's outcome is only knowable once every attempt has run, so flaky tests are excluded
+    // here rather than in onTestEnd. Their failing attempt still stays in the report artifact
+    // above (useful debugging material); only the GitHub-issue tracker excludes them, since it
+    // shouldn't open issues for tests that ultimately passed.
+    const flakyTestIds = new Set(
+      (this.suite?.allTests() ?? [])
+        .filter((test) => test.outcome() === 'flaky')
+        .map((test) => getTestIdentity(test).id)
+    );
+
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
       // Save failure tracking file for GitHub issue integration
-      this.failureTracker?.save();
+      this.failureTracker?.save({ excludeTestIds: flakyTestIds });
     } finally {
       this.report.conclude();
     }

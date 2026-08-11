@@ -25,7 +25,7 @@ import {
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
-  type AlertStatus,
+  type PublicAlertStatus,
 } from '@kbn/rule-data-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
@@ -130,7 +130,7 @@ const sort: AlertsTableSortCombinations[] = [
 ];
 
 export const AlertsPanel: FC = () => {
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+  const { data, http, notifications, rendering, fieldFormats, application, licensing, settings } =
     useMlKibana().services;
 
   const [isOpen, setIsOpen] = useState(true);
@@ -176,7 +176,7 @@ export const AlertsPanel: FC = () => {
         headerItems={Object.entries(countByStatus ?? {}).map(([status, count]) => {
           return (
             <>
-              {statusNameMap[status as AlertStatus]}{' '}
+              {statusNameMap[status as PublicAlertStatus]}{' '}
               <EuiNotificationBadge
                 size="m"
                 color={status === ALERT_STATUS_ACTIVE ? 'accent' : 'subdued'}
@@ -227,6 +227,7 @@ export const AlertsPanel: FC = () => {
               data,
               http,
               notifications,
+              rendering,
               fieldFormats,
               application,
               licensing,

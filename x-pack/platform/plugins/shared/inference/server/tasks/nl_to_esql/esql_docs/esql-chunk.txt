@@ -1,0 +1,57 @@
+# CHUNK
+
+The CHUNK function splits a text field into smaller chunks using a sentence-based chunking strategy. It can be applied to fields of the text family, such as text and semantic_text. You can specify the number of chunks returned and the length of the sentences used to create the chunks.
+
+## Syntax
+
+`CHUNK(field, chunking_settings, separator_group, overlap, sentence_overlap, strategy, max_chunk_size, separators)`
+
+### Parameters
+
+#### field
+
+The input field to be chunked.
+
+#### chunking_settings
+
+Options to customize chunking behavior. Defaults to `{"strategy":"sentence","max_chunk_size":300,"sentence_overlap":0}`.
+
+#### separator_group
+
+Optional. Sets a predefined list of separators based on the selected text type. Values can be `markdown` or `plaintext`. Only applicable to the `recursive` chunking strategy. When using the `recursive` strategy, either `separators` or `separator_group` must be specified.
+
+#### overlap
+
+Optional. The number of overlapping words for chunks. Only applicable to the `word` chunking strategy. This value cannot be higher than half the `max_chunk_size` value.
+
+#### sentence_overlap
+
+Optional. The number of overlapping sentences for chunks. Only applicable to the `sentence` chunking strategy. Can be either `1` or `0`.
+
+#### strategy
+
+Optional. The chunking strategy to use. Default value is `sentence`.
+
+#### max_chunk_size
+
+Optional. The maximum size of a chunk in words. Cannot be lower than `20` for the `sentence` strategy or `10` for the `word` or `recursive` strategies. This value should not exceed the window size for any associated models using the output of this function.
+
+#### separators
+
+Optional. A list of strings used as possible split points when chunking text. Each string can be a plain string or a regular expression pattern. The system tries each separator in order to split the text, starting from the first item in the list. After splitting, it attempts to recombine smaller pieces into larger chunks that stay within the `max_chunk_size` limit, to reduce the total number of chunks generated. Only applicable to the `recursive` chunking strategy. When using the `recursive` strategy, either `separators` or `separator_group` must be specified.
+
+## Examples
+
+Splits the provided text into chunks of up to 10 words each, with an overlap of 1 word between consecutive chunks, using the word chunking strategy and expands the resulting chunks into separate rows.
+
+```esql
+ROW result = CHUNK("It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief.", {"strategy": "word", "max_chunk_size": 10, "overlap": 1})
+| MV_EXPAND result
+```
+
+## Limitations
+
+- The minimum value for `max_chunk_size` is `20` for the `sentence` strategy and `10` for the `word` or `recursive` strategies.
+- For the `recursive` chunking strategy, either `separators` or `separator_group` must be specified.
+- The `overlap` parameter cannot be higher than half the `max_chunk_size` value.
+- The output chunk size should not exceed the window size for any associated models using the output of this function.

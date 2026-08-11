@@ -17,17 +17,6 @@ import { useFileUploadContext } from '../../use_file_upload';
 
 export const OverallUploadStatus: FC = () => {
   const { filesStatus, uploadStatus, existingIndexName, indexName } = useFileUploadContext();
-  const generateStatus = (statuses: STATUS[]): EuiStepStatus => {
-    if (statuses.includes(STATUS.STARTED)) {
-      return 'current';
-    } else if (statuses.includes(STATUS.FAILED) || statuses.includes(STATUS.ABORTED)) {
-      return 'danger';
-    } else if (statuses.every((status) => status === STATUS.COMPLETED)) {
-      return 'complete';
-    } else {
-      return 'incomplete';
-    }
-  };
 
   const css = {
     '.euiStep__content': { paddingBlockEnd: '0px' },
@@ -134,3 +123,15 @@ export const OverallUploadStatus: FC = () => {
 
   return <EuiSteps steps={steps} titleSize="xxs" css={css} />;
 };
+
+function generateStatus(statuses: STATUS[]): EuiStepStatus {
+  if (statuses.includes(STATUS.STARTED)) {
+    return 'current';
+  } else if (statuses.includes(STATUS.FAILED) || statuses.includes(STATUS.ABORTED)) {
+    return 'danger';
+  } else if (statuses.every((status) => status === STATUS.COMPLETED)) {
+    return 'complete';
+  } else {
+    return 'incomplete';
+  }
+}

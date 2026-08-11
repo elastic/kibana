@@ -39,24 +39,28 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-responsive-m-flexStart-stretch-row-OverviewWrapper"
     data-test-subj="user-overview"
   >
-    <button
-      aria-label="Inspect"
-      class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-      data-test-subj="inspect-icon-button"
-      disabled=""
-      title="Inspect"
-      type="button"
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id_euiToolTipAnchor"
     >
-      <span
-        aria-hidden="true"
-        class="euiButtonIcon__icon"
-        color="inherit"
-        data-euiicon-type="inspect"
-      />
-    </button>
+      <button
+        aria-label="Inspect"
+        class="euiButtonIcon inspectButtonComponent emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
+        data-test-subj="inspect-icon-button"
+        disabled=""
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="inspect"
+        />
+      </button>
+    </span>
     <div
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
@@ -91,6 +95,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       aa7ca589f1b8220002f2fc61c64cfbf1
                     </span>
@@ -135,6 +140,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       domain
                     </span>
@@ -227,6 +233,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -271,6 +278,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -315,6 +323,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
@@ -349,7 +358,7 @@ exports[`User Summary Component it renders the default User Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More
@@ -406,7 +415,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
   data-test-subj="hoverVisibilityContainer"
 >
   <div
-    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-l-flexStart-stretch-column-OverviewWrapper"
+    class="euiFlexGroup e1v2bxdw0 emotion-euiFlexGroup-m-flexStart-stretch-column-OverviewWrapper"
     data-test-subj="user-overview"
   >
     <div
@@ -443,6 +452,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       aa7ca589f1b8220002f2fc61c64cfbf1
                     </span>
@@ -487,6 +497,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       domain
                     </span>
@@ -579,6 +590,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       Debian GNU/Linux
                     </span>
@@ -623,6 +635,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       debian
                     </span>
@@ -667,6 +680,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                   >
                     <span
                       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                      id="generated-id-wrapper"
                     >
                       <button
                         class="euiLink emotion-euiLink-primary"
@@ -701,7 +715,7 @@ exports[`User Summary Component it renders the panel view User Summary 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                       >
                         +1 
                         More

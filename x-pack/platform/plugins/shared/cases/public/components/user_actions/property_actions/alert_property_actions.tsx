@@ -21,14 +21,14 @@ interface Props {
 }
 
 const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts, onDelete }) => {
-  const { permissions } = useCasesContext();
+  const { permissions, features } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
-    const showRemoveAlertIcon = permissions.delete;
+    const showRemoveAlertIcon = permissions.delete && features.alerts.all;
 
     return [
       ...(showRemoveAlertIcon
@@ -37,14 +37,14 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
               type: AttachmentActionType.BUTTON as const,
               color: 'danger' as const,
               disabled: false,
-              iconType: 'minusInCircle',
+              iconType: 'minusCircle',
               label: i18n.REMOVE_ALERTS(totalAlerts),
               onClick: onModalOpen,
             },
           ]
         : []),
     ];
-  }, [permissions.delete, totalAlerts, onModalOpen]);
+  }, [permissions.delete, features.alerts.all, totalAlerts, onModalOpen]);
 
   return (
     <>

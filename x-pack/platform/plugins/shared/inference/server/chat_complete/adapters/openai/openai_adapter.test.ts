@@ -17,7 +17,9 @@ import {
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -47,6 +49,32 @@ function createOpenAIChunk({
   };
 }
 
+function createOpenAIResponse({
+  content = null,
+  tool_calls = [],
+  usage,
+}: {
+  content?: string | null;
+  tool_calls?: OpenAI.ChatCompletion['choices'][0]['message']['tool_calls'];
+  usage?: OpenAI.ChatCompletion['usage'];
+}): OpenAI.ChatCompletion {
+  return {
+    id: v4(),
+    created: new Date().getTime(),
+    model: 'gpt-4o',
+    object: 'chat.completion',
+    choices: [
+      {
+        index: 0,
+        finish_reason: 'stop',
+        message: { content, refusal: null, role: 'assistant', tool_calls },
+        logprobs: null,
+      },
+    ],
+    usage,
+  };
+}
+
 describe('openAIAdapter', () => {
   const executorMock = {
     getConnector: jest.fn(),
@@ -57,10 +85,28 @@ describe('openAIAdapter', () => {
   };
 
   const logger = loggerMock.create();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'OpenAI connector',
+    connectorId: 'test-connector-id',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset().mockReturnValue(connector);
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
+
+    executorMock.invoke.mockImplementation(async () => {
+      return {
+        actionId: '',
+        status: 'ok',
+        data: new PassThrough(),
+      };
+    });
   });
 
   const defaultArgs = {
@@ -68,23 +114,17 @@ describe('openAIAdapter', () => {
     logger,
   };
 
+  function getRequest() {
+    const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
+
+    return { stream: params.stream, body: JSON.parse(params.body) };
+  }
+
+  function getSubActionParams() {
+    return executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, unknown>;
+  }
+
   describe('when creating the request', () => {
-    function getRequest() {
-      const params = executorMock.invoke.mock.calls[0][0].subActionParams as Record<string, any>;
-
-      return { stream: params.stream, body: JSON.parse(params.body) };
-    }
-
-    beforeEach(() => {
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: new PassThrough(),
-        };
-      });
-    });
-
     it('correctly formats messages ', () => {
       openAIAdapter
         .chatComplete({
@@ -125,6 +165,45 @@ describe('openAIAdapter', () => {
           role: 'user',
         },
       ]);
+    });
+
+    it('passes maxContentLength for buffered requests', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: false,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
+    });
+
+    it('passes maxContentLength for streaming requests', () => {
+      // Streaming responses are still subject to the connector's axios `maxContentLength`
+      // (enforced while the response stream is consumed), so the override must be forwarded
+      // for streaming requests too — otherwise large streamed completions fail at the 1MB default.
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+        .subscribe(noop);
+
+      expect(getSubActionParams()).toEqual(
+        expect.objectContaining({
+          stream: true,
+          maxContentLength: 10 * 1024 * 1024,
+        })
+      );
     });
 
     it('correctly formats messages with content parts', () => {
@@ -334,23 +413,6 @@ describe('openAIAdapter', () => {
       });
     });
 
-    it('always sets streaming to true', () => {
-      openAIAdapter
-        .chatComplete({
-          ...defaultArgs,
-          messages: [
-            {
-              role: MessageRole.User,
-              content: 'question',
-            },
-          ],
-        })
-        .subscribe(noop);
-
-      expect(getRequest().stream).toBe(true);
-      expect(getRequest().body.stream).toBe(true);
-    });
-
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 
@@ -421,246 +483,502 @@ describe('openAIAdapter', () => {
     });
   });
 
-  describe('when handling the response', () => {
-    it('throws an error if the connector response is in error', async () => {
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: 'actionId',
-          status: 'error',
-          serviceMessage: 'something went wrong',
-          data: undefined,
-        };
-      });
-
-      await expect(
-        lastValueFrom(
-          openAIAdapter
-            .chatComplete({
-              ...defaultArgs,
-              messages: [{ role: MessageRole.User, content: 'Hello' }],
-            })
-            .pipe(toArray())
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error calling connector: something went wrong"`
-      );
-    });
-
-    it('emits chunk events', async () => {
-      const source$ = of(
-        createOpenAIChunk({
-          delta: {
-            content: 'First',
-          },
-        }),
-        createOpenAIChunk({
-          delta: {
-            content: ', second',
-          },
+  describe('streaming mode', () => {
+    it('sets streaming to true', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
         })
-      );
+        .subscribe(noop);
 
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: observableIntoEventSourceStream(source$, logger),
-        };
-      });
-
-      const response$ = openAIAdapter.chatComplete({
-        ...defaultArgs,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'Hello',
-          },
-        ],
-      });
-
-      const allChunks = await lastValueFrom(
-        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
-      );
-
-      expect(allChunks).toEqual([
-        {
-          content: 'First',
-          tool_calls: [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
-        },
-        {
-          content: ', second',
-          tool_calls: [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
-        },
-      ]);
+      expect(getRequest().stream).toBe(true);
+      expect(getRequest().body.stream).toBe(true);
     });
 
-    it('emits chunk events with tool calls', async () => {
-      const source$ = of(
-        createOpenAIChunk({
-          delta: {
+    describe('when handling the response', () => {
+      it('throws an error if the connector response is in error', async () => {
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: 'actionId',
+            status: 'error',
+            serviceMessage: 'something went wrong',
+            data: undefined,
+          };
+        });
+
+        await expect(
+          lastValueFrom(
+            openAIAdapter
+              .chatComplete({
+                ...defaultArgs,
+                stream: true,
+                messages: [{ role: MessageRole.User, content: 'Hello' }],
+              })
+              .pipe(toArray())
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error calling connector: something went wrong"`
+        );
+      });
+
+      it('emits chunk events', async () => {
+        const source$ = of(
+          createOpenAIChunk({
+            delta: {
+              content: 'First',
+            },
+          }),
+          createOpenAIChunk({
+            delta: {
+              content: ', second',
+            },
+          })
+        );
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: observableIntoEventSourceStream(source$, logger),
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(
+          response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+        );
+
+        expect(allChunks).toEqual([
+          {
             content: 'First',
+            tool_calls: [],
+            type: ChatCompletionEventType.ChatCompletionChunk,
           },
-        }),
-        createOpenAIChunk({
-          delta: {
+          {
+            content: ', second',
+            tool_calls: [],
+            type: ChatCompletionEventType.ChatCompletionChunk,
+          },
+        ]);
+      });
+
+      it('emits chunk events with tool calls', async () => {
+        const source$ = of(
+          createOpenAIChunk({
+            delta: {
+              content: 'First',
+            },
+          }),
+          createOpenAIChunk({
+            delta: {
+              tool_calls: [
+                {
+                  index: 0,
+                  id: '0',
+                  function: {
+                    name: 'my_function',
+                    arguments: '{}',
+                  },
+                },
+              ],
+            },
+          })
+        );
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: observableIntoEventSourceStream(source$, logger),
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(
+          response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+        );
+
+        expect(allChunks).toEqual([
+          {
+            content: 'First',
+            tool_calls: [],
+            type: ChatCompletionEventType.ChatCompletionChunk,
+          },
+          {
+            content: '',
             tool_calls: [
               {
-                index: 0,
-                id: '0',
                 function: {
                   name: 'my_function',
                   arguments: '{}',
                 },
+                index: 0,
+                toolCallId: '0',
               },
             ],
+            type: ChatCompletionEventType.ChatCompletionChunk,
           },
-        })
-      );
-
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: observableIntoEventSourceStream(source$, logger),
-        };
+        ]);
       });
 
-      const response$ = openAIAdapter.chatComplete({
-        ...defaultArgs,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'Hello',
-          },
-        ],
-      });
+      it('emits token count events', async () => {
+        const source$ = of(
+          createOpenAIChunk({
+            delta: {
+              content: 'chunk',
+            },
+          }),
+          createOpenAIChunk({
+            usage: {
+              prompt_tokens: 50,
+              completion_tokens: 100,
+              total_tokens: 150,
+            },
+          })
+        );
 
-      const allChunks = await lastValueFrom(
-        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
-      );
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: observableIntoEventSourceStream(source$, logger),
+          };
+        });
 
-      expect(allChunks).toEqual([
-        {
-          content: 'First',
-          tool_calls: [],
-          type: ChatCompletionEventType.ChatCompletionChunk,
-        },
-        {
-          content: '',
-          tool_calls: [
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
             {
-              function: {
-                name: 'my_function',
-                arguments: '{}',
-              },
-              index: 0,
-              toolCallId: '0',
+              role: MessageRole.User,
+              content: 'Hello',
             },
           ],
-          type: ChatCompletionEventType.ChatCompletionChunk,
-        },
-      ]);
-    });
+        });
 
-    it('emits token count events', async () => {
-      const source$ = of(
-        createOpenAIChunk({
-          delta: {
-            content: 'chunk',
-          },
-        }),
-        createOpenAIChunk({
-          usage: {
-            prompt_tokens: 50,
-            completion_tokens: 100,
-            total_tokens: 150,
-          },
-        })
-      );
+        const allChunks = await lastValueFrom(response$.pipe(toArray()));
 
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: observableIntoEventSourceStream(source$, logger),
-        };
-      });
-
-      const response$ = openAIAdapter.chatComplete({
-        ...defaultArgs,
-        messages: [
+        expect(allChunks).toEqual([
           {
-            role: MessageRole.User,
-            content: 'Hello',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: 'chunk',
+            tool_calls: [],
           },
-        ],
+          {
+            type: ChatCompletionEventType.ChatCompletionTokenCount,
+            tokens: {
+              prompt: 50,
+              completion: 100,
+              total: 150,
+            },
+            model: 'gpt-4o', // Model from createOpenAIChunk helper
+          },
+        ]);
       });
 
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+      it('emits token count event when not provided by the response', async () => {
+        const source$ = of(
+          createOpenAIChunk({
+            delta: {
+              content: 'chunk',
+            },
+          })
+        );
 
-      expect(allChunks).toEqual([
-        {
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: observableIntoEventSourceStream(source$, logger),
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: true,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+        expect(allChunks).toHaveLength(2);
+        expect(allChunks[0]).toEqual({
           type: ChatCompletionEventType.ChatCompletionChunk,
           content: 'chunk',
           tool_calls: [],
-        },
-        {
-          type: ChatCompletionEventType.ChatCompletionTokenCount,
-          tokens: {
-            prompt: 50,
-            completion: 100,
-            total: 150,
-          },
-        },
-      ]);
-    });
-
-    it('emits token count event when not provided by the response', async () => {
-      const source$ = of(
-        createOpenAIChunk({
-          delta: {
-            content: 'chunk',
-          },
-        })
-      );
-
-      executorMock.invoke.mockImplementation(async () => {
-        return {
-          actionId: '',
-          status: 'ok',
-          data: observableIntoEventSourceStream(source$, logger),
-        };
-      });
-
-      const response$ = openAIAdapter.chatComplete({
-        ...defaultArgs,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'Hello',
-          },
-        ],
-      });
-
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
-
-      expect(allChunks).toEqual([
-        {
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          content: 'chunk',
-          tool_calls: [],
-        },
-        {
+        });
+        expect(allChunks[1]).toMatchObject({
           type: ChatCompletionEventType.ChatCompletionTokenCount,
           tokens: {
             completion: expect.any(Number),
             prompt: expect.any(Number),
             total: expect.any(Number),
           },
-        },
-      ]);
+        });
+        // Model field is optional - only present if request.model is set
+        // Since no modelName is provided, model should be undefined/not present
+      });
+    });
+  });
+
+  describe('non-streaming mode', () => {
+    it('sets streaming to false', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          stream: false,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(getRequest().stream).toBe(false);
+      expect(getRequest().body.stream).toBe(false);
+    });
+
+    describe('when handling the response', () => {
+      it('throws an error if the connector response is in error', async () => {
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: 'actionId',
+            status: 'error',
+            serviceMessage: 'something went wrong',
+            data: undefined,
+          };
+        });
+
+        await expect(
+          lastValueFrom(
+            openAIAdapter
+              .chatComplete({
+                ...defaultArgs,
+                stream: false,
+                messages: [{ role: MessageRole.User, content: 'Hello' }],
+              })
+              .pipe(toArray())
+          )
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error calling connector: something went wrong"`
+        );
+      });
+
+      it('emits a chunk event with the response', async () => {
+        const source = createOpenAIResponse({ content: 'Hello' });
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: source,
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: false,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(
+          response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+        );
+
+        expect(allChunks).toEqual([
+          {
+            content: 'Hello',
+            tool_calls: [],
+            type: ChatCompletionEventType.ChatCompletionChunk,
+          },
+        ]);
+      });
+
+      it('emits chunk events with tool calls', async () => {
+        const source = createOpenAIResponse({
+          content: 'Hello',
+          tool_calls: [
+            {
+              id: '0',
+              function: {
+                name: 'my_function',
+                arguments: '{}',
+              },
+              type: 'function',
+            },
+          ],
+        });
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: source,
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: false,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(
+          response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+        );
+
+        expect(allChunks).toEqual([
+          {
+            content: 'Hello',
+            tool_calls: [
+              {
+                function: {
+                  name: 'my_function',
+                  arguments: '{}',
+                },
+                index: 0,
+                toolCallId: '0',
+              },
+            ],
+            type: ChatCompletionEventType.ChatCompletionChunk,
+          },
+        ]);
+      });
+
+      it('emits token count events', async () => {
+        const source = createOpenAIResponse({
+          content: 'response',
+          usage: {
+            prompt_tokens: 50,
+            completion_tokens: 100,
+            total_tokens: 150,
+          },
+        });
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: source,
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: false,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+        expect(allChunks).toEqual([
+          {
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: 'response',
+            tool_calls: [],
+          },
+          {
+            type: ChatCompletionEventType.ChatCompletionTokenCount,
+            tokens: {
+              prompt: 50,
+              completion: 100,
+              total: 150,
+            },
+            model: 'gpt-4o',
+          },
+        ]);
+      });
+
+      it('emits token count event when not provided by the response', async () => {
+        const source = createOpenAIResponse({
+          content: 'response',
+        });
+
+        executorMock.invoke.mockImplementation(async () => {
+          return {
+            actionId: '',
+            status: 'ok',
+            data: source,
+          };
+        });
+
+        const response$ = openAIAdapter.chatComplete({
+          ...defaultArgs,
+          stream: false,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'Hello',
+            },
+          ],
+        });
+
+        const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+        expect(allChunks).toHaveLength(2);
+        expect(allChunks[0]).toEqual({
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: 'response',
+          tool_calls: [],
+        });
+        expect(allChunks[1]).toMatchObject({
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: expect.any(Number),
+            prompt: expect.any(Number),
+            total: expect.any(Number),
+          },
+        });
+      });
     });
   });
 });

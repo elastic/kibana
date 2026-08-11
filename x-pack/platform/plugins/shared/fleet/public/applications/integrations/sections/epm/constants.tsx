@@ -74,6 +74,9 @@ export const AssetTitleMap: Record<
   alerting_rule_template: i18n.translate('xpack.fleet.epm.assetTitles.alertingRuleTemplates', {
     defaultMessage: 'Alerting rule templates',
   }),
+  slo_template: i18n.translate('xpack.fleet.epm.assetTitles.sloTemplates', {
+    defaultMessage: 'SLO templates',
+  }),
   'ml-module': i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'Anomaly detection configurations',
   }),
@@ -125,10 +128,13 @@ export const AssetTitleMap: Record<
     defaultMessage: 'Views',
   }),
   knowledge_base: i18n.translate('xpack.fleet.epm.assetTitles.knowledgeBase', {
-    defaultMessage: 'Knowledge base',
+    defaultMessage: 'Integration knowledge',
   }),
   alert: i18n.translate('xpack.fleet.epm.assetTitles.rules', {
     defaultMessage: 'Rules',
+  }),
+  esql_view: i18n.translate('xpack.fleet.epm.assetTitles.esqlViews', {
+    defaultMessage: 'ES|QL views',
   }),
 };
 

@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // create drilldown
     await dashboardDrilldownPanelActions.clickCreateDrilldown();
     await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
-    await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
+    await testSubjects.click('drilldownFactoryItem-dashboard_drilldown');
     await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
       drilldownName: DRILLDOWN_TO_AREA_CHART_NAME,
       destinationDashboardTitle: dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
@@ -66,13 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await dashboardDrilldownPanelActions.getPanelDrilldownCount()).to.be(1);
 
     // save dashboard, navigate to view mode
-    await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    await dashboard.ensureHasUnsavedChangesNotification();
     await dashboard.saveDashboard(dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME, {
       saveAsNew: false,
       waitDialogIsClosed: true,
       exitFromEditMode: true,
     });
-    await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+    await dashboard.ensureMissingUnsavedChangesNotification();
   };
 
   const createControls = async (
@@ -127,6 +127,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboard.waitForRenderComplete();
   };
 
+  /**
+   * Purpose: Dashboard drilldown smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Dashboard to dashboard drilldown', function () {
     describe('Create & use drilldowns', () => {
       before(async () => {
@@ -293,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cleanFiltersAndControls = async (dashboardName: string) => {
           await dashboard.loadDashboardInEditMode(dashboardName);
           await filterBar.removeAllFilters();
-          await dashboardControls.deleteAllControls();
+          await dashboardControls.deleteAllPinnedControls();
           await dashboard.clickQuickSave();
         };
 

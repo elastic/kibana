@@ -8,7 +8,9 @@ paths:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: ResolveTimeline
-      summary: Get an existing saved Timeline or Timeline template
+      summary: Resolve a Timeline or Timeline template
+      description:
+        Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
       tags:
         - access:securitySolution
       parameters:
@@ -24,13 +26,41 @@ paths:
           description: The ID of the timeline to resolve
       responses:
         '200':
-          description: The (template) Timeline has been found
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
+              examples:
+                exactMatch:
+                  summary: Exact match outcome
+                  description: Timeline resolved without alias or conflict
+                  value:
+                    outcome: exactMatch
+                    timeline:
+                      savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      title: Investigation
+                      timelineType: default
 
         '400':
-          description: The request is missing parameters
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                badRequest:
+                  summary: Bad request
+                  value: {}
         '404':
           description: The (template) Timeline was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                notFound:
+                  summary: Not found
+                  value: {}

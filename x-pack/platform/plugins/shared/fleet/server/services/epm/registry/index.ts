@@ -95,6 +95,12 @@ export async function fetchList(
     if (params.type) {
       url.searchParams.set('type', params.type);
     }
+    if (params.package) {
+      url.searchParams.set('package', params.package);
+    }
+    if (params.all) {
+      url.searchParams.set('all', params.all.toString());
+    }
   }
 
   setConstraints(url);

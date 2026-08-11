@@ -11,7 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { EuiSearchBar } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core/public';
 
-import type { Index, IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
+import { PHASE_NAMES } from '../application/lib';
+import type { Index } from '../../common/types';
 
 import { retryLifecycleForIndex } from '../application/services/api';
 import { indexLifecycleTab } from './components/index_lifecycle_summary';
@@ -70,7 +72,7 @@ export const removeLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'stopFilled',
+    icon: 'stopFill',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.removeIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Remove lifecycle policy',
@@ -109,7 +111,7 @@ export const addLifecyclePolicyActionExtension = ({
         />
       );
     },
-    icon: 'plusInCircle',
+    icon: 'plusCircle',
     buttonLabel: i18n.translate('xpack.indexLifecycleMgmt.addLifecyclePolicyActionButtonLabel', {
       defaultMessage: 'Add lifecycle policy',
     }),
@@ -171,13 +173,13 @@ export const ilmFilterExtension = (indices: Index[]) => {
         options: [
           {
             value: true,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
               defaultMessage: 'Managed',
             }),
           },
           {
             value: false,
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
               defaultMessage: 'Unmanaged',
             }),
           },
@@ -192,36 +194,11 @@ export const ilmFilterExtension = (indices: Index[]) => {
         multiSelect: 'or',
         autoSortOptions: false,
         options: [
-          {
-            value: 'hot',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
-              defaultMessage: 'Hot',
-            }),
-          },
-          {
-            value: 'warm',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
-              defaultMessage: 'Warm',
-            }),
-          },
-          {
-            value: 'frozen',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.frozenLabel', {
-              defaultMessage: 'Frozen',
-            }),
-          },
-          {
-            value: 'cold',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
-              defaultMessage: 'Cold',
-            }),
-          },
-          {
-            value: 'delete',
-            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
-              defaultMessage: 'Delete',
-            }),
-          },
+          { value: 'hot', view: PHASE_NAMES.hot },
+          { value: 'warm', view: PHASE_NAMES.warm },
+          { value: 'frozen', view: PHASE_NAMES.frozen },
+          { value: 'cold', view: PHASE_NAMES.cold },
+          { value: 'delete', view: PHASE_NAMES.delete },
         ],
       },
     ];

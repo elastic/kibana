@@ -8,34 +8,51 @@
  */
 
 import moment from 'moment';
-import userEvent from '@testing-library/user-event';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, within, fireEvent } from '@testing-library/react';
 
 export class EuiSuperDatePickerTestHarness {
   // From https://github.com/elastic/eui/blob/6a30eba7c2a154691c96a1d17c8b2f3506d351a3/src/components/date_picker/super_date_picker/super_date_picker.tsx#L222
   private static readonly dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
+  #root: Document | HTMLElement;
+
+  constructor(root: Document | HTMLElement = document) {
+    this.#root = root;
+  }
+
+  #queries() {
+    return this.#root instanceof HTMLElement ? within(this.#root) : screen;
+  }
 
   /**
    * This method returns the currently selected commonly-used range as a string
    *
    * The empty string is returned if a commonly-used range is not currently selected
    */
-  public static get currentCommonlyUsedRange() {
-    return screen.queryByTestId('superDatePickerShowDatesButton')?.textContent ?? '';
+  public get currentCommonlyUsedRange() {
+    return this.#queries().queryByTestId('superDatePickerShowDatesButton')?.textContent ?? '';
   }
 
   /**
-   * This method returns the currently selected range as a pair of strings
+   * This method returns the currently selected range as a pair of strings.
+   * Returns `null` if the date picker is not found or not properly initialized.
    */
-  public static get currentRange() {
-    if (screen.queryByTestId('superDatePickerShowDatesButton')) {
+  public get currentRange(): { from: string; to: string } | null {
+    const queries = this.#queries();
+    if (queries.queryByTestId('superDatePickerShowDatesButton')) {
       // showing a commonly-used range
       return { from: '', to: '' };
     }
 
+    const fromEl = queries.queryByTestId('superDatePickerstartDatePopoverButton');
+    const toEl = queries.queryByTestId('superDatePickerendDatePopoverButton');
+    if (!fromEl || !toEl) {
+      return null;
+    }
+
     return {
-      from: screen.getByTestId('superDatePickerstartDatePopoverButton').textContent,
-      to: screen.getByTestId('superDatePickerendDatePopoverButton').textContent,
+      from: fromEl.textContent ?? '',
+      to: toEl.textContent ?? '',
     };
   }
 
@@ -45,8 +62,8 @@ export class EuiSuperDatePickerTestHarness {
    *
    * NOTE: it does not (yet) support commonly-used (textual) ranges like "Last 15 minutes"
    */
-  public static assertCurrentRange(range: { from: number; to: number }, expect: jest.Expect) {
-    expect(EuiSuperDatePickerTestHarness.currentRange).toEqual({
+  public assertCurrentRange(range: { from: number; to: number }, expect: jest.Expect) {
+    expect(this.currentRange).toEqual({
       from: moment(range.from).format(EuiSuperDatePickerTestHarness.dateFormat),
       to: moment(range.to).format(EuiSuperDatePickerTestHarness.dateFormat),
     });
@@ -55,27 +72,40 @@ export class EuiSuperDatePickerTestHarness {
   /**
    * Opens the popover for the date picker
    */
-  static async togglePopover() {
-    await userEvent.click(screen.getByRole('button', { name: 'Date quick select' }));
+  public togglePopover() {
+    const queries = this.#queries();
+    // Prefer EUI's stable test subject. This is used by EUI itself in tests.
+    const toggle = queries.queryByTestId('superDatePickerToggleQuickMenuButton');
+    if (toggle) {
+      fireEvent.click(toggle);
+      return;
+    }
+
+    // Fallback for older/embedded variants where the test subject may differ.
+    const fallbackToggle = queries.queryByRole('button', { name: 'Date quick select' });
+    if (!fallbackToggle) {
+      throw new Error('Expected date picker toggle button to exist');
+    }
+    fireEvent.click(fallbackToggle);
   }
 
   /**
    * Selects a commonly-used range from the date picker (opens the popover if it's not already open)
    */
-  static async selectCommonlyUsedRange(label: string) {
-    if (!screen.queryByText('Commonly used')) await this.togglePopover();
+  public async selectCommonlyUsedRange(label: string) {
+    if (!this.#queries().queryByText('Commonly used')) this.togglePopover();
 
-    // Using fireEvent here because userEvent erroneously claims that
-    // pointer-events is set to 'none'.
-    //
-    // I have verified that this fixed on the latest version of the @testing-library/user-event package
-    fireEvent.click(await screen.findByText(label));
+    fireEvent.click(await this.#queries().findByText(label));
   }
 
   /**
    * Activates the refresh button
    */
-  static async refresh() {
-    await userEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+  public refresh() {
+    const refreshButton = this.#queries().queryByRole('button', { name: 'Refresh' });
+    if (!refreshButton) {
+      throw new Error('Expected refresh button to exist');
+    }
+    fireEvent.click(refreshButton);
   }
 }

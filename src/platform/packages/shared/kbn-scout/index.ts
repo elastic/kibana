@@ -12,12 +12,12 @@ export * as cli from './src/cli';
 
 // Test framework
 export {
-  expect,
   test,
   spaceTest,
   lighthouseTest,
   apiTest,
   globalSetupHook,
+  globalTeardownHook,
   tags,
 } from './src/playwright';
 
@@ -25,9 +25,13 @@ export {
 export {
   browserAuthFixture,
   apiServicesFixture,
-  synthtraceFixture,
+  apiClientFixture,
+  coreWorkerFixtures,
+  esArchiverFixture,
+  networkFixture,
   createPlaywrightConfig,
   createLazyPageObject,
+  extendPlaywrightPage,
 } from './src/playwright';
 
 // Playwright integration
@@ -41,6 +45,21 @@ export * from './src/playwright/eui_components';
 
 // Kibana-wide components
 export * from './src/playwright/ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  DataGrid,
+  DiscoverApp,
+  FilterBar,
+  LensApp,
+  QueryBar,
+  UnifiedTabs,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  ListingTable,
+} from './src/playwright/page_objects';
+export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {
@@ -57,9 +76,15 @@ export type {
 // Fixture types
 export type {
   ApiServicesFixture,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
   BrowserAuthFixture,
+  NetworkFixture,
+  RequestAuthFixture,
   SamlAuth,
-  SynthtraceFixture,
+  ScoutSpaceParallelFixture,
+  SpaceSolutionView,
 } from './src/playwright';
 
 // Service & configuration types
@@ -70,12 +95,24 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // Authentication types
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+export type {
+  RoleSessionCredentials,
+  CookieHeader,
+} from './src/playwright/fixtures/scope/worker/core_fixtures';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
+
+// Config-set constants — exported so test files can import instead of redeclaring.
+export { AUDIT_LOG_PATH } from './src/servers/configs/config_sets/security_audit/shared';
+export {
+  OTEL_RECEIVER_PORT,
+  OTEL_TEST_PROJECT_ID,
+} from './src/servers/configs/config_sets/security_audit_otel/shared';

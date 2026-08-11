@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { FindGapsRequestBodyV1 } from '../../../../../../../common/routes/gaps/apis/find';
 import type { FindGapsParams } from '../../../../../../application/gaps/types';
@@ -18,12 +17,14 @@ export const transformRequest = ({
   sort_field,
   sort_order,
   statuses,
+  excluded_reasons,
 }: FindGapsRequestBodyV1): FindGapsParams => ({
   ruleId: rule_id,
   end,
   page,
   perPage: per_page,
   statuses,
+  excludedReasons: excluded_reasons,
   start,
   sortField: sort_field,
   sortOrder: sort_order,

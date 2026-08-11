@@ -10,9 +10,8 @@
       "react",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
       "@testing-library/jest-dom",
-      "@testing-library/react"
+      "@testing-library/react",
     ]
   },
   "include": [
@@ -32,6 +31,7 @@
     "@kbn/content-management-user-profiles",
     "@kbn/core-user-profile-browser",
     "@kbn/react-query",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*"

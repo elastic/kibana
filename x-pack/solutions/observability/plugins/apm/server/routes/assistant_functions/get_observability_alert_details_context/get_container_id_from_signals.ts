@@ -9,12 +9,12 @@ import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/li
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { rangeQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
-import type * as t from 'io-ts';
 import moment from 'moment';
-import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import type { AlertDetailsContextualInsightsHandlerQuery } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { CONTAINER_ID } from '@kbn/apm-types';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -30,7 +30,7 @@ export async function getContainerIdFromSignals({
   logSourcesService,
   apmEventClient,
 }: {
-  query: t.TypeOf<typeof alertDetailsContextRt>;
+  query: AlertDetailsContextualInsightsHandlerQuery;
   esClient: ElasticsearchClient;
   logSourcesService: LogSourcesService;
   coreContext: Pick<CoreRequestHandlerContext, 'uiSettings'>;
@@ -91,9 +91,13 @@ async function getContainerIdFromLogs({
     fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(res.hits.hits[0])?.fields;
 
-  return event?.container.id;
+  const event =
+    fields &&
+    accessKnownApmEventFields(fields as Partial<FlattenedApmEvent>).requireFields(requiredFields);
+
+  return event?.[CONTAINER_ID];
 }
 
 async function getContainerIdFromTraces({
@@ -105,6 +109,7 @@ async function getContainerIdFromTraces({
 }) {
   const requiredFields = asMutableArray([CONTAINER_ID] as const);
   const res = await apmEventClient.search('get_container_id_from_traces', {
+    ...params,
     apm: {
       sources: [
         {
@@ -113,11 +118,14 @@ async function getContainerIdFromTraces({
         },
       ],
     },
-    ...params,
     fields: requiredFields,
   });
 
-  const event = unflattenKnownApmEventFields(maybe(res.hits.hits[0])?.fields, requiredFields);
+  const fields = maybe(res.hits.hits[0])?.fields;
 
-  return event?.container.id;
+  const event =
+    fields &&
+    accessKnownApmEventFields(fields as Partial<FlattenedApmEvent>).requireFields(requiredFields);
+
+  return event?.[CONTAINER_ID];
 }

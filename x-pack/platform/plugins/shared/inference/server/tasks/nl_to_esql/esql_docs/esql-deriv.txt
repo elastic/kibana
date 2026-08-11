@@ -1,0 +1,27 @@
+# DERIV
+
+Calculates the derivative over time of a numeric field using linear regression.
+
+## Syntax
+
+`DERIV(field, window)`
+
+### Parameters
+
+#### field
+
+The metric field to calculate the derivative for.
+
+#### window
+
+The time window over which to compute the derivative.
+
+## Examples
+
+Calculates the maximum rate of change (derivative) of the `network.cost` field for each 5-minute time bucket and pod named "three".
+
+```esql
+TS datenanos-k8s
+| WHERE pod == "three"
+| STATS max_deriv = MAX(DERIV(network.cost)) BY time_bucket = BUCKET(@timestamp,5minute), pod
+```

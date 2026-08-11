@@ -13,6 +13,8 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { MigrationSource } from '../../common/types';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 
 jest.mock('../api');
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
@@ -38,6 +40,15 @@ const mockAddError = jest.fn();
 const invalidateRules = jest.fn();
 const invalidateStats = jest.fn();
 const mockReportTranslatedItemBulkInstall = jest.fn();
+const defaultMigrationStats = {
+  id: 'mig-1',
+  name: 'test-migration',
+  vendor: MigrationSource.SPLUNK,
+  status: SiemMigrationTaskStatus.READY,
+  items: { total: 100, pending: 100, processing: 0, completed: 0, failed: 0 },
+  created_at: '2025-01-01T00:00:00Z',
+  last_updated_at: '2025-01-01T01:00:00Z',
+};
 
 describe('useInstallMigrationRules', () => {
   beforeEach(() => {
@@ -67,7 +78,7 @@ describe('useInstallMigrationRules', () => {
     });
 
     it('shows a success toast', async () => {
-      const { result } = renderHook(() => useInstallMigrationRules('1'), {
+      const { result } = renderHook(() => useInstallMigrationRules(defaultMigrationStats), {
         wrapper: TestProviders,
       });
       result.current.mutate({ ids: ['1', '2'], enabled: true });
@@ -78,14 +89,14 @@ describe('useInstallMigrationRules', () => {
     });
 
     it('invalidates queries on settled', async () => {
-      const { result } = renderHook(() => useInstallMigrationRules('1'), {
+      const { result } = renderHook(() => useInstallMigrationRules(defaultMigrationStats), {
         wrapper: TestProviders,
       });
       result.current.mutate({ ids: ['1', '2'], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateRules).toHaveBeenCalledWith(defaultMigrationStats.id);
+        expect(invalidateStats).toHaveBeenCalledWith(defaultMigrationStats.id);
       });
     });
   });
@@ -96,7 +107,7 @@ describe('useInstallMigrationRules', () => {
     });
 
     it('shows an error toast', async () => {
-      const { result } = renderHook(() => useInstallMigrationRules('1'), {
+      const { result } = renderHook(() => useInstallMigrationRules(defaultMigrationStats), {
         wrapper: TestProviders,
       });
       result.current.mutate({ ids: ['1', '2'], enabled: true });
@@ -109,14 +120,14 @@ describe('useInstallMigrationRules', () => {
     });
 
     it('invalidates queries on settled', async () => {
-      const { result } = renderHook(() => useInstallMigrationRules('1'), {
+      const { result } = renderHook(() => useInstallMigrationRules(defaultMigrationStats), {
         wrapper: TestProviders,
       });
       result.current.mutate({ ids: ['1', '2'], enabled: true });
 
       await waitFor(() => {
-        expect(invalidateRules).toHaveBeenCalledWith('1');
-        expect(invalidateStats).toHaveBeenCalledWith('1');
+        expect(invalidateRules).toHaveBeenCalledWith(defaultMigrationStats.id);
+        expect(invalidateStats).toHaveBeenCalledWith(defaultMigrationStats.id);
       });
     });
   });

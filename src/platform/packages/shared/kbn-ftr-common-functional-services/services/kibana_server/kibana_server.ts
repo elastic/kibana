@@ -18,6 +18,7 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   const lifecycle = getService('lifecycle');
   const url = Url.format(config.get('servers.kibana'));
   const defaults = config.get('uiSettings.defaults');
+  const globalDefaults = config.get('uiSettings.globalDefaults');
 
   const kbn = new KbnClient({
     log,
@@ -29,6 +30,24 @@ export function KibanaServerProvider({ getService }: FtrProviderContext): KbnCli
   if (defaults) {
     lifecycle.beforeTests.add(async () => {
       await kbn.uiSettings.update(defaults);
+    });
+  }
+
+  if (globalDefaults) {
+    lifecycle.beforeTests.add(async () => {
+      try {
+        await kbn.uiSettings.updateGlobal(globalDefaults);
+      } catch (err) {
+        // If a setting is already enforced via server-level globalOverrides, the API returns 400.
+        // That's fine — the override achieves the same goal.
+        if (err?.message?.includes('because it is overridden')) {
+          log.warning(
+            `Skipping globalDefaults update — setting already enforced by a server-level override: ${err.message}`
+          );
+          return;
+        }
+        throw err;
+      }
     });
   }
 

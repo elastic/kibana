@@ -63,6 +63,7 @@ export const ChartSwitchSelectable = ({
         showIcons: false,
         onFocusBadge: false,
         isVirtualized: false,
+        paddingSize: 's',
       }}
       renderOption={(option, searchValue) => (
         <ChartOption option={option} searchValue={searchValue} />

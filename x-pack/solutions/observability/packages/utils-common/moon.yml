@@ -4,23 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-utils-common'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/observability-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-utils-common'
+  title: '@kbn/observability-utils-common'
   description: Moon project for @kbn/observability-utils-common
   channel: ''
   owner: '@elastic/observability-ui'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/packages/utils-common
+  sourceRoot: x-pack/solutions/observability/packages/utils-common
 dependsOn:
   - '@kbn/es-query'
-  - '@kbn/safer-lodash-set'
-  - '@kbn/utility-types'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
@@ -33,16 +31,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

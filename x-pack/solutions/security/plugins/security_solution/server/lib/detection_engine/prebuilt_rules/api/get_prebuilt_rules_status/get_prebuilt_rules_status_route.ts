@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { GET_PREBUILT_RULES_STATUS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { GetPrebuiltRulesStatusResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -21,7 +22,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
       path: GET_PREBUILT_RULES_STATUS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -64,6 +65,11 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             mlAuthz
           );
 
+          const deprecatedAssets = await ruleAssetsClient.fetchDeprecatedRules();
+          const numDeprecated = deprecatedAssets.filter((asset) =>
+            currentRuleVersionsMap.has(asset.rule_id)
+          ).length;
+
           const upgradeableRulesTags = upgradableRules.reduce<string[]>((tags, rule) => {
             const ruleTags = currentRuleVersionsMap.get(rule.rule_id)?.tags;
             if (ruleTags) {
@@ -78,6 +84,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
               num_prebuilt_rules_to_install: installableRuleAssets.length,
               num_prebuilt_rules_to_upgrade: upgradableRules.length,
               num_prebuilt_rules_total_in_package: latestRuleVersions.length,
+              num_prebuilt_rules_deprecated: numDeprecated,
             },
             aggregated_fields: {
               upgradeable_rules: {

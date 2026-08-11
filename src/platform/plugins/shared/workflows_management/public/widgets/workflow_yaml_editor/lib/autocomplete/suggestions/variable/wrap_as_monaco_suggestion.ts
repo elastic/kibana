@@ -9,7 +9,7 @@
 
 import type { Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { PROPERTY_PATH_REGEX } from '../../../../../../../common/lib/regex';
+import { PROPERTY_PATH_REGEX } from '@kbn/workflows-yaml';
 
 export function wrapAsMonacoSuggestion(
   key: string,
@@ -35,13 +35,15 @@ export function wrapAsMonacoSuggestion(
   let insertText = keyToInsert;
   let insertTextRules = monaco.languages.CompletionItemInsertTextRule.None;
   if (isAt) {
-    // $0 is the cursor position
-    insertText = `${key}$0`;
+    // $0 is the cursor position - only add it when we're wrapping in new braces
+    // When inside existing braces, just insert the key without placeholder
     if (useCurlyBraces) {
-      insertText = `{{ ${insertText} }}`;
+      insertText = `{{ ${key}$0 }}`;
+      insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+    } else {
+      // Inside existing braces, just insert the key without placeholder
+      insertText = keyToInsert;
     }
-
-    insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   if (shouldBeQuoted) {
     insertText = `"${insertText}"`;

@@ -182,7 +182,17 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toMatchInlineSnapshot(`
+          "invalid params: [
+            {
+              \\"code\\": \\"custom\\",
+              \\"path\\": [
+                \\"browserTimezone\\"
+              ],
+              \\"message\\": \\"Invalid timezone\\"
+            }
+          ]"
+        `)
       );
   });
 
@@ -209,7 +219,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       })
@@ -226,11 +236,11 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },
@@ -250,7 +260,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         })
@@ -274,7 +284,7 @@ describe(`POST ${INTERNAL_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       });

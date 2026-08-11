@@ -19,7 +19,7 @@ export const useFooterItems = () => {
   const deploymentUrl = useObservable(onboarding.deploymentUrl$);
   const expandProject = useMemo(
     () => ({
-      icon: 'arrowUp',
+      icon: 'chevronSingleUp',
       id: OnboardingFooterLinkItemId.expand,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.expand.title', {
         defaultMessage: 'Expand your project',
@@ -39,7 +39,7 @@ export const useFooterItems = () => {
 
   const manageDeployment = useMemo(
     () => ({
-      icon: 'arrowUp',
+      icon: 'chevronSingleUp',
       id: OnboardingFooterLinkItemId.manageDeployment,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.manageDeployment.title', {
         defaultMessage: 'Manage your deployment',
@@ -108,7 +108,7 @@ export const useFooterItems = () => {
           },
         },
         {
-          icon: 'beaker',
+          icon: 'flask',
           id: OnboardingFooterLinkItemId.labs,
           title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
             defaultMessage: 'Help improve Elastic Security',

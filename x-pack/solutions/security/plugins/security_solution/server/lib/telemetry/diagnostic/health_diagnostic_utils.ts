@@ -6,11 +6,11 @@
  */
 
 import { randomUUID } from 'crypto';
-import * as YAML from 'yaml';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
   type HealthDiagnosticQuery,
+  type HealthDiagnosticQueryBase,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
@@ -20,12 +20,6 @@ import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
   return nextDate !== undefined && nextDate < endDate;
-}
-
-export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
-  return YAML.parseAllDocuments(input as string).map((doc) => {
-    return doc.toJSON() as HealthDiagnosticQuery;
-  });
 }
 
 export function fieldNames<T>(documents: T): string[] {
@@ -52,23 +46,27 @@ export function fieldNames<T>(documents: T): string[] {
   return Array.from(result);
 }
 
-export function emptyStat(name: string, now: Date): HealthDiagnosticQueryStats {
-  return {
-    name,
-    started: now.toISOString(),
-    traceId: randomUUID(),
-    finished: new Date().toISOString(),
-    numDocs: 0,
-    passed: false,
-    fieldNames: [],
-  };
-}
+export const emptyStat = (
+  name: string,
+  now: Date,
+  descriptorVersion: number
+): HealthDiagnosticQueryStats => ({
+  name,
+  started: now.toISOString(),
+  traceId: randomUUID(),
+  finished: new Date().toISOString(),
+  numDocs: 0,
+  passed: false,
+  fieldNames: [],
+  descriptorVersion,
+  status: 'failed',
+});
 
 export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
   salt: string,
-  query?: Pick<HealthDiagnosticQuery, 'encryptionKeyId'>,
+  query?: Pick<HealthDiagnosticQueryBase, 'encryptionKeyId'>,
   encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
@@ -200,6 +198,30 @@ export async function applyFilterlist(
 
   return filteredResult;
 }
+
+/**
+ * Merges two query arrays with v2 taking precedence on `id` conflicts.
+ * Queries without an `id` (ParseFailureQuery with no id field) are always
+ * included — they will be reported as skipped at execution time.
+ */
+export const mergeByPriority = (
+  v1Queries: HealthDiagnosticQuery[],
+  v2Queries: HealthDiagnosticQuery[]
+): HealthDiagnosticQuery[] => {
+  const map = new Map<string, HealthDiagnosticQuery>();
+  const idless: HealthDiagnosticQuery[] = [];
+
+  for (const q of [...v1Queries, ...v2Queries]) {
+    const id = (q as { id?: string }).id;
+    if (id !== undefined) {
+      map.set(id, q); // v2 entries overwrite v1 for the same id
+    } else {
+      idless.push(q);
+    }
+  }
+
+  return [...map.values(), ...idless];
+};
 
 async function maskValue(value: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();

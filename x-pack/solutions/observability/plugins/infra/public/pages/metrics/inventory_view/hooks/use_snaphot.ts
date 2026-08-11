@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -15,12 +16,9 @@ import type {
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
-export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries' | 'schema'> {
+export interface UseSnapshotRequest extends Omit<SnapshotRequest, 'timerange' | 'schema'> {
   currentTime: number;
-  includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
-
   schema?: DataSchemaFormat | null;
 }
 
@@ -61,7 +59,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     dropPartialBuckets = true,
     kuery,
     groupBy = null,
-    includeTimeseries = true,
+    includeTimeseries,
     metrics,
     nodeType,
     overrideCompositeSize,
@@ -82,7 +80,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
-    schema: schema ?? 'ecs',
+    schema: schema ?? DEFAULT_SCHEMA,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

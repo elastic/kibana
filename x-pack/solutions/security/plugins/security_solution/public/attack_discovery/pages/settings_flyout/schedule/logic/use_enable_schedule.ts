@@ -14,7 +14,8 @@ import { enableAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 export const ENABLE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'POST',
@@ -26,8 +27,10 @@ interface EnableAttackDiscoveryScheduleParams {
 }
 
 export const useEnableAttackDiscoverySchedule = () => {
+  const {
+    services: { telemetry },
+  } = useKibana();
   const { addError, addSuccess } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
   const invalidateFindAttackDiscoverySchedule = useInvalidateFindAttackDiscoverySchedule();
@@ -36,15 +39,21 @@ export const useEnableAttackDiscoverySchedule = () => {
     EnableAttackDiscoverySchedulesResponse,
     Error,
     EnableAttackDiscoveryScheduleParams
-  >(({ id }) => enableAttackDiscoverySchedule({ attackDiscoveryPublicApiEnabled, id }), {
+  >(({ id }) => enableAttackDiscoverySchedule({ id }), {
     mutationKey: ENABLE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY,
     onSuccess: ({ id }) => {
       invalidateGetAttackDiscoverySchedule(id);
       invalidateFindAttackDiscoverySchedule();
       addSuccess(i18n.ENABLE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS());
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.StatusUpdateSuccess, {
+        status: 'enabled',
+      });
     },
     onError: (error) => {
       addError(error, { title: i18n.ENABLE_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
+      telemetry.reportEvent(AttackDiscoverySchedulesEventTypes.StatusUpdateFailed, {
+        status: 'enabled',
+      });
     },
   });
 };

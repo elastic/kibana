@@ -13,6 +13,7 @@ import {
   EMPTY,
   from,
   merge,
+  throwError,
   type Observable,
   takeUntil,
   map,
@@ -22,6 +23,7 @@ import * as rx from 'rxjs';
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
 import type {
   EqlSearchRequest,
+  Indices,
   SearchRequest,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -31,14 +33,22 @@ import {
   type CircuitBreaker,
   type CircuitBreakerResult,
 } from './health_diagnostic_circuit_breakers.types';
-import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
+import {
+  QueryType,
+  PermissionError,
+  type IntegrationResolution,
+  type ExecutableQuery,
+} from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
-import { newTelemetryLogger } from '../helpers';
+import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
 export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExecutor {
   private readonly logger: TelemetryLogger;
-
-  constructor(private client: ElasticsearchClient, logger: Logger) {
+  constructor(
+    private client: ElasticsearchClient,
+    private readonly isServerless: boolean,
+    logger: Logger
+  ) {
     this.logger = newTelemetryLogger(logger.get('circuit-breaking-query-executor'));
   }
 
@@ -47,7 +57,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const abortSignal = controller.signal;
     const circuitBreakers$ = this.configureCircuitBreakers(circuitBreakers, controller);
 
-    switch (query.type) {
+    switch (query.query.type) {
       case QueryType.DSL:
         return this.streamDSL<T>(query, abortSignal).pipe(takeUntil(circuitBreakers$));
       case QueryType.EQL:
@@ -55,37 +65,57 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       case QueryType.ESQL:
         return this.streamEsql<T>(query, abortSignal).pipe(takeUntil(circuitBreakers$));
       default: {
-        const exhaustiveCheck: never = query.type;
+        const exhaustiveCheck: never = query.query.type;
         throw new Error(`Unhandled QueryType: ${exhaustiveCheck}`);
       }
     }
   }
 
-  streamEsql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
-    const regex = /^[\s\r\n]*FROM/;
+  streamEsql<T>(executableQuery: ExecutableQuery, abortSignal: AbortSignal): Observable<T> {
+    const { query } = executableQuery;
 
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
-        const query = regex.test(diagnosticQuery.query)
-          ? diagnosticQuery.query
-          : `FROM ${index} | ${diagnosticQuery.query}`;
+    if (query.version === 2 && /^[\s\r\n]*FROM/i.test(query.query)) {
+      // never should fail here since we already manage this scenario in the resolver, but just in case, we put this guard to
+      // avoid running potentially unsafe queries
+      return throwError(
+        () =>
+          new Error(
+            'v2 ESQL descriptors must not contain a FROM clause; use the integrations field to target indices'
+          )
+      );
+    }
 
-        return from(this.client.helpers.esql({ query }, { signal: abortSignal }).toRecords()).pipe(
-          mergeMap((resp) => {
-            return resp.records.map((r) => r as T);
+    const regex = /^[\s\r\n]*FROM/i;
+    const originalIndices = this.originalIndicesFor(executableQuery);
+
+    return from(this.checkPermissions(originalIndices)).pipe(
+      mergeMap(() => from(this.indicesFor(executableQuery))),
+      mergeMap((indices) =>
+        from(
+          indices.map((index) => {
+            const esqlQuery = regex.test(query.query)
+              ? query.query
+              : `FROM ${index} | ${query.query}`;
+            return from(
+              this.client.helpers.esql({ query: esqlQuery }, { signal: abortSignal }).toRecords()
+            ).pipe(mergeMap((resp) => resp.records.map((r) => r as T)));
           })
-        );
-      })
+        ).pipe(mergeMap((obs) => obs))
+      )
     );
   }
 
-  streamEql<T>(diagnosticQuery: HealthDiagnosticQuery, abortSignal: AbortSignal): Observable<T> {
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => {
+  streamEql<T>(executableQuery: ExecutableQuery, abortSignal: AbortSignal): Observable<T> {
+    const { query } = executableQuery;
+    const originalIndices = this.originalIndicesFor(executableQuery);
+
+    return from(this.checkPermissions(originalIndices)).pipe(
+      mergeMap(() => from(this.indicesFor(executableQuery))),
+      mergeMap((indices) => {
         const request: EqlSearchRequest = {
-          index,
-          query: diagnosticQuery.query,
-          size: diagnosticQuery.size,
+          index: indices,
+          query: query.query,
+          size: query.size,
         };
 
         return from(this.client.eql.search(request, { signal: abortSignal })).pipe(
@@ -95,10 +125,9 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
             } else if (resp.hits.sequences) {
               return resp.hits.sequences.map((seq) => seq.events.map((h) => h._source) as T);
             } else {
-              this.logger.warn(
-                '>> Neither hits.events nor hits.sequences found in the response for query',
-                { queryName: diagnosticQuery.name } as LogMeta
-              );
+              this.logger.warn('>> Neither hits.events nor hits.sequences found', {
+                queryName: query.name,
+              } as LogMeta);
               return [];
             }
           })
@@ -107,16 +136,36 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     );
   }
 
+  private async checkPermissions(index: Indices) {
+    try {
+      const res = await this.client.security.hasPrivileges({
+        index: [
+          {
+            names: index,
+            privileges: ['read'],
+          },
+        ],
+      });
+      if (!res.has_all_requested) {
+        throw new PermissionError('Missing read privileges');
+      }
+    } catch (e) {
+      throw new PermissionError(`Error checking privileges: ${e}`);
+    }
+  }
+
   streamDSL<T>(
-    diagnosticQuery: HealthDiagnosticQuery,
+    executableQuery: ExecutableQuery,
     abortSignal: AbortSignal,
     pitKeepAlive: string = '1m'
   ): Observable<T> {
+    const { query } = executableQuery;
+    const pageSize = query.size ?? 10000;
+    const parsedQuery: SearchRequest = JSON.parse(query.query) as SearchRequest;
+    const originalIndices = this.originalIndicesFor(executableQuery);
+
     let pitId: string;
     let searchAfter: SortResults | undefined;
-    const pageSize = diagnosticQuery.size ?? 10000;
-
-    const query: SearchRequest = JSON.parse(diagnosticQuery.query) as SearchRequest;
 
     const fetchPage = () => {
       const paginatedRequest: SearchRequest = {
@@ -124,14 +173,16 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         sort: [{ _shard_doc: 'asc' }],
         search_after: searchAfter,
         pit: { id: pitId, keep_alive: pitKeepAlive },
-        ...query,
+        ...parsedQuery,
       };
       return this.client.search<T>(paginatedRequest, { signal: abortSignal });
     };
 
-    return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }))),
-
+    return from(this.checkPermissions(originalIndices)).pipe(
+      mergeMap(() => from(this.indicesFor(executableQuery))),
+      mergeMap((indices) =>
+        from(this.client.openPointInTime({ index: indices, keep_alive: pitKeepAlive }))
+      ),
       map((res) => res.id),
 
       mergeMap((id) => {
@@ -139,6 +190,11 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         return from(fetchPage());
       }),
       expand((searchResponse) => {
+        const returnedPitId = (searchResponse as { pit_id?: string }).pit_id;
+        if (returnedPitId) {
+          pitId = returnedPitId;
+        }
+
         const hits = searchResponse.hits.hits;
         const aggrs = searchResponse.aggregations;
 
@@ -159,9 +215,11 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       }),
 
       finalize(() => {
-        this.client.closePointInTime({ id: pitId }).catch((error) => {
-          this.logger.warn('>> closePointInTime error', { error });
-        });
+        if (pitId !== undefined) {
+          this.client.closePointInTime({ id: pitId }).catch((error) => {
+            this.logger.warn('>> closePointInTime error', withErrorMessage(error));
+          });
+        }
       })
     );
   }
@@ -188,24 +246,54 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
   /**
    * Returns the list of indices to query based on the provided tiers.
-   * When running in serverless or `query.index` is not managed by an ILM, returns
-   * the same `query.index`.
-   *
-   * @param query The health diagnostic query object.
-   * @returns A Promise resolving to an array of indices.
+   * Dispatches on query version: v1 uses `query.index`, v2 uses resolved indices from Fleet.
+   * When running in serverless or the index is not managed by ILM, returns the base indices as-is.
    */
-  async indicesFor(query: HealthDiagnosticQuery): Promise<string[]> {
-    if (query.tiers === undefined) {
-      this.logger.debug('No tiers defined in the query, returning index as is', {
-        queryName: query.name,
-      } as LogMeta);
-      return [query.index];
-    }
+  async indicesFor(executableQuery: ExecutableQuery): Promise<string[]> {
+    const { query } = executableQuery;
     const tiers = query.tiers;
 
+    let baseIndices: string[];
+    if (query.version === 1) {
+      baseIndices = [query.index];
+      this.logger.debug('Using index from v1 query', { queryName: query.name } as LogMeta);
+    } else if ('index' in query && query.index) {
+      baseIndices = [query.index as string];
+      this.logger.trace('Using index from v2 query', { queryName: query.name } as LogMeta);
+    } else {
+      const v2Query = executableQuery as Extract<
+        ExecutableQuery,
+        { resolution: IntegrationResolution }
+      >;
+      baseIndices = v2Query.resolution.indices;
+      this.logger.debug('Using resolved indices from v2 query', {
+        queryName: query.name,
+        count: baseIndices.length,
+      } as LogMeta);
+    }
+
+    if (this.isServerless) {
+      this.logger.debug('Running in serverless, returning index as is', {
+        queryName: query.name,
+      } as LogMeta);
+      return baseIndices;
+    }
+
+    if (tiers === undefined || baseIndices.length === 0) {
+      this.logger.debug('No tiers defined or no base indices, returning as-is', {
+        queryName: query.name,
+      } as LogMeta);
+      return baseIndices;
+    }
+
+    const tiered = await Promise.all(baseIndices.map((index) => this.filterByTier(index, tiers)));
+    return tiered.flat().filter((index) => index !== '');
+  }
+
+  private async filterByTier(index: string, tiers: string[]): Promise<string[]> {
     return this.client.ilm
       .explainLifecycle({
-        index: query.index,
+        index,
         only_managed: false,
         filter_path: ['indices.*.phase'],
       })
@@ -213,11 +301,9 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         if (response.indices === undefined) {
           this.logger.debug(
             'Got an empty response while explaining lifecycle. Asumming serverless.',
-            {
-              index: query.index,
-            } as LogMeta
+            { index } as LogMeta
           );
-          return [query.index];
+          return [index];
         } else {
           const indices = Object.entries(response.indices).map(([indexName, stats]) => {
             if ('phase' in stats && stats.phase) {
@@ -232,7 +318,6 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
                 return '';
               }
             } else {
-              // should not happen, but just in case
               this.logger.debug('Index is not managed by an ILM', {
                 index: indexName,
                 tiers,
@@ -241,8 +326,8 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
             }
           });
           this.logger.debug('Indices managed by ILM', {
-            queryName: query.name,
-            tiers: query.tiers,
+            index,
+            tiers,
             indices,
           } as LogMeta);
           return indices;
@@ -252,8 +337,25 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
         return indices.filter((indexName) => indexName !== '');
       })
       .catch((error) => {
-        this.logger.info('Error while checking ILM status, assuming serverless', { error });
-        return [query.index];
+        this.logger.info(
+          'Error while checking ILM status, assuming serverless',
+          withErrorMessage(error)
+        );
+        return [index];
       });
+  }
+
+  // Returns the "pre-ILM" index/datastream patterns used for permission checking only.
+  // v1: the literal `index` field; v2: the Fleet-resolved datastream names.
+  // Permissions are granted against these names, NOT the backing .ds-* indices.
+  private originalIndicesFor(executableQuery: ExecutableQuery): string[] {
+    if (executableQuery.query.version === 1) {
+      return [executableQuery.query.index];
+    }
+    if ('index' in executableQuery.query && executableQuery.query.index) {
+      return [executableQuery.query.index as string];
+    }
+    const v2 = executableQuery as Extract<ExecutableQuery, { resolution: IntegrationResolution }>;
+    return v2.resolution.indices;
   }
 }

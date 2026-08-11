@@ -73,6 +73,9 @@ export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
         items={items}
         search={search}
         columns={columns}
+        tableCaption={i18n.translate('xpack.monitoring.euiTable.tableCaption', {
+          defaultMessage: 'Monitoring data table',
+        })}
         {...props}
         data-test-subj={
           items.length && hasItems ? 'monitoringTableHasData' : 'monitoringTableNoData'

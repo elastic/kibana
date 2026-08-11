@@ -32,6 +32,7 @@ describe('toSavedSearch', () => {
           columns: ['message', 'extension'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -43,6 +44,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -60,6 +62,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "message",
           "extension",
@@ -71,6 +74,7 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -127,6 +131,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",
@@ -164,6 +169,7 @@ describe('toSavedSearch', () => {
           columns: ['my', 'tab', 'columns'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
@@ -175,6 +181,7 @@ describe('toSavedSearch', () => {
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -192,6 +199,7 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "my",
           "tab",
@@ -204,6 +212,7 @@ describe('toSavedSearch', () => {
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -261,6 +270,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",

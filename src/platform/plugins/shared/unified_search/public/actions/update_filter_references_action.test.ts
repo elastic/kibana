@@ -10,15 +10,16 @@
 import { FilterManager } from '@kbn/data-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggers } from '@kbn/ui-actions-plugin/public';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UpdateFilterReferencesActionContext } from './update_filter_references_action';
 import { createUpdateFilterReferencesAction } from './update_filter_references_action';
-import { updateFilterReferencesTrigger } from '../triggers/update_filter_references_trigger';
 import { mockFilter } from '../mocks/get_stub_filter';
 
 describe('createUpdateFilterReferencesAction', () => {
   let filterManager: FilterManager;
   let executeActionFn: (context: UpdateFilterReferencesActionContext) => Promise<void>;
-  const trigger = updateFilterReferencesTrigger;
+  const trigger = triggers[UPDATE_FILTER_REFERENCES_TRIGGER];
 
   beforeEach(async () => {
     filterManager = new FilterManager(coreMock.createStart().uiSettings);

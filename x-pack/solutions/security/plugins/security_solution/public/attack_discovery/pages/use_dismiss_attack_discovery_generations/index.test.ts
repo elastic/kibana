@@ -6,15 +6,19 @@
  */
 
 import {
+  ATTACK_DISCOVERY_GENERATIONS,
   ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
-  ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
+import type {
+  GetAttackDiscoveryGenerationsResponse,
+  PostAttackDiscoveryGenerationsDismissResponse,
+} from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import '@kbn/react-query/mock';
-import { useMutation } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useMutation } from '@kbn/react-query';
+import React from 'react';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -31,13 +35,6 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
 const mockInvalidateGenerations = jest.fn();
 jest.mock('../use_get_attack_discovery_generations', () => ({
   useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
-}));
-
-const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
-  attackDiscoveryPublicApiEnabled: true,
-});
-jest.mock('../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 
 jest.mock('@kbn/i18n', () => ({
@@ -130,62 +127,10 @@ describe('useDismissAttackDiscoveryGeneration', () => {
     mockHttpFetch.mockResolvedValue({} as PostAttackDiscoveryGenerationsDismissResponse);
   });
 
-  describe('when attackDiscoveryPublicApiEnabled is false', () => {
+  describe('API calls', () => {
     const spy = useMutation as unknown as jest.MockedFn<typeof useMutation>;
 
     beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-      mockHttpFetch.mockResolvedValue({});
-
-      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
-        wrapper: TestProviders,
-      });
-
-      act(() => {
-        result.current.mutate({ executionUuid: 'gen1' });
-      });
-    });
-
-    afterEach(() => spy.mockClear());
-
-    it('calls POST with the internal API route', async () => {
-      const expectedInternalUrl = replaceParams(
-        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
-        {
-          execution_uuid: 'gen1',
-        }
-      );
-
-      await waitFor(() => {
-        expect(mockHttpFetch).toHaveBeenCalledWith(expectedInternalUrl, expect.any(Object));
-      });
-    });
-
-    it('calls POST with the internal API version', async () => {
-      await waitFor(() => {
-        expect(mockHttpFetch).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            version: API_VERSIONS.internal.v1,
-          })
-        );
-      });
-    });
-
-    it('uses the internal route in the mutation key', () => {
-      const calledArgs = spy.mock.calls[0][1] as unknown;
-      expect((calledArgs as { mutationKey: unknown }).mutationKey).toEqual([
-        'POST',
-        ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS,
-      ]);
-    });
-  });
-
-  describe('when attackDiscoveryPublicApiEnabled is true', () => {
-    const spy = useMutation as unknown as jest.MockedFn<typeof useMutation>;
-
-    beforeEach(() => {
-      mockUseKibanaFeatureFlags.mockReturnValue({ attackDiscoveryPublicApiEnabled: true });
       mockHttpFetch.mockResolvedValue({});
 
       const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), {
@@ -381,6 +326,173 @@ describe('useDismissAttackDiscoveryGeneration', () => {
       });
 
       await waitFor(() => expect(result.current.error).toBe(error));
+    });
+  });
+
+  describe('optimistic cache update', () => {
+    const buildResponse = (): GetAttackDiscoveryGenerationsResponse => ({
+      generations: [
+        {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen1',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'succeeded',
+        },
+        {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen2',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'succeeded',
+        },
+      ],
+    });
+
+    const getStatus = (
+      data: GetAttackDiscoveryGenerationsResponse | undefined,
+      executionUuid: string
+    ) => data?.generations.find((g) => g.execution_uuid === executionUuid)?.status;
+
+    let queryClient: QueryClient;
+    const wrapper: React.FC<React.PropsWithChildren> = ({ children }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+    beforeEach(() => {
+      queryClient = new QueryClient();
+      queryClient.setQueryData<GetAttackDiscoveryGenerationsResponse>(
+        ['GET', ATTACK_DISCOVERY_GENERATIONS],
+        buildResponse()
+      );
+    });
+
+    it('optimistically marks the dismissed generation as dismissed before the request resolves', async () => {
+      mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() =>
+        expect(
+          getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+        ).toBe('dismissed')
+      );
+    });
+
+    it('leaves other generations untouched during the optimistic update', async () => {
+      mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() =>
+        expect(
+          getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen2')
+        ).toBe('succeeded')
+      );
+    });
+
+    it('rolls back the optimistic update when the request fails', async () => {
+      mockHttpFetch.mockRejectedValue(new Error('Mutation failed'));
+
+      const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+      act(() => {
+        result.current.mutate({ executionUuid: 'gen1' });
+      });
+
+      await waitFor(() => expect(result.current.isError).toBe(true));
+
+      expect(
+        getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+      ).toBe('succeeded');
+    });
+
+    describe('when a single-generation query is cached under the same key prefix', () => {
+      // The single-generation hook (`useGetAttackDiscoveryGeneration`) caches a
+      // bare `AttackDiscoveryGeneration` (no `generations` array) under the key
+      // `['GET', ATTACK_DISCOVERY_GENERATIONS, executionUuid]`, which is matched
+      // by the partial-key `setQueriesData` call in the dismiss mutation.
+      const singleGenerationKey = ['GET', ATTACK_DISCOVERY_GENERATIONS, 'gen1'];
+
+      beforeEach(() => {
+        queryClient.setQueryData(singleGenerationKey, {
+          connector_id: 'connector1',
+          discoveries: 0,
+          execution_uuid: 'gen1',
+          start: '2026-06-27T00:00:00.000Z',
+          status: 'started',
+        });
+      });
+
+      it('marks the list generation as dismissed', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+          ).toBe('dismissed')
+        );
+      });
+
+      it('does not throw / enter an error state during the optimistic update', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() => expect(result.current.isLoading).toBe(true));
+        expect(result.current.isError).toBe(false);
+      });
+
+      it('does not surface an error toast during the optimistic update', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            getStatus(queryClient.getQueryData(['GET', ATTACK_DISCOVERY_GENERATIONS]), 'gen1')
+          ).toBe('dismissed')
+        );
+        expect(mockAddError).not.toHaveBeenCalled();
+      });
+
+      it('leaves the single-generation query untouched', async () => {
+        mockHttpFetch.mockReturnValue(new Promise(() => {})); // never resolves
+
+        const { result } = renderHook(() => useDismissAttackDiscoveryGeneration(), { wrapper });
+
+        act(() => {
+          result.current.mutate({ executionUuid: 'gen1' });
+        });
+
+        await waitFor(() =>
+          expect(
+            (queryClient.getQueryData(singleGenerationKey) as { status: string } | undefined)
+              ?.status
+          ).toBe('started')
+        );
+      });
     });
   });
 });

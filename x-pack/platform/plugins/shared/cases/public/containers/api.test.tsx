@@ -43,7 +43,6 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
-  bulkPostObservables,
 } from './api';
 
 import {
@@ -72,7 +71,12 @@ import {
   similarCasesSnake,
 } from './mock';
 
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
+import {
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+  DEFAULT_FROM_DATE,
+  DEFAULT_TO_DATE,
+} from './constants';
 import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, omit } from 'lodash';
@@ -155,6 +159,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
+          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });
@@ -198,6 +203,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -217,6 +224,9 @@ describe('Cases API', () => {
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
           customFields: {},
+          extendedFieldFilters: [],
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
@@ -233,6 +243,8 @@ describe('Cases API', () => {
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           owner: [SECURITY_SOLUTION_OWNER],
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -254,6 +266,8 @@ describe('Cases API', () => {
         body: JSON.stringify({
           severity: [CaseSeverity.HIGH],
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -274,6 +288,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -295,6 +311,8 @@ describe('Cases API', () => {
         body: JSON.stringify({
           status: [CaseStatuses.open],
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -315,6 +333,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -335,6 +355,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -356,6 +378,8 @@ describe('Cases API', () => {
         body: JSON.stringify({
           assignees: undefined,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -377,6 +401,8 @@ describe('Cases API', () => {
         body: JSON.stringify({
           assignees: ['none', '123'],
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -410,6 +436,8 @@ describe('Cases API', () => {
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           owner: [SECURITY_SOLUTION_OWNER],
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -440,6 +468,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -477,6 +507,8 @@ describe('Cases API', () => {
             activeCustomFieldKey: [true],
             inactiveCustomFieldKey: [false],
           },
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -502,6 +534,8 @@ describe('Cases API', () => {
         method: 'POST',
         body: JSON.stringify({
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          from: DEFAULT_FROM_DATE,
+          to: DEFAULT_TO_DATE,
           ...DEFAULT_QUERY_PARAMS,
         }),
         signal: abortCtrl.signal,
@@ -596,6 +630,85 @@ describe('Cases API', () => {
       const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
+
+    it('should include the search param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, search: 'hello world' },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            search: 'hello world',
+          },
+        }
+      );
+    });
+
+    it('should include the authors param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, authors: ['elastic'] },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            authors: ['elastic'],
+          },
+        }
+      );
+    });
+
+    it('should include multiple authors in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, authors: ['elastic', 'other'] },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            authors: ['elastic', 'other'],
+          },
+        }
+      );
+    });
+
+    it('should omit search and authors from the query when not provided', async () => {
+      await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('search');
+      expect(options.query).not.toHaveProperty('authors');
+    });
+
+    it('should omit authors from the query when an empty array is provided', async () => {
+      await findCaseUserActions(basicCase.id, { ...params, authors: [] }, abortCtrl.signal);
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('authors');
+    });
   });
 
   describe('getCaseUserActionsStats', () => {
@@ -604,6 +717,8 @@ describe('Cases API', () => {
       total_deletions: 0,
       total_comments: 10,
       total_comment_deletions: 0,
+      total_comment_creations: 10,
+      total_hidden_comment_updates: 0,
       total_other_actions: 10,
       total_other_action_deletions: 0,
     };
@@ -729,9 +844,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
+    const casesSnakeWithUpdateSummary = casesSnake.map((theCase) => ({
+      ...theCase,
+      updateSummary: {
+        syncedAlertCount: 0,
+      },
+    }));
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
     });
 
     const data = [
@@ -753,12 +875,45 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual(cases);
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
       expect(resp).toEqual([]);
+    });
+
+    it('returns cases with per-case alert status update summary', async () => {
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
+
+      const resp = await updateCases({
+        cases: data,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cases: data }),
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
   });
 
@@ -1308,64 +1463,6 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
-    });
-  });
-
-  describe('bulkPostObservables', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-
-    it('should be called with correct check url, method, signal', async () => {
-      await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_create`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            caseId: mockCase.id,
-            observables: [
-              {
-                typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-                value: 'test value',
-                description: '',
-              },
-            ],
-          }),
-          signal: abortCtrl.signal,
-        }
-      );
-    });
-
-    it('should return correct response', async () => {
-      const resp = await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-      expect(resp).toEqual(basicCase);
     });
   });
 });

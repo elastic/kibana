@@ -16,10 +16,10 @@ import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { FilterItemProps } from './filter_item';
 import { FilterItem } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 /**
  * Properties for the filter items component, which will render a single filter pill for every filter that is sent in

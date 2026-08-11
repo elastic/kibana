@@ -6,7 +6,9 @@
  */
 
 import { rangeQuery, kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { Transaction } from '@kbn/apm-types';
+import type { ErrorSampleDetailsResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { maybe } from '../../../../common/utils/maybe';
 import {
@@ -36,28 +38,14 @@ import {
   TRANSACTION_PAGE_URL,
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
+  ERROR_MESSAGE,
+  ERROR_TYPE,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getTransaction } from '../../transactions/get_transaction';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-
-export interface ErrorSampleDetailsResponse {
-  transaction: Transaction | undefined;
-  error: Omit<APMError, 'transaction' | 'error'> & {
-    transaction?: { id?: string; type?: string };
-    user_agent?: { name?: string; version?: string };
-    error: {
-      id: string;
-    } & Omit<APMError['error'], 'exception' | 'log'> & {
-        exception?: APMError['error']['exception'];
-        log?: APMError['error']['log'];
-      };
-  };
-}
 
 export async function getErrorSampleDetails({
   environment,
@@ -99,6 +87,8 @@ export async function getErrorSampleDetails({
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
     ERROR_ID,
+    ERROR_MESSAGE,
+    ERROR_TYPE,
     URL_FULL,
     HTTP_REQUEST_METHOD,
     HTTP_RESPONSE_STATUS_CODE,
@@ -150,20 +140,26 @@ export async function getErrorSampleDetails({
 
   const source = 'error' in hit._source ? hit._source : undefined;
 
-  const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
+  const errorFromFields = accessKnownApmEventFields(hit.fields)
+    .requireFields(requiredFields)
+    .unflatten();
 
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace?.id;
 
   let transaction: Transaction | undefined;
   if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
+    try {
+      transaction = await getTransaction({
+        transactionId,
+        traceId,
+        apmEventClient,
+        start,
+        end,
+      });
+    } catch {
+      transaction = undefined;
+    }
   }
 
   return {

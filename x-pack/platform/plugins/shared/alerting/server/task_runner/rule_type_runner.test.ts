@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { DATE_1970, mockTaskInstance, RULE_ID, RULE_NAME, RULE_TYPE_ID } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
@@ -43,6 +44,7 @@ const wrappedScopedClusterClient = wrappedScopedClusterClientMock.create();
 const getDataViews = jest.fn().mockResolvedValue(dataViews);
 const getWrappedSearchSourceClient = jest.fn();
 const getAsyncSearchClient = jest.fn();
+const getCpsData = jest.fn().mockResolvedValue({ linkedProjects: [] });
 
 const fakeRequest = {
   headers: {},
@@ -141,7 +143,7 @@ const mockedTaskInstance: ConcreteTaskInstance = {
   timeoutOverride: '3m',
   params: {
     adHocRunParamsId: 'abc',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
   },
   ownerId: null,
 };
@@ -187,7 +189,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -201,6 +203,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -217,6 +220,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -300,7 +304,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -314,6 +318,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -330,6 +335,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -416,7 +422,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -430,6 +436,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -446,6 +453,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -526,7 +534,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -540,6 +548,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -556,6 +565,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -636,7 +646,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -650,6 +660,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -677,7 +688,7 @@ describe('RuleTypeRunner', () => {
           maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -691,6 +702,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -707,6 +719,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -798,7 +811,7 @@ describe('RuleTypeRunner', () => {
           maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -812,6 +825,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -828,6 +842,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -918,7 +933,7 @@ describe('RuleTypeRunner', () => {
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -932,6 +947,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -949,6 +965,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -1026,7 +1043,7 @@ describe('RuleTypeRunner', () => {
             maintenanceWindowsService,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -1040,6 +1057,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -1057,6 +1075,7 @@ describe('RuleTypeRunner', () => {
           alertsClient: alertsClient.client(),
           getDataViews: expect.any(Function),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
           savedObjectsClient,
@@ -1137,7 +1156,7 @@ describe('RuleTypeRunner', () => {
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -1151,6 +1170,7 @@ describe('RuleTypeRunner', () => {
             wrappedScopedClusterClient,
             getWrappedSearchSourceClient,
             getAsyncSearchClient,
+            getCpsData,
           },
           rule: mockedRule,
           ruleType,
@@ -1167,6 +1187,7 @@ describe('RuleTypeRunner', () => {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
           getMaintenanceWindowIds: expect.any(Function),
+          getMaintenanceWindowNames: expect.any(Function),
           getDataViews: expect.any(Function),
           ruleMonitoringService: publicRuleMonitoringService,
           ruleResultService: publicRuleResultService,
@@ -1246,7 +1267,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1260,6 +1281,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
@@ -1273,6 +1295,64 @@ describe('RuleTypeRunner', () => {
           ruleExecutionTimeout: mockRuleExecutionTimeout,
         })
       );
+    });
+  });
+
+  describe('lastEnabledAt', () => {
+    const getRunOpts = (rule: RuleData<Record<string, unknown>>) => ({
+      context: {
+        alertingEventLogger,
+        logger,
+        maintenanceWindowsService,
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        queryDelaySec: 0,
+        request: fakeRequest,
+        ruleId: RULE_ID,
+        ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+        ruleRunMetricsStore,
+        spaceId: asSpaceId('default'),
+        isServerless: false,
+      },
+      alertsClient,
+      executionId: 'abc',
+      executorServices: {
+        getDataViews,
+        ruleMonitoringService: publicRuleMonitoringService,
+        ruleResultService: publicRuleResultService,
+        savedObjectsClient,
+        uiSettingsClient,
+        wrappedScopedClusterClient,
+        getWrappedSearchSourceClient,
+        getAsyncSearchClient,
+        getCpsData,
+      },
+      rule,
+      ruleType,
+      startedAt: new Date(DATE_1970),
+      state: mockTaskInstance().state,
+      validatedParams: mockedRuleParams,
+    });
+
+    test('should pass lastEnabledAt to executor when present', async () => {
+      const enabledAt = new Date('2024-01-15T10:00:00.000Z');
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      await ruleTypeRunner.run(getRunOpts({ ...mockedRule, lastEnabledAt: enabledAt }));
+
+      expect(ruleType.executor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rule: expect.objectContaining({ lastEnabledAt: enabledAt }),
+        })
+      );
+    });
+
+    test('should not include lastEnabledAt when it is undefined', async () => {
+      ruleType.executor.mockResolvedValueOnce({ state: { foo: 'bar' } });
+
+      await ruleTypeRunner.run(getRunOpts(mockedRule));
+
+      const executorCall = ruleType.executor.mock.calls[0][0];
+      expect(executorCall.rule).not.toHaveProperty('lastEnabledAt');
     });
   });
 
@@ -1291,7 +1371,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1305,6 +1385,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -1368,7 +1449,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1382,6 +1463,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,
@@ -1427,7 +1509,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1441,6 +1523,7 @@ describe('RuleTypeRunner', () => {
           wrappedScopedClusterClient,
           getWrappedSearchSourceClient,
           getAsyncSearchClient,
+          getCpsData,
         },
         rule: mockedRule,
         ruleType,

@@ -11,6 +11,7 @@ import { ResourceIdentifier } from '../../../../../../common/siem_migrations/res
 import type { SiemMigrationsDataResourcesClient } from '../../data/siem_migrations_data_resources_client';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { ItemDocument } from '../../types';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock('../../data/siem_migrations_data_resources_client');
 jest.mock('../../../../../../common/siem_migrations/resources');
@@ -28,10 +29,14 @@ class TestResourceRetriever extends ResourceRetriever {
   protected ResourceIdentifierClass = MockResourceIdentifierClass;
 }
 
+const mockExperimentalFeatures = {
+  splunkV2DashboardsEnabled: false,
+} as unknown as ExperimentalFeatures;
+
 const defaultResourceIdentifier = () =>
   ({
-    fromOriginal: jest.fn().mockReturnValue([]),
-    fromResources: jest.fn().mockReturnValue([]),
+    fromOriginal: jest.fn().mockResolvedValue([]),
+    fromResources: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>);
 
 describe('ResourceRetriever', () => {
@@ -45,15 +50,14 @@ describe('ResourceRetriever', () => {
     } as unknown as jest.Mocked<SiemMigrationsDataResourcesClient>;
 
     MockResourceIdentifierClass.mockImplementation(defaultResourceIdentifier);
-    mockResourceIdentifier = new MockResourceIdentifierClass('splunk') as jest.Mocked<
-      ResourceIdentifier<ItemDocument>
-    >;
+    mockResourceIdentifier = new MockResourceIdentifierClass('splunk', {
+      experimentalFeatures: mockExperimentalFeatures,
+    }) as jest.Mocked<ResourceIdentifier<ItemDocument>>;
 
-    retriever = new TestResourceRetriever(
-      'mockMigrationId',
-      mockDataClient,
-      MockResourceIdentifierClass
-    );
+    retriever = new TestResourceRetriever('mockMigrationId', MockResourceIdentifierClass, {
+      resourcesDataClient: mockDataClient,
+      experimentalFeatures: mockExperimentalFeatures,
+    });
   });
 
   it('throws an error if initialize is not called before getResources', async () => {
@@ -127,8 +131,8 @@ describe('ResourceRetriever', () => {
       () =>
         ({
           ...defaultResourceIdentifier(),
-          fromOriginal: jest.fn().mockReturnValue(mockResourcesIdentifiedFromRule),
-          fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
+          fromOriginal: jest.fn().mockResolvedValue(mockResourcesIdentifiedFromRule),
+          fromResources: jest.fn().mockResolvedValue([]).mockResolvedValueOnce(mockNestedResources),
         } as unknown as jest.Mocked<ResourceIdentifier<ItemDocument>>)
     );
 

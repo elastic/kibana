@@ -8,6 +8,8 @@
 import { buildValuesFileUrl } from './build_values_file_url';
 import { OTEL_KUBE_STACK_VERSION, OTEL_STACK_NAMESPACE } from './constants';
 
+const DAEMON_PROCESSOR_START_INDEX = 9;
+
 export function buildInstallStackCommand({
   isMetricsOnboardingEnabled,
   isManagedOtlpServiceAvailable,
@@ -15,6 +17,7 @@ export function buildInstallStackCommand({
   elasticsearchUrl,
   apiKeyEncoded,
   agentVersion,
+  onboardingId,
 }: {
   isMetricsOnboardingEnabled: boolean;
   isManagedOtlpServiceAvailable: boolean;
@@ -22,6 +25,7 @@ export function buildInstallStackCommand({
   elasticsearchUrl: string;
   apiKeyEncoded: string;
   agentVersion: string;
+  onboardingId: string;
 }): string {
   const ingestEndpointUrl = isManagedOtlpServiceAvailable
     ? managedOtlpEndpointUrl
@@ -35,6 +39,19 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
+  const onboardingIdConfig = (() => {
+    let config = ` \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].action=upsert' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].key=onboarding.id' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].value=${onboardingId}' \\
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${DAEMON_PROCESSOR_START_INDEX}]=resource/onboarding_id'`;
+    if (isMetricsOnboardingEnabled) {
+      config += ` \\
+  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[${DAEMON_PROCESSOR_START_INDEX}]=resource/onboarding_id'`;
+    }
+    return config;
+  })();
+
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}
 kubectl create secret generic elastic-secret-otel \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
@@ -43,5 +60,5 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'`;
+  --version '${OTEL_KUBE_STACK_VERSION}'${onboardingIdConfig}`;
 }

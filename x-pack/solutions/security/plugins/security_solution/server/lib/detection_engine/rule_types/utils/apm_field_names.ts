@@ -41,6 +41,13 @@ export const SECURITY_RULE_ID = 'security_rule_id';
  */
 export const SECURITY_RULE_STATUS = 'security_rule_status';
 
+/**
+ * APM custom context key under which the full execution-outcome diagnostics document is
+ * attached to the rule-execution transaction. Written as custom context (not labels) to
+ * avoid the indexing cost of dozens of low-cardinality fields.
+ */
+export const SECURITY_EXECUTION_OUTCOME = 'security_execution_outcome';
+
 // Schema field names and descriptions for APM custom context set by security rule executors
 
 /**

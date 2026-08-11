@@ -16,7 +16,7 @@ export const reportingPDFExportShareIntegration = ({
   apiClient,
   startServices$,
 }: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
-  const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
+  const supportedObjectTypes = ['dashboard', 'visualization', 'lens', 'ai_value_report'];
 
   return {
     id: 'pdfReports',

@@ -21,6 +21,7 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,9 +29,12 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
+  CoreStart,
 } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StartDependencies } from '@kbn/content-management-plugin/public/types';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import type { FailedImport } from '../../../lib';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
@@ -150,7 +154,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'created':
       return (
         <EuiIconTip
-          type={'checkInCircleFilled'}
+          type={'checkCircleFill'}
           color={'success'}
           content={i18n.translate('savedObjectsManagement.importSummary.createdOutcomeLabel', {
             defaultMessage: 'Created',
@@ -202,9 +206,29 @@ const ImportWarnings: FC<{ warnings: SavedObjectsImportWarning[]; basePath: IBas
 };
 
 const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePath }> = ({
-  warning,
+  warning: providedWarning,
   basePath,
 }) => {
+  const kibana = useKibana<CoreStart & StartDependencies>();
+  const isUnifiedRulesPageEnabled = useMemo(
+    () => kibana.services.application?.isAppRegistered?.('rules') ?? false,
+    [kibana.services.application]
+  );
+
+  const isRulesWarning =
+    'actionPath' in providedWarning && providedWarning.actionPath.endsWith('triggersActions/rules');
+
+  const warning = useMemo(
+    () =>
+      isUnifiedRulesPageEnabled && isRulesWarning
+        ? {
+            ...providedWarning,
+            actionPath: '/app/rules',
+          }
+        : providedWarning,
+    [isUnifiedRulesPageEnabled, isRulesWarning, providedWarning]
+  );
+
   const warningContent = useMemo(() => {
     if (warning.type === 'action_required') {
       return (
@@ -213,6 +237,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
             <EuiButton
               size="s"
               color="warning"
+              data-test-subj="warningActionButton"
               href={basePath.prepend(warning.actionPath)}
               target="_blank"
             >
@@ -300,9 +325,7 @@ export const ImportSummary: FC<ImportSummaryProps> = ({
             </EuiFlexItem>
             <EuiFlexItem css={styles.title} data-test-subj="importSavedObjectsTitle">
               <EuiText size="s">
-                <p className="eui-textTruncate" title={title}>
-                  {title}
-                </p>
+                <EuiTextTruncate text={title} />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

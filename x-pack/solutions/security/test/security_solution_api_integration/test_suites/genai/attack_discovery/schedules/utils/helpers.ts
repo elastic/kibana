@@ -79,7 +79,7 @@ export const deleteAllAttackDiscoverySchedules = async ({
         });
 
       const { data, total } = await attackApis.find({
-        query: { page: 0, perPage: 100 },
+        query: { page: 0, per_page: 100 },
         kibanaSpace,
       });
 
@@ -110,7 +110,7 @@ export const getScheduleNotFoundError = (scheduleId: string) => {
 export const getScheduleBadRequestError = (attributeName: string) => {
   return {
     error: 'Bad Request',
-    message: `[request body]: ${attributeName}: Required`,
+    message: `[request body]: ${attributeName}: Invalid input`,
     statusCode: 400,
   };
 };
@@ -122,7 +122,7 @@ export const getMissingAssistantKibanaPrivilegesError = ({
 }) => {
   return {
     error: 'Forbidden',
-    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant]`,
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [securitySolution-attackDiscoveryAll,alerts-read]`,
     statusCode: 403,
   };
 };
@@ -144,9 +144,15 @@ export const getMissingAssistantAndScheduleKibanaPrivilegesError = ({
 }: {
   routeDetails: string;
 }) => {
+  // The PUT UPDATE route has privileges listed in reverse order compared to the CREATE/ENABLE/DISABLE routes
+  const isUpdateRoute = routeDetails.startsWith('PUT ');
+  const privileges = isUpdateRoute
+    ? '[securitySolution-updateAttackDiscoverySchedule,securitySolution-attackDiscoveryAll,alerts-read]' // PUT
+    : '[securitySolution-attackDiscoveryAll,securitySolution-updateAttackDiscoverySchedule,alerts-read]'; // CREATE/ENABLE/DISABLE
+
   return {
     error: 'Forbidden',
-    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant,securitySolution-updateAttackDiscoverySchedule]`,
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges ${privileges}`,
     statusCode: 403,
   };
 };

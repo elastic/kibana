@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { AttachmentRequest } from '../../../../common/types/api';
+import type { AttachmentRequestV2 } from '../../../../common/types/api';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { AttachmentService } from '../../../services';
 import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../../common/constants';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 import { isFileAttachmentRequest, isPersistableStateOrExternalReference } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 
@@ -27,8 +28,9 @@ export class PersistableStateAndExternalReferencesLimiter extends BaseLimiter {
     });
   }
 
-  public countOfItemsInRequest(requests: AttachmentRequest[]): number {
-    const totalReferences = requests
+  public countOfItemsInRequest(requests: AttachmentRequestV2[]): number {
+    const legacyRequests = requests.filter(isLegacyAttachmentRequest);
+    const totalReferences = legacyRequests
       .filter(isPersistableStateOrExternalReference)
       .filter((request) => !isFileAttachmentRequest(request));
 

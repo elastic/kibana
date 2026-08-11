@@ -15,7 +15,7 @@ export const TRANSLATED_RULES_EMPTY_PAGE_MESSAGE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.emptyPageMessage',
   {
     defaultMessage:
-      'Translate your existing Splunk Rules with Elastic Automatic Migration. Got to Automatic Migration for step-by-step guidance.',
+      'Translate your existing Splunk Rules with Elastic Automatic Migration. Go to Automatic Migration for step-by-step guidance.',
   }
 );
 

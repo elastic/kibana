@@ -7,258 +7,243 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
-import { take } from 'rxjs';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
-import { buildEsQuery } from '@kbn/es-query';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
+import { DataLoadingState } from '@kbn/unified-data-table';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { TIMEPICKER_FALLBACK } from './constants';
+import { useTriggerEventSearch } from './use_trigger_event_search';
+import { useTriggerEventTableConfig } from './use_trigger_event_table_config';
+import { useWorkflowsEventsDataView } from './use_workflows_events_data_view';
+import { WorkflowExecuteEventFormSearchResults } from './workflow_execute_event_form_search_results';
+import { WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS } from './workflow_execute_modal_global_styles';
+import {
+  getWorkflowCustomTriggerTypeIds,
+  isDefaultTriggerEventSearchScope,
+} from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSpaceId } from '../../../hooks/use_space_id';
+import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
 
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    'kibana.alert.rule.name': string;
-    'kibana.alert.rule.uuid': string;
-    'kibana.alert.severity': string;
-    'kibana.alert.status': string;
-    'kibana.alert.reason': string;
-    [key: string]: unknown;
-  };
-}
+export { buildTriggerEventReplayInputs } from './workflow_execute_event_replay_inputs';
 
-interface WorkflowExecuteEventFormProps {
+export interface WorkflowExecuteEventFormProps {
+  definition: WorkflowYaml | null;
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
-  setErrors: (errors: string | null) => void;
+  /** Clears validation errors when the table updates the run payload from the current selection. */
+  setErrors?: (errors: string | null) => void;
+  /** Number of rows currently selected in the trigger-events table (checkbox selection). */
+  onTriggerEventTableSelectionCountChange?: (selectedCount: number) => void;
+  /** Mirrors modal layout when the table expands to full screen. */
+  isTableGridFullScreen?: boolean;
+  /** Notifies the modal when the table toolbar fullscreen control is toggled. */
+  onTableGridFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Switches the execute modal to the Manual tab from the empty-state action. */
+  onOpenManualTab?: () => void;
 }
 
 export const WorkflowExecuteEventForm = ({
-  value,
+  definition,
+  value: _value,
   setValue,
   errors,
   setErrors,
+  onTriggerEventTableSelectionCountChange,
+  isTableGridFullScreen = false,
+  onTableGridFullScreenChange,
+  onOpenManualTab,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+  const tableSurfaceColor = euiTheme.colors.backgroundBasePlain;
   const { services } = useKibana();
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-    spaces,
-  } = services;
-  const [spaceId, setSpaceId] = useState<string | null>(null);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    from: 'now-15m',
-    to: 'now',
+  const { SearchBar } = services.unifiedSearch.ui;
+
+  const { eventDrivenExecutionEnabled, isLoading: isEventConfigLoading } =
+    useEventDrivenExecutionStatus();
+
+  const activeSpaceId = useSpaceId();
+  const replaySpaceId = activeSpaceId ?? 'default';
+
+  const customTriggerTypeIds = useMemo(
+    () => getWorkflowCustomTriggerTypeIds(definition),
+    [definition]
+  );
+  const customTriggerIdsKey = useMemo(
+    () => customTriggerTypeIds.join('\0'),
+    [customTriggerTypeIds]
+  );
+
+  const triggerEventsSurfaceRef = useRef<HTMLDivElement | null>(null);
+
+  const dataView = useWorkflowsEventsDataView({
+    dataViews: services.dataViews,
+    toasts: services.notifications.toasts,
   });
 
-  const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const queryEnabled =
+    eventDrivenExecutionEnabled && !isEventConfigLoading && Boolean(services.http);
 
-  // Get space ID
-  useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => {
-        setSpaceId(space.id);
-      });
-    }
-  }, [spaces]);
+  const getTimeDefaults = useCallback(
+    () => services.data?.query?.timefilter?.timefilter?.getTimeDefaults?.() ?? TIMEPICKER_FALLBACK,
+    [services.data?.query?.timefilter?.timefilter]
+  );
 
-  const fetchAlerts = useCallback(async () => {
-    if (!services.data || !spaceId) {
-      return;
-    }
-
-    setAlertsLoading(true);
-    setErrors(null);
-
-    try {
-      const esQuery = buildEsQuery(undefined, query ? [query] : [], []);
-      const searchQuery = {
-        bool: {
-          must: esQuery.bool.must || [],
-          filter: [
-            ...(esQuery.bool.filter || []),
-            {
-              range: {
-                '@timestamp': {
-                  gte: timeRange.from,
-                  lte: timeRange.to,
-                },
-              },
-            },
-          ],
-          should: esQuery.bool.should || [],
-          must_not: esQuery.bool.must_not || [],
-        },
-      };
-
-      const request = {
-        params: {
-          index: `.alerts-*-${spaceId}`,
-          body: {
-            query: searchQuery,
-            size: 50,
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
-        },
-      };
-
-      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
-
-      if (
-        response &&
-        response.rawResponse &&
-        response.rawResponse.hits &&
-        response.rawResponse.hits.hits
-      ) {
-        setAlerts(response.rawResponse.hits.hits as Alert[]);
-      } else {
-        setAlerts([]);
-      }
-    } catch (err) {
-      setErrors(err instanceof Error ? err.message : 'Failed to fetch alerts');
-      setAlerts([]);
-    } finally {
-      setAlertsLoading(false);
-    }
-  }, [services.data, setErrors, query, timeRange.from, timeRange.to, spaceId]);
+  const {
+    query,
+    submittedQuery,
+    timeRange,
+    searchResult,
+    isError,
+    searchError,
+    rows,
+    totalHits,
+    onFetchMoreRecords,
+    tableLoadingState,
+    isFetching,
+    handleQueryChange,
+    handleQuerySubmit,
+    handleRefresh,
+  } = useTriggerEventSearch({
+    definition,
+    customTriggerTypeIds,
+    customTriggerIdsKey,
+    queryEnabled,
+    isEventConfigLoading,
+    getTimeDefaults,
+  });
 
   useEffect(() => {
-    if (spaceId) {
-      fetchAlerts();
+    if (rows.length === 0 && isTableGridFullScreen) {
+      onTableGridFullScreenChange?.(false);
     }
-  }, [fetchAlerts, spaceId]);
+  }, [rows.length, isTableGridFullScreen, onTableGridFullScreenChange]);
 
-  const updateEventData = (selectedAlerts: Alert[]) => {
-    if (selectedAlerts.length > 0) {
-      const alertIds: AlertSelection[] = selectedAlerts.map((alert: Alert) => ({
-        _id: alert._id,
-        _index: alert._index,
-      }));
+  const documentCount = searchResult?.total ?? 0;
 
-      const workflowEvent: AlertTriggerInput = {
-        event: {
-          alertIds,
-          triggerType: 'alert',
-        },
-      };
+  const isDefaultTriggerScope = useMemo(
+    () => isDefaultTriggerEventSearchScope(submittedQuery, customTriggerTypeIds),
+    [submittedQuery, customTriggerTypeIds]
+  );
 
-      setValue(JSON.stringify(workflowEvent, null, 2));
-    }
-  };
+  const showNoEventsEmptyState =
+    tableLoadingState === DataLoadingState.loaded &&
+    !isFetching &&
+    !isError &&
+    documentCount === 0 &&
+    Boolean(dataView);
 
-  const handleQueryChange = ({
-    query: newQuery,
-    dateRange,
-  }: {
-    query?: Query;
-    dateRange: TimeRange;
-  }) => {
-    if (newQuery) {
-      setQuery(newQuery);
-    }
-    setTimeRange(dateRange);
-  };
+  const tableConfig = useTriggerEventTableConfig({
+    services,
+    dataView,
+    rows,
+    documentCount,
+    replaySpaceId,
+    setValue,
+    setErrors,
+    onTriggerEventTableSelectionCountChange,
+  });
 
-  const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
-
-  const columns: EuiBasicTableColumn<Alert>[] = [
-    {
-      field: '_source.@timestamp',
-      name: '@timestamp',
-      sortable: true,
-      width: '250px',
-      render: (timestamp: string) => fmt.convert(new Date(timestamp)),
-    },
-    {
-      field: '_source.kibana.alert.rule.name',
-      name: 'Rule',
-      sortable: true,
-      render: (name: string, item: Alert) => item._source['kibana.alert.rule.name'],
-    },
-  ];
+  if (!eventDrivenExecutionEnabled && !isEventConfigLoading) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18n.translate(
+          'workflows.workflowExecuteEventTriggerForm.eventDrivenDisabledTitle',
+          {
+            defaultMessage: 'Event-driven execution is disabled',
+          }
+        )}
+        color="warning"
+        iconType="warning"
+        size="s"
+      >
+        <EuiText size="s">
+          {i18n.translate('workflows.workflowExecuteEventTriggerForm.eventDrivenDisabledBody', {
+            defaultMessage:
+              'Trigger-event logging and replay require event-driven workflows to be enabled in cluster configuration.',
+          })}
+        </EuiText>
+      </EuiCallOut>
+    );
+  }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
-        <SearchBar
-          appName="workflow_management"
-          showDatePicker
-          onQuerySubmit={handleQueryChange}
-          query={query}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
-          showFilterBar={false}
-          showSubmitButton={true}
-          placeholder="Filter your data using KQL syntax"
-          data-test-subj="workflow-query-input"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {alertsLoading ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                {i18n.translate('workflows.workflowExecuteEventForm.loadingAlerts', {
-                  defaultMessage: 'Loading alerts...',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiBasicTable
-            itemId="_id"
-            rowHeader="@timestamp"
-            tableLayout="fixed"
-            items={alerts}
-            columns={columns}
-            selection={{
-              onSelectionChange: updateEventData,
-            }}
+    <EuiFlexGroup
+      className={`workflowTriggerEventsRoot ${WORKFLOW_EXECUTE_TABLE_TAB_ROOT_CLASS}`}
+      direction="column"
+      gutterSize="s"
+      css={css({
+        flex: 1,
+        minHeight: 0,
+        height: '100%',
+      })}
+    >
+      {!isTableGridFullScreen ? (
+        <EuiFlexItem grow={false}>
+          <SearchBar
+            appName="workflow_management"
+            useDefaultBehaviors={true}
+            disableSubscribingToGlobalDataServices={true}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
+            onRefresh={handleRefresh}
+            query={query}
+            indexPatterns={dataView ? [dataView] : []}
+            showDatePicker={true}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            showFilterBar={false}
+            showSubmitButton={true}
+            placeholder={i18n.translate(
+              'workflows.workflowExecuteEventTriggerForm.searchPlaceholder',
+              {
+                defaultMessage: 'Filter using KQL (e.g. triggerId: my.trigger or eventId: abc)',
+              }
+            )}
+            dataTestSubj="workflow-trigger-events-query-input"
+            displayStyle="inPage"
           />
-        )}
-      </EuiFlexItem>
-
-      {/* Error Display */}
-      {errors && (
-        <EuiFlexItem>
-          <EuiCallOut
-            announceOnMount
-            title="Failed to load alerts"
-            color="warning"
-            iconType="help"
-            size="s"
-          >
-            <p>{errors}</p>
-            <EuiText size="s">
-              {i18n.translate('workflows.workflowExecuteEventForm.errorMessage', {
-                defaultMessage:
-                  'Make sure you have the proper permissions to access security alerts, or manually enter the event data below.',
-              })}
-            </EuiText>
-          </EuiCallOut>
         </EuiFlexItem>
-      )}
+      ) : null}
+
+      <WorkflowExecuteEventFormSearchResults
+        isError={isError}
+        searchError={searchError}
+        errors={errors}
+        triggerEventsSurfaceRef={triggerEventsSurfaceRef}
+        euiTheme={euiTheme}
+        tableSurfaceColor={tableSurfaceColor}
+        timestampCellTypography={tableConfig.timestampCellTypography}
+        tableLoadingState={tableLoadingState}
+        dataView={dataView}
+        getNoCellActions={tableConfig.getNoCellActions}
+        visibleTableColumns={tableConfig.visibleTableColumns}
+        columnsMeta={tableConfig.columnsMeta}
+        dataTableRows={tableConfig.dataTableRows}
+        rowsLength={rows.length}
+        unifiedDataTableServices={tableConfig.unifiedDataTableServices}
+        handleUnifiedDataTableSetColumns={tableConfig.handleUnifiedDataTableSetColumns}
+        showTimeColumn={tableConfig.showTimeColumn}
+        sort={tableConfig.sort}
+        handleSortChange={tableConfig.handleSortChange}
+        customGridColumnsConfiguration={tableConfig.customGridColumnsConfiguration}
+        renderCustomToolbar={tableConfig.renderCustomToolbar}
+        renderCellPopover={tableConfig.renderCellPopover}
+        externalCustomRenderers={tableConfig.externalCustomRenderers}
+        totalHits={totalHits}
+        onFetchMoreRecords={onFetchMoreRecords}
+        isTableGridFullScreen={isTableGridFullScreen}
+        onDataGridFullScreenChange={onTableGridFullScreenChange}
+        showNoEventsEmptyState={showNoEventsEmptyState}
+        isDefaultTriggerScope={isDefaultTriggerScope}
+        onOpenManualTab={onOpenManualTab}
+      />
     </EuiFlexGroup>
   );
 };
+
+WorkflowExecuteEventForm.displayName = 'WorkflowExecuteEventForm';

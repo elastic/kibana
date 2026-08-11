@@ -23,8 +23,14 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
-
   const isReinstalling = installationStatus === InstallStatus.reinstalling;
+
+  const isStatusInProgress = [
+    InstallStatus.installing,
+    InstallStatus.rollingBack,
+    InstallStatus.uninstalling,
+  ].includes(installationStatus);
+
   const isUploadedPackage = installSource === 'upload';
 
   const handleClickReinstall = useCallback(() => {
@@ -33,10 +39,11 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
 
   const reinstallButton = (
     <EuiButton
+      data-test-subj="reinstallButton"
       iconType="refresh"
       isLoading={isReinstalling}
       onClick={handleClickReinstall}
-      disabled={isUploadedPackage || isCustomPackage}
+      disabled={isUploadedPackage || isCustomPackage || isStatusInProgress}
     >
       {isReinstalling ? (
         <FormattedMessage
@@ -66,6 +73,17 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
             <FormattedMessage
               id="xpack.fleet.integrations.installPackage.uploadedTooltip"
               defaultMessage="This integration was installed by upload and cannot be automatically reinstalled. Please upload it again to reinstall."
+            />
+          }
+        >
+          {reinstallButton}
+        </EuiToolTip>
+      ) : isCustomPackage ? (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.customTooltip"
+              defaultMessage="This is a custom integration and cannot be automatically reinstalled."
             />
           }
         >

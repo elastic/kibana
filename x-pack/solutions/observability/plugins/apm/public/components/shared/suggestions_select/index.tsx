@@ -27,6 +27,7 @@ interface SuggestionsSelectProps {
   prepend?: string;
   serviceName?: string;
   shouldReset?: boolean;
+  compressed?: boolean;
 }
 
 export type { SuggestionsSelectProps };
@@ -46,6 +47,7 @@ export function SuggestionsSelect({
   prepend,
   serviceName,
   shouldReset = false,
+  compressed = false,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -148,6 +150,7 @@ export function SuggestionsSelect({
       onCreateOption={handleCreateOption}
       data-test-subj={dataTestSubj}
       prepend={prepend}
+      compressed={compressed}
     />
   );
 }

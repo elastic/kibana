@@ -21,9 +21,12 @@ import {
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
+import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import { generateCreateAgentlessPolicyDevToolsRequest } from '../../../services/devtools_request';
+import {
+  generateCreateAgentlessPolicyDevToolsRequest,
+  generateUpdateAgentlessPolicyDevToolsRequest,
+} from '../../../services/devtools_request';
 
 export function useDevToolsRequest({
   newAgentPolicy,
@@ -32,6 +35,7 @@ export function useDevToolsRequest({
   selectedPolicyTab,
   withSysMonitoring,
   packagePolicyId,
+  createDatasetTemplates,
 }: {
   withSysMonitoring: boolean;
   selectedPolicyTab: SelectedPolicyTab;
@@ -39,24 +43,33 @@ export function useDevToolsRequest({
   packagePolicy: NewPackagePolicy;
   packageInfo?: PackageInfo;
   packagePolicyId?: string;
+  createDatasetTemplates?: boolean;
 }) {
   const showDevtoolsRequest = !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '');
+
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
     if (selectedPolicyTab === SelectedPolicyTab.NEW) {
       const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
 
-      if (
-        ExperimentalFeaturesService.get().useAgentlessAPIInUI &&
-        packagePolicy.supports_agentless &&
-        !packagePolicy.supports_cloud_connector
-      ) {
+      if (packagePolicy.supports_agentless) {
         return [
-          generateCreateAgentlessPolicyDevToolsRequest(packagePolicy),
+          generateCreateAgentlessPolicyDevToolsRequest(
+            {
+              ...packagePolicy,
+              create_dataset_templates: createDatasetTemplates,
+            },
+            varGroups,
+            packageInfo
+          ),
           i18n.translate(
             'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
             {
-              defaultMessage: 'These Kibana requests create a new agentless policy.',
+              defaultMessage: 'These Kibana requests create a new managed integration.',
             }
           ),
         ];
@@ -76,7 +89,9 @@ export function useDevToolsRequest({
                 ])
               )
             : generateCreatePackagePolicyDevToolsRequest({
-                ...{ ...packagePolicy, policy_ids: [''] },
+                ...packagePolicy,
+                policy_ids: [''],
+                create_dataset_templates: createDatasetTemplates,
               })
         }`,
         packagePolicyId
@@ -97,6 +112,27 @@ export function useDevToolsRequest({
       ];
     }
 
+    // Editing an existing agentless policy: preview the agentless full-replace PUT rather than the
+    // package-policy update, matching the actual request the edit form now issues. When the
+    // agentless policies UI kill switch is off, edits go through the legacy package-policy PUT,
+    // so preview that instead (fall-through below).
+    if (packagePolicyId && packagePolicy.supports_agentless && agentlessUIEnabled) {
+      return [
+        generateUpdateAgentlessPolicyDevToolsRequest(
+          packagePolicyId,
+          packagePolicy,
+          varGroups,
+          packageInfo
+        ),
+        i18n.translate(
+          'xpack.fleet.editPackagePolicy.devtoolsRequestUpdateAgentlessPolicyDescription',
+          {
+            defaultMessage: 'This Kibana request updates a managed integration.',
+          }
+        ),
+      ];
+    }
+
     return [
       packagePolicyId
         ? generateUpdatePackagePolicyDevToolsRequest(
@@ -105,6 +141,7 @@ export function useDevToolsRequest({
           )
         : generateCreatePackagePolicyDevToolsRequest({
             ...packagePolicy,
+            create_dataset_templates: createDatasetTemplates,
           }),
       packagePolicyId
         ? i18n.translate('xpack.fleet.editPackagePolicy.devtoolsRequestDescription', {
@@ -114,7 +151,17 @@ export function useDevToolsRequest({
             defaultMessage: 'This Kibana request creates a new package policy.',
           }),
     ];
-  }, [packagePolicy, newAgentPolicy, withSysMonitoring, selectedPolicyTab, packagePolicyId]);
+  }, [
+    packagePolicy,
+    newAgentPolicy,
+    withSysMonitoring,
+    selectedPolicyTab,
+    packagePolicyId,
+    createDatasetTemplates,
+    varGroups,
+    packageInfo,
+    agentlessUIEnabled,
+  ]);
 
   return { showDevtoolsRequest, devtoolRequest, devtoolRequestDescription };
 }

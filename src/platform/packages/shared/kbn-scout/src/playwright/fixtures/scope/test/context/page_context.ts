@@ -19,15 +19,8 @@ import { coreWorkerFixtures } from '../../worker';
  * ensuring consistent browser state across all tests.
  */
 export const pageContextFixture = coreWorkerFixtures.extend<{ context: BrowserContext }>({
-  context: async ({ context, log }, use) => {
-    // Add init script to set localStorage flags before any page navigation
-    // This will be executed on every page load/reload
-    await context.addInitScript(() => {
-      // Force hide tour for the solution navigation
-      localStorage.setItem('solutionNavigationTour:completed', 'true');
-    });
-
-    log.debug('Page context initialized');
+  context: async ({ context }, use) => {
+    // set localStorage flags before any page navigation
     await use(context);
   },
 });

@@ -571,6 +571,219 @@ describe('StatusRuleExecutor', () => {
       });
     });
 
+    describe('filtering configs with missing latestPing.monitor', () => {
+      it('should skip configs where latestPing is undefined', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should skip configs where latestPing.monitor is undefined', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should log a debug message for each skipped config', async () => {
+        const debugSpy = jest.spyOn(statusRule, 'debug');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id2-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id2',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test2',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(debugSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping down config id1-us_central_qa')
+        );
+        expect(debugSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping down config id2-us_central_dev')
+        );
+      });
+
+      it('should only alert for valid configs when mixed with invalid ones (grouped by location)', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: testPing,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id2-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id2',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test2',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertId: 'id1-us_central_qa',
+          })
+        );
+      });
+
+      it('should only alert for valid configs when mixed with invalid ones (ungrouped)', async () => {
+        statusRule.params = {
+          condition: {
+            groupBy: 'none',
+            window: {
+              numberOfChecks: 1,
+            },
+            downThreshold: 1,
+            locationsThreshold: 1,
+          },
+        };
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: testPing,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id1-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertId: 'id1',
+            locationNames: ['Test location'],
+            locationIds: ['test'],
+          })
+        );
+      });
+
+      it('should not alert when all configs have missing latestPing (ungrouped)', async () => {
+        statusRule.params = {
+          condition: {
+            groupBy: 'none',
+            window: {
+              numberOfChecks: 1,
+            },
+            downThreshold: 1,
+            locationsThreshold: 1,
+          },
+        };
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id1-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
+      });
+    });
+
     it('should send 2 alerts for un-grouped with 2 different monitors', async () => {
       statusRule.params = {
         condition: {

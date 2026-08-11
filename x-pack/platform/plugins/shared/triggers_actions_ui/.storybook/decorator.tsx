@@ -50,6 +50,12 @@ const notifications: NotificationsStart = {
     get$: () => of([]),
   },
   showErrorDialog: () => {},
+  feedback: {
+    isEnabled: () => true,
+  },
+  tours: {
+    isEnabled: () => true,
+  },
 };
 
 const userProfile = { getUserProfile$: () => of(null) };
@@ -71,8 +77,6 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       rulesDetailLogs: true,
       ruleUseExecutionStatus: false,
       ruleKqlBar: true,
-      isMustacheAutocompleteOn: false,
-      showMustacheAutocompleteSwitch: false,
       alertDeletionSettingsEnabled: false,
     },
   });

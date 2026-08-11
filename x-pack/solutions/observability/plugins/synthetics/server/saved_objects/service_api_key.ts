@@ -83,6 +83,9 @@ const deleteSyntheticsServiceApiKey = async (soClient: SavedObjectsClientContrac
   try {
     return await soClient.delete(syntheticsServiceApiKey.name, syntheticsApiKeyID);
   } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      return;
+    }
     throw e;
   }
 };

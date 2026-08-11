@@ -24,13 +24,14 @@ export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
  * Returns Storybook-compatible service abstractions for the `SampleDataCard` Provider.
  */
 export const getStoryServices = (params: Params) => {
+  const cardServices = getSampleDataCardStoryServices(params);
   const services: SampleDataTabServices = {
+    ...cardServices,
     fetchSampleDataSets: async () => {
       const data = getSampleDataCardMockDataSet(params);
       return [data, data, data];
     },
     logClick: () => {},
-    ...getSampleDataCardStoryServices(params),
   };
 
   return services;

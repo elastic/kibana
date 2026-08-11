@@ -43,6 +43,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
   const {
     serializer,
     idSet,
+    isLoadingIds,
     handleSubmit: formSubmit,
     formState: { isSubmitting, errors },
   } = hooksForm;
@@ -70,6 +71,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   isLoading={isSubmitting}
+                  isDisabled={isLoadingIds}
                   color="primary"
                   fill
                   size="m"

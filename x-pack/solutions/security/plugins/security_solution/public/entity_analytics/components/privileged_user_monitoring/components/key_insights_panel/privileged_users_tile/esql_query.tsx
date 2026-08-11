@@ -11,4 +11,4 @@ export const getPrivilegedUsersEsqlCount = (
   namespace: string
 ) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
       | WHERE user.is_privileged == true
-      | STATS count = COUNT_DISTINCT(user.name)`;
+      | STATS count = COUNT(*)`;

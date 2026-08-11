@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AgentPolicy } from '../../common';
@@ -14,21 +13,6 @@ import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from
 import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
-
-const fakeRequest = {
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
   esClient: ElasticsearchClient,
@@ -40,7 +24,7 @@ export async function agentPolicyUpdateEventHandler(
   // to ensure encrypted SOs are handled correctly
   const internalSoClient = options?.spaceId
     ? appContextService.getInternalUserSOClientForSpaceId(options?.spaceId)
-    : appContextService.getInternalUserSOClient(fakeRequest);
+    : appContextService.getInternalUserSOClient();
 
   if (action === 'created') {
     await generateEnrollmentAPIKey(internalSoClient, esClient, {

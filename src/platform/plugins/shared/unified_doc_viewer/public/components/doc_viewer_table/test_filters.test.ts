@@ -10,7 +10,8 @@
 import { renderHook, act } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  useTableFilters,
+  useTableFiltersState,
+  useTableFiltersCallbacks,
   LOCAL_STORAGE_KEY_SEARCH_TERM,
   LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES,
 } from './table_filters';
@@ -61,6 +62,26 @@ const rowTimestamp = new FieldRow({
   isPinned: false,
   columnsMeta: undefined,
 });
+// machine.os and geo.src both exist in stubLogstashDataView, so the data view's
+// formatter is used (avoids needing a real fieldFormats mock).
+const rowMachineOs = new FieldRow({
+  name: 'machine.os',
+  flattenedValue: 'osx',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
+const rowGeoSrc = new FieldRow({
+  name: 'geo.src',
+  flattenedValue: 'US',
+  hit,
+  dataView,
+  fieldFormats: {} as FieldFormatsStart,
+  isPinned: false,
+  columnsMeta: undefined,
+});
 
 describe('useTableFilters', () => {
   beforeAll(() => {
@@ -74,10 +95,17 @@ describe('useTableFilters', () => {
     storage.clear();
   });
 
+  const useTableFilters = () => {
+    const state = useTableFiltersState({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM });
+    const callbacks = useTableFiltersCallbacks({
+      searchTerm: state.searchTerm,
+      selectedFieldTypes: state.selectedFieldTypes,
+    });
+    return { ...state, ...callbacks };
+  };
+
   it('should return initial search term and field types', () => {
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     expect(result.current.searchTerm).toBe('');
     expect(result.current.selectedFieldTypes).toEqual([]);
@@ -88,9 +116,7 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by search term', () => {
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     act(() => {
       result.current.onChangeSearchTerm('ext');
@@ -103,9 +129,7 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by field type', () => {
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     act(() => {
       result.current.onChangeFieldTypes(['number']);
@@ -133,9 +157,7 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by search term and field type', () => {
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     act(() => {
       result.current.onChangeSearchTerm('ext');
@@ -167,9 +189,7 @@ describe('useTableFilters', () => {
   });
 
   it('should filter by field value and field type', () => {
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     expect(result.current.onFilterField(rowTimestamp)).toBe(true);
     expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
@@ -207,13 +227,61 @@ describe('useTableFilters', () => {
     expect(storage.get(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES)).toBe('["date"]');
   });
 
+  it('should filter by wildcard search term', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // Anchored wildcard: '^machine.*os$' matches 'machine.os' but not 'geo.src'
+    act(() => {
+      result.current.onChangeSearchTerm('machine*os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should treat spaces as wildcards in search term', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // Unanchored space wildcard: '.*machine.*os.*' matches 'machine.os' but not 'geo.src'
+    act(() => {
+      result.current.onChangeSearchTerm('machine os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should match with fuzzy search allowing one typo', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    // 'm4chine.os' has one substitution from 'machine.os' (Levenshtein distance 1)
+    act(() => {
+      result.current.onChangeSearchTerm('m4chine.os');
+    });
+
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(false);
+  });
+
+  it('should not filter when search term is only whitespace', () => {
+    const { result } = renderHook(() => useTableFilters());
+
+    act(() => {
+      result.current.onChangeSearchTerm('   ');
+    });
+
+    expect(result.current.onFilterField(rowExtensionKeyword)).toBe(true);
+    expect(result.current.onFilterField(rowBytes)).toBe(true);
+    expect(result.current.onFilterField(rowTimestamp)).toBe(true);
+    expect(result.current.onFilterField(rowMachineOs)).toBe(true);
+    expect(result.current.onFilterField(rowGeoSrc)).toBe(true);
+  });
+
   it('should restore previous filters', () => {
     storage.set(LOCAL_STORAGE_KEY_SEARCH_TERM, 'bytes');
     storage.set(LOCAL_STORAGE_KEY_SELECTED_FIELD_TYPES, '["number"]');
 
-    const { result } = renderHook(() =>
-      useTableFilters({ storage, storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM })
-    );
+    const { result } = renderHook(() => useTableFilters());
 
     expect(result.current.searchTerm).toBe('bytes');
     expect(result.current.selectedFieldTypes).toEqual(['number']);

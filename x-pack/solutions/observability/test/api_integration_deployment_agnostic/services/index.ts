@@ -11,7 +11,7 @@ import { ApmApiProvider } from './apm_api';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ObservabilityAIAssistantApiProvider } from './observability_ai_assistant_api';
-import { SyntheticsParamsApiProvider } from './synthetics_params_api';
+import { ObservabilityAgentBuilderApiProvider } from './observability_agent_builder_api';
 
 export type {
   InternalRequestHeader,
@@ -27,7 +27,7 @@ export const services = {
   sloApi: SloApiProvider,
   synthtrace: SynthtraceProvider,
   observabilityAIAssistantApi: ObservabilityAIAssistantApiProvider,
-  syntheticsParamsApi: SyntheticsParamsApiProvider,
+  observabilityAgentBuilderApi: ObservabilityAgentBuilderApiProvider,
 };
 
 export type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';

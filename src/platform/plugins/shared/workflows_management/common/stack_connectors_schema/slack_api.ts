@@ -12,28 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
-
-// Slack API connector parameter schemas for different sub-actions
-export const SlackApiPostMessageParamsSchema = z.object({
-  channels: z.array(z.string()),
-  text: z.string(),
-  blocks: z.array(z.any()).optional(),
-  attachments: z.array(z.any()).optional(),
-  thread_ts: z.string().optional(),
-  unfurl_links: z.boolean().optional(),
-  unfurl_media: z.boolean().optional(),
-});
-
-export const SlackApiGetChannelsParamsSchema = z.object({
-  types: z.string().optional(),
-  exclude_archived: z.boolean().optional(),
-  limit: z.number().optional(),
-});
-
-export const SlackApiGetUsersParamsSchema = z.object({
-  limit: z.number().optional(),
-});
+import { z } from '@kbn/zod/v4';
 
 // Slack API connector response schema
 export const SlackApiResponseSchema = z.object({

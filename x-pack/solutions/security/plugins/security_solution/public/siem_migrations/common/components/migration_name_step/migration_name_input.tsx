@@ -23,10 +23,10 @@ export const MigrationNameInput = React.memo<MigrationNameInputProps>(
     }, []);
 
     const handleNameSave = useCallback(() => {
-      setMigrationName(name);
+      setMigrationName(name.trim());
     }, [name, setMigrationName]);
 
-    const isInvalid = name.length === 0;
+    const isInvalid = name.trim().length === 0;
     const errors = useMemo(() => {
       if (isInvalid) {
         return [i18n.MIGRATION_NAME_INPUT_ERROR];

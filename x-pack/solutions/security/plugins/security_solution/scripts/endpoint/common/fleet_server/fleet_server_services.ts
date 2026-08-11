@@ -30,8 +30,7 @@ import {
   fleetServerHostsRoutesService,
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
-import axios from 'axios';
-import * as https from 'https';
+import { Agent } from 'undici';
 import {
   CA_TRUSTED_FINGERPRINT,
   FLEET_SERVER_CERT_PATH,
@@ -40,11 +39,10 @@ import {
 } from '@kbn/dev-utils';
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
-import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
-import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
   createAgentPolicy,
   createIntegrationPolicy,
@@ -283,7 +281,8 @@ const startFleetServerWithDocker = async ({
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
   );
 
-  let retryAttempt = isServerless ? 0 : 1;
+  let retryAttempt = 0;
+  const maxRetries = isServerless ? 1 : 2;
   const attemptServerlessFleetServerSetup = async (): Promise<StartedServer> => {
     fleetServerVersionInfo = '';
 
@@ -291,8 +290,8 @@ const startFleetServerWithDocker = async ({
       const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
       let containerId = '';
 
-      if (isLocalhost(esURL.hostname)) {
-        esURL.hostname = localhostRealIp;
+      if (isLocalhost(esURL.hostname) || esURL.hostname === localhostRealIp) {
+        esURL.hostname = 'host.docker.internal';
       }
 
       if (isServerless) {
@@ -359,7 +358,19 @@ const startFleetServerWithDocker = async ({
           }
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
-          await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+          try {
+            await waitForHostToEnroll(kbnClient, log, hostname, 240000);
+          } catch (enrollErr) {
+            log.warning(
+              `Agent enrollment lookup timed out for [${hostname}], falling back to fleet server status check`
+            );
+            if (!(await isFleetServerRunning(kbnClient, log))) {
+              throw enrollErr;
+            }
+            log.info(
+              `Fleet server at [${fleetServerUrl}] is responding — proceeding despite enrollment lookup timeout`
+            );
+          }
         }
 
         fleetServerVersionInfo = isServerless
@@ -390,9 +401,22 @@ const startFleetServerWithDocker = async ({
               })
             ).stdout;
       } catch (error) {
-        if (retryAttempt < 1) {
+        // Capture Docker container logs for diagnostics before retrying or throwing
+        try {
+          const dockerLogs = await execa('docker', ['logs', '--tail', '40', containerName]);
+          log.error(`Docker container [${containerName}] logs:\n${dockerLogs.stdout}`);
+          if (dockerLogs.stderr) {
+            log.error(`Docker container [${containerName}] stderr:\n${dockerLogs.stderr}`);
+          }
+        } catch (logError) {
+          log.verbose(`Failed to retrieve Docker logs for [${containerName}]: ${logError.message}`);
+        }
+
+        if (retryAttempt < maxRetries) {
           retryAttempt++;
-          log.error(`Failed to start fleet server, retrying. Error: ${error.message}`);
+          log.error(
+            `Failed to start fleet server (attempt ${retryAttempt}/${maxRetries}), retrying. Error: ${error.message}`
+          );
           log.verbose(dump(error));
           return attemptServerlessFleetServerSetup();
         }
@@ -604,14 +628,14 @@ const addFleetServerHostToFleetSettings = async (
           },
           body: newFleetHostEntry,
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .catch((error: FormattedAxiosError) => {
+        .catch((error) => {
           if (
-            error.response.status === 403 &&
-            ((error.response?.data?.message as string) ?? '').includes('disabled')
+            error instanceof KbnClientRequesterError &&
+            error.status === 403 &&
+            error.message.includes('disabled')
           ) {
             log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${
-              error.response.data.message
+              error.message
             }].
 
   ${chalk.red('Are you running this utility against a Serverless project?')}
@@ -681,14 +705,12 @@ const updateFleetElasticsearchOutputHostNames = async (
 
               log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
 
-              await kbnClient
-                .request<GetOneOutputResponse>({
-                  method: 'PUT',
-                  headers: { 'elastic-api-version': '2023-10-31' },
-                  path: outputRoutesService.getUpdatePath(id),
-                  body: update,
-                })
-                .catch(catchAxiosErrorFormatAndThrow);
+              await kbnClient.request<GetOneOutputResponse>({
+                method: 'PUT',
+                headers: { 'elastic-api-version': '2023-10-31' },
+                path: outputRoutesService.getUpdatePath(id),
+                body: update,
+              });
             }
           }
         }
@@ -721,21 +743,24 @@ export const isFleetServerRunning = async (
 
   return pRetry(
     async () => {
-      return axios
-        .request({
-          method: 'GET',
-          url: url.toString(),
-          responseType: 'json',
-          // Custom agent to ensure we don't get cert errors
-          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        })
-        .then((response) => {
-          log.debug(
-            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
-            response.data
-          );
-        })
-        .catch(catchAxiosErrorFormatAndThrow);
+      const response = await fetch(url, {
+        method: 'GET',
+        // Custom dispatcher to ensure we don't get cert errors
+        dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
+      } as RequestInit);
+
+      if (!response.ok) {
+        throw new Error(
+          `Fleet server status check failed at [${url.toString()}]: ${response.status} ${
+            response.statusText
+          } -- ${await response.text()}`
+        );
+      }
+
+      log.debug(
+        `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
+        await response.json()
+      );
     },
     {
       maxTimeout: 10000,

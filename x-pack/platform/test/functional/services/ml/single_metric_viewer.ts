@@ -95,10 +95,6 @@ export function MachineLearningSingleMetricViewerProvider(
       await testSubjects.existOrFail('mlAnomaliesListRowActionConfigureRulesButton');
     },
 
-    async assertFeedbackButtonExists() {
-      await testSubjects.existOrFail('mlFeatureFeedbackButton');
-    },
-
     async ensureAnomalyActionDiscoverButtonClicked() {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.click('mlAnomaliesListRowAction_viewInDiscoverButton');

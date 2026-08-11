@@ -22,24 +22,35 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../hooks/use_integrations', () => ({
-  useEntityAnalyticsIntegrations: jest.fn(() => [
-    {
-      name: 'Okta',
-      version: '1.0.0',
-      title: 'Okta Integration',
-      description: 'Okta integration description',
-      icon: 'oktaIcon',
-    },
-    {
-      name: 'Active Directory',
-      version: '1.0.0',
-      title: 'Active Directory Integration',
-      description: 'Active Directory integration description',
-      icon: 'adIcon',
-    },
-  ]),
-}));
+jest.mock(
+  '../../entity_analytics_integrations_cards/hooks/use_entity_analytics_integrations',
+  () => ({
+    useEntityAnalyticsIntegrations: jest.fn(() => [
+      {
+        packageInfo: {
+          name: 'Okta',
+          version: '1.0.0',
+          title: 'Okta Integration',
+          description: 'Okta integration description',
+          icon: 'oktaIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+      {
+        packageInfo: {
+          name: 'Active Directory',
+          version: '1.0.0',
+          title: 'Active Directory Integration',
+          description: 'Active Directory integration description',
+          icon: 'adIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+    ]),
+  })
+);
 
 describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {

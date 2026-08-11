@@ -9,6 +9,10 @@
         "disabled"
       ]
     },
+    "data_autocomplete_rules": {
+      "grok_pattern": "",
+      "text": []
+    },
     "methods": [
       "GET",
       "POST"

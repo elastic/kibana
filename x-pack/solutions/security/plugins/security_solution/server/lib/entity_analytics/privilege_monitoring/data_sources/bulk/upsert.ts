@@ -9,9 +9,19 @@ import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import type { PrivMonBulkUser } from '../../types';
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics';
 
-/** Script to update privileged status and sources array based on new status from source
- * If new status is false, remove source from sources array, and if sources array is empty, set is_privileged to false
- * If new status is true, add source to sources array if not already present, and set is_privileged to true
+/**
+ * Updates a user's privileged state based on the latest status from a source.
+ *
+ * - When the new status is `true`:
+ *   - Add the source to the `sources` array if not already present
+ *   - Set `is_privileged` to `true`
+ *
+ * - When the new status is `false`:
+ *   - Remove the source from the `sources` array
+ *   - If no sources remain, set `is_privileged` to `false`
+ *
+ * This allows multiple sources to independently assert privileged status,
+ * with `is_privileged` reflecting if at least one source is active.
  */
 export const UPDATE_SCRIPT_SOURCE = `
 def src = ctx._source;
@@ -108,123 +118,6 @@ if (params.new_privileged_status == false) {
 }
 `;
 
-// TODO: this script is out of date see bulkUpsertOperationsFactory below
-export const INDEX_SCRIPT = `
-              if (ctx._source.labels == null) {
-                ctx._source.labels = new HashMap();
-              }
-              if (ctx._source.labels.source_ids == null) {
-                ctx._source.labels.source_ids = new ArrayList();
-              }
-              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
-                ctx._source.labels.source_ids.add(params.source_id);
-              }
-              if (!ctx._source.labels.sources.contains("index")) {
-                ctx._source.labels.sources.add("index");
-              }
-
-              ctx._source.user.is_privileged = true;
-              ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
-              ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
-              ctx._source.user.entity.attributes.Privileged = true;
-            `;
-/**
- * Builds a list of Elasticsearch bulk operations to upsert privileged users.
- *
- * For each user:
- * - If the user already exists (has an ID), generates an `update` operation using a Painless script
- *   to append the source id to `labels.source_ids` and ensure `'index'` is listed in `labels.sources`.
- * - If the user is new, generates an `index` operation to create a new document with default labels.
- *
- * Logs key steps during operation generation and returns the bulk operations array, ready for submission to the ES Bulk API.
- *
- * @param dataClient - The Privilege Monitoring Data Client providing access to logging and dependencies.
- *
- * @param users - List of users to create or update.
- * @param userIndexName - Name of the Elasticsearch index where user documents are stored.
- * @returns An array of bulk operations suitable for the Elasticsearch Bulk API.
- */
-export const bulkUpsertOperationsFactory =
-  (dataClient: PrivilegeMonitoringDataClient) =>
-  (users: PrivMonBulkUser[], userIndexName: string): object[] => {
-    const ops: object[] = [];
-    dataClient.log('info', `Building bulk operations for ${users.length} users`);
-    const now = new Date().toISOString();
-    for (const user of users) {
-      if (user.existingUserId) {
-        // Update user with painless script
-        dataClient.log(
-          'debug',
-          `Updating existing user: ${user.username} with ID: ${user.existingUserId}`
-        );
-        ops.push(
-          { update: { _index: userIndexName, _id: user.existingUserId } },
-          {
-            script: {
-              source: `
-              boolean userModified = false;
-              if (ctx._source.labels == null) {
-                ctx._source.labels = new HashMap();
-              }
-              if (ctx._source.labels.source_ids == null) {
-                ctx._source.labels.source_ids = new ArrayList();
-              }
-              if (!ctx._source.labels.source_ids.contains(params.source_id)) {
-                ctx._source.labels.source_ids.add(params.source_id);
-                userModified = true;
-              }
-              if (ctx._source.labels.sources == null) {
-                ctx._source.labels.sources = new ArrayList();
-              }
-              if (!ctx._source.labels.sources.contains("index")) {
-                ctx._source.labels.sources.add("index");
-                userModified = true;
-              }
-
-              if (ctx._source.user.is_privileged != true) {
-                ctx._source.user.is_privileged = true;
-                ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
-                ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
-                ctx._source.user.entity.attributes.Privileged = true;
-                userModified = true;
-              }
-              
-              if (userModified) {
-                ctx._source['@timestamp'] = params.now;
-                ctx._source.event.ingested = params.now;
-              }
-            `,
-              params: {
-                source_id: user.sourceId,
-                now,
-              },
-            },
-          }
-        );
-      } else {
-        // New user — create
-        dataClient.log('info', `Creating new user: ${user.username}`);
-        ops.push(
-          { index: { _index: userIndexName } },
-          {
-            '@timestamp': now,
-            user: {
-              name: user.username,
-              is_privileged: true,
-              entity: { attributes: { Privileged: true } },
-            },
-            labels: {
-              sources: ['index'],
-              source_ids: [user.sourceId],
-            },
-          }
-        );
-      }
-    }
-    dataClient.log('debug', `Built ${ops.length} bulk operations for users`);
-    return ops;
-  };
-
 type ParamsBuilder<T extends PrivMonBulkUser> = (
   user: T,
   sourceLabel?: Object
@@ -243,6 +136,31 @@ const buildCreateDoc = (user: PrivMonBulkUser, sourceLabel: string) => ({
   labels: { sources: [sourceLabel], source_ids: [user.sourceId] },
 });
 
+/**
+ * Builds a list of bulk operations to upsert privileged users.
+ *
+ * Allows customization of:
+ * - The update script source (updateScriptSource)
+ * - The source label used for new documents (sourceLabel)
+ * - The parameters passed to the update script (buildUpdateParams)
+ * - Creation of new users (shouldCreate)
+ *
+ * For each user:
+ * - If the user already exists (has existingUserId), generates update operation using
+ *   updateScriptSource with parameters built by buildUpdateParams(user).
+ * - If the user is new and shouldCreate(user) returns true, generates index operation
+ *   to create a new document with sourceLabel and user data.
+ *
+ * Logs steps during ops generation and returns the bulk operations array, for Bulk API.
+ *
+ * @param dataClient - The Privilege Monitoring Data Client providing access to logging and dependencies.
+ * @param users - List of users to create or update.
+ * @param updateScriptSource - The Painless script source to use for update operations.
+ * @param sourceLabel - The label to use for the source type when creating new documents.
+ * @param buildUpdateParams - Function to build parameters for the update script based on user data.
+ * @param shouldCreate - Optional function to determine if a new user should be created (defaults to always creating).
+ * @returns  Array of bulk operations suitable for the Elasticsearch Bulk API.
+ */
 export const bulkUpsertOperationsFactoryShared =
   (dataClient: PrivilegeMonitoringDataClient) =>
   <T extends PrivMonBulkUser>({
@@ -273,13 +191,17 @@ export const bulkUpsertOperationsFactoryShared =
     return ops;
   };
 
-export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
+export const makeOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) =>
-    buildOps({
+  return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) => {
+    let sourceLabel = 'entity_analytics_integration';
+    if (source.type === 'index') {
+      sourceLabel = 'index'; // want to update source label to index_sync. Currently just index. Related Issue: https://github.com/elastic/security-team/issues/14071
+    }
+    return buildOps({
       users: usersChunk,
       updateScriptSource: UPDATE_SCRIPT_SOURCE,
-      sourceLabel: 'entity_analytics_integration',
+      sourceLabel,
       buildUpdateParams: (user) => ({
         new_privileged_status: user.isPrivileged,
         monitoring_labels: user.monitoringLabels,
@@ -289,16 +211,5 @@ export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataCli
       }),
       shouldCreate: (user) => user.isPrivileged,
     });
-};
-
-export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
-  const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-  const indexOperations = (usersChunk: PrivMonBulkUser[]) =>
-    buildOps({
-      users: usersChunk,
-      updateScriptSource: INDEX_SCRIPT,
-      sourceLabel: 'index_sync',
-      buildUpdateParams: (user) => ({ source_id: user.sourceId }),
-    });
-  return indexOperations || [];
+  };
 };

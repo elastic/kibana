@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
@@ -13,6 +14,15 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 
 import { usersManagementApp } from './users_management_app';
 import { securityMock } from '../../mocks';
+
+jest.mock('./users_grid', () => ({ UsersGridPage: () => 'Users Page' }));
+jest.mock('./edit_user', () => ({
+  CreateUserPage: () => 'Create User Page',
+  EditUserPage: () => 'Edit User Page',
+}));
+
+jest.mock('./user_api_client', () => ({ UserAPIClient: class {} }));
+jest.mock('../roles', () => ({ RolesAPIClient: class {} }));
 
 const element = document.body.appendChild(document.createElement('div'));
 

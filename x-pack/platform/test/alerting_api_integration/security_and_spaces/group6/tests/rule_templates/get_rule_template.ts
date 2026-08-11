@@ -8,6 +8,9 @@
 import expect from '@kbn/expect';
 
 import {
+  SAMPLE_V1_TEMPLATE_ID,
+  SAMPLE_V2_TEMPLATE_ID,
+  createAlertingV2RuleTemplateSO,
   createRuleTemplateSO,
   deleteRuleTemplateByESQuery,
   getRuleTemplate,
@@ -37,10 +40,18 @@ export default (ftrProvider: FtrProviderContext): void => {
 
       const ruleTemplate = await getRuleTemplate({
         supertest: supertestWithoutAuth,
-        templateId: 'sample-alerting-rule',
+        templateId: SAMPLE_V1_TEMPLATE_ID,
       });
 
-      expect(ruleTemplate.body).to.eql(getRuleTemplateResponse('sample-alerting-rule'));
+      expect(ruleTemplate.body).to.eql({
+        ...getRuleTemplateResponse(SAMPLE_V1_TEMPLATE_ID),
+
+        description: 'This is a sample alerting rule template description',
+        artifacts: {
+          dashboards: [{ id: 'dash-1' }],
+          investigation_guide: { blob: 'text' },
+        },
+      });
     });
 
     it('unhappy path - 404s when rule template do not exists', async () => {
@@ -49,6 +60,19 @@ export default (ftrProvider: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(404);
+    });
+
+    it('rejects alerting v2 engine templates', async () => {
+      await createAlertingV2RuleTemplateSO(ftrProvider);
+
+      const ruleTemplate = await getRuleTemplate({
+        supertest: supertestWithoutAuth,
+        templateId: SAMPLE_V2_TEMPLATE_ID,
+        auth: { user: Superuser, space: null },
+      });
+
+      expect(ruleTemplate.status).to.eql(400);
+      expect(ruleTemplate.body.message).to.contain('alerting v2 attribute shape');
     });
 
     describe('rbac', () => {
@@ -63,7 +87,7 @@ export default (ftrProvider: FtrProviderContext): void => {
         ]) {
           const ruleTemplate = await getRuleTemplate({
             supertest: supertestWithoutAuth,
-            templateId: 'sample-alerting-rule',
+            templateId: SAMPLE_V1_TEMPLATE_ID,
             auth: { user, space: 'space1' },
           });
           expect(ruleTemplate.status).to.eql(200);
@@ -76,7 +100,7 @@ export default (ftrProvider: FtrProviderContext): void => {
         for (const user of [NoKibanaPrivilegesAtSpace1.user]) {
           const ruleTemplate = await getRuleTemplate({
             supertest: supertestWithoutAuth,
-            templateId: 'sample-alerting-rule',
+            templateId: SAMPLE_V1_TEMPLATE_ID,
             auth: { user, space: 'space1' },
           });
 
@@ -90,7 +114,7 @@ export default (ftrProvider: FtrProviderContext): void => {
         for (const user of [Space1AllAtSpace1.user]) {
           const ruleTemplate = await getRuleTemplate({
             supertest: supertestWithoutAuth,
-            templateId: 'sample-alerting-rule',
+            templateId: SAMPLE_V1_TEMPLATE_ID,
             auth: { user, space: 'space2' },
           });
 

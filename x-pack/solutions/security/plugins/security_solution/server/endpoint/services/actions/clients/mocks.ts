@@ -23,7 +23,9 @@ import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attac
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createEndpointFleetServicesFactoryMock } from '../../fleet/endpoint_fleet_services_factory.mocks';
+import { ScriptsLibraryMock } from '../../scripts_library/mocks';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
@@ -95,6 +97,7 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
+  const scriptsLibraryClientMock = ScriptsLibraryMock.getMockedClient();
 
   // TODO:PT refactor mock to instead use Mocked endpoint context and not the real class with mocked dependencies
   const endpointService = new EndpointAppContextService();
@@ -219,12 +222,15 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
   });
 
-  // Enable the mocking of internal fleet services
-  const fleetServices = endpointService.getInternalFleetServices();
-  jest.spyOn(fleetServices, 'ensureInCurrentSpace');
-
+  // use fleet services mock for `getInternalFleetServices()`
   const getInternalFleetServicesMock = jest.spyOn(endpointService, 'getInternalFleetServices');
-  getInternalFleetServicesMock.mockReturnValue(fleetServices);
+  const fleetServicesFactoryMock = createEndpointFleetServicesFactoryMock({
+    fleetDependencies: endpointServiceStartContract.fleetStartServices,
+  });
+  getInternalFleetServicesMock.mockReturnValue(fleetServicesFactoryMock.service.asInternalUser());
+
+  // Mock the Scripts Library client
+  jest.spyOn(endpointService, 'getScriptsLibraryClient').mockReturnValue(scriptsLibraryClientMock);
 
   return {
     esClient,
@@ -295,7 +301,7 @@ const createKillOrSuspendProcessOptionsMock = (
   const options: KillOrSuspendProcessRequestBody = {
     ...createNoParamsResponseActionOptionsMock(),
     parameters,
-  };
+  } as KillOrSuspendProcessRequestBody;
   return merge(options, overrides);
 };
 

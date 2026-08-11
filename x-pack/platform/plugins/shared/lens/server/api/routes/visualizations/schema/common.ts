@@ -5,37 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils';
-import { lensItemDataSchema, lensSavedObjectSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+import { z } from '@kbn/zod';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-/**
- * The Lens item meta returned from the server
- */
-export const lensItemMetaSchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), [
-      'type',
-      'createdAt',
-      'updatedAt',
-      'createdBy',
-      'updatedBy',
-      'originId',
-      'managed',
-    ]),
-  },
-  { unknowns: 'forbid' }
-);
+import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zod';
 
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = schema.object(
-  {
-    id: lensSavedObjectSchema.getPropSchemas().id,
-    data: schema.oneOf([lensApiStateSchema, lensItemDataSchema]),
-    meta: lensItemMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+export const lensResponseItemSchema = z
+  .object({
+    id: lensCommonSavedObjectSchemaV2.shape.id,
+    data: lensApiConfigSchemaNoESQL,
+    meta: asCodeMetaSchema,
+  })
+  .strict()
+  .meta({ id: 'lensResponseItem', title: 'Visualization Response' });

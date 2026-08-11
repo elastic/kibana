@@ -17,12 +17,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { paths, SLOS_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
-import { paths } from '../../../common/locators/paths';
+import { useHistory } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -42,11 +43,12 @@ export function SlosWelcomePage() {
   const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const history = useHistory();
 
-  const { data: { total } = { total: 0 }, isLoading } = useFetchSloDefinitions({ perPage: 0 });
+  const { hasSlos, isLoading } = useHasSlos();
 
   const hasSlosAndPermissions =
-    !isLoading && total > 0 && hasRightLicense && permissions?.hasAllReadRequested === true;
+    !isLoading && hasSlos && hasRightLicense && permissions?.hasAllReadRequested === true;
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.sloCreate));
@@ -54,9 +56,9 @@ export function SlosWelcomePage() {
 
   useEffect(() => {
     if (hasSlosAndPermissions) {
-      navigateToUrl(basePath.prepend(paths.slos));
+      history.replace(SLOS_PATH);
     }
-  }, [basePath, navigateToUrl, hasSlosAndPermissions]);
+  }, [hasSlosAndPermissions, history]);
 
   useBreadcrumbs(
     [

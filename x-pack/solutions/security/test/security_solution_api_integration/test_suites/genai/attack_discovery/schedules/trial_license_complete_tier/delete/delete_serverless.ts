@@ -7,7 +7,8 @@
 
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES } from '@kbn/elastic-assistant-common';
+import { replaceParams } from '@kbn/openapi-common/shared';
+import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
@@ -53,8 +54,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Happy path for predefined users', () => {
       const roles = [
         'editor',
-        ROLES.t1_analyst,
-        ROLES.t2_analyst,
         ROLES.t3_analyst,
         ROLES.rule_author,
         ROLES.soc_manager,
@@ -84,27 +83,36 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
-      it('should not be able to delete a schedule with the "viewer" role', async () => {
-        const testAgent = await utils.createSuperTest('viewer');
+      // These roles have `securitySolutionAttackDiscovery: minimal_all`, which grants read-only
+      // Attack Discovery access without the schedule management privilege, so they cannot delete
+      // schedules (mirroring their read-only Rule privileges).
+      const minimalAllRoles = ['viewer', ROLES.t1_analyst, ROLES.t2_analyst];
 
-        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+      minimalAllRoles.forEach((role) => {
+        it(`should not be able to delete a schedule with the "${role}" role`, async () => {
+          const testAgent = await utils.createSuperTest(role);
 
-        const result = await apis.delete({
-          id: createdSchedule.id,
-          kibanaSpace: kibanaSpace1,
-          expectedHttpCode: 403,
-        });
+          const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
 
-        expect(result).toEqual(
-          getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `DELETE ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}`,
-          })
-        );
+          const result = await apis.delete({
+            id: createdSchedule.id,
+            kibanaSpace: kibanaSpace1,
+            expectedHttpCode: 403,
+          });
 
-        await checkIfScheduleExists({
-          getService,
-          id: createdSchedule.id,
-          kibanaSpace: kibanaSpace1,
+          expect(result).toEqual(
+            getMissingScheduleKibanaPrivilegesError({
+              routeDetails: `DELETE ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, {
+                id: createdSchedule.id,
+              })}`,
+            })
+          );
+
+          await checkIfScheduleExists({
+            getService,
+            id: createdSchedule.id,
+            kibanaSpace: kibanaSpace1,
+          });
         });
       });
 
@@ -121,7 +129,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `DELETE ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}`,
+            routeDetails: `DELETE ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 
@@ -147,7 +157,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `DELETE ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}`,
+            routeDetails: `DELETE ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 
@@ -171,7 +183,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `DELETE ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}`,
+            routeDetails: `DELETE ${replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, {
+              id: createdSchedule.id,
+            })}`,
           })
         );
 

@@ -6,11 +6,37 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "h": [],
+      "h": [
+        "node",
+        "id",
+        "pid",
+        "host",
+        "ip",
+        "port",
+        "attr",
+        "value"
+      ],
       "s": [],
       "local": "__flag__",
       "master_timeout": [

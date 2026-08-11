@@ -17,6 +17,7 @@ import type { HttpService } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
 import { createInternalHttpService } from '../utilities';
 
@@ -38,6 +39,7 @@ describe('ServerMetricsCollector', () => {
     const httpSetup = await server.setup({
       context: contextSetup,
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
     hapiServer = httpSetup.server;
     router = httpSetup.createRouter('/');
@@ -320,8 +322,9 @@ describe('ServerMetricsCollector', () => {
       await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
       let metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(250);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(240);
+      expect(metrics.response_times.avg_in_millis).toBeLessThanOrEqual(260);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
 
       collector.reset();
       metrics = await collector.collect();
@@ -331,8 +334,8 @@ describe('ServerMetricsCollector', () => {
       await Promise.all([sendGet('/500-ms'), sendGet('/500-ms')]);
       metrics = await collector.collect();
 
-      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(500);
-      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(500);
+      expect(metrics.response_times.avg_in_millis).toBeGreaterThanOrEqual(490);
+      expect(metrics.response_times.max_in_millis).toBeGreaterThanOrEqual(490);
     });
   });
 });

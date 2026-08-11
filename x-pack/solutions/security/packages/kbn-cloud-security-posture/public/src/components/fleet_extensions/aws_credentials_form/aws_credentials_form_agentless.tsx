@@ -4,8 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import React, { Suspense } from 'react';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -15,12 +22,12 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { LazyCloudConnectorSetup } from '@kbn/fleet-plugin/public';
 import {
   AWS_CLOUD_FORMATION_ACCORDION_TEST_SUBJ,
   AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -41,6 +48,7 @@ import {
   getCloudCredentialVarsConfig,
   updatePolicyWithInputs,
   getAwsCredentialsType,
+  findVariableDef,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -50,8 +58,6 @@ import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { AwsInputFieldMapping, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-
-import { CloudConnectorSetup } from '../cloud_connector/cloud_connector_setup';
 
 interface AwsAgentlessFormProps {
   cloud: CloudSetup;
@@ -84,7 +90,8 @@ const updatePolicyCloudConnectorSupport = (
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy,
   input: NewPackagePolicyInput,
-  awsPolicyType: string
+  awsPolicyType: string,
+  pkgInfo: PackageInfo
 ) => {
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
@@ -94,10 +101,12 @@ const updatePolicyCloudConnectorSupport = (
             value: awsCredentialsType,
             type: 'text',
           },
-          'aws.supports_cloud_connectors': {
-            value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
-            type: 'bool',
-          },
+          ...(findVariableDef(pkgInfo, 'aws.supports_cloud_connectors') && {
+            'aws.supports_cloud_connectors': {
+              value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+              type: 'bool',
+            },
+          }),
         }),
       },
     });
@@ -160,7 +169,8 @@ export const AwsCredentialsFormAgentless = ({
       newPolicy,
       updatePolicy,
       input,
-      awsPolicyType
+      awsPolicyType,
+      packageInfo
     );
   }, [
     awsCredentialsType,
@@ -169,6 +179,7 @@ export const AwsCredentialsFormAgentless = ({
     awsPolicyType,
     newPolicy,
     updatePolicy,
+    packageInfo,
   ]);
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
@@ -215,7 +226,7 @@ export const AwsCredentialsFormAgentless = ({
           isAwsCloudConnectorEnabled ? (
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
-              defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+              defaultMessage="Utilize AWS Access Keys or Federated Identity to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 shortName,
                 gettingStartedLink: (
@@ -272,6 +283,7 @@ export const AwsCredentialsFormAgentless = ({
                 optionId,
                 showCloudConnectors: isAwsCloudConnectorEnabled,
                 provider: AWS_PROVIDER,
+                packageInfo,
               })
             ),
           });
@@ -310,7 +322,7 @@ export const AwsCredentialsFormAgentless = ({
                 data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
                 target="_blank"
                 iconSide="left"
-                iconType="launch"
+                iconType="rocket"
                 href={cloudFormationConfig.templateUrl}
               >
                 <FormattedMessage
@@ -338,17 +350,24 @@ export const AwsCredentialsFormAgentless = ({
       )}
 
       {awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS && (
-        <CloudConnectorSetup
-          templateName={templateName}
-          input={input}
-          newPolicy={newPolicy}
-          packageInfo={packageInfo}
-          updatePolicy={updatePolicy}
-          isEditPage={isEditPage}
-          hasInvalidRequiredVars={hasInvalidRequiredVars}
-          cloud={cloud}
-          cloudProvider={AWS_PROVIDER}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCloudConnectorSetup
+            templateName={templateName}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            cloud={cloud}
+            cloudProvider={AWS_PROVIDER}
+            accountType={accountType}
+            iacTemplateUrl={getTemplateUrlFromPackageInfo(
+              packageInfo,
+              templateName ?? '',
+              SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+            )}
+          />
+        </Suspense>
       )}
       <ReadDocumentation url={awsOverviewPath} />
     </>

@@ -24,7 +24,7 @@ import type {
   ThreatTechnique,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type {
   RuleAction as AlertingRuleAction,
   RuleSystemAction as AlertingRuleSystemAction,
@@ -53,6 +53,8 @@ import type {
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
 import type {
   RuleCreateProps,
+  RuleResponse,
+  ThreatMatchRuleUpdateProps,
   AlertSuppression,
   RequiredFieldInput,
   SeverityMapping,
@@ -265,101 +267,85 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   | NewTermsRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
-      const {
-        index,
-        queryBar,
-        threshold,
-        threatIndex,
-        threatQueryBar,
-        threatMapping,
-        eqlOptions,
-        newTermsFields,
-        historyWindowSize,
-        ...mlRuleFields
-      } = fields;
-      return mlRuleFields;
+      return omit(fields, [
+        'index',
+        'queryBar',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'threshold':
-      const {
-        anomalyThreshold,
-        machineLearningJobId,
-        threatIndex: _removedThreatIndex,
-        threatQueryBar: _removedThreatQueryBar,
-        threatMapping: _removedThreatMapping,
-        eqlOptions: _eqlOptions,
-        newTermsFields: removedNewTermsFields,
-        historyWindowSize: removedHistoryWindowSize,
-        ...thresholdRuleFields
-      } = fields;
-      return thresholdRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'threat_match':
-      const {
-        anomalyThreshold: _removedAnomalyThreshold,
-        machineLearningJobId: _removedMachineLearningJobId,
-        threshold: _removedThreshold,
-        eqlOptions: __eqlOptions,
-        newTermsFields: _removedNewTermsFields,
-        historyWindowSize: _removedHistoryWindowSize,
-        ...threatMatchRuleFields
-      } = fields;
-      return threatMatchRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'query':
     case 'saved_query':
-      const {
-        anomalyThreshold: _a,
-        machineLearningJobId: _m,
-        threshold: _t,
-        threatIndex: __removedThreatIndex,
-        threatQueryBar: __removedThreatQueryBar,
-        threatMapping: __removedThreatMapping,
-        eqlOptions: ___eqlOptions,
-        newTermsFields: __removedNewTermsFields,
-        historyWindowSize: __removedHistoryWindowSize,
-        ...queryRuleFields
-      } = fields;
-      return queryRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'eql':
-      const {
-        anomalyThreshold: __a,
-        machineLearningJobId: __m,
-        threshold: __t,
-        threatIndex: ___removedThreatIndex,
-        threatQueryBar: ___removedThreatQueryBar,
-        threatMapping: ___removedThreatMapping,
-        newTermsFields: ___removedNewTermsFields,
-        historyWindowSize: ___removedHistoryWindowSize,
-        ...eqlRuleFields
-      } = fields;
-      return eqlRuleFields;
-
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+      ]);
     case 'new_terms':
-      const {
-        anomalyThreshold: ___a,
-        machineLearningJobId: ___m,
-        threshold: ___t,
-        threatIndex: ____removedThreatIndex,
-        threatQueryBar: ____removedThreatQueryBar,
-        threatMapping: ____removedThreatMapping,
-        eqlOptions: ____eqlOptions,
-        ...newTermsRuleFields
-      } = fields;
-      return newTermsRuleFields;
-
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'eqlOptions',
+      ]);
     case 'esql':
-      const {
-        anomalyThreshold: _esql_a,
-        machineLearningJobId: _esql_m,
-        threshold: _esql_t,
-        threatIndex: _esql_removedThreatIndex,
-        threatQueryBar: _esql_removedThreatQueryBar,
-        threatMapping: _esql_removedThreatMapping,
-        newTermsFields: _esql_removedNewTermsFields,
-        historyWindowSize: _esql_removedHistoryWindowSize,
-        eqlOptions: _esql__eqlOptions,
-        index: _esql_index,
-        dataViewId: _esql_dataViewId,
-        ...esqlRuleFields
-      } = fields;
-      return esqlRuleFields;
+      return omit(fields, [
+        'anomalyThreshold',
+        'machineLearningJobId',
+        'threshold',
+        'threatIndex',
+        'threatQueryBar',
+        'threatMapping',
+        'newTermsFields',
+        'historyWindowSize',
+        'eqlOptions',
+        'index',
+        'dataViewId',
+      ]);
   }
   assertUnreachable(type);
 };
@@ -617,8 +603,8 @@ export const formatAboutStepData = (
       ? {
           exceptions_list: [
             {
-              id: ENDPOINT_LIST_ID,
-              list_id: ENDPOINT_LIST_ID,
+              id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
               namespace_type: 'agnostic' as NamespaceType,
               type: 'endpoint' as ExceptionListType,
             },
@@ -709,6 +695,20 @@ export const formatRule = <T>(
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
+
+/**
+ * concurrent_searches/items_per_search are API-only fields with no UI controls
+ * (see #276203), so they never round-trip through the define step form. On
+ * rule edit, merge them back in directly from the previously loaded rule
+ * rather than routing them through form state, since the edit form saves via
+ * a full-replace PUT.
+ */
+export const getApiOnlyThreatMatchFields = (
+  rule: RuleResponse
+): Pick<ThreatMatchRuleUpdateProps, 'concurrent_searches' | 'items_per_search'> =>
+  rule.type === 'threat_match'
+    ? { concurrent_searches: rule.concurrent_searches, items_per_search: rule.items_per_search }
+    : {};
 
 export const formatPreviewRule = ({
   defineRuleData,

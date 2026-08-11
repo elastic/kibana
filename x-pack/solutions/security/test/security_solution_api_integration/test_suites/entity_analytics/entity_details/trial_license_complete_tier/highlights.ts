@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   const siemModule = 'security_linux_v3';
-  const mlJobId = 'v3_linux_anomalous_network_activity';
+  const mlJobId = 'v3_linux_anomalous_network_activity_ea';
 
   describe('@ess @serverless @skipInServerlessMKI Entity Details - Highlights API', () => {
     const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
@@ -227,22 +227,23 @@ export default function ({ getService }: FtrProviderContext) {
         assetCriticality: [
           {
             '@timestamp': [expect.any(String)],
-            'asset.criticality': ['high_impact'],
+            'asset.criticality': ['High Impact'],
             'host.name': [expect.any(String)],
           },
         ],
         riskScore: [
           {
             id_field: ['host.name'],
-            inputs: [
+            alert_inputs: [
               {
                 contribution_score: [expect.any(String)],
                 description: [expect.any(String)],
-                risk_score: ['21'],
+                risk_score: ['21.00'],
                 timestamp: [expect.any(String)],
               },
             ],
-            score: [expect.any(Number)],
+            asset_criticality_contribution_score: expect.any(String),
+            score: [expect.any(String)],
           },
         ],
         vulnerabilities: [
@@ -261,14 +262,14 @@ export default function ({ getService }: FtrProviderContext) {
         },
         anomalies: [
           {
-            id: 'v3_linux_anomalous_network_activity',
+            id: 'v3_linux_anomalous_network_activity_ea',
             'job.description':
               'Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.',
             'job.name': 'Unusual Linux Network Activity',
             score: 4.834237150691662,
           },
           {
-            id: 'v3_linux_anomalous_network_activity',
+            id: 'v3_linux_anomalous_network_activity_ea',
             'job.description':
               'Security: Linux - Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity.',
             'job.name': 'Unusual Linux Network Activity',
@@ -277,7 +278,9 @@ export default function ({ getService }: FtrProviderContext) {
         ],
       });
       expect(body.replacements).toEqual(expect.any(Object));
-      expect(body.prompt).toContain('Generate markdown text with most important information');
+      expect(body.prompt).toContain(
+        'Generate structured information for an entity so a Security analyst can act.'
+      );
 
       // check if anonymization fields are working
       expect(JSON.stringify(body.summary)).not.toContain(hostName);
@@ -306,10 +309,13 @@ export default function ({ getService }: FtrProviderContext) {
           MEDIUM: 0,
           NONE: 0,
         },
-        anomalies: [],
+        // anomalies is null when there are no ML findings
+        anomalies: null,
       });
       expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
-      expect(body.prompt).toContain('Generate markdown text with most important information');
+      expect(body.prompt).toContain(
+        'Generate structured information for an entity so a Security analyst can act.'
+      );
     });
 
     describe('anonymization fields handling', () => {

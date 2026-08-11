@@ -95,10 +95,8 @@ export const CategoryTable: FC<Props> = ({
       width: '40px',
       isExpander: true,
       render: (item: Category) => (
-        <EuiButtonIcon
-          data-test-subj="aiopsLogPatternsColumnsButton"
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             itemIdToExpandedRowMap[item.key]
               ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
                   defaultMessage: 'Collapse',
@@ -107,8 +105,23 @@ export const CategoryTable: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="aiopsLogPatternsColumnsButton"
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.key]
+                ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
+          />
+        </EuiToolTip>
       ),
       'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
     },
@@ -152,7 +165,13 @@ export const CategoryTable: FC<Props> = ({
             {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
               defaultMessage: 'Tokens',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
@@ -298,6 +317,9 @@ export const CategoryTable: FC<Props> = ({
               }
             : undefined;
         }}
+        tableCaption={i18n.translate('xpack.aiops.logCategorization.categoryTable.tableCaption', {
+          defaultMessage: 'Log pattern categories',
+        })}
       />
     </div>
   );

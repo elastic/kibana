@@ -120,8 +120,10 @@ export const alertsTableShowsAssigneesForAllAlerts = (users: string[]) => {
 };
 
 export const alertDetailsFlyoutShowsAssignees = (users: string[]) => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE).within(() => {
-    users.forEach((user) => cy.get(`.euiAvatar${ALERT_USER_AVATAR(user)}`).should('exist'));
+  users.forEach((user) => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_VALUE)
+      .find(`.euiAvatar${ALERT_USER_AVATAR(user)}`)
+      .should('be.visible');
   });
 };
 
@@ -139,7 +141,7 @@ export const selectAlertAssignee = (assignee: string) => {
 
 /**
  * This will update assignees for selected alert
- * @param users The list of assugnees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
+ * @param users The list of assignees to update. If assignee is not assigned yet it will be assigned, otherwise it will be unassigned
  */
 export const updateAssigneesForFirstAlert = (users: string[]) => {
   openFirstAlertAssigningActionMenu();

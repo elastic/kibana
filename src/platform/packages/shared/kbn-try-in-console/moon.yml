@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/try-in-console'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/try-in-console'
+  title: '@kbn/try-in-console'
   description: Moon project for @kbn/try-in-console
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-try-in-console
+  sourceRoot: src/platform/packages/shared/kbn-try-in-console
 dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/i18n'
@@ -35,16 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

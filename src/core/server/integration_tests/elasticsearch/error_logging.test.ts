@@ -52,8 +52,8 @@ describe('Error logging', () => {
 
     afterAll(async () => {
       mockConsoleLog.mockRestore();
-      await kibanaServer.stop();
-      await esServer.stop();
+      await kibanaServer?.stop();
+      await esServer?.stop();
     });
 
     it('logs errors following the expected pattern for the json layout', async () => {

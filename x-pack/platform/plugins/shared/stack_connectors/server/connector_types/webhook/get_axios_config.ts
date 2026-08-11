@@ -15,7 +15,8 @@ import {
 } from '@kbn/actions-plugin/server/lib';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
-import type { SSLSettings, Services } from '@kbn/actions-plugin/server/types';
+import type { SSLSettings } from '@kbn/actions-utils';
+import type { Services } from '@kbn/actions-plugin/server/types';
 import type {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -59,6 +60,7 @@ const getOAuth2AxiosConfig = async ({
       configurationUtilities,
       oAuthScope: scope,
       credentials: {
+        type: 'client_secret',
         secrets: { clientSecret: clientSecret! },
         config: {
           clientId: clientId!,
@@ -108,7 +110,7 @@ const getDefaultAxiosConfig = async ({ config, secrets }: GetDefaultAxiosConfig)
     ca,
   });
 
-  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets?.secretHeaders);
   const headersWithAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,

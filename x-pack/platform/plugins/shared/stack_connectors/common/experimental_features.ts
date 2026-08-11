@@ -12,13 +12,12 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  isMustacheAutocompleteOn: false,
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
   inferenceConnectorOff: false,
   crowdstrikeConnectorRTROn: true,
   microsoftDefenderEndpointOn: true,
-  connectorsFromSpecs: false,
+  connectorsFromSpecs: true,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

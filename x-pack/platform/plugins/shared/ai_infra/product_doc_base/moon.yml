@@ -4,26 +4,24 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/product-doc-base-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-ai-infra'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/product-doc-base-plugin'
+  title: '@kbn/product-doc-base-plugin'
   description: Moon project for @kbn/product-doc-base-plugin
   channel: ''
   owner: '@elastic/appex-ai-infra'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/ai_infra/product_doc_base
+  sourceRoot: x-pack/platform/plugins/shared/ai_infra/product_doc_base
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging'
   - '@kbn/config-schema'
   - '@kbn/product-doc-common'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/utils'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
   - '@kbn/licensing-plugin'
@@ -33,6 +31,8 @@ dependsOn:
   - '@kbn/ml-is-populated-object'
   - '@kbn/i18n'
   - '@kbn/licensing-types'
+  - '@kbn/fs'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod
@@ -49,16 +49,6 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

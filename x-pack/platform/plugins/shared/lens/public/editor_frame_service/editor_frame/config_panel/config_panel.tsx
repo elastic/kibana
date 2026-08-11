@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import React, { useEffect, useMemo, memo, useCallback } from 'react';
+import { EuiForm, euiBreakpoint, useEuiTheme } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
 import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -27,6 +25,7 @@ import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
 import {
   setLayerDefaultDimension,
+  setDimensionAndUpdateDatasource,
   useLensDispatch,
   removeOrClearLayer,
   cloneLayer,
@@ -38,6 +37,7 @@ import {
   selectVisualization,
   selectSelectedLayerId,
   registerLibraryAnnotationGroup,
+  selectCanEditTextBasedQuery,
 } from '../../../state_management';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
@@ -62,10 +62,11 @@ export function ConfigPanel(
 ) {
   const { datasourceMap } = useEditorFrameService();
   const { activeVisualization, indexPatternService } = props;
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
-  const selectedLayerId = useLensSelector(selectSelectedLayerId);
+  const selectedLayerIdFromState = useLensSelector(selectSelectedLayerId);
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -77,6 +78,36 @@ export function ConfigPanel(
     [activeVisualization, visualization.state]
   );
 
+  // Determine if there is only one layer, or if multiple layers exist but only one is visible.
+  // This avoids some rerendering when there's just one layer but the selectedLayerId hadn't been set yet.
+  const { isOnlyLayer, selectedLayerId } = useMemo(() => {
+    if (layerIds.length === 1) {
+      return { isOnlyLayer: true, selectedLayerId: layerIds[0] };
+    }
+
+    const visibleLayerIds = layerIds.filter((id) => {
+      const config = activeVisualization.getConfiguration({
+        layerId: id,
+        frame: props.framePublicAPI,
+        state: visualization.state,
+      });
+      return !config.hidden;
+    });
+
+    const isOnlyVisibleLayer = visibleLayerIds.length === 1;
+
+    return {
+      isOnlyLayer: isOnlyVisibleLayer,
+      selectedLayerId: isOnlyVisibleLayer ? visibleLayerIds[0] : selectedLayerIdFromState,
+    };
+  }, [
+    activeVisualization,
+    props.framePublicAPI,
+    visualization.state,
+    layerIds,
+    selectedLayerIdFromState,
+  ]);
+
   const focusLayerTabsContent = () => {
     setTimeout(() => {
       const element = document.getElementById(LENS_LAYER_TABS_CONTENT_ID);
@@ -84,14 +115,13 @@ export function ConfigPanel(
     }, 0);
   };
 
-  // need to use this instead of plain useEffect to compare actual values of layerIds
-  // not just comparing the array references.
-  useShallowCompareEffect(() => {
-    if (selectedLayerId) {
+  useEffect(() => {
+    // Do not trigger in ES|QL mode, as the focus should remain in the editor.
+    if (selectedLayerId && !canEditTextBasedQuery) {
       focusLayerTabsContent();
     }
     // Needs layerIds to refocus when layers are removed
-  }, [selectedLayerId, layerIds]);
+  }, [canEditTextBasedQuery, selectedLayerId, layerIds.length]);
 
   const setVisualizationState = useMemo(
     () => (newState: unknown) => {
@@ -134,16 +164,13 @@ export function ConfigPanel(
     [updateDatasource]
   );
 
-  const updateAll = useMemo(
+  const updateAll = useMemo<LayerPanelProps['updateAll']>(
     () =>
-      (
-        datasourceId: string | undefined,
-        newDatasourceState: unknown,
-        newVisualizationState: unknown
-      ) => {
-        if (!datasourceId) return;
-        // React will synchronously update if this is triggered from a third party component,
-        // which we don't want. The timeout lets user interaction have priority, then React updates.
+      ({ datasourceId, newDatasourceState, layerId, groupId, columnId }) => {
+        const visualizationId = visualization.activeId;
+        if (!datasourceId || !visualizationId) return;
+        // Keep async behavior from dimension editors, but delegate the
+        // datasource+visualization orchestration to a single reducer action.
 
         setTimeout(() => {
           const newDsState =
@@ -151,28 +178,19 @@ export function ConfigPanel(
               ? newDatasourceState(datasourceStates[datasourceId].state)
               : newDatasourceState;
 
-          const newVisState =
-            typeof newVisualizationState === 'function'
-              ? newVisualizationState(visualization.state)
-              : newVisualizationState;
-
           dispatchLens(
-            updateVisualizationState({
-              visualizationId: activeVisualization.id,
-              newState: newVisState,
-              dontSyncLinkedDimensions: true, // TODO: to refactor: this is quite brittle, we avoid to sync linked dimensions because we do it with datasourceState update
-            })
-          );
-          dispatchLens(
-            updateDatasourceState({
-              newDatasourceState: newDsState,
+            setDimensionAndUpdateDatasource({
+              visualizationId,
+              layerId,
+              groupId,
+              columnId,
               datasourceId,
-              clearStagedPreview: false,
+              newDatasourceState: newDsState,
             })
           );
         }, 0);
       },
-    [dispatchLens, visualization.state, datasourceStates, activeVisualization.id]
+    [dispatchLens, datasourceStates, visualization.activeId]
   );
 
   const toggleFullscreen = useCallback(() => {
@@ -275,23 +293,6 @@ export function ConfigPanel(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
-  const isOnlyLayer = useMemo(() => {
-    if (layerIds.length === 1) {
-      return true;
-    }
-
-    const visibleLayerIds = layerIds.filter((id) => {
-      const config = activeVisualization.getConfiguration({
-        layerId: id,
-        frame: props.framePublicAPI,
-        state: visualization.state,
-      });
-      return !config.hidden;
-    });
-
-    return visibleLayerIds.length === 1;
-  }, [activeVisualization, props.framePublicAPI, visualization.state, layerIds]);
-
   const layerConfig = useMemo(() => {
     if (!selectedLayerId) return;
 
@@ -306,21 +307,35 @@ export function ConfigPanel(
     };
   }, [activeVisualization, props.framePublicAPI, selectedLayerId, visualization.state]);
 
-  const euiOverflowScroll = useEuiOverflowScroll('y');
-
   if (layerConfig?.config.hidden || !selectedLayerId || !layerConfig) return null;
 
   return (
     <EuiForm
       css={css`
         .lnsApp & {
+          /* Add left padding and negative margin to create space for drag-drop extra targets
+             (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones. */
           padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
-          ${euiOverflowScroll}
+            calc(${DRAG_DROP_EXTRA_TARGETS_PADDING}px + ${euiTheme.size.base});
+          margin-left: -${DRAG_DROP_EXTRA_TARGETS_PADDING}px;
+          /* Background gradient: transparent in the extended left area (for tooltips),
+             solid color for the visible content area */
+          background: linear-gradient(
+            to right,
+            transparent 0,
+            transparent ${DRAG_DROP_EXTRA_TARGETS_PADDING}px,
+            ${euiTheme.colors.emptyShade} ${DRAG_DROP_EXTRA_TARGETS_PADDING}px
+          );
+          /* Override the default max-width of drag-drop extra targets to reduce
+             horizontal overflow space requirements */
+          .domDroppable__extraTargets {
+            width: ${DRAG_DROP_EXTRA_TARGETS_WIDTH}px;
+          }
+          /* Note: overflow scrolling is handled by the parent lnsConfigPanelScrollContainer */
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
             padding-left: ${euiTheme.size.base};
             margin-left: 0;
+            background: ${euiTheme.colors.emptyShade};
           }
         }
       `}

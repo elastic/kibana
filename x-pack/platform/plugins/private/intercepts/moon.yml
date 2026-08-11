@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/intercepts-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/intercepts-plugin'
+  title: '@kbn/intercepts-plugin'
   description: Moon project for @kbn/intercepts-plugin
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/intercepts
+  sourceRoot: x-pack/platform/plugins/private/intercepts
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-analytics-browser'
@@ -33,6 +32,8 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
+  - '@kbn/core-notifications-browser-internal'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -45,19 +46,10 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
+    - test/**/*
     - test_helpers/**/*
     - storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

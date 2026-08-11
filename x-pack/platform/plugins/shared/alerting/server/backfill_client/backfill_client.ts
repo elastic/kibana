@@ -8,13 +8,13 @@ import pMap from 'p-map';
 import type {
   ISavedObjectsRepository,
   Logger,
-  SavedObject,
+  SavedObjectBulkResult,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
   RunContext,
@@ -45,6 +45,7 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_o
 import type { TaskRunnerFactory } from '../task_runner';
 import type { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { SCHEDULE_TRUNCATED_WARNING } from './lib/calculate_schedule';
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
@@ -77,6 +78,21 @@ interface DeleteBackfillForRulesOpts {
   ruleIds: string[];
   namespace?: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  shouldUpdateGaps?: boolean;
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
+  eventLogClient?: IEventLogClient;
+  eventLogger?: IEventLogger;
+  actionsClient?: ActionsClient;
+}
+
+interface DeleteBackfillsByInitiatorIdOpts {
+  initiatorId: string;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  shouldUpdateGaps?: boolean;
+  internalSavedObjectsRepository?: ISavedObjectsRepository;
+  eventLogClient?: IEventLogClient;
+  eventLogger?: IEventLogger;
+  actionsClient?: ActionsClient;
 }
 
 export class BackfillClient {
@@ -95,6 +111,106 @@ export class BackfillClient {
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
+  }
+
+  private async deleteAdHocRunsAndTasks({
+    unsecuredSavedObjectsClient,
+    adHocRuns,
+    shouldUpdateGaps,
+    internalSavedObjectsRepository,
+    eventLogClient,
+    eventLogger,
+    actionsClient,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>>;
+    shouldUpdateGaps?: boolean;
+    internalSavedObjectsRepository?: ISavedObjectsRepository;
+    eventLogClient?: IEventLogClient;
+    eventLogger?: IEventLogger;
+    actionsClient?: ActionsClient;
+  }) {
+    if (adHocRuns.length === 0) return;
+
+    const canUpdateGaps =
+      shouldUpdateGaps && actionsClient && internalSavedObjectsRepository && eventLogClient;
+
+    // Prepare backfill metadata for gap updates before deleting SOs
+    const backfillsForGapUpdate = canUpdateGaps
+      ? adHocRuns.map((so) =>
+          transformAdHocRunToBackfillResult({
+            adHocRunSO: so,
+            isSystemAction: (id: string) => actionsClient.isSystemAction(id),
+          })
+        )
+      : [];
+
+    const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
+      adHocRuns.map((adHocRun) => ({
+        id: adHocRun.id,
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      }))
+    );
+
+    const deleteErrors = deleteResult.statuses.filter((status) => !!status.error);
+    if (deleteErrors.length > 0) {
+      this.logger.warn(
+        `Error deleting backfill jobs with IDs: ${deleteErrors
+          .map((status) => status.id)
+          .join(', ')} with errors: ${deleteErrors.map(
+          (status) => status.error?.message
+        )} - jobs and associated task were not deleted.`
+      );
+    }
+
+    if (canUpdateGaps) {
+      for (const backfill of backfillsForGapUpdate ?? []) {
+        if (!('rule' in backfill)) {
+          continue;
+        }
+        try {
+          await updateGaps({
+            ruleId: backfill.rule.id,
+            start: new Date(backfill.start),
+            end: backfill.end ? new Date(backfill.end) : new Date(),
+            backfillSchedule: backfill.schedule,
+            savedObjectsRepository: internalSavedObjectsRepository,
+            logger: this.logger,
+            eventLogClient,
+            eventLogger,
+            shouldRefetchAllBackfills: true,
+            backfillClient: this,
+            actionsClient: actionsClient!,
+            initiator: backfill.initiator,
+          });
+        } catch (e) {
+          this.logger.warn(
+            `Error updating gaps after deleting backfill ${backfill.id ?? 'unknown'}: ${
+              (e as Error).message
+            }`
+          );
+        }
+      }
+    }
+
+    // delete the associated tasks
+    const taskIdsToDelete = deleteResult.statuses
+      .filter((status) => status.success)
+      .map((status) => status.id);
+
+    // only delete tasks if the associated ad hoc runs were successfully deleted
+    const taskManager = await this.taskManagerStartPromise;
+    const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
+    const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
+    if (deleteTaskErrors.length > 0) {
+      this.logger.warn(
+        `Error deleting tasks with IDs: ${deleteTaskErrors
+          .map((status) => status.id)
+          .join(', ')} with errors: ${deleteTaskErrors
+          .map((status) => status.error?.message)
+          .join(', ')}`
+      );
+    }
   }
 
   public async bulkQueue({
@@ -135,6 +251,7 @@ export class BackfillClient {
 
     const soToCreateIndexOrErrorMap: Map<number, number | ScheduleBackfillError> = new Map();
     const rulesWithUnsupportedActions = new Set<number>();
+    const truncatedScheduleSOs = new Set<number>();
 
     for (let ndx = 0; ndx < params.length; ndx++) {
       const param = params[ndx];
@@ -163,9 +280,20 @@ export class BackfillClient {
           rulesWithUnsupportedActions.add(ndx);
         }
 
+        const { adHocRunSO, truncated } = transformBackfillParamToAdHocRun(
+          param,
+          rule,
+          actions,
+          spaceId
+        );
+
+        if (truncated) {
+          truncatedScheduleSOs.add(ndx);
+        }
+
         adHocSOsToCreate.push({
           type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          attributes: transformBackfillParamToAdHocRun(param, rule, actions, spaceId),
+          attributes: adHocRunSO,
           references: [reference, ...references],
         });
       } else if (error) {
@@ -185,8 +313,9 @@ export class BackfillClient {
       );
     }
 
-    // Bulk create the saved objects in chunks of 10 to manage resource usage
-    const chunkSize = 10;
+    // Bulk create the saved objects in small chunks; each SO is capped at ~10k schedule
+    // entries by calculateSchedule, so a chunk of 3 stays well within memory limits.
+    const chunkSize = 3;
 
     const chunks: Array<{
       startIndex: number;
@@ -203,11 +332,11 @@ export class BackfillClient {
     }
 
     // Pre-size result array to preserve original order regardless of parallel completion order
-    const orderedResults: Array<SavedObject<AdHocRunSO> | BulkCreateError> = new Array(
+    const orderedResults: Array<SavedObjectBulkResult<AdHocRunSO> | BulkCreateError> = new Array(
       adHocSOsToCreate.length
     );
 
-    const chunkConcurrency = 10;
+    const chunkConcurrency = 2;
     await pMap(
       chunks,
       async ({ startIndex, items }, idx) => {
@@ -225,6 +354,7 @@ export class BackfillClient {
             })`
           );
         } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
           items.forEach((item, i) => {
             const ruleId = item.references?.[0]?.id;
             if (!ruleId) {
@@ -233,13 +363,13 @@ export class BackfillClient {
             orderedResults[startIndex + i] = {
               ruleId,
               ruleName: item.attributes.rule.name,
-              bulkCreateError: new Error(error.message),
+              bulkCreateError: new Error(errorMessage),
             };
-            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${error.message}`);
+            this.logger.warn(`Error to schedule backfill for ruleId ${ruleId} - ${errorMessage}`);
             auditLogger?.log(
               adHocRunAuditEvent({
                 action: AdHocRunAuditAction.CREATE,
-                error: new Error(error.message),
+                error: new Error(errorMessage),
               })
             );
           });
@@ -253,17 +383,17 @@ export class BackfillClient {
     );
 
     const isBulkCreateError = (
-      result: SavedObject<AdHocRunSO> | BulkCreateError
+      result: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError
     ): result is BulkCreateError => {
       return 'bulkCreateError' in result && result.bulkCreateError !== undefined;
     };
 
     const transformedResponse: ScheduleBackfillResults = orderedResults.map(
-      (so: SavedObject<AdHocRunSO> | BulkCreateError, index: number) => {
+      (so: SavedObjectBulkResult<AdHocRunSO> | BulkCreateError, index: number) => {
         if (isBulkCreateError(so)) {
           return createBackfillError(so.bulkCreateError.message, so.ruleId, so.ruleName);
         }
-        if (so.error) {
+        if (isSavedObjectErrorResult(so)) {
           auditLogger?.log(
             adHocRunAuditEvent({
               action: AdHocRunAuditAction.CREATE,
@@ -310,13 +440,17 @@ export class BackfillClient {
       if (isNumber(indexOrError)) {
         // This number is the index of the response from the savedObjects bulkCreate function
         const response = transformedResponse[indexOrError];
-        if (rulesWithUnsupportedActions.has(indexOrError)) {
-          return {
-            ...response,
-            warnings: [
-              `Rule has actions that are not supported for backfill. Those actions will be skipped.`,
-            ],
-          };
+        const warnings: string[] = [];
+        if (rulesWithUnsupportedActions.has(ndx)) {
+          warnings.push(
+            'Rule has actions that are not supported for backfill. Those actions will be skipped.'
+          );
+        }
+        if (truncatedScheduleSOs.has(ndx)) {
+          warnings.push(SCHEDULE_TRUNCATED_WARNING);
+        }
+        if (warnings.length) {
+          return { ...response, warnings };
         }
         return response;
       } else {
@@ -366,6 +500,7 @@ export class BackfillClient {
                 backfillClient: this,
                 actionsClient,
                 gaps: ruleGaps,
+                initiator: backfill.initiator,
               });
             })
           );
@@ -406,46 +541,49 @@ export class BackfillClient {
         adHocRuns.push(...response.saved_objects);
       }
       await adHocRunFinder.close();
-
-      if (adHocRuns.length > 0) {
-        const deleteResult = await unsecuredSavedObjectsClient.bulkDelete(
-          adHocRuns.map((adHocRun) => ({
-            id: adHocRun.id,
-            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          }))
-        );
-
-        const deleteErrors = deleteResult.statuses.filter((status) => !!status.error);
-        if (deleteErrors.length > 0) {
-          this.logger.warn(
-            `Error deleting backfill jobs with IDs: ${deleteErrors
-              .map((status) => status.id)
-              .join(', ')} with errors: ${deleteErrors.map(
-              (status) => status.error?.message
-            )} - jobs and associated task were not deleted.`
-          );
-        }
-
-        // only delete tasks if the associated ad hoc runs were successfully deleted
-        const taskIdsToDelete = deleteResult.statuses
-          .filter((status) => status.success)
-          .map((status) => status.id);
-
-        // delete the associated tasks
-        const taskManager = await this.taskManagerStartPromise;
-        const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
-        const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
-        if (deleteTaskErrors.length > 0) {
-          this.logger.warn(
-            `Error deleting tasks with IDs: ${deleteTaskErrors
-              .map((status) => status.id)
-              .join(', ')} with errors: ${deleteTaskErrors.map((status) => status.error?.message)}`
-          );
-        }
-      }
+      await this.deleteAdHocRunsAndTasks({
+        unsecuredSavedObjectsClient,
+        adHocRuns,
+      });
     } catch (error) {
       this.logger.warn(
         `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
+      );
+    }
+  }
+
+  public async deleteBackfillsByInitiatorId({
+    initiatorId,
+    unsecuredSavedObjectsClient,
+    shouldUpdateGaps,
+    internalSavedObjectsRepository,
+    eventLogClient,
+    eventLogger,
+    actionsClient,
+  }: DeleteBackfillsByInitiatorIdOpts) {
+    try {
+      const adHocRunFinder = await unsecuredSavedObjectsClient.createPointInTimeFinder<AdHocRunSO>({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        filter: `${AD_HOC_RUN_SAVED_OBJECT_TYPE}.attributes.initiatorId: "${initiatorId}"`,
+      });
+      const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+      await adHocRunFinder.close();
+      await this.deleteAdHocRunsAndTasks({
+        unsecuredSavedObjectsClient,
+        adHocRuns,
+        shouldUpdateGaps,
+        internalSavedObjectsRepository,
+        eventLogClient,
+        eventLogger,
+        actionsClient,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Error deleting backfill jobs for initiatorId ${initiatorId} - ${(error as Error).message}`
       );
     }
   }

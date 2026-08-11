@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
@@ -15,11 +14,17 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { findRulesSo } from '../../../../data/rule';
+import { alertingAuthorizationFilterOpts } from '../../../../rules_client/common/constants';
 import {
-  alertingAuthorizationFilterOpts,
-  RULE_TYPE_CHECKS_CONCURRENCY,
-} from '../../../../rules_client/common/constants';
+  extractGapDurationSums,
+  calculateHighestPriorityGapFillStatus,
+  type GapDurationBucket,
+  RULE_GAP_AGGREGATIONS,
+  buildExhaustedRetryGapsAgg,
+  getExhaustedRetryGapsInfo,
+} from '../utils';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
+import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
 export async function getGapsSummaryByRuleIds(
   context: RulesClientContext,
@@ -42,7 +47,11 @@ export async function getGapsSummaryByRuleIds(
       throw error;
     }
 
-    const { start, end, ruleIds } = params;
+    const { start, end, ruleIds, schedulerId, excludedReasons } = params;
+
+    const schedulerContext = schedulerId
+      ? await getSchedulerContextInternal(context.unsecuredSavedObjectsClient, schedulerId)
+      : null;
     const { filter: authorizationFilter } = authorizationTuple;
     const kueryNodeFilter = convertRuleIdsToKueryNode(ruleIds);
     const kueryNodeFilterWithAuth =
@@ -76,33 +85,36 @@ export async function getGapsSummaryByRuleIds(
       throw Boom.badRequest(`No rules matching ids ${ruleIds} found to get gaps summary`);
     }
 
-    await pMap(
-      buckets,
-      async ({ key: [ruleType, consumer] }) => {
-        try {
-          await context.authorization.ensureAuthorized({
-            ruleTypeId: ruleType,
-            consumer,
-            operation: ReadOperations.FindGaps,
-            entity: AlertingAuthorizationEntity.Rule,
-          });
-        } catch (error) {
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
-              error,
-            })
-          );
-          throw error;
-        }
-      },
-      { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-    );
+    const ruleTypeIdConsumersPairs = buckets.map(({ key: [ruleTypeId, consumer] }) => ({
+      ruleTypeId,
+      consumers: [consumer],
+    }));
+
+    try {
+      await context.authorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs,
+        operation: ReadOperations.FindGaps,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
+          error,
+        })
+      );
+      throw error;
+    }
 
     const filter = buildGapsFilter({
       start,
       end,
+      excludedReasons,
     });
+
+    const exhaustedRetryAgg = schedulerContext?.enabled
+      ? buildExhaustedRetryGapsAgg(schedulerContext)
+      : {};
 
     const aggs = await eventLogClient.aggregateEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -116,21 +128,8 @@ export async function getGapsSummaryByRuleIds(
               size: 10000,
             },
             aggs: {
-              totalUnfilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.unfilled_duration_ms',
-                },
-              },
-              totalInProgressDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.in_progress_duration_ms',
-                },
-              },
-              totalFilledDurationMs: {
-                sum: {
-                  field: 'kibana.alert.rule.gap.filled_duration_ms',
-                },
-              },
+              ...RULE_GAP_AGGREGATIONS,
+              ...exhaustedRetryAgg,
             },
           },
         },
@@ -138,24 +137,30 @@ export async function getGapsSummaryByRuleIds(
     );
 
     interface UniqueRuleIdsAgg {
-      buckets: Array<{
-        key: string;
-        totalUnfilledDurationMs: { value: number };
-        totalInProgressDurationMs: { value: number };
-        totalFilledDurationMs: { value: number };
-      }>;
+      buckets: Array<GapDurationBucket & Record<string, unknown>>;
     }
 
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
     const result: GetGapsSummaryByRuleIdsResponse = {
-      data: resultBuckets.map((bucket) => ({
-        ruleId: bucket.key,
-        totalUnfilledDurationMs: bucket.totalUnfilledDurationMs.value,
-        totalInProgressDurationMs: bucket.totalInProgressDurationMs.value,
-        totalFilledDurationMs: bucket.totalFilledDurationMs.value,
-      })),
+      data: resultBuckets.map((bucket) => {
+        const sums = extractGapDurationSums(bucket);
+        const exhaustedInfo = schedulerContext?.enabled
+          ? getExhaustedRetryGapsInfo(bucket)
+          : { hasExhaustedRetryGaps: false, exhaustedRetryUnfilledDurationMs: 0 };
+        const gapFillStatus = calculateHighestPriorityGapFillStatus(
+          sums,
+          exhaustedInfo.hasExhaustedRetryGaps
+        );
+        return {
+          ruleId: bucket.key,
+          totalUnfilledDurationMs: sums.totalUnfilledDurationMs,
+          totalInProgressDurationMs: sums.totalInProgressDurationMs,
+          totalFilledDurationMs: sums.totalFilledDurationMs,
+          ...(gapFillStatus ? { gapFillStatus } : {}),
+        };
+      }),
     };
 
     return result;

@@ -34,6 +34,12 @@ export interface CrossClusterApiKey extends BaseApiKey {
    * search and cross-cluster replication. At least one of them must be specified.
    */
   access: CrossClusterApiKeyAccess;
+
+  /**
+   * The certificate identity associated with this cross-cluster API key (strong identity
+   * verification). Restricts the API key to connections authenticated by a specific TLS certificate.
+   */
+  certificate_identity?: string;
 }
 
 /**
@@ -65,7 +71,10 @@ type CrossClusterApiKeySearch = Pick<
 >;
 
 // TODO: Remove this type when `@elastic/elasticsearch` has been updated.
-type CrossClusterApiKeyReplication = Pick<estypes.SecurityIndicesPrivileges, 'names'>;
+type CrossClusterApiKeyReplication = Pick<
+  estypes.SecurityIndicesPrivileges,
+  'names' | 'allow_restricted_indices'
+>;
 
 export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescriptor>;
 
@@ -96,6 +105,11 @@ interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
   count: number;
   total: number;
   queryError: never;
+  /**
+   * The search_after cursor for the next page of results.
+   * Use this value in the next request to get the following page.
+   */
+  searchAfter?: estypes.SortResults;
 }
 
 interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {

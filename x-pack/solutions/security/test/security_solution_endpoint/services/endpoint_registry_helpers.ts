@@ -60,6 +60,8 @@ export function SecuritySolutionEndpointRegistryHelpers() {
       const args: string[] = [
         '-v',
         `${packageRegistryConfig}:/package-registry/config.yml`,
+        '-e',
+        'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
         ...dockerArgs,
       ];
       return defineDockerServersConfig({
@@ -71,6 +73,7 @@ export function SecuritySolutionEndpointRegistryHelpers() {
           args,
           waitForLogLine: 'package manifests loaded',
           waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
         },
       });
     },

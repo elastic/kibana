@@ -104,7 +104,6 @@ export const createExceptionListsIndex = async (
 export const removeListServerGeneratedProperties = (
   list: Partial<ListSchema>
 ): Partial<ListSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
   return props;
 };
@@ -116,7 +115,6 @@ export const removeListServerGeneratedProperties = (
 export const removeListItemServerGeneratedProperties = (
   list: Partial<ListItemSchema>
 ): Partial<ListItemSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, '@timestamp': _t, ...props } = list;
   return props;
 };
@@ -128,7 +126,6 @@ export const removeListItemServerGeneratedProperties = (
 export const removeExceptionListItemServerGeneratedProperties = (
   list: Partial<ExceptionListItemSchema>
 ): Partial<ExceptionListItemSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
 };
@@ -140,7 +137,6 @@ export const removeExceptionListItemServerGeneratedProperties = (
 export const removeExceptionListServerGeneratedProperties = (
   list: Partial<ExceptionListSchema>
 ): Partial<ExceptionListSchema> => {
-  /* eslint-disable-next-line @typescript-eslint/naming-convention */
   const { created_at, updated_at, id, tie_breaker_id, _version, ...removedProperties } = list;
   return removedProperties;
 };
@@ -454,12 +450,6 @@ const listsMappings = {
     name: {
       type: 'keyword',
     },
-    deserializer: {
-      type: 'keyword',
-    },
-    serializer: {
-      type: 'keyword',
-    },
     description: {
       type: 'keyword',
     },
@@ -501,12 +491,6 @@ const itemsMappings = {
       type: 'keyword',
     },
     list_id: {
-      type: 'keyword',
-    },
-    deserializer: {
-      type: 'keyword',
-    },
-    serializer: {
       type: 'keyword',
     },
     meta: {

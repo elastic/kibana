@@ -10,25 +10,25 @@ import { i18n } from '@kbn/i18n';
 const selectableAriaLabel = i18n.translate(
   'xpack.aiAssistant.connectorSelector.selectableAriaLabel',
   {
-    defaultMessage: 'Select a connector',
+    defaultMessage: 'Select a model',
   }
 );
 
 const addConnectorAriaLabel = i18n.translate(
   'xpack.aiAssistant.connectorSelector.addConnectorAriaLabel',
   {
-    defaultMessage: 'Add Connector',
+    defaultMessage: 'Add Model',
   }
 );
 
 const addConnectorLabel = i18n.translate('xpack.aiAssistant.connectorSelector.addConnectorLabel', {
-  defaultMessage: 'Add Connector',
+  defaultMessage: 'Add Model',
 });
 
 const manageConnectorAriaLabel = i18n.translate(
   'xpack.aiAssistant.connectorSelector.manageConnectorAriaLabel',
   {
-    defaultMessage: 'Manage Connector',
+    defaultMessage: 'Manage Model',
   }
 );
 

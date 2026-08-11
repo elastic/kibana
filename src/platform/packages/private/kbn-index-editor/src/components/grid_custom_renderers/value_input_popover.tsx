@@ -171,7 +171,7 @@ export const getValueInputPopover =
           announceOnMount
           size="s"
           title={i18n.translate('indexEditor.flyout.grid.cell.noColumnDefined', {
-            defaultMessage: 'Define a column name before adding cell values',
+            defaultMessage: 'Define a field name before adding cell values',
           })}
         />
       );

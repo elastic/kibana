@@ -8,15 +8,29 @@
  */
 
 import { LRUCache } from 'lru-cache';
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
-import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import { DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
+
+import type { LegacyDashboardSearchResponseBody } from '../../server/api/search/types';
+import type {
+  DashboardSearchRequestParams,
+  DashboardSearchResponseBody,
+  DashboardState,
+} from '../../server';
+import {
+  DASHBOARD_API_PATH,
+  DASHBOARD_API_VERSION,
+  DASHBOARD_APP_API_PATH,
+  DASHBOARD_APP_API_VERSION,
+  DASHBOARD_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type {
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
-  DashboardState,
   DashboardUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
@@ -24,43 +38,50 @@ import { coreServices } from '../services/kibana_services';
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-const cache = new LRUCache<string, DashboardReadResponseBody>({
+export type ReadBodyWithResolve = DashboardReadResponseBody & {
+  resolve: {
+    outcome: SavedObjectsResolveResponse['outcome'] | undefined;
+    aliasTargetId: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose: SavedObjectsResolveResponse['alias_purpose'];
+  };
+};
+
+const cache = new LRUCache<string, ReadBodyWithResolve>({
   max: CACHE_SIZE,
   ttl: CACHE_TTL,
 });
 
+const buildDashboardPath = (id: string) => buildPath(`${DASHBOARD_API_PATH}/{id}`, { id });
+const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PATH}/{id}`, { id });
+
 export const dashboardClient = {
-  create: async (dashboardState: DashboardState, references: Reference[]) => {
-    return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
-      version: DASHBOARD_API_VERSION,
-      query: {
-        allowUnmappedKeys: true,
-      },
+  create: async (
+    dashboardState: DashboardState,
+    accessMode?: SavedObjectAccessControl['accessMode']
+  ) => {
+    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
+      version: DASHBOARD_APP_API_VERSION,
       body: JSON.stringify({
-        data: {
-          ...dashboardState,
-          references,
-        },
+        ...dashboardState,
+        ...(accessMode && { access_control: { access_mode: accessMode } }),
       }),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
     cache.delete(id);
-    return coreServices.http.delete(`/api/dashboards/dashboard/${id}`, {
+    return coreServices.http.delete(buildDashboardPath(id), {
       version: DASHBOARD_API_VERSION,
     });
   },
-  get: async (id: string): Promise<DashboardReadResponseBody> => {
+  get: async (id: string): Promise<ReadBodyWithResolve> => {
     if (cache.has(id)) {
       return cache.get(id)!;
     }
 
-    const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
-        version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
-        },
+    const { body, response } = await coreServices.http
+      .get<DashboardReadResponseBody>(buildDashboardAppPath(id), {
+        version: DASHBOARD_APP_API_VERSION,
+        asResponse: true,
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -70,7 +91,16 @@ export const dashboardClient = {
         throw new Error(message);
       });
 
-    if (result.meta.outcome !== 'aliasMatch') {
+    const result = {
+      ...body,
+      resolve: {
+        outcome: response?.headers.get('kbn-resolve-outcome') ?? undefined,
+        aliasTargetId: response?.headers.get('kbn-resolve-alias-target-id') ?? undefined,
+        aliasPurpose: response?.headers.get('kbn-resolve-purpose') ?? undefined,
+      },
+    } as ReadBodyWithResolve;
+
+    if (result.resolve.outcome !== 'aliasMatch') {
       /**
        * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
        * alias info gets cached and prevents the dashboard contents from being updated
@@ -79,32 +109,48 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchBody: DashboardSearchRequestBody) => {
-    return await coreServices.http.post<DashboardSearchResponseBody>(`/api/dashboards/search`, {
+  search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
+    const { query, ...params } = searchParams;
+
+    const response = await coreServices.http.get<
+      DashboardSearchResponseBody | LegacyDashboardSearchResponseBody
+    >(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
-      body: JSON.stringify({
-        ...searchBody,
-        search: searchBody.search ? `${searchBody.search}*` : undefined,
-      }),
+      query: {
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
+      },
     });
-  },
-  update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
-    const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `/api/dashboards/dashboard/${id}`,
-      {
-        version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
+
+    // Normalize the legacy response shape to the GA shape so callers always receive `{ data, meta }`,
+    // regardless of whether the server has the `asCode.useGASchemas` feature flag enabled.
+    if ('dashboards' in response) {
+      return {
+        data: response.dashboards,
+        meta: {
+          page: response.page,
+          per_page: params.per_page ?? PAGINATION_DEFAULT_PER_PAGE,
+          total: response.total,
         },
-        body: JSON.stringify({
-          data: {
-            ...dashboardState,
-            references,
-          },
-        }),
+      };
+    }
+
+    return response;
+  },
+  update: async (id: string, dashboardState: DashboardState) => {
+    const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
+      buildDashboardAppPath(id),
+      {
+        version: DASHBOARD_APP_API_VERSION,
+        body: JSON.stringify(dashboardState),
       }
     );
     cache.delete(id);
     return updateResponse;
+  },
+  invalidateCache: async (id: string) => {
+    if (cache.has(id)) {
+      cache.delete(id);
+    }
   },
 };

@@ -15,12 +15,24 @@ jest.doMock('./adapters', () => {
   };
 });
 
+export const inferenceEndpointAdapterMock = {
+  chatComplete: jest.fn(),
+};
+
+jest.doMock('./adapters/inference_endpoint', () => ({
+  inferenceEndpointAdapter: inferenceEndpointAdapterMock,
+}));
+
 export const getInferenceExecutorMock = jest.fn();
+export const resolveInferenceEndpointMock = jest.fn();
+export const createInferenceEndpointExecutorMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
   return {
     ...actual,
     getInferenceExecutor: getInferenceExecutorMock,
+    resolveInferenceEndpoint: resolveInferenceEndpointMock,
+    createInferenceEndpointExecutor: createInferenceEndpointExecutorMock,
   };
 });

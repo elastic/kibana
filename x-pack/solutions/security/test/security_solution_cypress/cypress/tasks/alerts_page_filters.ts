@@ -5,13 +5,42 @@
  * 2.0.
  */
 
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   CONTROL_FRAMES,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
 } from '../screens/common/filter_group';
+
+const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+    persist: true,
+  },
+  {
+    title: 'Severity',
+    field_name: 'kibana.alert.severity',
+    selected_options: [],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+  },
+  {
+    title: 'User',
+    field_name: 'user.name',
+  },
+  {
+    title: 'Host',
+    field_name: 'host.name',
+  },
+];
 
 export const assertFilterControlsWithFilterObject = (
   filterObject: FilterControlConfig[] = DEFAULT_DETECTION_PAGE_FILTERS
@@ -29,7 +58,7 @@ export const assertFilterControlsWithFilterObject = (
   filterObject.forEach((filter, idx) => {
     cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
       const controlText = sub.text();
-      filter.selectedOptions?.forEach((option) => {
+      filter.selected_options?.forEach((option) => {
         expect(controlText).to.have.string(String(option));
       });
     });

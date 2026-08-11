@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET } from './config';
+import { configSchema, CLAIM_STRATEGY_MGET } from './config';
 
 describe('config validation', () => {
   test('task manager defaults', () => {
@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -23,6 +24,11 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
+        },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
@@ -32,7 +38,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 4000,
+        "monitored_stats_required_freshness": 1500,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {},
@@ -71,6 +77,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -81,6 +88,11 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
+        },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
@@ -90,7 +102,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 4000,
+        "monitored_stats_required_freshness": 1500,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {},
@@ -127,6 +139,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -137,6 +150,11 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "grant_uiam_api_keys": false,
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
+        },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
         "metrics_reset_interval": 30000,
@@ -146,7 +164,7 @@ describe('config validation', () => {
           "level": "debug",
           "warn_delayed_task_start_in_seconds": 60,
         },
-        "monitored_stats_required_freshness": 4000,
+        "monitored_stats_required_freshness": 1500,
         "monitored_stats_running_average_window": 50,
         "monitored_task_execution_thresholds": Object {
           "custom": Object {
@@ -242,13 +260,9 @@ describe('config validation', () => {
     }).not.toThrowError();
   });
 
-  test('any claim strategy is valid', () => {
-    configSchema.validate({ claim_strategy: 'anything!' });
-  });
-
-  test('default claim strategy defaults poll interval to 3000ms', () => {
-    const result = configSchema.validate({ claim_strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY });
-    expect(result.poll_interval).toEqual(3000);
+  test('any claim strategy is valid and poll interval uses default value', () => {
+    const result = configSchema.validate({ claim_strategy: 'anything!' });
+    expect(result.poll_interval).toEqual(500);
   });
 
   test('mget claim strategy defaults poll interval to 500ms', () => {

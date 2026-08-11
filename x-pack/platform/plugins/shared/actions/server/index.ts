@@ -21,9 +21,12 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
+  ClassicActionType,
   InMemoryConnector,
   ActionsApiRequestHandlerContext,
-  SSLSettings,
+  ConnectorLifecycleListener,
+  ConnectorLifecyclePostCreateParams,
+  ConnectorLifecyclePostDeleteParams,
 } from './types';
 
 export type {
@@ -33,12 +36,24 @@ export type {
 } from './application/connector/types';
 
 export type { PluginSetupContract, PluginStartContract } from './plugin';
+export { RelayRequestError } from './lib/relay';
+export type {
+  RelayBinding,
+  RelayCallbackResponse,
+  RelayClaimResponse,
+  RelayClientContract,
+  RelayInstallRequest,
+  RelayInstallResponse,
+} from './lib/relay';
 
 export {
   asSavedObjectExecutionSource,
   asHttpRequestExecutionSource,
   asNotificationExecutionSource,
+  isNotificationExecutionSource,
   getBasicAuthHeader,
+  NOTIFICATIONS_REQUESTER_ID,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
@@ -57,6 +72,7 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     // recipient_allowlist is not exposed because it may contain sensitive information
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
+    auth: { ears: { enabled: true, enableExperimental: true } },
   },
 };
 

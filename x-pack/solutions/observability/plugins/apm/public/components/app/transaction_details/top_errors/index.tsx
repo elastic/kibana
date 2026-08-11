@@ -9,9 +9,9 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -59,7 +59,7 @@ export function TopErrors() {
 
   const { data = INITIAL_STATE_MAIN_STATISTICS, status } = useFetcher(
     (callApmApi) => {
-      if (start && end && transactionType) {
+      if (start && end && transactionType && transactionName) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
           {
@@ -163,6 +163,9 @@ export function TopErrors() {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.apm.transactionDetails.topErrors.caption', {
+            defaultMessage: 'Top errors summary',
+          })}
           error={
             status === FETCH_STATUS.FAILURE
               ? i18n.translate('xpack.apm.transactionDetails.topErrors.errorMessage', {

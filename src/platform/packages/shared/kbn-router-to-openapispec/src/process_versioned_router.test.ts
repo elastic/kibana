@@ -19,117 +19,12 @@ import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
 import { OasConverter } from './oas_converter';
-import {
-  extractVersionedRequestBodies,
-  extractVersionedResponses,
-  processVersionedRouter,
-} from './process_versioned_router';
+import { processVersionedRouter } from './process_versioned_router';
 import type { VersionedRouterRoute } from '@kbn/core-http-server';
 import { createOpIdGenerator, setXState } from './util';
 
-let oasConverter: OasConverter;
-beforeEach(() => {
-  oasConverter = new OasConverter();
-});
-
 afterEach(() => {
   jest.clearAllMocks();
-});
-
-describe('extractVersionedRequestBodies', () => {
-  test('handles full request config as expected', () => {
-    expect(
-      extractVersionedRequestBodies(createInternalTestRoute(), oasConverter, ['application/json'])
-    ).toEqual({
-      'application/json; Elastic-Api-Version=1': {
-        schema: {
-          additionalProperties: false,
-          properties: {
-            foo: {
-              type: 'string',
-            },
-          },
-          required: ['foo'],
-          type: 'object',
-        },
-      },
-      'application/json; Elastic-Api-Version=2': {
-        schema: {
-          additionalProperties: false,
-          properties: {
-            foo2: {
-              type: 'string',
-            },
-          },
-          required: ['foo2'],
-          type: 'object',
-        },
-      },
-    });
-  });
-});
-
-describe('extractVersionedResponses', () => {
-  test('handles full response config as expected', () => {
-    expect(
-      extractVersionedResponses(createInternalTestRoute(), oasConverter, ['application/test+json'])
-    ).toEqual({
-      200: {
-        description: 'OK response 1\nOK response 2', // merge multiple version descriptions
-        content: {
-          'application/test+json; Elastic-Api-Version=1': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                bar: { type: 'number', minimum: 1, maximum: 99 },
-              },
-              required: ['bar'],
-            },
-          },
-          'application/test+json; Elastic-Api-Version=2': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                bar2: { type: 'number', minimum: 1, maximum: 99 },
-              },
-              required: ['bar2'],
-            },
-          },
-        },
-      },
-      404: {
-        description: 'Not Found response 1',
-        content: {
-          'application/test2+json; Elastic-Api-Version=1': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                ok: { type: 'boolean', enum: [false] },
-              },
-              required: ['ok'],
-            },
-          },
-        },
-      },
-      500: {
-        content: {
-          'application/test2+json; Elastic-Api-Version=2': {
-            schema: {
-              type: 'object',
-              additionalProperties: false,
-              properties: {
-                ok: { type: 'boolean', enum: [false] },
-              },
-              required: ['ok'],
-            },
-          },
-        },
-      },
-    });
-  });
 });
 
 describe('processVersionedRouter', () => {
@@ -248,73 +143,6 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
           response: {
             200: {
               description: 'OK response 2024-12-31',
-              bodyContentType: 'application/test+json',
-              body: () => schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
-            },
-            500: {
-              bodyContentType: 'application/test2+json',
-              body: () => schema.object({ ok: schema.literal(false) }),
-            },
-            unsafe: { body: false },
-          },
-        }),
-      },
-    },
-  ],
-});
-
-const createInternalTestRoute: () => VersionedRouterRoute = () => ({
-  path: '/foo',
-  method: 'get',
-  isVersioned: true,
-  options: {
-    access: 'internal',
-    deprecated: true,
-    discontinued: 'discontinued versioned router',
-    options: { body: { access: ['application/test+json'] } as any },
-    security: {
-      authz: {
-        requiredPrivileges: ['manage_spaces'],
-      },
-    },
-    description: 'This is a test route description.',
-  },
-  handlers: [
-    {
-      fn: jest.fn(),
-      options: {
-        version: '1',
-        validate: () => ({
-          request: {
-            body: schema.object({ foo: schema.string() }),
-          },
-          response: {
-            200: {
-              description: 'OK response 1',
-              bodyContentType: 'application/test+json',
-              body: () => schema.object({ bar: schema.number({ min: 1, max: 99 }) }),
-            },
-            404: {
-              description: 'Not Found response 1',
-              bodyContentType: 'application/test2+json',
-              body: () => schema.object({ ok: schema.literal(false) }),
-            },
-            unsafe: { body: false },
-          },
-        }),
-      },
-    },
-    {
-      fn: jest.fn(),
-      options: {
-        version: '2',
-        validate: () => ({
-          request: {
-            body: schema.object({ foo2: schema.string() }),
-          },
-          response: {
-            200: {
-              description: 'OK response 2',
               bodyContentType: 'application/test+json',
               body: () => schema.object({ bar2: schema.number({ min: 1, max: 99 }) }),
             },

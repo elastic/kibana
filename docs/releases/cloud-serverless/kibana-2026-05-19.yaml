@@ -1,0 +1,386 @@
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+entries:
+- file:
+    name: 268873.yaml
+    checksum: 872b24031d457b83663c60b289e42eedcd169c1a
+  type: enhancement
+  title: Add service map preview to the alerts page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268873
+  issues:
+  - https://github.com/elastic/kibana/issues/268612
+- file:
+    name: 268598.yaml
+    checksum: 176ffb7ad09d5253c1b2756625305426a7c990f2
+  type: enhancement
+  title: Add trial usage badge with period progress
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/268598
+- file:
+    name: 269080.yaml
+    checksum: e3410e4c7ac74e587708bbab6324a9521929a159
+  type: bug-fix
+  title: Parse top-level Elasticsearch fields on package upgrade or reinstall
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/269080
+- file:
+    name: 269297.yaml
+    checksum: 575297352fc8b8ae276ad6bbd7ab18c88b60c6dc
+  type: enhancement
+  title: Synchronize cursor position across dashboard panels for data correlation
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269297
+  issues:
+  - https://github.com/elastic/kibana/issues/266304
+- file:
+    name: 268917.yaml
+    checksum: 2970e9a9e848e43853186005a650a60c200d603b
+  type: bug-fix
+  title: Retry sample fetch with halved size on async search response limit error
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268917
+  issues:
+  - https://github.com/elastic/kibana/issues/265843
+- file:
+    name: 267800.yaml
+    checksum: c489cbe2e3c6cdf1feca770b87c9bf7c2cd7585b
+  type: feature
+  title: Add UI for exporting Osquery results
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/267800
+- file:
+    name: 266495.yaml
+    checksum: 6337f51e5ea85c9d04ddf72517fbfc60562d6e53
+  type: enhancement
+  title: Add cross-project search data to Alert Document and Event Log
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/266495
+- file:
+    name: 268711.yaml
+    checksum: bee57da5c0fe1940fe41ef5cb0d548fc5aad76f5
+  type: feature
+  title: Add a "Remove collector" action for OpAMP collectors in the Fleet agents list
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/268711
+  issues:
+  - '# PRIVATE: https://github.com/elastic/ingest-dev/issues/7567'
+- file:
+    name: 268496.yaml
+    checksum: 402fef68f9347d205e9c6506c98d98d310cb7afe
+  type: bug-fix
+  title: Validate email address format in email connector
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: 'Fixes the email connector to reject malformed email addresses (such as addresses with leading/trailing hyphens in the local part or domain labels) that would be rejected by mail servers, preventing unnecessary SMTP connection attempts. Note: existing connectors saved with such addresses will start failing validation on upgrade and will need to be updated.'
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/268496
+- file:
+    name: 269462.yaml
+    checksum: ee3138605d0c07cc1373148ed6ba01830de07763
+  type: bug-fix
+  title: Upgrade `langsmith` from 0.5.25 to 0.7.1
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269462
+- file:
+    name: 269377.yaml
+    checksum: 8a5e38221b56e1a03332c5cf8389ff536ba6d875
+  type: enhancement
+  title: Improve investigation skill matching alerts query
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269377
+- file:
+    name: 269571.yaml
+    checksum: 08a06bbcc28776a6b2c06de8103394a3268f116f
+  type: bug-fix
+  title: Fix content connector redirects to be basePath and space-aware
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: Fixes client-side navigation within the content connectors UI to honor `server.basePath` and Kibana space prefixes.
+  prs:
+  - https://github.com/elastic/kibana/pull/269571
+- file:
+    name: 269228.yaml
+    checksum: 93ffcd421cbd63eab5f28092e978d465329b4ddc
+  type: bug-fix
+  title: Hide markdown panels from library flyout when tag filter is applied
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/269228
+- file:
+    name: 269051.yaml
+    checksum: c1de10435ba1357d80b7233e0f782f6bcc659095
+  type: bug-fix
+  title: Allow null in combination with any other type in `CASE()`
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/269051
+  issues:
+  - https://github.com/elastic/kibana/issues/269029
+- file:
+    name: 269047.yaml
+    checksum: 13d68e4592f879bd022974fde1cfaf6be209db4d
+  type: bug-fix
+  title: Make `with` optional for workflow steps with no required parameters
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269047
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17302'
+- file:
+    name: 268945.yaml
+    checksum: d2a5ff9b974f27e9b0de64b2f17d90584d4f89bb
+  type: enhancement
+  title: Add `ai.prompt`, `ai.summarize`, and `ai.classify` workflow AI steps to the Feature Settings page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: These changes allow administrators to customize the model list of each AI step on a per-space basis.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/268945
+- file:
+    name: 267937.yaml
+    checksum: 9b8319b3a92427f80b23df7b67ce31d0ce74e16d
+  type: enhancement
+  title: Enforce `form-action` CSP directive
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: Adds `form-action` CSP directive to enforcing mode.
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/267937
+- file:
+    name: 268729.yaml
+    checksum: c36ca4781299437637fe1088351b3a72b337c038
+  type: bug-fix
+  title: Fix legend size for vertical placements
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: The Lens API now returns correctly an XY chart configured with legend in the top or bottom positions.
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/268729
+  issues:
+  - https://github.com/elastic/kibana/issues/267482
+- file:
+    name: 268973.yaml
+    checksum: fa604cfe93745762e337812f9c29ee81f0932cbc
+  type: enhancement
+  title: Improve investigation methodology in the Observability investigation skill
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268973
+- file:
+    name: 268733.yaml
+    checksum: 2519ab6eae8ea45740aba34296e7c6368ba39d4d
+  type: bug-fix
+  title: Fix default Kibana URL to use `https://` when `--ssl` is enabled
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268733
+- file:
+    name: 268895.yaml
+    checksum: e6340fd54c56405e289f728abc3f301a2997a66a
+  type: bug-fix
+  title: Fix "Explain this log entry" AI insight resetting on auto-refresh
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268895
+  issues:
+  - https://github.com/elastic/kibana/issues/268105
+- file:
+    name: 268963.yaml
+    checksum: 8feb447e662cac676c7fa6d66997cf6bd2fe6bb0
+  type: enhancement
+  title: Add subtype filter to Knowledge Indicators table
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268963
+- file:
+    name: 269283.yaml
+    checksum: 260908f8a823972caf4c893c5513479aaf78325b
+  type: enhancement
+  title: Add "Explore traces" Discover entry points on the Traces page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269283
+  issues:
+  - https://github.com/elastic/kibana/issues/257865
+- file:
+    name: 269000.yaml
+    checksum: 853b06df3d3d86ca82e020efb91bc6c7a3ed3e29
+  type: bug-fix
+  title: Fix crash in Discover flyout Overview tab for alert documents
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269000
+- file:
+    name: 268996.yaml
+    checksum: 9cb239a28a8ae153287860809cbf93850b72e63f
+  type: bug-fix
+  title: Fix double border in EASE alert summary flyout header
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/268996
+- file:
+    name: 268083.yaml
+    checksum: 69f90e40e0d8f022c4cdca52939dc9528f71f73a
+  type: enhancement
+  title: Improve Model Management Elastic Inference and Feature Settings pages
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  description: Displays badges for the deprecation and end-of-life status of the models.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/268083
+- file:
+    name: 268892.yaml
+    checksum: 22f01b921b30b887442ad30c3392308339fafbdf
+  type: bug-fix
+  title: Fix computed field display in Discover cascaded documents
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/268892
+  issues:
+  - https://github.com/elastic/kibana/issues/268814
+- file:
+    name: 268328.yaml
+    checksum: 8e40f91f7ff0e64bbbbf6ec607d166cd06d977ac
+  type: bug-fix
+  title: Keep track of the expanded document after refresh
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/268328
+  issues:
+  - https://github.com/elastic/kibana/issues/268442
+- file:
+    name: 268942.yaml
+    checksum: 3fa2a28c940d380c53a41316acd37ccd97b973fa
+  type: deprecation
+  title: Update `GET /api/status` endpoint details
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  impact: '`GET /api/status` now requires the Elasticsearch `cluster:monitor` privilege to return the full payload, including host info, build details, core and plugin status, and metrics. Authenticated callers without `monitor`, and callers when the privilege check fails, receive the same minimal response shape that unauthenticated callers already receive: `{ status: { overall: { level } } }`. Kubernetes liveness and readiness probes are unaffected.'
+  action: 'If you need to preserve the previous behavior while updating monitoring users or roles, set `status.statusPageBypassMonitorPrivilege: true` to allow authenticated users to access the full status API and `/status` page without `monitor`. The `/status` UI renders an explanatory prompt for users without `monitor` when the bypass is disabled.'
+  prs:
+  - https://github.com/elastic/kibana/pull/268942
+  issues:
+  - https://github.com/elastic/kibana/issues/202446
+- file:
+    name: 269164.yaml
+    checksum: dfc8a875299cdb7fde66546b529c665cc8ff6eae
+  type: bug-fix
+  title: Fix access gating for asset criticality updates
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/269164
+- file:
+    name: 265254.yaml
+    checksum: d80996a8c6966c18ff2e5f3731b157b3a44477b5
+  type: bug-fix
+  title: Fix Streams "Modify suggestions" popover toggle when already open
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/265254
+- file:
+    name: 262354.yaml
+    checksum: 280fe686283c65202a5b0ec622036998b05d141b
+  type: feature
+  title: Add rule query inspector
+  products:
+  - product: cloud-serverless
+    target: 2026-05-19
+  prs:
+  - https://github.com/elastic/kibana/pull/262354
+  issues:
+  - https://github.com/elastic/kibana/issues/260262

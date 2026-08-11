@@ -14,6 +14,7 @@ import {
   openZipArchiveMock,
   validateArtifactArchiveMock,
   fetchArtifactVersionsMock,
+  fetchSecurityLabsVersionsMock,
   ensureDefaultElserDeployedMock,
 } from './package_installer.test.mocks';
 import { cloneDeep } from 'lodash';
@@ -21,6 +22,8 @@ import type { ProductName } from '@kbn/product-doc-common';
 import {
   getArtifactName,
   getProductDocIndexName,
+  getSecurityLabsArtifactName,
+  getSecurityLabsIndexName,
   DocumentationProduct,
 } from '@kbn/product-doc-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -33,6 +36,7 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const artifactsFolder = '/lost';
 const artifactRepositoryUrl = 'https://repository.com';
+const artifactRepositoryProxyUrl = 'http://proxy.example.com:3128';
 const kibanaVersion = '8.16.3';
 
 const callOrder = (fn: { mock: { invocationCallOrder: number[] } }): number => {
@@ -66,6 +70,8 @@ describe('PackageInstaller', () => {
       productName: 'kibana',
       productVersion: '8.17',
     });
+
+    validateArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
@@ -77,6 +83,7 @@ describe('PackageInstaller', () => {
     openZipArchiveMock.mockReset();
     validateArtifactArchiveMock.mockReset();
     fetchArtifactVersionsMock.mockReset();
+    fetchSecurityLabsVersionsMock.mockReset();
     ensureDefaultElserDeployedMock.mockReset();
   });
 
@@ -86,6 +93,13 @@ describe('PackageInstaller', () => {
         close: jest.fn(),
       };
       openZipArchiveMock.mockResolvedValue(zipArchive);
+
+      const artifactName = getArtifactName({
+        productName: 'kibana',
+        productVersion: '8.16',
+      });
+
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
 
       const mappings = {
         properties: {
@@ -100,17 +114,15 @@ describe('PackageInstaller', () => {
 
       await packageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
 
-      const artifactName = getArtifactName({
-        productName: 'kibana',
-        productVersion: '8.16',
-      });
       const indexName = getProductDocIndexName('kibana');
+
       expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
 
       expect(downloadToDiskMock).toHaveBeenCalledTimes(1);
       expect(downloadToDiskMock).toHaveBeenCalledWith(
         `${artifactRepositoryUrl}/${artifactName}`,
-        `${artifactsFolder}/${artifactName}`
+        `${artifactsFolder}/${artifactName}`,
+        undefined
       );
 
       expect(openZipArchiveMock).toHaveBeenCalledTimes(1);
@@ -232,6 +244,30 @@ describe('PackageInstaller', () => {
         productVersion: '8.15',
       });
     });
+
+    it('falls back to previous version when selected artifact is missing', async () => {
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.15', '8.16'],
+      });
+
+      openZipArchiveMock.mockImplementationOnce(async () => {
+        throw new Error('End of central directory record signature not found.');
+      });
+      openZipArchiveMock.mockResolvedValue({
+        close: jest.fn(),
+      });
+
+      await packageInstaller.installAll();
+
+      expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith({
+        productName: 'kibana',
+        productVersion: '8.15',
+        customInference: undefined,
+      });
+    });
   });
 
   describe('ensureUpToDate', () => {
@@ -240,6 +276,7 @@ describe('PackageInstaller', () => {
         kibana: ['8.15', '8.16'],
         security: ['8.15', '8.16'],
         elasticsearch: ['8.15'],
+        openapi: [],
       });
 
       productDocClient.getInstallationStatus.mockResolvedValue({
@@ -247,6 +284,10 @@ describe('PackageInstaller', () => {
         security: { status: 'installed', version: '8.16' },
         elasticsearch: { status: 'uninstalled' },
       } as Record<ProductName, ProductInstallState>);
+
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
 
       jest.spyOn(packageInstaller, 'installPackage');
 
@@ -257,6 +298,91 @@ describe('PackageInstaller', () => {
         productName: 'kibana',
         productVersion: '8.16',
       });
+    });
+
+    it('passes the artifact repository proxy URL when fetching versions', async () => {
+      const proxyPackageInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl,
+        kibanaVersion,
+      });
+
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.16'],
+        security: [],
+        elasticsearch: [],
+        observability: [],
+        openapi: [],
+      });
+
+      productDocClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'uninstalled' },
+        security: { status: 'uninstalled' },
+        elasticsearch: { status: 'uninstalled' },
+        observability: { status: 'uninstalled' },
+      } as Record<ProductName, ProductInstallState>);
+
+      productDocClient.getOpenapiSpecInstallationStatus.mockResolvedValue({
+        status: 'uninstalled',
+      });
+
+      await proxyPackageInstaller.ensureUpToDate({ inferenceId: defaultInferenceEndpoints.ELSER });
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl,
+      });
+    });
+  });
+
+  describe('artifact repository proxy', () => {
+    let proxyPackageInstaller: PackageInstaller;
+
+    beforeEach(() => {
+      proxyPackageInstaller = new PackageInstaller({
+        artifactsFolder,
+        logger,
+        esClient,
+        productDocClient,
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl,
+        kibanaVersion,
+      });
+    });
+
+    it('passes the proxy URL to fetchArtifactVersions in installAll', async () => {
+      jest.spyOn(proxyPackageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.16'],
+      });
+
+      await proxyPackageInstaller.installAll();
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl,
+      });
+    });
+
+    it('passes the proxy URL to downloadToDisk in installPackage', async () => {
+      const zipArchive = {
+        close: jest.fn(),
+      };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/artifact.zip`);
+
+      await proxyPackageInstaller.installPackage({ productName: 'kibana', productVersion: '8.16' });
+
+      expect(downloadToDiskMock).toHaveBeenCalledWith(
+        expect.stringContaining(artifactRepositoryUrl),
+        expect.any(String),
+        artifactRepositoryProxyUrl
+      );
     });
   });
 
@@ -290,6 +416,203 @@ describe('PackageInstaller', () => {
         expect(packageInstaller.uninstallPackage).toHaveBeenCalledWith({ productName });
       });
       expect(productDocClient.setUninstalled).toHaveBeenCalledTimes(totalProducts);
+    });
+  });
+
+  describe('installSecurityLabs', () => {
+    const VERSION_OLD = '2025.12.01';
+    const VERSION_NEW = '2025.12.12';
+
+    it('downloads and installs the latest version when no version is provided', async () => {
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_OLD, VERSION_NEW]);
+      downloadToDiskMock.mockResolvedValue(
+        `${artifactsFolder}/${getSecurityLabsArtifactName({ version: VERSION_NEW })}`
+      );
+
+      const mappings = {
+        properties: {
+          semantic: {
+            inference_id: '.elser',
+            type: 'semantic_text',
+            model_settings: {},
+          },
+        },
+      };
+      loadMappingFileMock.mockResolvedValue(mappings);
+      loadManifestFileMock.mockResolvedValue({ formatVersion: TEST_FORMAT_VERSION } as any);
+
+      await packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER });
+
+      const artifactName = getSecurityLabsArtifactName({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      const indexName = getSecurityLabsIndexName(defaultInferenceEndpoints.ELSER);
+
+      expect(ensureDefaultElserDeployedMock).toHaveBeenCalledTimes(1);
+
+      expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledTimes(1);
+      expect(fetchSecurityLabsVersionsMock).toHaveBeenCalledWith({
+        artifactRepositoryUrl,
+        artifactRepositoryProxyUrl: undefined,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(downloadToDiskMock).toHaveBeenCalledWith(
+        `${artifactRepositoryUrl}/${artifactName}`,
+        `${artifactsFolder}/${artifactName}`,
+        undefined
+      );
+
+      // Critical: openZipArchive must use the full path returned by downloadToDisk.
+      expect(openZipArchiveMock).toHaveBeenCalledWith(`${artifactsFolder}/${artifactName}`);
+
+      expect(createIndexMock).toHaveBeenCalledTimes(1);
+      const modifiedMappings = cloneDeep(mappings);
+      modifiedMappings.properties.semantic.inference_id = defaultInferenceEndpoints.ELSER;
+      expect(createIndexMock).toHaveBeenCalledWith({
+        indexName,
+        mappings: modifiedMappings,
+        manifestVersion: TEST_FORMAT_VERSION,
+        esClient,
+        log: logger,
+      });
+
+      expect(populateIndexMock).toHaveBeenCalledTimes(1);
+      expect(populateIndexMock).toHaveBeenCalledWith({
+        indexName,
+        archive: zipArchive,
+        manifestVersion: TEST_FORMAT_VERSION,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+        esClient,
+        log: logger,
+      });
+
+      expect(productDocClient.setSecurityLabsInstallationStarted).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      expect(productDocClient.setSecurityLabsInstallationSuccessful).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        indexName,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(zipArchive.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls setSecurityLabsInstallationFailed if installation fails', async () => {
+      const zipArchive = { close: jest.fn() };
+      openZipArchiveMock.mockResolvedValue(zipArchive);
+      fetchSecurityLabsVersionsMock.mockResolvedValue([VERSION_NEW]);
+      const artifactName = getSecurityLabsArtifactName({
+        version: VERSION_NEW,
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+      downloadToDiskMock.mockResolvedValue(`${artifactsFolder}/${artifactName}`);
+
+      populateIndexMock.mockImplementation(async () => {
+        throw new Error('something bad');
+      });
+
+      await expect(
+        packageInstaller.installSecurityLabs({ inferenceId: defaultInferenceEndpoints.ELSER })
+      ).rejects.toThrowError();
+
+      expect(productDocClient.setSecurityLabsInstallationFailed).toHaveBeenCalledWith({
+        version: VERSION_NEW,
+        failureReason: 'something bad',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(zipArchive.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('installOpenAPISpec', () => {
+    const getOpenApiArchive = () => ({
+      close: jest.fn(),
+      hasEntry: jest.fn().mockReturnValue(true),
+      getEntryPaths: jest
+        .fn()
+        .mockReturnValue([
+          'kibana/content/content-0.ndjson',
+          'elasticsearch/content/content-0.ndjson',
+        ]),
+      getEntryContent: jest.fn().mockImplementation(async (entryPath: string) => {
+        if (entryPath.endsWith('manifest.json')) {
+          return Buffer.from(JSON.stringify({ formatVersion: TEST_FORMAT_VERSION }), 'utf-8');
+        }
+        if (entryPath.endsWith('mappings.json')) {
+          return Buffer.from(JSON.stringify({ properties: {} }), 'utf-8');
+        }
+        return Buffer.from(
+          JSON.stringify({
+            _inference_fields: {
+              semantic: {
+                inference: {
+                  inference_id: defaultInferenceEndpoints.ELSER,
+                },
+              },
+            },
+          }),
+          'utf-8'
+        );
+      }),
+    });
+
+    beforeEach(() => {
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
+    });
+
+    it('does not fetch artifact versions when explicit version is directly installable', async () => {
+      openZipArchiveMock
+        .mockResolvedValueOnce({ close: jest.fn() }) // precheck
+        .mockResolvedValueOnce(getOpenApiArchive()); // install
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-explicit.zip');
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(fetchArtifactVersionsMock).not.toHaveBeenCalled();
+      expect(productDocClient.setOpenapiSpecInstallationStarted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productVersion: '8.16',
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      );
+    });
+
+    it('retries listing and falls back to previous explicit version when selected is missing', async () => {
+      openZipArchiveMock
+        .mockImplementationOnce(async () => {
+          throw new Error('End of central directory record signature not found.');
+        }) // explicit precheck miss
+        .mockResolvedValueOnce({ close: jest.fn() }) // fallback precheck success
+        .mockResolvedValueOnce(getOpenApiArchive()); // install fallback
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-fallback.zip');
+
+      fetchArtifactVersionsMock
+        .mockRejectedValueOnce(new Error('temporary listing failure'))
+        .mockResolvedValueOnce({
+          openapi: ['8.16', '8.15'],
+        });
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledTimes(2);
+      expect(productDocClient.setOpenapiSpecInstallationStarted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productVersion: '8.15',
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      );
     });
   });
 });

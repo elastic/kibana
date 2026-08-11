@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_RULES_WITH_GAPS_TO_FETCH } from '../../../common/constants';
 
 export const POPOVER_TOOLTIP_ARIA_LABEL = (columnName: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.popoverTooltip.ariaLabel', {
@@ -35,14 +36,6 @@ export const UPLOAD_VALUE_LISTS_TOOLTIP = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip',
-  {
-    defaultMessage:
-      'A user with manage cluster privileges must visit the Rules page before you can import value lists.',
-  }
-);
-
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
@@ -51,7 +44,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Rules',
+  defaultMessage: 'Detection rules (SIEM)',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(
@@ -598,6 +591,15 @@ export const BULK_EDIT_FLYOUT_FORM_ADD_INVESTIGATION_FIELDS_TITLE = i18n.transla
   }
 );
 
+export const RULES_TABLE_MAX_RULES_WITH_GAPS_WARNING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.rulesTable.maxRulesWithGapsWarningMessage',
+  {
+    values: { maxRules: MAX_RULES_WITH_GAPS_TO_FETCH },
+    defaultMessage:
+      'Showing up to the first {maxRules} rules with gaps in the selected time range. Adjust your filters to narrow down the selection.',
+  }
+);
+
 export const BULK_EDIT_FLYOUT_FORM_DELETE_INVESTIGATION_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteInvestigationFieldsComboboxLabel',
   {
@@ -662,6 +664,13 @@ export const CLEAR_SELECTION = i18n.translate(
   }
 );
 
+export const RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.tableCaption',
+  {
+    defaultMessage: 'Detection rules',
+  }
+);
+
 export const SELECTED_RULES = (selectedRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.selectedRulesTitle', {
     values: { selectedRules },
@@ -682,10 +691,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+export const LACK_OF_KIBANA_RULES_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaRulesFeaturePrivileges',
   {
-    defaultMessage: 'You do not have Kibana Security privileges',
+    defaultMessage: 'You do not have Kibana Rules privileges',
   }
 );
 
@@ -693,6 +702,13 @@ export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlRulesDisabledMessageTitle',
   {
     defaultMessage: 'ML rules require Platinum License and ML Admin Permissions',
+  }
+);
+
+export const RULE_CHANGES_HISTORY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.ruleChangesHistoryDescription',
+  {
+    defaultMessage: 'History',
   }
 );
 
@@ -750,6 +766,13 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
   {
     defaultMessage: 'Manual run available only for enabled rules',
+  }
+);
+
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
+  {
+    defaultMessage: 'You need access to the "Manual rule run" privilege',
   }
 );
 
@@ -865,20 +888,6 @@ export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
   }
 );
 
-export const COLUMN_GAP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
-  {
-    defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
-  {
-    defaultMessage: 'see documentation',
-  }
-);
-
 export const ENABLED_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.enabledRulesTitle',
   {
@@ -967,6 +976,41 @@ export const RULE_EXECUTION_STATUS_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
   {
     defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
+export const GAP_FILL_STATUS_FILTER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.label',
+  {
+    defaultMessage: 'Gap fill status',
+  }
+);
+
+export const GAP_FILL_STATUS_IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export const GAP_FILL_STATUS_UNFILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.unfilled',
+  {
+    defaultMessage: 'Unfilled',
+  }
+);
+
+export const GAP_FILL_STATUS_FILLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
+  {
+    defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 
@@ -1154,6 +1198,13 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
     defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
   }
 );
 
@@ -1497,8 +1548,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
 export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
-    defaultMessage:
-      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+    defaultMessage: 'Check the bulk update dialog for changes on rules containing data views.',
   }
 );
 
@@ -1626,5 +1676,66 @@ export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDurationTooltip',
   {
     defaultMessage: 'Sum of remaining unfilled or partially filled gaps',
+  }
+);
+
+export const RULE_SETTINGS_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
+  {
+    defaultMessage: 'Prebuilt rules available for upgrade',
+  }
+);
+
+/**
+ * AI rule creation save handler
+ */
+
+export const SAVE_RULE_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.saveFailedTitle',
+  {
+    defaultMessage: 'Failed to save rule',
+  }
+);
+
+export const RULE_UPDATED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.updatedTitle',
+  {
+    defaultMessage: 'Rule updated',
+  }
+);
+
+export const RULE_SAVED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.savedTitle',
+  {
+    defaultMessage: 'Rule saved',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TITLE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedTitle',
+  {
+    defaultMessage: 'Rule saved, but the chat card could not be linked to it',
+  }
+);
+
+export const ORIGIN_LINK_FAILED_TEXT = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.originLinkFailedText',
+  {
+    defaultMessage:
+      'The rule was saved successfully. Refresh the conversation before saving from this card again to avoid creating a duplicate.',
+  }
+);
+
+export const UNKNOWN_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.saveRuleHandler.unknownErrorMessage',
+  {
+    defaultMessage: 'Unknown error',
   }
 );

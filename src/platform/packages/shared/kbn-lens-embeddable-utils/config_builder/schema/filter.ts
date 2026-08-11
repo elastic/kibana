@@ -7,65 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const filterSchema = schema.object({
-  language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
-    defaultValue: 'kuery',
-  }),
-  /**
-   * Filter query
-   */
-  query: schema.string({
-    meta: {
-      description: 'Filter query',
-    },
-  }),
-});
+export const filterSchema = z
+  .object({
+    language: z
+      .union([z.literal('kql'), z.literal('lucene')])
+      .default('kql')
+      .meta({
+        description:
+          'Query language: `kql` (Kibana Query Language) or `lucene`. Defaults to `kql`.',
+      }),
+    expression: z.string().meta({
+      description: 'A query expression in KQL or Lucene syntax',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'filterSimple',
+    title: 'Filter',
+    description:
+      'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
+  });
 
-export const filterWithLabelSchema = schema.object({
-  /**
-   * Filter query
-   */
-  filter: filterSchema,
-  /**
-   * Label for the filter
-   */
-  label: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Label for the filter',
-      },
-    })
-  ),
-});
+export const filterWithLabelSchema = z
+  .object({
+    /**
+     * Filter query
+     */
+    filter: filterSchema,
+    /**
+     * Label for the filter
+     */
+    label: z.string().optional().meta({
+      description: 'Label for the filter',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'filterWithLabel',
+    title: 'Filter with Label',
+    description: 'A KQL or Lucene filter with an optional display label.',
+  });
 
-export type LensApiFilterType = typeof filterSchema.type;
-
-const FilterQueryType = schema.object({
-  match_phrase: schema.maybe(schema.any({})),
-  prefix: schema.maybe(schema.any({})),
-  exists: schema.maybe(schema.any({})),
-  match: schema.maybe(schema.any({})),
-  wildcard: schema.maybe(schema.any({})),
-  bool: schema.maybe(schema.any({})),
-  range: schema.maybe(schema.any({})),
-});
-
-/**
- * Unified search filter schema that can accept either a full filter object or a simple query string.
- */
-export const unifiedSearchFilterSchema = schema.oneOf([
-  schema.object({
-    query: schema.oneOf([schema.string(), FilterQueryType]),
-    meta: schema.maybe(schema.object({})),
-    language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
-  }),
-  FilterQueryType.extends({
-    meta: schema.maybe(schema.object({})),
-    language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
-  }),
-]);
-
-export type UnifiedSearchFilterType = TypeOf<typeof unifiedSearchFilterSchema>;
+export type LensApiFilterType = z.output<typeof filterSchema>;

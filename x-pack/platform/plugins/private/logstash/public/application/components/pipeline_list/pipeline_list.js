@@ -171,6 +171,7 @@ class PipelineListUi extends React.Component {
     const { isForbidden, isLoading } = this.state;
     return isForbidden && !isLoading ? (
       <EuiCallOut
+        announceOnMount
         color="danger"
         iconType="cross"
         title={
@@ -293,7 +294,10 @@ class PipelineListUi extends React.Component {
       <EuiPageSection data-test-subj="pipelineList">
         <EuiPageHeader
           pageTitle={
-            <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
+            <FormattedMessage
+              id="xpack.logstash.pipelineList.head"
+              defaultMessage="Logstash pipelines"
+            />
           }
           description={
             <FormattedMessage

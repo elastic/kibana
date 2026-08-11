@@ -35,7 +35,7 @@ describe('Lens flyout', () => {
     test('updater is run if modifies visualization or datasource state', () => {
       store.dispatch(
         updateDatasourceState({
-          datasourceId: 'testDatasource2',
+          datasourceId: 'textBased',
           newDatasourceState: 'newDatasourceState',
         })
       );
@@ -51,8 +51,8 @@ describe('Lens flyout', () => {
       store.dispatch(
         setState({
           datasourceStates: {
-            testDatasource: { state: {}, isLoading: true },
-            testDatasource2: { state: {}, isLoading: true },
+            formBased: { state: {}, isLoading: true },
+            textBased: { state: {}, isLoading: true },
           },
           visualization: { state: {}, activeId: 'testVis', selectedLayerId: null },
         })
@@ -62,7 +62,7 @@ describe('Lens flyout', () => {
       // testing
       store.dispatch(
         updateDatasourceState({
-          datasourceId: 'testDatasource2',
+          datasourceId: 'textBased',
           newDatasourceState: {},
         })
       );

@@ -10,7 +10,7 @@ import type { DedotObject } from '@kbn/utility-types';
 import type { ValuesType } from 'utility-types';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { EventOutcome, StatusCode } from '@kbn/apm-types/src/es_schemas/raw/fields';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 
 const {
   CLOUD,
@@ -24,8 +24,8 @@ const {
   TIER,
   INDEX,
   DATA_STEAM_TYPE,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
   SPAN_STACKTRACE,
   ...CONCRETE_FIELDS
 } = APM_EVENT_FIELDS_MAP;
@@ -37,6 +37,13 @@ export const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.PROCESS_ARGS,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_TRACE_ID,
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_TRACE_ID,
+  APM_EVENT_FIELDS_MAP.SPAN_LINKS_SPAN_ID,
+  // gen_ai messages arrive as one array element per message and finish_reasons
+  // as one element per choice — collapsing them to the first element loses data.
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
 ] as const;
 
 export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;
@@ -63,6 +70,8 @@ interface TypeOverrideMap {
   [APM_EVENT_FIELDS_MAP.TRANSACTION_SAMPLED]: boolean;
   [APM_EVENT_FIELDS_MAP.PROCESSOR_NAME]: 'transaction' | 'metric' | 'error';
   [APM_EVENT_FIELDS_MAP.HTTP_RESPONSE_STATUS_CODE]: number;
+  [APM_EVENT_FIELDS_MAP.GEN_AI_USAGE_INPUT_TOKENS]: number;
+  [APM_EVENT_FIELDS_MAP.GEN_AI_USAGE_OUTPUT_TOKENS]: number;
   [APM_EVENT_FIELDS_MAP.PROCESS_PID]: number;
   [APM_EVENT_FIELDS_MAP.OBSERVER_VERSION_MAJOR]: number;
   [APM_EVENT_FIELDS_MAP.ERROR_EXC_HANDLED]: boolean;

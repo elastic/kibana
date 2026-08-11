@@ -31,11 +31,13 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   setDataViewsService(dataViews);
   return deps.rendering.addContext(
     <KibanaContextProvider services={{ ...deps }}>
-      <Router history={deps.history}>
-        <Routes>
-          <Route path={`/`} component={suspendedComponentWithProps(StackAlertsPage, 'xl')} />
-        </Routes>
-      </Router>
+      <KibanaContextProvider services={{ uiActions: deps.uiActions }}>
+        <Router history={deps.history}>
+          <Routes>
+            <Route path={`/`} component={suspendedComponentWithProps(StackAlertsPage, 'xl')} />
+          </Routes>
+        </Router>
+      </KibanaContextProvider>
     </KibanaContextProvider>
   );
 };

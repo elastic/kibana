@@ -7,14 +7,11 @@
 
 import type { PrivilegeMonitoringDataClient } from '../../engine/data_client';
 import { bulkSoftDeleteOperationsFactory } from './soft_delete';
-import { bulkUpsertOperationsFactory } from './upsert';
 
 export const createBulkUtilsService = (dataClient: PrivilegeMonitoringDataClient) => {
-  const bulkUpsertOperations = bulkUpsertOperationsFactory(dataClient);
   const bulkSoftDeleteOperations = bulkSoftDeleteOperationsFactory(dataClient);
 
   return {
-    bulkUpsertOperations,
     bulkSoftDeleteOperations,
   };
 };

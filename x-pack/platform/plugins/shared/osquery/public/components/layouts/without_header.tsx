@@ -20,16 +20,17 @@ export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
 
 export const contentCss = {
   height: '100%',
+  paddingBottom: '24px',
 };
 
 interface Props {
-  restrictWidth?: number;
+  restrictWidth?: number | false;
   children?: React.ReactNode;
 }
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
-    <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
+    <EuiPage css={pageCss} restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}>
       <EuiPageBody>
         <div css={contentCss}>
           <EuiSpacer size="m" />

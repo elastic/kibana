@@ -6,11 +6,11 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { WorkplaceAIAppPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { WorkplaceAIAppPlugin } = await import('./plugin');
   return new WorkplaceAIAppPlugin(initializerContext);
 };
 

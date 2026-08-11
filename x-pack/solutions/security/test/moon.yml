@@ -4,17 +4,16 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-security'
-type: unknown
+layer: unknown
 owners: {}
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-security'
+  title: '@kbn/test-suites-xpack-security'
   description: Moon project for @kbn/test-suites-xpack-security
   channel: ''
-  metadata:
-    sourceRoot: x-pack/solutions/security/test
+  sourceRoot: x-pack/solutions/security/test
 dependsOn:
   - '@kbn/security-solution-test-api-clients'
   - '@kbn/detections-response-ftr-services'
@@ -46,15 +45,15 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/session-view-plugin'
   - '@kbn/repo-info'
-  - '@kbn/es-archiver'
   - '@kbn/serverless-security-settings'
   - '@kbn/rison'
-  - '@kbn/core-chrome-browser'
   - '@kbn/management-settings-ids'
   - '@kbn/connector-schemas'
   - '@kbn/cloud-security-posture-graph'
   - '@kbn/kubernetes-security-plugin'
   - '@kbn/securitysolution-list-constants'
+  - '@kbn/kbn-client'
+  - '@kbn/entity-store'
 tags:
   - test-helper
   - package
@@ -70,6 +69,7 @@ fileGroups:
     - '!security_solution_cypress/cypress/**/*'
     - '!security_solution_api_integration/**/*'
     - '!security_solution_endpoint/**/*'
+    - '!security-solution-evals/**/*'
     - '!*/packages/**/*'
     - '!*/*/packages/**/*'
 tasks: {}

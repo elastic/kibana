@@ -8,6 +8,7 @@
  */
 
 import { serializeLayout } from './serialize_layout';
+import type { DashboardLayout } from './types';
 
 describe('serializeLayout', () => {
   test('should serialize panels', () => {
@@ -33,39 +34,45 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
+      pinnedPanels: {
+        control1: {
+          grow: true,
+          width: 'small',
+          type: 'someControl',
+          order: 1,
+        },
+        control2: {
+          type: 'someOtherControl',
+          order: 0,
+        },
+      },
       sections: {
         section1: {
           collapsed: true,
           grid: {
             y: 6,
           },
-          uid: 'section1',
+          id: 'section1',
           title: 'Section One',
         },
       },
-    };
+    } as unknown as DashboardLayout;
     const childState = {
       '1': {
-        rawState: {
-          title: 'panel One',
-        },
-        references: [
-          {
-            name: 'myRef',
-            id: 'ref1',
-            type: 'testRefType',
-          },
-        ],
+        title: 'panel One',
       },
       '3': {
-        rawState: {
-          title: 'panel Three',
-        },
-        references: [],
+        title: 'panel Three',
+      },
+      control1: {
+        selection: 'some value',
+      },
+      control2: {
+        anotherValue: 'test',
       },
     };
 
-    const { panels, references } = serializeLayout(layout, childState);
+    const { panels, pinned_panels } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -78,14 +85,15 @@ describe('serializeLayout', () => {
             "x": 0,
             "y": 0,
           },
+          "id": "1",
           "type": "testPanelType",
-          "uid": "1",
         },
         Object {
           "collapsed": true,
           "grid": Object {
             "y": 6,
           },
+          "id": "section1",
           "panels": Array [
             Object {
               "config": Object {
@@ -97,21 +105,31 @@ describe('serializeLayout', () => {
                 "x": 0,
                 "y": 0,
               },
+              "id": "3",
               "type": "testPanelType",
-              "uid": "3",
             },
           ],
           "title": "Section One",
-          "uid": "section1",
         },
       ]
     `);
-    expect(references).toMatchInlineSnapshot(`
+    expect(pinned_panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "id": "ref1",
-          "name": "1:myRef",
-          "type": "testRefType",
+          "config": Object {
+            "anotherValue": "test",
+          },
+          "id": "control2",
+          "type": "someOtherControl",
+        },
+        Object {
+          "config": Object {
+            "selection": "some value",
+          },
+          "grow": true,
+          "id": "control1",
+          "type": "someControl",
+          "width": "small",
         },
       ]
     `);

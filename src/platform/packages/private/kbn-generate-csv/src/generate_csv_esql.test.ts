@@ -24,6 +24,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -38,6 +39,8 @@ const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
 });
 
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
+
+const jobId = 'mock-job-id';
 
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
@@ -97,6 +100,7 @@ describe('CsvESQLGenerator', () => {
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s', strategy: 'pit' },
       maxConcurrentShardRequests: 5,
+      maxRows: 500,
     };
 
     mockLogger = loggingSystemMock.createLogger();
@@ -114,7 +118,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -146,7 +151,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
@@ -174,7 +180,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(false);
@@ -204,7 +211,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     const csvResult = await generateCsv.generateData();
     expect(csvResult.max_size_reached).toBe(true);
@@ -297,7 +305,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(timeFromNowInMs);
@@ -309,7 +318,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -373,7 +382,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       ).generateData();
 
       await jest.advanceTimersByTimeAsync(requestDuration);
@@ -387,7 +397,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', time_zone: 'America/New_York' } },
         {
           strategy: 'esql',
           transport: {
@@ -421,7 +431,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -456,7 +467,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -482,7 +494,8 @@ describe('CsvESQLGenerator', () => {
               },
             },
             locale: 'en',
-            query: query.esql,
+            query: 'from kibana_sample_data_logs | limit 10\n| LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -521,7 +534,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
       await generateCsv.generateData();
 
@@ -555,7 +569,166 @@ describe('CsvESQLGenerator', () => {
               }),
             ]),
             locale: 'en',
-            query: query.esql,
+            query: `${query.esql}\n| LIMIT 500`,
+            time_zone: 'America/New_York',
+          },
+        },
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
+      );
+    });
+
+    it('passes user-defined variable params to the query', async () => {
+      const query = {
+        esql: 'FROM test_csv_tokens | WHERE TO_STRING(crew.id) == TO_STRING(?crew_id)',
+      };
+      const esqlVariables = [{ key: 'crew_id', value: '123', type: 'values' as any }];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, esqlVariables }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            query: `${query.esql}\n| LIMIT 500`,
+            params: expect.arrayContaining([expect.objectContaining({ crew_id: '123' })]),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('rewrites field variables (?field → ??field) and passes them as params', async () => {
+      const query = {
+        esql: 'FROM test_csv_tokens | STATS COUNT(*) BY ?breakdown_field',
+      };
+      const esqlVariables = [
+        { key: 'breakdown_field', value: 'bytes', type: ESQLVariableType.FIELDS },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, esqlVariables }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            // identifier-type variables must be sent to ES with the ?? prefix
+            query: 'FROM test_csv_tokens | STATS COUNT(*) BY ??breakdown_field\n| LIMIT 500',
+            params: expect.arrayContaining([expect.objectContaining({ breakdown_field: 'bytes' })]),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('passes both time params and user variable params together', async () => {
+      const query = {
+        esql: 'FROM test | WHERE @timestamp >= ?_tstart AND TO_STRING(crew.id) == ?crew_id',
+      };
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: 'now-15m',
+                lte: 'now',
+              },
+            },
+          },
+        },
+      ];
+      const esqlVariables = [{ key: 'crew_id', value: 'abc', type: 'values' as any }];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters, esqlVariables }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            params: expect.arrayContaining([
+              expect.objectContaining({ _tstart: expect.any(String) }),
+              expect.objectContaining({ crew_id: 'abc' }),
+            ]),
+          }),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    it('adds maxRows limit to the query', async () => {
+      const query = {
+        esql: 'FROM custom-metrics',
+      };
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      await generateCsv.generateData();
+
+      expect(mockDataClient.search).toHaveBeenCalledWith(
+        {
+          params: {
+            filter: undefined,
+            locale: 'en',
+            query: 'FROM custom-metrics\n| LIMIT 500',
+            time_zone: 'America/New_York',
           },
         },
         {
@@ -589,7 +762,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -619,7 +793,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -640,6 +815,7 @@ describe('CsvESQLGenerator', () => {
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s', strategy: 'pit' },
         maxConcurrentShardRequests: 5,
+        maxRows: 500,
       };
       mockSearchResponse({
         columns: [{ name: 'message', type: 'string' }],
@@ -657,7 +833,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const csvResult = await generateCsv.generateData();
@@ -686,7 +863,8 @@ describe('CsvESQLGenerator', () => {
       },
       new CancellationToken(),
       mockLogger,
-      stream
+      stream,
+      jobId
     );
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
@@ -723,7 +901,8 @@ describe('CsvESQLGenerator', () => {
         },
         new CancellationToken(),
         mockLogger,
-        stream
+        stream,
+        jobId
       );
 
       const { error_code: errorCode, warnings } = await generateCsv.generateData();
@@ -738,9 +917,71 @@ describe('CsvESQLGenerator', () => {
         Array [
           Array [
             [ResponseError: Response Error],
+            Object {
+              "tags": Array [
+                "mock-job-id",
+              ],
+            },
           ],
         ]
       `);
+    });
+  });
+
+  describe('forceNow anchors _tstart/_tend for scheduled reports', () => {
+    it('resolves relative date math filters to forceNow-anchored absolute times for _tstart/_tend', async () => {
+      const forceNow = '2025-06-18T06:00:00.000Z';
+      const query = {
+        esql: 'FROM custom-metrics | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
+      };
+      // Relative filter — as stored in a scheduled report payload.
+      // Uses meta: {} to match buildEsQuery expectations in the test mock environment.
+      const filters = [
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: 'now-1h',
+                lte: 'now',
+              },
+            },
+          },
+        },
+      ];
+
+      const generateCsv = new CsvESQLGenerator(
+        createMockJob({ query, filters, forceNow, timeFieldName: '@timestamp' }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream,
+        jobId
+      );
+      (mockDataClient.search as jest.Mock).mockClear();
+      await generateCsv.generateData();
+
+      const callArgs = (mockDataClient.search as jest.Mock).mock.calls[0][0];
+      const searchParams = callArgs.params;
+
+      // The ES range filter should have resolved, absolute times anchored to forceNow
+      const rangeFilter = searchParams.filter.bool.filter[0].range['@timestamp'];
+      expect(rangeFilter.gte).toBe('2025-06-18T05:00:00.000Z'); // forceNow - 1h
+      expect(rangeFilter.lte).toBe(forceNow); // forceNow exactly (roundUp on 'now')
+
+      // The _tstart/_tend named params should also use the forceNow-resolved values
+      // (they come from extractTimeRange on the already-resolved currentFilters)
+      const tstart = searchParams.params.find((p: Record<string, string>) => '_tstart' in p);
+      const tend = searchParams.params.find((p: Record<string, string>) => '_tend' in p);
+      expect(tstart._tstart).toBe('2025-06-18T05:00:00.000Z');
+      expect(tend._tend).toBe(forceNow);
     });
   });
 });

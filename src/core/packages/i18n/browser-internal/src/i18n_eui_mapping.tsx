@@ -43,40 +43,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { index },
         description: 'ARIA and displayed label on a checkbox to select a single table row',
       }),
-    'euiBasicTable.tableCaptionWithPagination': ({ tableCaption, page, pageCount }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableCaptionWithPagination', {
-        defaultMessage: '{tableCaption}; Page {page} of {pageCount}.',
-        values: { tableCaption, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableAutoCaptionWithPagination': ({
-      itemCount,
-      totalItemCount,
-      page,
-      pageCount,
-    }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableAutoCaptionWithPagination', {
-        defaultMessage:
-          'This table contains {itemCount} rows out of {totalItemCount} rows; Page {page} of {pageCount}.',
-        values: { itemCount, totalItemCount, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableSimpleAutoCaptionWithPagination': ({
-      itemCount,
-      page,
-      pageCount,
-    }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableSimpleAutoCaptionWithPagination', {
-        defaultMessage: 'This table contains {itemCount} rows; Page {page} of {pageCount}.',
-        values: { itemCount, page, pageCount },
-        description: 'Screen reader text to describe the size of a paginated table',
-      }),
-    'euiBasicTable.tableAutoCaptionWithoutPagination': ({ itemCount }: EuiValues) =>
-      i18n.translate('core.euiBasicTable.tableAutoCaptionWithoutPagination', {
-        defaultMessage: 'This table contains {itemCount} rows.',
-        values: { itemCount },
-        description: 'Screen reader text to describe the size of a table',
-      }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
         defaultMessage: 'Pagination for table: {tableCaption}',
@@ -88,6 +54,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiBasicTable.deselectRows': i18n.translate('core.euiBasicTable.deselectRows', {
       defaultMessage: 'Deselect rows',
+    }),
+    'euiBasicTable.caption.itemCountPart.withTotalItemCount': ({
+      itemCount,
+      totalItemCount,
+    }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.caption.itemCountPart.withTotalItemCount', {
+        defaultMessage: 'Showing {itemCount} of {totalItemCount} data rows.',
+        values: { itemCount, totalItemCount },
+        description: 'Screen reader text to describe the shown item count and total item count.',
+      }),
+    'euiBasicTable.caption.paginationPart.withPageCount': ({ page, pageCount }: EuiValues) =>
+      i18n.translate('core.euiBasicTable.caption.paginationPart.withPageCount', {
+        defaultMessage: 'Page {page} of {pageCount}.',
+        values: { page, pageCount },
+        description: 'Screen reader text to describe the shown page and total page count.',
+      }),
+    'euiBasicTable.caption.tableName': i18n.translate('core.euiBasicTable.caption.tableName', {
+      defaultMessage: 'Data table',
+      description: 'Screen reader text to announce the table.',
+    }),
+    'euiBasicTable.caption.emptyState': i18n.translate('core.euiBasicTable.caption.emptyState', {
+      defaultMessage: '(empty)',
+      description: 'Screen reader text to announce the empty table.',
     }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
@@ -184,45 +173,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Title content when the actions popover toggle is disabled',
       }
     ),
-    'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
-      defaultMessage: 'Site menu',
-    }),
-    'euiCollapsedNavButton.ariaLabelButtonIcon': ({ title }: EuiValues) =>
-      i18n.translate('core.euiCollapsedNavButton.ariaLabelButtonIcon', {
-        defaultMessage: '{title}, quick navigation menu',
-        values: { title },
-      }),
-    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelExpand',
-      { defaultMessage: 'Expand navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelCollapse',
-      { defaultMessage: 'Collapse navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Close navigation' }
-    ),
-    'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
-      'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Open navigation' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
-      { defaultMessage: 'Solution view' }
-    ),
-    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
-      { defaultMessage: '- click to switch to another solution' }
-    ),
-    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
-      'core.euiCollapsibleNavKibanaSolution.groupLabel',
-      { defaultMessage: 'Navigate to solution' }
-    ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
       description: 'Label describing color alpha channel',
+    }),
+    'euiColorPicker.ariaLabel': i18n.translate('core.euiColorPicker.ariaLabel', {
+      defaultMessage: 'Select a color',
+      description: 'ARIA label for the color picker button',
     }),
     'euiColorPicker.colorLabel': i18n.translate('core.euiColorPicker.colorLabel', {
       defaultMessage: 'Color value',
@@ -271,7 +228,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
       'core.euiColumnSelector.dragHandleAriaLabel',
       {
-        defaultMessage: 'Drag handle',
+        defaultMessage: 'drag handle',
       }
     ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
@@ -787,10 +744,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage:
         'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
     }),
-    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
-      'core.euiFlyout.screenReaderNonModalDialog',
+    'euiFlyout.screenReaderNoOverlayMaskDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNoOverlayMaskDialog',
       {
-        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+        defaultMessage: 'You are in a modal dialog. To close the dialog, press Escape.',
       }
     ),
     'euiFlyout.screenReaderFocusTrapShards': i18n.translate(
@@ -799,6 +756,15 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can still continue tabbing through other global page landmarks.',
       }
     ),
+    'euiFlyoutMenu.back': i18n.translate('core.euiFlyoutMenu.back', {
+      defaultMessage: 'Back',
+    }),
+    'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
+      defaultMessage: 'History',
+    }),
+    'euiFlyoutManaged.defaultTitle': i18n.translate('core.euiFlyoutManaged.defaultTitle', {
+      defaultMessage: 'Unknown Flyout',
+    }),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
@@ -1369,6 +1335,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next {displayInterval}',
         values: { displayInterval },
       }),
+    'euiTimeWindowButtons.invalidZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomInLabel',
+      { defaultMessage: 'Cannot zoom in invalid time window' }
+    ),
+    'euiTimeWindowButtons.cannotZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.cannotZoomInLabel',
+      { defaultMessage: 'Cannot zoom in any further' }
+    ),
+    'euiTimeWindowButtons.zoomInLabel': i18n.translate('core.euiTimeWindowButtons.zoomInLabel', {
+      defaultMessage: 'Zoom in',
+    }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',
@@ -1792,10 +1769,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiToast.newNotification': i18n.translate('core.euiToast.newNotification', {
       defaultMessage: 'A new notification appears',
     }),
-    'euiToast.notification': i18n.translate('core.euiToast.notification', {
-      defaultMessage: 'Notification',
-      description: 'ARIA label on an element containing a notification',
-    }),
     'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
@@ -1885,5 +1858,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
       defaultMessage: 'Selected color',
     }),
+    'euiContextMenuPanelTitle.ariaLabel': i18n.translate(
+      'core.euiContextMenuPanelTitle.ariaLabel',
+      {
+        defaultMessage: 'Close current panel:',
+      }
+    ),
+    'euiBanner.dismissAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiBanner.dismissAriaLabel', {
+        defaultMessage: 'Dismiss "{title}" announcement',
+        values: {
+          title,
+        },
+      }),
+    'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
+      defaultMessage: 'Previous',
+    }),
+    'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
+      defaultMessage: 'Next',
+    }),
+    'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.pagination.counter', {
+        defaultMessage: '{position} of {total}',
+        values: { position, total },
+      }),
   };
 };

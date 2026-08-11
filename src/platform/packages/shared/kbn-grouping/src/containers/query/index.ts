@@ -18,6 +18,9 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
 
+// number of additional group pages revealed each time the "Show more" pagination control is used
+export const PAGE_BATCH_SIZE = 20;
+
 // there is known limitation for max size of runtime field which is used in the runtime_mappings script
 export const MAX_RUNTIME_FIELD_SIZE = 100;
 
@@ -36,6 +39,7 @@ export const MAX_RUNTIME_FIELD_SIZE = 100;
  * @param timeRange timerange object for the query (from - to)
  * @param multiValueFieldsToFlatten list of multi-value field to be flattened when grouping
  * @param countByKeyForMultiValueFields field ES should use to count the documents (defaults to 'groupByField')
+ * @param unitsCountFilter custom filter for unitsCount aggregation
  *
  * @returns query dsl {@link GroupingQuery}
  */
@@ -53,6 +57,7 @@ export const getGroupingQuery = ({
   timeRange,
   multiValueFieldsToFlatten = [],
   countByKeyForMultiValueFields,
+  unitsCountFilter,
 }: GroupingQueryArgs): GroupingQuery => {
   const shouldFlattenMultiValueField = checkIsFlattenResults(
     groupByField,
@@ -111,7 +116,9 @@ export const getGroupingQuery = ({
           bucket_truncate: {
             bucket_sort: {
               sort,
-              from: pageNumber,
+              // the terms agg above never returns more than MAX_QUERY_SIZE buckets, so requesting
+              // an offset beyond that window would always come back empty
+              from: Math.min(pageNumber ?? 0, Math.max(MAX_QUERY_SIZE - size, 0)),
               size,
             },
           },
@@ -125,13 +132,26 @@ export const getGroupingQuery = ({
       // if not passed the counting will have duplicates since we are counting the number of values
       // of the groupByField stores instead of the actual documents count
       // else , shouldFlattenMultiValueField = false - count documents by groupByField
-      unitsCount: {
-        value_count: {
-          field: shouldFlattenMultiValueField
-            ? countByKeyForMultiValueFields ?? 'groupByField'
-            : 'groupByField',
-        },
-      },
+      unitsCount: unitsCountFilter
+        ? {
+            filter: unitsCountFilter,
+            aggs: {
+              filteredUnitsCount: {
+                value_count: {
+                  field: shouldFlattenMultiValueField
+                    ? countByKeyForMultiValueFields ?? 'groupByField'
+                    : 'groupByField',
+                },
+              },
+            },
+          }
+        : {
+            value_count: {
+              field: shouldFlattenMultiValueField
+                ? countByKeyForMultiValueFields ?? 'groupByField'
+                : 'groupByField',
+            },
+          },
       groupsCount: { cardinality: { field: 'groupByField' } },
 
       ...(rootAggregations
@@ -204,6 +224,9 @@ export const parseGroupingQuery = <T>(
     groupByFields: { buckets: groupByFields },
     groupsCount: {
       value: aggs.groupsCount?.value ?? 0,
+    },
+    unitsCount: {
+      value: (aggs as any).unitsCount?.filteredUnitsCount?.value ?? aggs.unitsCount?.value ?? 0,
     },
   };
 };

@@ -9,11 +9,12 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink } from '@elastic/eui';
+import type { Services } from '../../../services/types';
 
 export const DocsLinkSubtitle = React.memo(() => {
-  const { docLinks } = useKibana().services;
+  const { docLinks } = useKibana<Services>().services;
   return (
-    <EuiText size="s" color="subdued">
+    <EuiText size="s" color="subdued" component="span">
       <FormattedMessage
         id="xpack.automaticImport.createIntegrationUpload.uploadHelpText"
         defaultMessage="For more information, refer to {link}"

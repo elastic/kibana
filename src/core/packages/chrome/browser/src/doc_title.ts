@@ -17,7 +17,7 @@
  * ```
  *
  * @example
- * How to reset the title of the document to it's initial value
+ * How to reset the title of the document to its initial value
  * ```ts
  * chrome.docTitle.reset()
  * ```
@@ -39,7 +39,7 @@ export interface ChromeDocTitle {
    */
   change(newTitle: string | string[]): void;
   /**
-   * Resets the document title to it's initial value.
+   * Resets the document title to its initial value.
    * (meaning the one present in the title meta at application load.)
    */
   reset(): void;

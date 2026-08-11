@@ -75,7 +75,7 @@ export type ScriptedRangeFilter = Filter & {
 export type MatchAllRangeFilter = Filter & {
   meta: RangeFilterMeta;
   query: {
-    match_all: estypes.QueryDslQueryContainer['match_all'];
+    match_all: NonNullable<estypes.QueryDslQueryContainer>['match_all'];
   };
 };
 

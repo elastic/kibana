@@ -4,25 +4,25 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-errors'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-errors'
+  title: '@kbn/search-errors'
   description: Moon project for @kbn/search-errors
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-search-errors
+  sourceRoot: src/platform/packages/shared/kbn-search-errors
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
   - '@kbn/kibana-utils-plugin'
   - '@kbn/data-views-plugin'
   - '@kbn/search-types'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-common
   - package
@@ -35,16 +35,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

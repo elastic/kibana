@@ -6,7 +6,8 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { Logger, SavedObjectErrorResult, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import pRetry from 'p-retry';
@@ -21,6 +22,7 @@ import {
 
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from './app_context';
+import { getSpaceForAgentPolicy } from './spaces/helpers';
 
 export class PolicyWatcher {
   private subscription: Subscription | undefined;
@@ -63,7 +65,9 @@ export class PolicyWatcher {
 
     log.info('Checking agent policies for compliance with the current license.');
 
-    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
+    const updatedAgentPolicies: Array<
+      SavedObjectsUpdateResponse<AgentPolicySOAttributes> | SavedObjectErrorResult
+    > = [];
 
     try {
       for await (const agentPolicyPageResults of agentPolicyFetcher) {
@@ -93,7 +97,7 @@ export class PolicyWatcher {
                   updated_by: 'system',
                 },
                 ...(policyContent.space_ids?.length
-                  ? { namespace: policyContent.space_ids[0] }
+                  ? { namespace: getSpaceForAgentPolicy(policyContent) }
                   : {}),
               };
               return updatedPolicy;
@@ -112,7 +116,7 @@ export class PolicyWatcher {
     }> = [];
 
     updatedAgentPolicies.forEach((policy) => {
-      if (policy.error) {
+      if (isSavedObjectErrorResult(policy)) {
         failedPolicies.push({
           id: policy.id,
           error: policy.error,
@@ -120,7 +124,9 @@ export class PolicyWatcher {
       }
     });
 
-    const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
+    const updatedPoliciesSuccess = updatedAgentPolicies.filter(
+      (policy) => !isSavedObjectErrorResult(policy)
+    );
 
     if (!updatedPoliciesSuccess.length && !failedPolicies.length) {
       log.info(`All agent policies are compliant, nothing to do!`);

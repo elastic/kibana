@@ -1,0 +1,36 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-storybook-types",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/esql-types",
+    "@kbn/react-field",
+    "@kbn/field-utils",
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/search-types",
+    "@kbn/esql-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/licensing-types",
+    "@kbn/data-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*"
+  ]
+}

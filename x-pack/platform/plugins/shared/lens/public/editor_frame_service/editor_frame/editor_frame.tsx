@@ -14,6 +14,7 @@ import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
+  FormBasedPrivateState,
   FramePublicAPI,
   Suggestion,
   UserMessagesGetter,
@@ -23,6 +24,7 @@ import type {
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
@@ -49,6 +51,7 @@ import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
 import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
+import { applyVisualizationTypeDatasourceDefaults } from '../../datasources/form_based/visualization_type_defaults';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -112,10 +115,36 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');
-        switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
+        const { datasourceId: suggestionDatasourceId } = suggestion;
+        const targetVisualization = suggestionDatasourceId
+          ? visualizationMap[suggestion.visualizationId]
+          : undefined;
+        // Intentional `as FormBasedPrivateState` type assertion as suggestions carry datasource state opaquely (`unknown`); `applyVisualizationTypeDatasourceDefaults` re-checks `datasourceId === formBased` before touching it.
+        const suggestionDatasourceState = suggestion.datasourceState as
+          | FormBasedPrivateState
+          | undefined;
+        const adjustedSuggestion =
+          targetVisualization && suggestionDatasourceId && suggestionDatasourceState
+            ? {
+                ...suggestion,
+                datasourceState: applyVisualizationTypeDatasourceDefaults({
+                  kind: 'suggestion',
+                  datasourceId: suggestionDatasourceId,
+                  datasourceState: suggestionDatasourceState,
+                  // Intentional `as FormBasedPrivateState` type assertion as the redux store carries datasource state opaquely (`unknown`);
+                  previousDatasourceState: datasourceStates[suggestionDatasourceId]?.state as
+                    | FormBasedPrivateState
+                    | undefined,
+                  targetVisualizationTypeId: targetVisualization.getVisualizationTypeId(
+                    suggestion.visualizationState
+                  ),
+                }),
+              }
+            : suggestion;
+        switchToSuggestion(dispatchLens, adjustedSuggestion, { clearStagedPreview: true });
       }
     },
-    [getSuggestionForField, dispatchLens]
+    [getSuggestionForField, dispatchLens, visualizationMap, datasourceStates]
   );
 
   const onError = useCallback((error: Error) => {
@@ -167,38 +196,52 @@ export function EditorFrame(props: EditorFrameProps) {
         configPanel={
           areDatasourcesLoaded && (
             <ErrorBoundary onError={onError}>
-              <>
-                <EuiFlexGroup
-                  gutterSize="s"
-                  css={styles.visualizationToolbar}
-                  justifyContent="flexEnd"
-                  responsive={false}
-                  wrap={true}
-                >
-                  <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
-                    <VisualizationToolbarWrapper
-                      framePublicAPI={framePublicAPI}
-                      isInlineEditing={true}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
+              {/* Flex container to enable proper scroll behavior for the config panel.
+                  The toolbar and layer tabs remain fixed at the top while the
+                  ConfigPanelWrapper content area scrolls independently. */}
+              <div css={styles.configPanelFlexContainer}>
+                {/* Toolbar area - fixed height, doesn't shrink */}
+                <div css={styles.toolbarArea}>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    css={styles.visualizationToolbar}
+                    justifyContent="flexEnd"
+                    responsive={false}
+                    wrap={true}
+                  >
+                    <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                      <VisualizationToolbarWrapper
+                        framePublicAPI={framePublicAPI}
+                        isInlineEditing={true}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                </div>
+                {/* Layer tabs - fixed height via its own styling */}
                 <LayerTabsWrapper
                   coreStart={props.core}
                   framePublicAPI={framePublicAPI}
                   uiActions={props.plugins.uiActions}
                 />
-                <ConfigPanelWrapper
-                  core={props.core}
-                  framePublicAPI={framePublicAPI}
-                  uiActions={props.plugins.uiActions}
-                  dataViews={props.plugins.dataViews}
-                  data={props.plugins.data}
-                  indexPatternService={props.indexPatternService}
-                  getUserMessages={props.getUserMessages}
-                />
-              </>
+                {/* Scrollable config panel content area - takes remaining height */}
+                <div
+                  className="eui-scrollBar"
+                  data-test-subj="lnsConfigPanelScrollContainer"
+                  css={styles.scrollableConfigPanel}
+                >
+                  <ConfigPanelWrapper
+                    core={props.core}
+                    framePublicAPI={framePublicAPI}
+                    uiActions={props.plugins.uiActions}
+                    dataViews={props.plugins.dataViews}
+                    data={props.plugins.data}
+                    indexPatternService={props.indexPatternService}
+                    getUserMessages={props.getUserMessages}
+                  />
+                </div>
+              </div>
             </ErrorBoundary>
           )
         }
@@ -240,6 +283,30 @@ export function EditorFrame(props: EditorFrameProps) {
 }
 
 const componentStyles = {
+  configPanelFlexContainer: () =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+    }),
+  toolbarArea: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      backgroundColor: euiTheme.colors.backgroundBaseHighlighted,
+      borderBottom: euiTheme.border.thin,
+    }),
+  scrollableConfigPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0, // Required for overflow to work in flex container
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      // Extend the scroll container to the left to accommodate drag-drop extra targets
+      // (e.g., "Alt/Option to duplicate" tooltip) that are positioned to the left of drop zones.
+      // Use transparent background here - the EuiForm inside has its own background.
+      paddingLeft: DRAG_DROP_EXTRA_TARGETS_PADDING,
+      marginLeft: -DRAG_DROP_EXTRA_TARGETS_PADDING,
+    }),
   visualizationToolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base}`,

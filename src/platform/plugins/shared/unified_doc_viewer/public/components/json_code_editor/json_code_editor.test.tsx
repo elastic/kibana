@@ -8,16 +8,43 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import JsonCodeEditor from './json_code_editor';
+import { JsonCodeEditorCommon } from './json_code_editor_common';
+import { render, screen } from '@testing-library/react';
 
-it('returns the `JsonCodeEditor` component', () => {
-  const value = {
-    _index: 'test',
-    _type: 'doc',
-    _id: 'foo',
-    _score: 1,
-    _source: { test: 123 },
-  };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+jest.mock('./json_code_editor_common', () => ({
+  JsonCodeEditorCommon: jest.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
+}));
+
+const mockedJsonCodeEditorCommon = jest.mocked(JsonCodeEditorCommon);
+
+describe('JsonCodeEditor', () => {
+  beforeEach(() => {
+    mockedJsonCodeEditorCommon.mockClear();
+  });
+
+  it('passes formatted JSON and props to JsonCodeEditorCommon', () => {
+    const jsonValue = {
+      _index: 'test',
+      _type: 'doc',
+      _id: 'foo',
+      _score: 1,
+      _source: { test: 123 },
+    };
+
+    render(<JsonCodeEditor json={jsonValue} width="100%" height={200} hasLineNumbers />);
+
+    expect(screen.getByTestId('jsonCodeEditorCommon')).toBeVisible();
+    expect(mockedJsonCodeEditorCommon).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hasLineNumbers: true,
+        height: 200,
+        hideCopyButton: true,
+        jsonValue: JSON.stringify(jsonValue, null, 2),
+        onEditorDidMount: expect.any(Function),
+        width: '100%',
+      }),
+      {}
+    );
+  });
 });

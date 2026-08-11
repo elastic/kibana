@@ -7,8 +7,21 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { useFetchActiveAlerts } from '../hooks/use_fetch_active_alerts';
+import { useGetUrlParams } from '../../../hooks';
 
 export const MonitorAlertsIcon = () => {
+  const { remoteName } = useGetUrlParams();
+  // Alerts cannot currently be fetched cross-cluster. Bail early so we
+  // never issue a doomed `/internal/rac/alerts/find` request for remote
+  // monitors, even if a caller forgets the surrounding conditional.
+  if (remoteName) {
+    return null;
+  }
+
+  return <MonitorAlertsIconContent />;
+};
+
+const MonitorAlertsIconContent = () => {
   const { numberOfActiveAlerts } = useFetchActiveAlerts();
 
   return numberOfActiveAlerts > 0 ? (

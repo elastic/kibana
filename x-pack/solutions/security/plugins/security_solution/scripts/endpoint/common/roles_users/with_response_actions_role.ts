@@ -17,8 +17,8 @@ export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV4: [
-            ...noResponseActionsRole.kibana[0].feature.siemV4,
+          siemV5: [
+            ...noResponseActionsRole.kibana[0].feature.siemV5,
             'file_operations_all',
             'execute_operations_all',
             'scan_operations_all',
@@ -27,6 +27,7 @@ export const getWithResponseActionsRole: () => Omit<Role, 'name'> = () => {
             'actions_log_management_all',
             'actions_log_management_read',
           ],
+          securitySolutionRulesV2: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

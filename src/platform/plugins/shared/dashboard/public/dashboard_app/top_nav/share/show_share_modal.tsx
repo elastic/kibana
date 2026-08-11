@@ -7,38 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-import moment from 'moment';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
-
-import { EuiCheckboxGroup } from '@elastic/eui';
+import { EuiCheckbox, EuiFlexGrid, EuiFlexItem, EuiFormFieldset } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
-import type { QueryState } from '@kbn/data-plugin/common';
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
 
-import type { DashboardLocatorParams } from '../../../../common';
-import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
-import { dataService, shareService } from '../../../services/kibana_services';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import {
+  AccessModeContainer,
+  type AccessControlClient,
+} from '@kbn/content-management-access-control-public';
+
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
+import { shareService, coreServices, spacesService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
+import type { useShareOptions } from './use_share_options';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
-  asExport?: boolean;
-  isDirty: boolean;
-  savedObjectId?: string;
-  dashboardTitle?: string;
-  anchorElement: HTMLElement;
+  shareOptions: ReturnType<typeof useShareOptions>;
+  canSave: boolean;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  createdBy?: string;
+  isManaged: boolean;
+  accessControlClient: AccessControlClient;
+  saveDashboard: () => Promise<void>;
+  changeAccessMode: (accessMode: SavedObjectAccessControl['accessMode']) => Promise<void>;
+  onClose?: () => void;
 }
 
-export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
+export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities): boolean => {
   if (!anonymousUserCapabilities.dashboard_v2) return false;
 
   const dashboard = anonymousUserCapabilities.dashboard_v2;
@@ -47,13 +49,28 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 };
 
 export function ShowShareModal({
-  isDirty,
-  asExport,
-  anchorElement,
-  savedObjectId,
-  dashboardTitle,
+  shareOptions,
+  canSave,
+  accessControl,
+  createdBy,
+  isManaged,
+  accessControlClient,
+  saveDashboard,
+  changeAccessMode,
+  onClose,
 }: ShowShareModalProps) {
   if (!shareService) return;
+
+  const handleChangeAccessMode = async (accessMode: SavedObjectAccessControl['accessMode']) => {
+    if (!shareOptions.objectId) return;
+
+    try {
+      await changeAccessMode(accessMode);
+      return shareModalStrings.accessModeUpdateSuccess;
+    } catch (error) {
+      return shareModalStrings.accessModeUpdateError;
+    }
+  };
 
   const EmbedUrlParamExtension = ({
     setParamValue,
@@ -70,13 +87,14 @@ export function ShowShareModal({
         label: shareModalStrings.getTopMenuCheckbox(),
       },
       {
-        id: dashboardUrlParams.showQueryInput,
-        label: shareModalStrings.getQueryCheckbox(),
-      },
-      {
         id: dashboardUrlParams.showTimeFilter,
         label: shareModalStrings.getTimeFilterCheckbox(),
       },
+      {
+        id: dashboardUrlParams.showQueryInput,
+        label: shareModalStrings.getQueryCheckbox(),
+      },
+
       {
         id: showFilterBarId,
         label: shareModalStrings.getFilterBarCheckbox(),
@@ -100,72 +118,41 @@ export function ShowShareModal({
     };
 
     return (
-      <EuiCheckboxGroup
-        options={checkboxes}
-        idToSelectedMap={urlParamsSelectedMap}
-        onChange={handleChange}
-        legend={{
-          children: shareModalStrings.getCheckboxLegend(),
-        }}
-        data-test-subj="embedUrlParamExtension"
-      />
+      <EuiFormFieldset legend={{ children: shareModalStrings.getCheckboxLegend() }}>
+        <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="embedUrlParamExtension">
+          {checkboxes.map(({ id, label }) => (
+            <EuiFlexItem key={id}>
+              <EuiCheckbox
+                id={id}
+                label={label}
+                checked={!!urlParamsSelectedMap[id]}
+                onChange={() => handleChange(id)}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFormFieldset>
     );
   };
 
-  const unsavedDashboardState =
-    getDashboardBackupService().getState(savedObjectId) ?? ({} as DashboardLocatorParams);
+  const { showWriteControls } = getDashboardCapabilities();
+  const showAccessContainer = shareOptions.objectId && !isManaged && showWriteControls;
 
-  const hasPanelChanges = unsavedDashboardState.panels !== undefined;
-
-  const unsavedDashboardStateForLocator: DashboardLocatorParams = {
-    ...unsavedDashboardState,
-    controlGroupInput:
-      unsavedDashboardState.controlGroupInput as DashboardLocatorParams['controlGroupInput'],
-    references: unsavedDashboardState.references as DashboardLocatorParams['references'],
-  };
-
-  const locatorParams: DashboardLocatorParams = {
-    dashboardId: savedObjectId,
-    preserveSavedFilters: true,
-    refreshInterval: undefined, // We don't share refresh interval externally
-    viewMode: 'view', // For share locators we always load the dashboard in view mode
-    useHash: false,
-    timeRange: dataService.query.timefilter.timefilter.getTime(),
-    ...unsavedDashboardStateForLocator,
-  };
-
-  let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
-  if (_g?.filters && _g.filters.length === 0) {
-    _g = omit(_g, 'filters');
-  }
-  const baseUrl = setStateToKbnUrl('_g', _g, undefined, window.location.href);
-
-  const shareableUrl = setStateToKbnUrl(
-    DASHBOARD_STATE_STORAGE_KEY,
-    unsavedDashboardStateForLocator,
-    { useHash: false, storeInHashQuery: true },
-    unhashUrl(baseUrl)
-  );
-
-  const allowShortUrl = getDashboardCapabilities().createShortUrl;
+  const hasPanelChanges = Boolean(shareOptions.sharingData.locatorParams.params.panels);
 
   shareService.toggleShareContextMenu({
-    isDirty,
-    anchorElement,
-    allowShortUrl,
-    shareableUrl,
-    asExport,
-    objectId: savedObjectId,
-    objectType: 'dashboard',
+    ...shareOptions,
+    onClose,
+    onSave: canSave ? saveDashboard : undefined,
     objectTypeMeta: {
       title: i18n.translate('dashboard.share.shareModal.title', {
-        defaultMessage: 'Share this dashboard',
+        defaultMessage: 'Share dashboard',
       }),
       config: {
         link: {
           draftModeCallOut: {
             message: hasPanelChanges
-              ? allowShortUrl
+              ? shareOptions.allowShortUrl
                 ? shareModalStrings.getDraftSharePanelChangesWarning()
                 : shareModalStrings.getSnapshotShareWarning()
               : shareModalStrings.getDraftShareWarning('link'),
@@ -200,22 +187,18 @@ export function ShowShareModal({
       },
     },
     sharingData: {
-      title:
-        dashboardTitle ||
-        i18n.translate('dashboard.share.defaultDashboardTitle', {
-          defaultMessage: 'Dashboard [{date}]',
-          values: { date: moment().toISOString(true) },
-        }),
-      locatorParams: {
-        id: DASHBOARD_APP_LOCATOR,
-        params: locatorParams,
-      },
-    },
-    shareableUrlLocatorParams: {
-      locator: shareService.url.locators.get(
-        DASHBOARD_APP_LOCATOR
-      ) as LocatorPublic<DashboardLocatorParams>,
-      params: locatorParams,
+      ...shareOptions.sharingData,
+      accessModeContainer: showAccessContainer ? (
+        <AccessModeContainer
+          accessControl={accessControl}
+          createdBy={createdBy}
+          getActiveSpace={spacesService?.getActiveSpace}
+          getCurrentUser={coreServices.userProfile.getCurrent}
+          onChangeAccessMode={handleChangeAccessMode}
+          accessControlClient={accessControlClient}
+          contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
+        />
+      ) : undefined,
     },
   });
 }

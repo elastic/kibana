@@ -31,3 +31,10 @@ export const ROUTE_TAG_AUTH_FLOW = 'security:authFlow';
  * JWT as a means of authentication.
  */
 export const ROUTE_TAG_ACCEPT_JWT = 'security:acceptJWT';
+
+/**
+ * If the route is marked with this tag, the HTTP authentication provider will accept UIAM OAuth access tokens for authentication.
+ * HTTP authentication provider will exchange the UIAM OAuth access token for an ephemeral UIAM token
+ * via the UIAM service before authenticating with Elasticsearch.
+ */
+export const ROUTE_TAG_ACCEPT_UIAM_OAUTH = 'security:acceptUiamOAuth';

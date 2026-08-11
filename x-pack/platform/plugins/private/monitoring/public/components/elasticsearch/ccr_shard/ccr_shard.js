@@ -63,6 +63,12 @@ export function CcrShard(props) {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiBasicTable
+              tableCaption={i18n.translate(
+                'xpack.monitoring.elasticsearch.ccrShard.errorsTable.caption',
+                {
+                  defaultMessage: 'CCR shard error details',
+                }
+              )}
               items={stat.read_exceptions}
               columns={[
                 {

@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/core-user-activity-server-internal",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

@@ -1,6 +1,6 @@
 # MV_SLICE
 
-The `MV_SLICE` function extracts a subset of a multivalued field based on specified start and end index values. It is particularly useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`. It allows access of specific elements in the multivalue field array..
+The MV_SLICE function returns a subset of a multivalued field using specified start and end index values. This is especially useful when working with functions that produce multivalued columns in a known order, such as `SPLIT` or `MV_SORT`. The order in which multivalued fields are read from storage is not guaranteed and should not be relied upon.
 
 ## Syntax
 
@@ -8,44 +8,30 @@ The `MV_SLICE` function extracts a subset of a multivalued field based on specif
 
 ### Parameters
 
-#### `field`
+#### field
 
-- A multivalue expression. If `null`, the function returns `null`.
+Multivalue expression. If this parameter is `null`, the function returns `null`.
 
-#### `start`
+#### start
 
-- The starting position of the slice. If `null`, the function returns `null`.
-- Can be negative, where `-1` refers to the last value in the list.
+Start position. If this parameter is `null`, the function returns `null`. The start argument can be negative; an index of -1 refers to the last value in the list.
 
-#### `end` (Optional)
+#### end
 
-- The ending position of the slice (inclusive). If omitted, only the value at the `start` position is returned.
-- Can be negative, where `-1` refers to the last value in the list.
+End position (included). Optional; if omitted, only the value at the `start` position is returned. The end argument can be negative; an index of -1 refers to the last value in the list.
 
 ## Examples
 
-Extracting specific slices from a multivalued field
+Extracts the value at index 1 and the values from index 2 to 3 from the multivalued field `a`.
 
 ```esql
-ROW a = [1, 2, 2, 3]
-| EVAL a1 = MV_SLICE(a, 1), a2 = MV_SLICE(a, 2, 3)
+row a = [1, 2, 2, 3]
+| eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
 ```
 
-This example extracts:
-- `a1` as the value starting at index `1` (second value in the list).
-- `a2` as the values from index `2` to `3` (third and fourth values in the list).
-
-Using negative indices to slice from the end of the list
+Extracts the value at index -2 and the values from index -3 to -1 from the multivalued field `a`.
 
 ```esql
-ROW a = [1, 2, 2, 3]
-| EVAL a1 = MV_SLICE(a, -2), a2 = MV_SLICE(a, -3, -1)
+row a = [1, 2, 2, 3]
+| eval a1 = mv_slice(a, -2), a2 = mv_slice(a, -3, -1)
 ```
-
-This example extracts:
-- `a1` as the value starting at the second-to-last index (`-2`).
-- `a2` as the values from the third-to-last index (`-3`) to the last index (`-1`).
-
-## Notes
-
-- The order in which multivalued fields are read from underlying storage is not guaranteed. While it is often ascending, this behavior should not be relied upon.

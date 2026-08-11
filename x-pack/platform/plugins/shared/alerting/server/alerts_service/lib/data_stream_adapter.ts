@@ -198,6 +198,7 @@ async function getValidConcreteIndices({
         esClient.indices.getAlias({
           index: patterns,
           name: indexPatterns.alias,
+          expand_wildcards: ['open', 'hidden'],
         }),
       { logger }
     );

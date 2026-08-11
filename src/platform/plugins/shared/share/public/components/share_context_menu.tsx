@@ -16,6 +16,7 @@ import { EuiContextMenu } from '@elastic/eui';
 
 import type { Capabilities } from '@kbn/core/public';
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
 import type { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
@@ -30,8 +31,8 @@ export interface ShareContextMenuProps {
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: any;
+    locator: LocatorPublic<SerializableRecord>;
+    params: SerializableRecord;
   };
   shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;
@@ -124,7 +125,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed code',
         }),
-        icon: 'console',
+        icon: 'commandLine',
         panel: embedPanel.id,
         sortOrder: 0,
       });

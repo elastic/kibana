@@ -167,10 +167,12 @@ export const scheduleUnusedUrlsCleanupTask = async ({
   taskManager,
   checkInterval,
   isEnabled,
+  logger,
 }: {
   taskManager: TaskManagerStartContract;
   checkInterval: Duration;
   isEnabled: boolean;
+  logger: Logger;
 }) => {
   try {
     if (!isEnabled) {
@@ -185,6 +187,8 @@ export const scheduleUnusedUrlsCleanupTask = async ({
       interval: durationToSeconds(checkInterval),
     });
   } catch (e) {
-    throw new Error(e.message || 'Failed to schedule unused URLs cleanup task');
+    logger.error(
+      `Failed to schedule unused URLs cleanup task.${e.message ? ` Error: ${e.message}` : ''}`
+    );
   }
 };

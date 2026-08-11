@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { optionalExcludedGapReasonsSchema } from '../../../../common/schemas';
 import { gapStatusSchema } from '.';
 
 const findGapsBaseParamsSchema = schema.object(
@@ -25,6 +26,7 @@ const findGapsBaseParamsSchema = schema.object(
     hasUnfilledIntervals: schema.maybe(schema.boolean()),
     hasInProgressIntervals: schema.maybe(schema.boolean()),
     hasFilledIntervals: schema.maybe(schema.boolean()),
+    excludedReasons: optionalExcludedGapReasonsSchema,
   },
   {
     validate({ start, end }) {
@@ -65,4 +67,5 @@ export const findGapsSearchAfterParamsSchema = findGapsBaseParamsSchema.extends(
     schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean(), schema.any()]))
   ),
   updatedBefore: schema.maybe(schema.string()),
+  failedAutoFillAttemptsLessThan: schema.maybe(schema.number({ min: 1 })),
 });

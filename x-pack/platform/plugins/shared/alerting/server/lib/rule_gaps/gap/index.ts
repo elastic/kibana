@@ -6,7 +6,7 @@
  */
 import type { InternalFields } from '@kbn/event-log-plugin/server/es/cluster_client_adapter';
 import type { GapBase, Interval, StringInterval } from '../../../application/gaps/types';
-import type { GapStatus } from '../../../../common/constants';
+import type { GapStatus, GapReason } from '../../../../common/constants';
 import { gapStatus } from '../../../../common/constants';
 
 import {
@@ -28,6 +28,8 @@ interface GapConstructorParams {
   inProgressIntervals?: StringInterval[];
   internalFields?: InternalFields;
   updatedAt?: string;
+  failedAutoFillAttempts?: number;
+  reason?: GapReason;
 }
 
 export class Gap {
@@ -37,6 +39,8 @@ export class Gap {
   private _internalFields?: InternalFields;
   private _timestamp?: string;
   private _updatedAt?: string;
+  private _failedAutoFillAttempts?: number;
+  private _reason?: GapReason;
   readonly _ruleId: string;
 
   constructor({
@@ -47,6 +51,8 @@ export class Gap {
     inProgressIntervals = [],
     internalFields,
     updatedAt,
+    failedAutoFillAttempts,
+    reason,
   }: GapConstructorParams) {
     this._range = normalizeInterval(range);
     this._filledIntervals = mergeIntervals(filledIntervals.map(normalizeInterval));
@@ -60,6 +66,8 @@ export class Gap {
 
     this._updatedAt = updatedAt ?? new Date().toISOString();
     this._ruleId = ruleId;
+    this._failedAutoFillAttempts = failedAutoFillAttempts ?? 0;
+    this._reason = reason;
   }
 
   public fillGap(interval: Interval): void {
@@ -144,6 +152,14 @@ export class Gap {
     }
   }
 
+  public incrementFailedAutoFillAttempts(): void {
+    this._failedAutoFillAttempts = (this._failedAutoFillAttempts ?? 0) + 1;
+  }
+
+  public get failedAutoFillAttempts(): number {
+    return this._failedAutoFillAttempts ?? 0;
+  }
+
   public resetInProgressIntervals(): void {
     this._inProgressIntervals = [];
   }
@@ -154,6 +170,10 @@ export class Gap {
 
   public get ruleId() {
     return this._ruleId;
+  }
+
+  public get reason() {
+    return this._reason;
   }
 
   public getState() {
@@ -167,6 +187,7 @@ export class Gap {
       filledDurationMs: this.filledGapDurationMs,
       unfilledDurationMs: this.unfilledGapDurationMs,
       inProgressDurationMs: this.inProgressGapDurationMs,
+      ...(this._reason ? { reason: this._reason } : {}),
     };
   }
 
@@ -185,6 +206,8 @@ export class Gap {
       unfilled_duration_ms: this.unfilledGapDurationMs,
       in_progress_duration_ms: this.inProgressGapDurationMs,
       updated_at: this._updatedAt,
+      failed_auto_fill_attempts: this._failedAutoFillAttempts,
+      ...(this._reason ? { reason: this._reason } : {}),
     };
   }
 }

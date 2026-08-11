@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT } from './constants';
-import { streamsEndpointLatencySchema, streamsStateErrorSchema } from './schemas';
+import {
+  STREAMS_ENDPOINT_LATENCY_EVENT,
+  STREAMS_STATE_ERROR_EVENT,
+  STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+} from './constants';
+import {
+  streamsEndpointLatencySchema,
+  streamsStateErrorSchema,
+  streamsProcessingPipelineSuggestedSchema,
+  streamsAgentToolEventCreateSchema,
+} from './schemas';
 
 const streamsEndpointLatencyEventType = {
   eventType: STREAMS_ENDPOINT_LATENCY_EVENT,
@@ -18,4 +28,19 @@ const streamsStateErrorEventType = {
   schema: streamsStateErrorSchema,
 };
 
-export { streamsEndpointLatencyEventType, streamsStateErrorEventType };
+const streamsProcessingPipelineSuggestedEventType = {
+  eventType: STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+  schema: streamsProcessingPipelineSuggestedSchema,
+};
+
+const streamsAgentToolEventCreateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  schema: streamsAgentToolEventCreateSchema,
+};
+
+export {
+  streamsEndpointLatencyEventType,
+  streamsStateErrorEventType,
+  streamsProcessingPipelineSuggestedEventType,
+  streamsAgentToolEventCreateEventType,
+};

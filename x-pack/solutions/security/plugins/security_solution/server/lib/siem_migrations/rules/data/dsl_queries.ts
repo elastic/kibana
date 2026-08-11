@@ -23,10 +23,10 @@ export const dsl = {
     return { bool: { must_not: dsl.isPrebuilt() } };
   },
   matchElasticTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_rule.title': title } };
+    return { match: { 'elastic_rule.title': { query: title, operator: 'and' } } };
   },
   matchOriginalTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'original_rule.title': title } };
+    return { match: { 'original_rule.title': { query: title, operator: 'and' } } };
   },
   matchTitle(title: string): QueryDslQueryContainer {
     return {
@@ -37,6 +37,13 @@ export const dsl = {
           // If translation failed, match the original title
           { bool: { must: [genericDsl.isFailed(), dsl.matchOriginalTitle(title)] } },
         ],
+      },
+    };
+  },
+  matchTitles(titles: string[]): QueryDslQueryContainer {
+    return {
+      terms: {
+        'original_rule.title.keyword': titles,
       },
     };
   },

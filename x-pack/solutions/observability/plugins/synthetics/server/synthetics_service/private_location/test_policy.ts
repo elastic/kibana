@@ -137,6 +137,7 @@ export const testMonitorPolicy = {
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
             'source.inline.script': { type: 'yaml' },
+            'source.inline.encoding': { type: 'text' },
             params: { type: 'yaml' },
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
@@ -118,7 +118,19 @@ const EventCategoryLinks = memo(function ({
     ],
     [nodeID, id]
   );
-  return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
+  return (
+    <EuiInMemoryTable<EventCountsTableView>
+      items={rows}
+      columns={columns}
+      sorting
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.panel.nodeEvents.relatedEventCountsCaption',
+        {
+          defaultMessage: 'Related event counts',
+        }
+      )}
+    />
+  );
 });
 
 // eslint-disable-next-line react/display-name

@@ -58,10 +58,8 @@ describe('#Host details search strategy helpers', () => {
         },
         host_ip: {
           terms: {
-            script: {
-              source: "doc['host.ip']",
-              lang: 'painless',
-            },
+            field: 'host.ip',
+            value_type: 'ip',
             size: 10,
             order: {
               timestamp: Direction.desc,

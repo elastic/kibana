@@ -65,11 +65,11 @@ export const getAlertSummaryLensAttributes = ({
       columns: [
         {
           columnId: 'tableStackBy0',
-          width: 300,
         },
         {
           columnId: 'count',
           summaryRow: 'sum',
+          width: 100,
         },
       ],
       layerId: LAYER_ID,

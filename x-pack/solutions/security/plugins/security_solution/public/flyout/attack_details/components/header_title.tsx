@@ -5,23 +5,58 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { FlyoutTitle } from '../../shared/components/flyout_title';
+import React, { memo, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { flyoutHeaderBlockStyles } from '../../../flyout_v2/shared/components/flyout_header_block';
+import { Notes } from '../../../flyout_v2/shared/components/notes';
+import { AlertsCount } from '../../../flyout_v2/attack/main/components/alerts_count';
+import { HeaderTitle as V2HeaderTitle } from '../../../flyout_v2/attack/main/components/header_title';
+import { Status } from '../../../flyout_v2/attack/main/components/status';
+import { Assignees } from '../../../flyout_v2/attack/main/components/assignees';
 import { useAttackDetailsContext } from '../context';
-import { getField } from '../../document_details/shared/utils';
-
-export const HEADER_TITLE_TEST_ID = 'attack-details-flyout-header-title';
-const FIELD_ATTACK_TITLE = 'kibana.alert.attack_discovery.title';
+import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
 /**
- * Header data for the Attack details flyout
+ * Header title for the legacy attack details flyout.
+ * Bridges context → props for the v2 HeaderTitle, then renders the four
+ * summary blocks (status, alerts, assignees, notes) in the same 2-column
+ * layout as the v2 flyout so both flyouts stay visually identical.
  */
 export const HeaderTitle = memo(() => {
-  const { getFieldsData } = useAttackDetailsContext();
+  const { searchHit, attackId, refetch } = useAttackDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const openNotesTab = useNavigateToAttackDetailsLeftPanel({ tab: 'notes' });
 
-  const title = getField(getFieldsData(FIELD_ATTACK_TITLE)) ?? '';
-
-  return <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />;
+  return (
+    <>
+      <V2HeaderTitle hit={hit} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <Status hit={hit} onAttackUpdated={refetch} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertsCount hit={hit} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem css={flyoutHeaderBlockStyles}>
+          <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <Assignees hit={hit} onAttackUpdated={refetch} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Notes documentId={attackId} onShowNotes={openNotesTab} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
 });
 
 HeaderTitle.displayName = 'HeaderTitle';

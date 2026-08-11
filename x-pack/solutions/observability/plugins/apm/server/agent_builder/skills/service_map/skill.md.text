@@ -1,0 +1,72 @@
+## When to Use This Skill
+
+Use this skill when the user explicitly asks to **show**, **see**, or **visualize** a service map, service topology, or service dependencies in an APM or observability context. The key trigger is the user wanting a visual representation of how services connect, not a generic architecture diagram.
+
+Examples that should use this skill:
+- "Show me the service map for checkout"
+- "Visualize the topology around payment-service"
+- "Show the upstream and downstream services for frontend"
+- "Map out the dependencies for payment-service"
+
+Examples that should NOT trigger a service map visual:
+- "What calls checkout?" — answer with text from `get_service_topology`, no map needed
+- "What are the dependencies of payment-service?" — answer with text, no map needed
+- "Draw the architecture for frontend" — if the user wants a generic architecture diagram rather than an observability service map, prefer the generic graph skill
+
+## How to Create a Service Map
+
+### Step 1: Get the topology data
+
+Call `get_service_topology` to retrieve the service dependency graph.
+
+**For a specific service's neighborhood:**
+```
+get_service_topology(serviceName: "checkout", direction: "both", start: "now-15m", end: "now")
+```
+
+**For upstream callers only:**
+```
+get_service_topology(serviceName: "payment-service", direction: "upstream", start: "now-15m", end: "now")
+```
+
+**For downstream dependencies only:**
+```
+get_service_topology(serviceName: "frontend", direction: "downstream", start: "now-15m", end: "now")
+```
+
+If the user asks for the full topology without naming a specific service, first call `get_services` to discover available services, then call `get_service_topology` for a central service (like the frontend or entry point) with `direction: "both"` to get the broadest view.
+
+### Step 2: Create the service map attachment
+
+Pass the topology data directly to `attachments.add`:
+
+```json
+{
+  "type": "observability.service-map",
+  "description": "Service topology map for checkout",
+  "data": {
+    "connections": <connections array from get_service_topology result>,
+    "serviceName": "checkout",
+    "title": "Service Map — checkout"
+  }
+}
+```
+
+The `data.connections` field should contain the exact connections array returned by `get_service_topology`. Do NOT transform, restructure, or compute positions — the renderer handles layout and styling automatically.
+
+### Step 3: Render the attachment
+
+After creating the attachment, render it inline:
+
+```xml
+<render_attachment id="ATTACHMENT_ID" />
+```
+
+## Important Notes
+
+- If `get_service_topology` returns an empty `connections` array, do NOT create a service map attachment. Instead, tell the user that no topology data was found for the requested service or time range.
+- Do NOT compute node positions or build React Flow JSON — the attachment renderer handles all layout and styling
+- Do NOT use the generic graph attachment (`type: "graph"`) for service maps — use `type: "observability.service-map"`
+- The `serviceName` field in the data is optional but helps label the map when scoped to a specific service
+- Throughput and error rate are shown as labels on edges when available
+- The map is a static visual — node click popovers and links to APM pages are not yet available

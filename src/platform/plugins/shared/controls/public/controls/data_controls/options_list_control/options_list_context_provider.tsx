@@ -8,18 +8,22 @@
  */
 
 import React, { useContext } from 'react';
-import type { OptionsListDisplaySettings } from '../../../../common/options_list';
-import type { OptionsListComponentApi } from './types';
 
-export const OptionsListControlContext = React.createContext<
-  | {
-      componentApi: OptionsListComponentApi;
-      displaySettings: OptionsListDisplaySettings;
-    }
-  | undefined
->(undefined);
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
-export const useOptionsListContext = () => {
+import type { OptionsListComponentApi } from '../../types';
+import type { OptionsListCustomStrings } from './types';
+
+interface Context {
+  componentApi: OptionsListComponentApi;
+  displaySettings: OptionsListDisplaySettings;
+  // Optional custom strings to override default labels
+  customStrings?: OptionsListCustomStrings;
+}
+
+export const OptionsListControlContext = React.createContext<Context | undefined>(undefined);
+
+export const useOptionsListContext = (): Context => {
   const optionsListContext = useContext(OptionsListControlContext);
   if (!optionsListContext)
     throw new Error(

@@ -9,10 +9,13 @@ import type { ComponentProps } from 'react';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/chart-expressions-common';
-import type { FramePublicAPI, HeatmapVisualizationState } from '@kbn/lens-common';
-import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
+import type { OperationDescriptor } from '@kbn/lens-common';
 import { HeatmapStyleSettings } from './style_settings';
+import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
+import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from '../constants';
+import type { HeatmapVisualizationState } from '../types';
 
 type Props = ComponentProps<typeof HeatmapStyleSettings>;
 
@@ -20,21 +23,25 @@ const defaultProps: Props = {
   state: {
     layerId: '1',
     layerType: 'data',
-    shape: 'heatmap',
+    shape: CHART_SHAPES.HEATMAP,
     xAccessor: 'x',
     legend: {
       isVisible: true,
+      position: Position.Right,
       legendSize: LegendSize.AUTO,
+      type: LEGEND_FUNCTION,
     },
     gridConfig: {
+      type: HEATMAP_GRID_FUNCTION,
+      isCellLabelVisible: false,
+      isYAxisLabelVisible: true,
+      isYAxisTitleVisible: false,
       isXAxisLabelVisible: true,
       isXAxisTitleVisible: false,
-    } as HeatmapGridConfigResult,
-  } as HeatmapVisualizationState,
+    },
+  },
   setState: jest.fn(),
-  frame: {
-    datasourceLayers: {},
-  } as FramePublicAPI,
+  frame: createMockFramePublicAPI(),
 };
 
 const renderComponent = (props: Partial<Props> = {}) => {
@@ -49,6 +56,48 @@ const clickButtonByName = async (name: string | RegExp, container?: HTMLElement)
 describe('heatmap style settings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should disable the x-axis sort order for a time-based horizontal axis', async () => {
+    const setState = jest.fn();
+    const state: HeatmapVisualizationState = {
+      ...defaultProps.state,
+      gridConfig: {
+        ...defaultProps.state.gridConfig,
+        xSortPredicate: 'asc',
+      },
+    };
+
+    const datasource = createMockDatasource();
+    const timeSeriesXAxisOperation: OperationDescriptor = {
+      label: 'Date histogram',
+      dataType: 'date',
+      scale: 'interval',
+      isBucketed: true,
+      hasTimeShift: false,
+      hasReducedTimeRange: false,
+    };
+    datasource.publicAPIMock.getOperationForColumnId.mockReturnValue(timeSeriesXAxisOperation);
+
+    renderComponent({
+      state,
+      setState,
+      frame: createMockFramePublicAPI({
+        datasourceLayers: {
+          [state.layerId]: datasource.publicAPIMock,
+        },
+      }),
+    });
+
+    expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).toBeDisabled();
+    expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).toHaveValue('none');
+    expect(screen.getByTestId('lnsHeatmapYAxisSortOrder')).not.toBeDisabled();
+    expect(setState).not.toHaveBeenCalled();
+  });
+
+  it('should keep the x-axis sort order enabled for non time-based x axis', () => {
+    renderComponent();
+    expect(screen.getByTestId('lnsHeatmapXAxisSortOrder')).not.toBeDisabled();
   });
 
   it('should have called setState with the proper value of xAxisLabelRotation', async () => {

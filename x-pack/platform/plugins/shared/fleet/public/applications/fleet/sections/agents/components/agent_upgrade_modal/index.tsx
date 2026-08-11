@@ -579,7 +579,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               defaultMessage="For more information, refer to {documentationLink}."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.agentReleaseProcess}>
+                  <EuiLink
+                    external={true}
+                    target="_blank"
+                    href={docLinks.links.fleet.agentReleaseProcess}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.iarVersionSelected.documentationLink"
                       defaultMessage="Elastic Agent release process"

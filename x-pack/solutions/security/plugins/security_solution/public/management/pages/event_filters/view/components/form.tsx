@@ -31,16 +31,19 @@ import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
@@ -49,6 +52,7 @@ import {
   PROCESS_DESCENDANT_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
 import { isProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
@@ -70,16 +74,19 @@ import {
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
+import { OS_TITLES } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
+import { EVENT_FILTER_LIST_TYPE } from '../../constants';
+
+const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
 
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
-import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from '../translations';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -112,7 +119,10 @@ const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -131,6 +141,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
+    );
+    const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
+      hasEscaping([exception], exception.os_types)
     );
 
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
@@ -182,22 +195,30 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         onChange({
           item,
           isValid: isFormValid && areConditionsValid && hasFormChanged,
-          confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'event filter',
-                })
-              )
-            : undefined,
+          confirmModalLabels:
+            hasWildcardWithWrongOperator || hasUnnecessaryEscaping
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'event filter',
+                    }
+                  ),
+                  { hasWildcardWithWrongOperator, hasUnnecessaryEscaping },
+                  links
+                )
+              : undefined,
         });
       },
       [
-        areConditionsValid,
         exception,
-        hasFormChanged,
-        isFormValid,
         onChange,
+        isFormValid,
+        areConditionsValid,
+        hasFormChanged,
         hasWildcardWithWrongOperator,
+        hasUnnecessaryEscaping,
+        links,
       ]
     );
 
@@ -287,6 +308,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const handleOnOsChange = useCallback(
       (os: OperatingSystem) => {
         if (!exception) return;
+        setHasUnnecessaryEscaping(hasEscaping([exception], [os]));
         processChanged({
           os_types: [os],
           entries: exception.entries,
@@ -410,7 +432,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
               />
             </EuiText>
           ),
-          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
+          iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkCircleFill',
           'data-test-subj': getTestId('filterEventsButton'),
         },
         {
@@ -423,12 +445,14 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Process Descendants"
                 />
               </EuiText>
-              <ProcessDescendantsTooltip
+              <ProcessDescendantsIconTip
                 data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+                tooltipText={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
               />
             </EuiFlexGroup>
           ),
-          iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
+          iconType: isFilterProcessDescendantsSelected ? 'checkCircleFill' : 'empty',
           'data-test-subj': getTestId('filterProcessDescendantsButton'),
         },
       ];
@@ -498,8 +522,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           setHasDuplicateFields(false);
         }
 
-        // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems, exception.os_types));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -645,9 +669,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
-        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+          {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

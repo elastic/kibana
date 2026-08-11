@@ -15,6 +15,7 @@ import { type KibanaGroup, KIBANA_SOLUTIONS } from '@kbn/projects-solutions-grou
 
 export const TEMPLATE_DIR = resolve(__dirname, '../templates');
 export const PKG_TEMPLATE_DIR = resolve(TEMPLATE_DIR, 'package');
+export const CONNECTOR_TEMPLATE_DIR = resolve(TEMPLATE_DIR, 'connector');
 
 export const PKG_DIRS: Record<string, string> = {
   'oss|platform|private': resolve(REPO_ROOT, 'src/platform/packages/private'),

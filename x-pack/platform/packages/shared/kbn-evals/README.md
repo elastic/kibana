@@ -1,370 +1,505 @@
 # @kbn/evals
 
-`@kbn/evals` contains utilities for writing offline evaluation suites against LLM-based workflows in Kibana.
+Offline evaluation framework for LLM-based workflows in Kibana. Requires the `evals` plugin to be enabled.
 
-This package is built on top of `@kbn/scout` and the `@kbn/inference-*` packages. It bundles three main entry-points:
+**Entry points:**
 
-1. `createPlaywrightEvalsConfig` – helper that returns a ready-made Playwright config for evaluation suites. It automatically:
+- **Local** - `node scripts/evals start` (interactive CLI, see [CLI.md](./CLI.md) for the full command reference)
+- **CI on PRs** - GitHub labels (`evals:<suite-id>`, `models:<model-group>`)
+- **On-demand** - [Buildkite pipeline](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
+- **UI** - the "New experiment" form on the Experiments tab runs experiments server-side via Kibana Workflows, no CLI required (see [From the UI](../../../plugins/shared/evals/README.md#from-the-ui))
+- **Agent Builder** - the `eval-experiment-authoring` skill composes, previews, saves, and runs experiments from a chat (see [From Agent Builder](../../../plugins/shared/evals/README.md#from-agent-builder))
+- **Workflow YAML** - a version-controlled experiment workflow file, run via Workflows Management (see [From YAML](../../../plugins/shared/evals/README.md#from-yaml))
 
-   - discovers available connectors from `kibana.yml` / `KIBANA_TESTING_AI_CONNECTORS` env var
-   - duplicates the standard _local_ Playwright project once per connector so the same test file is executed for each model.
+---
 
-2. `evaluate` – a [`@playwright/test`](https://playwright.dev/docs/test-intro) extension that boots:
+## 1. Running evaluations
 
-   - an Inference Client that is pre-bound to a Kibana connector
-   - a (Kibana-flavored) Phoenix client to run experiments
-
-3. `scripts/generate_schema` – one-off script that (re)generates typed GraphQL artifacts for the Phoenix schema using `@graphql/codegen`. The artifacts are currently not in use because we only have a single query, but the script is useful if we add more queries.
-
-## Writing an evaluation test
-
-```ts
-// my_eval.test.ts
-import { evaluate } from '@kbn/evals';
-
-evaluate('the model should answer truthfully', async ({ inferenceClient, phoenixClient }) => {
-  const dataset = {
-    name: 'my-dataset',
-    description: 'my-description',
-    examples: [
-      {
-        input: {
-          content: 'Hi',
-        },
-        output: {
-          content: 'Hey',
-        },
-      },
-    ],
-  };
-
-  await phoenixClient.runExperiment({
-    dataset,
-    evaluators: [
-      {
-        name: 'equals',
-        kind: 'CODE',
-        evaluate: ({ input, output, expected }) => {
-          return {
-            score: output === 'bar' ? 1 : 0,
-          };
-        },
-      },
-    ],
-    task: async ({ input }) => {
-      return (
-        await inferenceClient.output({
-          id: 'foo',
-          input: input.content as string,
-        })
-      ).content;
-    },
-  });
-});
-```
-
-### Available fixtures
-
-| Fixture                     | Description                                                                                                                                   |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                             |
-| `phoenixClient`             | Client for the Phoenix API (to run experiments)                                                                                               |
-| `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                   |
-| `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                            |
-| `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional) |
-
-## Running the suite
-
-Make sure that you've configured a Phoenix exporter in `kibana.dev.yml`:
-
-```yaml
-telemetry.tracing.exporters:
-  - phoenix:
-      base_url: 'https://<my-phoenix-host>'
-      public_url: 'https://<my-phoenix-host>'
-      project_name: '<my-name>'
-      api_key: '<my-api-key>'
-```
-
-Create a Playwright config that delegates to the helper:
-
-```ts
-// playwright.config.ts
-import { createPlaywrightEvalsConfig } from '@kbn/evals';
-
-export default createPlaywrightEvalsConfig({ testDir: __dirname });
-```
-
-Start scout:
+### 1.1 Getting started locally
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/evals start
 ```
 
-Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
+On first run, `start` prompts for an infrastructure target, discovers connectors, starts background services (EDOT collector + Scout), and runs a Playwright eval suite. Subsequent runs reuse the running services for fast iteration.
+
+Suite selection is interactive. `start` lists registered suites from [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json). Pass `--suite <id>` to skip the prompt.
+
+**Validate your setup with the smoke tests:**
 
 ```bash
-node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+node scripts/evals start --suite smoke-tests
 ```
 
-### Trace-Based Evaluators (Optional)
+#### Profiles
 
-Trace-based evaluators automatically collect non-functional metrics from OpenTelemetry traces stored in Elasticsearch:
+| `--profile` value | Behavior                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `dev-vault`       | Read Golden Cluster config from Vault at runtime (requires `vault login --method oidc`). No file needed. |
+| `local`           | Use `config.local.json` (auto-created with localhost defaults if missing).                               |
+| `<name>`          | Use `config.<name>.json`. If missing, runs an interactive wizard.                                        |
+| _(omitted)_       | Interactive prompt: local / golden-cluster / custom.                                                     |
 
-- **Token usage** (input, output, cached tokens)
-- **Latency** (request duration)
-- **Tool calls** (number of tool invocations)
-- You can build your own using `createTraceBasedEvaluator` factory.
+Config files live in `scripts/vault/config.<profile>.json`. The golden cluster profile reads secrets directly from Vault -- no local file required.
 
-By default, these evaluators query traces from the same Elasticsearch cluster as your test environment using the `esClient` fixture.
+#### Key flags
 
-#### Prerequisites
+| Flag                | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `--suite <id>`      | Suite to run (interactive prompt if omitted)     |
+| `--model <id>`      | Connector/model to evaluate (comma-separated OK) |
+| `--judge <id>`      | Connector for LLM-as-a-judge evaluators          |
+| `--grep <pattern>`  | Filter tests by name                             |
+| `--repetitions <n>` | Repeat each example N times                      |
+| `--skip-server`     | Skip EDOT/Scout startup (use existing services)  |
+| `--skip-init`       | Skip config and connector setup                  |
+| `--dry-run`         | Print configuration and exit                     |
 
-To enable trace-based evaluators, configure the HTTP exporter in `kibana.dev.yml` to export traces via OpenTelemetry:
+#### EIS connector setup
 
-```yaml
-telemetry.tracing.exporters:
-  - phoenix:
-      base_url: 'https://<my-phoenix-host>'
-      public_url: 'https://<my-phoenix-host>'
-      project_name: '<my-name>'
-      api_key: '<my-api-key>'
-  - http:
-      url: 'http://localhost:4318/v1/traces'
-```
-
-#### Start EDOT Collector
-
-Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
+`start` auto-detects missing connectors and walks you through EIS model discovery (Vault auth, model selection, connector generation). To run setup separately and discover connectors to use across terminals:
 
 ```bash
-# Optionally use non-default ports using --http-port <http-port> or --grpc-port <grpc-port>
-# You must update the tracing exporters with the right port in kibana.dev.yml
-ELASTICSEARCH_HOST=http://localhost:9220 node scripts/edot_collector.js
+node scripts/evals init
 ```
 
-The EDOT Collector receives traces from Kibana via the HTTP exporter and stores them in your local Elasticsearch cluster. Alternatively, you can use a managed OTLP endpoint instead of running EDOT Collector locally (this hasn't been tested yet though).
+#### Loading datasets from Golden Cluster
 
-#### Using a Separate Monitoring Cluster
-
-If your EDOT Collector stores traces in a different Elasticsearch cluster than your test environment (e.g., a common monitoring cluster for your team), specify the trace cluster URL with the `TRACING_ES_URL` environment variable:
+Use `--datasets-profile` when dataset credentials should come from the shared golden cluster:
 
 ```bash
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
+node scripts/evals start --suite agent-builder --datasets-profile dev-vault
 ```
 
-This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
-
-## Customizing Report Display
-
-By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
-
-```ts
-// my_eval.test.ts
-import {
-  evaluate as base,
-  type EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-} from '@kbn/evals';
-
-export const evaluate = base.extend({
-  reportModelScore: async ({}, use) => {
-    // Custom reporter implementation
-    await use(async (scoreRepository, runId, log) => {
-      // Query Elasticsearch for evaluation results
-      const docs = await scoreRepository.getScoresByRunId(runId);
-
-      if (docs.length === 0) {
-        log.error(`No results found for run: ${runId}`);
-        return;
-      }
-
-      // Build your custom report
-      log.info('=== CUSTOM REPORT ===');
-      log.info(`Model: ${docs[0].model.id}`);
-      log.info(`Run ID: ${runId}`);
-      log.info(`Total evaluations: ${docs.length}`);
-
-      // Group by dataset, calculate aggregates, write to file, etc.
-      const datasetResults = groupByDataset(docs);
-      writeToFile(`report-${runId}.json`, datasetResults);
-    });
-  },
-});
-
-evaluate('my test', async ({ phoenixClient }) => {
-  // Your test logic here
-});
-```
-
-**Note:** Elasticsearch export always happens first and is not affected by custom reporters. This ensures all results are persisted regardless of custom reporting logic.
-
-## Elasticsearch Export
-
-The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
-
-### Datastream Structure
-
-The evaluation data is stored with the following structure:
-
-- **Index Pattern**: `.kibana-evaluations*`
-- **Datastream**: `.kibana-evaluations`
-- **Document Structure**:
-
-  ```json
-  {
-    "@timestamp": "2025-08-28T14:21:35.886Z",
-    "run_id": "026c5060fbfc7dcb",
-    "model": {
-      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-      "family": "anthropic",
-      "provider": "bedrock"
-    },
-    "dataset": {
-      "id": "dataset_id",
-      "name": "my-dataset",
-      "examples_count": 10
-    },
-    "evaluator": {
-      "name": "Factuality",
-      "stats": {
-        "mean": 0.85,
-        "median": 1.0,
-        "std_dev": 0.37,
-        "min": 0.0,
-        "max": 1.0,
-        "count": 10,
-        "percentage": 85.0
-      },
-      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
-    },
-    "experiments": [{ "id": "experiment_id_1" }],
-    "environment": {
-      "hostname": "your-hostname"
-    }
-  }
-  ```
-
-### Querying Evaluation Data
-
-After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
-
-```kql
-environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
-```
-
-### Using the Evaluation Analysis Service
-
-The `evaluationAnalysisService` fixture provides methods to analyze and compare evaluation results:
-
-```ts
-evaluate('compare model performance', async ({ evaluationAnalysisService }) => {
-  // The service automatically retrieves scores from Elasticsearch
-  // and provides statistical analysis capabilities
-  // Analysis happens automatically after experiments complete
-});
-```
-
-### LLM-as-a-judge
-
-Some of the evals will use LLM-as-a-judge. For consistent results, you should specify `EVALUATION_CONNECTOR_ID` as an environment variable, in order for the evaluations to always be judged by the same LLM:
+#### Filtering, model selection, judge, repetitions
 
 ```bash
-EVALUATION_CONNECTOR_ID=bedrock-claude node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+node scripts/evals start --suite agent-builder --grep "product documentation"
+node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
+node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
+node scripts/evals start --suite agent-builder --repetitions 3
 ```
 
-### Testing a specific connector
+#### Advanced options
 
-The helper will spin up one `local` project per available connector so results are isolated per model. Each project is named after the connector id. To run the evaluations only for a specific connector, use `--project`:
+<details>
+<summary>LiteLLM setup</summary>
+
+If you have access to the internal LiteLLM gateway:
 
 ```bash
-node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
+bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
 ```
 
-### Selecting specific evaluators
+This logs you in via SSO, generates a virtual key, and exports `KIBANA_TESTING_AI_CONNECTORS`.
 
-To enable selective evaluator execution, wrap your evaluators with the `selectEvaluators` function:
+</details>
 
-```ts
-import { selectEvaluators } from '@kbn/evals';
+<details>
+<summary>Scout server (standalone)</summary>
 
-await phoenixClient.runExperiment(
-  {
-    dataset,
-    task: myTask,
-  },
-  selectEvaluators([
-    ...createQuantitativeCorrectnessEvaluators(),
-    createQuantitativeGroundednessEvaluator(),
-  ])
-);
-```
-
-Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
+`start` manages Scout automatically. To run it independently:
 
 ```bash
-SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
+node scripts/evals scout
 ```
 
-If not specified, all evaluators will run by default.
+This wraps `node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing`.
 
-### Repeated evaluations
+</details>
 
-For statistical analysis and reliability testing, you can run the same evaluation examples multiple times.
+<details>
+<summary>EDOT collector (standalone)</summary>
 
-**Note:** Each repetition creates a separate experiment in Phoenix with the same dataset name. This may change when Phoenix adds in-experiment repetitions in the future (see [issue](https://github.com/Arize-ai/phoenix/issues/3584)).
-
-#### Configuring repetitions in your Playwright config
-
-You can set a default number of repetitions for your entire test suite by adding the `repetitions` parameter to your Playwright configuration:
-
-```ts
-// playwright.config.ts
-import { createPlaywrightEvalsConfig } from '@kbn/evals';
-
-export default createPlaywrightEvalsConfig({
-  testDir: __dirname,
-  repetitions: 3, // Run each example 3 times
-});
-```
-
-#### Overriding repetitions with environment variables
-
-To override the repetitions at runtime without modifying your configuration, use the `EVALUATION_REPETITIONS` environment variable:
+`start` manages the EDOT collector automatically. To run it independently:
 
 ```bash
-# Run each example 3 times
-EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+node scripts/edot_collector.js
+# Override target ES cluster:
+ELASTICSEARCH_HOST=http://localhost:9200 node scripts/edot_collector.js
 ```
 
-### Running evaluations against your local/development Kibana instance
+</details>
 
-To run evaluations against your local Kibana instance instead of the Scout server, manually create a Scout configuration file. This approach provides more control over the testing environment (running Kibana in Debug mode, connecting to local/remote test cluster, etc.). Running the Scout server is also not required for this approach.
+<details>
+<summary>Running directly via Playwright</summary>
 
-To do this, you need to create (or override) a configuration file at `.scout/servers/local.json` and add host and auth details for your target Kibana instance:
+Only use this if the CLI doesn't cover your use case. Ensure Scout and EDOT are already running.
+
+```bash
+node scripts/playwright test --config x-pack/platform/packages/shared/<suite-dir>/playwright.config.ts
+```
+
+</details>
+
+<details>
+<summary>Skipping connector setup/teardown</summary>
+
+If evaluating with pre-configured connectors (e.g. from `kibana.yml`):
+
+```bash
+KBN_EVALS_SKIP_CONNECTOR_SETUP=true node scripts/evals run --suite <id>
+```
+
+</details>
+
+<details>
+<summary>Running against your local/dev Kibana</summary>
+
+We recommend using Scout (the default). If you must target your own Kibana instance, create `.scout/servers/local.json`:
 
 ```json
 {
   "serverless": false,
   "isCloud": false,
-  "hosts": {
-    "kibana": "http://localhost:5601/<basePath>"
-  },
-  "auth": {
-    "username": "elastic",
-    "password": "changeme"
-  }
+  "hosts": { "kibana": "http://localhost:5601/<basePath>" },
+  "auth": { "username": "elastic", "password": "changeme" }
 }
 ```
 
-Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
+You must also configure tracing in `kibana.dev.yml`:
 
-> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
-
-## Regenerating Phoenix GraphQL types
-
-```bash
-node --require ./src/setup_node_env x-pack/platform/packages/shared/kbn-evals/scripts/generate_schema/index.ts
+```yaml
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+telemetry.enabled: true
+telemetry.tracing.enabled: true
+telemetry.tracing.sample_rate: 1
+telemetry.tracing.exporters:
+  - http:
+      url: 'http://localhost:4318/v1/traces'
 ```
 
-The script temporarily installs GraphQL-Codegen, fetches the Phoenix schema, emits the artefacts into `kibana_phoenix_client/__generated__`, lints them, and finally removes the transient dependencies.
+> **Note:** Starting Scout overwrites `.scout/servers/local.json`, so you may need to recreate it when switching back.
+
+</details>
+
+---
+
+### 1.2 Running evals on PRs (CI)
+
+Add GitHub labels to trigger evals in PR CI:
+
+| Label                         | Effect                                                            |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `evals:<suite-id>`            | Run a specific suite                                              |
+| `evals:all`                   | Run all suites                                                    |
+| `models:<model-group>`        | Select model(s) to evaluate (required -- evals skip without this) |
+| `models:judge:<connector-id>` | Override the judge connector                                      |
+| `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
+| `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
+
+Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+
+PRs touching the eval framework get `evals:smoke-tests` automatically
+([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
+`evals:skip-smoke-tests` to skip it.
+
+When the labels match, PR CI triggers the dedicated
+[`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
+surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
+results and triage.
+
+---
+
+### 1.3 On-demand evals (Buildkite)
+
+Run a suite on any branch without a PR:
+
+1. Open [kibana-evals-on-demand-llm-evals](https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals)
+2. Click **New build**, select branch/commit
+3. Add environment variables:
+
+| Variable                          | Required           | Description                                                                                                  |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `EVAL_SUITE_ID`                   | yes                | Suite id from `evals.suites.json`. Comma-separate to run several suites                                      |
+| `EVAL_MODEL_GROUPS`               | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2`                                  |
+| `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
+| `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
+| `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
+| `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
+| `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
+| `EVAL_SLACK_NOTIFICATION_CHANNEL` | no                 | Slack channel or member ID to send the triage to. If unset, no Slack notification is sent for on-demand runs |
+
+Example (single suite):
+
+```text
+EVAL_SUITE_ID=agent-builder
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+Example (multiple suites):
+
+```text
+EVAL_SUITE_ID=agent-builder,observability-ai,streams
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+#### Where the triage summary is sent (on-demand)
+
+On-demand triage routing is "branch OR PR" (never both), plus an independent Slack opt-in:
+
+- Run a **branch**: set the New Build **Branch** to branch (e.g. `main`). No PR comment is posted.
+- Run a **PR**: set the New Build **Branch** to `refs/pull/<N>/head` (e.g. `refs/pull/123/head`), Commit `HEAD`.
+- **Slack** is independent: set `EVAL_SLACK_NOTIFICATION_CHANNEL` to send the triage to a Slack channel.
+
+Example (PR run + Slack)
+Set Branch to `refs/pull/<N>/head`, Commit `HEAD`, then under Options -> Environment Variables:
+
+```text
+EVAL_SUITE_ID=observability-ai
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
+```
+
+---
+
+## 2. Creating a new evaluation suite
+
+Each eval suite lives in its own `kbn-evals-suite-<name>` package. The package contains a Playwright config, evaluation specs, and optionally custom fixtures.
+
+To scaffold a new suite, you can use the [`evals-create-suite`](../../../../../.agents/skills/evals-create-suite/SKILL.md) skill (available to AI coding agents) or follow its templates manually. Register suites in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) for CI labeling and `node scripts/evals list`.
+
+### Playwright config
+
+```ts
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
+
+export default createPlaywrightEvalsConfig({ testDir: __dirname });
+```
+
+This auto-discovers connectors and creates one Playwright project per model so the same test file runs against each.
+
+#### `workers` — parallelising spec files
+
+By default Playwright runs all spec files in the suite serially (`workers: 1`). If your spec files are independent you can run several in parallel:
+
+```ts
+export default createPlaywrightEvalsConfig({
+  testDir: __dirname,
+  workers: 3, // run up to 3 spec files simultaneously
+});
+```
+
+Allowed values are `1` (default), `2`, or `3`.
+
+**Before raising `workers`, verify that every spec file in the suite is isolation-safe:**
+
+hints:
+
+1. **Do two specs write to the same named index / data stream / saved-object namespace?** If yes, their cleanup windows can overlap and corrupt each other's data.
+2. **Do any tests assert hard-coded expected values that depend on the index being empty of other fixtures?** If yes, a concurrently seeding spec will invalidate those assertions.
+3. **Is `beforeAll` cleanup scoped to this run's resources only?** Cleanup via document IDs returned from the current `beforeAll` is safe; `deleteByQuery` on a shared alias without a run-specific filter is not.
+
+### Writing evaluation tests
+
+```ts
+import { evaluate } from '@kbn/evals';
+
+evaluate('the model should answer truthfully', async ({ inferenceClient, executorClient }) => {
+  const dataset = {
+    name: 'my-dataset',
+    description: 'my-description',
+    examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+  };
+
+  await executorClient.runExperiment(
+    {
+      datasets: [dataset],
+      task: async ({ input }) => {
+        const result = await inferenceClient.output({
+          id: 'foo',
+          input: input.content as string,
+        });
+        return { content: result.content };
+      },
+    },
+    [
+      {
+        name: 'equals',
+        kind: 'CODE',
+        evaluate: async ({ output, expected }) => ({
+          score: output?.content === expected?.content ? 1 : 0,
+          metadata: { output: output?.content, expected: expected?.content },
+        }),
+      },
+    ]
+  );
+});
+```
+
+### Tagging datasets
+
+Datasets can declare `tags` and a `maturity` level, which the dataset list in Kibana filters on. Declaring them alongside the examples keeps them current on every run:
+
+```ts
+const dataset = {
+  name: 'my-dataset',
+  description: 'my-description',
+  tags: ['agent-builder', 'esql'],
+  maturity: 'golden', // 'raw' | 'cleaned' | 'golden'
+  examples: [{ input: { content: 'Hi' }, output: { content: 'Hey' } }],
+};
+```
+
+Tags are lowercased and deduplicated when stored, so `ESQL` and `esql` are the same tag. Each tag must start with a letter or number and may otherwise contain letters, numbers and `: . _ -`; a tag with a space or comma in it fails the upsert with a 400, so keep them slug-like (`team:obs-ai`, `esql`). Leaving either field out preserves what the dataset already has, so a suite that doesn't declare them will not wipe tags curated in the UI.
+
+### Typing datasets
+
+```ts
+import type { Example } from '@kbn/evals';
+
+type MyExample = Example<
+  { question: string },
+  { expectedAnswer: string },
+  { tags?: string[] } | null
+>;
+```
+
+Use `selectEvaluators<MyExample, MyTaskOutput>(...)` for typed evaluator callbacks.
+
+### Available fixtures
+
+| Fixture            | Description                                                                |
+| ------------------ | -------------------------------------------------------------------------- |
+| `inferenceClient`  | Bound to the connector declared by the active Playwright project.          |
+| `executorClient`   | Runs experiments (in-Kibana executor by default).                          |
+| `evalsClient`      | Client for evals plugin APIs (scores, datasets, experiment stats).         |
+| `reportModelScore` | Displays results in terminal (overridable for custom reporting).           |
+| `traceEsClient`    | ES client for querying OTel traces (defaults to Scout `esClient` cluster). |
+
+### Available evaluators
+
+Built-in evaluator factories you can use directly or as inspiration for custom evaluators:
+
+- **LLM-as-a-judge** -- the most common evaluator type. Built-in judge evaluators include:
+  - `Criteria` -- scores output against user-defined criteria (most commonly used)
+  - `Correctness` -- checks factual accuracy against expected output
+  - `Groundedness` -- verifies claims are supported by provided context
+- **Trace-based** -- `createTraceBasedEvaluator` (token usage, latency, tool calls), `createSkillInvocationEvaluator` (checks agent skill reads)
+- **RAG** -- `createRagEvaluators` (Precision@K, Recall@K, F1@K)
+- **Code evaluators** -- any inline `{ name, kind: 'CODE', evaluate }` object
+
+You can use these as-is or build your own directly in the suite.
+
+#### LLM-as-a-judge
+
+Set `--judge` to select which model judges results. Judge evaluators receive the judge connector automatically.
+
+```bash
+node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
+```
+
+#### Selecting evaluators at runtime
+
+Wrap evaluators with `selectEvaluators()` then control which run via environment variable:
+
+```bash
+SELECTED_EVALUATORS="Factuality,Relevance" node scripts/evals run --suite agent-builder
+```
+
+### Customizing report display
+
+Override `reportModelScore` to create custom reports:
+
+```ts
+import { evaluate as base, type EvalsClient } from '@kbn/evals';
+
+export const evaluate = base.extend({
+  reportModelScore: async ({}, use) => {
+    await use(async (evalsClient: EvalsClient, experimentId, log) => {
+      const experimentStats = await evalsClient.getExperimentStats(experimentId);
+      log.info(`Model: ${experimentStats.taskModel.id}`);
+      // Custom formatting, file output, etc.
+    });
+  },
+});
+```
+
+Score ingestion happens before custom reporting and is not affected by it.
+
+---
+
+## 3. Seeding datasets into your environment
+
+Use [`@kbn/es-snapshot-loader`](../kbn-es-snapshot-loader/) to restore snapshots and replay data streams within your eval suite. See that package's README for full API docs.
+
+- **`restoreSnapshot`** -- restore indices directly from a GCS/URL/FS snapshot
+- **`replaySnapshot`** -- restore with timestamp transformation, making historical data streams appear fresh
+
+Typical usage in a suite (from [`kbn-evals-suite-observability-ai`](../../../../solutions/observability/packages/kbn-evals-suite-observability-ai)):
+
+```ts
+import { createGcsRepository, replaySnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await replaySnapshot({
+  esClient,
+  log,
+  repository: createGcsRepository({ bucket: 'my-bucket', basePath: 'my-path' }),
+  snapshotName: 'my-snapshot',
+  patterns: ['logs-*', 'metrics-*', 'traces-*'],
+});
+```
+
+Set `GCS_CREDENTIALS` (full JSON service account string) before starting Scout so Elasticsearch can access GCS repositories.
+
+### Dataplex (optional)
+
+Register snapshot datasets in Dataplex for discoverability. Aspects YAML files live in `snapshots/dataplex/<team>/`.
+
+```bash
+node scripts/evals dataplex sync            # Create/update entries from YAML
+node scripts/evals dataplex sync --dry-run   # Preview changes
+```
+
+---
+
+## 4. Developer details
+
+### Automated label sync
+
+`models:*` and `models:judge:*` labels are synced automatically:
+
+- **Weekly** -- the weekly LLM evals pipeline includes a label sync step
+- **On demand** -- add `ci:sync-model-labels` label to any PR
+
+Stale labels are renamed to `deprecated:models:*` (kept for historical record).
+
+### CI ops
+
+Update all model + judge labels:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels --prune  # also deprecate stale
+```
+
+Update Vault config:
+
+```bash
+# Edit scripts/vault/config.json, then generate a vault write command:
+node scripts/vault/get_command.js --vault ci-prod
+# Sync from Vault:
+node scripts/vault/retrieve_secrets.js --vault ci-prod
+```
+
+### CI telemetry
+
+EIS inference requests are tagged with `X-Elastic-Product-Use-Case: kbn_evals`. Override via `KBN_EVALS_TELEMETRY_PLUGIN_ID`.
+
+### Golden cluster privileges
+
+A single API key covers all golden cluster operations (scores, traces, datasets). Create via Kibana Dev Tools using the privilege payload exported from [`@kbn/evals-common`](../kbn-evals-common/golden_cluster_privileges.ts).
+
+Grants:
+
+- Write/read `.evaluation-scores*` (results)
+- Write/read `traces-*` (OTLP traces)
+- Write/read/delete `.evaluation-dataset*` (managed datasets)
+- Kibana `evals` feature privilege (`all`)
+
+With `--profile dev-vault`, these keys are read from Vault automatically.

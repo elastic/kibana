@@ -85,7 +85,7 @@ export const QueryRulesSets = () => {
             return (
               <UseRunQueryRuleset
                 rulesetId={item.ruleset_id}
-                type="contextMenuItem"
+                type="tableActionItem"
                 content={i18n.translate('xpack.queryRules.queryRulesSetTable.actions.run', {
                   defaultMessage: 'Test in Console',
                 })}
@@ -156,6 +156,9 @@ export const QueryRulesSets = () => {
             items={queryRulesSetsFilteredData} // Use filtered data from hook
             columns={columns}
             pagination={pagination}
+            tableCaption={i18n.translate('xpack.queryRules.queryRulesSetTable.tableCaption', {
+              defaultMessage: 'Query rule sets list',
+            })}
             onChange={({ page: changedPage }) => {
               setPageIndex(changedPage.index);
               setPageSize(changedPage.size);

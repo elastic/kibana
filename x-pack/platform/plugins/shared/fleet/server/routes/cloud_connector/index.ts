@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
@@ -22,6 +24,8 @@ import {
   UpdateCloudConnectorResponseSchema,
   DeleteCloudConnectorRequestSchema,
   DeleteCloudConnectorResponseSchema,
+  GetCloudConnectorUsageRequestSchema,
+  GetCloudConnectorUsageResponseSchema,
 } from '../../types/rest_spec/cloud_connector';
 
 import {
@@ -30,6 +34,7 @@ import {
   getCloudConnectorHandler,
   updateCloudConnectorHandler,
   deleteCloudConnectorHandler,
+  getCloudConnectorUsageHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -50,6 +55,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Create cloud connector',
+      description: 'Create a new Fleet cloud connector.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -61,6 +67,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_cloud_connector.yaml'),
+        },
         validate: {
           request: CreateCloudConnectorRequestSchema,
           response: {
@@ -95,6 +104,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get cloud connectors',
+      description: 'List all Fleet cloud connectors.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -106,6 +116,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_cloud_connectors.yaml'),
+        },
         validate: {
           request: GetCloudConnectorsRequestSchema,
           response: {
@@ -140,6 +153,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get cloud connector',
+      description: 'Get a cloud connector by ID.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -151,6 +165,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_cloud_connector.yaml'),
+        },
         validate: {
           request: GetCloudConnectorRequestSchema,
           response: {
@@ -185,6 +202,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Update cloud connector',
+      description: 'Update a cloud connector by ID.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -196,6 +214,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_cloud_connector.yaml'),
+        },
         validate: {
           request: UpdateCloudConnectorRequestSchema,
           response: {
@@ -230,6 +251,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Delete cloud connector (supports force deletion)',
+      description:
+        'Delete a cloud connector by ID. Use the `force` query parameter to delete even if package policies are still using it.',
       options: {
         tags: ['oas-tag:Fleet cloud connectors'],
         availability: {
@@ -241,6 +264,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_cloud_connector.yaml'),
+        },
         validate: {
           request: DeleteCloudConnectorRequestSchema,
           response: {
@@ -256,5 +282,104 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteCloudConnectorHandler
+    );
+
+  // GET /api/fleet/cloud_connectors/{cloudConnectorId}/usage
+  router.versioned
+    .get({
+      path: CLOUD_CONNECTOR_API_ROUTES.USAGE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud connector usage (package policies using the connector)',
+      description: 'Get a list of package policies that are using a given cloud connector.',
+      options: {
+        tags: ['oas-tag:Fleet cloud connectors'],
+        availability: {
+          since: '9.2.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              '200': {
+                content: {
+                  'application/json': {
+                    examples: {
+                      getCloudConnectorUsageResponseExample: {
+                        description:
+                          'Example response showing package policies using the cloud connector',
+                        value: {
+                          items: [
+                            {
+                              id: 'package-policy-1',
+                              name: 'CSPM AWS Policy',
+                              package: {
+                                name: 'cloud_security_posture',
+                                title: 'Cloud Security Posture Management',
+                                version: '3.1.1',
+                              },
+                              policy_ids: ['policy-id-123', 'policy-id-456'],
+                              created_at: '2025-01-16T09:00:00.000Z',
+                              updated_at: '2025-01-16T09:00:00.000Z',
+                            },
+                          ],
+                          total: 2,
+                          page: 1,
+                          perPage: 20,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              '400': {
+                content: {
+                  'application/json': {
+                    examples: {
+                      genericErrorResponseExample: {
+                        description: 'Example of a generic error response',
+                        value: {
+                          statusCode: 400,
+                          error: 'Bad Request',
+                          message: 'Cloud connector not found',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: GetCloudConnectorUsageRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudConnectorUsageResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudConnectorUsageHandler
     );
 };

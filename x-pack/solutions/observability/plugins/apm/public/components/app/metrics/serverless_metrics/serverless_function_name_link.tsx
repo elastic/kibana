@@ -7,11 +7,10 @@
 import { EuiLink } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React from 'react';
+import { truncate } from '@kbn/apm-common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { truncate } from '../../../../utils/style';
-
 const StyledLink = styled(EuiLink)`
   ${truncate('100%')};
 `;

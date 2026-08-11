@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { GapFillStatus } from '@kbn/alerting-plugin/common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
@@ -17,6 +18,8 @@ type PrepareSearchFilterProps =
   | {
       filterOptions: FilterOptions;
       gapRange?: { start: string; end: string };
+      gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
       dryRunResult?: DryRunResult;
     };
 
@@ -78,5 +81,7 @@ export const prepareSearchParams = ({
   return {
     query: convertRulesFilterToKQL(modifiedFilterOptions),
     ...(props.gapRange ? { gapRange: props.gapRange } : {}),
+    ...(props.gapFillStatuses?.length ? { gapFillStatuses: props.gapFillStatuses } : {}),
+    ...(props.schedulerId ? { schedulerId: props.schedulerId } : {}),
   };
 };

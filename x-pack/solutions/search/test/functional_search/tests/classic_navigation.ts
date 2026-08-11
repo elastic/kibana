@@ -34,10 +34,10 @@ export default function searchSolutionNavigation({
       await cleanUp();
     });
 
-    // TODO: see https://github.com/elastic/kibana/pull/243499
-    it.skip('renders expected navigation items', async () => {
+    it('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
+        { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Build', label: 'Build' },
         { id: 'Indices', label: 'Index Management' },
         { id: 'Playground', label: 'Playground' },
@@ -46,7 +46,6 @@ export default function searchSolutionNavigation({
         { id: 'Relevance', label: 'Relevance' },
         { id: 'Synonyms', label: 'Synonyms' },
         { id: 'QueryRules', label: 'Query rules' },
-        { id: 'InferenceEndpoints', label: 'Inference endpoints' },
       ]);
     });
     it('has expected navigation', async () => {
@@ -62,7 +61,7 @@ export default function searchSolutionNavigation({
         {
           navItem: 'Indices',
           breadcrumbs: ['Build', 'Index Management'],
-          pageTestSubject: 'indexManagementHeaderContent',
+          pageTestSubject: 'indicesList',
         },
         {
           navItem: 'Playground',
@@ -83,11 +82,6 @@ export default function searchSolutionNavigation({
           navItem: 'QueryRules',
           breadcrumbs: ['Relevance', 'Query rules'],
           pageTestSubject: 'queryRulesBasePage',
-        },
-        {
-          navItem: 'InferenceEndpoints',
-          breadcrumbs: ['Relevance', 'Inference endpoints'],
-          pageTestSubject: 'inferenceEndpointsPage',
         },
       ];
 

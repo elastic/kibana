@@ -29,12 +29,10 @@ export const parseMappings = (
     dynamic,
     properties,
     runtime,
-    /* eslint-disable @typescript-eslint/naming-convention */
     numeric_detection,
     date_detection,
     dynamic_date_formats,
     dynamic_templates,
-    /* eslint-enable @typescript-eslint/naming-convention */
     subobjects,
   } = mappingsDefinition;
 

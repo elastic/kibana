@@ -11,6 +11,7 @@ import {
   type CreateListIndexResponse,
   CreateListIndexResponse as ResponseSchema,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -39,59 +40,78 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
       path: LIST_INDEX,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })
-    .addVersion({ validate: false, version: '2023-10-31' }, async (context, _, response) => {
-      const siemResponse = buildSiemResponse(response);
+    .addVersion(
+      {
+        options: {
+          deprecated: {
+            documentationUrl: '',
+            message:
+              'List index creation is now handled automatically by the Security Solution initialization framework via POST /api/security_solution/initialize.',
+            reason: {
+              newApiMethod: 'POST',
+              newApiPath: '/api/security_solution/initialize',
+              type: 'migrate',
+            },
+            severity: 'warning',
+          },
+        },
+        validate: false,
+        version: '2023-10-31',
+      },
+      async (context, _, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const lists = await getInternalListClient(context);
+        try {
+          const lists = await getInternalListClient(context);
 
-        const listDataStreamExists = await lists.getListDataStreamExists();
-        const listItemDataStreamExists = await lists.getListItemDataStreamExists();
+          const listDataStreamExists = await lists.getListDataStreamExists();
+          const listItemDataStreamExists = await lists.getListItemDataStreamExists();
 
-        const templateListExists = await lists.getListTemplateExists();
-        const templateListItemsExists = await lists.getListItemTemplateExists();
+          const templateListExists = await lists.getListTemplateExists();
+          const templateListItemsExists = await lists.getListItemTemplateExists();
 
-        if (!templateListExists || !listDataStreamExists) {
-          await lists.setListTemplate();
-        }
+          if (!templateListExists || !listDataStreamExists) {
+            await lists.setListTemplate();
+          }
 
-        if (!templateListItemsExists || !listItemDataStreamExists) {
-          await lists.setListItemTemplate();
-        }
+          if (!templateListItemsExists || !listItemDataStreamExists) {
+            await lists.setListItemTemplate();
+          }
 
-        if (listDataStreamExists && listItemDataStreamExists) {
+          if (listDataStreamExists && listItemDataStreamExists) {
+            return response.ok(getAcknowledgedResponse());
+          }
+
+          if (!listDataStreamExists) {
+            await ignoreResourceAlreadyExistsError(async () => {
+              const listIndexExists = await lists.getListIndexExists();
+              await (listIndexExists
+                ? lists.migrateListIndexToDataStream()
+                : lists.createListDataStream());
+            });
+          }
+
+          if (!listItemDataStreamExists) {
+            await ignoreResourceAlreadyExistsError(async () => {
+              const listItemIndexExists = await lists.getListItemIndexExists();
+              await (listItemIndexExists
+                ? lists.migrateListItemIndexToDataStream()
+                : lists.createListItemDataStream());
+            });
+          }
+
           return response.ok(getAcknowledgedResponse());
-        }
-
-        if (!listDataStreamExists) {
-          await ignoreResourceAlreadyExistsError(async () => {
-            const listIndexExists = await lists.getListIndexExists();
-            await (listIndexExists
-              ? lists.migrateListIndexToDataStream()
-              : lists.createListDataStream());
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        if (!listItemDataStreamExists) {
-          await ignoreResourceAlreadyExistsError(async () => {
-            const listItemIndexExists = await lists.getListItemIndexExists();
-            await (listItemIndexExists
-              ? lists.migrateListItemIndexToDataStream()
-              : lists.createListItemDataStream());
-          });
-        }
-
-        return response.ok(getAcknowledgedResponse());
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    });
+    );
 };

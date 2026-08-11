@@ -15,6 +15,8 @@ import { appContextService } from '../../services';
 import { TASK_TIMEOUT, TASK_TITLE, TASK_TYPE, type SetupTaskParams } from './utils';
 import { runBackportPackagePolicyInputId } from './run_backport_package_policy_input_id';
 import { runMigrateComponentTemplateILMs } from './run_migrate_component_template_ilms';
+import { runUpgradePackageInstallVersion } from './run_upgrade_package_install_version';
+import { runReinstallPackagesForGlobalAssetUpdate } from './run_reinstall_packages_for_global_asset_update';
 
 /**
  * Register Fleet setup operations, migrations, ...
@@ -27,10 +29,10 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
       maxAttempts: 3,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         const logger = appContextService.getLogger();
 
@@ -42,12 +44,22 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
             try {
               if (taskParams.type === 'backportPackagePolicyInputId') {
                 await runBackportPackagePolicyInputId({
-                  abortController,
+                  signal,
                   logger,
                 });
               } else if (taskParams.type === 'migrateComponentTemplateILMs') {
                 await runMigrateComponentTemplateILMs({
-                  abortController,
+                  signal,
+                  logger,
+                });
+              } else if (taskParams.type === 'upgradePackageInstallVersion') {
+                await runUpgradePackageInstallVersion({
+                  signal,
+                  logger,
+                });
+              } else if (taskParams.type === 'reinstallPackagesForGlobalAssetUpdate') {
+                await runReinstallPackagesForGlobalAssetUpdate({
+                  signal,
                   logger,
                 });
               } else {

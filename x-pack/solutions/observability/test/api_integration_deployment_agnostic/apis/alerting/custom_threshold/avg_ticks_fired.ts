@@ -35,8 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // Failing: See https://github.com/elastic/kibana/issues/240902
-  describe.skip('AVG - TICKS - FIRED', () => {
+  describe('AVG - TICKS - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
@@ -108,10 +107,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await esClient.deleteByQuery({
         index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+        conflicts: 'proceed',
+        refresh: true,
       });
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': expectedConsumer } },
+        conflicts: 'proceed',
+        refresh: true,
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,

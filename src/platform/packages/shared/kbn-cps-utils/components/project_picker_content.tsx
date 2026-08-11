@@ -11,31 +11,48 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
-  EuiPopoverTitle,
   EuiButtonGroup,
   EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiLoadingSpinner,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { ProjectsData } from '../types';
-import { PROJECT_ROUTING } from '../constants';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
-import { useFetchProjects } from './use_fetch_projects';
+import type { UseFetchProjectsResult } from './use_fetch_projects';
 
-export interface ProjectPickerContentProps {
+export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
+
+interface ProjectPickerContentBaseProps {
   projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  fetchProjects: () => Promise<ProjectsData | null>;
-  isReadonly?: boolean;
-  readonlyCustomTitle?: string;
+  projects: UseFetchProjectsResult;
 }
+
+interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
+  controlsState?: 'enabled';
+  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
+}
+
+interface ProjectPickerContentReadOnlyProps extends ProjectPickerContentBaseProps {
+  /**
+   * Controls the project routing toggle (`All projects` / `This project`):
+   * - `disabled`: shown but not interactive
+   * - `hidden`: not rendered, leaving a read-only project list
+   */
+  controlsState: Exclude<ProjectPickerControlsState, 'enabled'>;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+}
+
+export type ProjectPickerContentProps =
+  | ProjectPickerContentEnabledProps
+  | ProjectPickerContentReadOnlyProps;
 
 const projectPickerOptions = [
   {
@@ -43,90 +60,49 @@ const projectPickerOptions = [
     label: i18n.translate('cpsUtils.projectPicker.allProjectsLabel', {
       defaultMessage: 'All projects',
     }),
+    'data-test-subj': 'cpsProjectRoutingButton-all',
   },
   {
     id: PROJECT_ROUTING.ORIGIN,
     label: strings.getOriginProjectLabel(),
+    'data-test-subj': 'cpsProjectRoutingButton-origin',
   },
 ];
 
 export const ProjectPickerContent = ({
   projectRouting,
   onProjectRoutingChange,
-  fetchProjects,
-  isReadonly = false,
-  readonlyCustomTitle,
+  projects,
+  controlsState = 'enabled',
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
-  const { originProject, linkedProjects } = useFetchProjects(fetchProjects);
+  const { originProject, linkedProjects, error, isLoading } = projects;
 
-  // Don't render if we don't have the required data yet
-  if (!originProject || !linkedProjects) {
+  if (!isLoading && !error && !originProject && linkedProjects.length === 0) {
     return null;
   }
 
-  const projectsList =
-    projectRouting === PROJECT_ROUTING.ORIGIN
-      ? [originProject]
-      : [originProject, ...linkedProjects];
+  const projectsList = originProject ? [originProject, ...linkedProjects] : linkedProjects;
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiPopoverTitle paddingSize="s">
-          <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiTitle size="xxs">
-                <h5>{strings.getProjectPickerPopoverTitle()}</h5>
-              </EuiTitle>
-            </EuiFlexItem>
-            {/* TODO: Add settings button when cps management is available
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={strings.getManageCrossProjectSearchLabel()} repositionOnScroll>
-                <EuiButtonIcon
-                  display="empty"
-                  iconType="gear"
-                  aria-label={i18n.translate('cpsUtils.projectPicker.settingsButtonLabel', {
-                    defaultMessage: 'Manage cross-project search',
-                  })}
-                  onClick={() => {
-                    // TODO: redirect to the correct project settings page
-                  }}
-                  isDisabled={true}
-                  size="xs"
-                  color="text"
-                />
-              </EuiToolTip>
-            </EuiFlexItem> */}
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
-        {isReadonly && (
-          <EuiCallOut
-            size="s"
-            css={styles.callout}
-            title={readonlyCustomTitle ?? strings.getProjectPickerReadonlyCallout()}
-            iconType="info"
+      {controlsState !== 'hidden' ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            isFullWidth
+            legend={strings.projectPickerButtonAriaLabel}
+            idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
+            options={projectPickerOptions}
+            onChange={(optionId: string) => {
+              onProjectRoutingChange?.(optionId);
+            }}
+            css={styles.buttonGroup}
+            buttonSize="compressed"
+            isDisabled={controlsState === 'disabled'}
           />
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          isFullWidth
-          legend={strings.getProjectPickerButtonAriaLabel()}
-          idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
-          options={projectPickerOptions}
-          onChange={(value: string) => {
-            // TODO: add telemetry for project scope change?
-            onProjectRoutingChange(
-              value === PROJECT_ROUTING.ORIGIN ? PROJECT_ROUTING.ORIGIN : PROJECT_ROUTING.ALL
-            );
-          }}
-          css={styles.buttonGroup}
-          buttonSize="compressed"
-          isDisabled={isReadonly}
-        />
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false} css={styles.projectCountHeader}>
         <EuiTitle size="xxxs">
           <h6 css={styles.projectCountTitle}>
@@ -134,23 +110,36 @@ export const ProjectPickerContent = ({
               id="cpsUtils.projectPicker.numberOfProjectsDescription"
               defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
               values={{
-                numberOfProjects:
-                  projectRouting === PROJECT_ROUTING.ORIGIN ? 1 : linkedProjects.length + 1,
+                numberOfProjects: projectsList.length,
               }}
             />
           </h6>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem css={styles.listContainer} className="eui-yScroll">
+        {isLoading && (
+          <div css={styles.loadingOverlay}>
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-          {projectsList.map((project, index) => (
-            <ProjectListItem
-              key={project._id}
-              project={project}
-              index={index}
-              isOriginProject={project._id === originProject._id}
+          {error ? (
+            <KbnDangerCallout
+              announceOnMount
+              size="s"
+              title={strings.getProjectPickerFetchError()}
+              css={styles.errorCallout}
             />
-          ))}
+          ) : (
+            projectsList.map((project, index) => (
+              <ProjectListItem
+                key={project._id}
+                project={project}
+                index={index}
+                isOriginProject={project._id === originProject?._id}
+              />
+            ))
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -158,6 +147,10 @@ export const ProjectPickerContent = ({
 };
 
 const projectPickerContentStyles = {
+  errorCallout: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: euiTheme.size.m,
+    }),
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       maxHeight: euiTheme.base * 25,
@@ -165,7 +158,7 @@ const projectPickerContentStyles = {
     }),
   buttonGroup: ({ euiTheme }: UseEuiTheme) =>
     css({
-      margin: euiTheme.size.s,
+      margin: euiTheme.size.m,
     }),
   projectCountHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -179,9 +172,23 @@ const projectPickerContentStyles = {
   listContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      position: 'relative',
     }),
-  callout: ({ euiTheme }: UseEuiTheme) =>
+  loadingOverlay: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.m,
+      position: 'absolute',
+      inset: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1,
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        opacity: 0.8,
+        borderRadius: euiTheme.border.radius.small,
+      },
     }),
 };

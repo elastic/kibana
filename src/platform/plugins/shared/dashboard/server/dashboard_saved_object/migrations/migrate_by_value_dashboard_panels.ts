@@ -8,13 +8,10 @@
  */
 
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import {
-  controlGroupSavedObjectStateToSerializableRuntimeState,
-  serializableRuntimeStateToControlGroupSavedObjectState,
-} from '@kbn/controls-plugin/server';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
 import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { safeJsonParse, safeJsonStringify } from '@kbn/std';
 
 import {
   convertPanelStateToSavedDashboardPanel,
@@ -34,15 +31,17 @@ export const migrateByValueDashboardPanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupState = controlGroupSavedObjectStateToSerializableRuntimeState(
-        attributes.controlGroupInput
-      );
+      const controlGroupState: SerializableRecord = {
+        panels: safeJsonParse(attributes.controlGroupInput.panelsJSON) ?? {},
+      };
+
       const migratedControlGroupInput = migrate({
         ...controlGroupState,
         type: CONTROLS_GROUP_TYPE,
       } as SerializableRecord);
-      attributes.controlGroupInput =
-        serializableRuntimeStateToControlGroupSavedObjectState(migratedControlGroupInput);
+      attributes.controlGroupInput = {
+        panelsJSON: safeJsonStringify(migratedControlGroupInput.panels),
+      };
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

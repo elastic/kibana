@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-ai-assistant-app-plugin'
-type: unknown
+layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-ai-assistant'
-toolchain:
+  defaultOwner: '@elastic/nightshift-context-and-research-team'
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-ai-assistant-app-plugin'
+  title: '@kbn/observability-ai-assistant-app-plugin'
   description: Moon project for @kbn/observability-ai-assistant-app-plugin
   channel: ''
-  owner: '@elastic/obs-ai-assistant'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_ai_assistant_app
+  owner: '@elastic/nightshift-context-and-research-team'
+  sourceRoot: x-pack/solutions/observability/plugins/observability_ai_assistant_app
 dependsOn:
   - '@kbn/es-types'
   - '@kbn/observability-ai-assistant-plugin'
@@ -47,7 +46,7 @@ dependsOn:
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/dev-cli-runner'
   - '@kbn/tooling-log'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/expect'
   - '@kbn/synthtrace-client'
   - '@kbn/alerting-plugin'
@@ -61,8 +60,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/es-query'
   - '@kbn/rule-registry-plugin'
-  - '@kbn/esql-validation-autocomplete'
-  - '@kbn/esql-ast'
+  - '@kbn/esql-language'
   - '@kbn/field-types'
   - '@kbn/security-plugin'
   - '@kbn/observability-plugin'
@@ -88,11 +86,14 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
   - '@kbn/alerts-ui-shared'
-  - '@kbn/traced-es-client'
-  - '@kbn/licensing-types'
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/object-utils'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/react-query'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
@@ -108,16 +109,6 @@ fileGroups:
     - server/**/*
     - .storybook/**/*.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

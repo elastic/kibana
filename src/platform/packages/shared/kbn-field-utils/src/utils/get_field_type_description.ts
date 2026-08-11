@@ -156,6 +156,10 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('fieldUtils.fieldNameDescription.versionField', {
         defaultMessage: 'Software versions. Supports "Semantic Versioning" precedence rules.',
       });
+    case KNOWN_FIELD_TYPES.NULL:
+      return i18n.translate('fieldUtils.fieldNameDescription.nullField', {
+        defaultMessage: 'Field with null values.',
+      });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;

@@ -57,7 +57,7 @@ describe('alertSearchBarStateContainer', () => {
   });
 
   it('should update controlConfigs using setControlConfigs', () => {
-    const newControlConfigs: FilterControlConfig[] = [{ fieldName: 'host.name' }];
+    const newControlConfigs: FilterControlConfig[] = [{ field_name: 'host.name' }];
     alertSearchBarStateContainer.transitions.setControlConfigs(newControlConfigs);
     expect(alertSearchBarStateContainer.get().controlConfigs).toEqual(newControlConfigs);
   });

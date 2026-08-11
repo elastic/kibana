@@ -6,7 +6,7 @@
  */
 
 import { isArray } from 'lodash';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import type { MetricsAPIRequest, MetricsExplorerRequestBody } from '../../../../common/http_api';
 import { afterKeyObjectRT } from '../../../../common/http_api';
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';

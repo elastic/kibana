@@ -11,11 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import {
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
@@ -51,15 +47,15 @@ export const createEndpointTrustedAppsList = async ({
         comments: undefined,
         created_at: dateNow,
         created_by: user,
-        description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
+        description: ENDPOINT_ARTIFACT_LISTS.trustedApps.description,
         entries: undefined,
         expire_time: undefined,
         immutable: false,
         item_id: undefined,
-        list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         list_type: 'list',
         meta: undefined,
-        name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+        name: ENDPOINT_ARTIFACT_LISTS.trustedApps.name,
         os_types: [],
         tags: [],
         tie_breaker_id: tieBreaker ?? uuidv4(),
@@ -69,7 +65,7 @@ export const createEndpointTrustedAppsList = async ({
       },
       {
         // We intentionally hard coding the id so that there can only be one Trusted apps list within the space
-        id: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       }
     );
     return transformSavedObjectToExceptionList({ savedObject });

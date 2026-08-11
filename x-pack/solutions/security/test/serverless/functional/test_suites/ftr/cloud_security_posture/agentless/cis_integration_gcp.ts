@@ -13,7 +13,6 @@ import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
@@ -24,24 +23,35 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationGcp: typeof pageObjects.cisAddIntegration.cisGcp;
-
-    const mockAgentlessApiService = setupMockServer();
     let mockApiServer: http.Server;
 
     before(async () => {
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
+
+      // Ensure CSP is installed — prior suites in this FTR config (e.g. cis_integration_aws)
+      // delete the package in their after hook, so we can't rely on the server-args preinstall.
+      await supertest
+        .post('/api/fleet/epm/packages/cloud_security_posture')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      mockApiServer.close();
+      try {
+        await supertest
+          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({ force: true })
+          .expect(200);
+      } finally {
+        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
+      }
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
@@ -52,6 +62,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_SINGLE_ACCOUNT_TEST_SUBJ);
 
         await cisIntegration.selectSetupTechnology('agentless');
+
+        // When GCP Cloud Connectors are enabled (package >= 3.3.0-preview03), the form defaults
+        // to the cloud_connectors credential type. Switch to credentials-json to show the
+        // Cloud Shell button — same pattern used by the AWS test with selectAwsCredentials('direct').
+        if (await cisIntegration.isGcpCredentialSelectorVisible()) {
+          await cisIntegration.selectGcpCredentials('credentials-json');
+        }
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -66,12 +83,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
 
+        // Same as above — switch away from cloud_connectors when the selector is visible.
+        if (await cisIntegration.isGcpCredentialSelectorVisible()) {
+          await cisIntegration.selectGcpCredentials('credentials-json');
+        }
+
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
     });
 
+    // credentials_json field component changed, getFieldAttributeValue returns [object Object]
     describe.skip('Serverless - Agentless CIS_GCP edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newCredentialsJSON = 'newJson';

@@ -66,7 +66,7 @@ export const spacesManagementApp = Object.freeze({
 
       async mount({ element, setBreadcrumbs, history }) {
         const [
-          [coreStart, { features }],
+          [coreStart, { features, cps }],
           { SpacesGridPage },
           { CreateSpacePage },
           { EditSpacePage },
@@ -124,6 +124,7 @@ export const spacesManagementApp = Object.freeze({
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               eventTracker={eventTracker}
+              isCpsTierEligible={cps?.isTierEligible ?? false}
             />
           );
         };
@@ -181,7 +182,7 @@ export const spacesManagementApp = Object.freeze({
 
         render(
           coreStart.rendering.addContext(
-            <KibanaContextProvider services={coreStart}>
+            <KibanaContextProvider services={{ ...coreStart, cps }}>
               <RedirectAppLinks coreStart={coreStart}>
                 <Router history={history}>
                   <Routes>

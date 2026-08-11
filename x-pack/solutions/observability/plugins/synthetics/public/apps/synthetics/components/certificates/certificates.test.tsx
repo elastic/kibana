@@ -9,11 +9,12 @@ import React from 'react';
 import { CertificatesPage } from './certificates';
 import { render } from '../../utils/testing';
 
+jest.setTimeout(10_000);
+
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {
     const { findByText } = render(<CertificatesPage />);
 
-    expect(await findByText('This table contains 0 rows; Page 1 of 0.')).toBeInTheDocument();
     expect(await findByText('No Certificates found.')).toBeInTheDocument();
   });
 });

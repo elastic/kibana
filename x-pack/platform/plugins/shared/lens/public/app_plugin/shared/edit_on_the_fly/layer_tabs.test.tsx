@@ -120,12 +120,12 @@ describe('LayerTabs', () => {
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           visualization: {
             activeId: 'testVis',
             state: 'state',
@@ -155,7 +155,7 @@ describe('LayerTabs', () => {
     datasourceMap: ReturnType<typeof mockDatasourceMap>;
   } {
     frame.datasourceLayers = {
-      first: datasourceMap.testDatasource.publicAPIMock,
+      first: datasourceMap.formBased.publicAPIMock,
     };
 
     // Override getAddLayerButtonComponent to return simple buttons for testing
@@ -222,7 +222,7 @@ describe('LayerTabs', () => {
         },
       ]);
 
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
       const { instance, lensStore } = await prepareAndMountComponent(props);
 
@@ -256,7 +256,7 @@ describe('LayerTabs', () => {
         layerId: 'newId',
         prevState: undefined,
       });
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+      expect(datasourceMap.formBased.initializeDimension).not.toHaveBeenCalled();
     });
 
     it('should not add an initial dimension when not specified', async () => {
@@ -270,7 +270,7 @@ describe('LayerTabs', () => {
           label: 'Reference layer',
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
@@ -278,13 +278,13 @@ describe('LayerTabs', () => {
 
       // One call for adding the layer, one call for setting it as the current selected layer
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+      expect(datasourceMap.formBased.initializeDimension).not.toHaveBeenCalled();
     });
 
     it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
 
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
@@ -309,7 +309,7 @@ describe('LayerTabs', () => {
       addNewLayer(instance);
       // One call for adding the layer, one call for setting it as the current selected layer
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
+      expect(datasourceMap.formBased.initializeDimension).not.toHaveBeenCalled();
     });
 
     it('should use group initial dimension value when adding a new layer if available', async () => {
@@ -346,7 +346,7 @@ describe('LayerTabs', () => {
           ],
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ datasourceMap, visualizationMap });
 
       const { instance, lensStore } = await prepareAndMountComponent(props);
@@ -354,7 +354,7 @@ describe('LayerTabs', () => {
 
       // One call for adding the layer, one call for setting it as the current selected layer
       expect(lensStore.dispatch).toHaveBeenCalledTimes(2);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+      expect(datasourceMap.formBased.initializeDimension).toHaveBeenCalledWith(
         {},
         'newId',
         frame.dataViews.indexPatterns,
@@ -362,6 +362,7 @@ describe('LayerTabs', () => {
           columnId: 'myColumn',
           groupId: 'testGroup',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -434,12 +435,12 @@ describe('LayerTabs', () => {
       const { instance } = await prepareAndMountComponent(props, {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            formBased: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: 'formBased',
           visualization: {
             activeId: 'testVis',
             state: 'state',
@@ -462,7 +463,7 @@ describe('LayerTabs', () => {
       expect(instance.find('[data-test-subj="lnsLayerActionsMenu"]').exists()).toBe(true);
 
       // The delete action should exist
-      expect(instance.find('button[title="Delete layer"]').exists()).toBe(true);
+      expect(instance.find('button[aria-label="Delete layer"]').exists()).toBe(true);
     });
 
     it('should call the remove callback when deleting layer', async () => {
@@ -506,7 +507,7 @@ describe('LayerTabs', () => {
 
       // Click the delete layer button
       act(() => {
-        instance.find('button[title="Delete layer"]').first().simulate('click');
+        instance.find('button[aria-label="Delete layer"]').first().simulate('click');
       });
       instance.update();
 

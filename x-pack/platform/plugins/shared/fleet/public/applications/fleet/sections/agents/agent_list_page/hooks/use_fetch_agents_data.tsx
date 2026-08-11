@@ -27,9 +27,15 @@ import {
   useAgentlessResources,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper } from '../../../../services';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
+import {
+  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  FLEET_PAGE_SIZE_OPTIONS,
+} from '../../../../constants';
 
 import { getKuery } from '../utils/get_kuery';
+
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
 
 import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
@@ -181,7 +187,7 @@ export function useFetchAgentsData() {
     [updateTableState]
   );
 
-  const pageSizeOptions = [5, 20, 50];
+  const pageSizeOptions = [...FLEET_PAGE_SIZE_OPTIONS];
 
   // Sync draftKuery with session storage search
   const [draftKuery, setDraftKuery] = useState<string>(search);
@@ -326,8 +332,9 @@ export function useFetchAgentsData() {
           throw new Error('Invalid GET /agents response - no status summary');
         }
         // Fetch agent policies, use a local cache
-        const policyIds = agentsResponse.items.map((agent) => agent.policy_id as string);
-
+        const policyIds = agentsResponse.items.map((agent) =>
+          removeVersionSuffixFromPolicyId(agent?.policy_id!)
+        );
         const policies = await fullAgentPolicyFecher.fetchPolicies(policyIds);
 
         const agentPoliciesIndexedById = policies.reduce((acc, agentPolicy) => {
@@ -403,7 +410,7 @@ export function useFetchAgentsData() {
 
   const newAllTags = useMemo(() => data?.newAllTags || [], [data]);
   useEffect(() => {
-    if (newAllTags.length && !isEqual(newAllTags, allTags)) {
+    if (!isEqual(newAllTags, allTags)) {
       setAllTags(newAllTags);
     }
   }, [newAllTags, allTags]);

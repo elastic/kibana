@@ -11,7 +11,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { TrendlineResult } from './expression_functions';
+import type { MetricDensity, TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
 
@@ -30,6 +30,7 @@ export interface MetricVisParam {
     visuals?: string;
     baseline?: number | string;
     palette?: [string, string, string];
+    textPalette?: [string, string, string];
   };
   color?: string;
   icon?: string;
@@ -40,7 +41,7 @@ export interface MetricVisParam {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
+  density: MetricDensity;
   primaryPosition: MetricStyle['valuePosition'];
   maxCols: number;
   minTiles?: number;
@@ -48,11 +49,11 @@ export interface MetricVisParam {
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
   /**
    * Determines where the metric color should be applied.
-   * Only applies when the supporting visualization is a panel.
+   * Only applies when the background chart is a panel.
    * - 'background': Applies the color to the metric's background area.
    * - 'value': Applies the color to the Primary Metric's value.
    */
-  applyColorTo: 'background' | 'value';
+  applyColorTo?: 'background' | 'value';
 }
 
 export interface VisParams {

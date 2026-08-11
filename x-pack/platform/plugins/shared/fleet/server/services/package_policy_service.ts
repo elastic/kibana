@@ -19,8 +19,6 @@ import type {
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-
 import type {
   PostDeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -29,10 +27,12 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
+import type { PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicySOAttributes,
 } from '../types';
@@ -55,7 +55,7 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
     : A extends 'packagePolicyPostCreate'
     ? PackagePolicy
     : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
+    ? UpdatePackagePolicyWithId
     : A extends 'packagePolicyPostUpdate'
     ? PackagePolicy
     : never;
@@ -84,13 +84,13 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -109,9 +109,9 @@ export interface PackagePolicyClient {
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
       force?: true;
-      authorizationHeader?: HTTPAuthorizationHeader | null;
       asyncDeploy?: boolean;
-    }
+    },
+    request?: KibanaRequest
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
@@ -120,7 +120,7 @@ export interface PackagePolicyClient {
   bulkUpdate(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    packagePolicyUpdates: UpdatePackagePolicy[],
+    packagePolicyUpdates: UpdatePackagePolicyWithId[],
     options?: PackagePolicyClientBulkUpdateOptions,
     currentVersion?: string
   ): Promise<{
@@ -150,6 +150,14 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  compilePackagePolicyForVersions(
+    soClient: SavedObjectsClientContract,
+    packageInfo: PackageInfo,
+    assetsMap: PackagePolicyAssetsMap,
+    packagePolicy: PackagePolicy,
+    agentVersions?: string[]
+  ): Promise<void>;
 
   getByIDs(
     soClient: SavedObjectsClientContract,
@@ -281,7 +289,8 @@ export interface PackagePolicyClient {
 
   rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult>;
 
   restoreRollback(
@@ -334,6 +343,7 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   skipUnassignFromAgentPolicies?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

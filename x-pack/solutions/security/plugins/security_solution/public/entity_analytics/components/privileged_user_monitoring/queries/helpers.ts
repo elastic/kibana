@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import type { ESQLAstQueryExpression, ESQLCommand, ESQLForkParens } from '@kbn/esql-ast';
-import { Walker, BasicPrettyPrinter, isFunctionExpression, isColumn, mutate } from '@kbn/esql-ast';
+import type {
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLForkParens,
+  ESQLProperNode,
+} from '@elastic/esql/types';
+import {
+  Walker,
+  BasicPrettyPrinter,
+  isFunctionExpression,
+  isColumn,
+  mutate,
+  Parser,
+  isAsExpression,
+  isFieldExpression,
+} from '@elastic/esql';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { partition } from 'lodash/fp';
-import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
-import { Parser } from '@kbn/esql-ast/src/parser/parser';
-import { isAsExpression, isFieldExpression } from '@kbn/esql-ast/src/ast/is';
 import * as E from 'fp-ts/Either';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 

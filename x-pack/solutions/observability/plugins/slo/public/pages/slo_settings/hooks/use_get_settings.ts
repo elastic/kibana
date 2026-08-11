@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
+import type { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../common/constants';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 
@@ -32,4 +32,5 @@ const defaultSettings: GetSLOSettingsResponse = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
   staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+  staleInstancesCleanupEnabled: false,
 };

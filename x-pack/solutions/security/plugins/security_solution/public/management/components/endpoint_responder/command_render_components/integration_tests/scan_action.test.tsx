@@ -257,6 +257,8 @@ describe('When using scan action from response actions console', () => {
   });
 
   it.each([
+    'ra_scan_error_canceled',
+    'ra_scan_error_disabled',
     'ra_scan_error_not-found',
     'ra_scan_error_invalid-input',
     'ra_scan_error_queue-quota',

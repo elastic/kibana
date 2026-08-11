@@ -1,0 +1,46 @@
+{
+  "10.1.0": [
+    {
+      "type": "user",
+      "status": "started",
+      "logExtractionState": {
+        "filter": "",
+        "additionalIndexPattern": "logs-*",
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "3h",
+        "delay": "1m",
+        "docsLimit": 10000,
+        "timeout": "25s",
+        "frequency": "30s"
+      },
+      "versionState": {
+        "version": 2,
+        "state": "running",
+        "isMigratedFromV1": false
+      }
+    }
+  ],
+  "10.2.0": [
+    {
+      "type": "user",
+      "status": "started",
+      "logExtractionState": {
+        "filter": "",
+        "additionalIndexPattern": "logs-*",
+        "additionalIndexPatterns": [],
+        "fieldHistoryLength": 10,
+        "lookbackPeriod": "3h",
+        "delay": "1m",
+        "docsLimit": 10000,
+        "timeout": "25s",
+        "frequency": "30s",
+        "paginationId": ""
+      },
+      "versionState": {
+        "version": 2,
+        "state": "running",
+        "isMigratedFromV1": false
+      }
+    }
+  ]
+}

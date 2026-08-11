@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
-import type { TaskManagerConfig } from '../config';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
@@ -30,6 +30,10 @@ describe('Configuration Statistics Aggregator', () => {
         interval: 10000,
       },
       kibanas_per_partition: 2,
+      invalidate_api_key_task: {
+        interval: '5m',
+        removalDelay: '1h',
+      },
       max_attempts: 9,
       poll_interval: 6000000,
       allow_reading_invalid_state: false,
@@ -60,11 +64,13 @@ describe('Configuration Statistics Aggregator', () => {
       },
       worker_utilization_running_average_window: 5,
       metrics_reset_interval: 3000,
-      claim_strategy: 'update_by_query',
+      claim_strategy: 'mget',
       request_timeouts: {
         update_by_query: 1000,
       },
       auto_calculate_default_ech_capacity: false,
+      api_key_type: ApiKeyType.ES,
+      grant_uiam_api_keys: false,
     };
 
     return new Promise<void>(async (resolve, reject) => {
@@ -78,7 +84,7 @@ describe('Configuration Statistics Aggregator', () => {
                 as_workers: 10,
                 as_cost: 20,
               },
-              claim_strategy: 'update_by_query',
+              claim_strategy: 'mget',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,
@@ -97,7 +103,7 @@ describe('Configuration Statistics Aggregator', () => {
                 as_workers: 8,
                 as_cost: 16,
               },
-              claim_strategy: 'update_by_query',
+              claim_strategy: 'mget',
               poll_interval: 6000000,
               request_capacity: 1000,
               monitored_aggregated_stats_refresh_rate: 5000,

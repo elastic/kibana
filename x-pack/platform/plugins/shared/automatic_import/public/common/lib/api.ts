@@ -5,137 +5,37 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core/public';
 import type {
-  EcsMappingRequestBody,
-  EcsMappingResponse,
-  CategorizationRequestBody,
-  CategorizationResponse,
-  RelatedRequestBody,
-  RelatedResponse,
-  CheckPipelineRequestBody,
-  CheckPipelineResponse,
-  BuildIntegrationRequestBody,
-  AnalyzeLogsRequestBody,
-  AnalyzeLogsResponse,
-  CelInputRequestBody,
-  CelInputResponse,
-  AnalyzeApiRequestBody,
-  AnalyzeApiResponse,
-} from '../../../common';
-import {
-  INTEGRATION_BUILDER_PATH,
-  ECS_GRAPH_PATH,
-  CATEGORIZATION_GRAPH_PATH,
-  RELATED_GRAPH_PATH,
-  CEL_INPUT_GRAPH_PATH,
-  CHECK_PIPELINE_PATH,
-} from '../../../common';
-import {
-  ANALYZE_API_PATH,
-  ANALYZE_LOGS_PATH,
-  FLEET_PACKAGES_PATH,
-} from '../../../common/constants';
+  CreateAutoImportIntegrationResponse,
+  GetAutoImportIntegrationResponse,
+  GetAllAutoImportIntegrationsResponse,
+} from '../../../common/model/api/integrations/integration.gen';
 
-export interface EpmPackageResponse {
-  items: [{ id: string; type: string }];
-  _meta?: {
-    install_source: string;
-    name: string;
-  };
-}
+import type { UploadSamplesToDataStreamResponse } from '../../../common/model/api/data_streams/data_stream.gen';
+import type { DataStream, OriginalSource } from '../../../common/model/common_attributes.gen';
+import { getLangSmithOptions } from './lang_smith';
+import type { LangSmithOptions } from './lang_smith';
 
-const defaultHeaders = {
-  'Elastic-Api-Version': '1',
-};
+export const FLEET_PACKAGES_PATH = `/api/fleet/epm/packages`;
+export const AUTOMATIC_IMPORT_INTEGRATIONS_PATH = `/api/automatic_import/integrations`;
+
 const fleetDefaultHeaders = {
   'Elastic-Api-Version': '2023-10-31',
 };
 
 export interface RequestDeps {
   http: HttpSetup;
-  abortSignal: AbortSignal;
+  abortSignal?: AbortSignal;
 }
 
-export const runAnalyzeApiGraph = async (
-  body: AnalyzeApiRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<AnalyzeApiResponse> =>
-  http.post<AnalyzeApiResponse>(ANALYZE_API_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runAnalyzeLogsGraph = async (
-  body: AnalyzeLogsRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<AnalyzeLogsResponse> =>
-  http.post<AnalyzeLogsResponse>(ANALYZE_LOGS_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runEcsGraph = async (
-  body: EcsMappingRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<EcsMappingResponse> =>
-  http.post<EcsMappingResponse>(ECS_GRAPH_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runCategorizationGraph = async (
-  body: CategorizationRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<CategorizationResponse> =>
-  http.post<CategorizationResponse>(CATEGORIZATION_GRAPH_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runRelatedGraph = async (
-  body: RelatedRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<RelatedResponse> =>
-  http.post<RelatedResponse>(RELATED_GRAPH_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runCelGraph = async (
-  body: CelInputRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<CelInputResponse> =>
-  http.post<CelInputResponse>(CEL_INPUT_GRAPH_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runCheckPipelineResults = async (
-  body: CheckPipelineRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<CheckPipelineResponse> =>
-  http.post<CheckPipelineResponse>(CHECK_PIPELINE_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
-
-export const runBuildIntegration = async (
-  body: BuildIntegrationRequestBody,
-  { http, abortSignal }: RequestDeps
-): Promise<Blob> =>
-  http.post<Blob>(INTEGRATION_BUILDER_PATH, {
-    headers: defaultHeaders,
-    body: JSON.stringify(body),
-    signal: abortSignal,
-  });
+export interface EpmPackageResponse {
+  items: Array<{ id: string; type: string }>;
+  _meta?: {
+    install_source: string;
+    name: string;
+  };
+}
 
 export const runInstallPackage = async (
   zipFile: Blob,
@@ -160,3 +60,190 @@ export const getInstalledPackages = async ({
     query: { prerelease: true },
     signal: abortSignal,
   });
+
+export interface CreateUpdateIntegrationRequest {
+  connectorId: string;
+  integrationId: string;
+  title: string;
+  description: string;
+  logo?: string;
+  dataStreams?: DataStream[];
+  langSmithOptions?: LangSmithOptions;
+}
+
+export const createIntegration = async ({
+  http,
+  abortSignal,
+  ...body
+}: RequestDeps & CreateUpdateIntegrationRequest): Promise<CreateAutoImportIntegrationResponse> =>
+  http.put<CreateAutoImportIntegrationResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    body: JSON.stringify({
+      ...body,
+      langSmithOptions: body.langSmithOptions ?? getLangSmithOptions(),
+    }),
+    signal: abortSignal,
+  });
+
+export const getIntegrationById = async ({
+  http,
+  abortSignal,
+  integrationId,
+}: RequestDeps & { integrationId: string }): Promise<GetAutoImportIntegrationResponse> =>
+  http.get<GetAutoImportIntegrationResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(integrationId)}`,
+    {
+      version: '1',
+      signal: abortSignal,
+    }
+  );
+
+export const getAllIntegrations = async ({
+  http,
+  abortSignal,
+}: RequestDeps): Promise<GetAllAutoImportIntegrationsResponse> =>
+  http.get<GetAllAutoImportIntegrationsResponse>(AUTOMATIC_IMPORT_INTEGRATIONS_PATH, {
+    version: '1',
+    signal: abortSignal,
+  });
+
+export interface DeleteIntegrationRequest {
+  integrationId: string;
+}
+
+export const deleteIntegration = async ({
+  http,
+  integrationId,
+}: RequestDeps & DeleteIntegrationRequest): Promise<void> =>
+  http.delete<void>(`${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(integrationId)}`, {
+    version: '1',
+  });
+
+export interface UploadSamplesRequest {
+  integrationId: string;
+  dataStreamId: string;
+  samples?: string[];
+  sourceIndex?: string;
+  originalSource: OriginalSource;
+}
+
+export const uploadSamplesToDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  samples,
+  sourceIndex,
+  originalSource,
+}: RequestDeps & UploadSamplesRequest): Promise<UploadSamplesToDataStreamResponse> =>
+  http.post<UploadSamplesToDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/upload`,
+    {
+      version: '1',
+      body: JSON.stringify({
+        ...(samples ? { samples } : {}),
+        ...(sourceIndex ? { sourceIndex } : {}),
+        originalSource,
+      }),
+      signal: abortSignal,
+    }
+  );
+
+export interface DeleteDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export const deleteDataStream = async ({
+  http,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & DeleteDataStreamRequest): Promise<void> =>
+  http.delete<void>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+    }
+  );
+
+export interface ReanalyzeDataStreamRequest {
+  integrationId: string;
+  dataStreamId: string;
+  connectorId: string;
+}
+
+export interface ReanalyzeDataStreamResponse {
+  success: boolean;
+}
+
+export const reanalyzeDataStream = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  connectorId,
+}: RequestDeps & ReanalyzeDataStreamRequest): Promise<ReanalyzeDataStreamResponse> =>
+  http.put<ReanalyzeDataStreamResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/reanalyze`,
+    {
+      version: '1',
+      body: JSON.stringify({ connectorId }),
+      signal: abortSignal,
+    }
+  );
+
+export interface GetDataStreamResultsRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export interface GetDataStreamResultsResponse {
+  ingest_pipeline: Record<string, unknown>;
+  results: Array<Record<string, unknown>>;
+}
+
+export const getDataStreamResults = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & GetDataStreamResultsRequest): Promise<GetDataStreamResultsResponse> =>
+  http.get<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
+    {
+      version: '1',
+      signal: abortSignal,
+    }
+  );
+
+export interface UpdateDataStreamPipelineRequest {
+  integrationId: string;
+  dataStreamId: string;
+  ingestPipeline: string;
+}
+
+export const updateDataStreamPipeline = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+  ingestPipeline,
+}: RequestDeps & UpdateDataStreamPipelineRequest): Promise<GetDataStreamResultsResponse> =>
+  http.patch<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}`,
+    {
+      version: '1',
+      body: JSON.stringify({ ingest_pipeline: ingestPipeline }),
+      signal: abortSignal,
+    }
+  );

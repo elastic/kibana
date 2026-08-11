@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Serializable } from '@kbn/utility-types';
 import type { TypeOf } from '@kbn/config-schema';
+import type { Serializable } from '@kbn/utility-types';
 import type { dashboardAttributesSchema, gridDataSchema } from './v2';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;

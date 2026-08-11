@@ -6,7 +6,7 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
@@ -118,7 +118,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getOverviewTabDockerMetricCharts(metric: string) {
@@ -128,13 +130,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
         `infraAssetDetailsDockerChartsSection${metric}`
       );
 
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"])'
+      );
     },
 
     async getOverviewTabKubernetesMetricCharts() {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     // Collapsable sections
@@ -246,13 +252,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getMetricsTabKubernetesCharts() {
       const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async getMetricsTabDockerCharts(metric: string) {
@@ -260,7 +270,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsDockerChartsSection${metric}`
       );
-      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+      return section.findAllByCssSelector(
+        '[data-test-subj*="infraAssetDetailsMetricChart"]:not([data-test-subj*="hover-actions"]'
+      );
     },
 
     async quickAccessItemExists(metric: string) {
@@ -364,8 +376,8 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsApmServicesLinkTab');
     },
 
-    setAlertStatusFilter(alertStatus?: AlertStatus) {
-      const buttons: Record<AlertStatus | 'all', string> = {
+    setAlertStatusFilter(alertStatus?: PublicAlertStatus) {
+      const buttons: Record<PublicAlertStatus | 'all', string> = {
         active: 'hostsView-alert-status-filter-active-button',
         recovered: 'hostsView-alert-status-filter-recovered-button',
         untracked: 'hostsView-alert-status-filter-untracked-button',

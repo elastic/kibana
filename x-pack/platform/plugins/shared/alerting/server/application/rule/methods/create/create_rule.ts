@@ -9,12 +9,15 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -24,7 +27,12 @@ import {
   validateActions,
   addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import {
+  generateAPIKeyName,
+  apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+  resolveRuleAPIKey,
+} from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -40,16 +48,25 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { RULE_CREATED_EVENT } from './event_based_telemetry';
 
 export interface CreateRuleOptions {
   id?: string;
+  initialRevision?: number;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
+  changeTracking?: RuleChangeTracking;
   allowMissingConnectorSecrets?: boolean;
-  isFlappingEnabled?: boolean;
+  /**
+   * The id of the rule template this rule was created from, when known (e.g. gallery
+   * create-from-template, or Fleet installing a rule from a package template). Used only
+   * for telemetry - it is not persisted on the rule saved object.
+   */
+  templateId?: string;
 }
 
 export async function createRule<Params extends RuleParams = never>(
@@ -60,8 +77,9 @@ export async function createRule<Params extends RuleParams = never>(
   const {
     data: initialData,
     options,
+    changeTracking,
     allowMissingConnectorSecrets,
-    isFlappingEnabled = false,
+    templateId,
   } = createParams;
 
   const actionsClient = await context.getActionsClient();
@@ -137,24 +155,18 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
   const username = await context.getUserName();
 
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
+    const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
@@ -184,12 +196,6 @@ export async function createRule<Params extends RuleParams = never>(
     );
   }
 
-  if (initialData.flapping !== undefined && !isFlappingEnabled) {
-    throw Boom.badRequest(
-      'Error creating rule: can not create rule with flapping if global flapping is disabled'
-    );
-  }
-
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
   const artifacts = data.artifacts ?? {};
   // Extract saved object references for this rule
@@ -209,15 +215,26 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   const { systemActions, actions: actionToNotUse, ...restData } = data;
+
+  const apiKeyProps = apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey);
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    data.tags,
+    apiKeyProps.uiamApiKey,
+    apiKeyProps.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
     artifactsWithRefs,
     rule: {
       ...restData,
+      tags: tagsWithUiamCheck,
       // TODO (http-versioning) create a rule domain version of this function
       // Right now this works because the 2 types can interop but it's not ideal
-      ...apiKeyAsRuleDomainProperties(createdAPIKey, username, isAuthTypeApiKey),
+      ...apiKeyProps,
       id,
       createdBy: username,
       updatedBy: username,
@@ -230,7 +247,7 @@ export async function createRule<Params extends RuleParams = never>(
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
-      revision: 0,
+      revision: options?.initialRevision ?? 0,
       running: false,
     },
     params: {
@@ -238,6 +255,10 @@ export async function createRule<Params extends RuleParams = never>(
       paramsWithRefs: updatedParams,
     },
   });
+
+  if (data.enabled) {
+    ruleAttributes.lastEnabledAt = new Date(createTime).toISOString();
+  }
 
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
@@ -251,6 +272,19 @@ export async function createRule<Params extends RuleParams = never>(
         returnRuleAttributes: true,
       })
   );
+
+  await logRuleChanges({
+    ruleSOs: [createdRuleSavedObject],
+    encryptedFieldsMap: new Map([
+      [id, { apiKey: ruleAttributes.apiKey, uiamApiKey: ruleAttributes.uiamApiKey ?? null }],
+    ]),
+    rulesClientContext: context,
+    changesContext: {
+      action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
+      metadata: changeTracking?.metadata,
+      refresh: changeTracking?.refresh,
+    },
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
@@ -272,9 +306,59 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+  const rule = transformRuleDomainToRule<Params>(ruleDomain);
+
+  reportRuleCreatedEvent(context, {
+    id,
+    templateId,
+    createTime,
+    alertTypeId: data.alertTypeId,
+    enabled: data.enabled,
+    consumer: data.consumer,
+    producer: ruleType.producer,
+  });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
+}
+
+/**
+ * Reports the rule-create EBT event. Fails open: telemetry must never break rule creation,
+ * so any error is caught and logged at debug level (mirrors the UIAM provisioning pattern
+ * in `reportProvisioningRunEvent`).
+ */
+function reportRuleCreatedEvent(
+  context: RulesClientContext,
+  {
+    id,
+    templateId,
+    createTime,
+    alertTypeId,
+    enabled,
+    consumer,
+    producer,
+  }: {
+    id: string;
+    templateId?: string;
+    createTime: number;
+    alertTypeId: string;
+    enabled: boolean;
+    consumer: string;
+    producer: string;
+  }
+): void {
+  try {
+    context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
+      rule_id: id,
+      ...(templateId ? { template_id: templateId } : {}),
+      created_at: new Date(createTime).toISOString(),
+      rule_type_id: alertTypeId,
+      enabled,
+      consumer,
+      producer,
+    });
+  } catch (e) {
+    context.logger.debug(`Failed to report rule create telemetry event: ${e}`);
+  }
 }

@@ -24,6 +24,11 @@ export interface IElasticsearchConfig {
   readonly healthCheckDelay: Duration;
 
   /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  readonly healthCheckFailureInterval: Duration | undefined;
+
+  /**
    * The number of times to retry the health check request
    */
   readonly healthCheckRetry: number;

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/test-suites-xpack-workplace-ai'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workchat-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/test-suites-xpack-workplace-ai'
+  title: '@kbn/test-suites-xpack-workplace-ai'
   description: Moon project for @kbn/test-suites-xpack-workplace-ai
   channel: ''
   owner: '@elastic/workchat-eng'
-  metadata:
-    sourceRoot: x-pack/solutions/workplaceai/test
+  sourceRoot: x-pack/solutions/workplaceai/test
 dependsOn:
   - '@kbn/test'
   - '@kbn/test-suites-xpack-platform'

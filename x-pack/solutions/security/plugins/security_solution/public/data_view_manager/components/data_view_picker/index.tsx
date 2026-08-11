@@ -7,7 +7,7 @@
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,7 +44,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, notifications },
   } = useKibana();
 
   const canEditDataView = useMemo(
@@ -117,27 +117,35 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         return;
       }
 
-      const dataViewInstance = await data.dataViews.get(dataViewId);
-      // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
-      if (dataViewInstance.isPersisted?.()) {
-        data.dataViews.clearInstanceCache(dataViewId);
+      // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+      try {
+        const dataViewInstance = await data.dataViews.get(dataViewId);
+        // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+        if (dataViewInstance.isPersisted?.()) {
+          data.dataViews.clearInstanceCache(dataViewId);
+        }
+
+        closeFieldEditor.current = await dataViewFieldEditor.openEditor({
+          ctx: {
+            dataView: dataViewInstance,
+          },
+          fieldName,
+          onSave: async () => {
+            if (!dataViewInstance.id) {
+              return;
+            }
+
+            handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
+          },
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: 'Error retrieving data view',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
       }
-
-      closeFieldEditor.current = await dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: dataViewInstance,
-        },
-        fieldName,
-        onSave: async () => {
-          if (!dataViewInstance.id) {
-            return;
-          }
-
-          handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
-        },
-      });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView, notifications]
   );
 
   const getDataViewHelpText = useCallback(

@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275365
+issues:
+- https://github.com/elastic/kibana/issues/274632
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Add advanced setting for default log columns in trace samples

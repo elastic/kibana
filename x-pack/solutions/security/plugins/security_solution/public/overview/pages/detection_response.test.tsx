@@ -50,18 +50,8 @@ jest.mock('../../common/components/filters_global', () => ({
 
 jest.mock('../../common/components/empty_prompt');
 
-const defaultUseSourcererReturn = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: '',
-};
-const mockUseSourcererDataView = jest.fn(() => defaultUseSourcererReturn);
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: () => mockUseSourcererDataView(),
-}));
-
 const defaultUseAlertsPrivilegesReturn = {
-  hasKibanaREAD: true,
+  hasAlertsRead: true,
   hasIndexRead: true,
 };
 
@@ -103,7 +93,6 @@ jest.mock('../../common/lib/kibana', () => {
 describe('DetectionResponse', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
@@ -129,10 +118,6 @@ describe('DetectionResponse', () => {
   });
 
   it('should render landing page if index not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      indicesExist: false,
-    });
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
     const result = render(
@@ -148,11 +133,7 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
   });
 
-  it('should render loader if sourcerer is loading', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      ...defaultUseSourcererReturn,
-      loading: true,
-    });
+  it('should render loader if dataview is loading', () => {
     jest
       .mocked(useDataView)
       .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });
@@ -166,7 +147,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_globalSearchBar')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_globalSearchBar')).not.toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseLoader')).toBeInTheDocument();
     expect(result.queryByTestId('detectionResponseSections')).not.toBeInTheDocument();
   });
@@ -174,7 +155,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not index read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: false,
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
     });
 
     const result = render(
@@ -198,7 +179,7 @@ describe('DetectionResponse', () => {
   it('should not render alerts data sections if user has not kibana read permission', () => {
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: true,
-      hasKibanaREAD: false,
+      hasAlertsRead: false,
     });
 
     const result = render(
@@ -243,7 +224,7 @@ describe('DetectionResponse', () => {
   it('should render page permissions message if the user does not have read permission', () => {
     mockCanUseCases.mockReturnValue(noCasesPermissions());
     mockUseAlertsPrivileges.mockReturnValue({
-      hasKibanaREAD: true,
+      hasAlertsRead: true,
       hasIndexRead: false,
     });
 

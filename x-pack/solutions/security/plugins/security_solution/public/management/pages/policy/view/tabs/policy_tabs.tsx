@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EventFiltersProcessDescendantIndicator } from '../../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -72,6 +72,8 @@ import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_transl
 import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../endpoint_exceptions/constants';
 import { EndpointExceptionsApiClient } from '../../../endpoint_exceptions/service/api_client';
 import { POLICY_ARTIFACT_ENDPOINT_EXCEPTIONS_LABELS } from './endpoint_exceptions_translations';
+import { TrustedAppsCardDecorator } from '../../../trusted_apps/view/trusted_apps_list';
+import { EventFiltersCardDecorator } from '../../../event_filters/view/event_filters_list';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -245,6 +247,8 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
+  const { data: isPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
       ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
@@ -350,6 +354,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getTrustedAppsListPath}
                   getPolicyArtifactsPath={getPolicyDetailsArtifactsListPath}
                   canWriteArtifact={canWriteTrustedApplications}
+                  CardDecorator={TrustedAppsCardDecorator}
                 />
               </>
             ),
@@ -402,7 +407,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
-                  CardDecorator={EventFiltersProcessDescendantIndicator}
+                  CardDecorator={EventFiltersCardDecorator}
                 />
               </>
             ),
@@ -479,6 +484,7 @@ export const PolicyTabs = React.memo(() => {
                     getArtifactPath={getEndpointExceptionsListPath}
                     getPolicyArtifactsPath={getPolicyEndpointExceptionsPath}
                     canWriteArtifact={canWriteEndpointExceptions}
+                    disableArtifactsByPolicy={!isPerPolicyOptIn?.status}
                   />
                 </>
               ),
@@ -530,6 +536,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEndpointExceptions,
     getEndpointExceptionsApiClientInstance,
     canWriteEndpointExceptions,
+    isPerPolicyOptIn?.status,
     isEnterprise,
   ]);
 

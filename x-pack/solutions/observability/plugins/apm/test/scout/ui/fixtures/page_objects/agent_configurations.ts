@@ -13,26 +13,26 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { EuiComboBoxWrapper, EuiFieldTextWrapper } from '@kbn/scout-oblt';
+import { EuiFieldTextWrapper } from '@kbn/scout-oblt';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AgentConfigurationsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/agent-configuration`);
-    await this.page.waitForLoadingIndicatorHidden();
+    await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateConfigurationButton() {
     // Wait for the page to be fully loaded
-    this.page.getByRole('heading', { name: 'Configurations', exact: true });
+    await this.page.getByRole('heading', { name: 'Configurations', exact: true }).waitFor();
 
-    return this.page.getByText('Create configuration');
+    await this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton').waitFor();
+    return this.page.getByTestId('apmAgentConfigurationListCreateConfigurationButton');
   }
 
   async isCreateConfigurationButtonAvailable() {
@@ -46,15 +46,9 @@ export class AgentConfigurationsPage {
   }
 
   async hasPermissionsError() {
-    try {
-      this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
-      return await this.page
-        .getByText('Your user may not have the sufficient permissions')
-        .isVisible();
-    } catch {
-      return false;
-    }
+    return await this.page
+      .getByText('Your user may not have the sufficient permissions')
+      .isVisible({ timeout: 2500 });
   }
 
   async clickCreateConfiguration() {
@@ -63,8 +57,7 @@ export class AgentConfigurationsPage {
   }
 
   async selectServiceFromDropdown(serviceName: string) {
-    const serviceComboBox = new EuiComboBoxWrapper(this.page, 'serviceNameComboBox');
-    return await serviceComboBox.selectSingleOption(serviceName);
+    await this.page.components.comboBox('serviceNameComboBox').setSelectedOptions([serviceName]);
   }
 
   async selectEnvironment(environmentName: string) {

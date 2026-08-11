@@ -5,296 +5,289 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
-import type { Logger } from '@kbn/core/server';
-import type { OriginEventId, EsQuery } from './types';
-import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
+import {
+  regroupEvents,
+  enrichEventDocData,
+  regroupRelationships,
+  enrichRelationshipDocData,
+  enrichEntityRecords,
+} from './parse_records';
+import { fetchEntityEnrichment } from './fetch_entity_enrichment';
+import type { EventEdge, RelationshipEdge, EntityRecord } from './types';
+
+jest.mock('./fetch_events_graph');
+jest.mock('./fetch_entity_relationships_graph');
+jest.mock('./parse_records');
+jest.mock('./fetch_entity_enrichment');
+
+const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>;
+const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFunction<
+  typeof fetchEntityRelationships
+>;
+const mockedFetchEntities = fetchEntities as jest.MockedFunction<typeof fetchEntities>;
+const mockedFetchEntityEnrichment = fetchEntityEnrichment as jest.MockedFunction<
+  typeof fetchEntityEnrichment
+>;
+const mockedRegroupEvents = regroupEvents as jest.MockedFunction<typeof regroupEvents>;
+const mockedEnrichEventDocData = enrichEventDocData as jest.MockedFunction<
+  typeof enrichEventDocData
+>;
+const mockedRegroupRelationships = regroupRelationships as jest.MockedFunction<
+  typeof regroupRelationships
+>;
+const mockedEnrichRelationshipDocData = enrichRelationshipDocData as jest.MockedFunction<
+  typeof enrichRelationshipDocData
+>;
+const mockedApplyEnrichmentToEntityRecords = enrichEntityRecords as jest.MockedFunction<
+  typeof enrichEntityRecords
+>;
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
-  let logger: Logger;
+  const logger = loggingSystemMock.createLogger();
+
+  const baseParams = {
+    esClient,
+    logger,
+    start: '2024-01-01T00:00:00.000Z',
+    end: '2024-01-02T00:00:00.000Z',
+    originEventIds: [{ id: 'event-1', isAlert: false }],
+    showUnknownTarget: false,
+    indexPatterns: ['logs-*'],
+    spaceId: 'default',
+  };
+
+  const mockEventRecords: EventEdge[] = [
+    {
+      badge: 1,
+      action: 'test-action',
+      actorNodeId: 'actor-1',
+      actorIdsCount: 1,
+      targetNodeId: 'target-1',
+      targetIdsCount: 1,
+      docs: ['{"id":"doc-1","type":"event"}'],
+      isAlert: false,
+      isOrigin: true,
+      isOriginAlert: false,
+      uniqueEventsCount: 1,
+      uniqueAlertsCount: 0,
+      labelNodeId: 'doc-1',
+    },
+  ];
+
+  const mockRelationshipRecords: RelationshipEdge[] = [
+    {
+      badge: 1,
+      relationship: 'Owns',
+      relationshipNodeId: 'actor-1-Owns',
+      actorNodeId: 'actor-1',
+      actorIdsCount: 1,
+      actorIds: ['actor-1'],
+      targetNodeId: 'target-1',
+      targetIdsCount: 1,
+      targetIds: ['target-1'],
+    },
+  ];
 
   beforeEach(() => {
-    const toRecordsMock = jest.fn().mockResolvedValue([{ id: 'dummy' }]);
-    // Stub the esClient helpers.esql method to return an object with toRecords
-    esClient.asCurrentUser.helpers.esql.mockReturnValue({
-      toRecords: toRecordsMock,
-      toArrowTable: jest.fn(),
-      toArrowReader: jest.fn(),
-    });
-
-    // Mock the enrich.getPolicy method with default behavior (policy exists)
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
-      policies: [
-        {
-          config: {
-            match: {
-              name: getEnrichPolicyId(),
-            },
-          },
-        },
-      ],
-    });
-
-    logger = {
-      trace: jest.fn(),
-      info: jest.fn(),
-      error: jest.fn(),
-    } as unknown as Logger;
+    mockedFetchEvents.mockResolvedValue({
+      records: mockEventRecords,
+    } as any);
+    mockedFetchEntityRelationships.mockResolvedValue({
+      columns: [],
+      records: mockRelationshipRecords,
+    } as any);
+    mockedFetchEntities.mockResolvedValue({
+      columns: [],
+      records: [],
+    } as any);
+    // Return empty enrichment map by default (no entity store data)
+    mockedFetchEntityEnrichment.mockResolvedValue(new Map());
+    // Mock re-grouping functions to pass records through unchanged. The mocked
+    // fetchEvents/fetchEntityRelationships return EventEdge/RelationshipEdge-shaped
+    // records (rather than the real *EsqlRow inputs) so the test can assert on the
+    // final post-regroup shape — cast through unknown to satisfy the signatures.
+    mockedRegroupEvents.mockImplementation((records) => records as unknown as EventEdge[]);
+    mockedEnrichEventDocData.mockImplementation((events) => events);
+    mockedRegroupRelationships.mockImplementation(
+      (records) => records as unknown as RelationshipEdge[]
+    );
+    mockedEnrichRelationshipDocData.mockImplementation((rels) => rels);
+    mockedApplyEnrichmentToEntityRecords.mockImplementation((records: EntityRecord[]) => records);
   });
 
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('should throw an error for an invalid index pattern', async () => {
-    const invalidIndexPatterns = ['invalid pattern']; // space is not allowed
-    const params = {
+  it('should call fetchEvents with correct parameters', async () => {
+    await fetchGraph(baseParams);
+
+    expect(mockedFetchEvents).toHaveBeenCalledTimes(1);
+    expect(mockedFetchEvents).toHaveBeenCalledWith({
       esClient,
       logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: invalidIndexPatterns,
-      spaceId: 'default',
+      start: baseParams.start,
+      end: baseParams.end,
+      originEventIds: baseParams.originEventIds,
+      showUnknownTarget: baseParams.showUnknownTarget,
+      indexPatterns: baseParams.indexPatterns,
+      spaceId: baseParams.spaceId,
       esQuery: undefined,
-    };
-
-    await expect(() => fetchGraph(params)).rejects.toThrowError(/Invalid index pattern/);
+      pinnedIds: undefined,
+    });
   });
 
-  it('should execute the esql query and return records for valid inputs with no origin events', async () => {
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
+  it('should return events from fetchEvents (re-grouped by type/subtype)', async () => {
+    const result = await fetchGraph(baseParams);
 
-    const result = await fetchGraph(params);
-    // Verify that our stubbed esClient has been called with the correct query and params
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    expect(esqlCallArgs[0].query).toContain('FROM valid_index');
-    expect(result).toEqual([{ id: 'dummy' }]);
+    // Re-grouping produces one group per (action, actorType, actorSubType, ...) combination
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].action).toBe('test-action');
+    expect(result.events[0].isOrigin).toBe(true);
+    expect(result.events[0].badge).toBe(1);
   });
 
-  it('should include origin event parameters when originEventIds are provided', async () => {
-    // Create sample origin events; one is alert and one is not.
-    const originEventIds: OriginEventId[] = [
-      { id: '1', isAlert: true },
-      { id: '2', isAlert: false },
-    ];
-    const validIndexPatterns = ['valid_index'];
-    const esQuery: EsQuery = {
+  it('should not call fetchEntityRelationships when entityIds is undefined', async () => {
+    await fetchGraph(baseParams);
+
+    expect(mockedFetchEntityRelationships).not.toHaveBeenCalled();
+  });
+
+  it('should not call fetchEntityRelationships when entityIds is empty', async () => {
+    await fetchGraph({ ...baseParams, entityIds: [] });
+
+    expect(mockedFetchEntityRelationships).not.toHaveBeenCalled();
+  });
+
+  it('should return empty relationships when entityIds is not provided', async () => {
+    const result = await fetchGraph(baseParams);
+
+    // No entityIds → relationshipsPromise resolves to empty → re-grouping returns []
+    expect(result.relationships).toHaveLength(0);
+  });
+
+  it('should not call fetchEvents when originEventIds is empty and no esQuery', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+
+    await fetchGraph({ ...baseParams, originEventIds: [], entityIds });
+
+    expect(mockedFetchEvents).not.toHaveBeenCalled();
+  });
+
+  it('should return empty events when originEventIds is empty and no esQuery', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+
+    const result = await fetchGraph({ ...baseParams, originEventIds: [], entityIds });
+
+    expect(result.events).toHaveLength(0);
+  });
+
+  it('should call fetchEvents when originEventIds is empty but esQuery is provided', async () => {
+    const esQuery = {
       bool: {
-        filter: [],
+        filter: [{ term: { 'cloud.provider': 'gcp' } }],
         must: [],
         should: [],
         must_not: [],
       },
     };
 
-    const params = {
-      esClient,
-      logger,
-      start: 100,
-      end: 200,
-      originEventIds,
-      showUnknownTarget: true,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery,
-    };
+    await fetchGraph({ ...baseParams, originEventIds: [], esQuery });
 
-    const result = await fetchGraph(params);
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    expect(esqlCallArgs[0].query).toContain('FROM valid_index');
-
-    // Expect two sets of params: one for all origin events and one for alerts only.
-    expect(esqlCallArgs[0].params).toHaveLength(3);
-
-    // Check that the parameter keys include og_id and og_alrt_id keys.
-    const ogIdKeys = esqlCallArgs[0].params
-      // @ts-ignore: field is typed as Record<string, string>[]
-      ?.map((p) => Object.keys(p)[0] as string)
-      .filter((key) => key.startsWith('og_id'));
-    const ogAlertKeys = esqlCallArgs[0].params
-      // @ts-ignore: field is typed as Record<string, string>[]
-      ?.map((p) => Object.keys(p)[0] as string)
-      .filter((key) => key.startsWith('og_alrt_id'));
-
-    expect(ogIdKeys).toEqual(['og_id0', 'og_id1']);
-    expect(ogAlertKeys).toEqual(['og_alrt_id0']);
-    expect(result).toEqual([{ id: 'dummy' }]);
+    expect(mockedFetchEvents).toHaveBeenCalledTimes(1);
   });
 
-  it('should include entity enrichment when isEnrichPolicyExists is true', async () => {
-    // Mock the enrich.getPolicy method to return a policy that exists
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockResolvedValueOnce({
-        policies: [
-          {
-            config: {
-              match: {
-                name: getEnrichPolicyId(),
-              },
-            },
-          },
-        ],
-      });
+  it('should call fetchEntityRelationships when entityIds are provided', async () => {
+    const entityIds = [
+      { id: 'entity-1', isOrigin: true },
+      { id: 'entity-2', isOrigin: false },
+    ];
 
-    const validIndexPatterns = ['valid_index'];
-    const params = {
+    await fetchGraph({ ...baseParams, entityIds });
+
+    expect(mockedFetchEntityRelationships).toHaveBeenCalledTimes(1);
+    expect(mockedFetchEntityRelationships).toHaveBeenCalledWith({
       esClient,
       logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
+      entityIds,
       spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
-
-    const result = await fetchGraph(params);
-
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
-
-    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip`
-    );
-    expect(query).toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`
-    );
-
-    expect(query).toContain('EVAL actorDocData = CONCAT');
-    expect(query).toContain('actor.entity.id');
-    expect(query).toContain('actorEntityName');
-    expect(query).toContain('actorEntityType');
-    expect(query).toContain('actorEntitySubType');
-    expect(query).toContain('actorHostIp');
-
-    expect(query).toContain('EVAL targetDocData = CONCAT');
-    expect(query).toContain('target.entity.id');
-    expect(query).toContain('targetEntityName');
-    expect(query).toContain('targetEntityType');
-    expect(query).toContain('targetEntitySubType');
-    expect(query).toContain('targetHostIp');
-
-    expect(query).toContain('EVAL sourceIps = source.ip');
-    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
-
-    expect(query).toContain('actorsDocData = VALUES(actorDocData)');
-    expect(query).toContain('targetsDocData = VALUES(targetDocData)');
-
-    expect(result).toEqual([{ id: 'dummy' }]);
+    });
   });
 
-  it('should not include entity enrichment when isEnrichPolicyExists is false', async () => {
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockResolvedValueOnce({
-        policies: [],
-      });
+  it('should return relationships from fetchEntityRelationships (re-grouped by type/subtype)', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
 
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-    };
+    const result = await fetchGraph({ ...baseParams, entityIds });
 
-    const result = await fetchGraph(params);
-
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
-
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).not.toContain(
-      `WITH actorEntityName = entity.name,
-      actorEntityType = entity.type,
-      actorEntitySubType = entity.sub_type,
-      actorHostIp = host.ip,
-      actorSourceIndex = entity.source`
-    );
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).not.toContain(
-      `WITH targetEntityName = entity.name,
-      targetEntityType = entity.type,
-      targetEntitySubType = entity.sub_type,
-      targetHostIp = host.ip,
-      targetSourceIndex = entity.source`
-    );
-
-    // Fallback eval clauses for non-enriched actor data
-    expect(query).toContain(`EVAL actorEntityType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorEntitySubType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorDocData = TO_STRING(null)`);
-    expect(query).toContain(`EVAL actorHostIp = TO_STRING(null)`);
-
-    // Fallback eval clauses for non-enriched target data
-    expect(query).toContain(`EVAL targetEntityType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetEntitySubType = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetDocData = TO_STRING(null)`);
-    expect(query).toContain(`EVAL targetHostIp = TO_STRING(null)`);
-
-    expect(query).toContain('EVAL sourceIps = source.ip');
-    expect(query).toContain('EVAL sourceCountryCodes = source.geo.country_iso_code');
-
-    expect(query).toContain(`actorsDocData = VALUES(actorDocData)`);
-    expect(query).toContain(`targetsDocData = VALUES(targetDocData)`);
-
-    expect(result).toEqual([{ id: 'dummy' }]);
+    // Re-grouping by (actorNodeId, relationship, targetType, targetSubType) — 1 group
+    expect(result.relationships).toHaveLength(1);
+    expect(result.relationships[0].relationship).toBe('Owns');
+    expect(result.relationships[0].badge).toBe(1);
   });
 
-  it('should not include entity enrichment when the enrich policy check fails', async () => {
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
-      .fn()
-      .mockRejectedValueOnce(new Error('Failed to get enrich policy'));
-
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
+  it('should pass esQuery to fetchEvents when provided', async () => {
+    const esQuery = {
+      bool: {
+        filter: [{ term: { 'cloud.provider': 'gcp' } }],
+        must: [],
+        should: [],
+        must_not: [],
+      },
     };
 
-    const result = await fetchGraph(params);
+    await fetchGraph({ ...baseParams, esQuery });
 
-    expect(logger.error).toHaveBeenCalled();
+    expect(mockedFetchEvents).toHaveBeenCalledWith(expect.objectContaining({ esQuery }));
+  });
 
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
-    expect(result).toEqual([{ id: 'dummy' }]);
+  it('should log and re-throw when fetchEvents fails', async () => {
+    const error = new Error('ESQL query failed');
+    mockedFetchEvents.mockRejectedValue(error);
+
+    await expect(fetchGraph(baseParams)).rejects.toThrow('ESQL query failed');
+    expect(logger.error).toHaveBeenCalledWith('Failed to fetch events: ESQL query failed');
+  });
+
+  it('should log and re-throw when fetchEntityRelationships fails', async () => {
+    const entityIds = [{ id: 'entity-1', isOrigin: true }];
+    const error = new Error('Connection refused');
+    mockedFetchEntityRelationships.mockRejectedValue(error);
+
+    await expect(fetchGraph({ ...baseParams, entityIds })).rejects.toThrow('Connection refused');
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to fetch entity relationships: Connection refused'
+    );
+  });
+
+  describe('Pinned IDs', () => {
+    it('should pass pinnedIds to fetchEvents when provided', async () => {
+      const pinnedIds = ['entity-1', 'entity-2'];
+
+      await fetchGraph({ ...baseParams, pinnedIds });
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ pinnedIds: ['entity-1', 'entity-2'] })
+      );
+    });
+
+    it('should pass pinnedIds as undefined to fetchEvents when not provided', async () => {
+      await fetchGraph(baseParams);
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ pinnedIds: undefined })
+      );
+    });
+
+    it('should pass empty pinnedIds array to fetchEvents when provided as empty', async () => {
+      await fetchGraph({ ...baseParams, pinnedIds: [] });
+
+      expect(mockedFetchEvents).toHaveBeenCalledWith(expect.objectContaining({ pinnedIds: [] }));
+    });
   });
 });

@@ -7,8 +7,9 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { FindListsRequestQuery, FindListsResponse } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { decodeCursor } from '../../services/utils';
@@ -21,7 +22,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
       path: `${LIST_URL}/_find`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

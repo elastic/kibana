@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { waitForDocumentInIndex } from '../../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
+import { waitForDocumentInIndex } from '../../../../common/utils/alerting_wait_for_helpers';
 import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -29,8 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   const samlAuth = getService('samlAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/240900
-  describe.skip('SyntheticsAlertOnNoData', function () {
+  describe('SyntheticsAlertOnNoData', function () {
     // Test failing on MKI and ECH
     this.tags(['skipCloud']);
 
@@ -71,6 +70,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: SYNTHETICS_RULE_ALERT_INDEX,
         query: { match_all: {} },
         ignore_unavailable: true,
+        conflicts: 'proceed',
+        refresh: true,
       });
       await server.savedObjects.clean({ types: ['rule'] });
     });

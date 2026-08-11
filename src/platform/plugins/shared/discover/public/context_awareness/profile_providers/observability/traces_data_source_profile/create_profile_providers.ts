@@ -9,19 +9,11 @@
 
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createTracesDataSourceProfileProvider } from './profile';
-import {
-  createTracesAPMDataSourceProfileProvider,
-  createTracesOtelDataSourceProfileProvider,
-} from './sub_profiles';
 
 export const createObservabilityTracesDataSourceProfileProviders = (
   providerServices: ProfileProviderServices
 ) => {
   const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(providerServices);
 
-  return [
-    createTracesAPMDataSourceProfileProvider(tracesDataSourceProfileProvider),
-    createTracesOtelDataSourceProfileProvider(tracesDataSourceProfileProvider),
-    tracesDataSourceProfileProvider,
-  ];
+  return [tracesDataSourceProfileProvider];
 };

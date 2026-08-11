@@ -56,13 +56,10 @@ export class VisualizationsPlugin
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
     );
 
-    plugins.embeddable.registerTransforms(
-      VISUALIZE_EMBEDDABLE_TYPE,
-      getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerEmbeddableServerDefinition(VISUALIZE_EMBEDDABLE_TYPE, {
+      title: 'Legacy visualization',
+      getTransforms,
+    });
 
     plugins.contentManagement.register({
       id: CONTENT_ID,

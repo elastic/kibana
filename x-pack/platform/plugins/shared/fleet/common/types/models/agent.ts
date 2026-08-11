@@ -11,6 +11,7 @@ import type {
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
   AgentStatuses,
+  AGENT_TYPE_OPAMP,
 } from '../../constants';
 
 import type { SecretReference, SOSecret } from './secret';
@@ -18,7 +19,8 @@ import type { SecretReference, SOSecret } from './secret';
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
   | typeof AGENT_TYPE_PERMANENT
-  | typeof AGENT_TYPE_TEMPORARY;
+  | typeof AGENT_TYPE_TEMPORARY
+  | typeof AGENT_TYPE_OPAMP;
 
 type AgentStatusTuple = typeof AgentStatuses;
 export type AgentStatus = AgentStatusTuple[number];
@@ -36,6 +38,7 @@ export type SimplifiedAgentStatus =
 export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
+  | 'ROLLBACK'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
@@ -45,7 +48,8 @@ export type AgentActionType =
   | 'POLICY_CHANGE'
   | 'INPUT_ACTION'
   | 'MIGRATE'
-  | 'PRIVILEGE_LEVEL_CHANGE';
+  | 'PRIVILEGE_LEVEL_CHANGE'
+  | 'REMOVE_COLLECTOR';
 
 export type AgentUpgradeStateType =
   | 'UPG_REQUESTED'
@@ -115,9 +119,10 @@ interface AgentBase {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'starting' | 'disconnected';
   last_checkin_message?: string;
   user_provided_metadata?: AgentMetadata;
   local_metadata: AgentMetadata;
@@ -126,12 +131,33 @@ interface AgentBase {
   agent?: FleetServerAgentMetadata;
   unhealthy_reason?: UnhealthyReason[];
   namespaces?: string[];
+  upgrade?: AgentUpgrade;
+  identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  non_identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  sequence_num?: number;
+  capabilities?: string[];
+  health?: ComponentHealth;
+  effective_config?: any;
+  signals?: string[];
 }
 
 export enum UnhealthyReason {
   INPUT = 'input',
   OUTPUT = 'output',
   OTHER = 'other',
+}
+
+export interface AgentUpgrade {
+  rollbacks?: AgentRollback[];
+}
+
+export interface AgentRollback {
+  valid_until: string;
+  version: string;
 }
 
 export interface AgentMetrics {
@@ -154,6 +180,7 @@ export interface Agent extends AgentBase {
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
   outputs?: OutputMap;
   status?: AgentStatus;
+  pipeline_config?: string;
   packages: string[];
   sort?: any[];
   metrics?: AgentMetrics;
@@ -308,6 +335,10 @@ export interface FleetServerAgent {
    */
   policy_id?: string;
   /**
+   * The base policy ID (policy_id without version suffix) for efficient querying.
+   */
+  policy_base_id?: string;
+  /**
    * The current policy revision_idx for the Elastic Agent
    */
   policy_revision_idx?: number | null;
@@ -326,7 +357,7 @@ export interface FleetServerAgent {
   /**
    * Last checkin status
    */
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   /**
    * Last checkin message
    */
@@ -386,6 +417,31 @@ export interface FleetServerAgent {
    * The last known agent status
    */
   last_known_status?: AgentStatus;
+  /**
+   * Upgrade information including available upgrade rollbacks for the Elastic Agent
+   */
+  upgrade?: AgentUpgrade;
+  identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  non_identifying_attributes?: {
+    [key: string]: string | number;
+  };
+  sequence_num?: number;
+  capabilities?: string[];
+  health?: ComponentHealth;
+  effective_config?: any;
+}
+
+export interface ComponentHealth {
+  healthy: boolean;
+  status: string;
+  status_time_unix_nano?: number;
+  start_time_unix_nano?: number;
+  last_error?: string;
+  component_health_map?: {
+    [key: string]: ComponentHealth;
+  };
 }
 
 /**

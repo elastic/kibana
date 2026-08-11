@@ -10,13 +10,21 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
-export { PanelPlacementStrategy } from './plugin_constants';
 export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/page_bundle_constants';
-export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
+export type {
+  DashboardApi,
+  DashboardInternalApi,
+  DashboardCreationOptions,
+  DashboardSaveEvent,
+  DashboardInitializationState,
+} from './dashboard_api/types';
 export { DASHBOARD_API_TYPE } from './dashboard_api/types';
 export type { DashboardRendererProps } from './dashboard_renderer/dashboard_renderer';
 export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_renderer/lazy_dashboard_renderer';
-export type { DashboardStart } from './plugin';
+export type { DashboardStart, DashboardSetup } from './plugin';
+export type { DashboardListingTab } from './dashboard_listing/types';
+export { OPEN_DASHBOARD_CHAT_ACTION_ID } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
+export type { OpenDashboardChatActionContext } from './dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
@@ -26,7 +34,6 @@ export type { FindDashboardsByIdResponse } from './dashboard_client';
 
 export { DASHBOARD_APP_ID } from '../common/page_bundle_constants';
 export { cleanEmptyKeys, DashboardAppLocatorDefinition } from '../common/locator/locator';
-export { getDashboardLocatorParamsFromEmbeddable } from '../common/locator/get_dashboard_locator_params';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

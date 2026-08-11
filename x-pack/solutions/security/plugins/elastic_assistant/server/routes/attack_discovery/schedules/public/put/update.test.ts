@@ -12,15 +12,10 @@ import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { updateAttackDiscoverySchedulesRoute } from './update';
 import { serverMock } from '../../../../../__mocks__/server';
 import { requestContextMock } from '../../../../../__mocks__/request_context';
-import { updateAttackDiscoverySchedulesPublicRequest } from '../../../../../__mocks__/request';
+import { updateAttackDiscoverySchedulesRequest } from '../../../../../__mocks__/request';
 import { getAttackDiscoveryScheduleMock } from '../../../../../__mocks__/attack_discovery_schedules.mock';
-import type { AttackDiscoveryScheduleDataClient } from '../../../../../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-schedules-common';
 import { performChecks } from '../../../../helpers';
-import { getKibanaFeatureFlags } from '../../../helpers/get_kibana_feature_flags';
-
-jest.mock('../../../helpers/get_kibana_feature_flags', () => ({
-  getKibanaFeatureFlags: jest.fn(),
-}));
 
 jest.mock('../../../../helpers', () => ({
   performChecks: jest.fn(),
@@ -30,10 +25,11 @@ const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
+const getAttackDiscoverySchedule = jest.fn();
 const updateAttackDiscoverySchedule = jest.fn();
 const mockSchedulingDataClient = {
   findSchedules: jest.fn(),
-  getSchedule: jest.fn(),
+  getSchedule: getAttackDiscoverySchedule,
   createSchedule: jest.fn(),
   updateSchedule: updateAttackDiscoverySchedule,
   deleteSchedule: jest.fn(),
@@ -68,15 +64,13 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    // Mock getKibanaFeatureFlags to be enabled by default
-    (getKibanaFeatureFlags as jest.Mock).mockResolvedValue({
-      attackDiscoveryPublicApiEnabled: true,
-    });
     // Mock performChecks to return success by default
     (performChecks as jest.Mock).mockResolvedValue({
       isSuccess: true,
     });
     updateAttackDiscoverySchedulesRoute(server.router);
+    // Default: existing schedule has no workflowConfig (pre-FF schedule)
+    getAttackDiscoverySchedule.mockResolvedValue(getAttackDiscoveryScheduleMock());
     updateAttackDiscoverySchedule.mockResolvedValue(
       getAttackDiscoveryScheduleMock({
         params: {
@@ -94,7 +88,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
 
   it('should handle successful request', async () => {
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-1', mockRequestBody),
       requestContextMock.convertContext(context)
     );
     expect(response.status).toEqual(200);
@@ -104,7 +98,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
   it('should handle missing data client', async () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(null);
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-2', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-2', mockRequestBody),
       requestContextMock.convertContext(context)
     );
 
@@ -118,7 +112,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
   it('should handle `dataClient.updateSchedule` error', async () => {
     (updateAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
-      updateAttackDiscoverySchedulesPublicRequest('schedule-3', mockRequestBody),
+      updateAttackDiscoverySchedulesRequest('schedule-3', mockRequestBody),
       requestContextMock.convertContext(context)
     );
     expect(response.status).toEqual(500);
@@ -131,44 +125,102 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
     });
   });
 
-  describe('public API feature flag behavior', () => {
-    describe('when the public API is disabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: false,
-        });
-      });
+  it('calls getSchedule before updateSchedule to read existing workflowConfig', async () => {
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-4', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
 
-      it('returns a 403 response when the public API is disabled', async () => {
-        const response = await server.inject(
-          updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
+    const getOrder = getAttackDiscoverySchedule.mock.invocationCallOrder[0];
+    const updateOrder = updateAttackDiscoverySchedule.mock.invocationCallOrder[0];
+    expect(getAttackDiscoverySchedule).toHaveBeenCalledWith('schedule-4');
+    expect(getOrder).toBeLessThan(updateOrder);
+  });
 
-        expect(response.status).toEqual(403);
-        expect(response.body).toEqual({
-          message: { error: 'Attack discovery public API is disabled', success: false },
-          status_code: 403,
-        });
-      });
-    });
+  it('preserves existing workflowConfig when updating a workflow-mode schedule', async () => {
+    const mockWorkflowConfig = {
+      alertRetrievalMode: 'esql' as const,
+      alertRetrievalWorkflowIds: ['workflow-id-1'],
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: true,
+      skillEnabled: true,
+      validationWorkflowId: 'validation-1',
+    };
+    getAttackDiscoverySchedule.mockResolvedValue(
+      getAttackDiscoveryScheduleMock({
+        params: {
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          apiConfig: {
+            actionTypeId: '.gen-ai',
+            connectorId: 'gpt-4o',
+            name: 'Mock GPT-4o',
+          },
+          end: 'now',
+          size: 100,
+          start: 'now-24h',
+          workflowConfig: mockWorkflowConfig,
+        },
+      })
+    );
 
-    describe('when the public API is enabled', () => {
-      beforeEach(() => {
-        (getKibanaFeatureFlags as jest.Mock).mockResolvedValueOnce({
-          attackDiscoveryPublicApiEnabled: true,
-        });
-      });
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-5', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
 
-      it('proceeds with normal execution when the public API is enabled', async () => {
-        const response = await server.inject(
-          updateAttackDiscoverySchedulesPublicRequest('schedule-1', mockRequestBody),
-          requestContextMock.convertContext(context)
-        );
+    expect(updateAttackDiscoverySchedule).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          workflowConfig: mockWorkflowConfig,
+        }),
+      })
+    );
+  });
 
-        expect(response.status).toEqual(200);
-        expect(response.body).toEqual(expect.objectContaining({ ...mockRequestBody }));
-      });
-    });
+  it('does not set workflowConfig when updating a pre-FF schedule without workflowConfig', async () => {
+    // Default mock returns schedule without workflowConfig (set in beforeEach)
+    await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-6', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    const updateCall = updateAttackDiscoverySchedule.mock.calls[0][0];
+    expect(updateCall.params.workflowConfig).toBeUndefined();
+  });
+
+  it('returns 200 and does not expose workflowConfig in the response body', async () => {
+    const mockWorkflowConfig = {
+      alertRetrievalMode: 'esql' as const,
+      alertRetrievalWorkflowIds: ['workflow-id-2'],
+      alertRetrievalWorkflowsEnabled: true,
+      defaultRetrievalEnabled: true,
+      skillEnabled: true,
+      validationWorkflowId: 'validation-2',
+    };
+    getAttackDiscoverySchedule.mockResolvedValue(
+      getAttackDiscoveryScheduleMock({
+        params: {
+          alertsIndexPattern: '.alerts-security.alerts-default',
+          apiConfig: {
+            actionTypeId: '.gen-ai',
+            connectorId: 'gpt-4o',
+            name: 'Mock GPT-4o',
+          },
+          end: 'now',
+          size: 100,
+          start: 'now-24h',
+          workflowConfig: mockWorkflowConfig,
+        },
+      })
+    );
+
+    const response = await server.inject(
+      updateAttackDiscoverySchedulesRequest('schedule-7', mockRequestBody),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body).not.toHaveProperty('params.workflowConfig');
+    expect(response.body).not.toHaveProperty('params.workflow_config');
   });
 });

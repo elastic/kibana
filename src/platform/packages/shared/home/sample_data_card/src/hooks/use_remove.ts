@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
 import { useServices } from '../services';
+import { pollForRemoval } from './poll_sample_data_status';
 
 /**
  * Parameters for the `useRemove` React hook.
@@ -23,17 +24,30 @@ export type Params = Pick<SampleDataSet, 'id' | 'defaultIndex' | 'name'> & {
 
 /**
  * A React hook that allows a component to remove a sample data set, handling success and
- * failure in the Kibana UI.  It also provides a boolean that indicates if the data set is
+ * failure in the Kibana UI. It also provides a boolean that indicates if the data set is
  * in the process of being removed.
+ *
+ * After removal, this hook polls the status endpoint until the data is confirmed
+ * as uninstalled
  */
 export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => void, boolean] => {
-  const { removeSampleDataSet, notifyError, notifySuccess } = useServices();
+  const { removeSampleDataSet, fetchSampleDataSets, notifyError, notifySuccess } = useServices();
   const [isRemoving, setIsRemoving] = React.useState(false);
 
   const remove = useCallback(async () => {
     try {
       setIsRemoving(true);
+
       await removeSampleDataSet(id, defaultIndex);
+
+      // Poll until removal is confirmed
+      await pollForRemoval(id, fetchSampleDataSets, {
+        maxAttempts: 20,
+        initialDelayMs: 500,
+        minTimeout: 500,
+        factor: 1.5,
+      });
+
       setIsRemoving(false);
 
       notifySuccess({
@@ -56,7 +70,16 @@ export const useRemove = ({ id, defaultIndex, name, onRemove }: Params): [() => 
         text: `${e.message}`,
       });
     }
-  }, [removeSampleDataSet, notifyError, notifySuccess, id, defaultIndex, name, onRemove]);
+  }, [
+    removeSampleDataSet,
+    fetchSampleDataSets,
+    notifyError,
+    notifySuccess,
+    id,
+    defaultIndex,
+    name,
+    onRemove,
+  ]);
 
   return [remove, isRemoving];
 };

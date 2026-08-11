@@ -69,6 +69,8 @@ describe('inferenceAdapter', () => {
         connectorId: '.id',
         config: {},
         capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
       };
     });
   });
@@ -183,6 +185,7 @@ describe('inferenceAdapter', () => {
             prompt: 10,
             total: 15,
           },
+          model: 'gpt-4o', // Model from createOpenAIChunk helper
         },
       ]);
     });
@@ -218,16 +221,17 @@ describe('inferenceAdapter', () => {
         response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
       );
 
-      expect(tokenChunks).toEqual([
-        {
-          type: ChatCompletionEventType.ChatCompletionTokenCount,
-          tokens: {
-            completion: expect.any(Number),
-            prompt: expect.any(Number),
-            total: expect.any(Number),
-          },
+      expect(tokenChunks).toHaveLength(1);
+      expect(tokenChunks[0]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: {
+          completion: expect.any(Number),
+          prompt: expect.any(Number),
+          total: expect.any(Number),
         },
-      ]);
+      });
+      // Model field is optional - only present if request.model is set
+      // Since no modelName is provided, model should be undefined/not present
     });
 
     it('propagates the temperature parameter', () => {

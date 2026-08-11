@@ -134,11 +134,6 @@ export class DataViewsService extends FtrService {
    * Switch Data View from top search bar
    */
   public async switchTo(name: string) {
-    // TODO: remove in https://github.com/elastic/kibana/issues/239313
-    if (await this.testSubjects.exists('nav-tour-skip-button')) {
-      await this.testSubjects.click('nav-tour-skip-button');
-      await this.testSubjects.waitForDeleted('nav-tour-skip-button');
-    }
     const selectedDataView = await this.getSelectedName();
     if (name === selectedDataView) {
       return;
@@ -147,7 +142,7 @@ export class DataViewsService extends FtrService {
     await this.testSubjects.existOrFail('indexPattern-switcher');
     await this.testSubjects.setValue('indexPattern-switcher--input', name);
     await this.find.clickByCssSelector(
-      `[data-test-subj="indexPattern-switcher"] [title="${name}"]`
+      `[data-test-subj="indexPattern-switcher"] [data-test-subj="dataView-${name}"]`
     );
   }
 

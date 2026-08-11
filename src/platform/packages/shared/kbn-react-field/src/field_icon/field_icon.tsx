@@ -21,6 +21,7 @@ export const typeToEuiIconMap = {
   // icon for an index pattern mapping conflict in discover
   conflict: { iconType: 'warning', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
+  date_nanos: { iconType: 'tokenDate' },
   date_range: { iconType: 'tokenDate' },
   dense_vector: { iconType: 'tokenVectorDense' },
   geo_point: { iconType: 'tokenGeo' },
@@ -48,7 +49,7 @@ export const typeToEuiIconMap = {
   histogram: { iconType: 'tokenHistogram' },
   exponential_histogram: { iconType: 'tokenHistogram' },
   tdigest: { iconType: 'tokenHistogram' },
-  _source: { iconType: 'editorCodeBlock', color: 'gray' },
+  _source: { iconType: 'code', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },
   sparse_vector: { iconType: 'tokenVectorSparse' },
@@ -64,6 +65,7 @@ export const typeToEuiIconMap = {
   nested: { iconType: 'tokenNested' },
   version: { iconType: 'tokenTag' },
   percolator: { iconType: 'tokenPercolator' },
+  null: { iconType: 'tokenNull' },
 } as const;
 
 type AllowedIconType = keyof typeof typeToEuiIconMap;

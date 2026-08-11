@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import { transformRRuleToCustomSchedule } from '@kbn/response-ops-schedule-schema';
 import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/create';
 import type { CreateMaintenanceWindowParams } from '../../../../../../../application/methods/create/types';
 
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1
 ): CreateMaintenanceWindowParams['data'] => {
+  const schedule = transformRRuleToCustomSchedule({
+    rRule: createBody.r_rule,
+    duration: createBody.duration,
+  });
   return {
     title: createBody.title,
     duration: createBody.duration,
     rRule: createBody.r_rule,
     categoryIds: createBody.category_ids,
     scopedQuery: createBody.scoped_query,
+    schedule: { custom: schedule },
+    ...(createBody.scoped_query ? { scope: { alerting: createBody.scoped_query } } : {}),
   };
 };

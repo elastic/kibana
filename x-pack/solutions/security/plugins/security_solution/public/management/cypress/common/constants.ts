@@ -31,9 +31,10 @@ export const SIEM_VERSIONS = [
   'siem',
   'siemV2',
   'siemV3',
+  'siemV4',
 
   // actual version, should equal to SECURITY_FEATURE_ID
-  'siemV4',
+  'siemV5',
 ] as const;
 
 export type SiemVersion = (typeof SIEM_VERSIONS)[number];

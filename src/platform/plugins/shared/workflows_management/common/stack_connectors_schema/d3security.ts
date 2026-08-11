@@ -12,7 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // D3 Security connector parameter schema for run action
 export const D3SecurityRunParamsSchema = z.object({

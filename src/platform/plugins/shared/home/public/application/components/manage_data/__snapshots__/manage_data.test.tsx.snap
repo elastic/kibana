@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ManageData hide dev tools and stack management links if unavailable 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeDataManage__title"
   bottomBorder={true}
   data-test-subj="homeDataManage"
@@ -82,11 +82,11 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`ManageData render 1`] = `
-<_EuiPageSection
+<EuiPageTemplate.Section
   aria-labelledby="homeDataManage__title"
   bottomBorder={true}
   data-test-subj="homeDataManage"
@@ -131,21 +131,6 @@ exports[`ManageData render 1`] = `
             <MemoizedFormattedMessage
               defaultMessage="Dev Tools"
               id="home.manageData.devToolsButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiButtonEmpty
-            data-test-subj="homeManage"
-            flush="both"
-            href=""
-            iconType="gear"
-          >
-            <MemoizedFormattedMessage
-              defaultMessage="Stack Management"
-              id="home.manageData.stackManagementButtonLabel"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -207,7 +192,7 @@ exports[`ManageData render 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</_EuiPageSection>
+</EuiPageTemplate.Section>
 `;
 
 exports[`ManageData render null without any features 1`] = `""`;

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import type { StoryFn, StoryObj } from '@storybook/react';
@@ -43,24 +42,22 @@ const nodeTypes = {
 };
 
 const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
-  <ThemeProvider theme={{ darkMode: false }}>
-    <ReactFlow
-      fitView
-      attributionPosition={undefined}
-      nodeTypes={nodeTypes}
-      nodes={[
-        {
-          id: args.id,
-          type: args.shape,
-          data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
-          position: { x: 0, y: 0 },
-        },
-      ]}
-    >
-      <Controls />
-      <Background />
-    </ReactFlow>
-  </ThemeProvider>
+  <ReactFlow
+    fitView
+    attributionPosition={undefined}
+    nodeTypes={nodeTypes}
+    nodes={[
+      {
+        id: args.id,
+        type: args.shape,
+        data: pick(args, ['id', 'label', 'color', 'icon', 'interactive', 'expandButtonClick']),
+        position: { x: 0, y: 0 },
+      },
+    ]}
+  >
+    <Controls />
+    <Background />
+  </ReactFlow>
 );
 
 export const ShortLabel: StoryObj<NodeViewModel> = {

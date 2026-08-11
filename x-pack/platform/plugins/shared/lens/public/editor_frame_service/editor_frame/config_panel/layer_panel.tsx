@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import type { LensDatasourceId } from '@kbn/lens-common';
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { EMPTY } from 'rxjs';
+import { useObservable } from '@kbn/use-observable';
 import {
   EuiSpacer,
   EuiFlexGroup,
@@ -23,8 +27,12 @@ import { css } from '@emotion/react';
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  useStateFromPublishingSubject,
+  apiPublishesApproximation,
+} from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
 import { isOperation } from '../../../types_guards';
@@ -36,15 +44,18 @@ import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
   useLensSelector,
+  useLensDispatch,
+  onActiveDataChange,
+  selectCanEditTextBasedQuery,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
 } from '../../../state_management';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { LENS_LAYER_TABS_CONTENT_ID } from '../../../app_plugin/shared/edit_on_the_fly/layer_tabs';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
@@ -88,16 +99,42 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { parentApi } = editorProps;
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi)
+    apiPublishesESQLVariables(parentApi)
       ? parentApi?.esqlVariables$
       : new BehaviorSubject(undefined)
+  );
+  const isApproximate = useStateFromPublishingSubject(
+    apiPublishesApproximation(parentApi) ? parentApi?.isApproximate$ : new BehaviorSubject(false)
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
+  const dispatch = useLensDispatch();
+
+  // Sync the chart's finished-loading data into Redux so that downstream consumers
+  // (e.g. color mapping term lists) always have access to activeData.
+  // The default layer id mirrors WorkspacePanel#onData$ so the safety-net dispatch agrees
+  // with the canonical one on how single-table adapter output is keyed, and avoids
+  // re-keying the previous layer's table under the currently selected tab's layerId.
+  const isDataLoading = useObservable(editorProps.dataLoading$ ?? EMPTY);
+  const lensAdaptersRef = useRef(editorProps.lensAdapters);
+  lensAdaptersRef.current = editorProps.lensAdapters;
+  const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers ?? {});
+
+  useEffect(() => {
+    if (isDataLoading !== false || !defaultLayerId) return;
+    const activeData = getActiveDataFromDatatable(
+      defaultLayerId,
+      lensAdaptersRef.current?.tables?.tables
+    );
+    if (Object.keys(activeData).length > 0) {
+      dispatch(onActiveDataChange({ activeData }));
+    }
+  }, [isDataLoading, dispatch, defaultLayerId]);
 
   useEffect(() => {
     // is undefined when the dimension panel is closed
@@ -136,7 +173,7 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
+  const datasourceId = datasourcePublicAPI?.datasourceId! as LensDatasourceId;
   let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
@@ -259,17 +296,13 @@ export function LayerPanel(props: LayerPanelProps) {
           props.onRemoveDimension({ layerId, columnId: openColumnId });
         }
       } else if (isDimensionComplete) {
-        updateAll(
+        updateAll({
           datasourceId,
-          newState,
-          activeVisualization.setDimension({
-            layerId,
-            groupId: openColumnGroup.groupId,
-            columnId: openColumnId,
-            prevState: visualizationState,
-            frame: framePublicAPI,
-          })
-        );
+          newDatasourceState: newState,
+          layerId,
+          groupId: openColumnGroup.groupId,
+          columnId: openColumnId,
+        });
       } else {
         if (forceRender) {
           updateDatasource(datasourceId, newState);
@@ -288,8 +321,6 @@ export function LayerPanel(props: LayerPanelProps) {
       layerId,
       updateAll,
       updateDatasourceAsync,
-      visualizationState,
-      framePublicAPI,
     ]
   );
 
@@ -299,6 +330,10 @@ export function LayerPanel(props: LayerPanelProps) {
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
     false;
+  const shouldRenderESQLEditor =
+    isTextBasedLanguage &&
+    canEditTextBasedQuery &&
+    isOfAggregateQueryType(editorProps.attributes?.state.query);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -374,9 +409,10 @@ export function LayerPanel(props: LayerPanelProps) {
         tabIndex={-1}
         css={css`
           margin-bottom: ${euiTheme.size.base};
-          // disable focus ring for mouse clicks, leave it for keyboard users
-          &:focus:not(:focus-visible) {
-            animation: none !important; // sass-lint:disable-line no-important
+          // disable focus ring - this is a container element that receives programmatic focus
+          // for screen reader announcements, not an interactive element
+          &:focus {
+            outline: none;
           }
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
@@ -481,13 +517,16 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            <ESQLEditor
-              uiSettings={core.uiSettings}
-              isTextBasedLanguage={isTextBasedLanguage}
-              framePublicAPI={framePublicAPI}
-              layerId={layerId}
-              {...editorProps}
-            />
+            {shouldRenderESQLEditor ? (
+              <ESQLEditor
+                uiSettings={core.uiSettings}
+                http={core.http}
+                isTextBasedLanguage={isTextBasedLanguage}
+                framePublicAPI={framePublicAPI}
+                layerId={layerId}
+                {...editorProps}
+              />
+            ) : null}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{
@@ -762,7 +801,7 @@ export function LayerPanel(props: LayerPanelProps) {
           panelRef={(el) => (settingsPanelRef.current = el)}
           isFullscreen={false}
           label={i18n.translate('xpack.lens.editorFrame.layerSettingsTitle', {
-            defaultMessage: 'Layer settings',
+            defaultMessage: 'Settings',
           })}
           isOpen={isPanelSettingsOpen}
           handleClose={() => {
@@ -845,6 +884,10 @@ export function LayerPanel(props: LayerPanelProps) {
                 columnId: openColumnId,
                 groupId: openColumnGroup.groupId,
                 hideGrouping: openColumnGroup.hideGrouping,
+                activeVisualizationTypeId: activeVisualization?.getVisualizationTypeId?.(
+                  visualizationState,
+                  layerId
+                ),
                 filterOperations: openColumnGroup.filterOperations,
                 isMetricDimension: openColumnGroup?.isMetricDimension,
                 dimensionGroups,
@@ -858,6 +901,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 indexPatterns: dataViews.indexPatterns,
                 activeData: layerVisualizationConfigProps.activeData,
                 esqlVariables,
+                isApproximate,
                 dataSectionExtra: !isFullscreen &&
                   openDimension.isComplete &&
                   activeVisualization.DimensionEditorDataExtraComponent && (
@@ -882,25 +926,19 @@ export function LayerPanel(props: LayerPanelProps) {
               activeVisualization.DimensionEditorComponent &&
               openColumnGroup?.enableDimensionEditor && (
                 <>
-                  <div
-                    css={css`
-                      padding: ${euiTheme.size.base} 0;
-                    `}
-                  >
-                    <activeVisualization.DimensionEditorComponent
-                      {...{
-                        ...layerVisualizationConfigProps,
-                        groupId: openColumnGroup.groupId,
-                        accessor: openColumnId,
-                        datasource,
-                        setState: props.updateVisualization,
-                        addLayer: props.addLayer,
-                        removeLayer: props.onRemoveLayer,
-                        panelRef,
-                        isInlineEditing,
-                      }}
-                    />
-                  </div>
+                  <activeVisualization.DimensionEditorComponent
+                    {...{
+                      ...layerVisualizationConfigProps,
+                      groupId: openColumnGroup.groupId,
+                      accessor: openColumnId,
+                      datasource,
+                      setState: props.updateVisualization,
+                      addLayer: props.addLayer,
+                      removeLayer: props.onRemoveLayer,
+                      panelRef,
+                      isInlineEditing,
+                    }}
+                  />
                   {activeVisualization.DimensionEditorAdditionalSectionComponent && (
                     <activeVisualization.DimensionEditorAdditionalSectionComponent
                       {...{

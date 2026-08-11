@@ -10,6 +10,12 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
+  onSuggestionsReady?: (
+    computeStart: number,
+    computeEnd: number,
+    queryLength: number,
+    queryLines: number
+  ) => void;
 }
 
 export enum QuerySource {
@@ -19,6 +25,8 @@ export enum QuerySource {
   HELP = 'help',
   AUTOCOMPLETE = 'autocomplete',
   QUICK_SEARCH = 'quick_search',
+  SEARCH_BUTTON = 'search_button',
+  TIME_FILTER = 'time_filter',
 }
 
 export interface TelemetryQuerySubmittedProps {
@@ -35,4 +43,13 @@ export enum ControlTriggerSource {
 export enum TelemetryControlCancelledReason {
   CANCEL_BUTTON = 'cancel_button',
   CLOSE_BUTTON = 'close_button',
+}
+
+export interface TelemetryLatencyProps {
+  duration: number; // Latency in milliseconds.
+  queryLength: number; // Query length in characters.
+  queryLines: number; // Query length in lines.
+  sessionId: string; // Editor mount session id.
+  isInitialLoad?: boolean; // True for the first sampled event of each metric.
+  callbacksDuration?: number; // Duration spent running callbacks during the execution.
 }
