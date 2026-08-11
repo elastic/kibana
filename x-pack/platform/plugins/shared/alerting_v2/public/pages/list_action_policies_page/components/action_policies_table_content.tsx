@@ -160,7 +160,11 @@ export const ActionPoliciesTableContent = ({
         scrollableInline
         responsiveBreakpoint={false}
       >
-        <Column.Name showDescription onClick={(item) => setPolicyToViewId(toPolicy(item).id)} />
+        <Column.Name
+          showDescription
+          onClick={(item) => setPolicyToViewId(toPolicy(item).id)}
+          maxWidth="400px"
+        />
         <DestinationsColumn />
         <Column
           id="tags"
@@ -185,7 +189,6 @@ export const ActionPoliciesTableContent = ({
         <Column
           id="updatedBy"
           name={UPDATED_BY_COLUMN_NAME}
-          width="150px"
           render={(item) => {
             const { updatedBy } = toPolicy(item);
             if (!updatedBy) return null;
@@ -248,7 +251,7 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
             defaultMessage: 'Notify',
           })}
-          width="50px"
+          width="60px"
           render={(item) => {
             const policy = toPolicy(item);
             if (!policy.enabled || !canWrite) return null;
@@ -271,6 +274,7 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
             defaultMessage: 'Actions',
           })}
+          width="80px"
           render={(item) => {
             const policy = toPolicy(item);
             return (
@@ -432,6 +436,7 @@ const EnabledFilterComponent = ({
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
+    hideSearch
     data-test-subj="actionPoliciesEnabledFilter"
   />
 );
