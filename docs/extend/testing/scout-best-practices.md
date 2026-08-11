@@ -116,7 +116,30 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 - Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
-- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
+- Run your tests against a real Cloud target before merging, especially when fixing a flake that CI reported on a `@cloud-*` target. Pass `--location cloud`; the default is `local`:
+
+  ```bash
+  # Elastic Cloud Hosted deployment (ECH)
+  node scripts/scout run-tests --location cloud --arch stateful --domain classic \
+    --config <module-root>/test/scout/ui/playwright.config.ts
+
+  # Elastic Cloud project (MKI)
+  node scripts/scout run-tests --location cloud --arch serverless --domain search \
+    --config <module-root>/test/scout/ui/playwright.config.ts
+  ```
+
+A Cloud target differs from your local stack in ways that break otherwise-correct tests:
+
+| On Cloud                                                        | What tends to break                                                                        |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| the deployment already holds data your suite didn't create      | assertions over collections: exact counts, result caps, pagination, whichever row is first |
+| requests cross a real network to a shared deployment            | timeouts and polling budgets calibrated against a local stack                              |
+| serverless project types render different navigation and chrome | direct clicks on controls that collapse into an overflow menu                              |
+
+::::::{warning}
+**The Flaky Test Runner only covers local targets.** It fans out over `--arch` and `--domain` only, so `@local-stateful-classic` and `@cloud-stateful-classic` collapse into the same locally provisioned run. A green 50-iteration flaky run says nothing about whether the test passes on a `@cloud-*` target. When the failure you're fixing was reported on a cloud target, reproduce it with `--location cloud` before trusting the fix.
+::::::
+
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
 
 A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
@@ -136,7 +159,14 @@ For the full guide (including when a custom server config is unavoidable), see [
 
 When you add new tests, fix flakes, or make significant changes, run the same tests multiple times to catch flakiness early. A good starting point is **20–50 runs**.
 
-Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
+Prefer doing this locally first (faster feedback) with `--repeatEach`, and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
+
+```bash
+node scripts/scout run-tests --arch stateful --domain classic \
+  --config <module-root>/test/scout/ui/playwright.config.ts --repeatEach 25
+```
+
+Repetition only tells you about the target you repeated on. Neither `--repeatEach` nor the Flaky Test Runner exercises Cloud, so see [the Cloud warning](#design-tests-with-a-cloud-first-mindset) when the flake was reported on a `@cloud-*` target.
 
 ## Keep test suites independent [keep-test-suites-independent]
 
