@@ -7,11 +7,10 @@
 
 import { recurse } from 'cypress-recurse';
 import {
-  MANAGE_NAVIGATION_ITEMS,
-  SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM,
   SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM,
   UPDATE_STATUS,
 } from '../../screens/threat_intelligence/common';
+import { BLOCKLIST_URL } from '../../urls/navigation';
 import {
   BARCHART_POPOVER_BUTTON,
   BARCHART_WRAPPER,
@@ -29,8 +28,7 @@ import {
  * Navigate to Blocklist screen via the Security Solution navbar and Manage menu item
  */
 export const navigateToBlocklist = () => {
-  cy.get(SECURITY_SOLUTION_NAVBAR_MANAGE_ITEM).click();
-  cy.get(MANAGE_NAVIGATION_ITEMS).contains('Blocklist').click();
+  cy.visit(BLOCKLIST_URL);
 };
 
 /**
