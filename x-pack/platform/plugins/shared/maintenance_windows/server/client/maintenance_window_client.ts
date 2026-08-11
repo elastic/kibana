@@ -92,9 +92,7 @@ export class MaintenanceWindowClient {
     this.notifyChange?.();
     return result;
   };
-  public archive = async (
-    params: ArchiveMaintenanceWindowParams
-  ): Promise<MaintenanceWindow> => {
+  public archive = async (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> => {
     const result = await archiveMaintenanceWindow(this.context, params);
     this.notifyChange?.();
     return result;
