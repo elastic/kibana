@@ -102,7 +102,7 @@ export const useBulkAlertAssigneesItems = ({
               disableOnQuery: true,
               disable: false,
               icon: 'users' as const,
-              groupId: 'assignees',
+              groupId: 'assignees' as const,
             },
             {
               key: ALERT_ASSIGNEE_ACTION_IDS.unassignAll,
@@ -113,7 +113,7 @@ export const useBulkAlertAssigneesItems = ({
               onClick: onRemoveAllAssignees,
               disable: alertAssignments ? isEmpty(alertAssignments) : false,
               icon: 'users' as const,
-              groupId: 'assignees',
+              groupId: 'assignees' as const,
             },
           ]
         : [],
