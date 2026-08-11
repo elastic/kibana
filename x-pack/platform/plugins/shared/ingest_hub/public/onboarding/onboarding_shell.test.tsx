@@ -41,10 +41,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
 
 beforeEach(() => {
-  mockUseSessionStorage.mockImplementation((_key, initial) =>
-    // @ts-expect-error useState return type is compatible at runtime
-    React.useState(initial)
-  );
+  mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
 // apigateway_logs  → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
