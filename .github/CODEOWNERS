@@ -2616,6 +2616,10 @@ x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/oauth_cl
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.ts @elastic/response-ops @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.test.ts @elastic/response-ops @elastic/workchat-eng
 
+## API key query
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.ts @elastic/response-ops @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.test.ts @elastic/response-ops @elastic/workchat-eng
+
 ## EARS
 x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
@@ -2695,6 +2699,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
