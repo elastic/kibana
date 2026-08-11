@@ -168,6 +168,20 @@ describe('lazySchema', () => {
       });
     });
 
+    it('does not pollute the global registry with the proxy after toJSONSchema', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).describe('test'));
+      z.toJSONSchema(Schema);
+      expect(z.globalRegistry.has(Schema)).toBe(false);
+    });
+
+    it('does not crash or produce id collisions when the factory uses .meta({ id })', () => {
+      const Schema = lazySchema(() =>
+        z.object({ id: z.string() }).meta({ id: 'my-schema', title: 'My Schema' })
+      );
+      expect(() => z.toJSONSchema(Schema)).not.toThrow();
+      expect(z.globalRegistry.has(Schema)).toBe(false);
+    });
+
     it('does not crash when the factory returns an optional-wrapped schema', () => {
       const Schema = lazySchema(() => z.object({ id: z.string() }).optional());
       expect(() => z.toJSONSchema(Schema)).not.toThrow();

@@ -82,13 +82,30 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
           }
           // process() calls metadataRegistry.get(proxy) after processJSONSchema returns
           // to merge title/description into the output. The registry is keyed by real
-          // object identity, so alias the entry onto the proxy so the lookup hits.
+          // object identity so the proxy lookup would miss. Rather than mutating the
+          // global registry (ctx.metadataRegistry defaults to zod's module singleton),
+          // shadow it on ctx with a thin wrapper that redirects proxy lookups to real.
           if (
             ctx?.metadataRegistry != null &&
             ctx.metadataRegistry.has(real) &&
             !ctx.metadataRegistry.has(self)
           ) {
-            ctx.metadataRegistry.add(self, ctx.metadataRegistry.get(real));
+            const orig = ctx.metadataRegistry;
+            ctx.metadataRegistry = {
+              has: (k: unknown) => orig.has(k === self ? real : k),
+              get: (k: unknown) => {
+                const meta = orig.get(k === self ? real : k);
+                // Strip `id` when returning metadata for the proxy: both proxy and
+                // real are in ctx.seen (from the ctx.seen alias above), so extractDefs
+                // would see the same id twice and throw a duplicate-id error.
+                if (k === self && meta != null && typeof meta === 'object' && 'id' in meta) {
+                  const { id: _id, ...rest } = meta as Record<string, unknown>;
+                  return Object.keys(rest).length ? rest : undefined;
+                }
+                return meta;
+              },
+              add: (k: unknown, v: unknown) => orig.add(k, v),
+            };
           }
           return originalPJS(ctx, json, params);
         };
