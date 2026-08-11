@@ -124,7 +124,7 @@ Your tests shouldn't assume they run in a clean environment, as other suites may
 
 Any assertion over a list has to tolerate entries your test didn't create:
 
-- **Narrow the query to your test data.** Search or filter by a term only it matches before asserting. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
+- **Narrow the query to your test data.** Filter by a term only your test data matches, then assert on the filtered results. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
 - **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
 - **Assert containment, not totality.** `toContainText('my-fixture')` passes even when the deployment has other data; `toHaveCount(4)` does not.
 
