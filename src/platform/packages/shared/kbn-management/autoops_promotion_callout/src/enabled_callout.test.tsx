@@ -11,8 +11,11 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AutoOpsEnabledCallout, AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY } from './enabled_callout';
-import { AUTOOPS_CALLOUT_DISMISSED_KEY } from './callout';
+import {
+  AutoOpsEnabledCallout,
+  AUTOOPS_ENABLED_CALLOUT_DISMISSED_KEY,
+  AUTOOPS_CALLOUT_DISMISSED_KEY,
+} from './callout';
 
 jest.mock('@elastic/eui-illustrations', () => ({
   megaphone: {
