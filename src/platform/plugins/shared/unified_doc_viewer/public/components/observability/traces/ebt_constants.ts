@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DOC_VIEWER_TABS_EBT_ELEMENT } from '@kbn/unified-doc-viewer';
+
 export const TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS = {
   VIEW_TRANSACTION: 'viewTransaction',
   VIEW_DEPENDENCY: 'viewDependency',
@@ -18,7 +20,7 @@ export const TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS = {
 export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
   ERRORS: 'docViewerErrors',
   SPAN_LINKS: 'docViewerSpanLinks',
-  TABS: 'docViewerTabs',
+  TABS: DOC_VIEWER_TABS_EBT_ELEMENT,
   FLYOUT_TABS: 'docViewerFlyoutTabs',
   TRACE_SUMMARY: 'docViewerTraceSummary',
   TRACE_SUMMARY_EXPAND_BUTTON: 'docViewerTraceSummaryExpandButton',
