@@ -1039,8 +1039,6 @@
     "controls.optionsList.editor.multiSelectLabel": "允许多选",
     "controls.optionsList.editor.prefixSearchLabel": "前缀",
     "controls.optionsList.editor.prefixSearchTooltip": "匹配以给定搜索字符串开头的值。",
-    "controls.optionsList.editor.runPastTimeout": "忽略超时以获取结果",
-    "controls.optionsList.editor.runPastTimeout.tooltip": "等待列表加载完成后显示结果。此设置用于大型数据集，但可能需要更长时间来填充结果。",
     "controls.optionsList.editor.searchOptionsTitle": "正在搜索",
     "controls.optionsList.editor.selectionOptionsTitle": "选择的内容",
     "controls.optionsList.editor.singleSelectLabel": "只允许单一选择",
