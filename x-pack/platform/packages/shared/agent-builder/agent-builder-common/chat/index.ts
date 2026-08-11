@@ -6,9 +6,12 @@
  */
 
 export {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,

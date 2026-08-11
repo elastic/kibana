@@ -10,6 +10,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
   normalizeConversationAccessControl,
 } from './types';
 
@@ -70,5 +71,24 @@ describe('normalizeConversationAccessControl', () => {
       access_mode: ConversationAccessControlMode.Public,
       entries: [entry],
     });
+  });
+});
+
+describe('isConversationAccessControlRole', () => {
+  it('accepts the member role', () => {
+    expect(isConversationAccessControlRole(ConversationAccessControlRole.Member)).toBe(true);
+  });
+
+  it('rejects agent access-control roles', () => {
+    expect(isConversationAccessControlRole('user')).toBe(false);
+    expect(isConversationAccessControlRole('editor')).toBe(false);
+    expect(isConversationAccessControlRole('manager')).toBe(false);
+  });
+
+  it('rejects non-string values', () => {
+    expect(isConversationAccessControlRole(undefined)).toBe(false);
+    expect(isConversationAccessControlRole(null)).toBe(false);
+    expect(isConversationAccessControlRole(1)).toBe(false);
+    expect(isConversationAccessControlRole({ role: 'member' })).toBe(false);
   });
 });

@@ -12,6 +12,8 @@ import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
+  type ConversationAccessControl,
+  normalizeConversationAccessControl,
   createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -23,6 +25,8 @@ import {
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
+  GetConversationAccessControlResponse,
+  UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
@@ -32,6 +36,8 @@ import {
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
   hasConversationRenameAccess,
+  hasConversationUpdateAccessControlAccess,
+  normalizeAccessControlUpdate,
   type ConversationAccess,
 } from '../access_control';
 import type {
@@ -77,6 +83,11 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
+  getAccessControl(conversationId: string): Promise<GetConversationAccessControlResponse>;
+  updateAccessControl(
+    conversationId: string,
+    update: UpdateConversationAccessControlRequestBody
+  ): Promise<ConversationAccessControl>;
 }
 
 export const createClient = ({
@@ -327,6 +338,73 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
+  async getAccessControl(conversationId: string): Promise<GetConversationAccessControlResponse> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+    const conversation = document._source!;
+
+    return {
+      access_control: normalizeConversationAccessControl(conversation.access_control),
+      permissions: {
+        update_access_control: hasConversationUpdateAccessControlAccess({
+          conversation,
+          user: this.user,
+        }),
+      },
+    };
+  }
+
+  async updateAccessControl(
+    conversationId: string,
+    update: UpdateConversationAccessControlRequestBody
+  ): Promise<ConversationAccessControl> {
+    const conversation = await this.writeConversation({
+      conversationId,
+      access: 'updateAccessControl',
+      fields: (current) => ({
+        access_control: this.buildAccessControlUpdate({ current, update }),
+      }),
+    });
+
+    return normalizeConversationAccessControl(conversation.access_control);
+  }
+
+  /**
+   * Builds the replacement access control, carrying `added_at` over for members that are
+   * already listed so re-sharing does not reset when they were added.
+   */
+  private buildAccessControlUpdate({
+    current,
+    update,
+  }: {
+    current: Conversation;
+    update: UpdateConversationAccessControlRequestBody;
+  }): ConversationAccessControl {
+    const normalized = normalizeAccessControlUpdate({
+      entries: update.entries,
+      ownerId: current.user.id,
+    });
+
+    if (normalized.error !== undefined) {
+      throw createBadRequestError(normalized.error);
+    }
+
+    const now = new Date().toISOString();
+    const addedAtById = new Map(
+      normalizeConversationAccessControl(current.access_control).entries.map((entry) => [
+        `${entry.type}:${entry.id}`,
+        entry.added_at,
+      ])
+    );
+
+    return {
+      access_mode: update.access_mode,
+      entries: normalized.entries.map((entry) => ({
+        ...entry,
+        added_at: addedAtById.get(`${entry.type}:${entry.id}`) ?? now,
+      })),
+    };
+  }
+
   private toResponseConversation(document: Document): ConversationWithPermissions {
     return {
       ...fromEs(document),
@@ -429,6 +507,10 @@ class ConversationClientImpl implements ConversationClient {
 
       case 'delete':
         allowed = hasConversationDeleteAccess({ conversation, user: this.user });
+        break;
+
+      case 'updateAccessControl':
+        allowed = hasConversationUpdateAccessControlAccess({ conversation, user: this.user });
         break;
     }
 

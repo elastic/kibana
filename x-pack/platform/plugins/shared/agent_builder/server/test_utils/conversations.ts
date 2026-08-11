@@ -64,6 +64,8 @@ export const createConversationClientMock = (): ConversationClientMock => {
     upsertRound: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
+    getAccessControl: jest.fn(),
+    updateAccessControl: jest.fn(),
   };
 };
 

@@ -11,7 +11,11 @@ import {
   createAgentUnavailableError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
+import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
+import {
+  ConversationAccessControlMode,
+  ConversationAccessControlRole,
+} from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
@@ -49,6 +53,7 @@ describe('ConversationClient', () => {
     userId = 'user-1',
     username = 'test-user',
     accessMode = ConversationAccessControlMode.Private,
+    entries = [],
     seqNo = 1,
     primaryTerm = 1,
     // ES omits both fields entirely when `seq_no_primary_term` is not requested
@@ -64,6 +69,7 @@ describe('ConversationClient', () => {
     userId?: string;
     username?: string;
     accessMode?: ConversationAccessControlMode;
+    entries?: ConversationAccessControlEntry[];
     seqNo?: number;
     primaryTerm?: number;
     versioned?: boolean;
@@ -90,6 +96,7 @@ describe('ConversationClient', () => {
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
         access_control: {
           access_mode: accessMode,
+          entries,
         },
       },
     } as Document);
@@ -1154,6 +1161,187 @@ describe('ConversationClient', () => {
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('getAccessControl', () => {
+    const memberEntry: ConversationAccessControlEntry = {
+      type: 'user',
+      id: 'user-1',
+      role: ConversationAccessControlRole.Member,
+      added_at: '2026-01-01T00:00:00.000Z',
+    };
+    const otherMemberEntry: ConversationAccessControlEntry = {
+      ...memberEntry,
+      id: 'user-2',
+      added_at: '2026-01-02T00:00:00.000Z',
+    };
+
+    it('returns the access control and manage permission to the owner', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ entries: [otherMemberEntry] })] },
+      });
+
+      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [otherMemberEntry],
+        },
+        permissions: { update_access_control: true },
+      });
+    });
+
+    it('returns the full entries list to a member, without the manage permission', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              entries: [memberEntry, otherMemberEntry],
+            }),
+          ],
+        },
+      });
+
+      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [memberEntry, otherMemberEntry],
+        },
+        permissions: { update_access_control: false },
+      });
+    });
+
+    it('normalizes legacy access control without entries', async () => {
+      const document = createConversationDocument();
+      delete document._source!.access_control!.entries;
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [document] } });
+
+      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
+        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
+        permissions: { update_access_control: true },
+      });
+    });
+
+    it('masks conversations the caller cannot converse in as not found', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ userId: 'other-user-id' })] },
+      });
+
+      await expect(client.getAccessControl('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+  });
+
+  describe('updateAccessControl', () => {
+    const newMember: Omit<ConversationAccessControlEntry, 'added_at'> = {
+      type: 'user',
+      id: 'user-2',
+      role: ConversationAccessControlRole.Member,
+    };
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('stamps added_at on new entries and persists the requested mode', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [newMember],
+      });
+
+      expect(result).toEqual({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }],
+      });
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({ access_control: result }),
+        })
+      );
+    });
+
+    it('preserves added_at for members that are already listed', async () => {
+      const existing: ConversationAccessControlEntry = {
+        ...newMember,
+        added_at: '2026-01-01T00:00:00.000Z',
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ entries: [existing] })] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [newMember, { ...newMember, id: 'user-3' }],
+      });
+
+      expect(result.entries).toEqual([
+        existing,
+        { type: 'user', id: 'user-3', role: 'member', added_at: '2026-08-11T10:00:00.000Z' },
+      ]);
+    });
+
+    it('drops an entry naming the owner and dedupes repeated ids', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ ...newMember, id: 'user-1' }, newMember, newMember],
+      });
+
+      expect(result.entries).toEqual([{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }]);
+    });
+
+    it('rejects an invalid role with a bad request error', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ ...newMember, role: 'manager' as ConversationAccessControlRole }],
+        })
+      ).rejects.toThrow('Unknown ACL role: manager');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('masks non-owners as not found, even for members of a public conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
   });
 });

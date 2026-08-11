@@ -7,15 +7,64 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  ConversationAccessControlMode,
+  ConversationAccessControlRole,
+} from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
   GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
+  GetConversationAccessControlResponse,
+  UpdateConversationAccessControlRequestBody,
+  UpdateConversationAccessControlResponse,
 } from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+
+const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
+  [
+    schema.literal(ConversationAccessControlMode.Private),
+    schema.literal(ConversationAccessControlMode.Public),
+  ],
+  {
+    meta: {
+      description:
+        'Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation agent can read and continue it).',
+    },
+  }
+);
+
+const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
+  schema.object({
+    type: schema.literal('user'),
+    id: schema.string({
+      minLength: 1,
+      maxLength: CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+      meta: {
+        description:
+          'Stable identifier of the user to share the conversation with: a Kibana user profile uid. Users without a profile cannot be granted access.',
+      },
+    }),
+    role: schema.oneOf([schema.literal(ConversationAccessControlRole.Member)], {
+      meta: {
+        description:
+          'Role granted to the principal. `member` is the only role: members can read and continue the conversation, but never rename, delete, or re-share it.',
+      },
+    }),
+  }),
+  {
+    maxSize: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+    meta: {
+      description:
+        'Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored, and repeated ids are collapsed.',
+    },
+  }
+);
 
 export function registerConversationRoutes({
   router,
@@ -169,6 +218,115 @@ export function registerConversationRoutes({
           body: {
             success: status,
           },
+        });
+      })
+    );
+
+  // Get conversation access control
+  router.versioned
+    .get({
+      path: `${publicApiPath}/conversations/{conversation_id}/access_control`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: "Get a conversation's access control",
+      description:
+        '**Technical Preview; added in 9.6.0.** Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+        availability: {
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: {
+                  description:
+                    'The unique identifier of the conversation whose access control to retrieve.',
+                },
+              }),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/conversations_access_control_get.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const accessControl = await client.getAccessControl(conversationId);
+
+        return response.ok<GetConversationAccessControlResponse>({
+          body: accessControl,
+        });
+      })
+    );
+
+  // Update conversation access control
+  router.versioned
+    .put({
+      path: `${publicApiPath}/conversations/{conversation_id}/access_control`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: "Update a conversation's access control",
+      description:
+        "**Technical Preview; added in 9.6.0.** Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).",
+      options: {
+        tags: ['conversation', 'oas-tag:agent builder'],
+        availability: {
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              conversation_id: schema.string({
+                meta: {
+                  description:
+                    'The unique identifier of the conversation whose access control to update.',
+                },
+              }),
+            }),
+            body: schema.object({
+              access_mode: ACCESS_CONTROL_MODE_SCHEMA,
+              entries: ACCESS_CONTROL_ENTRIES_SCHEMA,
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/conversations_access_control_update.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { conversations: conversationsService } = getInternalServices();
+        const { conversation_id: conversationId } = request.params;
+
+        const client = await conversationsService.getScopedClient({ request });
+        const accessControl = await client.updateAccessControl(
+          conversationId,
+          request.body as UpdateConversationAccessControlRequestBody
+        );
+
+        return response.ok<UpdateConversationAccessControlResponse>({
+          body: accessControl,
         });
       })
     );
