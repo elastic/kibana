@@ -108,17 +108,20 @@ apiTest.describe(
       expect(response.body).toMatchObject({ avatar_symbol: 'U', avatar_color: '#FF5733' });
     });
 
-    apiTest('updates configuration.instructions (the overview-page edit-details flow)', async ({ asAdmin }) => {
-      const id = await createAgent(asAdmin);
+    apiTest(
+      'updates configuration.instructions (the overview-page edit-details flow)',
+      async ({ asAdmin }) => {
+        const id = await createAgent(asAdmin);
 
-      const newInstructions = 'Updated instructions for the agent prompt';
-      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-        body: { configuration: { instructions: newInstructions } },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.configuration.instructions).toBe(newInstructions);
-    });
+        const newInstructions = 'Updated instructions for the agent prompt';
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+          body: { configuration: { instructions: newInstructions } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.configuration.instructions).toBe(newInstructions);
+      }
+    );
 
     apiTest('updates configuration.enable_elastic_capabilities', async ({ asAdmin }) => {
       const id = await createAgent(asAdmin);
@@ -147,33 +150,27 @@ apiTest.describe(
     // access_control schema contract
     // -------------------------------------------------------------------------
 
-    apiTest(
-      'accepts access_control with only access_mode: public',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
+    apiTest('accepts access_control with only access_mode: public', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
 
-        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: { access_control: { access_mode: AgentAccessControlMode.Public } },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.access_control.access_mode).toBe(AgentAccessControlMode.Public);
-      }
-    );
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { access_control: { access_mode: AgentAccessControlMode.Public } },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.access_control.access_mode).toBe(AgentAccessControlMode.Public);
+    });
 
-    apiTest(
-      'accepts access_control with only access_mode: private',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
+    apiTest('accepts access_control with only access_mode: private', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
 
-        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: { access_control: { access_mode: AgentAccessControlMode.Private } },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.access_control.access_mode).toBe(AgentAccessControlMode.Private);
-      }
-    );
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { access_control: { access_mode: AgentAccessControlMode.Private } },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.access_control.access_mode).toBe(AgentAccessControlMode.Private);
+    });
 
     apiTest(
       'rejects access_control payload that includes entries (regression guard for elastic/search-team#15698)',
@@ -203,36 +200,30 @@ apiTest.describe(
     // Unknown / extra properties
     // -------------------------------------------------------------------------
 
-    apiTest(
-      'rejects unknown top-level properties in the update body',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
+    apiTest('rejects unknown top-level properties in the update body', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
 
-        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: { unknown_field: 'some value' },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(400);
-      }
-    );
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { unknown_field: 'some value' },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
 
-    apiTest(
-      'rejects unknown nested properties inside configuration',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
+    apiTest('rejects unknown nested properties inside configuration', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
 
-        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: {
-            configuration: {
-              instructions: 'Valid instruction',
-              unexpected_config_field: true,
-            },
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: {
+          configuration: {
+            instructions: 'Valid instruction',
+            unexpected_config_field: true,
           },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(400);
-      }
-    );
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
 
     // -------------------------------------------------------------------------
     // Partial updates — no clobbering
@@ -270,61 +261,55 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'updating only access_mode does not affect configuration',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin, {
-          configuration: {
-            instructions: 'Stable instructions',
-            tools: [{ tool_ids: ['*'] }],
-          },
-        });
+    apiTest('updating only access_mode does not affect configuration', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin, {
+        configuration: {
+          instructions: 'Stable instructions',
+          tools: [{ tool_ids: ['*'] }],
+        },
+      });
 
-        const putResponse = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: { access_control: { access_mode: AgentAccessControlMode.Private } },
-          responseType: 'json',
-        });
-        expect(putResponse).toHaveStatusCode(200);
-        expect(putResponse.body.configuration.instructions).toBe('Stable instructions');
-        expect(putResponse.body.access_control.access_mode).toBe(AgentAccessControlMode.Private);
-      }
-    );
+      const putResponse = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: { access_control: { access_mode: AgentAccessControlMode.Private } },
+        responseType: 'json',
+      });
+      expect(putResponse).toHaveStatusCode(200);
+      expect(putResponse.body.configuration.instructions).toBe('Stable instructions');
+      expect(putResponse.body.access_control.access_mode).toBe(AgentAccessControlMode.Private);
+    });
 
     // -------------------------------------------------------------------------
     // GET-after-PUT round-trip parity
     // -------------------------------------------------------------------------
 
-    apiTest(
-      'GET after PUT returns the same document as the PUT response',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
+    apiTest('GET after PUT returns the same document as the PUT response', async ({ asAdmin }) => {
+      const id = await createAgent(asAdmin);
 
-        const putResponse = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-          body: {
-            name: 'Round-trip Agent',
-            description: 'Round-trip description',
-            labels: ['round', 'trip'],
-            configuration: { instructions: 'Round-trip instructions' },
-          },
-          responseType: 'json',
-        });
-        expect(putResponse).toHaveStatusCode(200);
-
-        const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${id}`, {
-          responseType: 'json',
-        });
-        expect(getResponse).toHaveStatusCode(200);
-
-        // Core user-visible fields must match between PUT response and subsequent GET.
-        expect(getResponse.body).toMatchObject({
-          id,
+      const putResponse = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
+        body: {
           name: 'Round-trip Agent',
           description: 'Round-trip description',
           labels: ['round', 'trip'],
-        });
-        expect(getResponse.body.configuration.instructions).toBe('Round-trip instructions');
-      }
-    );
+          configuration: { instructions: 'Round-trip instructions' },
+        },
+        responseType: 'json',
+      });
+      expect(putResponse).toHaveStatusCode(200);
+
+      const getResponse = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${id}`, {
+        responseType: 'json',
+      });
+      expect(getResponse).toHaveStatusCode(200);
+
+      // Core user-visible fields must match between PUT response and subsequent GET.
+      expect(getResponse.body).toMatchObject({
+        id,
+        name: 'Round-trip Agent',
+        description: 'Round-trip description',
+        labels: ['round', 'trip'],
+      });
+      expect(getResponse.body.configuration.instructions).toBe('Round-trip instructions');
+    });
 
     apiTest(
       'repeated GET-modify-PUT cycles keep the stored document stable',
