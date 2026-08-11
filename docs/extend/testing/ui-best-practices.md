@@ -279,10 +279,10 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 ## Use EUI component helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-EUI components are awkward to drive by hand (portals, virtualization, async state), so prefer a ready-made helper and keep it in a `readonly` class field. Scout has two, depending on the component:
+Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. Scout has two sources:
 
-- **`page.components`** — the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Combo boxes today, with more moving over time.
-- **`@kbn/scout` wrappers** (or your solution's Scout package) — for components that don't have a published helper yet: data grids, toasts, super selects, checkboxes, text fields, selectables, and code blocks.
+- **`page.components`** — the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Prefer these where your component is covered; autocomplete shows what's available.
+- **`@kbn/scout` wrappers** (or your solution's Scout package) — the `Eui*Wrapper` classes, for components the published helpers don't reach yet.
 
 :::::{dropdown} Example
 
@@ -306,7 +306,7 @@ export class MyAppPage {
 
 :::::
 
-If neither covers your component, `page.testSubj` locators are fine for simple ones. For a component that's genuinely hard to drive reliably, add a wrapper under `kbn-scout`'s `eui_components/` instead of solving it privately in your page object — that's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
+If neither covers your component, `page.testSubj` locators are fine. When the component is EUI's, add a wrapper under `kbn-scout`'s `eui_components/` instead of keeping the logic in your page object — that's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
 
 :::::{note}
 If a Component Object lacks what you need, don't subclass it or drive the component yourself — that puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
