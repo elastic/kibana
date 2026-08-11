@@ -89,10 +89,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           aria-hidden="true"
           style={{
             width: '1px',
-            height: '16px',
+            height: euiTheme.size.base,
             background: euiTheme.colors.backgroundLightText,
-            marginLeft: '12px',
-            marginRight: '4px',
+            marginLeft: euiTheme.size.s,
+            marginRight: euiTheme.size.xs,
           }}
         />
         <EuiFlexItem grow={false}>
