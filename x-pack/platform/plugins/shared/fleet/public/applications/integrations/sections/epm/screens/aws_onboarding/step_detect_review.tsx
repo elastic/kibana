@@ -22,7 +22,12 @@ import {
 
 import { CardHeader } from './card_header';
 import type { AwsServiceEntry } from './aws_services_data';
-import { CONTENT_BY_SERVICE, GENERAL_CONTENT, type AwsContentItem } from './aws_content_data';
+import {
+  CONTENT_BY_SERVICE,
+  DETECTION_RULES_BY_SERVICE,
+  GENERAL_CONTENT,
+  type AwsContentItem,
+} from './aws_content_data';
 
 const REGION_LABELS: Record<string, string> = {
   'us-east': 'US-East',
@@ -36,6 +41,7 @@ const CONTENT_TYPE_ICONS: Record<AwsContentItem['type'], string> = {
   search: 'discoverApp',
   alert_rule: 'bell',
   content_package: 'package',
+  detection_rule: 'securityApp',
 };
 
 const CONTENT_TYPE_LABELS: Record<AwsContentItem['type'], string> = {
@@ -43,6 +49,7 @@ const CONTENT_TYPE_LABELS: Record<AwsContentItem['type'], string> = {
   search: 'Saved search',
   alert_rule: 'Alert rule template',
   content_package: 'Content package',
+  detection_rule: 'Detection rule',
 };
 
 const SummaryItem: React.FunctionComponent<{ label: string; value: React.ReactNode }> = ({
@@ -175,10 +182,27 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
     return () => timers.current.forEach((t) => window.clearTimeout(t));
   }, []);
 
+  // Prebuilt SIEM detection rules for the selected services (from the
+  // security_detection_engine package) — presented as their own group since
+  // they install from a separate package than the aws integration.
+  const detectionRules = services.flatMap((s) => DETECTION_RULES_BY_SERVICE[s.id] ?? []);
+
   const groups = [
     { service: { id: '_general', name: 'Amazon Web Services (all services)' }, items: GENERAL_CONTENT },
     ...services.map((service) => ({ service, items: CONTENT_BY_SERVICE[service.id] ?? [] })),
+    { service: { id: '_security', name: 'Security detection rules' }, items: detectionRules },
   ].filter((g) => g.items.length > 0);
+
+  // Two-column layout: GuardDuty and the detection rules anchor the right
+  // column; everything else stacks on the left. If nothing lands on the
+  // right, alternate groups between the columns instead.
+  const RIGHT_COLUMN_IDS = new Set(['guardduty', '_security']);
+  let leftGroups = groups.filter((g) => !RIGHT_COLUMN_IDS.has(g.service.id));
+  let rightGroups = groups.filter((g) => RIGHT_COLUMN_IDS.has(g.service.id));
+  if (rightGroups.length === 0 && leftGroups.length > 1) {
+    rightGroups = leftGroups.filter((_, i) => i % 2 === 1);
+    leftGroups = leftGroups.filter((_, i) => i % 2 === 0);
+  }
 
   const allItems = groups.flatMap((g) => g.items);
   const installedCount = allItems.filter((i) => installState[i.id] === 'installed').length;
@@ -213,26 +237,32 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {groups.map(({ service, items }) => (
-        <React.Fragment key={service.id}>
-          <EuiSpacer size="l" />
-          <EuiTitle size="xxs">
-            <h4>{service.name}</h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="m">
-            {items.map((item) => (
-              <EuiFlexItem key={item.id}>
-                <ContentItemCard
-                  item={item}
-                  state={installState[item.id] ?? 'idle'}
-                  onInstall={() => onInstall(item.id)}
-                />
-              </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        {[leftGroups, rightGroups].map((column, colIndex) => (
+          <EuiFlexItem key={colIndex} style={{ minWidth: 0 }}>
+            {column.map(({ service, items }) => (
+              <React.Fragment key={service.id}>
+                <EuiSpacer size="l" />
+                <EuiTitle size="xxs">
+                  <h4>{service.name}</h4>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                {items.map((item, itemIndex) => (
+                  <React.Fragment key={item.id}>
+                    {itemIndex > 0 && <EuiSpacer size="m" />}
+                    <ContentItemCard
+                      item={item}
+                      state={installState[item.id] ?? 'idle'}
+                      onInstall={() => onInstall(item.id)}
+                    />
+                  </React.Fragment>
+                ))}
+              </React.Fragment>
             ))}
-          </EuiFlexGrid>
-        </React.Fragment>
-      ))}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
