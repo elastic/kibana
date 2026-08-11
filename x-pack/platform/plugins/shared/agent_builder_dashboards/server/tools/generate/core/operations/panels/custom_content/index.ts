@@ -88,6 +88,6 @@ export const customContentPanelDefinition = definePanelType({
       ? { ok: true }
       : {
           ok: false,
-          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as custom content.`,
+          error: `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as custom content. Use source: "request" for ES|QL-backed Lens or Vega panels.`,
         },
 });

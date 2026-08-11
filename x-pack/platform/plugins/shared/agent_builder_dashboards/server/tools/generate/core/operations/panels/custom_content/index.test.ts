@@ -9,7 +9,11 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   customContentStateSchema,
 } from '@kbn/custom-content-common';
-import { customContentPanelConfigSchema, customContentPanelDefinition } from '.';
+import {
+  customContentPanelConfigSchema,
+  customContentPanelDefinition,
+  editCustomContentPanelConfigInputSchema,
+} from '.';
 
 /**
  * Drift guard: `customContentPanelConfigSchema` is derived from `customContentStateSchema`
@@ -55,6 +59,40 @@ describe('customContentPanelDefinition', () => {
         type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
         config,
       });
+    });
+  });
+
+  describe('editCustomContentPanelConfigInputSchema', () => {
+    it('accepts a valid edit payload', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          panelId: 'cc-1',
+          config: { prompt: 'Updated KPI' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects when panelId is missing', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          config: { prompt: 'Updated KPI' },
+        }).success
+      ).toBe(false);
+    });
+
+    it('rejects when prompt is missing from config', () => {
+      expect(
+        editCustomContentPanelConfigInputSchema.safeParse({
+          source: 'config',
+          type: 'custom_content',
+          panelId: 'cc-1',
+          config: {},
+        }).success
+      ).toBe(false);
     });
   });
 
