@@ -14,7 +14,13 @@ import { deleteMetricsAnomaliesMlData } from '../fixtures/metrics_anomalies_ml';
 globalTeardownHook(
   'Clean up infra data after UI parallel tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ esClient, infraSynthtraceEsClient, logsSynthtraceEsClient, apmSynthtraceEsClient, log }) => {
+  async ({
+    esClient,
+    infraSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apmSynthtraceEsClient,
+    log,
+  }) => {
     log.info('Running infra UI global teardown...');
 
     await infraSynthtraceEsClient.clean();
