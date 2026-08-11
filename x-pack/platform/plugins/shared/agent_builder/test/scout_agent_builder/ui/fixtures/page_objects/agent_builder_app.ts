@@ -780,6 +780,30 @@ export class AgentBuilderApp {
     return id;
   }
 
+  async openMcpClientEdit(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
+  }
+
   async closeMcpClientDetails() {
     await this.dismissToasts();
     await this.page.testSubj.click('mcpClientDetailsCloseButton');

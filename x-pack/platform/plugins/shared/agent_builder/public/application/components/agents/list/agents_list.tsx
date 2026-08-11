@@ -26,10 +26,14 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
+import moment from 'moment';
 import React, { useMemo } from 'react';
 import type { ListAgentResponseItem } from '../../../../../common/http_api/agents';
+import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -47,12 +51,61 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
+const renderOwnerCell = (
+  owner: { id?: string; username?: string } | undefined,
+  date?: string,
+  profileMap?: Map<string, string>,
+  dateFormat?: string
+) => {
+  const label = resolveOwnerLabel(owner, profileMap);
+  const relativeDate = date ? moment(date).fromNow() : undefined;
+
+  if (!label && !relativeDate) {
+    return (
+      <EuiText size="s" color="subdued">
+        —
+      </EuiText>
+    );
+  }
+
+  if (!label) {
+    return (
+      <EuiText size="s" color="subdued">
+        {relativeDate}
+      </EuiText>
+    );
+  }
+
+  if (!relativeDate) {
+    return label;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={moment(date).format(dateFormat ?? 'LL LT')}>
+          <EuiText size="xs" color="subdued" tabIndex={0}>
+            {relativeDate}
+          </EuiText>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
   accessControlMode: i18n.translate('xpack.agentBuilder.agents.accessControlModeColumn', {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
+    defaultMessage: 'Created by',
+  }),
+  lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
+    defaultMessage: 'Last updated by',
+  }),
 };
 
 const actionLabels = {
@@ -109,10 +162,15 @@ const spaceDefaultBadgeTooltip = i18n.translate(
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const profileMap = useOwnerProfiles(agents ?? []);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
   const { addSuccessToast, addErrorToast } = useToasts();
+  const {
+    services: { settings },
+  } = useKibana();
+  const dateFormat = settings?.client.get<string>('dateFormat');
   // The space's currently assigned default agent id (null if unconfigured).
   // Used to render the "Space default" badge and to switch the row action
   // between "Set as space default" and "Remove as space default".
@@ -240,6 +298,24 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
+    const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'created_by',
+      name: columnNames.createdBy,
+      render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListCreatedBy',
+    };
+
+    const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'updated_by',
+      name: columnNames.lastUpdatedBy,
+      render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
+    };
+
     const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
       width: '120px',
       actions: [
@@ -360,6 +436,8 @@ export const AgentsList: React.FC = () => {
       agentNameAndDescription,
       agentAccessControlMode,
       agentLabels,
+      agentCreatedBy,
+      agentLastUpdatedBy,
       agentActions,
     ];
   }, [
@@ -369,6 +447,8 @@ export const AgentsList: React.FC = () => {
     canManageAgentAccess,
     spaceDefaultAgentId,
     setSpaceDefaultAgent,
+    profileMap,
+    dateFormat,
   ]);
 
   const errorMessage = useMemo(
