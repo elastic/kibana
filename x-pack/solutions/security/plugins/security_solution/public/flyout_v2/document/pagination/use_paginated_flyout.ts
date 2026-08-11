@@ -80,7 +80,6 @@ export const usePaginatedFlyout = ({
   const setState = useCallback((partial: Partial<ScopedPaginationSlice>): void => {
     storeRef.current.setState(partial);
     // storeRef.current is stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const closePaginatedFlyout = useCallback((): void => {
@@ -90,7 +89,6 @@ export const usePaginatedFlyout = ({
       v2OverlayRef.current = null;
     }
     // storeRef.current is stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openPaginatedFlyout = useCallback(
@@ -134,7 +132,7 @@ export const usePaginatedFlyout = ({
       );
     },
     // historyKey is stable. Mutable values are read through refs. storeRef.current is stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [historyKey]
   );
 
@@ -148,7 +146,6 @@ export const usePaginatedFlyout = ({
       storeRef.current.setState({ openDocumentFlyoutImpl: null });
     };
     // storeRef.current and openPaginatedFlyout are stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openPaginatedFlyout]);
 
   // Close the overlay on unmount (navigation away from the source page).
@@ -161,7 +158,6 @@ export const usePaginatedFlyout = ({
       }
     };
     // storeRef.current is stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openDocumentFlyout = useCallback(
