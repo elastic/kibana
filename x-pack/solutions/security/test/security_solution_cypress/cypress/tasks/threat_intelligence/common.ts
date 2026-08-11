@@ -96,6 +96,12 @@ export const navigateToFlyoutJsonTab = () => {
  * When the KQL bar itself is absent (the page stalled during initialisation before the search
  * bar mounted), a hard reload is the only recovery — a missing bar means the data view
  * bootstrap never completed and clicking elsewhere on the page does nothing.
+ *
+ * After issuing a reload, wait for the KQL bar to reappear before returning to the recurse
+ * loop. Without this, the 2 s inter-iteration delay is shorter than the time Kibana needs to
+ * mount the security-solution app (~3 s observed in CI), causing the loop to reload again
+ * before the previous reload has settled — each reload interrupts the one before it and the
+ * table never gets a chance to render.
  */
 export const waitForViewToBeLoaded = () => {
   recurse(
@@ -106,6 +112,7 @@ export const waitForViewToBeLoaded = () => {
         }
         if ($body.find(REFRESH_BUTTON).length === 0) {
           cy.reload();
+          cy.get(REFRESH_BUTTON, { timeout: 15000 }).should('exist');
         } else {
           cy.get(REFRESH_BUTTON).click();
         }
