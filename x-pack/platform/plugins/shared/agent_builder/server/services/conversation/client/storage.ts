@@ -38,6 +38,7 @@ const storageSettings = {
       read: types.boolean({}),
       pinned: types.boolean({}),
       workspace_id: types.keyword({}),
+      parent_conversation_id: types.keyword({}),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -69,6 +70,7 @@ export interface ConversationProperties {
   read?: boolean;
   pinned?: boolean;
   workspace_id?: string;
+  parent_conversation_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
   // legacy field

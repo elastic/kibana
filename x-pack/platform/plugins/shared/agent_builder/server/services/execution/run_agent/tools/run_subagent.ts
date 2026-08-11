@@ -7,24 +7,50 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
   ToolType,
   isRoundCompleteEvent,
   internalTools,
   SubagentExecutionMode,
+  SubagentMode,
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
+import type { SubagentTracker } from '../subagent_tracker';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),
   prompt: z.string().describe('The task for the agent to perform'),
+  mode: z
+    .enum([SubagentMode.oneshot, SubagentMode.persistent])
+    .optional()
+    .describe(
+      'Whether the sub-agent is a one-off (oneshot, default) or persistent — kept ' +
+        'as a named session you can talk to again later via the send_message tool. ' +
+        'Only use "persistent" when you expect to follow up with the same sub-agent ' +
+        'across multiple invocations (either later in this round or in a future round).'
+    ),
+  name: z
+    .string()
+    .optional()
+    .describe(
+      'Identifier for a persistent sub-agent (ignored when mode is "oneshot"). ' +
+        'Defaults to "subagent". \n\n' +
+        'This name is how you will address the sub-agent later via send_message. ' +
+        "Pick a short, meaningful name that reflects its role (e.g. \"researcher\", " +
+        '"code-reviewer", "planner"). Names are scoped to the current conversation. \n\n' +
+        'IMPORTANT: run_subagent ONLY creates. Calling it with a name that is ' +
+        'ALREADY in use will fail — use send_message to talk to an existing ' +
+        'sub-agent. The current active roster is surfaced to you via ' +
+        '<active_subagents> notices in the message history.'
+    ),
   run_in_background: z
     .boolean()
     .optional()
@@ -64,6 +90,12 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
   - Use foreground (default) when you need the agent's results before you can proceed — e.g., research agents whose findings inform your next steps.
   - Use background when you have genuinely independent work to do in parallel.
 
+## Persistent sub-agents
+
+- \`mode: "persistent"\` creates a named, long-running sub-agent you can address later with the \`send_message\` tool.
+- \`run_subagent\` only ever creates. If a persistent sub-agent with the same name already exists, this call will fail — use \`send_message\` to talk to it.
+- The current active roster is surfaced to you in \`<active_subagents>\` notices; check there before choosing a name.
+
 ## Running agents in the background
 
 - When an agent runs in the background, **you** will be **automatically** notified when it completes via a system notification
@@ -81,6 +113,9 @@ export const createSubagentTool = ({
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
+  parentConversationId,
+  subagentTracker,
+  conversationExists,
 }: {
   agentId: string;
   executionId: string;
@@ -89,6 +124,12 @@ export const createSubagentTool = ({
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
+  /** Parent conversation id — required for persistent-mode creation. */
+  parentConversationId?: string;
+  /** Round-local persistent sub-agent tracker. */
+  subagentTracker?: SubagentTracker;
+  /** Existence probe for stale-entry recovery. */
+  conversationExists?: (id: string) => Promise<boolean>;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
@@ -97,17 +138,111 @@ export const createSubagentTool = ({
     schema,
     tags: ['subagent'],
     handler: async (
-      { description, prompt, run_in_background = false, effort = 'medium' },
+      { description, prompt, run_in_background = false, effort = 'medium', mode, name },
       { events, modelProvider }
     ) => {
+      const fullPrompt = `${description}\n\n${prompt}`;
+      const isPersistent = mode === SubagentMode.persistent;
+
+      const subAgentModel = await modelProvider.selectModel({
+        effortLevel: effort as EffortLevel,
+      });
+      const selectedConnectorId = subAgentModel.connector.connectorId;
+
       try {
-        const fullPrompt = `${description}\n\n${prompt}`;
+        if (isPersistent) {
+          const finalName = name ?? 'subagent';
 
-        const subAgentModel = await modelProvider.selectModel({
-          effortLevel: effort as EffortLevel,
-        });
-        const selectedConnectorId = subAgentModel.connector.connectorId;
+          if (!subagentTracker || !parentConversationId) {
+            return {
+              results: [
+                createErrorResult(
+                  'Persistent sub-agent creation is not available in this execution context.'
+                ),
+              ],
+            };
+          }
 
+          // Uniqueness check: name must not point to a live child.
+          const existing = subagentTracker.get(finalName);
+          if (existing) {
+            const stillExists = conversationExists ? await conversationExists(existing) : true;
+            if (stillExists) {
+              return {
+                results: [
+                  createErrorResult(
+                    `A sub-agent named "${finalName}" already exists in this conversation. ` +
+                      `Use send_message({ to: "${finalName}", ... }) to talk to it, or pick a ` +
+                      `different name to create a new one.`
+                  ),
+                ],
+              };
+            }
+            // Stale entry — drop and fall through to creation.
+            subagentTracker.clear(finalName);
+          }
+
+          // Creation path.
+          const newChildId = uuidv4();
+
+          const { executionId, events$ } = await subAgentExecutor.createSubAgent({
+            agentId,
+            parentConversationId,
+            parentExecutionId,
+            subagentName: finalName,
+            subagentPurpose: description,
+            conversationId: newChildId,
+            prompt: fullPrompt,
+            connectorId: selectedConnectorId,
+            capabilities,
+            ...(run_in_background ? {} : { abortSignal }),
+          });
+
+          subagentTracker.register({
+            name: finalName,
+            purpose: description,
+            conversation_id: newChildId,
+          });
+
+          events.reportProgress(`Sub-agent execution ${executionId} started`, {
+            metadata: { agent_execution_id: executionId, internal: 'true' },
+          });
+
+          const createdMarker = {
+            name: finalName,
+            purpose: description,
+            conversation_id: newChildId,
+          };
+
+          if (run_in_background) {
+            backgroundExecutionService?.registerExecution(executionId);
+            return {
+              results: [
+                createOtherResult({
+                  agent_execution_id: executionId,
+                  mode: SubagentExecutionMode.background,
+                  status: 'queued',
+                  _subagent_created: createdMarker,
+                }),
+              ],
+            };
+          }
+
+          const response = await extractFinalResponse(events$);
+          return {
+            results: [
+              createOtherResult({
+                agent_execution_id: executionId,
+                mode: SubagentExecutionMode.foreground,
+                status: 'completed',
+                response,
+                _subagent_created: createdMarker,
+              }),
+            ],
+          };
+        }
+
+        // Oneshot path — unchanged behavior.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
           connectorId: selectedConnectorId,
@@ -118,7 +253,6 @@ export const createSubagentTool = ({
           ...(run_in_background ? {} : { abortSignal }),
         });
 
-        // Emit progress with execution ID so the UI can show "Watch" before results arrive
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
           metadata: {
             agent_execution_id: executionId,
@@ -138,20 +272,20 @@ export const createSubagentTool = ({
               }),
             ],
           };
-        } else {
-          const response = await extractFinalResponse(events$);
-
-          return {
-            results: [
-              createOtherResult({
-                agent_execution_id: executionId,
-                mode: SubagentExecutionMode.foreground,
-                status: 'completed',
-                response,
-              }),
-            ],
-          };
         }
+
+        const response = await extractFinalResponse(events$);
+
+        return {
+          results: [
+            createOtherResult({
+              agent_execution_id: executionId,
+              mode: SubagentExecutionMode.foreground,
+              status: 'completed',
+              response,
+            }),
+          ],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return {

@@ -57,6 +57,8 @@ import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
+import { SubagentTracker } from './subagent_tracker';
+import { conversationIndexName } from '../../conversation/client/storage';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -137,6 +139,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     subAgentExecutor: context.subAgentExecutor,
     initialState: conversation?.state?.background_executions,
   });
+
+  // Round-local persistent sub-agent tracker, seeded from the parent
+  // conversation's persisted roster. New creations are added mid-round via the
+  // `run_subagent` tool; the snapshot is persisted back into conversation state
+  // via `getConversationState()` below.
+  const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -237,6 +245,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     backgroundExecutionService,
     filteredSkills,
     relevantSkillsEnabled,
+    // Persistent-sub-agent plumbing (Task 8 / Task 9):
+    parentConversationId: conversation?.id,
+    subagentTracker,
+    // Conversation-existence probe for stale-entry recovery in persistent
+    // `run_subagent`. Read via internal ES to avoid re-scoping a conversation
+    // client here.
+    conversationExists: async (id: string) => {
+      try {
+        const res = await context.esClient.asInternalUser.exists({
+          index: conversationIndexName,
+          id,
+        });
+        return res as unknown as boolean;
+      } catch {
+        return false;
+      }
+    },
   });
 
   // Then add dynamic tools
@@ -310,6 +335,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    // Compaction-resilient fallback so the parent sees the roster even when
+    // older SubagentRosterUpdatedSteps have been summarized away.
+    subagentRosterFallback: subagentTracker.snapshot(),
   });
 
   const agentGraph = createAgentGraph({
@@ -324,6 +352,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     processedConversation,
     promptFactory,
     backgroundExecutionService,
+    subagentTracker,
     roundId,
   });
 
@@ -390,6 +419,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
           todoStateManager,
+          subagents: subagentTracker.snapshot(),
         }),
       pendingRound,
       startTime,
@@ -433,12 +463,14 @@ const getConversationState = ({
   backgroundExecutionService,
   compactionSummary,
   todoStateManager,
+  subagents,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
   todoStateManager: TodoStateManager;
+  subagents?: Record<string, string>;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
   const todos = todoStateManager.get();
@@ -448,6 +480,7 @@ const getConversationState = ({
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
     ...(todos !== undefined ? { todos } : {}),
+    ...(subagents && Object.keys(subagents).length > 0 ? { subagents } : {}),
   };
 };
 

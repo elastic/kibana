@@ -109,6 +109,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     hooks: manager.deps.hooks,
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
     subAgentExecutor: manager.deps.subAgentExecutor,
     analyticsService,
     trackingService,

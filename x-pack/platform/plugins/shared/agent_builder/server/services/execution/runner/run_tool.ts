@@ -12,7 +12,6 @@ import {
   createBadRequestError,
   HookLifecycle,
   ToolResultType,
-  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
@@ -113,13 +112,13 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
   toolParams = beforeToolHooksResult.toolParams;
 
-  const isStandaloneExecution = manager.deps.executionMode === AgentExecutionMode.standalone;
+  const interactivityDisabled = !manager.deps.interactivity.enabled;
 
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
-      // In sub-agent mode, HITL is not available — auto-decline
-      if (isStandaloneExecution) {
+      // Non-interactive execution — auto-decline HITL prompts
+      if (interactivityDisabled) {
         return {
           results: [
             createErrorResult(
@@ -225,7 +224,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     });
   } else {
     // On-demand HITL prompt from tool handler
-    if (isStandaloneExecution) {
+    if (interactivityDisabled) {
       runToolReturn = {
         results: [
           createErrorResult(
@@ -336,6 +335,8 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
+    interactivity: manager.deps.interactivity,
+    parentExecutionId: manager.deps.parentExecutionId,
     agentConfiguration: manager.deps.agentConfiguration,
     experimentalFeatures,
   };

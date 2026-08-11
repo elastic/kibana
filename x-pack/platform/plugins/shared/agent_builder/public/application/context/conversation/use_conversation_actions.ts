@@ -16,6 +16,7 @@ import type {
   Conversation,
   CompactionStep,
   BackgroundAgentCompleteStep,
+  SubagentRosterUpdatedStep,
   TodosStep,
 } from '@kbn/agent-builder-common';
 import {
@@ -82,6 +83,7 @@ export interface ConversationActions {
   setAskUserQuestionAnswers: (prompts: Record<string, PromptResponse>) => void;
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addSubagentRosterUpdatedStep: ({ step }: { step: SubagentRosterUpdatedStep }) => void;
   addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
   setAttachments: ({ attachments }: { attachments: VersionedAttachment[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
@@ -243,6 +245,11 @@ export const createConversationActions = ({
       });
     },
     addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
+    addSubagentRosterUpdatedStep: ({ step }: { step: SubagentRosterUpdatedStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
       });

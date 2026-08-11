@@ -28,7 +28,10 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
+  conversation: Pick<
+    Conversation,
+    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation_id'
+  >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -48,6 +51,12 @@ export const createConversation$ = ({
         status: roundCompletedEvent.data.round.status,
         read: false,
         rounds: [roundCompletedEvent.data.round],
+        // Snapshot parent's user + parent link when creating a child (persistent
+        // sub-agent). No-op for regular conversations (fields absent).
+        ...(conversation.user ? { user: conversation.user } : {}),
+        ...(conversation.parent_conversation_id
+          ? { parent_conversation_id: conversation.parent_conversation_id }
+          : {}),
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
@@ -132,6 +141,7 @@ export const getConversation = async ({
   conversationClient,
   accessControl,
   origin,
+  subagentSeed,
 }: {
   agentId: string;
   conversationId: string | undefined;
@@ -139,6 +149,15 @@ export const getConversation = async ({
   conversationClient: ConversationClient;
   accessControl?: ConversationAccessControl;
   origin?: ConversationOrigin;
+  /**
+   * When creating a fresh conversation for a persistent sub-agent, carries the
+   * parent's linkage + a pre-selected title. The parent's user + access_control
+   * are looked up here and snapshotted onto the new placeholder.
+   */
+  subagentSeed?: {
+    parentConversationId: string;
+    subagentName: string;
+  };
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
@@ -173,12 +192,30 @@ export const getConversation = async ({
       ...(await conversationClient.get(conversationId)),
       operation: 'UPDATE',
     };
-  } else {
+  }
+
+  // Case 3a: Creating a child conversation for a persistent sub-agent —
+  // snapshot the parent's user + access_control, set the parent link.
+  if (subagentSeed) {
+    const parent = await conversationClient.get(subagentSeed.parentConversationId);
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+      ...placeholderConversation({
+        conversationId,
+        agentId,
+        accessControl: parent.access_control,
+        origin,
+      }),
+      title: subagentSeed.subagentName,
+      user: parent.user,
+      parent_conversation_id: subagentSeed.parentConversationId,
       operation: 'CREATE',
     };
   }
+
+  return {
+    ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+    operation: 'CREATE',
+  };
 };
 
 export const placeholderConversation = ({

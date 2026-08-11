@@ -13,8 +13,12 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import type { ChatEvent, InteractivityConfig } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  normalizeInteractive,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   AgentExecutionService,
@@ -72,10 +76,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     useTaskManager,
     abortSignal,
     metadata,
+    interactive,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = providedExecutionId ?? uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
+    const interactivity = normalizeInteractive(interactive, mode);
 
     const executionClient = this.createExecutionClient();
 
@@ -143,7 +149,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (useScheduledTask) {
       return this.executeWithScheduledTask({ executionId, agentId, request });
     } else {
-      return this.executeLocally({ execution, request });
+      return this.executeLocally({ execution, request, interactivity });
     }
   }
 
@@ -225,9 +231,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   private async executeLocally({
     execution,
     request,
+    interactivity,
   }: {
     execution: AgentExecution;
     request: ExecuteAgentParams['request'];
+    interactivity: InteractivityConfig;
   }): Promise<ExecuteAgentResult> {
     const { executionId } = execution;
     const executionClient = this.createExecutionClient();
@@ -256,6 +264,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         deps: this.deps,
         request,
         execution,
+        interactivity,
         abortSignal: abortMonitor.getSignal(),
       });
 

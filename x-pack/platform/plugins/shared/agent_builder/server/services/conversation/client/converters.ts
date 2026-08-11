@@ -66,6 +66,9 @@ const convertBaseFromEs = (document: Document) => {
     access_control: document._source.access_control ?? getDefaultConversationAccessControl(),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
+    ...(document._source.parent_conversation_id
+      ? { parent_conversation_id: document._source.parent_conversation_id }
+      : {}),
   };
 };
 
@@ -244,6 +247,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.parent_conversation_id
+      ? { parent_conversation_id: conversation.parent_conversation_id }
+      : {}),
   };
 };
 
@@ -279,10 +285,13 @@ export const createRequestToEs = ({
   creationDate: Date;
   space: string;
 }): ConversationProperties => {
+  // Honor conversation.user override if provided (used for persistent sub-agent
+  // creations where ownership is snapshotted from the parent conversation).
+  const effectiveUser = conversation.user ?? currentUser;
   return {
     agent_id: conversation.agent_id,
-    user_id: currentUser.id,
-    user_name: currentUser.username,
+    user_id: effectiveUser.id,
+    user_name: effectiveUser.username,
     space,
     title: conversation.title,
     created_at: creationDate.toISOString(),
@@ -296,5 +305,8 @@ export const createRequestToEs = ({
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.parent_conversation_id
+      ? { parent_conversation_id: conversation.parent_conversation_id }
+      : {}),
   };
 };

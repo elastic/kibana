@@ -19,6 +19,7 @@ import type {
   AgentExecutionMode,
   ChatEvent,
   ExecutionStatus,
+  InteractivityConfig,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -72,13 +73,45 @@ export interface AgentHandlerReturn {
  * The `request` is already bound — callers don't need to provide it.
  */
 export interface SubAgentExecutor {
-  /** Execute a sub-agent and return the execution ID and events observable. */
+  /** Execute a one-shot standalone sub-agent (unchanged today). */
   executeSubAgent(params: {
     agentId: string;
     connectorId?: string;
     capabilities?: AgentCapabilities;
     parentExecutionId: string;
     prompt: string;
+    abortSignal?: AbortSignal;
+  }): Promise<{
+    executionId: string;
+    events$: Observable<ChatEvent>;
+  }>;
+
+  /** Create a new persistent sub-agent backed by a fresh child conversation. */
+  createSubAgent(params: {
+    agentId: string;
+    parentConversationId: string;
+    parentExecutionId: string;
+    subagentName: string;
+    subagentPurpose?: string;
+    /** Pre-allocated id for the child conversation (assigned by the caller). */
+    conversationId: string;
+    prompt: string;
+    connectorId?: string;
+    capabilities?: AgentCapabilities;
+    abortSignal?: AbortSignal;
+  }): Promise<{
+    executionId: string;
+    events$: Observable<ChatEvent>;
+  }>;
+
+  /** Send a message to an existing persistent sub-agent (new round in its conversation). */
+  sendToSubAgent(params: {
+    parentExecutionId: string;
+    /** Existing child conversation id (resolved from parent.state.subagents[name]). */
+    conversationId: string;
+    prompt: string;
+    connectorId?: string;
+    capabilities?: AgentCapabilities;
     abortSignal?: AbortSignal;
   }): Promise<{
     executionId: string;
@@ -235,6 +268,16 @@ export interface AgentHandlerContext {
    * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
    */
   executionMode: AgentExecutionMode;
+  /**
+   * Canonical interactivity config for this run. When `enabled: false`,
+   * features requiring a live user (HITL, `ask_user_question`) are gated off.
+   */
+  interactivity: InteractivityConfig;
+  /**
+   * Id of the parent execution that spawned this one, when applicable.
+   * Undefined for top-level executions. Exposed for telemetry / tracing.
+   */
+  parentExecutionId?: string;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

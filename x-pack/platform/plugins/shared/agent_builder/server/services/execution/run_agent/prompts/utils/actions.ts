@@ -18,7 +18,7 @@ import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/form
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolCallWithResult, ToolResult } from '@kbn/agent-builder-common';
 import type {
@@ -33,6 +33,7 @@ import type {
 import {
   isAgentErrorAction,
   isBackgroundExecutionCompleteAction,
+  isSubagentRosterUpdatedAction,
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
@@ -142,6 +143,9 @@ const formatActions = async ({
     }
     if (isBackgroundExecutionCompleteAction(action)) {
       formatted.push(createUserMessage(formatSystemNotice(action.execution)));
+    }
+    if (isSubagentRosterUpdatedAction(action)) {
+      formatted.push(createUserMessage(formatSubagentRosterNotice(action.roster)));
     }
   }
 
@@ -374,5 +378,25 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
       { tagName: 'status', children: [status] },
       outcome.detail,
     ],
+  });
+};
+
+/**
+ * Render the active persistent sub-agent roster as an XML notice for injection
+ * into the parent's message history. Emitted append-only after any round in
+ * which `run_subagent` created a new persistent sub-agent (both in-round and,
+ * on replay, from persisted SubagentRosterUpdatedStep entries).
+ */
+export const formatSubagentRosterNotice = (roster: SubagentRosterEntry[]): string => {
+  return generateXmlTree({
+    tagName: 'active_subagents',
+    children: roster.map((entry) => ({
+      tagName: 'subagent',
+      attributes: {
+        name: entry.name,
+        ...(entry.purpose ? { purpose: entry.purpose } : {}),
+      },
+      children: [],
+    })),
   });
 };

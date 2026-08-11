@@ -17,6 +17,7 @@ import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { createSubagentTool } from './run_subagent';
+import { createSendMessageTool } from './send_message';
 import { createSleepTool } from './sleep';
 import { createLoadSkillTool } from './load_skill';
 import { createSearchRelevantSkillsTool } from './search_relevant_skills';
@@ -27,6 +28,7 @@ import { createBashTool } from './bash';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
+import type { SubagentTracker } from '../subagent_tracker';
 
 export interface RegisterInternalToolsParams {
   context: AgentHandlerContext;
@@ -43,6 +45,12 @@ export interface RegisterInternalToolsParams {
    * flag, since the tool also relies on the fast model.
    */
   relevantSkillsEnabled: boolean;
+  /** Parent conversation id — passed to `run_subagent` for persistent-mode creations. */
+  parentConversationId?: string;
+  /** Round-local persistent sub-agent tracker. */
+  subagentTracker: SubagentTracker;
+  /** Existence probe for stale-entry recovery in persistent `run_subagent`. */
+  conversationExists: (conversationId: string) => Promise<boolean>;
 }
 
 /**
@@ -59,6 +67,9 @@ export const registerInternalTools = async ({
   backgroundExecutionService,
   filteredSkills,
   relevantSkillsEnabled,
+  parentConversationId,
+  subagentTracker,
+  conversationExists,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -67,6 +78,7 @@ export const registerInternalTools = async ({
     modelProvider,
     experimentalFeatures,
     executionMode,
+    interactivity,
     defaultConnectorId,
     subAgentExecutor,
     analyticsService,
@@ -76,7 +88,12 @@ export const registerInternalTools = async ({
     todoStateManager,
   } = context;
 
-  const interactive = executionMode !== AgentExecutionMode.standalone;
+  // Recursion guard (#3): sub-agent creation is only available for non-standalone
+  // executions. Deliberately loose — persistent sub-agents (which run in
+  // conversation mode) can therefore spawn further sub-agents. Revisit later.
+  const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone;
+  // Interactivity gate (#4): ask_user_question requires a live user in the loop.
+  const interactive = interactivity.enabled;
 
   const tools: Array<BuiltinToolDefinition<any>> = [];
 
@@ -92,8 +109,9 @@ export const registerInternalTools = async ({
     tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // Sub-agent + sleep — experimental, and not available in standalone mode.
-  if (experimentalFeatures.subagents && interactive) {
+  // Sub-agent + send_message + sleep — experimental, and not available when
+  // the caller is itself a sub-agent (recursion guard).
+  if (experimentalFeatures.subagents && canSpawnSubagents) {
     tools.push(
       createSubagentTool({
         agentId: agentId ?? agentBuilderDefaultAgentId,
@@ -103,6 +121,19 @@ export const registerInternalTools = async ({
         subAgentExecutor,
         abortSignal,
         backgroundExecutionService,
+        parentConversationId,
+        subagentTracker,
+        conversationExists,
+      })
+    );
+    tools.push(
+      createSendMessageTool({
+        agentId: agentId ?? agentBuilderDefaultAgentId,
+        executionId: executionId ?? '',
+        capabilities,
+        subAgentExecutor,
+        abortSignal,
+        subagentTracker,
       })
     );
     tools.push(createSleepTool());

@@ -73,6 +73,8 @@ describe('createSubagentTool', () => {
           events$: events$.asObservable(),
         }),
         getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -100,6 +102,8 @@ describe('createSubagentTool', () => {
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
         getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -129,6 +133,8 @@ describe('createSubagentTool', () => {
           events$: events$.asObservable(),
         }),
         getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
       },
     });
 
@@ -169,7 +175,12 @@ describe('createSubagentTool', () => {
     const tool = createSubagentTool({
       agentId: 'test-agent',
       executionId: 'parent-exec-id',
-      subAgentExecutor: { executeSubAgent, getExecution: jest.fn() },
+      subAgentExecutor: {
+        executeSubAgent,
+        getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
+      },
       abortSignal,
     });
 
@@ -212,6 +223,8 @@ describe('createSubagentTool', () => {
           events$: events$.asObservable(),
         }),
         getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
       },
       abortSignal: new AbortController().signal,
     });
@@ -235,6 +248,8 @@ describe('createSubagentTool', () => {
           events$: events$.asObservable(),
         }),
         getExecution: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
       },
       backgroundExecutionService: {
         registerExecution,

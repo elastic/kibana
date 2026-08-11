@@ -336,9 +336,13 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -392,6 +396,9 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       askUserQuestion: false,
       bash: false,
     },
+    executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -445,9 +452,13 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 

@@ -92,6 +92,7 @@ export enum ConversationRoundStepType {
   updateTodos = 'update_todos',
   askUserQuestion = 'ask_user_question',
   relevantSkills = 'relevant_skills',
+  subagentRosterUpdated = 'subagent_roster_updated',
 }
 
 // tool call step
@@ -331,7 +332,45 @@ export type ConversationRoundStep =
   | BackgroundAgentCompleteStep
   | TodosStep
   | AskUserQuestionStep
-  | RelevantSkillsStep;
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
+
+/**
+ * An entry in the active persistent-sub-agent roster.
+ */
+export interface SubagentRosterEntry {
+  /** The name the parent addresses this sub-agent by (via `send_message`). */
+  name: string;
+  /** Role summary, sourced from the `description` param passed to `run_subagent`. */
+  purpose?: string;
+  /** The sub-agent's own conversation id. */
+  conversation_id: string;
+}
+
+export interface SubagentRosterUpdatedStepData {
+  /** Full active roster at time of emission. Latest entry supersedes older ones. */
+  roster: SubagentRosterEntry[];
+}
+
+export type SubagentRosterUpdatedStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.subagentRosterUpdated,
+  SubagentRosterUpdatedStepData
+>;
+
+export const createSubagentRosterUpdatedStep = (
+  data: SubagentRosterUpdatedStepData
+): SubagentRosterUpdatedStep => {
+  return {
+    type: ConversationRoundStepType.subagentRosterUpdated,
+    ...data,
+  };
+};
+
+export const isSubagentRosterUpdatedStep = (
+  step: ConversationRoundStep
+): step is SubagentRosterUpdatedStep => {
+  return step.type === ConversationRoundStepType.subagentRosterUpdated;
+};
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -488,6 +527,12 @@ export interface Conversation {
    * Identifier of the bash/VFS workspace for this conversation.
    */
   workspace_id?: string;
+  /**
+   * When this conversation was created as a child of another (persistent sub-agent),
+   * the id of the parent conversation. Absent for top-level conversations.
+   * Used by the UI nav filter to hide sub-agent conversations from the sidebar.
+   */
+  parent_conversation_id?: string;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
@@ -524,6 +569,12 @@ export interface ConversationInternalState {
   background_executions?: Record<string, BackgroundExecutionState>;
   /** Active todo list for the current conversation. Replaced wholesale on each write. */
   todos?: TodoItem[];
+  /**
+   * Map of persistent sub-agent name → child conversation id.
+   * Authoritative source for the (parent, name) → child lookup and for the
+   * roster snapshot emitted after each creation. Set only on the parent side.
+   */
+  subagents?: Record<string, string>;
 }
 
 export interface BackgroundExecutionCompletedAt {

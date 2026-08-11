@@ -46,6 +46,7 @@ export const getResearchAgentPrompt = async (
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
     conversationTimestamp,
+    subagentRosterFallback: params.subagentRosterFallback,
   });
 
   const relevantSkillsMessages =

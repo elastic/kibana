@@ -170,6 +170,7 @@ describe('chat_message_text', () => {
         setAskUserQuestionAnswers: jest.fn(),
         clearLastRoundResponse: jest.fn(),
         addBackgroundExecutionCompleteStep: jest.fn(),
+        addSubagentRosterUpdatedStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),

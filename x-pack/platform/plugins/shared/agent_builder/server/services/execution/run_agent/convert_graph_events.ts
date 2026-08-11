@@ -20,6 +20,7 @@ import {
   createTextChunkEvent,
   createThinkingCompleteEvent,
   createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -42,6 +43,7 @@ import {
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
   isHandoverAction,
+  isSubagentRosterUpdatedAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -264,6 +266,22 @@ export const convertGraphEvents = ({
 
           if (bgEvents.length > 0) {
             return of(...bgEvents);
+          }
+        }
+
+        // emit subagent roster updated events (persistent creation)
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
+          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+          const rosterEvents: ConvertedEvents[] = [];
+
+          for (const action of addedActions) {
+            if (isSubagentRosterUpdatedAction(action)) {
+              rosterEvents.push(createSubagentRosterUpdatedEvent(action.roster));
+            }
+          }
+
+          if (rosterEvents.length > 0) {
+            return of(...rosterEvents);
           }
         }
 

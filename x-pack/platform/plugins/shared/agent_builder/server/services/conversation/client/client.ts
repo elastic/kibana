@@ -156,6 +156,9 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             buildReadAccessFilter({ user: this.user, agentIds }),
+            // Hide sub-agent conversations from the nav list — they are only
+            // reachable via the parent's tool-call flyout / direct URL.
+            { bool: { must_not: [{ exists: { field: 'parent_conversation_id' } }] } },
           ],
         },
       },
@@ -314,7 +317,40 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async delete(conversationId: string): Promise<boolean> {
+    return this.deleteWithCascade(conversationId, new Set<string>());
+  }
+
+  private async deleteWithCascade(
+    conversationId: string,
+    visited: Set<string>
+  ): Promise<boolean> {
+    // Guard against cycles / self-referential loops (should be impossible in prod
+    // where child ids are always distinct, but keeps behavior robust and simplifies
+    // test mocking where a broad search mock might return unexpected hits).
+    if (visited.has(conversationId)) {
+      return true;
+    }
+    visited.add(conversationId);
+
     await this.getDocumentWithAccess({ conversationId, access: 'delete' });
+
+    // Cascade — find children (persistent sub-agent conversations), recursively
+    // delete them (best-effort). Failures are logged and the parent delete still
+    // proceeds so the user's intent isn't blocked by an orphaned child.
+    const childIds = (await this.findChildConversationIds(conversationId)).filter(
+      (id) => id !== conversationId && !visited.has(id)
+    );
+    for (const childId of childIds) {
+      try {
+        await this.deleteWithCascade(childId, visited);
+      } catch (err) {
+        this.logger.warn(
+          `Failed to cascade-delete child conversation ${childId} of ${conversationId}: ${
+            (err as Error)?.message ?? String(err)
+          }`
+        );
+      }
+    }
 
     try {
       const { result } = await this.storage.getClient().delete({ id: conversationId });
@@ -325,6 +361,23 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  private async findChildConversationIds(parentId: string): Promise<string[]> {
+    const response = await this.storage.getClient().search({
+      size: 100,
+      track_total_hits: false,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            { term: { parent_conversation_id: parentId } },
+            createSpaceDslFilter(this.space),
+          ],
+        },
+      },
+    });
+    return response.hits.hits.map((h) => h._id as string).filter((id) => id !== undefined);
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {

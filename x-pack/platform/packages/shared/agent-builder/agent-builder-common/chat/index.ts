@@ -63,6 +63,11 @@ export {
   type RelevantSkillsStepData,
   createRelevantSkillsStep,
   isRelevantSkillsStep,
+  type SubagentRosterEntry,
+  type SubagentRosterUpdatedStep,
+  type SubagentRosterUpdatedStepData,
+  createSubagentRosterUpdatedStep,
+  isSubagentRosterUpdatedStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -120,6 +125,10 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  type SubagentRosterUpdatedEvent,
+  type SubagentRosterUpdatedEventData,
+  createSubagentRosterUpdatedEvent,
+  isSubagentRosterUpdatedEvent,
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,

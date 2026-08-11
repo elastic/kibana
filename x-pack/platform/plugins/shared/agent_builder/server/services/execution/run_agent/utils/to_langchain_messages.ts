@@ -19,6 +19,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isSubagentRosterUpdatedStep,
   isAskUserQuestionStep,
   isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
@@ -35,7 +36,7 @@ import type {
   ProcessedRoundInput,
 } from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
-import { formatSystemNotice } from '../prompts/utils/actions';
+import { formatSystemNotice, formatSubagentRosterNotice } from '../prompts/utils/actions';
 import { createRelevantSkillsNoticeMessage } from '../prompts/utils/skills';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
@@ -69,6 +70,15 @@ export interface ConversationToLangchainOptions {
    * prefix stays stable across rounds (prompt-cache friendly).
    */
   conversationTimestamp?: string;
+  /**
+   * Optional current roster of persistent sub-agents (from
+   * `conversation.state.subagents`). Used to guarantee the parent LLM sees
+   * the active roster even when compaction has removed the most recent
+   * `SubagentRosterUpdatedStep` from history. When surviving rounds already
+   * include a `SubagentRosterUpdatedStep`, the LLM's "latest wins" reasoning
+   * naturally lets that step supersede this synthesized notice.
+   */
+  subagentRosterFallback?: Record<string, string>;
 }
 
 /**
@@ -83,6 +93,7 @@ export const convertPreviousRounds = async ({
   ignoreSteps = false,
   compactionSummary,
   conversationTimestamp,
+  subagentRosterFallback,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
@@ -105,6 +116,19 @@ export const convertPreviousRounds = async ({
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
+  }
+
+  // Compaction-resilient fallback: inject a synthesized <active_subagents>
+  // notice up front when we know the roster (from conversation state). If any
+  // surviving round emits a real SubagentRosterUpdatedStep later, the LLM's
+  // "latest wins" reading naturally lets that step supersede this notice.
+  if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
+    const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+      name,
+      conversation_id: id,
+      // purpose is unknown here — surviving SubagentRosterUpdatedStep entries carry it.
+    }));
+    messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
   }
 
   for (const round of rounds) {
@@ -167,6 +191,8 @@ export const roundToLangchain = async (
     for (const step of round.steps) {
       if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
+      } else if (isSubagentRosterUpdatedStep(step)) {
+        messages.push(createUserMessage(formatSubagentRosterNotice(step.roster)));
       } else if (isRelevantSkillsStep(step)) {
         if (step.skills.length > 0) {
           messages.push(createRelevantSkillsNoticeMessage(step.skills));

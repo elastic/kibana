@@ -12,6 +12,7 @@ import {
   isToolCallStep,
   isCompactionStep,
   isBackgroundAgentCompleteStep,
+  isSubagentRosterUpdatedStep,
   isAskUserQuestionStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
@@ -59,6 +60,13 @@ export const StepItem: React.FC<StepItemProps> = ({
   }
   if (isBackgroundAgentCompleteStep(step)) {
     return <BackgroundAgentStep step={step} />;
+  }
+  if (isSubagentRosterUpdatedStep(step)) {
+    // Roster updates exist for prompt injection (LLM-visible <active_subagents>
+    // notice in subsequent rounds). The user already sees sub-agent creations
+    // via the run_subagent tool call, so we don't surface roster steps in the
+    // thinking panel.
+    return null;
   }
   if (isAskUserQuestionStep(step)) {
     return <AskUserQuestionStepEvent step={step} />;

@@ -43,6 +43,12 @@ export interface PromptFactoryParams {
    */
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
+  /**
+   * Current persistent-sub-agent roster (name → child conversation id) from
+   * the parent conversation's state. Used as a compaction-resilient fallback
+   * for the `<active_subagents>` notice in `convertPreviousRounds`.
+   */
+  subagentRosterFallback?: Record<string, string>;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

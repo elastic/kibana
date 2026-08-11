@@ -19,6 +19,7 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ExecutionStatus,
+  InteractiveInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -90,6 +91,18 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /**
+   * @internal
+   * When creating a fresh conversation for a persistent sub-agent, carries the
+   * parent linkage and seeded metadata. Not exposed on public route schemas;
+   * consumed only by the conversation-creation path when
+   * `autoCreateConversationWithId` is true.
+   */
+  _subagentSeed?: {
+    parentConversationId: string;
+    subagentName: string;
+    subagentPurpose?: string;
+  };
 }
 
 /**
@@ -185,6 +198,12 @@ interface ExecuteAgentBaseParams {
    * - `undefined` (default): auto-decide based on context.
    */
   useTaskManager?: boolean;
+  /**
+   * Interactivity configuration for this execution. Accepts a boolean shortcut
+   * or a full config; normalized at the boundary. Defaults derive from `mode`
+   * (conversation → true, standalone → false).
+   */
+  interactive?: InteractiveInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

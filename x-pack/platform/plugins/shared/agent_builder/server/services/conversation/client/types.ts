@@ -15,6 +15,7 @@ import type {
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -31,6 +32,12 @@ export type ConversationCreateRequest = Omit<
   'id' | 'created_at' | 'updated_at' | 'user'
 > & {
   id?: string;
+  /**
+   * Optional user override. When creating a child conversation for a persistent
+   * sub-agent, this is set to the parent conversation's user (snapshotted) so
+   * ownership matches. Falls back to the current request user when omitted.
+   */
+  user?: Conversation['user'];
 };
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
@@ -105,7 +112,8 @@ export type PersistentConversationRoundStep =
   | BackgroundAgentCompleteStep
   | TodosStep
   | AskUserQuestionStep
-  | RelevantSkillsStep;
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
