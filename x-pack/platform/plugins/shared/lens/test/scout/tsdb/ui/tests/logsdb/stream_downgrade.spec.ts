@@ -185,7 +185,7 @@ const runScenario = async (
     await pageObjects.discover.writeAndSubmitEsqlQuery(esqlQuery);
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
+    await pageObjects.discover.openLensEditFlyout();
 
     await expect
       .poll(
