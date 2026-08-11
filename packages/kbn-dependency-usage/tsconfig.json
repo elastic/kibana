@@ -15,6 +15,5 @@
   ],
   "kbn_references": [
     "@kbn/repo-info",
-    "@kbn/repo-packages",
   ],
 }
