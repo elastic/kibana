@@ -11,7 +11,9 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isMac } from '@kbn/shared-ux-utility';
+
+// have to copy `isMac` from `@kbn/shared-ux-utility` to get around allowlist
+const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.userAgent ?? '');
 
 import type { AppMenuConfig } from '../types';
 
