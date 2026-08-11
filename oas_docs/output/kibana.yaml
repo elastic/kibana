@@ -33428,6 +33428,12 @@ paths:
           required: false
           schema:
             type: number
+        - description: Return only actions whose start_time is in the future
+          in: query
+          name: scheduledOnly
+          required: false
+          schema:
+            type: boolean
         - description: Number of error details to include per action
           in: query
           name: errorSize
@@ -116322,6 +116328,14 @@ components:
       description: Area-specific rendering settings
       type: object
       properties:
+        fill:
+          default: solid
+          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          enum:
+            - solid
+            - gradient
+          type: string
+          x-state: Added in 9.6.0
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)
