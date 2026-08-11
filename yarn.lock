@@ -7015,6 +7015,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-meta-blocks@link:src/platform/packages/shared/shared-ux/flyout/meta-blocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""
