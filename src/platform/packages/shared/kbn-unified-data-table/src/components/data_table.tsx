@@ -112,10 +112,7 @@ import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_addition
 import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
-import {
-  renderCustomToolbar as defaultRenderCustomToolbar,
-  type UnifiedDataTableRenderCustomToolbar,
-} from './custom_toolbar/render_custom_toolbar';
+import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
@@ -1184,14 +1181,14 @@ const InternalUnifiedDataTable = React.forwardRef<
       visibleRowLeadingControls,
     ]);
 
-    // In-table search is always passed via gridProps.inTableSearchControl to the
-    // (consumer or default) custom toolbar — not via additionalControls.
+    // When a custom toolbar is used, in-table search is passed via
+    // gridProps.inTableSearchControl. Otherwise it goes on EUI's right controls.
     const additionalControls = useMemo(() => {
-      if (!externalAdditionalControls && !selectedDocsCount) {
+      if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
         return null;
       }
 
-      return (
+      const leftControls = (
         <EuiFlexGroup gutterSize="s">
           {Boolean(selectedDocsCount) && (
             <EuiFlexItem grow={false}>
@@ -1218,9 +1215,19 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
         </EuiFlexGroup>
       );
+
+      if (!renderCustomToolbar && inTableSearchControl) {
+        return {
+          left: leftControls,
+          right: inTableSearchControl,
+        };
+      }
+
+      return leftControls;
     }, [
       externalAdditionalControls,
       selectedDocsCount,
+      inTableSearchControl,
       isPlainRecord,
       isFilterActive,
       displayedRows,
@@ -1233,44 +1240,50 @@ const InternalUnifiedDataTable = React.forwardRef<
       unifiedDataTableContextValue.pageSize,
       toastNotifications,
       visibleColumns,
+      renderCustomToolbar,
       customBulkActions,
       hideDefaultBulkActions,
     ]);
 
-    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] = useMemo(() => {
-      const baseRender = renderCustomToolbar ?? defaultRenderCustomToolbar;
+    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+      () =>
+        renderCustomToolbar
+          ? (toolbarProps) => {
+              const columnControl = toolbarProps.columnControl ? (
+                <ColumnControlWithSummary
+                  columnControl={toolbarProps.columnControl}
+                  showSummaryColumn={hasSummaryColumns}
+                  isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
+                  onChangeShowSummaryColumn={onChangeShowSummaryColumn}
+                />
+              ) : (
+                toolbarProps.columnControl
+              );
 
-      return (toolbarProps) => {
-        const columnControl = toolbarProps.columnControl ? (
-          <ColumnControlWithSummary
-            columnControl={toolbarProps.columnControl}
-            showSummaryColumn={hasSummaryColumns}
-            isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
-            onChangeShowSummaryColumn={onChangeShowSummaryColumn}
-          />
-        ) : (
-          toolbarProps.columnControl
-        );
-
-        return baseRender({
-          toolbarProps: {
-            ...toolbarProps,
-            columnControl,
-          },
-          gridProps: {
-            additionalControls,
-            inTableSearchControl,
-          },
-        });
-      };
-    }, [
-      renderCustomToolbar,
-      additionalControls,
-      inTableSearchControl,
-      hasSummaryColumns,
-      isSummaryOnlyColumn,
-      onChangeShowSummaryColumn,
-    ]);
+              return renderCustomToolbar({
+                toolbarProps: {
+                  ...toolbarProps,
+                  columnControl,
+                },
+                gridProps: {
+                  additionalControls:
+                    additionalControls && 'left' in additionalControls
+                      ? additionalControls.left
+                      : additionalControls,
+                  inTableSearchControl,
+                },
+              });
+            }
+          : undefined,
+      [
+        renderCustomToolbar,
+        additionalControls,
+        inTableSearchControl,
+        hasSummaryColumns,
+        isSummaryOnlyColumn,
+        onChangeShowSummaryColumn,
+      ]
+    );
 
     const showDisplaySelector = useMemo(():
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions

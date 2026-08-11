@@ -38,6 +38,7 @@ import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { DataLoadingState, UnifiedDataTable } from './data_table';
 import { ColumnControlWithSummary } from './column_control_with_summary';
+import { renderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { dataViewsMock } from '../../__mocks__/data_views';
 import { defaultTimeColumnWidth } from '../constants';
 import { EuiButton, EuiThemeProvider } from '@elastic/eui';
@@ -1899,6 +1900,7 @@ describe('UnifiedDataTable', () => {
         await renderDataTable({
           columns: [],
           showTimeCol: false,
+          renderCustomToolbar,
         });
 
         expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
@@ -1918,6 +1920,7 @@ describe('UnifiedDataTable', () => {
         await renderDataTable({
           columns: ['message'],
           showTimeCol: false,
+          renderCustomToolbar,
         });
 
         expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
