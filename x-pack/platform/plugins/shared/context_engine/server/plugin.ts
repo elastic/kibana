@@ -25,6 +25,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
@@ -106,6 +107,9 @@ export class ContextEnginePlugin
         return startDeps.actions;
       },
     });
+
+    // Read-only Signals routes (reads run as the current user).
+    registerSignalRoutes({ router });
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),

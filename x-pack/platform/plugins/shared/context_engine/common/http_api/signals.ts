@@ -50,3 +50,24 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
 }
 
 export type Signal = EsqlToolCallSignal;
+
+/** A single row of the preaggregated grouped-by-tag Signals list. */
+export interface SignalGroup {
+  /** The tag/classification label (a plain keyword such as `query_error`). */
+  tag: string;
+  /** Number of signals carrying this tag across the whole signals store. */
+  count: number;
+}
+
+/** Response of the grouped Signals list: a terms aggregation over the `tags` keyword field. */
+export interface ListSignalGroupsResponse {
+  groups: SignalGroup[];
+}
+
+/** Response of the per-group Signals fetch (paginated). */
+export interface ListSignalsResponse {
+  /** The individual signals carrying the requested tag. */
+  signals: Signal[];
+  /** Total number of signals carrying the tag (for pagination). */
+  total: number;
+}

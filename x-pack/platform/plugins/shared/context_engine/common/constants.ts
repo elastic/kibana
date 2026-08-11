@@ -12,6 +12,20 @@ export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiSummaryPath = `${internalApiPath}/ai_index/{aiIndexId}/ki_summary`;
 
+/** Read-only Signals routes (internal): a preaggregated grouped list and a per-group fetch. */
+export const signalGroupsPath = `${internalApiPath}/signals/groups`;
+export const signalsPath = `${internalApiPath}/signals`;
+
+/** Version of the internal Signals API, shared between route registration and the browser client. */
+export const SIGNALS_INTERNAL_API_VERSION = '1';
+
+/** Max number of tag groups returned by the grouped Signals list. */
+export const MAX_SIGNAL_GROUPS = 100;
+
+/** Default and maximum page size when fetching the individual signals in a group. */
+export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
+export const MAX_SIGNALS_PAGE_SIZE = 100;
+
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.
