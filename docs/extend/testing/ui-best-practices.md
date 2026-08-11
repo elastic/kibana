@@ -301,7 +301,7 @@ export class MyAppPage {
 
 :::::
 
-If your component isn't covered yet, `page.testSubj` locators are fine for now. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team with a short justification of what your test needs, so the addition is [designed and owned together](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than duplicated per suite. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
+If your component isn't covered yet, `page.testSubj` locators are fine for now. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team in `#kibana-qa` on Slack with a short justification of what your test needs, so the addition is [designed and owned together](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than duplicated per suite. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
