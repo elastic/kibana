@@ -21,6 +21,7 @@ plugins:
     - dashboard
     - dashboard_markdown
     - data
+    - data_federation
     - data_view_editor
     - data_view_management
     - data_views
@@ -50,6 +51,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - license_management
     - links
     - logstash
     - management
@@ -63,6 +65,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - remote_clusters
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
