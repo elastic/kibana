@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -51,6 +51,21 @@ const setup = () => {
   return { core, service };
 };
 
+/**
+ * Backs the `userStorage` mock with a single in-memory value, so a write through
+ * `savePreset`/`deletePreset` is visible to a later `getPresets$()` subscription.
+ */
+const withInMemoryStorage = ({ userStorage }: ReturnType<typeof setup>['core']) => {
+  const stored$ = new BehaviorSubject<unknown>(DEFAULT_STORED_PRESETS);
+
+  userStorage.get.mockImplementation(async () => stored$.getValue());
+  userStorage.get$.mockReturnValue(stored$.asObservable());
+  userStorage.set.mockImplementation(async (_key, value) => {
+    stored$.next(value);
+    return value;
+  });
+};
+
 const storedPresets = (presets: PresetItem[]): StoredPresetsV2 => ({ version: 2, presets });
 const legacyStoredPresets = (presets: PresetItem[] | null): StoredPresets => ({
   version: 1,
@@ -86,15 +101,29 @@ describe('DateRangePickerPresetsService', () => {
 
     it('emits the most recently saved preset at the top of the list', async () => {
       const { core, service } = setup();
-      const newest: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+      withInMemoryStorage(core);
       const oldest: PresetItem = { start: 'now-2h', end: 'now', label: 'Last 2 hours' };
-      core.userStorage.get$.mockReturnValue(of(storedPresets([newest, oldest])));
+      const newest: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(oldest);
+      await service.savePreset(newest);
 
       expect(await firstValueFrom(service.getPresets$())).toEqual([
         newest,
         oldest,
         ...lockedQuickRangePresets,
       ]);
+    });
+
+    it('stops emitting a deleted preset', async () => {
+      const { core, service } = setup();
+      withInMemoryStorage(core);
+      const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
+
+      await service.savePreset(preset);
+      await service.deletePreset(preset);
+
+      expect(await firstValueFrom(service.getPresets$())).toEqual(lockedQuickRangePresets);
     });
 
     it('emits only the locked quick ranges when nothing is stored', async () => {
