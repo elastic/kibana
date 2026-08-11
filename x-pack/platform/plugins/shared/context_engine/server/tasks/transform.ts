@@ -158,7 +158,10 @@ const computeRoundSignals = (kinds: QueryKind[]): RoundSignals => {
     raw_query_count: rawQueryCount,
     ki_retrieval_count: kiRetrievalCount,
     looped: esqlCount >= LOOP_THRESHOLD,
-    fell_back_to_raw: rawQueryCount > 0,
+    // A genuine fallback: the round tried a KI retrieval and *also* hit raw
+    // access. A raw-only round is direct access, not a fallback (it is still
+    // surfaced per-signal as a `coverage_gap` tag in `classify`).
+    fell_back_to_raw: kiRetrievalCount > 0 && rawQueryCount > 0,
   };
 };
 

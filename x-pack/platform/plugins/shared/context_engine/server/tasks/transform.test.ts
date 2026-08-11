@@ -199,7 +199,7 @@ describe('build', () => {
     expect(signal.data.error).toBe('boom');
   });
 
-  it('computes looped/fell_back_to_raw across every span in the round', () => {
+  it('computes looped/round_signals across every span in the round (raw-only is not a fallback)', () => {
     const rawArgs = JSON.stringify({ query: 'FROM logs-* | LIMIT 10' });
     const rows = [
       toolRow({ span_id: 'span-1', 'attributes.gen_ai.tool.call.arguments': rawArgs }),
@@ -212,12 +212,38 @@ describe('build', () => {
     expect(signals).toHaveLength(3);
     for (const signal of signals) {
       expect(signal.data.looped).toBe(true);
-      expect(signal.data.fell_back_to_raw).toBe(true);
+      // No KI retrieval happened, so raw access here is direct, not a fallback.
+      expect(signal.data.fell_back_to_raw).toBe(false);
       expect(signal.data.query_kind).toBe('raw_access');
       expect(signal.data.round_signals).toEqual({
         esql_count: 3,
         raw_query_count: 3,
         ki_retrieval_count: 0,
+      });
+    }
+  });
+
+  it('marks fell_back_to_raw only when a round mixes KI retrieval and raw access', () => {
+    const rows = [
+      // Default toolRow queries a ki-retrieval index.
+      toolRow({ span_id: 'span-1' }),
+      toolRow({
+        span_id: 'span-2',
+        'attributes.gen_ai.tool.call.arguments': JSON.stringify({
+          query: 'FROM logs-* | LIMIT 10',
+        }),
+      }),
+    ];
+
+    const signals = build({ toolRows: rows, convAgent: new Map([['trace-1', userAgent]]) });
+
+    expect(signals).toHaveLength(2);
+    for (const signal of signals) {
+      expect(signal.data.fell_back_to_raw).toBe(true);
+      expect(signal.data.round_signals).toEqual({
+        esql_count: 2,
+        raw_query_count: 1,
+        ki_retrieval_count: 1,
       });
     }
   });
