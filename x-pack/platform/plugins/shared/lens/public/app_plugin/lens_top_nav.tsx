@@ -869,7 +869,6 @@ export const LensTopNavMenu = ({
   }, [
     initialContext,
     initialInput?.ref_id,
-    incomingState,
     isComingFromDashboardView,
     activeData,
     isSaveable,
@@ -1238,7 +1237,7 @@ export const LensTopNavMenu = ({
         Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
         default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
       */}
-      <div data-test-subj="lnsApp_topNav">
+      <div data-test-subj="lnsApp_topNav" className="hide-for-sharing">
         <AggregateQuerySearchBar
           allowSavingQueries
           savedQuery={savedQuery}
