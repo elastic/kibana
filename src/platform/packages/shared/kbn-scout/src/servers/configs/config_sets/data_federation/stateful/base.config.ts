@@ -44,7 +44,7 @@ export const dataFederationConfig: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'es.federation.enabled=false'],
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'esql.federation.enabled=false'],
     secureFiles: [
       ...(defaultConfig.esTestCluster.secureFiles ?? []),
       `cluster.state.encryption.active_password_id=${clusterStateEncryptionActivePasswordIdFile}`,
