@@ -7,7 +7,6 @@
 
 // Client
 export { McpClient } from './mcp/src/client';
-export { McpConnectionError } from './mcp/src/errors';
 
 // Errors - re-exported from SDK for use by consumers
 export { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -24,10 +23,9 @@ export type {
   EmbeddedResourcePart,
   FetchLike,
   ListToolsResponse,
-  McpClientOptions,
-  McpRequestOptions,
-  NonTextPart,
-  TextPart,
   Tool,
   ToolProviderMetadata,
+  TextPart,
+  NonTextPart,
+  McpClientOptions,
 } from './mcp/src/types';

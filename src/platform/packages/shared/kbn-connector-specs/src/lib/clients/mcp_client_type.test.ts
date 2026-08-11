@@ -7,29 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, McpConnectionError } from '@kbn/mcp-client';
+import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 import type { BuildContext } from './client_type_spec';
 import { createMcpClientType } from './mcp_client_type';
 
 jest.mock('@kbn/mcp-client', () => {
-  class MockMcpConnectionError extends Error {
-    readonly httpStatus?: number;
-    constructor(message: string, opts?: { httpStatus?: number }) {
-      super(message);
-      this.name = 'McpConnectionError';
-      this.httpStatus = opts?.httpStatus;
-    }
-  }
-
-  const MockMcpClient = jest.fn().mockImplementation(() => ({
-    connect: jest.fn().mockResolvedValue({ connected: true }),
-    disconnect: jest.fn().mockResolvedValue(undefined),
-    terminateSession: jest.fn().mockResolvedValue(undefined),
-  }));
-
+  const actual = jest.requireActual('@kbn/mcp-client');
   return {
-    McpClient: MockMcpClient,
-    McpConnectionError: MockMcpConnectionError,
+    ...actual,
+    McpClient: jest.fn().mockImplementation(() => ({
+      connect: jest.fn().mockResolvedValue({ connected: true }),
+      disconnect: jest.fn().mockResolvedValue(undefined),
+    })),
   };
 });
 
@@ -84,7 +73,7 @@ describe('createMcpClientType', () => {
       expect(client.connect).toHaveBeenCalled();
     });
 
-    it('throws McpConnectionError when config.serverUrl is missing', async () => {
+    it('throws when config.serverUrl is missing', async () => {
       const ctx = makeBuildContext({ config: {} });
 
       await expect(createMcpClientType().build(ctx)).rejects.toThrow(
@@ -136,22 +125,6 @@ describe('createMcpClientType', () => {
       );
     });
 
-    it('passes requestTimeout to connect()', async () => {
-      const ctx = makeBuildContext();
-
-      const client = await createMcpClientType({ requestTimeout: 10000 }).build(ctx);
-
-      expect(client.connect).toHaveBeenCalledWith({ timeout: 10000 });
-    });
-
-    it('calls connect() without options when no requestTimeout', async () => {
-      const ctx = makeBuildContext();
-
-      const client = await createMcpClientType().build(ctx);
-
-      expect(client.connect).toHaveBeenCalledWith(undefined);
-    });
-
     it('merges credential auth headers into the factory and McpClient headers', async () => {
       const authHeaders = { Authorization: 'Bearer tok' };
       const mockResource = { fetch: jest.fn(), close: jest.fn() };
@@ -185,22 +158,10 @@ describe('createMcpClientType', () => {
   });
 
   describe('terminate', () => {
-    it('calls terminateSession then disconnect', async () => {
+    it('disconnects the client', async () => {
       const clientType = createMcpClientType();
       const ctx = makeBuildContext();
       const client = await clientType.build(ctx);
-
-      await clientType.terminate(client);
-
-      expect(client.terminateSession).toHaveBeenCalled();
-      expect(client.disconnect).toHaveBeenCalled();
-    });
-
-    it('disconnects even when terminateSession throws', async () => {
-      const clientType = createMcpClientType();
-      const ctx = makeBuildContext();
-      const client = await clientType.build(ctx);
-      (client.terminateSession as jest.Mock).mockRejectedValue(new Error('terminate failed'));
 
       await clientType.terminate(client);
 
@@ -221,24 +182,37 @@ describe('createMcpClientType', () => {
   });
 
   describe('isUserError', () => {
-    it('returns true for McpConnectionError with httpStatus 401', () => {
-      const err = new McpConnectionError('Unauthorized', { httpStatus: 401 });
+    it('returns true for UnauthorizedError', () => {
+      expect(createMcpClientType().isUserError?.(new UnauthorizedError('nope'))).toBe(true);
+    });
+
+    it('returns true for StreamableHTTPError with code 401', () => {
+      expect(
+        createMcpClientType().isUserError?.(new StreamableHTTPError(401, 'Unauthorized'))
+      ).toBe(true);
+    });
+
+    it('returns true for StreamableHTTPError with code 403', () => {
+      expect(createMcpClientType().isUserError?.(new StreamableHTTPError(403, 'Forbidden'))).toBe(
+        true
+      );
+    });
+
+    it('returns false for StreamableHTTPError with code 500', () => {
+      expect(
+        createMcpClientType().isUserError?.(new StreamableHTTPError(500, 'Server Error'))
+      ).toBe(false);
+    });
+
+    it('returns true for McpClient-wrapped Unauthorized error messages', () => {
+      expect(
+        createMcpClientType().isUserError?.(new Error('Unauthorized error: invalid token'))
+      ).toBe(true);
+    });
+
+    it('returns true when cause is UnauthorizedError', () => {
+      const err = new Error('wrapped', { cause: new UnauthorizedError('nope') });
       expect(createMcpClientType().isUserError?.(err)).toBe(true);
-    });
-
-    it('returns true for McpConnectionError with httpStatus 403', () => {
-      const err = new McpConnectionError('Forbidden', { httpStatus: 403 });
-      expect(createMcpClientType().isUserError?.(err)).toBe(true);
-    });
-
-    it('returns false for McpConnectionError with httpStatus 500', () => {
-      const err = new McpConnectionError('Server Error', { httpStatus: 500 });
-      expect(createMcpClientType().isUserError?.(err)).toBe(false);
-    });
-
-    it('returns false for McpConnectionError without httpStatus', () => {
-      const err = new McpConnectionError('Connection failed');
-      expect(createMcpClientType().isUserError?.(err)).toBe(false);
     });
 
     it('returns false for plain Error', () => {

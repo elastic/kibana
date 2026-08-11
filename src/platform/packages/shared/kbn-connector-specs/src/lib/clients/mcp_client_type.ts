@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, McpConnectionError } from '@kbn/mcp-client';
+import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 import { createMcpFetch } from '../mcp/create_mcp_fetch';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
 import type { ConfiguredFetchFactory, ConfiguredFetchResource } from './configured_fetch_types';
@@ -29,7 +29,6 @@ const fetchResources = new WeakMap<McpClient, ConfiguredFetchResource>();
 export interface McpClientTypeDeps {
   configuredFetchFactory?: ConfiguredFetchFactory;
   defaultHeaders?: Readonly<Record<string, string>>;
-  requestTimeout?: number;
 }
 
 /**
@@ -40,9 +39,9 @@ export interface McpClientTypeDeps {
  * available, falls back to the built-in Fetch API so the type remains usable in unit tests and
  * contexts where the factory has not been wired yet.
  *
- * `isUserError` classifies 401 and 403 HTTP statuses (from `McpConnectionError.httpStatus`) as
- * user errors so that the executor can surface them as non-retryable USER errors rather than
- * FRAMEWORK errors.
+ * `isUserError` classifies unauthorized / forbidden failures as user errors so the executor can
+ * surface them as non-retryable USER errors rather than FRAMEWORK errors. Relies on the SDK error
+ * types when present, and on `McpClient.connect`'s wrapped "Unauthorized error:" messages.
  */
 export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpec<McpClient> => ({
   id: 'mcp',
@@ -51,7 +50,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     const serverUrl = typeof ctx.config?.serverUrl === 'string' ? ctx.config.serverUrl : undefined;
 
     if (!serverUrl) {
-      throw new McpConnectionError('config.serverUrl is required', { httpStatus: undefined });
+      throw new Error('config.serverUrl is required');
     }
 
     ctx.networkSettings.ensureUriAllowed(serverUrl);
@@ -98,17 +97,12 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       fetchResources.set(client, resource);
     }
 
-    await client.connect(deps.requestTimeout ? { timeout: deps.requestTimeout } : undefined);
+    await client.connect();
 
     return client;
   },
 
   async terminate(client: McpClient): Promise<void> {
-    try {
-      await client.terminateSession();
-    } catch {
-      // best-effort
-    }
     await client.disconnect();
 
     // Release the configured-fetch resource (undici dispatcher) tied to this client, if any.
@@ -124,10 +118,23 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   },
 
   isUserError(err: unknown): boolean {
-    if (err instanceof McpConnectionError) {
-      return (
-        typeof err.httpStatus === 'number' && (err.httpStatus === 401 || err.httpStatus === 403)
-      );
+    if (err instanceof UnauthorizedError) {
+      return true;
+    }
+    if (err instanceof StreamableHTTPError) {
+      return err.code === 401 || err.code === 403;
+    }
+    if (err instanceof Error) {
+      // McpClient.connect wraps UnauthorizedError as a plain Error with this prefix.
+      if (err.message.startsWith('Unauthorized error:')) {
+        return true;
+      }
+      if (err.cause instanceof UnauthorizedError) {
+        return true;
+      }
+      if (err.cause instanceof StreamableHTTPError) {
+        return err.cause.code === 401 || err.cause.code === 403;
+      }
     }
     return false;
   },
