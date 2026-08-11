@@ -221,6 +221,7 @@ export function NoData(props) {
           <>
             <AutoOpsEnabledCallout
               autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+              docsUrl={cloudConnectStatus.autoOpsDocsUrl}
               style={{ margin: `0 ${euiTheme.size.l}` }}
             />
             <EuiSpacer size="m" />
