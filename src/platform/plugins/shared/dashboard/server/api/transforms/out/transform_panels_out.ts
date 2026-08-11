@@ -267,10 +267,15 @@ async function applyPanelTypeMigrations(
     }));
 
     const errorsByPanelId = new Map<string, Error>();
-    const successesByPanelId = new Map<
-      string,
-      Array<{ to: string; config: Record<string, unknown> }>
-    >();
+    interface Success {
+      to: string;
+      config: Record<string, unknown>;
+    }
+    interface MultipleSuccesses {
+      multiple: { first: string; second: string };
+    }
+    type SuccessState = Success | MultipleSuccesses;
+    const successesByPanelId = new Map<string, SuccessState>();
 
     for (const migration of migrations) {
       let results: readonly PanelTypeMigrationResult[];
@@ -290,9 +295,15 @@ async function applyPanelTypeMigrations(
           continue;
         }
 
-        const existing = successesByPanelId.get(panelId) ?? [];
-        existing.push({ to: migration.to, config: result.config });
-        successesByPanelId.set(panelId, existing);
+        const existing = successesByPanelId.get(panelId);
+        if (!existing) {
+          successesByPanelId.set(panelId, { to: migration.to, config: result.config });
+          continue;
+        }
+        if ('multiple' in existing) continue;
+        successesByPanelId.set(panelId, {
+          multiple: { first: existing.to, second: migration.to },
+        });
       }
     }
 
@@ -311,23 +322,22 @@ async function applyPanelTypeMigrations(
         continue;
       }
 
-      const successes = successesByPanelId.get(panelId) ?? [];
-      if (successes.length > 1) {
+      const successState = successesByPanelId.get(panelId);
+      if (successState && 'multiple' in successState) {
         warnings.push({
           type: 'dropped_panel',
           panel_type: sourceType,
           panel_config: working.panel.config,
           panel_references: working.references,
-          message: `Multiple panel type migrations claimed this panel: ${successes
-            .map((s) => s.to)
-            .join(', ')}`,
+          message: `Multiple panel type migrations claimed this panel: ${successState.multiple.first}, ${successState.multiple.second}`,
         });
         working.dropped = true;
         continue;
       }
 
-      const success = successes[0];
+      const success = successState;
       if (!success) continue;
+      if ('multiple' in success) continue;
 
       if (!migrationContext.allowMissingTargetSchema) {
         const targetTransforms = embeddableService?.getTransforms(

@@ -9,14 +9,9 @@ import type { AggDescriptor } from '../descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../constants';
 
 function getAggType(metricAgg: string): AGG_TYPE | undefined {
-  const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
-    return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
-  });
-  return aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
-}
-
-function isHeatmap(mapType: string): boolean {
-  return mapType.toLowerCase() === 'heatmap';
+  return (Object.values(AGG_TYPE) as string[]).includes(metricAgg)
+    ? (metricAgg as AGG_TYPE)
+    : undefined;
 }
 
 function isMetricCountable(aggType: AGG_TYPE): boolean {
@@ -33,7 +28,7 @@ export function createLegacyTileMapAggDescriptor(
     !aggType ||
     aggType === AGG_TYPE.COUNT ||
     !metricFieldName ||
-    (isHeatmap(mapType) && !isMetricCountable(aggType))
+    (mapType.toLowerCase() === 'heatmap' && !isMetricCountable(aggType))
   ) {
     return { type: AGG_TYPE.COUNT };
   }

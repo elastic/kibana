@@ -8,11 +8,7 @@
 export {
   createEmsVectorTileBasemapLayerDescriptor,
   createLegacyCompatibleBasemapLayersFromLegacyParams,
-  createWmsOverlayLayerDescriptor,
-  getLegacyEmsLightModeDefault,
-  normalizeLegacyEmsBasemapId,
 } from './basemap_layers';
-export type { LegacyBasemapLayersOptions } from './basemap_layers';
 export { getEmsLayerIdFromSelectedLayer } from './ems_layer_id';
 export {
   createLegacyRegionMapAggDescriptor,

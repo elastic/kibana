@@ -10,7 +10,8 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import isPlainObject from 'lodash/isPlainObject';
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { VISUALIZE_SAVED_OBJECT_TYPE, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { safeJsonParse } from '@kbn/std';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type {
   PanelTypeMigrationPanel,
@@ -35,7 +36,6 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   VECTOR_STYLES,
-  MAP_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import { getJoinAggKey, getSourceAggKey } from '../../common/get_agg_key';
 
@@ -80,36 +80,24 @@ interface LegacyUiState {
   mapZoom?: unknown;
 }
 
-function omitUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, value]) => value !== undefined)
-  ) as Partial<T>;
-}
-
 function getPanelBaseConfig(sourceConfig: Record<string, unknown>) {
   const { title, description, hide_title, hide_border, time_range, drilldowns } = sourceConfig;
-  return omitUndefined({
-    title,
-    description,
-    hide_title,
-    hide_border,
-    time_range,
-    drilldowns,
-  });
+  return Object.fromEntries(
+    Object.entries({ title, description, hide_title, hide_border, time_range, drilldowns }).filter(
+      ([, value]) => value !== undefined
+    )
+  );
 }
 
 function parseJsonObject(value: unknown): Record<string, unknown> | undefined {
   if (typeof value !== 'string') return undefined;
-  try {
-    const parsed = JSON.parse(value);
-    return isPlainObject(parsed) ? (parsed as Record<string, unknown>) : undefined;
-  } catch {
-    return undefined;
-  }
+  const parsed = safeJsonParse<unknown>(value);
+  return isPlainObject(parsed) ? (parsed as Record<string, unknown>) : undefined;
 }
 
-function getUiStateFromSavedVis(savedVis: any): LegacyUiState | undefined {
-  const uiState = savedVis?.uiState;
+function getUiStateFromSavedVis(savedVis: unknown): LegacyUiState | undefined {
+  if (!isPlainObject(savedVis)) return undefined;
+  const uiState = (savedVis as Record<string, unknown>).uiState;
   return isPlainObject(uiState) ? (uiState as LegacyUiState) : undefined;
 }
 
@@ -148,9 +136,11 @@ function getMapCenterAndZoom(uiState: LegacyUiState | undefined): {
 
 function getIndexPatternIdFromSearchSource(searchSource: unknown): string | undefined {
   if (!isPlainObject(searchSource)) return undefined;
-  const index = (searchSource as any).index;
+  const index = (searchSource as Record<string, unknown>).index;
   if (typeof index === 'string') return index;
-  if (isPlainObject(index) && typeof (index as any).id === 'string') return (index as any).id;
+  if (isPlainObject(index) && typeof (index as Record<string, unknown>).id === 'string') {
+    return (index as Record<string, unknown>).id as string;
+  }
   return undefined;
 }
 
@@ -178,11 +168,14 @@ function getSearchSourceFromSavedObjectAttributes(
   }
 }
 
-function getAggsFromSavedVis(savedVis: any): LegacyAgg[] {
-  const dataAggs = savedVis?.data?.aggs;
-  if (Array.isArray(dataAggs)) return dataAggs as LegacyAgg[];
-  const aggs = savedVis?.aggs;
-  return Array.isArray(aggs) ? (aggs as LegacyAgg[]) : [];
+function getAggsFromSavedVis(savedVis: unknown): LegacyAgg[] {
+  if (!isPlainObject(savedVis)) return [];
+  const record = savedVis as Record<string, unknown>;
+  const data = record.data;
+  if (isPlainObject(data) && Array.isArray((data as Record<string, unknown>).aggs)) {
+    return (data as Record<string, unknown>).aggs as LegacyAgg[];
+  }
+  return Array.isArray(record.aggs) ? (record.aggs as LegacyAgg[]) : [];
 }
 
 function getAggsFromVisState(visState: LegacyVisState): LegacyAgg[] {
@@ -200,14 +193,14 @@ function getFirstMetricAgg(aggs: LegacyAgg[]): LegacyAgg | undefined {
 function getAggFieldName(agg: LegacyAgg | undefined): string | undefined {
   const params = agg?.params;
   if (!isPlainObject(params)) return undefined;
-  const field = (params as any).field;
+  const field = (params as Record<string, unknown>).field;
   return typeof field === 'string' ? field : undefined;
 }
 
 function getTermsSize(agg: LegacyAgg | undefined): number | undefined {
   const params = agg?.params;
   if (!isPlainObject(params)) return undefined;
-  const size = (params as any).size;
+  const size = (params as Record<string, unknown>).size;
   return typeof size === 'number' ? size : undefined;
 }
 
@@ -431,20 +424,18 @@ function buildMapAttributesFromTileMap(args: {
     metricAgg,
     metricFieldName,
   });
-  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, {
-    idGenerator: uuidv4,
-  });
+  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
 
-  return omitUndefined({
+  return {
     title: args.title,
     isLayerTOCOpen: true,
     settings: { projection: 'mercator' },
     layers: [...basemapLayers, layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
-  }) as Record<string, unknown>;
+  };
 }
 
 function buildMapAttributesFromRegionMap(args: {
@@ -457,13 +448,15 @@ function buildMapAttributesFromRegionMap(args: {
   const colorSchema =
     typeof args.params.colorSchema === 'string' ? args.params.colorSchema : 'Yellow to Red';
 
-  const selectedLayer = args.params.selectedLayer as any;
-  const selectedJoinField = args.params.selectedJoinField as any;
-  if (!selectedLayer || !selectedJoinField) return undefined;
-  if (selectedLayer.isEMS !== true) return undefined;
+  const selectedLayer = args.params.selectedLayer;
+  const selectedJoinField = args.params.selectedJoinField;
+  if (!isPlainObject(selectedLayer) || !isPlainObject(selectedJoinField)) return undefined;
+  if ((selectedLayer as Record<string, unknown>).isEMS !== true) return undefined;
   const emsLayerId = getEmsLayerIdFromSelectedLayer(selectedLayer);
   const leftFieldName =
-    typeof selectedJoinField.name === 'string' ? selectedJoinField.name : undefined;
+    typeof (selectedJoinField as Record<string, unknown>).name === 'string'
+      ? ((selectedJoinField as Record<string, unknown>).name as string)
+      : undefined;
   if (!emsLayerId || !leftFieldName) return undefined;
 
   const indexPatternId = getIndexPatternIdFromSearchSource(args.searchSource);
@@ -490,41 +483,44 @@ function buildMapAttributesFromRegionMap(args: {
     metricAgg,
     metricFieldName,
   });
-  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, {
-    idGenerator: uuidv4,
-  });
+  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
 
-  return omitUndefined({
+  return {
     title: args.title,
     isLayerTOCOpen: true,
     settings: { projection: 'mercator' },
     layers: [...basemapLayers, layer],
     ...(center ? { center } : {}),
     ...(zoom !== undefined ? { zoom } : {}),
-  }) as Record<string, unknown>;
+  };
 }
 
 function getByValueMapResult(
   panelId: string,
   config: Record<string, unknown>
 ): PanelTypeMigrationSuccessResult | undefined {
-  const savedVis = (config as any).savedVis;
-  if (!isPlainObject(savedVis) || typeof (savedVis as any).type !== 'string') return undefined;
+  const savedVis = config.savedVis;
+  if (!isPlainObject(savedVis)) return undefined;
+  const savedVisRecord = savedVis as Record<string, unknown>;
+  if (typeof savedVisRecord.type !== 'string') return undefined;
 
-  const visType = (savedVis as any).type;
-  const title = typeof (savedVis as any).title === 'string' ? (savedVis as any).title : 'Map';
+  const visType = savedVisRecord.type;
+  const title = typeof savedVisRecord.title === 'string' ? savedVisRecord.title : 'Map';
 
   const aggs = getAggsFromSavedVis(savedVis);
-  const searchSource = (savedVis as any)?.data?.searchSource;
+  const data = savedVisRecord.data;
+  const searchSource = isPlainObject(data)
+    ? (data as Record<string, unknown>).searchSource
+    : undefined;
   const uiState = getUiStateFromSavedVis(savedVis);
 
   const attributes =
     visType === TILE_MAP_VIS_TYPE
       ? buildMapAttributesFromTileMap({
           title,
-          params: (savedVis as any).params as LegacyTileMapParams,
+          params: (savedVisRecord.params ?? {}) as LegacyTileMapParams,
           aggs,
           searchSource,
           uiState,
@@ -532,7 +528,7 @@ function getByValueMapResult(
       : visType === REGION_MAP_VIS_TYPE
       ? buildMapAttributesFromRegionMap({
           title,
-          params: (savedVis as any).params as LegacyRegionMapParams,
+          params: (savedVisRecord.params ?? {}) as LegacyRegionMapParams,
           aggs,
           searchSource,
           uiState,
@@ -559,14 +555,9 @@ function getByReferenceMapResult(args: {
   const visStateString = args.attributes.visState;
   if (typeof visStateString !== 'string') return undefined;
 
-  let visState: LegacyVisState;
-  try {
-    const parsed = JSON.parse(visStateString);
-    if (!isPlainObject(parsed)) return undefined;
-    visState = parsed as LegacyVisState;
-  } catch {
-    return undefined;
-  }
+  const parsed = parseJsonObject(visStateString);
+  if (!parsed) return undefined;
+  const visState = parsed as LegacyVisState;
 
   const visType = visState.type;
   if (visType !== TILE_MAP_VIS_TYPE && visType !== REGION_MAP_VIS_TYPE) return undefined;
@@ -627,7 +618,7 @@ export async function migrateLegacyTileAndRegionMapPanels(
       continue;
     }
 
-    const savedObjectId = (config as any).savedObjectId;
+    const savedObjectId = config.savedObjectId;
     if (typeof savedObjectId === 'string' && savedObjectId.length > 0) {
       byRefCandidates.push({
         panelId: panel.id,
@@ -643,7 +634,7 @@ export async function migrateLegacyTileAndRegionMapPanels(
 
   const uniqueIds = Array.from(new Set(byRefCandidates.map((c) => c.savedObjectId)));
 
-  let bulkGetResponse;
+  let bulkGetResponse: Awaited<ReturnType<SavedObjectsClientContract['bulkGet']>>;
   try {
     bulkGetResponse = await savedObjectsClient.bulkGet(
       uniqueIds.map((id) => ({ type: VISUALIZE_SAVED_OBJECT_TYPE, id }))
@@ -652,22 +643,17 @@ export async function migrateLegacyTileAndRegionMapPanels(
     return results;
   }
 
-  const byId = new Map<string, unknown>();
-  uniqueIds.forEach((id, idx) => {
-    byId.set(id, bulkGetResponse.saved_objects[idx]);
-  });
+  const byId = new Map<string, (typeof bulkGetResponse.saved_objects)[number]>(
+    bulkGetResponse.saved_objects.map((so) => [so.id, so] as const)
+  );
 
   for (const candidate of byRefCandidates) {
     const bulkItem = byId.get(candidate.savedObjectId);
     if (!bulkItem) continue;
-    if (isSavedObjectErrorResult(bulkItem as any)) continue;
+    if (isSavedObjectErrorResult(bulkItem)) continue;
 
-    const attrs = (bulkItem as any).attributes as
-      | LegacyVisualizationSavedObjectAttributes
-      | undefined;
-    if (!attrs) continue;
-
-    const refs = ((bulkItem as any).references ?? []) as SavedObjectReference[];
+    const attrs = bulkItem.attributes as LegacyVisualizationSavedObjectAttributes;
+    const refs = bulkItem.references ?? [];
 
     const byRefResult = getByReferenceMapResult({
       panelId: candidate.panelId,
@@ -682,8 +668,3 @@ export async function migrateLegacyTileAndRegionMapPanels(
 
   return results;
 }
-
-export const legacyVisualizeToMapPanelMigration = {
-  from: VISUALIZE_EMBEDDABLE_TYPE,
-  to: MAP_SAVED_OBJECT_TYPE,
-} as const;

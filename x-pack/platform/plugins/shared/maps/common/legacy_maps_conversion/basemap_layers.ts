@@ -10,48 +10,8 @@ import {
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
-import type { LayerDescriptor } from '../descriptor_types';
+import type { EMSVectorTileLayerDescriptor, RasterLayerDescriptor } from '../descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../constants';
-
-export interface LegacyBasemapLayersOptions {
-  readonly idGenerator: () => string;
-}
-
-export function normalizeLegacyEmsBasemapId(id: string): string {
-  // Legacy tile/region maps stored older raster style ids.
-  // Maps uses vector basemap ids (Borealis theme), so map known raster ids.
-  if (id === 'road_map_desaturated') return DEFAULT_EMS_ROADMAP_DESATURATED_ID;
-  return id;
-}
-
-function getSelectedTmsLayerIdFromLegacyParams(legacyParams: unknown): string | undefined {
-  if (!isPlainObject(legacyParams)) return undefined;
-  const wms = (legacyParams as any).wms;
-  if (!isPlainObject(wms)) return undefined;
-  const selectedTmsLayer = (wms as any).selectedTmsLayer;
-  if (!isPlainObject(selectedTmsLayer)) return undefined;
-
-  const id = (selectedTmsLayer as any).id;
-  return typeof id === 'string' ? normalizeLegacyEmsBasemapId(id) : undefined;
-}
-
-function getIsDesaturatedFromLegacyParams(legacyParams: unknown): boolean | undefined {
-  if (!isPlainObject(legacyParams)) return undefined;
-  return typeof (legacyParams as any).isDesaturated === 'boolean'
-    ? (legacyParams as any).isDesaturated
-    : undefined;
-}
-
-export function getLegacyEmsLightModeDefault(legacyParams: unknown): string | undefined {
-  const selectedTmsLayerId = getSelectedTmsLayerIdFromLegacyParams(legacyParams);
-  if (selectedTmsLayerId) return selectedTmsLayerId;
-
-  const isDesaturated = getIsDesaturatedFromLegacyParams(legacyParams);
-  if (isDesaturated === true) return DEFAULT_EMS_ROADMAP_DESATURATED_ID;
-  if (isDesaturated === false) return DEFAULT_EMS_ROADMAP_ID;
-
-  return undefined;
-}
 
 export function createEmsVectorTileBasemapLayerDescriptor({
   id,
@@ -63,11 +23,10 @@ export function createEmsVectorTileBasemapLayerDescriptor({
   id: string;
   lightModeDefault?: string;
   isAutoSelect?: boolean;
-}): LayerDescriptor {
+}): EMSVectorTileLayerDescriptor {
   return {
     id,
     type: LAYER_TYPE.EMS_VECTOR_TILE,
-    label: undefined,
     alpha: 1,
     visible: true,
     minZoom: 0,
@@ -77,7 +36,6 @@ export function createEmsVectorTileBasemapLayerDescriptor({
     locale: AUTOSELECT_EMS_LOCALE,
     sourceDescriptor: {
       type: SOURCE_TYPES.EMS_TMS,
-      id: undefined,
       isAutoSelect,
       lightModeDefault,
     },
@@ -85,7 +43,7 @@ export function createEmsVectorTileBasemapLayerDescriptor({
   };
 }
 
-export function createWmsOverlayLayerDescriptor({
+function createWmsOverlayLayerDescriptor({
   id,
   serviceUrl,
   layers,
@@ -95,7 +53,7 @@ export function createWmsOverlayLayerDescriptor({
   serviceUrl: string;
   layers: string;
   styles: string;
-}): LayerDescriptor {
+}): RasterLayerDescriptor {
   return {
     id,
     type: LAYER_TYPE.RASTER_TILE,
@@ -111,45 +69,69 @@ export function createWmsOverlayLayerDescriptor({
       layers,
       styles,
     },
-    style: { type: LAYER_STYLE_TYPE.TILE },
   };
 }
 
 export function createLegacyCompatibleBasemapLayersFromLegacyParams(
   legacyParams: unknown,
-  { idGenerator }: LegacyBasemapLayersOptions
-): LayerDescriptor[] {
-  const lightModeDefault = getLegacyEmsLightModeDefault(legacyParams);
+  idGenerator: () => string
+): Array<EMSVectorTileLayerDescriptor | RasterLayerDescriptor> {
+  let lightModeDefault: string | undefined;
+  if (isPlainObject(legacyParams)) {
+    const legacy = legacyParams as Record<string, unknown>;
+    const wms = legacy.wms;
+    if (isPlainObject(wms)) {
+      const wmsRecord = wms as Record<string, unknown>;
+      const selectedTmsLayer = wmsRecord.selectedTmsLayer;
+      if (isPlainObject(selectedTmsLayer)) {
+        const rawId = (selectedTmsLayer as Record<string, unknown>).id;
+        if (typeof rawId === 'string') {
+          // Legacy tile/region maps stored older raster style ids.
+          lightModeDefault =
+            rawId === 'road_map_desaturated' ? DEFAULT_EMS_ROADMAP_DESATURATED_ID : rawId;
+        }
+      }
+    }
+
+    if (!lightModeDefault && typeof legacy.isDesaturated === 'boolean') {
+      lightModeDefault = legacy.isDesaturated
+        ? DEFAULT_EMS_ROADMAP_DESATURATED_ID
+        : DEFAULT_EMS_ROADMAP_ID;
+    }
+  }
+
   const basemap = createEmsVectorTileBasemapLayerDescriptor({
     id: idGenerator(),
     lightModeDefault: lightModeDefault ?? undefined,
   });
 
   if (!isPlainObject(legacyParams)) return [basemap];
-  const wms = (legacyParams as any).wms;
+  const legacy = legacyParams as Record<string, unknown>;
+  const wms = legacy.wms;
   if (
     !isPlainObject(wms) ||
-    (wms as any).enabled !== true ||
-    typeof (wms as any).url !== 'string'
+    (wms as Record<string, unknown>).enabled !== true ||
+    typeof (wms as Record<string, unknown>).url !== 'string'
   ) {
     return [basemap];
   }
 
-  const options = (wms as any).options;
+  const wmsRecord = wms as Record<string, unknown>;
+  const options = wmsRecord.options;
   const layers =
-    isPlainObject(options) && typeof (options as any).layers === 'string'
-      ? (options as any).layers
+    isPlainObject(options) && typeof (options as Record<string, unknown>).layers === 'string'
+      ? ((options as Record<string, unknown>).layers as string)
       : '';
   const styles =
-    isPlainObject(options) && typeof (options as any).styles === 'string'
-      ? (options as any).styles
+    isPlainObject(options) && typeof (options as Record<string, unknown>).styles === 'string'
+      ? ((options as Record<string, unknown>).styles as string)
       : '';
 
   return [
     basemap,
     createWmsOverlayLayerDescriptor({
       id: idGenerator(),
-      serviceUrl: (wms as any).url,
+      serviceUrl: wmsRecord.url as string,
       layers,
       styles,
     }),
