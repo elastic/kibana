@@ -19,6 +19,7 @@ export {
   globalSetupHook,
   globalTeardownHook,
   tags,
+  getPlaywrightTagsFor,
 } from './src/playwright';
 
 // Fixtures & configuration

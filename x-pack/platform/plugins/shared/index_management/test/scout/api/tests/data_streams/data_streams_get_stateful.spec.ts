@@ -6,6 +6,7 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { DataStream } from '../../../../../common';
 import {
@@ -16,32 +17,25 @@ import {
   expectedDataStream,
   testData,
 } from '../../fixtures';
-import { MKI_SECURITY_ONLY } from '../../tags';
 
 const { API_BASE_PATH, COMMON_HEADERS } = testData;
 
-const DATA_STREAM_NAME = 'index-management-api-ds-mki-security';
+const DATA_STREAM_NAME = 'index-management-api-ds-get';
 
-// Cloud Security's project-level default retention (elastic/kibana#241105); other targets are
-// covered in data_streams_get_serverless.spec.ts / data_streams_get_stateful.spec.ts.
-const expectedLifecycle = {
-  enabled: true,
-  effective_retention: '396d',
-  globalMaxRetention: '396d',
-  retention_determined_by: 'default_global_retention',
+const expectedLifecycle = { enabled: true };
+// A single-shard index has an unassigned replica on a single node, so it reports yellow.
+const expectedHealth = 'yellow';
+const expectedStats = { maxTimeStamp: 0 };
+const expectedStorage = {
+  storageSize: 'string (populated)',
+  storageSizeBytes: 'number (populated)',
 };
 
-apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, () => {
+apiTest.describe('Data streams API - Get (stateful)', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
-  let expectedStats: object;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     credentials = await requestAuth.getApiKey('admin');
-    expectedStats = {
-      meteringDocsCount: 0,
-      meteringStorageSize: '0b',
-      meteringStorageSizeBytes: 0,
-    };
   });
 
   apiTest.beforeEach(async ({ esClient }) => {
@@ -71,7 +65,7 @@ apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, 
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: 'green',
+        health: expectedHealth,
         lifecycle: expectedLifecycle,
       })
     );
@@ -90,10 +84,7 @@ apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, 
     expect(dataStream).toBeDefined();
 
     const { storageSize, storageSizeBytes, ...rest } = dataStream!;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
-      storageSize: 'undefined',
-      storageSizeBytes: 'undefined',
-    });
+    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
 
     const { name: indexName, uuid } = rest.indices[0];
     expect(rest).toStrictEqual({
@@ -101,7 +92,7 @@ apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, 
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: 'green',
+        health: expectedHealth,
         lifecycle: expectedLifecycle,
       }),
       ...expectedStats,
@@ -116,10 +107,7 @@ apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, 
 
     expect(response).toHaveStatusCode(200);
     const { storageSize, storageSizeBytes, ...rest } = response.body;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
-      storageSize: 'undefined',
-      storageSizeBytes: 'undefined',
-    });
+    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
 
     const { name: indexName, uuid } = rest.indices[0];
     expect(rest).toStrictEqual({
@@ -127,7 +115,7 @@ apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, 
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: 'green',
+        health: expectedHealth,
         lifecycle: expectedLifecycle,
       }),
       ...expectedStats,

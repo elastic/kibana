@@ -8,14 +8,10 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { DataStream } from '../../../../../common';
 import {
   apiTest,
   createDataStream,
   deleteDataStream,
-  describeStorage,
-  expectedDataStream,
-  forDeployment,
   getDataStream,
   getDataStreamMappings,
   testData,
@@ -28,35 +24,12 @@ const { API_BASE_PATH, COMMON_HEADERS } = testData;
 const DATA_STREAM_NAME = 'index-management-api-ds-one';
 const OTHER_DATA_STREAM_NAME = 'index-management-api-ds-two';
 
-const expectedLifecycle = { enabled: true };
-
-// Security MKI applies a different default retention to `lifecycle` (elastic/kibana#241105) than
-// asserted here. That case is covered on its own, fully, in data_streams_mki_security.spec.ts —
-// mirrors the old FTR split (ds_serverless.ts / ds_mki.ts) instead of loosening this assertion.
-const SKIP_ON_MKI_SECURITY_REASON =
-  'Security MKI applies a different default retention; covered in data_streams_mki_security.spec.ts';
-
+// Get-endpoint assertions live in the data_streams_get_* specs; the operations below are agnostic.
 apiTest.describe('Data streams API', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
-  // A single-shard index has no replica to assign on serverless, so it reports green there.
-  let expectedHealth: string;
-  // Stateful reports shard-level stats, serverless metering ones.
-  let expectedStats: object;
-  let expectedStorage: { storageSize: string; storageSizeBytes: string };
-  let isMkiSecurity: boolean;
 
-  apiTest.beforeAll(async ({ requestAuth, config }) => {
+  apiTest.beforeAll(async ({ requestAuth }) => {
     credentials = await requestAuth.getApiKey('admin');
-    isMkiSecurity = config.isCloud && config.serverless && config.projectType === 'security';
-    expectedHealth = forDeployment(config, { stateful: 'yellow', serverless: 'green' });
-    expectedStats = forDeployment(config, {
-      stateful: { maxTimeStamp: 0 },
-      serverless: { meteringDocsCount: 0, meteringStorageSize: '0b', meteringStorageSizeBytes: 0 },
-    });
-    expectedStorage = forDeployment(config, {
-      stateful: { storageSize: 'string (populated)', storageSizeBytes: 'number (populated)' },
-      serverless: { storageSize: 'undefined', storageSizeBytes: 'undefined' },
-    });
   });
 
   apiTest.beforeEach(async ({ esClient }) => {
@@ -67,90 +40,6 @@ apiTest.describe('Data streams API', { tag: tags.deploymentAgnostic }, () => {
   apiTest.afterEach(async ({ esClient }) => {
     await deleteDataStream(esClient, DATA_STREAM_NAME);
     await deleteDataStream(esClient, OTHER_DATA_STREAM_NAME);
-  });
-
-  apiTest('lists the data streams', async ({ apiClient }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
-    apiTest.skip(isMkiSecurity, SKIP_ON_MKI_SECURITY_REASON);
-
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const dataStream = (response.body as DataStream[]).find(
-      ({ name }) => name === DATA_STREAM_NAME
-    );
-    expect(dataStream).toBeDefined();
-
-    const { name: indexName, uuid } = dataStream!.indices[0];
-    expect(dataStream).toStrictEqual(
-      expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: expectedHealth,
-        lifecycle: expectedLifecycle,
-      })
-    );
-  });
-
-  apiTest('includes stats when asked for them', async ({ apiClient }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
-    apiTest.skip(isMkiSecurity, SKIP_ON_MKI_SECURITY_REASON);
-
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams?includeStats=true`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const dataStream = (response.body as DataStream[]).find(
-      ({ name }) => name === DATA_STREAM_NAME
-    );
-    expect(dataStream).toBeDefined();
-
-    const { storageSize, storageSizeBytes, ...rest } = dataStream!;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
-
-    const { name: indexName, uuid } = rest.indices[0];
-    expect(rest).toStrictEqual({
-      ...expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: expectedHealth,
-        lifecycle: expectedLifecycle,
-      }),
-      ...expectedStats,
-    });
-  });
-
-  apiTest('returns a single data stream by name', async ({ apiClient }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
-    apiTest.skip(isMkiSecurity, SKIP_ON_MKI_SECURITY_REASON);
-
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams/${DATA_STREAM_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(200);
-    const { storageSize, storageSizeBytes, ...rest } = response.body;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
-
-    const { name: indexName, uuid } = rest.indices[0];
-    expect(rest).toStrictEqual({
-      ...expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: expectedHealth,
-        lifecycle: expectedLifecycle,
-      }),
-      ...expectedStats,
-    });
   });
 
   apiTest('updates the data retention of a data stream', async ({ apiClient }) => {
