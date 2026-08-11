@@ -106,11 +106,11 @@ export interface TsdbScenario {
   ) => Promise<{ expectedDocumentCountBeforeRollover: number }>;
 }
 
-interface LensUiTestFixtures extends LensTestFixtures {
+export interface LensUiTestFixtures extends LensTestFixtures {
   tsdbScenario: TsdbScenario;
 }
 
-interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
+export interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
   tsdbHelper: TsdbHelper;
 }
 
@@ -154,7 +154,8 @@ export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeR
   },
 });
 
-const runCleanupActions = async (
+/** Runs all cleanup actions and reports their failures together. */
+export const runCleanupActions = async (
   description: string,
   actions: Array<() => Promise<void>>
 ): Promise<void> => {
