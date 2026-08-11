@@ -6111,6 +6111,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-content-common@link:x-pack/platform/packages/shared/custom-content/custom-content-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-content-plugin@link:x-pack/platform/plugins/shared/custom_content":
   version "0.0.0"
   uid ""
