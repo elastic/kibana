@@ -353,7 +353,10 @@ describe(
 
       it('runs a take-action query against all enrolled agents', () => {
         cy.getBySel('expand-event').first().click();
-        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should('not.contain', 'Loading...');
+        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should(
+          'not.contain',
+          'Loading...'
+        );
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
         cy.getBySel('osquery-action-item').click();
         cy.getBySel('agentSelection').within(() => {
