@@ -1349,7 +1349,7 @@ describe('create', () => {
       });
     });
 
-    it('emits template and extended_fields user actions so the audit trail matches the persisted case', async () => {
+    it('emits an applied-template user action without field rows when only defaults are persisted', async () => {
       const clientArgs = createClientArgs();
 
       await create(
@@ -1369,10 +1369,63 @@ describe('create', () => {
       expect(byType.template.payload).toEqual({
         template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
-      // The initial extended_fields are recorded exactly as persisted on the case SO.
-      expect(byType.extended_fields.payload).toEqual({
-        extended_fields: { priority_as_keyword: 'medium' },
+      // Case SO still stores template defaults; Activity omits fields that match those defaults.
+      expect(byType.extended_fields).toBeUndefined();
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+    });
+
+    it('emits extended_fields user actions only for values that differ from template defaults', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: 'urgent' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.template.payload).toEqual({
+        template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'urgent' },
+      });
+    });
+
+    it('emits an extended_fields user action when the caller clears a non-empty template default', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: '' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: '' },
+      });
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: '' });
     });
 
     it('checks the assignCase operation when the template introduces assignees', async () => {
