@@ -10,7 +10,7 @@ import { createDashboardManagementSkill } from './dashboard_management_skill';
 
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
-  getCustomContentEnabled: () => Promise<boolean>
+  customContentEnabled: boolean
 ): void => {
-  agentBuilder.skills.register(createDashboardManagementSkill(getCustomContentEnabled));
+  agentBuilder.skills.register(createDashboardManagementSkill(customContentEnabled));
 };

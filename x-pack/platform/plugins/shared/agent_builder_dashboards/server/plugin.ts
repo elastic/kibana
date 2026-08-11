@@ -57,10 +57,16 @@ export class AgentBuilderDashboardsPlugin
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
-    registerSkills(setupDeps.agentBuilder, async () => {
+
+    (async () => {
       const [coreStart] = await coreSetup.getStartServices();
-      return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
-    });
+      const customContentEnabled = await coreStart.featureFlags.getBooleanValue(
+        CUSTOM_CONTENT_ENABLED_FLAG_KEY,
+        false
+      );
+      registerSkills(setupDeps.agentBuilder, customContentEnabled);
+    })();
+
     return {};
   }
 
