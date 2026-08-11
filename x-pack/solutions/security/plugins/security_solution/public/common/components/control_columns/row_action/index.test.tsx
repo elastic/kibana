@@ -29,6 +29,9 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 jest.mock('../../../hooks/use_is_new_flyout_enabled');
 jest.mock('../../../../flyout_v2/use_flyout_api');
+jest.mock('../../../hooks/use_space_id', () => ({
+  useSpaceId: () => 'default',
+}));
 const mockDispatch = jest.fn();
 jest.mock('react-redux-v7', () => {
   const original = jest.requireActual('react-redux-v7');
@@ -225,6 +228,48 @@ describe('RowAction', () => {
       scopeId: TableId.hostsPageEvents,
       alertsTableRef: undefined,
     });
+  });
+
+  test('should open the pattern-based flyout for rule preview alerts, converting the backing index to its alias', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const backingIndex = '.internal.preview.alerts-security.alerts-default';
+    const aliasIndex = '.preview.alerts-security.alerts-default';
+
+    const rulePreviewProps: RowActionProps = {
+      ...defaultProps,
+      tableId: TableId.rulePreview,
+      data: {
+        _id: '1',
+        _index: backingIndex,
+        data: [],
+        ecs: { _id: '1' },
+      },
+      esHitRecord: {
+        _id: '1',
+        _index: backingIndex,
+        _source: {},
+      },
+    };
+
+    const wrapper = render(
+      <TestProviders>
+        <RowAction {...rulePreviewProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(wrapper.getByTestId('expand-event'));
+
+    // Rule preview must NOT use the index-based wrapper (which searches via a data view
+    // pattern and cannot find preview backing indices); it must use the pattern-based
+    // wrapper, which resolves the document via useTimelineEventsDetails directly.
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
+    expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: '1',
+        indexName: aliasIndex,
+      })
+    );
   });
 
   describe('notes', () => {

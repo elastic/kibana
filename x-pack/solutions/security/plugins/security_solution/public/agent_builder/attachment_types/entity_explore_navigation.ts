@@ -17,7 +17,6 @@ import {
   type FlyoutDescriptor,
   type FlyoutV2UrlParamValue,
 } from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { notifyFlyoutV2Navigation } from '../../flyout_v2/shared/url_state/flyout_v2_navigation';
 import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
@@ -483,10 +482,6 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     path,
     replace: true,
   });
-
-  if (isNewFlyoutEnabled && descriptors) {
-    notifyFlyoutV2Navigation({ urlParamKey: FLYOUT_V2_URL_PARAM, descriptors });
-  }
 
   if (!alreadyOnEaHomePage) {
     scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });

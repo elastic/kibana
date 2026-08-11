@@ -257,22 +257,9 @@ export const ZendeskConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const baseUrl = buildBaseUrl(ctx);
-      try {
-        const response = await ctx.client.get(`${baseUrl}/users/me.json`);
-        const user = response.data?.user;
-        return {
-          ok: true,
-          message: user
-            ? `Successfully connected to Zendesk as ${user.email ?? user.name ?? 'user'}`
-            : 'Successfully connected to Zendesk API',
-        };
-      } catch (error: unknown) {
-        const message =
-          error && typeof error === 'object' && 'message' in error
-            ? String((error as { message: unknown }).message)
-            : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${baseUrl}/users/me.json`);
+      return {};
     },
+    enabled: true,
   },
 };
