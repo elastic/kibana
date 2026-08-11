@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { AddToCaseActionPanel, ADD_TO_CASE, CASE_TYPE } from '@kbn/response-ops-alerts-table';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -16,12 +18,25 @@ import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 
+export const ADD_TO_CASE_ACTION_IDS = {
+  addToCase: 'add-to-case-action',
+  addToExistingCase: 'add-to-existing-case-action',
+  addToNewCase: 'add-to-new-case-action',
+} as const;
+
+const ADD_TO_CASE_PANEL_ID = 'add-to-case-panel';
+
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
   ecsData: Ecs;
   nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
+  onActionClick?: (
+    actionId:
+      | typeof ADD_TO_CASE_ACTION_IDS.addToNewCase
+      | typeof ADD_TO_CASE_ACTION_IDS.addToExistingCase
+  ) => void;
   refetch?: (() => void) | undefined;
 }
 
@@ -31,6 +46,7 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
+  onActionClick,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -94,51 +110,74 @@ export const useAddToCaseActions = ({
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
+    onActionClick?.(ADD_TO_CASE_ACTION_IDS.addToNewCase);
     createCaseFlyout.open({
       attachments: caseAttachments,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+  }, [onMenuItemClick, onActionClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
+    onActionClick?.(ADD_TO_CASE_ACTION_IDS.addToExistingCase);
     selectCaseModal.open({
       getAttachments: () => caseAttachments,
     });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+  }, [caseAttachments, onActionClick, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (userCasesPermissions.createComment && userCasesPermissions.read) {
       return [
-        // add to existing case menu item
         {
           'aria-label': ariaLabel,
-          'data-test-subj': 'add-to-existing-case-action',
-          key: 'add-to-existing-case-action',
-          onClick: handleAddToExistingCaseClick,
-          name: ADD_TO_EXISTING_CASE,
-        },
-        // add to new case menu item
-        {
-          'aria-label': ariaLabel,
-          'data-test-subj': 'add-to-new-case-action',
-          key: 'add-to-new-case-action',
-          onClick: handleAddToNewCaseClick,
-          name: ADD_TO_NEW_CASE,
+          'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToCase,
+          key: ADD_TO_CASE_ACTION_IDS.addToCase,
+          name: ADD_TO_CASE,
+          panel: ADD_TO_CASE_PANEL_ID,
         },
       ];
     }
     return [];
-  }, [
-    userCasesPermissions.createComment,
-    userCasesPermissions.read,
-    ariaLabel,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
-  ]);
+  }, [userCasesPermissions.createComment, userCasesPermissions.read, ariaLabel]);
+  const addToCaseActionPanels: EuiContextMenuPanelDescriptor[] = useMemo(
+    () =>
+      userCasesPermissions.createComment && userCasesPermissions.read
+        ? [
+            {
+              id: ADD_TO_CASE_PANEL_ID,
+              title: CASE_TYPE,
+              content: (
+                <AddToCaseActionPanel
+                  actions={[
+                    {
+                      id: ADD_TO_CASE_ACTION_IDS.addToNewCase,
+                      label: ADD_TO_NEW_CASE,
+                      dataTestSubj: ADD_TO_CASE_ACTION_IDS.addToNewCase,
+                      onClick: handleAddToNewCaseClick,
+                    },
+                    {
+                      id: ADD_TO_CASE_ACTION_IDS.addToExistingCase,
+                      label: ADD_TO_EXISTING_CASE,
+                      dataTestSubj: ADD_TO_CASE_ACTION_IDS.addToExistingCase,
+                      onClick: handleAddToExistingCaseClick,
+                    },
+                  ]}
+                />
+              ),
+            },
+          ]
+        : [],
+    [
+      handleAddToExistingCaseClick,
+      handleAddToNewCaseClick,
+      userCasesPermissions.createComment,
+      userCasesPermissions.read,
+    ]
+  );
 
   return {
     addToCaseActionItems,
+    addToCaseActionPanels,
     handleAddToNewCaseClick,
     handleAddToExistingCaseClick,
   };
