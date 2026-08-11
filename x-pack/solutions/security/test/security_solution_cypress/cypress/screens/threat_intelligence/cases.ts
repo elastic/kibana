@@ -8,7 +8,6 @@
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const ADD_TO_CASE_ITEM = getDataTestSubjectSelector('add-to-case-action');
-export const ADD_TO_CASE_SUBMIT_BUTTON = getDataTestSubjectSelector('add-to-case-submit');
 export const INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON = getDataTestSubjectSelector(
   'tiIndicatorTableAddToNewCaseContextMenu'
 );

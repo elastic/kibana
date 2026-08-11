@@ -7,7 +7,6 @@
 
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  ADD_TO_CASE_ITEM,
   navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
@@ -24,6 +23,7 @@ import {
   selectExistingCase,
 } from '../../../tasks/threat_intelligence/cases';
 import {
+  ADD_TO_CASE_ITEM,
   CASE_COMMENT_EXTERNAL_REFERENCE,
   FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
   FLYOUT_ADD_TO_NEW_CASE_ITEM,
