@@ -79,9 +79,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
 ### UI Component Selection and Styling
-- Check for existing reusable components in the target module, shared packages the module is allowed to depend on, `@kbn/ui-*` under `src/platform/kbn-ui`, and `@elastic/eui`. When both `@kbn/ui-*` and `@elastic/eui` cover the same pattern, prefer `@kbn/ui-*`. Use `@kbn/ui-*` through their public APIs; create or modify their packages only when explicitly asked.
-- If a matching `@kbn/ui-*` or `@elastic/eui` component cannot fully support the needed behavior through its public API or composition, call out the gap and recommend consulting the component's owning team before working around it (rebuilding from lower-level primitives, overriding internals with CSS, or similar). Prefer established component patterns over one-off workarounds.
-- Style with Emotion (`@emotion/react`) and EUI design tokens; use inline styles only for runtime-computed values such as animation progress or measured coordinates.
+- Reuse components from the target module, allowed shared packages, and `@elastic/eui`. Prefer available `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components; create or modify `@kbn/ui-*` packages only when explicitly asked.
+- If meeting a requirement would require rebuilding a matching component or overriding its internals, call out the limitation and recommend consulting the component's owning team.
+- Style with Emotion (`@emotion/react`) and EUI design tokens; reserve inline styles for runtime-computed values.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
