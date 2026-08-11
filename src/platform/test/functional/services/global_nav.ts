@@ -70,9 +70,13 @@ export class GlobalNavService extends FtrService {
       'chrome header to settle on a single recognized state',
       this.findTimeout,
       async () => {
-        const present = await Promise.all(
-          headerSubjects.map((subj) => this.testSubjects.exists(subj, { timeout: 0 }))
-        );
+        // Probe sequentially: `exists` mutates the driver's shared implicit-wait timeout, so running
+        // the three checks concurrently lets their set/restore interleave and an absent-header lookup
+        // blocks for the full implicit wait, overrunning this settle deadline.
+        const present: boolean[] = [];
+        for (const subj of headerSubjects) {
+          present.push(await this.testSubjects.exists(subj, { timeout: 0 }));
+        }
         if (present.filter(Boolean).length !== 1) {
           return false;
         }
