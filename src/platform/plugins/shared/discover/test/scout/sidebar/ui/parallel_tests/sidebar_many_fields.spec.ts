@@ -39,12 +39,8 @@ spaceTest.describe('Discover sidebar many fields', { tag: tags.deploymentAgnosti
     await discover.waitUntilSearchingHasFinished();
 
     await unifiedFieldList.waitUntilSidebarHasLoaded();
-    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
-      String(testData.MANY_FIELDS_AVAILABLE_FIELD_COUNT)
-    );
-    await expect(unifiedFieldList.getSidebarSectionCountLocator('meta')).toHaveText(
-      String(testData.MANY_FIELDS_META_FIELD_COUNT)
-    );
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText('6873');
+    await expect(unifiedFieldList.getSidebarSectionCountLocator('meta')).toHaveText('4');
 
     await discover.selectDataView(testData.DEFAULT_DATA_VIEW);
     await discover.waitUntilSearchingHasFinished();

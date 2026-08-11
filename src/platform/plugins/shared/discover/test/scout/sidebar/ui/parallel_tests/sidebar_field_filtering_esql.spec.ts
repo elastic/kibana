@@ -37,25 +37,21 @@ spaceTest.describe(
       await expect(page.locator('[data-test-subj^="typeFilter-"]')).toHaveCount(6);
       await unifiedFieldList.closeFieldTypeFilter();
 
-      await unifiedFieldList.expectAvailableFieldCount(
-        testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText(
+        String(testData.LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT)
       );
-      await unifiedFieldList.expectSidebarSectionFieldCount(
-        'empty',
-        testData.LOGSTASH_ESQL_EMPTY_FIELD_COUNT
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('empty')).toHaveText(
+        String(testData.LOGSTASH_ESQL_EMPTY_FIELD_COUNT)
       );
 
       await unifiedFieldList.openFieldTypeFilter();
       await unifiedFieldList.selectFieldTypeFilter('number');
       await unifiedFieldList.closeFieldTypeFilter();
 
-      await unifiedFieldList.expectAvailableFieldCount(
-        testData.LOGSTASH_ESQL_NUMBER_FILTER_AVAILABLE_FIELD_COUNT
-      );
-      await unifiedFieldList.expectSidebarSectionFieldCount(
-        'empty',
-        testData.LOGSTASH_ESQL_NUMBER_FILTER_EMPTY_FIELD_COUNT
-      );
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText('5');
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('empty')).toHaveText('2');
     });
 
     spaceTest('shows empty fields for a KEEP query', async ({ pageObjects }) => {
@@ -65,14 +61,10 @@ spaceTest.describe(
         'from logstash-* | limit 10 | keep machine.ram_range, bytes'
       );
 
-      await unifiedFieldList.expectSidebarSectionFieldCount('selected', 2);
-      await unifiedFieldList.expectAvailableFieldCount(
-        testData.LOGSTASH_ESQL_KEEP_AVAILABLE_FIELD_COUNT
-      );
-      await unifiedFieldList.expectSidebarSectionFieldCount(
-        'empty',
-        testData.LOGSTASH_ESQL_KEEP_EMPTY_FIELD_COUNT
-      );
+      await unifiedFieldList.waitUntilSidebarHasLoaded();
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('selected')).toHaveText('2');
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('available')).toHaveText('1');
+      await expect(unifiedFieldList.getSidebarSectionCountLocator('empty')).toHaveText('1');
     });
   }
 );
