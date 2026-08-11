@@ -10,16 +10,21 @@ export {
   createLegacyCompatibleBasemapLayersFromLegacyParams,
 } from './basemap_layers';
 export { getEmsLayerIdFromSelectedLayer } from './ems_layer_id';
+export { createRegionMapAggDescriptor, createTileMapAggDescriptor } from './agg_descriptors';
+export { getGeoGridRequestType } from './geo_grid_request_type';
 export {
-  createLegacyRegionMapAggDescriptor,
-  createLegacyTileMapAggDescriptor,
-} from './agg_descriptors';
-export { getLegacyGeoGridRequestType } from './geo_grid_request_type';
+  createRegionMapLayerDescriptor,
+  createTileMapLayerDescriptor,
+} from './legacy_map_layer_descriptors';
+export type {
+  CreateRegionMapLayerDescriptorParams,
+  CreateTileMapLayerDescriptorParams,
+} from './legacy_map_layer_descriptors';
 export {
-  createLegacyGeoGridSourceDescriptor,
-  createLegacyJoinMetricStyleField,
-  createLegacyRegionMapVectorStyleProperties,
-  createLegacySourceMetricStyleField,
-  createLegacyTermSourceDescriptor,
-  createLegacyTileMapVectorStyleProperties,
-} from './legacy_layer_descriptor_parts';
+  extractRegionMapLayerDescriptorParams,
+  extractTileMapLayerDescriptorParams,
+} from './extract_layer_descriptor_params';
+export type {
+  ExtractedRegionMapLayerDescriptorParams,
+  ExtractedTileMapLayerDescriptorParams,
+} from './extract_layer_descriptor_params';

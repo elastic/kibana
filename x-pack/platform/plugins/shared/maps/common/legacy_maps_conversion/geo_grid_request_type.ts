@@ -7,7 +7,7 @@
 
 import { RENDER_AS } from '../constants';
 
-export function getLegacyGeoGridRequestType(mapType: string): RENDER_AS {
+export function getGeoGridRequestType(mapType: string): RENDER_AS {
   const mt = mapType.toLowerCase();
   if (mt === 'heatmap') return RENDER_AS.HEATMAP;
   if (mt === 'shaded geohash grid') return RENDER_AS.GRID;

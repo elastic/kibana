@@ -18,7 +18,7 @@ function isMetricCountable(aggType: AGG_TYPE): boolean {
   return [AGG_TYPE.COUNT, AGG_TYPE.SUM, AGG_TYPE.UNIQUE_COUNT].includes(aggType);
 }
 
-export function createLegacyTileMapAggDescriptor(
+export function createTileMapAggDescriptor(
   mapType: string,
   metricAgg: string,
   metricFieldName?: string
@@ -38,7 +38,7 @@ export function createLegacyTileMapAggDescriptor(
     : { type: aggType, field: metricFieldName };
 }
 
-export function createLegacyRegionMapAggDescriptor(
+export function createRegionMapAggDescriptor(
   metricAgg: string,
   metricFieldName?: string
 ): AggDescriptor {

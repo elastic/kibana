@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateTileMapLayerDescriptorParams } from '../../classes/layers/create_tile_map_layer_descriptor';
+import type { CreateTileMapLayerDescriptorParams } from '../../../common/legacy_maps_conversion';
 
 export const TILE_MAP_RENDER = 'tile_map_vis';
 export const TILE_MAP_VIS_TYPE = 'tile_map';

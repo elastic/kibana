@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateRegionMapLayerDescriptorParams } from '../../classes/layers/create_region_map_layer_descriptor';
+import type { CreateRegionMapLayerDescriptorParams } from '../../../common/legacy_maps_conversion';
 
 export const REGION_MAP_RENDER = 'region_map_vis';
 export const REGION_MAP_VIS_TYPE = 'region_map';

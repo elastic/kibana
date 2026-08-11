@@ -18,23 +18,14 @@ import type {
   PanelTypeMigrationResult,
   PanelTypeMigrationSuccessResult,
 } from '@kbn/embeddable-plugin/server';
+import type { AggConfigSerialized } from '@kbn/data-plugin/common';
 import {
   createLegacyCompatibleBasemapLayersFromLegacyParams,
-  createLegacyGeoGridSourceDescriptor,
-  createLegacyJoinMetricStyleField,
-  createLegacyRegionMapAggDescriptor,
-  createLegacyRegionMapVectorStyleProperties,
-  createLegacySourceMetricStyleField,
-  createLegacyTermSourceDescriptor,
-  createLegacyTileMapAggDescriptor,
-  createLegacyTileMapVectorStyleProperties,
-  getEmsLayerIdFromSelectedLayer,
-  getLegacyGeoGridRequestType,
+  createRegionMapLayerDescriptor,
+  createTileMapLayerDescriptor,
+  extractRegionMapLayerDescriptorParams,
+  extractTileMapLayerDescriptorParams,
 } from '../../common/legacy_maps_conversion';
-
-import { AGG_TYPE, GRID_RESOLUTION, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
-import { getJoinAggKey, getSourceAggKey } from '../../common/get_agg_key';
-import { createEmsFileSourceDescriptor } from '../../common/descriptor_factories';
 
 const TILE_MAP_VIS_TYPE = 'tile_map' as const;
 const REGION_MAP_VIS_TYPE = 'region_map' as const;
@@ -64,12 +55,6 @@ interface LegacyVisualizationSavedObjectAttributes {
   visState?: string;
   uiStateJSON?: string;
   kibanaSavedObjectMeta?: { searchSourceJSON?: string };
-}
-
-interface LegacyAgg {
-  type?: unknown;
-  schema?: unknown;
-  params?: unknown;
 }
 
 interface LegacyUiState {
@@ -165,222 +150,47 @@ function getSearchSourceFromSavedObjectAttributes(
   }
 }
 
-function getAggsFromSavedVis(savedVis: unknown): LegacyAgg[] {
+function getAggsFromSavedVis(savedVis: unknown): AggConfigSerialized[] {
   if (!isPlainObject(savedVis)) return [];
   const record = savedVis as Record<string, unknown>;
   const data = record.data;
   if (isPlainObject(data) && Array.isArray((data as Record<string, unknown>).aggs)) {
-    return (data as Record<string, unknown>).aggs as LegacyAgg[];
+    return (data as Record<string, unknown>).aggs as AggConfigSerialized[];
   }
-  return Array.isArray(record.aggs) ? (record.aggs as LegacyAgg[]) : [];
+  return Array.isArray(record.aggs) ? (record.aggs as AggConfigSerialized[]) : [];
 }
 
-function getAggsFromVisState(visState: LegacyVisState): LegacyAgg[] {
-  return Array.isArray(visState.aggs) ? (visState.aggs as LegacyAgg[]) : [];
-}
-
-function getFirstBucketAgg(aggs: LegacyAgg[]): LegacyAgg | undefined {
-  return aggs.find((a) => a.schema === 'segment' || a.schema === 'bucket');
-}
-
-function getFirstMetricAgg(aggs: LegacyAgg[]): LegacyAgg | undefined {
-  return aggs.find((a) => a.schema === 'metric');
-}
-
-function getAggFieldName(agg: LegacyAgg | undefined): string | undefined {
-  const params = agg?.params;
-  if (!isPlainObject(params)) return undefined;
-  const field = (params as Record<string, unknown>).field;
-  return typeof field === 'string' ? field : undefined;
-}
-
-function getTermsSize(agg: LegacyAgg | undefined): number | undefined {
-  const params = agg?.params;
-  if (!isPlainObject(params)) return undefined;
-  const size = (params as Record<string, unknown>).size;
-  return typeof size === 'number' ? size : undefined;
-}
-
-function getMetricAggType(agg: LegacyAgg | undefined): string | undefined {
-  return typeof agg?.type === 'string' ? agg.type : undefined;
-}
-
-function createTileMapLayerDescriptor(params: {
-  label: string;
-  mapType: string;
-  colorSchema: string;
-  indexPatternId: string;
-  geoFieldName: string;
-  metricAgg: string | undefined;
-  metricFieldName: string | undefined;
-}) {
-  const { label, mapType, colorSchema, indexPatternId, geoFieldName, metricAgg, metricFieldName } =
-    params;
-
-  const requestType = getLegacyGeoGridRequestType(mapType);
-  const metricsDescriptor = createLegacyTileMapAggDescriptor(
-    mapType,
-    metricAgg ?? AGG_TYPE.COUNT,
-    metricFieldName
-  );
-
-  const sourceDescriptor = createLegacyGeoGridSourceDescriptor({
-    id: uuidv4(),
-    indexPatternId,
-    geoField: geoFieldName,
-    metrics: [metricsDescriptor],
-    requestType,
-    resolution: GRID_RESOLUTION.MOST_FINE,
-  });
-
-  if (requestType === 'heatmap') {
-    return {
-      id: uuidv4(),
-      type: LAYER_TYPE.HEATMAP,
-      label,
-      visible: true,
-      alpha: 1,
-      minZoom: 0,
-      maxZoom: 24,
-      sourceDescriptor,
-      style: { type: LAYER_STYLE_TYPE.HEATMAP, colorRampName: 'theclassic' },
-    };
-  }
-
-  const metricSourceKey = getSourceAggKey({
-    aggType: metricsDescriptor.type,
-    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-  });
-
-  const metricStyleField = createLegacySourceMetricStyleField(metricSourceKey);
-  const styleProperties = createLegacyTileMapVectorStyleProperties({
-    metricStyleField,
-    color: colorSchema || 'Yellow to Red',
-    mapType,
-  });
-
-  return {
-    id: uuidv4(),
-    type: LAYER_TYPE.GEOJSON_VECTOR,
-    label,
-    visible: true,
-    alpha: 1,
-    minZoom: 0,
-    maxZoom: 24,
-    sourceDescriptor,
-    style: {
-      type: LAYER_STYLE_TYPE.VECTOR,
-      properties: styleProperties,
-    },
-    joins: [],
-    disableTooltips: false,
-  };
-}
-
-function createRegionMapLayerDescriptor(params: {
-  label: string;
-  emsLayerId: string;
-  leftFieldName: string;
-  termsFieldName: string;
-  termsSize?: number;
-  colorSchema: string;
-  indexPatternId: string;
-  metricAgg: string | undefined;
-  metricFieldName: string | undefined;
-}) {
-  const {
-    label,
-    emsLayerId,
-    leftFieldName,
-    termsFieldName,
-    termsSize,
-    colorSchema,
-    indexPatternId,
-    metricAgg,
-    metricFieldName,
-  } = params;
-
-  const metricsDescriptor = createLegacyRegionMapAggDescriptor(
-    metricAgg ?? AGG_TYPE.COUNT,
-    metricFieldName
-  );
-  const joinId = uuidv4();
-  const joinKey = getJoinAggKey({
-    aggType: metricsDescriptor.type,
-    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-    rightSourceId: joinId,
-  });
-
-  const termSourceDescriptor = createLegacyTermSourceDescriptor({
-    id: joinId,
-    indexPatternId,
-    term: termsFieldName,
-    ...(termsSize !== undefined ? { size: termsSize } : {}),
-    metrics: [metricsDescriptor],
-  });
-
-  return {
-    id: uuidv4(),
-    type: LAYER_TYPE.GEOJSON_VECTOR,
-    label,
-    visible: true,
-    alpha: 1,
-    minZoom: 0,
-    maxZoom: 24,
-    sourceDescriptor: createEmsFileSourceDescriptor({
-      id: emsLayerId,
-      tooltipProperties: ['name', leftFieldName],
-    }),
-    joins: [
-      {
-        leftField: leftFieldName,
-        right: termSourceDescriptor,
-      },
-    ],
-    style: {
-      type: LAYER_STYLE_TYPE.VECTOR,
-      properties: createLegacyRegionMapVectorStyleProperties({
-        joinStyleField: createLegacyJoinMetricStyleField(joinKey),
-        color: colorSchema || 'Yellow to Red',
-      }),
-    },
-    disableTooltips: false,
-  };
+function getAggsFromVisState(visState: LegacyVisState): AggConfigSerialized[] {
+  return Array.isArray(visState.aggs) ? (visState.aggs as AggConfigSerialized[]) : [];
 }
 
 function buildMapAttributesFromTileMap(args: {
   title: string;
   params: LegacyTileMapParams;
-  aggs: LegacyAgg[];
+  aggs: AggConfigSerialized[];
   searchSource: unknown;
   uiState: LegacyUiState | undefined;
 }): Record<string, unknown> | undefined {
   const mapType = typeof args.params.mapType === 'string' ? args.params.mapType : undefined;
-  const colorSchema =
-    typeof args.params.colorSchema === 'string' ? args.params.colorSchema : 'Yellow to Red';
   if (!mapType) return undefined;
 
   const indexPatternId = getIndexPatternIdFromSearchSource(args.searchSource);
   if (!indexPatternId) return undefined;
 
-  const bucket = getFirstBucketAgg(args.aggs);
-  if (getMetricAggType(bucket) !== 'geohash_grid') return undefined;
-  const geoFieldName = getAggFieldName(bucket);
-  if (!geoFieldName) return undefined;
-
-  const metric = getFirstMetricAgg(args.aggs);
-  const metricAgg = getMetricAggType(metric);
-  const metricFieldName = getAggFieldName(metric);
-
-  const layer = createTileMapLayerDescriptor({
+  const layerDescriptorParams = extractTileMapLayerDescriptorParams({
     label: args.title,
     mapType,
-    colorSchema,
+    colorSchema: typeof args.params.colorSchema === 'string' ? args.params.colorSchema : undefined,
     indexPatternId,
-    geoFieldName,
-    metricAgg,
-    metricFieldName,
+    aggs: args.aggs,
   });
+
+  const layer = createTileMapLayerDescriptor({
+    ...layerDescriptorParams,
+    alpha: 1,
+  });
+  if (!layer) return undefined;
+
   const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
@@ -398,48 +208,28 @@ function buildMapAttributesFromTileMap(args: {
 function buildMapAttributesFromRegionMap(args: {
   title: string;
   params: LegacyRegionMapParams;
-  aggs: LegacyAgg[];
+  aggs: AggConfigSerialized[];
   searchSource: unknown;
   uiState: LegacyUiState | undefined;
 }): Record<string, unknown> | undefined {
-  const colorSchema =
-    typeof args.params.colorSchema === 'string' ? args.params.colorSchema : 'Yellow to Red';
-
-  const selectedLayer = args.params.selectedLayer;
-  const selectedJoinField = args.params.selectedJoinField;
-  if (!isPlainObject(selectedLayer) || !isPlainObject(selectedJoinField)) return undefined;
-  if ((selectedLayer as Record<string, unknown>).isEMS !== true) return undefined;
-  const emsLayerId = getEmsLayerIdFromSelectedLayer(selectedLayer);
-  const leftFieldName =
-    typeof (selectedJoinField as Record<string, unknown>).name === 'string'
-      ? ((selectedJoinField as Record<string, unknown>).name as string)
-      : undefined;
-  if (!emsLayerId || !leftFieldName) return undefined;
-
   const indexPatternId = getIndexPatternIdFromSearchSource(args.searchSource);
   if (!indexPatternId) return undefined;
 
-  const bucket = getFirstBucketAgg(args.aggs);
-  if (getMetricAggType(bucket) !== 'terms') return undefined;
-  const termsFieldName = getAggFieldName(bucket);
-  if (!termsFieldName) return undefined;
-  const termsSize = getTermsSize(bucket);
-
-  const metric = getFirstMetricAgg(args.aggs);
-  const metricAgg = getMetricAggType(metric);
-  const metricFieldName = getAggFieldName(metric);
+  const layerDescriptorParams = extractRegionMapLayerDescriptorParams({
+    label: args.title,
+    colorSchema: typeof args.params.colorSchema === 'string' ? args.params.colorSchema : undefined,
+    indexPatternId,
+    selectedLayer: args.params.selectedLayer,
+    selectedJoinField: args.params.selectedJoinField,
+    aggs: args.aggs,
+  });
 
   const layer = createRegionMapLayerDescriptor({
-    label: args.title,
-    emsLayerId,
-    leftFieldName,
-    termsFieldName,
-    termsSize,
-    colorSchema,
-    indexPatternId,
-    metricAgg,
-    metricFieldName,
+    ...layerDescriptorParams,
+    alpha: 1,
   });
+  if (!layer) return undefined;
+
   const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
 
   const { center, zoom } = getMapCenterAndZoom(args.uiState);
