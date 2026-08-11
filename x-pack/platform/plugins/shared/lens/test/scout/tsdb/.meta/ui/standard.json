@@ -1,5 +1,5 @@
 {
-  "sha1": "459a8a2e244b9a2387a0b9c725e4ef7ee9b1b163",
+  "sha1": "73152a4e5cb7cff04be0fa4b1def02c9c672414b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -101,7 +101,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 169,
+        "line": 171,
         "column": 14
       }
     },
@@ -121,7 +121,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 177,
+        "line": 179,
         "column": 41
       }
     },
@@ -141,7 +141,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 191,
+        "line": 193,
         "column": 59
       }
     },
@@ -161,7 +161,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 202,
+        "line": 204,
         "column": 16
       }
     },
@@ -181,7 +181,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 216,
+        "line": 218,
         "column": 5
       }
     },
