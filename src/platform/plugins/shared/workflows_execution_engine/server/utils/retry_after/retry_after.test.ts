@@ -48,6 +48,18 @@ describe('getRetryAfterMsFromHeaders', () => {
     ).toBeLessThanOrEqual(365 * 24 * 60 * 60 * 1000 + 5000);
   });
 
+  it('interprets X-RateLimit-Reset as Unix timestamp for a near-future reset (now + 60s)', () => {
+    const futureSeconds = Math.floor(Date.now() / 1000) + 60;
+    const ms = getRetryAfterMsFromHeaders({ 'x-ratelimit-reset': String(futureSeconds) });
+    expect(ms).toBeGreaterThanOrEqual(58000);
+    expect(ms).toBeLessThanOrEqual(62000);
+  });
+
+  it('clamps an elapsed X-RateLimit-Reset timestamp to zero (now - 30s)', () => {
+    const pastSeconds = Math.floor(Date.now() / 1000) - 30;
+    expect(getRetryAfterMsFromHeaders({ 'x-ratelimit-reset': String(pastSeconds) })).toBe(0);
+  });
+
   it('clamps negative values to zero', () => {
     expect(getRetryAfterMsFromHeaders({ 'retry-after': '-5' })).toBe(0);
   });

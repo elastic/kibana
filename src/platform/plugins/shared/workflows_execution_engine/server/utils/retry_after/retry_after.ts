@@ -39,13 +39,14 @@ export function getRetryAfterMsFromHeaders(headers: Record<string, string>): num
   }
 
   // `X-RateLimit-Reset` is commonly a Unix timestamp, but some APIs emit a
-  // delta-seconds value. Use a simple heuristic: if the value looks like a
-  // timestamp at least one day in the future (relative to a recent epoch),
-  // treat it as absolute; otherwise treat it as delta-seconds.
-  const ONE_DAY_SECONDS = 24 * 60 * 60;
+  // delta-seconds value. Use a simple heuristic: anything large enough to be an
+  // epoch (greater than 1_000_000_000 seconds, i.e. after Sep 2001) is treated
+  // as absolute; otherwise treat it as delta-seconds. No real API sends a delta
+  // of a billion seconds, and no valid epoch is smaller than that.
+  const EPOCH_THRESHOLD_SECONDS = 1_000_000_000;
   const nowSeconds = Math.floor(Date.now() / 1000);
   const delaySeconds =
-    resetSeconds > nowSeconds + ONE_DAY_SECONDS ? resetSeconds - nowSeconds : resetSeconds;
+    resetSeconds > EPOCH_THRESHOLD_SECONDS ? resetSeconds - nowSeconds : resetSeconds;
 
   return Math.max(0, delaySeconds * 1000);
 }
