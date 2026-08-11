@@ -366,4 +366,5 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
 ]);

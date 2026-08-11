@@ -642,6 +642,64 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix slow workflow template rendering for workflows with large step outputs [#265027]({{kib-pull}}265027).
 * Fix connector and step icons in the workflows list showing the generic plugs fallback [#263880]({{kib-pull}}263880).
 
+## 9.4.5 [kibana-9.4.5-release-notes]
+
+### Fixes [kibana-9.4.5-fixes]
+
+**Elastic Agent Builder**:
+* Fix auto-created conversations overwriting an existing conversation that shares the same ID [#280189]({{kib-pull}}280189).
+
+**Alerting and cases**:
+* Fix attaching AIOps charts (change point, pattern analysis, log rate analysis) to a case failing with an "Attachment type is not registered" error [#281157]({{kib-pull}}281157).
+* Fix CSV exports covering a different time window than what was shown in Discover for relative time ranges. For scheduled reports, the corrected behavior applies only to reports created or re-saved after upgrading; existing schedules keep their previous time-window behavior until they are recreated [#278305]({{kib-pull}}278305).
+* Fix the alerts-as-data setup overriding an index's total fields limit that was already set to a higher value [#277402]({{kib-pull}}277402).
+
+**Dashboards and Visualizations**:
+* Fix duplicated Lens panels backed by a form-based ad hoc data view failing to load after you rename the data view or add a runtime field, caused by colliding ad hoc data view IDs [#281786]({{kib-pull}}281786).
+* Fix ad hoc data view resolution for **Lens** XY annotation layers created through the Visualizations API [#281079]({{kib-pull}}281079).
+* Fix the Visualizations API dropping the custom display name of inline (ad hoc) data views on round trip [#280546]({{kib-pull}}280546).
+* Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
+
+**Data ingestion and Fleet**:
+* Fix Fleet output edits failing with a validation error when more than 10 hosts were configured, by raising the host limit from 10 to 100 for Elasticsearch, remote Elasticsearch, Logstash, and Kafka outputs [#282397]({{kib-pull}}282397).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff).
+% * Fix Kafka outputs showing and accepting a proxy configuration, which Kafka outputs don't support [#282313]({{kib-pull}}282313).
+* Fix the `expiration` parameter on `POST /enrollment_api_keys` being silently dropped, and add an **Expiration** field to the **Create enrollment token** form in Fleet [#281324]({{kib-pull}}281324).
+* Fix OpenTelemetry integration metrics not defaulting to the `time_series` index mode [#281295]({{kib-pull}}281295).
+* Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
+* Fix the **Add Fleet Server** onboarding continuing to show after the Fleet Server agent moves to a version-specific policy [#281092]({{kib-pull}}281092).
+* Fix preconfigured Fleet proxies being rewritten on every setup, which needlessly bumped every dependent agent policy [#281059]({{kib-pull}}281059).
+
+**Data management**:
+* Fix **ILM Explain** in Index Management not returning results for hidden and system indices [#282137]({{kib-pull}}282137).
+* Fix follower index selections not clearing after you pause, resume, or unfollow an index in **Cross-Cluster Replication** [#273576]({{kib-pull}}273576).
+
+**Discover**:
+* Fix the Short Dots field formatter dropping single-character path segments [#281930]({{kib-pull}}281930).
+* Fix null date values in server-generated exports showing `-` instead of the `(null)` label used by the client [#281367]({{kib-pull}}281367).
+* Fix the Date Nanos field formatter ignoring the configured date format for numeric values [#281343]({{kib-pull}}281343).
+* Fix the geo point degrees, minutes, seconds field format distorting coordinates very close to zero [#281336]({{kib-pull}}281336).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.5 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Elasticsearch solution**:
+* Fix connector **View logs** filter pills showing `(null)` instead of the connector or agent ID [#281155]({{kib-pull}}281155).
+* Reject query rule, ruleset, and synonym set IDs that contain characters outside `[a-zA-Z0-9_-]` in the Query Rules and Synonyms APIs [#276710]({{kib-pull}}276710).
+
+**Machine learning and inference**:
+* Fix the trained model ID check for the infer, update, and stop deployment APIs allowing access to a different model than the one requested [#280511]({{kib-pull}}280511).
+* Fix the checkbox for applying an annotation to a single series not resetting when you edit an existing annotation [#279875]({{kib-pull}}279875).
+* Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
+* Fix the anomaly detection, data frame analytics, and trained model saved object APIs denying access to users who hold only a subset of the required privileges [#276936]({{kib-pull}}276936).
+
+% !!DEFERRED!! Workflows section has no confirmed entries yet: #283360 not yet confirmed in build candidate 9.4.5-c191ddff (backport merged after BC cutoff). Restore the "**Workflows**:" header when an entry is confirmed.
+% **Workflows**:
+% * Warn instead of block enabling a workflow when the editor can't statically prove a `foreach` collection is an array, deferring the check to runtime [#283360]({{kib-pull}}283360).
+
 ## 9.4.4 [kibana-9.4.4-release-notes]
 
 ::::{important} 
