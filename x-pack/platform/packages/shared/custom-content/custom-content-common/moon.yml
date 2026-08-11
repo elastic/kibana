@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/custom-content-common
   channel: ''
   owner: '@elastic/kibana-presentation'
-  sourceRoot: x-pack/platform/packages/shared/custom_content/custom_content_common
+  sourceRoot: x-pack/platform/packages/shared/custom-content/custom-content-common
 dependsOn:
   - '@kbn/zod'
 tags:
