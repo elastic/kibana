@@ -440,7 +440,16 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         </>
       )}
 
-      {currentStep === 5 && deploymentMethod === 'managed' && <StepDetectReview />}
+      {currentStep === 5 && deploymentMethod === 'managed' && (
+        <StepDetectReview
+          services={selectedServices}
+          triggerSources={triggerSources}
+          region={deployRegion}
+          identityName={deployIdentityName}
+          stackName={stackName}
+          receivedCount={receivedCount}
+        />
+      )}
       {currentStep === 5 && deploymentMethod === 'agent' && (
         <>
           <EuiTitle size="m">
@@ -492,6 +501,19 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               data-test-subj="awsOnboardingNext"
             >
               Next
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {currentStep === totalSteps && deploymentMethod === 'managed' && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType="sortRight"
+              iconSide="right"
+              href="/app/dashboards"
+              data-test-subj="awsOnboardingTakeMeToMyData"
+            >
+              Take me to my data
             </EuiButton>
           </EuiFlexItem>
         )}
