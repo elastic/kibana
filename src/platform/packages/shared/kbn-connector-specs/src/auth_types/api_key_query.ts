@@ -25,7 +25,7 @@ const authSchema = lazySchema(() =>
     .meta({ label: i18n.API_KEY_QUERY_AUTHENTICATION_LABEL })
 );
 
-type AuthSchemaType = z.infer<typeof authSchema>;
+type AuthSchemaType = Omit<z.infer<typeof authSchema>, 'paramNames'>;
 type NormalizedAuthSchemaType = Record<string, string>;
 
 /**
