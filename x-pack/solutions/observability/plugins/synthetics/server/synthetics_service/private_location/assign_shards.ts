@@ -7,6 +7,10 @@
 
 import { createHash } from 'crypto';
 
+// Float-rounding guard shared by every relative-load / surplus comparison below,
+// so equal-capacity ties stay exact.
+const EPSILON = 1e-9;
+
 /**
  * Deterministic monitor→agent assignment for scalable private locations.
  *
@@ -63,7 +67,7 @@ export const assignShard = (monitorId: string, nodeIds: string[]): string | unde
  * a single monitor's cost, so browser monitors (the memory that matters) end up
  * evenly spread. Determinism holds because monitors are processed in a stable
  * (cost desc, id asc) order and ties on relative load are broken toward the
- * monitor's rendezvous home (then lowest node id) — so the same input always
+ * monitor's rendezvous home (the lowest node id) — so the same input always
  * yields the same map ⇒ zero writes when nothing changed. The rendezvous
  * tie-break also gives light monitors some affinity to their HRW node, keeping
  * incidental churn down.
@@ -99,6 +103,30 @@ const makeCapacityOf = (
   };
 };
 
+/**
+ * LPT placement step shared by {@link balanceShardsByCost} and the failover phase
+ * of {@link rebalanceByCost}: places each already-ordered (heaviest-first) monitor
+ * onto the node with the lowest projected relative load, breaking ties toward the
+ * monitor's rendezvous home, else the lowest node id — both deterministic and
+ * independent of input order. Mutates `load` and `assignment` in place.
+ */
+const placeByLpt = (
+  orderedMonitors: ReadonlyArray<{ id: string; cost: number }>,
+  nodeIds: string[],
+  load: Map<string, number>,
+  capacityOf: (id: string) => number,
+  assignment: Map<string, string>
+): void => {
+  for (const monitor of orderedMonitors) {
+    const relativeLoad = (id: string) => (load.get(id)! + monitor.cost) / capacityOf(id);
+    const minScore = Math.min(...nodeIds.map(relativeLoad));
+    const candidates = nodeIds.filter((id) => relativeLoad(id) <= minScore + EPSILON);
+    const target = assignShard(monitor.id, candidates)!;
+    assignment.set(monitor.id, target);
+    load.set(target, load.get(target)! + monitor.cost);
+  }
+};
+
 export const balanceShardsByCost = (
   monitors: ReadonlyArray<{ id: string; cost: number }>,
   nodeIds: string[],
@@ -121,17 +149,7 @@ export const balanceShardsByCost = (
   // Heaviest first; stable id tie-break keeps the result deterministic.
   const ordered = [...monitors].sort((a, b) => b.cost - a.cost || (a.id < b.id ? -1 : 1));
 
-  for (const monitor of ordered) {
-    const relativeLoad = (id: string) => (load.get(id)! + monitor.cost) / capacityOf(id);
-    const minScore = Math.min(...nodeIds.map(relativeLoad));
-    // Epsilon guards float rounding so equal-capacity ties stay exact.
-    const candidates = nodeIds.filter((id) => relativeLoad(id) <= minScore + 1e-9);
-    // Prefer the monitor's rendezvous home among the best nodes, else the lowest
-    // node id — both deterministic and independent of input order.
-    const home = assignShard(monitor.id, candidates)!;
-    assignment.set(monitor.id, home);
-    load.set(home, load.get(home)! + monitor.cost);
-  }
+  placeByLpt(ordered, nodeIds, load, capacityOf, assignment);
 
   return assignment;
 };
@@ -143,8 +161,6 @@ export interface MonitorPlacement {
   /** Host the monitor is currently pinned to; undefined/stale ⇒ needs placing. */
   currentHost?: string;
 }
-
-const EPSILON = 1e-9;
 
 /**
  * Minimal-churn, capacity-aware rebalance of a location's monitors across its
@@ -170,7 +186,12 @@ const EPSILON = 1e-9;
  * a natural anti-churn threshold (a monitor won't move unless the imbalance
  * exceeds its own cost).
  *
- * @param recoveryHosts subset of `healthyHosts` eligible to *receive* load-
+ * @param monitors the location's monitors, with their current host (if any) and
+ *   memory cost (see {@link getMonitorCostMib}).
+ * @param healthyHosts candidate hosts eligible to run monitors (agent host names).
+ * @param opts.capacities optional per-host weight; missing/non-positive entries
+ *   fall back to the mean of the known capacities (see {@link makeCapacityOf}).
+ * @param opts.recoveryHosts subset of `healthyHosts` eligible to *receive* load-
  *   balancing moves (anti-flap hysteresis — a freshly-recovered host is excluded
  *   until stable). Defaults to all healthy hosts. Failover ignores this: a stale
  *   monitor can be placed on any healthy host.
@@ -210,16 +231,10 @@ export const rebalanceByCost = (
   // NOTE: this is not fenced — if a monitor's old host was a false-positive stale
   // (or hasn't polled the revised policy yet) while the new host has started, both
   // run it briefly. That short overlap is accepted (steady state is exactly-once,
-  // Heartbeat indexing is idempotent); see the POC design doc's tradeoffs.
+  // Heartbeat indexing is idempotent); see the tradeoffs in the POC design
+  // (https://github.com/elastic/kibana/pull/278434).
   const ordered = [...unplaced].sort((a, b) => b.cost - a.cost || (a.id < b.id ? -1 : 1));
-  for (const monitor of ordered) {
-    const relativeLoad = (id: string) => (load.get(id)! + monitor.cost) / capacityOf(id);
-    const minScore = Math.min(...healthyHosts.map(relativeLoad));
-    const candidates = healthyHosts.filter((id) => relativeLoad(id) <= minScore + EPSILON);
-    const target = assignShard(monitor.id, candidates)!;
-    assignment.set(monitor.id, target);
-    load.set(target, load.get(target)! + monitor.cost);
-  }
+  placeByLpt(ordered, healthyHosts, load, capacityOf, assignment);
 
   // Phase 3 — load-balance onto under-utilised recovery hosts, moving the fewest
   // monitors that each strictly reduce Σ (load − fairShare)².
@@ -231,7 +246,10 @@ export const rebalanceByCost = (
 
     const monitorsByHost = new Map<string, MonitorPlacement[]>();
     for (const monitor of monitors) {
-      const host = assignment.get(monitor.id)!;
+      const host = assignment.get(monitor.id);
+      if (!host) {
+        continue;
+      }
       const list = monitorsByHost.get(host) ?? [];
       list.push(monitor);
       monitorsByHost.set(host, list);
