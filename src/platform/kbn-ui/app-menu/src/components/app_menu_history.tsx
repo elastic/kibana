@@ -30,7 +30,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
         <EuiToolTip
           content={
             <>
-              {i18n.translate('core.chrome.appMenu.undoHistoryButton', {
+              {i18n.translate('kbnUI.appMenu.undoHistoryButton', {
                 defaultMessage: 'Undo',
               })}{' '}
               (<kbd>{COMMAND_KEY}</kbd> <kbd>Z</kbd>)
@@ -39,7 +39,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            aria-label={i18n.translate('core.chrome.appMenu.undoHistoryButton', {
+            aria-label={i18n.translate('kbnUI.appMenu.undoHistoryButton', {
               defaultMessage: 'Undo',
             })}
             color="text"
@@ -53,7 +53,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
         <EuiToolTip
           content={
             <>
-              {i18n.translate('core.chrome.appMenu.redoHistoryButton', {
+              {i18n.translate('kbnUI.appMenu.redoHistoryButton', {
                 defaultMessage: 'Redo',
               })}{' '}
               (<kbd>{COMMAND_KEY}</kbd> <kbd>Y</kbd>)
@@ -62,7 +62,7 @@ export const AppMenuHistoryComponent = ({ historyConfig }: AppMenuHistoryCompone
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            aria-label={i18n.translate('core.chrome.appMenu.redoHistoryButton', {
+            aria-label={i18n.translate('kbnUI.appMenu.redoHistoryButton', {
               defaultMessage: 'Redo',
             })}
             color="text"
