@@ -60,7 +60,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
 
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(rule.id);
-        expect(item.spaceId).toBe('default');
+        expect(item.space_id).toBe('default');
         expect(Date.parse(item.started_at)).toBeGreaterThan(0);
         expect(Date.parse(item.ended_at)).toBeGreaterThan(0);
         expect(['success', 'failure']).toContain(item.outcome);
@@ -107,18 +107,18 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
 
       const items = response.body.items as Array<{
         rule: { id: string };
-        spaceId: string;
+        space_id: string;
       }>;
 
       const sawDefaultSpaceRule = items.some(
-        (item) => item.rule.id === ruleInDefaultSpace.id && item.spaceId === 'default'
+        (item) => item.rule.id === ruleInDefaultSpace.id && item.space_id === 'default'
       );
 
       expect(sawDefaultSpaceRule).toBe(true);
 
       const leaked = items
-        .filter((item) => item.spaceId === OTHER_SPACE_ID || item.rule.id === ruleInOtherSpace.id)
-        .map((item) => `${item.spaceId}/${item.rule.id}`);
+        .filter((item) => item.space_id === OTHER_SPACE_ID || item.rule.id === ruleInOtherSpace.id)
+        .map((item) => `${item.space_id}/${item.rule.id}`);
 
       expect(leaked).toHaveLength(0);
     }
