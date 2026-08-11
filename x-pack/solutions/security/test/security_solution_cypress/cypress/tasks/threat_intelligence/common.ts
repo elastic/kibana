@@ -95,9 +95,14 @@ export const navigateToFlyoutJsonTab = () => {
  * re-trigger the search — this reliably recovers the view instead of a single, ever-growing wait.
  */
 export const waitForViewToBeLoaded = () => {
+  let attempt = 0;
   recurse(
     () => {
-      cy.get(REFRESH_BUTTON).should('exist').click();
+      if (attempt > 0) {
+        cy.get(REFRESH_BUTTON).should('exist').click();
+        cy.get(UPDATE_STATUS, { timeout: 30000 }).should('contain.text', 'Updated');
+      }
+      attempt++;
       return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
     },
     (isTableVisible) => isTableVisible === true,
