@@ -49,7 +49,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: [p1.id, p2.id], snoozedUntil },
+      body: { ids: [p1.id, p2.id], snoozed_until: snoozedUntil },
     });
 
     expect(response).toHaveStatusCode(200);
@@ -58,8 +58,8 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
     const updated1 = await apiServices.alertingV2.actionPolicies.get(p1.id);
     const updated2 = await apiServices.alertingV2.actionPolicies.get(p2.id);
-    expect(updated1.snoozedUntil).toBe(snoozedUntil);
-    expect(updated2.snoozedUntil).toBe(snoozedUntil);
+    expect(updated1.snoozed_until).toBe(snoozedUntil);
+    expect(updated2.snoozed_until).toBe(snoozedUntil);
   });
 
   apiTest(
@@ -71,7 +71,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
       const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ids: [existing.id, 'non-existent-id'], snoozedUntil: getSnoozeDate() },
+        body: { ids: [existing.id, 'non-existent-id'], snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -89,7 +89,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: [created.id], snoozedUntil: 'not-a-date' },
+      body: { ids: [created.id], snoozed_until: 'not-a-date' },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -113,7 +113,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
   apiTest('validation: rejects an empty ids array', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: [], snoozedUntil: getSnoozeDate() },
+      body: { ids: [], snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -125,7 +125,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
     async ({ apiClient }) => {
       const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ids: ['some-id'], snoozedUntil: getSnoozeDate(), unknownField: 'x' },
+        body: { ids: ['some-id'], snoozed_until: getSnoozeDate(), unknownField: 'x' },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -136,7 +136,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
   apiTest('validation: rejects an empty id', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: [''], snoozedUntil: getSnoozeDate() },
+      body: { ids: [''], snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -146,7 +146,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
   apiTest('validation: rejects an id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: ['a'.repeat(ID_MAX_LENGTH + 1)], snoozedUntil: getSnoozeDate() },
+      body: { ids: ['a'.repeat(ID_MAX_LENGTH + 1)], snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -158,7 +158,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
     const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ids: tooManyIds, snoozedUntil: getSnoozeDate() },
+      body: { ids: tooManyIds, snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -174,7 +174,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
       const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { ids: [created.id], snoozedUntil: getSnoozeDate() },
+        body: { ids: [created.id], snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -194,7 +194,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
       const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { ids: [created.id], snoozedUntil: getSnoozeDate() },
+        body: { ids: [created.id], snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -211,7 +211,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
 
       const response = await apiClient.post(getBulkSnoozeActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { ids: [created.id], snoozedUntil: getSnoozeDate() },
+        body: { ids: [created.id], snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(403);

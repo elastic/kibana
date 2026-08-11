@@ -54,7 +54,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
         description: 'my-policy description',
         destinations: [{ type: 'workflow', id: 'my-workflow-id' }],
         matcher: "env == 'production' && region == 'us-east-1'",
-        groupBy: ['service.name', 'environment'],
+        group_by: ['service.name', 'environment'],
         throttle: { interval: '1m' },
       });
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
@@ -88,10 +88,10 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       description: 'minimal-policy description',
       destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
       enabled: true,
-      snoozedUntil: null,
+      snoozed_until: null,
       matcher: null,
-      groupBy: null,
-      groupingMode: null,
+      group_by: null,
+      grouping_mode: null,
       throttle: null,
     });
   });
@@ -101,16 +101,16 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-field-policy',
-        groupBy: ['host.name'],
-        groupingMode: 'per_field',
+        group_by: ['host.name'],
+        grouping_mode: 'per_field',
         throttle: { strategy: 'time_interval', interval: '5m' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      groupingMode: 'per_field',
-      groupBy: ['host.name'],
+      grouping_mode: 'per_field',
+      group_by: ['host.name'],
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
   });
@@ -120,14 +120,14 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'per-episode-policy',
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      groupingMode: 'per_episode',
+      grouping_mode: 'per_episode',
       throttle: { strategy: 'on_status_change' },
     });
   });
@@ -137,14 +137,14 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         name: 'all-mode-policy',
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'every_time' },
       }),
     });
 
     expect(response).toHaveStatusCode(201);
     expect(response.body).toMatchObject({
-      groupingMode: 'all',
+      grouping_mode: 'all',
       throttle: { strategy: 'every_time' },
     });
   });
@@ -332,7 +332,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupBy: Array.from({ length: MAX_GROUPING_FIELDS + 1 }, (_, i) => `field.${i}`),
+        group_by: Array.from({ length: MAX_GROUPING_FIELDS + 1 }, (_, i) => `field.${i}`),
       }),
     });
 
@@ -343,7 +343,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects groupBy with empty field name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ groupBy: [''] }),
+      body: buildCreateActionPolicyData({ group_by: [''] }),
     });
 
     expect(response).toHaveStatusCode(400);
@@ -354,7 +354,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupBy: ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)],
+        group_by: ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)],
       }),
     });
 
@@ -367,7 +367,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
         // @ts-expect-error
-        groupingMode: 'per_galaxy',
+        grouping_mode: 'per_galaxy',
       }),
     });
 
@@ -404,7 +404,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'time_interval' },
       }),
     });
@@ -419,7 +419,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'per_status_interval' },
         }),
       });
@@ -433,7 +433,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'on_status_change' },
       }),
     });

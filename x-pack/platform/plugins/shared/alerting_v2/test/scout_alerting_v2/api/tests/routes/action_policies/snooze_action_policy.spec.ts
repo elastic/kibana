@@ -50,12 +50,12 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil },
+        body: { snoozed_until: snoozedUntil },
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.snoozedUntil).toBe(snoozedUntil);
+      expect(response.body.snoozed_until).toBe(snoozedUntil);
       expect(response.body.enabled).toBe(true);
     }
   );
@@ -71,19 +71,19 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil },
+        body: { snoozed_until: snoozedUntil },
       });
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({
         ...disabled,
         snoozedUntil,
-        updatedAt: response.body.updatedAt,
-        updatedBy: response.body.updatedBy,
+        updated_at: response.body.updated_at,
+        updated_by: response.body.updated_by,
         version: response.body.version,
       });
-      expect(Date.parse(response.body.updatedAt)).toBeGreaterThanOrEqual(
-        Date.parse(disabled.updatedAt)
+      expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
+        Date.parse(disabled.updated_at)
       );
       expect(response.body.version).not.toBe(disabled.version);
     }
@@ -102,18 +102,18 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil: secondDate },
+        body: { snoozed_until: secondDate },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.snoozedUntil).toBe(secondDate);
+      expect(response.body.snoozed_until).toBe(secondDate);
     }
   );
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
     const response = await apiClient.post(getSnoozeActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { snoozedUntil: getSnoozeDate() },
+      body: { snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(404);
@@ -127,7 +127,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
     const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { snoozedUntil: 'not-a-date' },
+      body: { snoozed_until: 'not-a-date' },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -143,7 +143,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil: '2026-01-01' },
+        body: { snoozed_until: '2026-01-01' },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -158,7 +158,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
     const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { snoozedUntil: '' },
+      body: { snoozed_until: '' },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -182,7 +182,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.post(getSnoozeActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { snoozedUntil: getSnoozeDate() },
+      body: { snoozed_until: getSnoozeDate() },
     });
 
     expect(response).toHaveStatusCode(400);
@@ -198,7 +198,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil: getSnoozeDate(), unknownField: 'x' },
+        body: { snoozed_until: getSnoozeDate(), unknownField: 'x' },
       });
 
       expect(response).toHaveStatusCode(400);
@@ -216,11 +216,11 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-        body: { snoozedUntil },
+        body: { snoozed_until: snoozedUntil },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.snoozedUntil).toBe(snoozedUntil);
+      expect(response.body.snoozed_until).toBe(snoozedUntil);
     }
   );
 
@@ -236,7 +236,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
-        body: { snoozedUntil: getSnoozeDate() },
+        body: { snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(403);
@@ -253,7 +253,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
-        body: { snoozedUntil: getSnoozeDate() },
+        body: { snoozed_until: getSnoozeDate() },
       });
 
       expect(response).toHaveStatusCode(403);
