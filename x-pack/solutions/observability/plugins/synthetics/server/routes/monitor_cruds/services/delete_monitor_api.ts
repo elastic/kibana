@@ -25,6 +25,8 @@ import {
 } from '../../telemetry/monitor_upgrade_sender';
 import type { RouteContext } from '../../types';
 
+type MonitorSavedObject = SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>;
+
 export class DeleteMonitorAPI {
   routeContext: RouteContext;
   result: Array<{ id: string; deleted: boolean; error?: string }> = [];
@@ -33,7 +35,7 @@ export class DeleteMonitorAPI {
   }
 
   async getMonitorsToDelete(monitorIds: string[]) {
-    const result: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>> = [];
+    const result: MonitorSavedObject[] = [];
     await pMap(
       monitorIds,
       async (monitorId) => {
@@ -83,9 +85,14 @@ export class DeleteMonitorAPI {
   }
 
   async execute({ monitorIds }: { monitorIds: string[] }) {
+    const monitors = await this.getMonitorsToDelete(monitorIds);
+
+    return this.executeWithMonitors({ monitors });
+  }
+
+  async executeWithMonitors({ monitors }: { monitors: MonitorSavedObject[] }) {
     const { response, server } = this.routeContext;
 
-    const monitors = await this.getMonitorsToDelete(monitorIds);
     // Dedup the per-space privilege check across monitors that share the same
     // saved-object type and space set, so a bulk delete issues one privilege
     // round-trip per distinct (type, spaces) combination instead of one per monitor.
@@ -142,11 +149,7 @@ export class DeleteMonitorAPI {
     }
   }
 
-  async deleteMonitorBulk({
-    monitors,
-  }: {
-    monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
-  }) {
+  async deleteMonitorBulk({ monitors }: { monitors: MonitorSavedObject[] }) {
     const { server, spaceId, syntheticsMonitorClient } = this.routeContext;
     const { logger, telemetry, stackVersion } = server;
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from './delete_monitor_api';
 
 jest.mock('../edit_monitor', () => ({
@@ -21,7 +23,11 @@ jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
   sendErrorTelemetryEvents: jest.fn(),
 }));
 
-const mockMonitor = (id: string, namespaces?: string[], type = 'synthetics-monitor') => ({
+const mockMonitor = (
+  id: string,
+  namespaces?: string[],
+  type = 'synthetics-monitor'
+): SavedObject<EncryptedSyntheticsMonitorAttributes> => ({
   id,
   type,
   references: [],
@@ -29,7 +35,7 @@ const mockMonitor = (id: string, namespaces?: string[], type = 'synthetics-monit
   attributes: {
     id,
     locations: [{ id: 'loc-1', isServiceManaged: false }],
-  },
+  } as EncryptedSyntheticsMonitorAttributes,
 });
 
 const createMockRouteContext = () => {
@@ -83,6 +89,24 @@ describe('DeleteMonitorAPI', () => {
       const api = new DeleteMonitorAPI(routeContext);
       await api.execute({ monitorIds: ['mon-1'] });
 
+      expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
+        routeContext,
+        ['default', 'other-space'],
+        'synthetics-monitor',
+        'bulk_delete'
+      );
+      expect(mocks.deleteMonitors).toHaveBeenCalledTimes(1);
+    });
+
+    it('authorizes and deletes provided monitors without loading them again', async () => {
+      const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
+      const { routeContext, mocks } = createMockRouteContext();
+      const monitor = mockMonitor('mon-1', ['default', 'other-space']);
+
+      const api = new DeleteMonitorAPI(routeContext);
+      await api.executeWithMonitors({ monitors: [monitor] });
+
+      expect(mocks.getDecrypted).not.toHaveBeenCalled();
       expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
         routeContext,
         ['default', 'other-space'],
