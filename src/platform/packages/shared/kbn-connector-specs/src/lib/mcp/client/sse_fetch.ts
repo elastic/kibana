@@ -8,7 +8,7 @@
  */
 
 import type { FetchLike } from '@kbn/mcp-client';
-import type { McpFetchResource } from './mcp_fetch_types';
+import type { McpFetchResource } from './fetch_resource';
 
 // How long to wait for the GET SSE channel before proceeding anyway.
 const SSE_READY_TIMEOUT_MS = 5_000;
@@ -27,7 +27,7 @@ interface SseChannelGate {
  * The underlying resource already applies network policy from `BuildContext.networkSettings`; this
  * wrapper adds only the MCP-specific SSE ordering guarantee.
  */
-export function createMcpFetch(resource: McpFetchResource): FetchLike {
+export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
   const gates = new Map<string, SseChannelGate>();
 
   const ensureChannelGate = (sessionId: string): SseChannelGate => {

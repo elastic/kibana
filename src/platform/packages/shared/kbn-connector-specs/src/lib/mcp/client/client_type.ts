@@ -9,9 +9,8 @@
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
-import type { McpFetchResource } from './mcp_fetch_types';
-import { createMcpFetch } from './create_mcp_fetch';
-import { createMcpFetchResource } from './create_mcp_fetch_resource';
+import { createFetchResource, type McpFetchResource } from './fetch_resource';
+import { createSseGatedFetch } from './sse_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 
@@ -64,14 +63,14 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     const headers: Record<string, string> = { ...(deps.defaultHeaders ?? {}), ...authHeaders };
     const hasHeaders = Object.keys(headers).length > 0;
 
-    const resource = createMcpFetchResource({
+    const resource = createFetchResource({
       networkSettings: ctx.networkSettings,
       logger: ctx.logger,
       targetUrl: serverUrl,
       ...(hasHeaders ? { headers } : {}),
       ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
     });
-    const customFetch = createMcpFetch(resource);
+    const customFetch = createSseGatedFetch(resource);
 
     const client = new McpClient(
       ctx.logger,

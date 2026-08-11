@@ -10,7 +10,7 @@
 import { Agent, ProxyAgent } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
-import { createMcpFetchResource } from './create_mcp_fetch_resource';
+import { createFetchResource } from './fetch_resource';
 
 jest.mock('undici', () => {
   const MockAgent = jest.fn().mockImplementation(() => ({
@@ -25,7 +25,7 @@ jest.mock('undici', () => {
   };
 });
 
-describe('createMcpFetchResource', () => {
+describe('createFetchResource', () => {
   const logger = loggerMock.create();
   const targetUrl = 'https://mcp-server.example.com/v1/mcp';
   const allowedHosts = ['mcp-server.example.com', 'allowed.example.com'];
@@ -37,7 +37,7 @@ describe('createMcpFetchResource', () => {
     targetUrl: string;
     headers?: Record<string, string>;
     userAgent?: string;
-  }) => createMcpFetchResource({ networkSettings, logger, ...opts });
+  }) => createFetchResource({ networkSettings, logger, ...opts });
 
   const mockRedirectResponse = (status: number, location: string | null): Response => {
     const headers = new Headers();

@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createMcpClientType } from './mcp_client_type';
-export type { McpClientTypeDeps } from './mcp_client_type';
-export { createMcpFetch } from './create_mcp_fetch';
-export { createMcpFetchResource } from './create_mcp_fetch_resource';
-export type { CreateMcpFetchResourceOpts } from './create_mcp_fetch_resource';
-export type { McpFetchResource } from './mcp_fetch_types';
+export { createMcpClientType } from './client_type';
+export type { McpClientTypeDeps } from './client_type';
+export { createSseGatedFetch } from './sse_fetch';
+export { createFetchResource } from './fetch_resource';
+export type { CreateFetchResourceOpts, McpFetchResource } from './fetch_resource';

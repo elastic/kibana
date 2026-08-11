@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { McpFetchResource } from './mcp_fetch_types';
-import { createMcpFetch } from './create_mcp_fetch';
+import type { McpFetchResource } from './fetch_resource';
+import { createSseGatedFetch } from './sse_fetch';
 
 const makeResource = (fetchImpl?: jest.Mock): McpFetchResource => ({
   fetch: fetchImpl ?? jest.fn(),
@@ -22,16 +22,16 @@ const makeResponse = (status = 200, headers: Record<string, string> = {}): Respo
   });
 };
 
-describe('createMcpFetch', () => {
+describe('createSseGatedFetch', () => {
   let mockFetch: jest.Mock;
   let resource: McpFetchResource;
-  let fetch: ReturnType<typeof createMcpFetch>;
+  let fetch: ReturnType<typeof createSseGatedFetch>;
 
   beforeEach(() => {
     jest.useFakeTimers();
     mockFetch = jest.fn();
     resource = makeResource(mockFetch);
-    fetch = createMcpFetch(resource);
+    fetch = createSseGatedFetch(resource);
   });
 
   afterEach(() => {

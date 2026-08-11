@@ -12,7 +12,12 @@ import type { Logger } from '@kbn/logging';
 import { getNodeSSLOptions, type CustomHostSettings, type SSLSettings } from '@kbn/actions-utils';
 import type { FetchLike } from '@kbn/mcp-client';
 import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
-import type { McpFetchResource } from './mcp_fetch_types';
+
+/** Closable fetch bound to one MCP server URL (owns Undici dispatchers). */
+export interface McpFetchResource {
+  readonly fetch: FetchLike;
+  close(): Promise<void>;
+}
 
 const DEFAULT_USER_AGENT = 'kibana-mcp-client';
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
@@ -26,7 +31,7 @@ const STRIPPED_METHOD_CHANGE_HEADERS = [
 ];
 const SSE_CONTENT_TYPE = 'text/event-stream';
 
-export interface CreateMcpFetchResourceOpts {
+export interface CreateFetchResourceOpts {
   networkSettings: ConnectorNetworkSettings;
   logger: Logger;
   targetUrl: string;
@@ -190,13 +195,13 @@ const enforceResponseContentLength = (response: Response, maxContentLength: numb
  * Builds a closable fetch resource for one MCP server URL using Actions network settings from
  * {@link BuildContext.networkSettings} (allowlist, TLS, proxy, timeout, body-size limits).
  */
-export function createMcpFetchResource({
+export function createFetchResource({
   networkSettings,
   logger,
   targetUrl,
   headers: defaultHeaders,
   userAgent = DEFAULT_USER_AGENT,
-}: CreateMcpFetchResourceOpts): McpFetchResource {
+}: CreateFetchResourceOpts): McpFetchResource {
   networkSettings.ensureUriAllowed(targetUrl);
 
   const { timeout, maxContentLength } = networkSettings.getResponseSettings();
