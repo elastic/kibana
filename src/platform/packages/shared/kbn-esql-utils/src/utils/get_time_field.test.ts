@@ -17,7 +17,7 @@ function createMockHttp(timeField?: string) {
 }
 
 // U+00A0 non-breaking space pasted by Monaco autocomplete
-const RAW_NBSP_QUERY = 'FROM logs';
+const RAW_NBSP_QUERY = 'FROM\u00a0logs';
 const NORMALIZED_QUERY = 'FROM logs';
 
 describe('getESQLTimeField', () => {
