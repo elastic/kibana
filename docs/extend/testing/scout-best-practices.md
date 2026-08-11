@@ -120,34 +120,35 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ## Don't assume your fixtures are the only data [dont-assume-your-fixtures-are-the-only-data]
 
-Tests share a deployment with other suites, with data left behind by earlier runs, and — on Cloud — with preinstalled managed content (Fleet integration dashboards, prebuilt rules, sample connectors). Anything that reads a *collection* has to tolerate unrelated entries.
+Your fixtures are never the only data on the deployment. Suites share one stack, earlier runs leave objects behind, and a Cloud project starts out with content a local stack doesn't have: Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors. Any assertion over a list has to tolerate entries your test didn't create.
 
-- **Narrow the query; don't count on ordering.** Search or filter by a term unique to your fixtures before asserting.
-- **Watch for result caps and pagination.** Both silently drop your rows once the deployment holds more data than your local stack. Filter a table down before clicking one of its rows.
-- **Prefer identity over position.** Address objects by ID or name, never by index.
-- **Assert containment, not totality.** `toContainText(myFixture)` survives a busy deployment; `toHaveCount(4)` does not.
+- **Narrow the query to your fixtures.** Search or filter by a term only they match before asserting. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
+- **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
+- **Assert containment, not totality.** `toContainText('my-fixture')` survives a busy deployment; `toHaveCount(4)` does not.
 
 :::::{dropdown} Examples
-❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where managed dashboards push the fixtures past the search provider's result cap:
+❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your fixtures past global search's cap of 40 results per provider:
 
 ```ts
 await pageObjects.globalSearch.searchFor('type:dashboard');
-await expect(page.testSubj.locator('globalSearchResults')).toHaveCount(4);
+await expect(pageObjects.globalSearch.resultLabels).toHaveCount(4);
 ```
 
-✔️ **Do:** include a term that only your fixtures match, and assert on those:
+✔️ **Do:** include a term only your fixtures match, and assert on those:
 
 ```ts
 await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
-await expect(page.testSubj.locator('globalSearchResults')).toContainText('my-fixture-1');
+await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1');
 ```
 
-✔️ **Do:** filter a paginated table down to the target before interacting with its row:
+✔️ **Do:** filter a table down to the target before reading its rows. Narrowing first is what makes an exact count safe:
 
 ```ts
 await searchBox.fill(connectorName);
 await searchBox.press('Enter');
-await page.testSubj.locator('connectorsTable-loaded').waitFor({ state: 'visible' });
+await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+
+await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
 ```
 
 :::::
