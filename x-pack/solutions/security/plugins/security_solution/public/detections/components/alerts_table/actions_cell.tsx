@@ -134,7 +134,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       setEventsLoading={setEventsLoading}
       setEventsDeleted={noop}
       refetch={alertsTableRefresh}
-      onExpandFlyout={isNewFlyoutEnabled && contextOpenDocumentFlyout ? onExpandFlyout : undefined}
+      onExpandFlyout={isNewFlyoutEnabled ? onExpandFlyout : undefined}
     />
   );
 };
