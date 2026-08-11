@@ -132,5 +132,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    describe('when service metrics are not present', () => {
+      it('falls back to traces', async () => {
+        expect(false).to.be(true);
+      });
+    });
   });
 }
