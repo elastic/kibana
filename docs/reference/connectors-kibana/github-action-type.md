@@ -90,37 +90,37 @@ The GitHub connector exposes the following actions:
 `createIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new issue in a repository.
 
-`addIssueComment`
+`addIssueComment` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Add a comment to an existing issue or pull request.
 
-`updateIssue`
+`updateIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Update an existing issue (title, body, state, assignees, labels, or milestone). To close an issue, set state to `closed`.
 
-`addLabels`
+`addLabels` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Add one or more labels to an issue or pull request without removing existing ones.
 
-`addAssignee`
+`addAssignee` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Add one or more assignees to an issue or pull request without removing existing ones.
 
-`createPullRequest`
+`createPullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new pull request. The head branch must already exist and have commits not in the base branch.
 
-`updatePullRequest`
+`updatePullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Update an open pull request (title, body, state, base branch, or maintainer permissions). To close a PR, set state to `closed`.
 
-`mergePullRequest`
+`mergePullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Merge an open pull request. Fails if the PR is not mergeable.
 
-`requestReviewers`
+`requestReviewers` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Request one or more reviewers (individuals or teams) on a pull request without removing existing requests.
 
-`createBranch`
+`createBranch` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new branch (git ref) in a repository.
 
-`createOrUpdateFile`
+`createOrUpdateFile` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (retrieved via `getFileContents`).
 
-`triggerWorkflow`
+`triggerWorkflow` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Trigger a `workflow_dispatch` event for a GitHub Actions workflow. The workflow must have a `workflow_dispatch` trigger defined in its YAML.
 
 `listTools`
