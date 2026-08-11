@@ -29,210 +29,214 @@ const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_logsdb_tsdb_${RESOURCE_S
 const ADDITIONAL_TSDB_DOWNSAMPLED = `kibana_sample_data_lens_logsdb_tsdb_ds_${RESOURCE_SUFFIX}`;
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
-interface ScenarioResult {
-  /** Bar chart data from the full time range with empty rows enabled. */
-  bars: Array<{ y: number }>;
-  /** Whether the before-downgrade time window contains any data. */
-  hasDataBeforeDowngrade: boolean;
-  /** Whether the after-downgrade time window contains any data. */
-  hasDataAfterDowngrade: boolean;
-  /** Bar chart data using the utc_time date field instead of @timestamp. */
-  altDateFieldBars: Array<{ y: number }>;
+interface LogsDBScenario {
+  title: string;
+  indexes: TsdbScenarioIndex[];
 }
 
-const runScenario = async (
-  { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
+const setupScenario = async (
+  { tsdbScenario }: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
-): Promise<ScenarioResult> => {
+): Promise<void> => {
   await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
-
-  const bars = await test.step('visualize date histogram chart', async () => {
-    await pageObjects.lens.workspace.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes',
-    });
-
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
-    const chartBars = chartData.bars?.[0]?.bars ?? [];
-    expect(chartBars.length).toBeGreaterThan(0);
-    return chartBars;
-  });
-
-  const includesBaseStream = indexes.some(({ index }) => index === BASE_STREAM);
-  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } = includesBaseStream
-    ? await test.step('visualize data on both sides of the downgrade boundary', async () => {
-        await pageObjects.lens.workspace.openFullEditor();
-        await pageObjects.datePicker.setAbsoluteRange({
-          from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
-          to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
-        });
-        await pageObjects.lens.configureDimension({
-          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'date_histogram',
-          field: '@timestamp',
-        });
-        await pageObjects.lens.configureDimension({
-          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'min',
-          field: 'bytes',
-        });
-
-        await pageObjects.lens.waitForVisualization('xyVisChart');
-        const barsBeforeDowngrade =
-          (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-            ?.bars ?? [];
-
-        await pageObjects.datePicker.setAbsoluteRange({
-          from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
-          to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
-        });
-        await pageObjects.lens.waitForVisualization('xyVisChart');
-        const barsAfterDowngrade =
-          (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-            ?.bars ?? [];
-
-        return {
-          hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
-          hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
-        };
-      })
-    : { hasDataBeforeDowngrade: false, hasDataAfterDowngrade: false };
-
-  const altDateFieldBars =
-    await test.step('visualize date histogram chart using a different date field', async () => {
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.datePicker.setAbsoluteRange(TIME_RANGE.picker);
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'utc_time',
-      });
-
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes',
-      });
-
-      await pageObjects.lens.waitForVisualization('xyVisChart');
-      const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
-      const chartBars = chartData.bars?.[0]?.bars ?? [];
-      expect(chartBars.length).toBeGreaterThan(0);
-      return chartBars;
-    });
-
-  const checkAnnotationLayer = async (timeField: string, extraFields: string[]): Promise<void> => {
-    await pageObjects.lens.workspace.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: 'utc_time',
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes',
-    });
-    await pageObjects.lens.layers.createLayer('annotations');
-
-    const layerCount = await pageObjects.lens.layers.getLayerCount();
-    expect(layerCount).toBe(2);
-
-    await pageObjects.lens.layers.ensureLayerTabIsActive(1);
-    const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
-      'lnsXY_xAnnotationsPanel'
-    );
-    expect(triggerText).toBe('Event');
-
-    await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
-    await page.testSubj.click('lnsXY_annotation_query');
-    await pageObjects.lens.style.configureQueryAnnotation({
-      queryString: 'host.name: *',
-      timeField,
-      textDecoration: { type: 'name' },
-      extraFields,
-    });
-    await pageObjects.lens.closeDimensionEditor();
-
-    // Multiple annotation icons may render on the chart; check that at least one exists.
-    const annotationIcons = page.testSubj.locator('xyVisGroupedAnnotationIcon');
-    await expect(annotationIcons).not.toHaveCount(0);
-
-    await pageObjects.lens.layers.removeLayer(1);
-  };
-
-  await test.step('visualize an annotation layer from a LogsDB stream', async () =>
-    checkAnnotationLayer('@timestamp', ['host.name', 'utc_time']));
-
-  await test.step('visualize an annotation layer using another time field', async () =>
-    checkAnnotationLayer('utc_time', ['host.name', '@timestamp']));
-
-  await test.step('visualize ES|QL queries based on a LogsDB stream', async () => {
-    await page.gotoApp('discover');
-
-    const esqlQuery = `from ${indexes
-      .map(({ index }) => index)
-      .join(', ')} | stats averageB = avg(bytes) by extension`;
-    await pageObjects.discover.writeAndSubmitEsqlQuery(esqlQuery);
-    await pageObjects.discover.waitUntilSearchingHasFinished();
-
-    await pageObjects.discover.openLensEditFlyout();
-
-    await expect
-      .poll(
-        async () => {
-          const dimensions = await page.testSubj.locator('lns-dimensionTrigger-textBased').all();
-          if (dimensions.length !== 2) return false;
-          const text = await dimensions[1].innerText();
-          return text === 'averageB';
-        },
-        { timeout: 10_000 }
-      )
-      .toBe(true);
-
-    // Navigate back to Lens for the next scenario
-    await page.gotoApp('lens');
-  });
-
-  return {
-    bars,
-    hasDataBeforeDowngrade,
-    hasDataAfterDowngrade,
-    altDateFieldBars,
-  };
 };
 
-/**
- * Asserts common visualization results. When `includesBaseStream` is true (default),
- * also checks the downgrade rollover boundary — data exists on both sides.
- * Standalone scenarios (e.g. no-host) don't include the downgraded base stream
- * and only verify that the chart rendered data.
- */
-const assertDowngradeResult = (
-  result: ScenarioResult,
-  { includesBaseStream = true }: { includesBaseStream?: boolean } = {}
-) => {
-  // FTR parity: the first and last rendered buckets contain data for both date fields.
-  expect.soft(result.bars[0]?.y).toBeGreaterThan(0);
-  expect.soft(result.bars[result.bars.length - 1]?.y).toBeGreaterThan(0);
-  expect.soft(result.altDateFieldBars[0]?.y).toBeGreaterThan(0);
-  expect.soft(result.altDateFieldBars[result.altDateFieldBars.length - 1]?.y).toBeGreaterThan(0);
+const visualizeTimestampHistogram = async (
+  context: TsdbScenarioContext,
+  indexes: TsdbScenarioIndex[]
+): Promise<void> => {
+  const { pageObjects } = context;
+  await setupScenario(context, indexes);
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'min',
+    field: 'bytes',
+  });
 
-  if (includesBaseStream) {
-    // Scout additionally checks the downgrade boundary with narrow time ranges.
-    expect.soft(result.hasDataBeforeDowngrade).toBe(true);
-    expect.soft(result.hasDataAfterDowngrade).toBe(true);
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
+  const bars = chartData.bars?.[0]?.bars ?? [];
+  expect(bars[0]?.y).toBeGreaterThan(0);
+  expect(bars[bars.length - 1]?.y).toBeGreaterThan(0);
+
+  if (!indexes.some(({ index }) => index === BASE_STREAM)) {
+    return;
   }
+
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
+    to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'min',
+    field: 'bytes',
+  });
+
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsBeforeDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+  expect(barsBeforeDowngrade.some(({ y }) => y > 0)).toBe(true);
+
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
+    to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
+  });
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsAfterDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+  expect(barsAfterDowngrade.some(({ y }) => y > 0)).toBe(true);
 };
+
+const visualizeAlternateDateHistogram = async (
+  context: TsdbScenarioContext,
+  indexes: TsdbScenarioIndex[]
+): Promise<void> => {
+  const { pageObjects } = context;
+  await setupScenario(context, indexes);
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange(TIME_RANGE.picker);
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: 'utc_time',
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'min',
+    field: 'bytes',
+  });
+
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
+  const bars = chartData.bars?.[0]?.bars ?? [];
+  expect(bars[0]?.y).toBeGreaterThan(0);
+  expect(bars[bars.length - 1]?.y).toBeGreaterThan(0);
+};
+
+const visualizeAnnotation = async (
+  context: TsdbScenarioContext,
+  indexes: TsdbScenarioIndex[],
+  timeField: string,
+  extraFields: string[]
+): Promise<void> => {
+  const { page, pageObjects } = context;
+  await setupScenario(context, indexes);
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: 'utc_time',
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+    operation: 'min',
+    field: 'bytes',
+  });
+  await pageObjects.lens.layers.createLayer('annotations');
+
+  expect(await pageObjects.lens.layers.getLayerCount()).toBe(2);
+  await pageObjects.lens.layers.ensureLayerTabIsActive(1);
+  expect(await pageObjects.lens.dimensions.getDimensionTriggerText('lnsXY_xAnnotationsPanel')).toBe(
+    'Event'
+  );
+
+  await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
+  await page.testSubj.click('lnsXY_annotation_query');
+  await pageObjects.lens.style.configureQueryAnnotation({
+    queryString: 'host.name: *',
+    timeField,
+    textDecoration: { type: 'name' },
+    extraFields,
+  });
+  await pageObjects.lens.closeDimensionEditor();
+
+  const annotationIcons = page.testSubj.locator('xyVisGroupedAnnotationIcon');
+  await expect(annotationIcons).not.toHaveCount(0);
+};
+
+const visualizeEsql = async (
+  context: TsdbScenarioContext,
+  indexes: TsdbScenarioIndex[]
+): Promise<void> => {
+  const { page, pageObjects } = context;
+  await setupScenario(context, indexes);
+  await page.gotoApp('discover');
+
+  const esqlQuery = `from ${indexes
+    .map(({ index }) => index)
+    .join(', ')} | stats averageB = avg(bytes) by extension`;
+  await pageObjects.discover.writeAndSubmitEsqlQuery(esqlQuery);
+  await pageObjects.discover.waitUntilSearchingHasFinished();
+  await pageObjects.discover.openLensEditFlyout();
+
+  await expect
+    .poll(
+      async () => {
+        const dimensions = await page.testSubj.locator('lns-dimensionTrigger-textBased').all();
+        if (dimensions.length !== 2) return false;
+        const text = await dimensions[1].innerText();
+        return text === 'averageB';
+      },
+      { timeout: 10_000 }
+    )
+    .toBe(true);
+};
+
+const logsDBScenarios: LogsDBScenario[] = [
+  {
+    title: 'a downgraded LogsDB data stream without additional indices',
+    indexes: [{ index: BASE_STREAM }],
+  },
+  {
+    title: 'a LogsDB stream without a predefined host.name mapping',
+    indexes: [
+      { index: LOGSDB_STREAM_NO_HOST, create: true, mode: 'logsdb', removeLogsDBFields: true },
+    ],
+  },
+  {
+    title: 'a downgraded LogsDB data stream with a regular index',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
+    ],
+  },
+  {
+    title: 'a downgraded LogsDB data stream with another LogsDB stream',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: ADDITIONAL_LOGSDB_STREAM, create: true, mode: 'logsdb' },
+    ],
+  },
+  {
+    title: 'a downgraded LogsDB data stream with a TSDB stream',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
+    ],
+  },
+  {
+    title: 'a downgraded LogsDB data stream with a downsampled TSDB stream',
+    indexes: [
+      { index: BASE_STREAM },
+      { index: ADDITIONAL_TSDB_DOWNSAMPLED, create: true, mode: 'tsdb', downsample: true },
+    ],
+  },
+];
 
 // Cloud serverless is excluded due to https://github.com/elastic/kibana/issues/195089.
 const logsDBDeploymentTags = [
@@ -259,72 +263,51 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentT
     await cleanupBaseStream?.();
   });
 
-  test('supports a downgraded LogsDB data stream without additional indices', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    assertDowngradeResult(result);
-  });
+  for (const { title, indexes } of logsDBScenarios) {
+    test(`renders a timestamp histogram for ${title}`, async ({
+      page,
+      pageObjects,
+      tsdbScenario,
+    }) => {
+      await visualizeTimestampHistogram({ page, pageObjects, tsdbScenario }, indexes);
+    });
 
-  test('supports a LogsDB stream without a predefined host.name mapping', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: LOGSDB_STREAM_NO_HOST, create: true, mode: 'logsdb', removeLogsDBFields: true },
-    ]);
-    // Standalone stream without the downgraded base stream — no rollover boundary to check
-    assertDowngradeResult(result, { includesBaseStream: false });
-  });
+    test(`renders an alternate-date histogram for ${title}`, async ({
+      page,
+      pageObjects,
+      tsdbScenario,
+    }) => {
+      await visualizeAlternateDateHistogram({ page, pageObjects, tsdbScenario }, indexes);
+    });
 
-  test('supports a downgraded LogsDB data stream with a regular index', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
-    ]);
-    assertDowngradeResult(result);
-  });
+    test(`renders a timestamp annotation for ${title}`, async ({
+      page,
+      pageObjects,
+      tsdbScenario,
+    }) => {
+      await visualizeAnnotation({ page, pageObjects, tsdbScenario }, indexes, '@timestamp', [
+        'host.name',
+        'utc_time',
+      ]);
+    });
 
-  test('supports a downgraded LogsDB data stream with another LogsDB stream', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: ADDITIONAL_LOGSDB_STREAM, create: true, mode: 'logsdb' },
-    ]);
-    assertDowngradeResult(result);
-  });
+    test(`renders an alternate-time-field annotation for ${title}`, async ({
+      page,
+      pageObjects,
+      tsdbScenario,
+    }) => {
+      await visualizeAnnotation({ page, pageObjects, tsdbScenario }, indexes, 'utc_time', [
+        'host.name',
+        '@timestamp',
+      ]);
+    });
 
-  test('supports a downgraded LogsDB data stream with a TSDB stream', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
-    ]);
-    assertDowngradeResult(result);
-  });
-
-  test('supports a downgraded LogsDB data stream with a downsampled TSDB stream', async ({
-    page,
-    pageObjects,
-    tsdbScenario,
-  }) => {
-    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
-      { index: BASE_STREAM },
-      { index: ADDITIONAL_TSDB_DOWNSAMPLED, create: true, mode: 'tsdb', downsample: true },
-    ]);
-    assertDowngradeResult(result);
-  });
+    test(`opens an ES|QL visualization from Discover for ${title}`, async ({
+      page,
+      pageObjects,
+      tsdbScenario,
+    }) => {
+      await visualizeEsql({ page, pageObjects, tsdbScenario }, indexes);
+    });
+  }
 });
