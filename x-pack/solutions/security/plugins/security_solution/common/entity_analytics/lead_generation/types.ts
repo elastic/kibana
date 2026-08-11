@@ -72,12 +72,19 @@ export const leadSchema = z.object({
   tags: z.array(z.string()),
   priority: z.number().min(1).max(10),
   chatRecommendations: z.array(z.string()),
+  /**
+   * ISO-8601 timestamp of the last generation run that produced or re-observed this lead.
+   * Updated on every run regardless of whether new observations were added.
+   * Distinct from `createdAt` (first insert) and `updatedAt` (last structural change or status change).
+   */
   timestamp: z.string().datetime(),
   staleness: LeadStalenessEnum,
   status: LeadStatusEnum.default('active'),
   observations: z.array(observationSchema),
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export type Lead = z.infer<typeof leadSchema>;

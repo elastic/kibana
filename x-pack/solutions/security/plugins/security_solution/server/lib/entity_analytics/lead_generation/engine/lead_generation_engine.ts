@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type {
@@ -16,11 +15,21 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
+import { computeContentHash, computeEntityIdentityKey } from '../content_hash';
 import { llmSynthesizeBatch, type CohortContext, type ScoredEntityInput } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
   readonly config?: Partial<LeadGenerationEngineConfig>;
+}
+
+/** Scored entity group ready for persist classification / optional LLM synthesis. */
+export interface LeadCandidate {
+  readonly entity: LeadEntity;
+  readonly priority: number;
+  readonly observations: Observation[];
+  readonly entityIdentityKey: string;
+  readonly contentHash: string;
 }
 
 export const createLeadGenerationEngine = ({
@@ -33,6 +42,82 @@ export const createLeadGenerationEngine = ({
   };
   const modules: ObservationModule[] = [];
 
+  const prepareLeadCandidates = async (entities: LeadEntity[]): Promise<LeadCandidate[]> => {
+    const pipelineStart = Date.now();
+
+    if (entities.length === 0) {
+      return [];
+    }
+
+    // 1. Collect observations from all enabled modules
+    const collectStart = Date.now();
+    const observations = await collectAllObservations(modules, entities, logger);
+    const collectMs = Date.now() - collectStart;
+    logger.debug(
+      `[LeadGenerationEngine] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
+    );
+
+    if (observations.length === 0) {
+      logger.debug('[LeadGenerationEngine] No observations collected - no leads to generate');
+      return [];
+    }
+
+    // 2. Score entities based on their observations
+    const scoreStart = Date.now();
+    const moduleWeights = new Map<string, number>(
+      modules.map((m) => {
+        const cfg = m.config as typeof m.config & { readonly weight?: number };
+        return [m.config.id, cfg.weight ?? 1.0];
+      })
+    );
+    const scoredEntities = scoreEntities(observations, entities, config, moduleWeights);
+    const scoreMs = Date.now() - scoreStart;
+    logger.debug(
+      `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
+    );
+
+    // 3. Filter entities below threshold and cap to maxLeads before synthesis
+    const qualifyingEntities = scoredEntities
+      .filter((e) => e.observations.length >= config.minObservations)
+      .slice(0, config.maxLeads);
+
+    if (qualifyingEntities.length === 0) {
+      logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
+      return [];
+    }
+
+    // 4. Compute entity identity key and content hash for each qualifying entity
+    const candidates = qualifyingEntities.map((scored) => {
+      return {
+        entity: scored.entity,
+        priority: scored.priority,
+        observations: scored.observations,
+        entityIdentityKey: computeEntityIdentityKey({
+          entities: [{ type: scored.entity.type, name: scored.entity.name, id: scored.entity.id }],
+        }),
+        contentHash: computeContentHash({ observations: scored.observations }),
+      };
+    });
+
+    logger.debug(
+      `[LeadGenerationEngine] Prepared ${candidates.length} candidates in ${
+        Date.now() - pipelineStart
+      }ms (collection=${collectMs}ms, scoring=${scoreMs}ms)`
+    );
+
+    return candidates;
+  };
+
+  const synthesizeLeads = async (
+    candidates: LeadCandidate[],
+    options: { chatModel: InferenceChatModel }
+  ): Promise<Lead[]> => {
+    if (candidates.length === 0) {
+      return [];
+    }
+    return groupIntoLeads(candidates, logger, options.chatModel);
+  };
+
   return {
     /**
      * Register an observation module with the engine.
@@ -44,72 +129,8 @@ export const createLeadGenerationEngine = ({
         `[LeadGenerationEngine] Registered module "${module.config.name}" (priority=${module.config.priority})`
       );
     },
-
-    /**
-     * Run all enabled modules against the given entities and produce leads.
-     */
-    async generateLeads(
-      entities: LeadEntity[],
-      options: { chatModel: InferenceChatModel }
-    ): Promise<Lead[]> {
-      const pipelineStart = Date.now();
-
-      if (entities.length === 0) {
-        return [];
-      }
-
-      // 1. Collect observations from all enabled modules
-      const collectStart = Date.now();
-      const observations = await collectAllObservations(modules, entities, logger);
-      const collectMs = Date.now() - collectStart;
-      logger.debug(
-        `[LeadGenerationEngine] Observation collection: ${collectMs}ms (${observations.length} observations from ${modules.length} modules)`
-      );
-
-      if (observations.length === 0) {
-        logger.debug('[LeadGenerationEngine] No observations collected - no leads to generate');
-        return [];
-      }
-
-      // 2. Score entities based on their observations
-      const scoreStart = Date.now();
-      const moduleWeights = new Map<string, number>(
-        modules.map((m) => {
-          const cfg = m.config as typeof m.config & { readonly weight?: number };
-          return [m.config.id, cfg.weight ?? 1.0];
-        })
-      );
-      const scoredEntities = scoreEntities(observations, entities, config, moduleWeights);
-      const scoreMs = Date.now() - scoreStart;
-      logger.debug(
-        `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
-      );
-
-      // 3. Filter entities below threshold and cap to maxLeads before synthesis
-      const qualifyingEntities = scoredEntities
-        .filter((e) => e.observations.length >= config.minObservations)
-        .slice(0, config.maxLeads);
-
-      if (qualifyingEntities.length === 0) {
-        logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
-        return [];
-      }
-
-      // 4. Group related entities into leads and synthesize content in a single LLM call
-      const groupStart = Date.now();
-      const leads = await groupIntoLeads(qualifyingEntities, config, logger, options.chatModel);
-      const groupMs = Date.now() - groupStart;
-      logger.debug(
-        `[LeadGenerationEngine] Lead grouping & synthesis: ${groupMs}ms (${leads.length} leads)`
-      );
-
-      const totalMs = Date.now() - pipelineStart;
-      logger.debug(
-        `[LeadGenerationEngine] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
-      );
-
-      return leads;
-    },
+    prepareLeadCandidates,
+    synthesizeLeads,
   };
 };
 
@@ -247,12 +268,11 @@ const calculateWeightedPriority = (
 };
 
 const groupIntoLeads = async (
-  scoredEntities: ScoredEntity[],
-  _config: LeadGenerationEngineConfig,
+  candidates: ReadonlyArray<ScoredEntityInput>,
   logger: Logger,
   chatModel: InferenceChatModel
 ): Promise<Lead[]> => {
-  const groups = groupByObservationPattern(scoredEntities);
+  const groups = groupByObservationPattern(candidates);
   const now = new Date();
 
   const cohort = computeCohortContext(groups);
@@ -263,17 +283,18 @@ const groupIntoLeads = async (
     `[LeadGenerationEngine] LLM synthesis: ${Date.now() - synthStart}ms (${groups.length} leads)`
   );
 
-  const leads: Lead[] = groups.map((group, i) => {
+  return groups.map((group, i) => {
     const allObservations = group.flatMap((e) => e.observations);
     const maxPriority = Math.max(...group.map((e) => e.priority));
     const llm = llmResults[i];
+    const entities = group.map((e) => e.entity);
 
     return {
-      id: uuidv4(),
+      id: computeEntityIdentityKey({ entities }),
       title: llm.title,
       byline: llm.byline?.trim() ? llm.byline : buildByline(group, allObservations),
       description: llm.description,
-      entities: group.map((e) => e.entity),
+      entities,
       tags: llm.tags,
       priority: maxPriority,
       chatRecommendations: llm.recommendations,
@@ -282,18 +303,15 @@ const groupIntoLeads = async (
       observations: allObservations,
     };
   });
-
-  leads.sort((a, b) => b.priority - a.priority);
-  return leads;
 };
 
 /**
  * Each entity gets its own lead. In a future phase, entities can be grouped
  * into a single lead when they are linked to the same incident or campaign.
  */
-const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity[][] => {
-  return scoredEntities.map((entity) => [entity]);
-};
+const groupByObservationPattern = (
+  candidates: ReadonlyArray<ScoredEntityInput>
+): ScoredEntityInput[][] => candidates.map((candidate) => [candidate]);
 
 /**
  * Aggregates cross-entity ("peer") context across the batch so a single lead's
@@ -316,7 +334,7 @@ export const computeCohortContext = (groups: ScoredEntityInput[][]): CohortConte
   return { totalCandidates, entityCountByObservationType };
 };
 
-const buildByline = (group: ScoredEntity[], observations: Observation[]): string => {
+const buildByline = (group: ScoredEntityInput[], observations: Observation[]): string => {
   if (group.length === 1) {
     const { entity } = group[0];
     const entityObs = observations.filter((o) => o.entityId === entity.id);

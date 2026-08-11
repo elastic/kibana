@@ -17,12 +17,16 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
+import type { Lead as PersistedLead } from '../../../../common/entity_analytics/lead_generation/types';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
+import type { LeadCandidate } from './engine/lead_generation_engine';
 import { registerObservationModules } from './observation_modules/register_modules';
 import { createLeadDataClient } from './lead_data_client';
+import type { LeadActionDecision } from './lead_data_client';
+import { computeEntityIdentityKey } from './content_hash';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import type { LeadEntity } from './types';
+import type { Lead, LeadEntity } from './types';
 
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
@@ -44,9 +48,35 @@ export interface RunPipelineResult {
   readonly total: number;
 }
 
+const toPersistedLead = (
+  lead: Lead,
+  executionId: string,
+  sourceType: LeadGenerationMode,
+  runTimestamp: string
+): PersistedLead => ({
+  ...lead,
+  entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
+  timestamp: runTimestamp,
+  status: 'active',
+  executionUuid: executionId,
+  sourceType,
+  createdAt: runTimestamp,
+  updatedAt: runTimestamp,
+});
+
+const shouldRunLLMSynthesis = (
+  item: LeadActionDecision<LeadCandidate>
+): item is LeadActionDecision<LeadCandidate> & {
+  decision: { type: 'create' } | { type: 'version'; existingId: string };
+} => item.decision.type === 'create' || item.decision.type === 'version';
+
 /**
  * Shared pipeline logic used by both the ad-hoc generate route and the
  * scheduled Task Manager task.
+ *
+ * Classifies candidates against existing leads before LLM synthesis so
+ * unchanged and previously dismissed leads do not pay for
+ * narrative generation.
  */
 export const runLeadGenerationPipeline = async ({
   listEntities,
@@ -68,11 +98,10 @@ export const runLeadGenerationPipeline = async ({
   const fetchStart = Date.now();
   const leadEntities = await listEntities();
   logger.info(
-    `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
+    `[LeadGeneration][Telemetry] Entities fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
     } candidates)`
   );
-
   if (leadEntities.length === 0) {
     logger.info(
       `[LeadGeneration] No entities found — skipping generation (executionId=${executionId})`
@@ -91,34 +120,77 @@ export const runLeadGenerationPipeline = async ({
     soClient,
   });
 
-  const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities, { chatModel });
+  const prepareStart = Date.now();
+  const candidates = await engine.prepareLeadCandidates(leadEntities);
   logger.info(
-    `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
-      leads.length
-    } leads)`
+    `[LeadGeneration][Telemetry] Prepare candidates: ${Date.now() - prepareStart}ms (${
+      candidates.length
+    } candidates)`
   );
+  if (candidates.length === 0) {
+    return { total: 0 };
+  }
 
   const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+
+  const classifyStart = Date.now();
+  const decisions = await leadDataClient.classifyLeadCandidates(candidates);
+  const toSynthesize = decisions.filter(shouldRunLLMSynthesis);
+  const dedups = decisions.flatMap((item) =>
+    item.decision.type === 'dedup' ? [{ existingId: item.decision.existingId }] : []
+  );
+  logger.info(
+    `[LeadGeneration][Telemetry] Classify leads: ${Date.now() - classifyStart}ms ` +
+      `(dedup=${dedups.length}, synthesize=${toSynthesize.length})`
+  );
+
+  const synthStart = Date.now();
+  const synthesized = await engine.synthesizeLeads(
+    toSynthesize.map(({ candidate }) => candidate),
+    { chatModel }
+  );
+  logger.info(
+    `[LeadGeneration][Telemetry] LLM synthesis: ${Date.now() - synthStart}ms (${
+      synthesized.length
+    }/${candidates.length} leads; skipped ${candidates.length - toSynthesize.length})`
+  );
+
+  const runTimestamp = new Date().toISOString();
+  const creates: PersistedLead[] = [];
+  const versions: Array<{ existingId: string; lead: PersistedLead }> = [];
+  for (const { candidate, decision } of toSynthesize) {
+    const synthesizedLead = synthesized.find(
+      (lead) =>
+        computeEntityIdentityKey({ entities: lead.entities }) === candidate.entityIdentityKey
+    );
+    if (!synthesizedLead) {
+      logger.warn(
+        `[LeadGeneration] Skipping persist; no synthesized lead for entity ${candidate.entityIdentityKey}`
+      );
+    } else {
+      const lead = toPersistedLead(synthesizedLead, executionId, sourceType, runTimestamp);
+      if (decision.type === 'version') {
+        versions.push({ existingId: decision.existingId, lead });
+      } else {
+        creates.push(lead);
+      }
+    }
+  }
+
   const persistStart = Date.now();
-
-  const leadsWithMeta = leads.map((lead) => ({
-    ...lead,
-    status: 'active' as const,
-    executionUuid: executionId,
-    sourceType,
-  }));
-
-  await leadDataClient.createLeads({
-    leads: leadsWithMeta,
+  await leadDataClient.persistLeads({
     executionId,
     sourceType,
+    timestamp: runTimestamp,
+    dedups,
+    creates,
+    versions,
   });
 
+  const persistedCount = dedups.length + creates.length + versions.length;
   logger.info(
-    `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
-      leads.length
-    } leads to ${sourceType} index)`
+    `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms ` +
+      `(dedup=${dedups.length}, create=${creates.length}, version=${versions.length})`
   );
   logger.info(
     `[LeadGeneration][Telemetry] Total pipeline: ${
@@ -128,9 +200,9 @@ export const runLeadGenerationPipeline = async ({
 
   analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
     spaceId,
-    leadsGenerated: leads.length,
+    leadsGenerated: persistedCount,
     sourceType,
   });
 
-  return { total: leads.length };
+  return { total: persistedCount };
 };
