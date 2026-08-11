@@ -54,8 +54,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      // The canvas renders all classic streams regardless of which one is open.
-      await pageObjects.streams.gotoCanvasTab(PLAIN_STREAM);
+      await pageObjects.streams.gotoStreamsLayoutTab('canvas');
     });
 
     test.afterAll(async ({ kbnClient, apiServices }) => {
@@ -186,6 +185,39 @@ test.describe(
         'aria-selected',
         'true'
       );
+
+      await expect(page).toHaveURL(/flyoutName:/);
+      await expect(page).toHaveURL(/flyoutTab:overview/);
+
+      const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
+
+      await attachmentsTab.click();
+
+      await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
+      // Expect the url to have changed, and to have a certain tab value
+      await expect(page).toHaveURL(/flyoutTab:attachments/);
+    });
+
+    test('navigating away from a flyout and back will restore the flyout to its previous state', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.testSubj.click('streamsCanvasDestinationNode');
+
+      const flyout = page.testSubj.locator('streamsCanvasFlyout');
+      const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
+
+      await attachmentsTab.click();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await expect(page).not.toHaveURL(/flyoutTab:attachments/);
+
+      await page.goBack();
+
+      await expect(page).toHaveURL(/flyoutTab:attachments/);
+      await expect(flyout).toBeVisible();
+      await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
   }
 );

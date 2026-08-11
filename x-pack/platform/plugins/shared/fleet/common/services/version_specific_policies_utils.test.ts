@@ -18,6 +18,7 @@ import {
   buildPolicyBaseIdWithFallbackEsFilter,
   buildPolicyBaseIdsWithFallbackEsFilter,
   buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
 } from './version_specific_policies_utils';
 
 describe('removeVersionSuffixFromPolicyId', () => {
@@ -345,5 +346,48 @@ describe('buildPolicyBaseIdsWithFallbackEsFilter', () => {
 
   it('should return match_none for an empty array', () => {
     expect(buildPolicyBaseIdsWithFallbackEsFilter([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('buildPolicyBaseIdsWithFallbackKuery', () => {
+  it('should match migrated docs via policy_base_id terms', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-b'])).toContain(
+      'policy_base_id:(policy-a or policy-b)'
+    );
+  });
+
+  it('should include fallback branch for docs missing policy_base_id', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-b'])).toContain(
+      'policy_id:(policy-a or policy-b) and not policy_base_id:*'
+    );
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    const result = buildPolicyBaseIdsWithFallbackKuery(['policy-a', 'policy-a', 'policy-b']);
+    expect(result).toBe(
+      '(policy_base_id:(policy-a or policy-b) or (policy_id:(policy-a or policy-b) and not policy_base_id:*))'
+    );
+  });
+
+  it('should return a never-matching kuery for an empty array', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery([])).toBe('policy_id:""');
+  });
+
+  it('should use custom field names when provided', () => {
+    expect(
+      buildPolicyBaseIdsWithFallbackKuery(
+        ['my-policy'],
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
+    ).toBe(
+      '(fleet-agents.policy_base_id:(my-policy) or (fleet-agents.policy_id:(my-policy) and not fleet-agents.policy_base_id:*))'
+    );
+  });
+
+  it('should escape special KQL characters in ids', () => {
+    expect(buildPolicyBaseIdsWithFallbackKuery(['my policy:1'])).toContain(
+      'policy_base_id:(my policy\\:1)'
+    );
   });
 });

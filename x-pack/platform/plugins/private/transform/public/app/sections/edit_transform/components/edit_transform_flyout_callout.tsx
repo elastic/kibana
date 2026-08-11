@@ -9,29 +9,31 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTextColor } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
+
 export const EditTransformFlyoutCallout: FC = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 
   return (
-    <EuiCallOut>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTextColor color="subdued">
-            {i18n.translate('xpack.transform.transformList.editFlyoutCalloutText', {
-              defaultMessage:
-                'This form allows you to update a transform. The list of properties that you can update is a subset of the list that you can define when you create a transform.',
-            })}
-          </EuiTextColor>
-          <EuiLink href={esTransformUpdate} target="_BLANK">
-            {i18n.translate('xpack.transform.transformList.editFlyoutCalloutDocs', {
-              defaultMessage: 'View docs',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <EuiCallOut
+      title={i18n.translate('xpack.transform.transformList.editFlyoutCalloutTitle', {
+        defaultMessage: 'This form allows you to update a transform.',
+      })}
+      text={i18n.translate('xpack.transform.transformList.editFlyoutCalloutText', {
+        defaultMessage:
+          'The list of properties that you can update is a subset of the list that you can define when you create a transform.',
+      })}
+      actionProps={{
+        primary: {
+          href: esTransformUpdate,
+          target: '_blank',
+          children: i18n.translate('xpack.transform.transformList.editFlyoutCalloutDocs', {
+            defaultMessage: 'View docs',
+          }),
+        },
+      }}
+    />
   );
 };

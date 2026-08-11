@@ -28,7 +28,9 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
+import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import type { OpenAIRequest } from '../openai/types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
@@ -39,6 +41,8 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
+  // Endpoint model identity is authoritative for parameter support.
+  endpointModelId?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
@@ -58,8 +62,9 @@ export const inferenceEndpointAdapter = {
       toolChoice,
       tools,
       functionCalling,
-      temperature = 0,
+      temperature,
       modelName,
+      endpointModelId,
       logger,
       abortSignal,
       timeout,
@@ -76,6 +81,7 @@ export const inferenceEndpointAdapter = {
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       modelName,
+      endpointModelId,
     });
 
     return defer(() =>
@@ -87,7 +93,8 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      processOpenAIStream(),
+      // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
+      processOpenAIStream({ allowNullObjectWithChoices: true }),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
@@ -100,8 +107,9 @@ const createEndpointRequest = ({
   toolChoice,
   tools,
   simulatedFunctionCalling,
-  temperature = 0,
+  temperature,
   modelName,
+  endpointModelId,
 }: {
   system?: string;
   messages: Message[];
@@ -110,7 +118,12 @@ const createEndpointRequest = ({
   simulatedFunctionCalling: boolean;
   temperature?: number;
   modelName?: string;
+  endpointModelId?: string;
 }): OpenAIRequest => {
+  const temperatureOptions = getTemperatureIfValid(temperature, {
+    modelId: endpointModelId ?? modelName,
+  });
+
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -119,17 +132,18 @@ const createEndpointRequest = ({
       tools,
     });
     return {
-      ...(temperature >= 0 ? { temperature } : {}),
+      ...temperatureOptions,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
   }
 
-  const openAiTools = toolsToOpenAI(tools);
+  const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
+  const openAiTools = toolsToOpenAI(toolsForRequest);
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
   return {
-    ...(temperature >= 0 ? { temperature } : {}),
+    ...temperatureOptions,
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools

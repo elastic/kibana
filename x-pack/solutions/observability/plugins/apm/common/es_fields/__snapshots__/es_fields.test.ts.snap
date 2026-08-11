@@ -180,6 +180,10 @@ exports[`Error FAAS_NAME 1`] = `undefined`;
 
 exports[`Error FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Error GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Error GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Error HOST 1`] = `
 Object {
   "hostname": "my hostname",
@@ -277,6 +281,14 @@ exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Error METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
@@ -665,6 +677,10 @@ exports[`Span FAAS_NAME 1`] = `undefined`;
 
 exports[`Span FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Span GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Span GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Span HOST 1`] = `undefined`;
 
 exports[`Span HOST_ARCHITECTURE 1`] = `undefined`;
@@ -758,6 +774,14 @@ exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Span METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
@@ -1146,6 +1170,10 @@ exports[`Transaction FAAS_NAME 1`] = `undefined`;
 
 exports[`Transaction FAAS_TRIGGER_TYPE 1`] = `undefined`;
 
+exports[`Transaction GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Transaction GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Transaction HOST 1`] = `
 Object {
   "hostname": "my hostname",
@@ -1249,6 +1277,14 @@ exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_CPU_RECENT_UTILIZATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_TYPE 1`] = `undefined`;
+
+exports[`Transaction METRIC_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
 
