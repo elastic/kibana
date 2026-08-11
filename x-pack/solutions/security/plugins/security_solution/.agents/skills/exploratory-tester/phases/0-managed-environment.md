@@ -5,7 +5,7 @@ Taken when `Environment.url` is absent from the invocation and no profile was lo
 | `Environment.type` | Command |
 |---|---|
 | `stateful-classic` (default) | `node scripts/scout start-server --arch stateful --domain classic &` |
-| `serverless` | `node scripts/scout start-server --arch serverless --domain security_complete &` |
+| `serverless` | `node scripts/scout start-server --arch serverless --domain <domain> &` |
 
 If Scout is already running on port 5620 — reuse it. Tell the user an existing session is being reused.
 
