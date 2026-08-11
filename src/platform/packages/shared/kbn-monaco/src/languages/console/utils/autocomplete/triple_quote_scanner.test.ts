@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { checkForTripleQuotesAndEsqlQuery, unescapeInvalidChars } from './autocomplete_utils';
+import {
+  checkForTripleQuotesAndEsqlQuery,
+  isInsideTripleQuotedJsonValue,
+} from './triple_quote_scanner';
 
-describe('autocomplete_utils', () => {
+describe('triple_quote_scanner', () => {
   describe('checkForTripleQuotesAndQueries', () => {
     it('returns false for all flags for an empty string', () => {
       expect(checkForTripleQuotesAndEsqlQuery('')).toEqual({
@@ -105,6 +108,11 @@ describe('autocomplete_utils', () => {
       insideEsqlQuery: true,
       esqlQueryIndex: request.indexOf('"""') + 3,
     });
+  });
+
+  it('does not set ESQL flags for GET _query (ES|QL requests are POST-only)', () => {
+    const request = 'GET _query\n{\n  "query": "FROM logs ';
+    expect(checkForTripleQuotesAndEsqlQuery(request).insideEsqlQuery).toBe(false);
   });
 
   it('detects single quoted query after POST _query?pretty suffix', () => {
@@ -207,41 +215,71 @@ describe('autocomplete_utils', () => {
     });
   });
 
-  describe('unescapeInvalidChars', () => {
-    it('should return the original string if there are no escape sequences', () => {
-      const input = 'simple string';
-      expect(unescapeInvalidChars(input)).toBe('simple string');
-    });
+  it('closes a double-quoted string after an even number of backslashes', () => {
+    const request = [
+      'GET _search',
+      '{"path":"\\\\"}',
+      'POST _query',
+      '{',
+      '  "script": """',
+      '',
+    ].join('\n');
+    expect(checkForTripleQuotesAndEsqlQuery(request).insideTripleQuotes).toBe(true);
+  });
 
-    it('should unescape escaped double quotes', () => {
-      const input = '\\"hello\\"';
-      expect(unescapeInvalidChars(input)).toBe('"hello"');
-    });
+  it('keeps a double-quoted string open after an escaped quote', () => {
+    const request = String.raw`POST _query
+{
+  "query": "FROM logs | WHERE field == \"value`;
+    expect(checkForTripleQuotesAndEsqlQuery(request).insideEsqlQuery).toBe(true);
+  });
 
-    it('should unescape escaped backslashes', () => {
-      const input = 'path\\\\to\\\\file';
-      expect(unescapeInvalidChars(input)).toBe('path\\to\\file');
-    });
+  it.each(['# """ GET _search', '// """ GET _search', '/* """\nGET _search\n*/'])(
+    'ignores quote and request-like text inside Console comments: %s',
+    (comment) => {
+      const request = ['GET _search', '{}', comment, 'GET _search', ''].join('\n');
+      expect(checkForTripleQuotesAndEsqlQuery(request)).toEqual({
+        insideTripleQuotes: false,
+        insideEsqlQuery: false,
+        esqlQueryIndex: -1,
+      });
+    }
+  );
 
-    it('should unescape both escaped backslashes and quotes', () => {
-      const input = 'say: \\"hello\\" and path: C:\\\\Program Files\\\\App';
-      expect(unescapeInvalidChars(input)).toBe('say: "hello" and path: C:\\Program Files\\App');
-    });
+  it.each(['# """', '// """', '/* """ */'])(
+    'does not treat comment markers inside triple-quoted content as comments: %s',
+    (content) => {
+      const request = ['POST _query', '{', `  "script": """value ${content}`, '}', ''].join('\n');
+      expect(checkForTripleQuotesAndEsqlQuery(request).insideTripleQuotes).toBe(false);
+    }
+  );
 
-    it('should handle mixed content correctly', () => {
-      const input = 'log: \\"User \\\\\\"admin\\\\\\" logged in\\"';
-      expect(unescapeInvalidChars(input)).toBe('log: "User \\"admin\\" logged in"');
-    });
+  it.each([
+    'POST _query\n{\n  "script": """',
+    'POST _query\n{\n  "script":\n  # comment\n  """',
+    'POST _query\n{\n  "script": /* comment */ """',
+    'POST _query\n["""',
+    'POST _query\n[// comment\n"""',
+    'POST _query\n["value", """',
+  ])('recognizes an open triple quote in a JSON value: %s', (request) => {
+    expect(isInsideTripleQuotedJsonValue(request)).toBe(true);
+  });
 
-    it('should leave already unescaped characters alone', () => {
-      const input = '"already unescaped" \\ and /';
-      expect(unescapeInvalidChars(input)).toBe('"already unescaped" \\ and /');
-    });
+  it.each([
+    'GET /foo\n"""',
+    'GET /foo\n{\n"""',
+    'GET /foo\n{"field":\nGET _search\n"""',
+    'GET /foo\n[\nGET _search\n, """',
+    'GET /foo\n{"field":"[", """',
+    'GET /foo\n[]\n, """',
+    'GET /foo\n{"field":"value" """',
+    'GET /foo\n["""value""" """',
+  ])('rejects an open triple quote outside a JSON value: %s', (request) => {
+    expect(isInsideTripleQuotedJsonValue(request)).toBe(false);
+  });
 
-    it('should not over-unescape multiple backslashes', () => {
-      const input = '\\\\\\\\"test\\\\"';
-      // \\\\"test\\" becomes \\"test\"
-      expect(unescapeInvalidChars(input)).toBe('\\\\"test\\"');
-    });
+  it('does not retain container state for oversized fallback input', () => {
+    const request = `POST _search\n${'['.repeat(100_001)}"""`;
+    expect(isInsideTripleQuotedJsonValue(request)).toBe(false);
   });
 });
