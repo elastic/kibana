@@ -325,11 +325,20 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.find(testSubj);
     },
     async setValue(value: string) {
-      const contextMenu = await testSubjects.find('groupByContextMenu');
-      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
-      const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
-      const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
-      await menuItems[menuItemValueIndex].click();
+      // The context-menu open animation clips items, so getVisibleText() returns '' until it settles.
+      const targetItem = await retry.try(async () => {
+        const contextMenu = await testSubjects.find('groupByContextMenu');
+        const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
+        const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
+        const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
+        if (menuItemValueIndex === -1) {
+          throw new Error(
+            `Group-by option "${value}" not rendered yet; got: ${menuItemsOptions.join(', ')}`
+          );
+        }
+        return menuItems[menuItemValueIndex];
+      });
+      await targetItem.click();
       return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
     },
     async openDropDown() {
