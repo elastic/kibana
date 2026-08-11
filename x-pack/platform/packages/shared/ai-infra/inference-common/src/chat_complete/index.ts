@@ -15,6 +15,10 @@ export type {
   ChatCompleteResponse,
   ChatCompleteRetryConfiguration,
 } from './api';
+export type {
+  ChatCompletionReasoning,
+  ChatCompletionReasoningEffort,
+} from './reasoning';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,

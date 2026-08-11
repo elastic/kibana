@@ -15,6 +15,7 @@ import type {
   ToolOptions,
   ChatCompleteMetadata,
   AnonymizationRule,
+  ChatCompletionReasoning,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
@@ -46,6 +47,7 @@ export type InferenceAdapterChatCompleteOptions = {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;

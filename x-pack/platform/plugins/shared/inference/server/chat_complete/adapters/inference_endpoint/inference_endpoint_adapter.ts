@@ -15,6 +15,7 @@ import type {
   ChatCompleteMetadata,
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
+  ChatCompletionReasoning,
 } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import {
@@ -28,10 +29,9 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
-import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
-import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import type { OpenAIRequest } from '../openai/types';
+import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
   executor: InferenceEndpointExecutor;
@@ -40,9 +40,8 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   system?: string;
   functionCalling?: FunctionCallingMode;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
-  // Endpoint model identity is authoritative for parameter support.
-  endpointModelId?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
@@ -62,9 +61,9 @@ export const inferenceEndpointAdapter = {
       toolChoice,
       tools,
       functionCalling,
-      temperature,
+      temperature = 0,
+      reasoning,
       modelName,
-      endpointModelId,
       logger,
       abortSignal,
       timeout,
@@ -80,8 +79,8 @@ export const inferenceEndpointAdapter = {
       tools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
+      reasoning,
       modelName,
-      endpointModelId,
     });
 
     return defer(() =>
@@ -93,8 +92,7 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
-      processOpenAIStream({ allowNullObjectWithChoices: true }),
+      processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
@@ -107,9 +105,9 @@ const createEndpointRequest = ({
   toolChoice,
   tools,
   simulatedFunctionCalling,
-  temperature,
+  temperature = 0,
+  reasoning,
   modelName,
-  endpointModelId,
 }: {
   system?: string;
   messages: Message[];
@@ -117,13 +115,9 @@ const createEndpointRequest = ({
   tools?: ToolOptions['tools'];
   simulatedFunctionCalling: boolean;
   temperature?: number;
+  reasoning?: ChatCompletionReasoning;
   modelName?: string;
-  endpointModelId?: string;
 }): OpenAIRequest => {
-  const temperatureOptions = getTemperatureIfValid(temperature, {
-    modelId: endpointModelId ?? modelName,
-  });
-
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -131,19 +125,27 @@ const createEndpointRequest = ({
       toolChoice,
       tools,
     });
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: false,
+    });
     return {
-      ...temperatureOptions,
+      ...(temperature >= 0 ? { temperature } : {}),
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   }
 
-  const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
-  const openAiTools = toolsToOpenAI(toolsForRequest);
+  const openAiTools = toolsToOpenAI(tools);
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+  const resolvedReasoning = resolveChatCompletionReasoning({
+    reasoning,
+    hasNativeTools: hasTools,
+  });
 
   return {
-    ...temperatureOptions,
+    ...(temperature >= 0 ? { temperature } : {}),
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools
@@ -152,5 +154,6 @@ const createEndpointRequest = ({
           tools: openAiTools,
         }
       : {}),
+    ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
   };
 };
