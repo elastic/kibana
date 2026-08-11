@@ -4,7 +4,7 @@ products:
   lifecycle: ga
   repo: kibana
   owner: elastic
-release-date: 2026-06-16w
+release-date: 2026-06-16
 entries:
 - file:
     name: 270487.yaml
