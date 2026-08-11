@@ -113,6 +113,21 @@ describe('customContentPanelDefinition', () => {
         }).success
       ).toBe(false);
     });
+
+    it('rejects a template containing a script tag', () => {
+      const result = editCustomContentPanelConfigInputSchema.safeParse({
+        source: 'config',
+        type: 'custom_content',
+        panelId: 'cc-1',
+        config: {
+          prompt: 'Updated KPI',
+          template: '<div>hello</div><script>alert(1)</script>',
+        },
+      });
+
+      expect(result.success).toBe(false);
+      expect(JSON.stringify(result.error)).toMatch(/script/i);
+    });
   });
 
   describe('validateConfigEdit', () => {

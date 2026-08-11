@@ -12,6 +12,7 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
+  CUSTOM_CONTENT_SCRIPT_PATTERN,
   customContentStateSchema,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
@@ -48,6 +49,13 @@ const customContentEditConfigSchema = customContentStateSchema.extend({
     .string()
     .max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH)
     .check((ctx) => {
+      if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(ctx.value)) {
+        ctx.issues.push({
+          code: 'custom',
+          message: 'Template was rejected: JavaScript (<script> tags) is not allowed.',
+          input: ctx.value,
+        });
+      }
       if (Buffer.byteLength(ctx.value, 'utf8') > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
         ctx.issues.push({
           code: 'custom',
