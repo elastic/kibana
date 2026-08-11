@@ -8,7 +8,7 @@
  */
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
-import type { BuildContext } from './client_type_spec';
+import type { BuildContext } from '../clients/client_type_spec';
 import { createMcpClientType } from './mcp_client_type';
 
 jest.mock('@kbn/mcp-client', () => {
@@ -22,7 +22,7 @@ jest.mock('@kbn/mcp-client', () => {
   };
 });
 
-jest.mock('../mcp/create_mcp_fetch', () => ({
+jest.mock('./create_mcp_fetch', () => ({
   createMcpFetch: jest.fn().mockReturnValue(jest.fn()),
 }));
 
@@ -90,7 +90,7 @@ describe('createMcpClientType', () => {
     });
 
     it('uses configuredFetchFactory when available', async () => {
-      const { createMcpFetch } = jest.requireMock('../mcp/create_mcp_fetch') as {
+      const { createMcpFetch } = jest.requireMock('./create_mcp_fetch') as {
         createMcpFetch: jest.Mock;
       };
       const mockResource = { fetch: jest.fn(), close: jest.fn() };

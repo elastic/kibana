@@ -8,9 +8,12 @@
  */
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
-import { createMcpFetch } from '../mcp/create_mcp_fetch';
-import type { BuildContext, ClientTypeSpec } from './client_type_spec';
-import type { ConfiguredFetchFactory, ConfiguredFetchResource } from './configured_fetch_types';
+import type { BuildContext, ClientTypeSpec } from '../clients/client_type_spec';
+import type {
+  ConfiguredFetchFactory,
+  ConfiguredFetchResource,
+} from '../clients/configured_fetch_types';
+import { createMcpFetch } from './create_mcp_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 
