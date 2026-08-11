@@ -32,7 +32,7 @@ const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhist
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   status: 'open',
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
-  title: 'Ledger backends — customer transaction connectivity failure',
+  title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
     'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
   summary:
@@ -298,18 +298,6 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
   causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
-const MISGROUPED_LEDGER_EVENT: Partial<SignificantEvent> = {
-  ...LEDGER_DB_CASCADE_EVENT,
-  status: 'open',
-  event_id: 'ledger-db-disconnect__misgrouped-auth',
-  signals: [
-    ...(LEDGER_DB_CASCADE_EVENT.signals ?? []),
-    ...(BENIGN_LOGIN_EVENT.signals ?? []),
-    ...(BENIGN_SIGNUP_EVENT.signals ?? []),
-  ],
-};
-
-/** Single-service connectivity failure — severity should not depend on cascade topology. */
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   status: 'open',
   event_id: 'frontend__balancereader-connection-refused',
@@ -337,54 +325,6 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
         detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det',
         rule_name: 'Frontend → Balance Reader Connection Failures',
         rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
-        change_point_type: 'spike',
-        p_value: 0.0001,
-      },
-    },
-  ],
-  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
-  blast_radius: [
-    {
-      type: 'dependency',
-      feature_id: 'frontend-balancereader',
-      source: 'frontend',
-      target: 'balancereader',
-      stream_name: 'logs',
-    },
-  ],
-};
-
-/**
- * Authored cache-error rule refuted; grounding surfaces a concrete connection failure in an
- * off-topic row that warrants its own high-severity event.
- */
-const OFF_TOPIC_CONNECTION_EVENT: Partial<SignificantEvent> = {
-  status: 'open',
-  event_id: 'balancereader__off-topic-connection-refused',
-  title: 'Balance reader — connection refused on balance lookups',
-  symptom_hypothesis:
-    'Balance lookups fail because the frontend cannot establish connections to balancereader.',
-  summary:
-    'Grounding surfaced connection-refused errors to balancereader:8080 during balance reads. The authored cache-error rule did not match; the observed connection failure blocks account-balance retrieval for users who hit this path.',
-  severity: '60-high',
-  confidence: 0.62,
-  stream_names: ['logs'],
-  signals: [
-    {
-      type: 'detection',
-      stream_name: 'logs',
-      confirmed: false,
-      description:
-        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: off-topic observed error — cache-error rule refuted.',
-      evidence: {
-        esql_query:
-          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
-        result: 'found',
-      },
-      metadata: {
-        detection_id: '159d6c01-9b26-5d7f-99c6-a3471e00d97e-det',
-        rule_name: 'Cache Errors in Balance Reader or Transaction History',
-        rule_uuid: '159d6c01-9b26-5d7f-99c6-a3471e00d97e',
         change_point_type: 'spike',
         p_value: 0.0001,
       },
@@ -431,7 +371,11 @@ export const discovery: DatasetConfig['discovery'] = [
     input: {
       scenario_id: 'ledger-db-disconnect',
       stream_name: 'logs',
-      detections: toInputDetections([LEDGER_DB_CASCADE_EVENT]),
+      detections: toInputDetections([
+        LEDGER_DB_CASCADE_EVENT,
+        BENIGN_LOGIN_EVENT,
+        BENIGN_SIGNUP_EVENT,
+      ]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
@@ -449,7 +393,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -495,27 +439,9 @@ export const discovery: DatasetConfig['discovery'] = [
           text: 'Verifies key cascade signals via execute_esql during KI grounding and stamps confirmed: true from its own query results, rather than trusting pre-collected input evidence alone.',
           score: 2,
         },
-      ],
-    },
-    metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
-  },
-  {
-    input: {
-      scenario_id: 'ledger-db-disconnect-misgrouped-auth',
-      stream_name: 'logs',
-      detections: toInputDetections([MISGROUPED_LEDGER_EVENT]),
-    },
-    output: {
-      expected_ground_truth:
-        'misgrouped ledger event remains open/80-critical for the database cascade; unbacked authentication detections do not shape the event narrative',
-      expected_confirmed_rule_uuids: {
-        [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
-      },
-      expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
-      criteria: [
         {
           id: 'reject-unrelated-auth-membership',
-          text: 'Omits Successful User Login and New User Account Created from the event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
+          text: 'Omits Successful User Login and New User Account Created from the cascade event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
           score: 3,
         },
         {
@@ -525,52 +451,12 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'open-confirmed-cascade',
-          text: 'Keeps the event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          text: 'Keeps the cascade event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
           score: 2,
         },
       ],
     },
-    metadata: {
-      difficulty: 'hard',
-      failure_domain: 'ledger-db',
-      failure_mode: 'misgrouped-signal',
-    },
-    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
-  },
-  {
-    input: {
-      scenario_id: 'ledger-off-topic-severe-error',
-      stream_name: 'logs',
-      detections: toInputDetections([OFF_TOPIC_CONNECTION_EVENT]),
-    },
-    output: {
-      expected_ground_truth:
-        'open 60-high event grounded in the off-topic connection-refused error; authored cache-error rule remains confirmed:false',
-      expected_significant_events: [OFF_TOPIC_CONNECTION_EVENT],
-      criteria: [
-        {
-          id: 'off-topic-open-high',
-          text: 'Creates or keeps an open event at 60-high (or higher) from the off-topic connection-refused row even though the cache-error rule hypothesis is refuted (confirmed:false on that signal).',
-          score: 3,
-        },
-        {
-          id: 'off-topic-narrative-grounding',
-          text: 'Title, symptom_hypothesis, and summary describe the observed connection-refused failure and blocked balance lookups. They do not title or summarize the event as a cache-error incident.',
-          score: 3,
-        },
-        {
-          id: 'off-topic-rule-refuted',
-          text: 'Leaves the cache-error detection signal confirmed:false while still treating the concrete off-topic connection failure as current evidence.',
-          score: 2,
-        },
-      ],
-    },
-    metadata: {
-      difficulty: 'hard',
-      failure_domain: 'balancereader',
-      failure_mode: 'off_topic_severe_error',
-    },
-    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
+    metadata: { difficulty: 'hard', failure_domain: 'ledger-db', failure_mode: 'cascade' },
   },
   {
     input: {

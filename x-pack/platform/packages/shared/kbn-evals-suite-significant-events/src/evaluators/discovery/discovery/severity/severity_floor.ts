@@ -5,22 +5,38 @@
  * 2.0.
  */
 
-import { SEVERITY_OPTIONS, type Severity } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
+import { severityRank } from './severity_rank';
 
-// SEVERITY_OPTIONS must be ordered most-severe first; lower index = higher severity
-const SEVERITY_RANK = new Map<Severity, number>(
-  SEVERITY_OPTIONS.map((severity, index) => [severity, index])
-);
+const ruleUuidFromSignal = (metadata: { rule_uuid?: string } | undefined): string | undefined =>
+  metadata?.rule_uuid;
 
-const severityRank = (severity: string | undefined): number | undefined => {
-  if (!severity || !SEVERITY_RANK.has(severity as Severity)) {
-    return undefined;
+const expectedRuleUuids = (event: {
+  signals?: Array<{ metadata?: { rule_uuid?: string } }>;
+}): string[] => [
+  ...new Set(
+    (event.signals ?? [])
+      .map((signal) => ruleUuidFromSignal(signal.metadata))
+      .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+  ),
+];
+
+const actualRuleUuids = (event: {
+  signals?: Array<{ metadata?: { rule_uuid?: string } }>;
+}): Set<string> => new Set(expectedRuleUuids(event));
+
+const coversExpectedRules = (
+  actualEvent: { signals?: Array<{ metadata?: { rule_uuid?: string } }> },
+  ruleUuids: string[]
+): boolean => {
+  if (ruleUuids.length === 0) {
+    return false;
   }
-  return SEVERITY_RANK.get(severity as Severity);
+  const actualUuids = actualRuleUuids(actualEvent);
+  return ruleUuids.every((ruleUuid) => actualUuids.has(ruleUuid));
 };
 
-const matchOpenEvent = (
+const matchOpenEventByTitle = (
   actualTitle: string | undefined,
   expectedTitle: string | undefined
 ): boolean => {
@@ -31,6 +47,23 @@ const matchOpenEvent = (
   const actual = normalize(actualTitle);
   const expected = normalize(expectedTitle);
   return actual === expected || actual.includes(expected) || expected.includes(actual);
+};
+
+const matchesExpectedEvent = (
+  actualEvent: {
+    title?: string;
+    signals?: Array<{ metadata?: { rule_uuid?: string } }>;
+  },
+  expectedEvent: {
+    title?: string;
+    signals?: Array<{ metadata?: { rule_uuid?: string } }>;
+  }
+): boolean => {
+  const ruleUuids = expectedRuleUuids(expectedEvent);
+  if (ruleUuids.length > 0) {
+    return coversExpectedRules(actualEvent, ruleUuids);
+  }
+  return matchOpenEventByTitle(actualEvent.title, expectedEvent.title);
 };
 
 /**
@@ -79,15 +112,18 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
       }
       validDenominator++;
 
+      const expectedRules = expectedRuleUuids(expectedEvent);
       const matchedActualIndex = openActualEvents.findIndex(
         (actualEvent, i) =>
-          !usedActualIndices.has(i) && matchOpenEvent(actualEvent.title, expectedEvent.title)
+          !usedActualIndices.has(i) && matchesExpectedEvent(actualEvent, expectedEvent)
       );
 
       if (matchedActualIndex === -1) {
-        issues.push(
-          `[${index}] no open event matched expected title "${expectedEvent.title ?? 'unknown'}"`
-        );
+        const matchHint =
+          expectedRules.length > 0
+            ? `rule_uuid(s) [${expectedRules.join(', ')}]`
+            : `title "${expectedEvent.title ?? 'unknown'}"`;
+        issues.push(`[${index}] no open event matched expected ${matchHint}`);
         return;
       }
       usedActualIndices.add(matchedActualIndex);
@@ -106,8 +142,9 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
         return;
       }
 
+      const matchedLabel = matchedActual.title ?? matchedActual.event_id ?? 'event';
       issues.push(
-        `[${index}] under-severity for "${matchedActual.title}": got ${matchedActual.severity}, expected >= ${expectedSeverity}`
+        `[${index}] under-severity for "${matchedLabel}": got ${matchedActual.severity}, expected >= ${expectedSeverity}`
       );
     });
 

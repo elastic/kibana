@@ -5,19 +5,8 @@
  * 2.0.
  */
 
-import { SEVERITY_OPTIONS, type Severity } from '@kbn/significant-events-schema';
 import type { ContinuationCycle, ContinuationEvaluator } from './continuation_stability';
-
-const SEVERITY_RANK = new Map<Severity, number>(
-  SEVERITY_OPTIONS.map((severity, index) => [severity, index])
-);
-
-const severityRank = (severity: string | undefined): number | undefined => {
-  if (!severity || !SEVERITY_RANK.has(severity as Severity)) {
-    return undefined;
-  }
-  return SEVERITY_RANK.get(severity as Severity);
-};
+import { severityRank } from '../severity/severity_rank';
 
 const openEventsWithSeverity = (cycle: ContinuationCycle) =>
   (cycle.producedEvents ?? []).filter(
@@ -69,6 +58,11 @@ export const scoreContinuationSeverityStability = (
       const eventId = event.event_id!;
       const baselineRank = baselineSeverityByEventId.get(eventId);
       if (baselineRank === undefined) {
+        // Event first seen after the establishing cycle — seed it now so later cycles can track it
+        const seedRank = severityRank(event.severity);
+        if (seedRank !== undefined) {
+          baselineSeverityByEventId.set(eventId, seedRank);
+        }
         continue;
       }
 

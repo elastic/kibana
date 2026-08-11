@@ -87,9 +87,12 @@ const writesTopology = ({ params, toolId }: ReturnType<typeof extractOrderedTool
 export const scoreToolUsage = ({
   steps,
   detectionCount,
+  skipMissingTopologySearchCheck = false,
 }: {
   steps: ConverseStep[];
   detectionCount: number;
+  /** Continuation cycles that must create a new event skip topology search when rule search is empty. */
+  skipMissingTopologySearchCheck?: boolean;
 }): ToolUsageScore => {
   const calledTools = new Set(extractToolCallIds(steps));
 
@@ -140,7 +143,12 @@ export const scoreToolUsage = ({
       Array.isArray(params.topology_feature_ids) &&
       params.topology_feature_ids.length > 0
   );
-  if (ruleSearchFoundNoCandidates && orderedCalls.some(writesTopology) && !hasTopologySearch) {
+  if (
+    !skipMissingTopologySearchCheck &&
+    ruleSearchFoundNoCandidates &&
+    orderedCalls.some(writesTopology) &&
+    !hasTopologySearch
+  ) {
     return {
       score: 0,
       label: 'missing-topology-search',
@@ -186,7 +194,11 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
 
   const perCycle = cycles.map((cycle): ToolUsageScore => {
     const steps = cycle.steps ?? [];
-    const baseScore = scoreToolUsage({ steps, detectionCount: 1 });
+    const baseScore = scoreToolUsage({
+      steps,
+      detectionCount: 1,
+      skipMissingTopologySearchCheck: cycle.expectReuse === false,
+    });
     if (
       cycle.expectTopologyEventSearch &&
       !extractOrderedToolCalls(steps).some(

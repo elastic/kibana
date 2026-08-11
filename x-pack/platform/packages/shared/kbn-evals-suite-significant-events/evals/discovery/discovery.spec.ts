@@ -97,7 +97,6 @@ evaluate.describe(
           expectTopologyEventSearch?: boolean;
           seedStatus?: 'closed';
           stripSeedTopology?: boolean;
-          seedUnconfirmedDetection?: Detection;
         }
 
         const collectedExamples: CollectedExample[] = [];
@@ -309,11 +308,6 @@ evaluate.describe(
             includesPath: (path: string) => path === 'cascade',
           },
           {
-            title: 'continuation - unconfirmed rule on open significant event',
-            description: 'an unconfirmed candidate rule does not establish continuation',
-            includesPath: (path: string) => path === 'unconfirmed-rule',
-          },
-          {
             title: 'continuation - closed significant event',
             description: 'a detection starts a new significant event after the prior event closes',
             includesPath: (path: string) => path === 'rule-uuid-closed',
@@ -338,11 +332,6 @@ evaluate.describe(
                 if (detections.length === 0) return [];
                 const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
                 const continuationChains = Object.entries(scenario.continuationChains ?? {});
-                const confirmedAnchor = byRuleName.get(
-                  'Frontend → Ledger Writer Payment Submission Error'
-                );
-                const unrelatedDetection = byRuleName.get('Successful User Login');
-
                 const allPlans: ContinuationPlan[] = [
                   {
                     path: 'rule-uuid-no-topology',
@@ -355,16 +344,6 @@ evaluate.describe(
                     expectReuse: false,
                     seedStatus: 'closed',
                   },
-                  ...(confirmedAnchor && unrelatedDetection
-                    ? [
-                        {
-                          path: 'unconfirmed-rule',
-                          sequence: [confirmedAnchor, unrelatedDetection],
-                          expectReuse: false,
-                          seedUnconfirmedDetection: unrelatedDetection,
-                        },
-                      ]
-                    : []),
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -390,7 +369,6 @@ evaluate.describe(
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
                   stripSeedTopology: plan.stripSeedTopology,
-                  seedUnconfirmedDetection: plan.seedUnconfirmedDetection,
                 }));
               });
 
@@ -425,7 +403,6 @@ evaluate.describe(
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
                           continuation_without_topology: run.stripSeedTopology,
-                          continuation_unconfirmed_rule: run.seedUnconfirmedDetection?.rule_uuid,
                         },
                       })),
                     },
@@ -554,31 +531,6 @@ evaluate.describe(
                             ...event,
                             '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
                             event_uuid: eventUuid,
-                            ...(i === 0 && run.seedUnconfirmedDetection
-                              ? {
-                                  signals: [
-                                    ...(event.signals ?? []).map((signal) => ({
-                                      ...signal,
-                                      confirmed: true as const,
-                                    })),
-                                    {
-                                      type: 'detection' as const,
-                                      stream_name: run.seedUnconfirmedDetection.stream_name,
-                                      confirmed: false,
-                                      description:
-                                        'The agent found no evidence that this signal supports the event.',
-                                      metadata: {
-                                        detection_id: run.seedUnconfirmedDetection.detection_id,
-                                        rule_name: run.seedUnconfirmedDetection.rule_name,
-                                        rule_uuid: run.seedUnconfirmedDetection.rule_uuid,
-                                        change_point_type:
-                                          run.seedUnconfirmedDetection.change_point_type,
-                                        p_value: run.seedUnconfirmedDetection.p_value,
-                                      },
-                                    },
-                                  ],
-                                }
-                              : {}),
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),

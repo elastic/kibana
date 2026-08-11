@@ -24,7 +24,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: 'Apply the `severity` field contract: `80-critical` requires confirmed impact meeting its critical definition, including a single critical operation fully blocked end-to-end. Grade the direct signal evidence over a generic "degraded" phrase in the summary. Use `60-high` or lower when the direct evidence shows completion for some users, intermittent or partial impact, a limited cohort, or unconfirmed impact.',
+    text: 'Apply the `severity` field contract in order. `80-critical` requires site-wide impact, blocked paths across distinct core operations, a component that can no longer perform its primary function end-to-end, or confirmed sensitive-data exposure. A single endpoint or lookup path that blocks only that operation — even for every caller who reaches it — is `60-high`, not `80-critical`. Grade the direct signal evidence over a generic "degraded" phrase in the summary. Use `40-medium` or lower when grounding has not confirmed whether the operation fails versus only slows, or impact is minor and bounded.',
   },
   {
     id: 'weak_signals_low_severity',
