@@ -57,6 +57,9 @@ import {
 import { stringifyWithExpandedEmpties } from '../../../detection_engine/rule_management/components/rule_details/three_way_diff/comparison_side/utils';
 import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
+/* Server-populated on save; spurious diffs against an AI-proposed rule, so hidden on the card only. */
+const AGENT_BUILDER_HIDDEN_PROPERTIES: Array<keyof RuleResponse> = ['license', 'meta'];
+
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
     <strong>{children}</strong>
@@ -133,10 +136,10 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const hasDiff = useMemo(() => {
     if (!originalRule || !rule) return false;
-    const normalizedNew = omit(
-      normalizeRule({ ...rule, threat: rule.threat ?? [] }),
-      ...HIDDEN_PROPERTIES
-    );
+    const normalizedNew = omit(normalizeRule({ ...rule, threat: rule.threat ?? [] }), [
+      ...HIDDEN_PROPERTIES,
+      ...AGENT_BUILDER_HIDDEN_PROPERTIES,
+    ]);
     const normalizedOld = pick(normalizeRule(originalRule), Object.keys(normalizedNew));
     return (
       stringifyWithExpandedEmpties(normalizedOld) !== stringifyWithExpandedEmpties(normalizedNew)
@@ -272,6 +275,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
               rightDiffSideLabel={DIFF_AI_LABEL}
               leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
               rightDiffSideDescription={DIFF_AI_DESCRIPTION}
+              extraHiddenProperties={AGENT_BUILDER_HIDDEN_PROPERTIES}
             />
           </EuiAccordion>
         </>

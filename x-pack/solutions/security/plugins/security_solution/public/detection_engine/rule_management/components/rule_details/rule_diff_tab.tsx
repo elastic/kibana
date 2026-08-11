@@ -58,13 +58,6 @@ export const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   'rule_source',
   /* Technical property that changes at rule runtime. */
   'execution_summary',
-  /*
-    Server-populated fields that are auto-added when a rule is saved via the form.
-    They are not part of the user-facing rule definition and would show as spurious
-    diffs when comparing an AI-proposed rule against its saved counterpart.
-  */
-  'license',
-  'meta',
 ];
 
 /**
@@ -130,6 +123,8 @@ interface RuleDiffTabProps {
   rightDiffSideLabel: string;
   leftDiffSideDescription: string;
   rightDiffSideDescription: string;
+  /** Caller-scoped properties to hide on top of {@link HIDDEN_PROPERTIES}. */
+  extraHiddenProperties?: Array<keyof RuleResponse>;
 }
 
 export const RuleDiffTab = ({
@@ -139,9 +134,11 @@ export const RuleDiffTab = ({
   rightDiffSideLabel,
   leftDiffSideDescription,
   rightDiffSideDescription,
+  extraHiddenProperties = [],
 }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
-    const visibleNewRuleProperties = omit(normalizeRule(newRule), ...HIDDEN_PROPERTIES);
+    const hiddenProperties = [...HIDDEN_PROPERTIES, ...extraHiddenProperties];
+    const visibleNewRuleProperties = omit(normalizeRule(newRule), ...hiddenProperties);
     const visibleOldRuleProperties = omit(
       /* Only compare properties that are present in the update. */
       pick(normalizeRule(oldRule), Object.keys(visibleNewRuleProperties))
@@ -151,7 +148,7 @@ export const RuleDiffTab = ({
       stringifyWithExpandedEmpties(visibleOldRuleProperties),
       stringifyWithExpandedEmpties(visibleNewRuleProperties),
     ];
-  }, [oldRule, newRule]);
+  }, [oldRule, newRule, extraHiddenProperties]);
 
   return (
     <>
