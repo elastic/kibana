@@ -145,6 +145,21 @@ describe('DocumentSummary', () => {
     expect(fetchAISummary).toHaveBeenCalled();
   });
 
+  it('renders the error callout above the existing summary when `hasSummary` is true and `fetchError` is set', () => {
+    (useDocumentSummary as jest.Mock).mockReturnValue({
+      ...baseHookReturn,
+      summary: 'Existing summary',
+      hasSummary: true,
+      fetchError: 'Something went wrong on the server.',
+    });
+
+    render(<DocumentSummary {...defaultProps} />);
+
+    expect(screen.getByText('Failed to generate summary')).toBeInTheDocument();
+    expect(screen.getByText('Something went wrong on the server.')).toBeInTheDocument();
+    expect(screen.getByText('Existing summary')).toBeInTheDocument();
+  });
+
   it('renders the connector missing callout when no defaultConnectorId is provided', () => {
     render(<DocumentSummary {...defaultProps} defaultConnectorId={undefined} />);
 

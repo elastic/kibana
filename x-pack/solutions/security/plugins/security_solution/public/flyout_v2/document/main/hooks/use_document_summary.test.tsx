@@ -334,6 +334,43 @@ describe('useDocumentSummary', () => {
     expect(result.current.fetchError).toBe('Something went wrong on the server.');
   });
 
+  it('should keep hasSummary true when regeneration fails but a persisted summary exists', async () => {
+    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
+      data: {
+        data: [{ id: 'summary-id', summary: 'Existing summary', replacements: {} }],
+        prompt: 'Generate an alert summary!',
+      },
+      refetch: mockRefetchSummary,
+      isFetched: true,
+    });
+
+    const { result } = renderHook(() =>
+      useDocumentSummary({
+        documentId: 'test-document-id',
+        defaultConnectorId: 'test-connector-id',
+        promptContext,
+        showAnonymizedValues: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.hasSummary).toBe(true);
+    });
+
+    mockSendMessage.mockResolvedValue({
+      response: 'Something went wrong on the server.',
+      isError: true,
+    });
+
+    await act(async () => {
+      await result.current.fetchAISummary();
+    });
+
+    expect(mockBulkUpdate).not.toHaveBeenCalled();
+    expect(result.current.hasSummary).toBe(true);
+    expect(result.current.fetchError).toBe('Something went wrong on the server.');
+  });
+
   it('should abort stream on unmount', () => {
     const { unmount } = renderHook(() =>
       useDocumentSummary({

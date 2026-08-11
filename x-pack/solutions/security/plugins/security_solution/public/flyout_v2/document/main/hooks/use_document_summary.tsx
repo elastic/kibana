@@ -309,7 +309,9 @@ export const useDocumentSummary = ({
           setFetchError(
             hasInvalidResponse && !rawResponse.isError ? INVALID_RESPONSE : errorResponse
           );
-          setHasSummary(false);
+          if (fetchedSummary.data.length === 0) {
+            setHasSummary(false);
+          }
         }
       }
       setIsGenerating(false);

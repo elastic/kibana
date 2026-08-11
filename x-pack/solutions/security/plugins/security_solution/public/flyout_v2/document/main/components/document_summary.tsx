@@ -228,6 +228,20 @@ export const DocumentSummary = memo(
 
     return (
       <>
+        {fetchError && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={GENERATION_ERROR_TITLE}
+              color="danger"
+              iconType="error"
+              size="s"
+            >
+              <EuiText size="xs">{fetchError}</EuiText>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         {isConnectorMissing && (
           <>
             <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />
