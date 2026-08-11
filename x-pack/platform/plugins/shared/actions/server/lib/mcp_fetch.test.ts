@@ -573,9 +573,7 @@ describe('buildMcpFetchFactory', () => {
       const resource = buildMcpFetchFactory(configurationUtilities, logger)({ targetUrl });
       await resource.close();
 
-      await expect(resource.fetch(targetUrl)).rejects.toThrow(
-        'MCP fetch resource is closed.'
-      );
+      await expect(resource.fetch(targetUrl)).rejects.toThrow('MCP fetch resource is closed.');
       expect(globalFetchSpy).not.toHaveBeenCalled();
     });
   });
