@@ -1582,9 +1582,9 @@
     },
     {
       "groupName": "typescript",
-<<<<<<< HEAD
       "matchDepNames": [
-        "typescript"
+        "typescript",
+        "typescript-7"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1596,12 +1596,6 @@
         "Team:Operations",
         "release_note:skip"
       ],
-=======
-      "matchDepNames": ["typescript", "typescript-7"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       "minimumReleaseAge": "14 days",
       "enabled": false
     },

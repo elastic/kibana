@@ -55,14 +55,6 @@ describe('dev/mocha/junit report generation', () => {
     const [testsuite] = report.testsuites.testsuite;
     expect(testsuite.$.time).toMatch(DURATION_REGEX);
     expect(testsuite.$.timestamp).toMatch(ISO_DATE_SEC_REGEX);
-<<<<<<< HEAD
-    const expectedCommandLine = process.env.CI
-      ? 'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests'
-      : 'node node_modules/jest-worker/build/workers/processChild.js';
-
-    expect(testsuite.$).toMatchObject({
-      'command-line': expectedCommandLine,
-=======
     const expectedCommandLineMultiple =
       'node scripts/jest --config src/platform/packages/shared/kbn-test/jest.config.js --runInBand --coverage=false --passWithNoTests';
     const expectedMoonCommandLine =
@@ -75,7 +67,6 @@ describe('dev/mocha/junit report generation', () => {
           `(${expectedCommandLineMultiple}|${expectedMoonCommandLine}|${expectedCommandLineSingle})`
         )
       ),
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       failures: '2',
       name: 'test',
       skipped: '1',
