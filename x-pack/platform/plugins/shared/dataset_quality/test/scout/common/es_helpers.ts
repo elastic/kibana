@@ -262,6 +262,17 @@ export const deleteDataStreamIfExists = async (
   log: ScoutLogger
 ) => ignoreMissing(() => esClient.indices.deleteDataStream({ name }), log, `data stream ${name}`);
 
+export const disableFailureStoreIfExists = async (
+  esClient: EsClient,
+  name: string,
+  log: ScoutLogger
+) =>
+  ignoreMissing(
+    () => esClient.indices.putDataStreamOptions({ name, failure_store: { enabled: false } }),
+    log,
+    `failure store options for data stream ${name}`
+  );
+
 /**
  * Stamps the global `logs` index template as belonging to an integration, which
  * is how a data stream gets reported as "categorized" without installing a package.
