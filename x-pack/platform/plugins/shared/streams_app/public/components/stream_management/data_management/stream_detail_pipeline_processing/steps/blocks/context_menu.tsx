@@ -280,6 +280,7 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
     <EuiPopover
       id={menuPopoverId}
       data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuPopover"
+      aria-label={tooltipContent}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => togglePopover(false)}

@@ -158,6 +158,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, branch, mod
   return (
     <EuiPopover
       id={menuPopoverId}
+      aria-label={createText}
       button={mode === 'inline' ? inlineButton : button}
       isOpen={isPopoverOpen}
       closePopover={() => togglePopover(false)}
