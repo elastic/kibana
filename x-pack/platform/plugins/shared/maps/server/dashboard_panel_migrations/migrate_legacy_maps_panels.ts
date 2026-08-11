@@ -20,24 +20,21 @@ import type {
 } from '@kbn/embeddable-plugin/server';
 import {
   createLegacyCompatibleBasemapLayersFromLegacyParams,
+  createLegacyGeoGridSourceDescriptor,
+  createLegacyJoinMetricStyleField,
   createLegacyRegionMapAggDescriptor,
+  createLegacyRegionMapVectorStyleProperties,
+  createLegacySourceMetricStyleField,
+  createLegacyTermSourceDescriptor,
   createLegacyTileMapAggDescriptor,
+  createLegacyTileMapVectorStyleProperties,
   getEmsLayerIdFromSelectedLayer,
   getLegacyGeoGridRequestType,
 } from '../../common/legacy_maps_conversion';
 
-import {
-  AGG_TYPE,
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  GRID_RESOLUTION,
-  LAYER_STYLE_TYPE,
-  LAYER_TYPE,
-  SOURCE_TYPES,
-  STYLE_TYPE,
-  VECTOR_STYLES,
-} from '../../common/constants';
+import { AGG_TYPE, GRID_RESOLUTION, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
 import { getJoinAggKey, getSourceAggKey } from '../../common/get_agg_key';
+import { createEmsFileSourceDescriptor } from '../../common/descriptor_factories';
 
 const TILE_MAP_VIS_TYPE = 'tile_map' as const;
 const REGION_MAP_VIS_TYPE = 'region_map' as const;
@@ -227,18 +224,14 @@ function createTileMapLayerDescriptor(params: {
     metricFieldName
   );
 
-  const sourceDescriptor = {
-    type: SOURCE_TYPES.ES_GEO_GRID,
+  const sourceDescriptor = createLegacyGeoGridSourceDescriptor({
     id: uuidv4(),
     indexPatternId,
     geoField: geoFieldName,
     metrics: [metricsDescriptor],
     requestType,
     resolution: GRID_RESOLUTION.MOST_FINE,
-    applyGlobalQuery: true,
-    applyGlobalTime: true,
-    applyForceRefresh: true,
-  } as const;
+  });
 
   if (requestType === 'heatmap') {
     return {
@@ -259,38 +252,12 @@ function createTileMapLayerDescriptor(params: {
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
   });
 
-  const metricStyleField = {
-    name: metricSourceKey,
-    origin: FIELD_ORIGIN.SOURCE,
-  } as const;
-
-  const styleProperties: Record<string, unknown> = {
-    [VECTOR_STYLES.FILL_COLOR]: {
-      type: STYLE_TYPE.DYNAMIC,
-      options: {
-        field: metricStyleField,
-        color: colorSchema || 'Yellow to Red',
-        type: COLOR_MAP_TYPE.ORDINAL,
-        fieldMetaOptions: { isEnabled: false },
-      },
-    },
-    [VECTOR_STYLES.LINE_COLOR]: {
-      type: STYLE_TYPE.STATIC,
-      options: { color: '#3d3d3d' },
-    },
-  };
-
-  if (mapType.toLowerCase() === 'scaled circle markers') {
-    styleProperties[VECTOR_STYLES.ICON_SIZE] = {
-      type: STYLE_TYPE.DYNAMIC,
-      options: {
-        minSize: 7,
-        maxSize: 18,
-        field: metricStyleField,
-        fieldMetaOptions: { isEnabled: false },
-      },
-    };
-  }
+  const metricStyleField = createLegacySourceMetricStyleField(metricSourceKey);
+  const styleProperties = createLegacyTileMapVectorStyleProperties({
+    metricStyleField,
+    color: colorSchema || 'Yellow to Red',
+    mapType,
+  });
 
   return {
     id: uuidv4(),
@@ -344,6 +311,14 @@ function createRegionMapLayerDescriptor(params: {
     rightSourceId: joinId,
   });
 
+  const termSourceDescriptor = createLegacyTermSourceDescriptor({
+    id: joinId,
+    indexPatternId,
+    term: termsFieldName,
+    ...(termsSize !== undefined ? { size: termsSize } : {}),
+    metrics: [metricsDescriptor],
+  });
+
   return {
     id: uuidv4(),
     type: LAYER_TYPE.GEOJSON_VECTOR,
@@ -352,40 +327,22 @@ function createRegionMapLayerDescriptor(params: {
     alpha: 1,
     minZoom: 0,
     maxZoom: 24,
-    sourceDescriptor: {
-      type: SOURCE_TYPES.EMS_FILE,
+    sourceDescriptor: createEmsFileSourceDescriptor({
       id: emsLayerId,
       tooltipProperties: ['name', leftFieldName],
-    },
+    }),
     joins: [
       {
         leftField: leftFieldName,
-        right: {
-          type: SOURCE_TYPES.ES_TERM_SOURCE,
-          id: joinId,
-          indexPatternId,
-          term: termsFieldName,
-          ...(termsSize !== undefined ? { size: termsSize } : {}),
-          metrics: [metricsDescriptor],
-          applyGlobalQuery: true,
-          applyGlobalTime: true,
-          applyForceRefresh: true,
-        },
+        right: termSourceDescriptor,
       },
     ],
     style: {
       type: LAYER_STYLE_TYPE.VECTOR,
-      properties: {
-        [VECTOR_STYLES.FILL_COLOR]: {
-          type: STYLE_TYPE.DYNAMIC,
-          options: {
-            field: { name: joinKey, origin: FIELD_ORIGIN.JOIN },
-            color: colorSchema || 'Yellow to Red',
-            type: COLOR_MAP_TYPE.ORDINAL,
-            fieldMetaOptions: { isEnabled: false },
-          },
-        },
-      },
+      properties: createLegacyRegionMapVectorStyleProperties({
+        joinStyleField: createLegacyJoinMetricStyleField(joinKey),
+        color: colorSchema || 'Yellow to Red',
+      }),
     },
     disableTooltips: false,
   };

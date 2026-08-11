@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type {
   AggDescriptor,
   ColorDynamicOptions,
@@ -13,19 +14,14 @@ import type {
   VectorStylePropertiesDescriptor,
 } from '../../../common/descriptor_types';
 import {
+  createLegacyGeoGridSourceDescriptor,
+  createLegacySourceMetricStyleField,
   createLegacyTileMapAggDescriptor,
+  createLegacyTileMapVectorStyleProperties,
   getLegacyGeoGridRequestType,
 } from '../../../common/legacy_maps_conversion';
-import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  STYLE_TYPE,
-  VECTOR_STYLES,
-} from '../../../common/constants';
+import { GRID_RESOLUTION, RENDER_AS, VECTOR_STYLES } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
-import { ESGeoGridSource } from '../sources/es_geo_grid_source';
 import { GeoJsonVectorLayer } from './vector_layer';
 import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
@@ -67,7 +63,8 @@ export function createTileMapLayerDescriptor({
 
   const requestType = getLegacyGeoGridRequestType(mapType);
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
-  const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
+  const geoGridSourceDescriptor = createLegacyGeoGridSourceDescriptor({
+    id: uuidv4(),
     indexPatternId,
     geoField: geoFieldName,
     metrics: [metricsDescriptor],
@@ -86,51 +83,22 @@ export function createTileMapLayerDescriptor({
     aggType: metricsDescriptor.type,
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
   });
-  const metricStyleField = {
-    name: metricSourceKey,
-    origin: FIELD_ORIGIN.SOURCE,
-  };
+  const metricStyleField = createLegacySourceMetricStyleField(metricSourceKey);
 
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
-  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
-    [VECTOR_STYLES.FILL_COLOR]: {
-      type: STYLE_TYPE.DYNAMIC,
-      options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
-        field: metricStyleField,
-        color: colorPallette ? colorPallette.value : 'Yellow to Red',
-        type: COLOR_MAP_TYPE.ORDINAL,
-        fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
-        },
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> =
+    createLegacyTileMapVectorStyleProperties({
+      metricStyleField,
+      color: colorPallette ? colorPallette.value : 'Yellow to Red',
+      mapType,
+      defaults: {
+        fillColor: defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]
+          .options as ColorDynamicOptions,
+        iconSize: defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions,
       },
-    },
-    [VECTOR_STYLES.LINE_COLOR]: {
-      type: STYLE_TYPE.STATIC,
-      options: {
-        color: '#3d3d3d',
-      },
-    },
-  };
-  if (mapType.toLowerCase() === 'scaled circle markers') {
-    styleProperties[VECTOR_STYLES.ICON_SIZE] = {
-      type: STYLE_TYPE.DYNAMIC,
-      options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
-        maxSize: 18,
-        field: metricStyleField,
-        fieldMetaOptions: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions)
-            .fieldMetaOptions,
-          isEnabled: false,
-        },
-      },
-    };
-  }
+    });
 
   return GeoJsonVectorLayer.createDescriptor({
     label,

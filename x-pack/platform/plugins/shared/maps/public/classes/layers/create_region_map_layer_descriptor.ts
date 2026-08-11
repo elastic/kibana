@@ -13,16 +13,15 @@ import type {
   ESTermSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
-import { createLegacyRegionMapAggDescriptor } from '../../../common/legacy_maps_conversion';
 import {
-  COLOR_MAP_TYPE,
-  FIELD_ORIGIN,
-  SOURCE_TYPES,
-  STYLE_TYPE,
-  VECTOR_STYLES,
-} from '../../../common/constants';
+  createLegacyJoinMetricStyleField,
+  createLegacyRegionMapAggDescriptor,
+  createLegacyRegionMapVectorStyleProperties,
+  createLegacyTermSourceDescriptor,
+} from '../../../common/legacy_maps_conversion';
+import { VECTOR_STYLES } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
-import { EMSFileSource } from '../sources/ems_file_source';
+import { createEmsFileSourceDescriptor } from '../../../common/descriptor_factories';
 import { GeoJsonVectorLayer } from './vector_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
@@ -71,19 +70,13 @@ export function createRegionMapLayerDescriptor({
   const colorPallette = NUMERICAL_COLOR_PALETTES.find((pallette) => {
     return pallette.value.toLowerCase() === colorSchema.toLowerCase();
   });
-  const termSourceDescriptor: Writable<ESTermSourceDescriptor> = {
-    type: SOURCE_TYPES.ES_TERM_SOURCE,
+  const termSourceDescriptor: Writable<ESTermSourceDescriptor> = createLegacyTermSourceDescriptor({
     id: joinId,
     indexPatternId,
     term: termsFieldName,
     metrics: [metricsDescriptor],
-    applyGlobalQuery: true,
-    applyGlobalTime: true,
-    applyForceRefresh: true,
-  };
-  if (termsSize !== undefined) {
-    termSourceDescriptor.size = termsSize;
-  }
+    size: termsSize,
+  });
   return GeoJsonVectorLayer.createDescriptor({
     label,
     joins: [
@@ -92,28 +85,19 @@ export function createRegionMapLayerDescriptor({
         right: termSourceDescriptor,
       },
     ],
-    sourceDescriptor: EMSFileSource.createDescriptor({
+    sourceDescriptor: createEmsFileSourceDescriptor({
       id: emsLayerId,
       tooltipProperties: ['name', leftFieldName],
     }),
     style: VectorStyle.createDescriptor({
-      [VECTOR_STYLES.FILL_COLOR]: {
-        type: STYLE_TYPE.DYNAMIC,
-        options: {
-          ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
-          field: {
-            name: joinKey,
-            origin: FIELD_ORIGIN.JOIN,
-          },
-          color: colorPallette ? colorPallette.value : 'Yellow to Red',
-          type: COLOR_MAP_TYPE.ORDINAL,
-          fieldMetaOptions: {
-            ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions)
-              .fieldMetaOptions,
-            isEnabled: false,
-          },
+      ...createLegacyRegionMapVectorStyleProperties({
+        joinStyleField: createLegacyJoinMetricStyleField(joinKey),
+        color: colorPallette ? colorPallette.value : 'Yellow to Red',
+        defaults: {
+          fillColor: defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]
+            .options as ColorDynamicOptions,
         },
-      },
+      }),
     }),
   });
 }

@@ -15,3 +15,11 @@ export {
   createLegacyTileMapAggDescriptor,
 } from './agg_descriptors';
 export { getLegacyGeoGridRequestType } from './geo_grid_request_type';
+export {
+  createLegacyGeoGridSourceDescriptor,
+  createLegacyJoinMetricStyleField,
+  createLegacyRegionMapVectorStyleProperties,
+  createLegacySourceMetricStyleField,
+  createLegacyTermSourceDescriptor,
+  createLegacyTileMapVectorStyleProperties,
+} from './legacy_layer_descriptor_parts';
