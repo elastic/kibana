@@ -23,7 +23,7 @@ import { useRef } from 'react';
  * `useMemo`/`useEffect` hooks keyed on the stabilized value then skip recomputation
  * instead of re-running on every render.
  */
-export const useStableByFingerprint = <T,>(value: T, fingerprint: string): T => {
+export const useStableByFingerprint = <T>(value: T, fingerprint: string): T => {
   const ref = useRef({ value, fingerprint });
   if (ref.current.fingerprint !== fingerprint) {
     ref.current = { value, fingerprint };

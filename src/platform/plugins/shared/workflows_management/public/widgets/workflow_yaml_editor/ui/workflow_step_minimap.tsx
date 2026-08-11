@@ -9,10 +9,10 @@
 
 import { EuiScreenReaderOnly, shade, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import type { monaco } from '@kbn/monaco';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
+import { i18n } from '@kbn/i18n';
+import type { monaco } from '@kbn/monaco';
 import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
@@ -153,7 +153,9 @@ const MinimapStepRow = React.memo(
     colors,
     onStepClick,
   }: MinimapStepRowProps) => {
-    const pillMaxW = isNested ? MINIMAP_MAX_LABEL_W - MINIMAP_NESTED_PILL_INDENT : MINIMAP_MAX_LABEL_W;
+    const pillMaxW = isNested
+      ? MINIMAP_MAX_LABEL_W - MINIMAP_NESTED_PILL_INDENT
+      : MINIMAP_MAX_LABEL_W;
     return (
       <button
         role="listitem"
@@ -450,14 +452,23 @@ export const WorkflowStepMinimap = ({
   const outerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
-        ? buildOuterRailSegments(stepIds, nestingInfo.depths, MINIMAP_OUTER_TRACK_X, MINIMAP_ITEM_HEIGHT)
+        ? buildOuterRailSegments(
+            stepIds,
+            nestingInfo.depths,
+            MINIMAP_OUTER_TRACK_X,
+            MINIMAP_ITEM_HEIGHT
+          )
         : [],
     [stepIds, nestingInfo]
   );
   const innerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
-        ? buildInnerRailSegments(nestingInfo.parentGroups, MINIMAP_INNER_TRACK_X, MINIMAP_ITEM_HEIGHT)
+        ? buildInnerRailSegments(
+            nestingInfo.parentGroups,
+            MINIMAP_INNER_TRACK_X,
+            MINIMAP_ITEM_HEIGHT
+          )
         : [],
     [nestingInfo]
   );
@@ -600,8 +611,7 @@ export const WorkflowStepMinimap = ({
         >
           {railLines}
           {stepEntries.map(([stepId], index) => {
-            const isNested =
-              nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
+            const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
             const cx = nestingInfo.hasNesting
               ? isNested
                 ? MINIMAP_INNER_TRACK_X
@@ -624,8 +634,7 @@ export const WorkflowStepMinimap = ({
 
         {/* ── Step pill buttons ── */}
         {stepEntries.map(([stepId, step], index) => {
-          const isNested =
-            nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
+          const isNested = nestingInfo.hasNesting && (nestingInfo.depths.get(stepId) ?? 0) > 0;
           return (
             <MinimapStepRow
               key={stepId}
