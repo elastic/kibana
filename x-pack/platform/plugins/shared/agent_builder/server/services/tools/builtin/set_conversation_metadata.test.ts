@@ -85,7 +85,12 @@ describe('createSetConversationMetadataTool', () => {
   it('allows updating multiple fields in a single call', async () => {
     const updates = { severity: 'medium', affected_user: 'bob', is_confirmed: true };
     const result = await callHandler(updates);
-    expect(updateConversationMetadata).toHaveBeenCalledWith(updates);
+    // Boolean values are serialized to strings before being persisted (flattened mapping).
+    expect(updateConversationMetadata).toHaveBeenCalledWith({
+      severity: 'medium',
+      affected_user: 'bob',
+      is_confirmed: 'true',
+    });
     expect(result.results[0].data.updated_keys).toEqual(
       expect.arrayContaining(['severity', 'affected_user', 'is_confirmed'])
     );
