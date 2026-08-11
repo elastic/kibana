@@ -218,6 +218,132 @@ const CloudFormationWidget: React.FunctionComponent<{
   );
 };
 
+type ManagedAccessMethod = 'access_keys' | 'identity_federation';
+
+// Managed Integrations widget — a second, separate credential set (used by
+// the managed integration itself to query data, distinct from the
+// CloudFormation/Setup access credentials above it). "Access Keys" is the
+// default per the same convention used elsewhere on this step.
+const ManagedIntegrationsWidget: React.FunctionComponent<{
+  servicesCount: number;
+  onValidityChange: (isValid: boolean) => void;
+}> = ({ servicesCount, onValidityChange }) => {
+  const [method, setMethod] = useState<ManagedAccessMethod>('access_keys');
+  const [accessKeyId, setAccessKeyId] = useState('');
+  const [isAccessKeyIdTouched, setIsAccessKeyIdTouched] = useState(false);
+  const [secretAccessKey, setSecretAccessKey] = useState('');
+  const [federatedIdentityName, setFederatedIdentityName] = useState('');
+  const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
+  const [roleArn, setRoleArn] = useState('');
+
+  const isAccessKeyIdInvalid = isAccessKeyIdTouched && accessKeyId.trim().length === 0;
+  const isIdentityNameInvalid = isIdentityNameTouched && federatedIdentityName.trim().length === 0;
+
+  useEffect(() => {
+    const isValid =
+      method === 'access_keys'
+        ? accessKeyId.trim().length > 0 && secretAccessKey.trim().length > 0
+        : federatedIdentityName.trim().length > 0;
+    onValidityChange(isValid);
+  }, [method, accessKeyId, secretAccessKey, federatedIdentityName, onValidityChange]);
+
+  return (
+    <EuiPanel
+      hasBorder
+      paddingSize="l"
+      style={{ overflow: 'hidden' }}
+      data-test-subj="awsOnboardingManagedIntegrationsPanel"
+    >
+      <PanelHeader iconType="package" title="Managed Integrations" servicesCount={servicesCount} />
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <p>
+          Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account.
+          Refer to our{' '}
+          <EuiLink href="#" target="_blank" external>
+            Getting Started
+          </EuiLink>{' '}
+          guide for details.
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiRadioGroup
+        options={[
+          { id: 'access_keys', label: 'Access Keys' },
+          { id: 'identity_federation', label: 'Identity Federation' },
+        ]}
+        idSelected={method}
+        onChange={(id) => setMethod(id as ManagedAccessMethod)}
+        name="awsOnboardingManagedIntegrationsMethod"
+        legend={{ children: 'Preferred method' }}
+        data-test-subj="awsOnboardingManagedIntegrationsMethodRadioGroup"
+      />
+      <EuiSpacer size="m" />
+
+      {method === 'access_keys' ? (
+        <>
+          <EuiFormRow
+            label="Access key ID"
+            isInvalid={isAccessKeyIdInvalid}
+            error="Required"
+            style={HALF_WIDTH}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              value={accessKeyId}
+              onChange={(e) => setAccessKeyId(e.target.value)}
+              onBlur={() => setIsAccessKeyIdTouched(true)}
+              isInvalid={isAccessKeyIdInvalid}
+              aria-label="Access key ID"
+              data-test-subj="awsOnboardingManagedAccessKeyId"
+            />
+          </EuiFormRow>
+          <EuiFormRow label="Secret access key" style={HALF_WIDTH} fullWidth>
+            <EuiFieldPassword
+              type="dual"
+              fullWidth
+              value={secretAccessKey}
+              onChange={(e) => setSecretAccessKey(e.target.value)}
+              aria-label="Secret access key"
+              data-test-subj="awsOnboardingManagedSecretAccessKey"
+            />
+          </EuiFormRow>
+        </>
+      ) : (
+        <>
+          <EuiFormRow
+            label="Federated Identity Name"
+            isInvalid={isIdentityNameInvalid}
+            error="Federated Identity Name is required"
+            style={HALF_WIDTH}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              value={federatedIdentityName}
+              onChange={(e) => setFederatedIdentityName(e.target.value)}
+              onBlur={() => setIsIdentityNameTouched(true)}
+              isInvalid={isIdentityNameInvalid}
+              aria-label="Federated Identity Name"
+              data-test-subj="awsOnboardingManagedFederatedIdentityName"
+            />
+          </EuiFormRow>
+          <EuiFormRow label="Role ARN" style={HALF_WIDTH} fullWidth>
+            <EuiFieldText
+              fullWidth
+              value={roleArn}
+              onChange={(e) => setRoleArn(e.target.value)}
+              aria-label="Role ARN"
+              data-test-subj="awsOnboardingManagedRoleArn"
+            />
+          </EuiFormRow>
+        </>
+      )}
+    </EuiPanel>
+  );
+};
+
 type PreferredAccessMethod = 'identity_federation' | 'direct_access_keys';
 type IdentityMode = 'new_identity' | 'existing_identity';
 
@@ -481,6 +607,7 @@ export const StepAuthentication: React.FunctionComponent<{
   const [agentAccessKeyId, setAgentAccessKeyId] = useState('');
   const [agentSecretAccessKey, setAgentSecretAccessKey] = useState('');
   const [managedCredsValid, setManagedCredsValid] = useState(false);
+  const [managedIntegrationsValid, setManagedIntegrationsValid] = useState(false);
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -494,9 +621,16 @@ export const StepAuthentication: React.FunctionComponent<{
     const isValid =
       deploymentMethod === 'agent'
         ? agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0
-        : managedCredsValid;
+        : managedCredsValid && managedIntegrationsValid;
     onCredentialsValidChange(isValid);
-  }, [deploymentMethod, agentAccessKeyId, agentSecretAccessKey, managedCredsValid, onCredentialsValidChange]);
+  }, [
+    deploymentMethod,
+    agentAccessKeyId,
+    agentSecretAccessKey,
+    managedCredsValid,
+    managedIntegrationsValid,
+    onCredentialsValidChange,
+  ]);
 
   return (
     <>
@@ -613,6 +747,11 @@ export const StepAuthentication: React.FunctionComponent<{
             onRegionChange={onDeployRegionChange}
             isLaunched={isDeployed}
             onLaunch={onLaunchCloudFormation}
+          />
+          <EuiSpacer size="m" />
+          <ManagedIntegrationsWidget
+            servicesCount={servicesCount}
+            onValidityChange={setManagedIntegrationsValid}
           />
         </>
       )}
