@@ -184,17 +184,9 @@ const assertEsqlVisualization = async (
   await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.discover.openLensEditFlyout();
 
-  await expect
-    .poll(
-      async () => {
-        const dimensions = await page.testSubj.locator('lns-dimensionTrigger-textBased').all();
-        if (dimensions.length !== 2) return false;
-        const text = await dimensions[1].innerText();
-        return text === 'averageB';
-      },
-      { timeout: 10_000 }
-    )
-    .toBe(true);
+  await expect(
+    page.testSubj.locator('lnsXY_yDimensionPanel > lns-dimensionTrigger-textBased')
+  ).toHaveText('averageB');
 };
 
 const logsDBScenarios: LogsDBScenario[] = [
