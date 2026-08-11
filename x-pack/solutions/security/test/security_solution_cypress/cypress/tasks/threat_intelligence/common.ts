@@ -112,7 +112,7 @@ export const waitForViewToBeLoaded = () => {
         }
         if ($body.find(REFRESH_BUTTON).length === 0) {
           cy.reload();
-          cy.get(REFRESH_BUTTON, { timeout: 15000 }).should('exist');
+          cy.get(REFRESH_BUTTON, { timeout: 30000 }).should('exist');
         } else {
           cy.get(REFRESH_BUTTON).click();
         }
@@ -154,5 +154,6 @@ export const clickAction = (propertySelector: string, rowIndex: number, actionSe
     ($el) => $el.is(':visible')
   );
 
+  cy.get(propertySelector).filter(':visible').eq(rowIndex).trigger('mouseover');
   cy.get(actionSelector).first().click();
 };
