@@ -142,7 +142,7 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-02-25`               |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
 | `SIGEVENTS_QUERYGEN_CONCURRENCY`        | Concurrent scenario runs per KI query generation experiment (each scenario has its own isolated replay index) | `4`     |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |

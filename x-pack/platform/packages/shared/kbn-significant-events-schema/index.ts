@@ -60,6 +60,7 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   isFeatureWithFilter,
+  MAX_FEATURE_ARRAY_ITEMS,
   mergeFeature,
   normalizeFeatureSlug,
   normalizeFeatureSlugForMatching,
@@ -78,6 +79,7 @@ export {
   CHANGE_POINT_TYPES,
   type KnowledgeIndicator,
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventStatus,
   type SignificantEventsTuningConfig,
   type TuningConfigFieldBounds,
@@ -118,6 +120,13 @@ export {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './src/significant_events';
 
 export type {
