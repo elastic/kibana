@@ -48,44 +48,34 @@ export class GlobalNavService extends FtrService {
    * new global header and, unlike the classic/project headers, no breadcrumb trail. Chrome style can
    * flip mid-session (e.g. entering a solution view), so this is probed per call.
    *
-   * The active header can be briefly absent while navigating, so we wait for one of the known headers
-   * to settle before deciding. Pages without a recognized header retain classic behavior.
+   * The active header can be briefly absent while navigating, so we wait until a known header is
+   * displayed before deciding. Pages without a recognized header retain classic behavior.
    */
   public async isNextProjectChrome(): Promise<boolean> {
-    // The chrome shell renders exactly one of these headers once loaded, but none while navigating,
-    // and a stale header from the previous page can briefly overlap the incoming one.
-    const headerSubjects = ['chromeNextGlobalHeader', 'headerGlobalNav', 'kibanaProjectHeader'];
-    const anyHeaderSelector = headerSubjects.map((subj) => `[data-test-subj="${subj}"]`).join(',');
-
-    // Pages without a recognized header retain classic behavior.
-    if (!(await this.find.existsByCssSelector(anyHeaderSelector, this.findTimeout))) {
-      return false;
-    }
-
-    // Wait until a single recognized header remains before reading the mode. A zero-timeout snapshot
-    // taken right after navigation can miss `chromeNextGlobalHeader` while it is still mounting (and
-    // catch a lingering previous header), which made repeated calls disagree and throw.
-    let isNextProjectChrome = false;
-    await this.retry.waitForWithTimeout(
-      'chrome header to settle on a single recognized state',
-      this.findTimeout,
-      async () => {
-        // Probe sequentially: `exists` mutates the driver's shared implicit-wait timeout, so running
-        // the three checks concurrently lets their set/restore interleave and an absent-header lookup
-        // blocks for the full implicit wait, overrunning this settle deadline.
-        const present: boolean[] = [];
-        for (const subj of headerSubjects) {
-          present.push(await this.testSubjects.exists(subj, { timeout: 0 }));
-        }
-        if (present.filter(Boolean).length !== 1) {
-          return false;
-        }
-        [isNextProjectChrome] = present;
+    const detectHeader = async (): Promise<boolean | undefined> => {
+      if (await this.testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) {
         return true;
       }
-    );
+      if (
+        (await this.testSubjects.exists('headerGlobalNav', { timeout: 0 })) ||
+        (await this.testSubjects.exists('kibanaProjectHeader', { timeout: 0 }))
+      ) {
+        return false;
+      }
+      return undefined;
+    };
 
-    return isNextProjectChrome;
+    try {
+      return await this.retry.tryForTime(this.findTimeout, async () => {
+        const result = await detectHeader();
+        if (result === undefined) {
+          throw new Error('no chrome header has rendered yet');
+        }
+        return result;
+      });
+    } catch {
+      return (await detectHeader()) ?? false;
+    }
   }
 
   public async moveMouseToLogo(): Promise<void> {
