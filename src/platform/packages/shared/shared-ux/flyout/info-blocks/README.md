@@ -1,11 +1,11 @@
-# @kbn/shared-ux-flyout-info-blocks
+# @kbn/flyout-info-blocks
 
 Presentational "info blocks" card: a responsive row of labeled key attributes, each a fixed-style text title above an arbitrary `ReactNode` value.
 
 ## Usage
 
 ```tsx
-import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
+import { InfoBlocks } from '@kbn/flyout-info-blocks';
 
 <InfoBlocks
   items={[
@@ -24,7 +24,7 @@ import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
 - Each `InfoBlockItem` accepts an optional `size` (EUI font-scale key, e.g. `'xl'`) to enlarge a single value, and an optional `color` (EUI text color token, e.g. `'danger'`) to tint it.
 
 ```tsx
-import { InfoBlocks } from '@kbn/shared-ux-flyout-info-blocks';
+import { InfoBlocks } from '@kbn/flyout-info-blocks';
 
 <InfoBlocks
   maxColumns="auto"
