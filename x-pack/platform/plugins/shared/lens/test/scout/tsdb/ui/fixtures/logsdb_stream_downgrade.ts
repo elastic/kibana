@@ -28,8 +28,7 @@ interface LogsDBScenarioConfig {
   type: LogsDBScenarioType;
 }
 
-type SetupFixtures = Pick<LensUiTestFixtures, 'apiServices' | 'uiSettings'> &
-  Pick<LensUiWorkerFixtures, 'tsdbHelper'>;
+type SetupFixtures = Pick<LensUiWorkerFixtures, 'apiServices' | 'uiSettings' | 'tsdbHelper'>;
 type LensFixtures = Pick<LensUiTestFixtures, 'page' | 'pageObjects'>;
 
 const getScenarioIndexes = (
@@ -150,11 +149,9 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
     const bars = chartData.bars?.[0]?.bars ?? [];
     expect(bars[0]?.y).toBeGreaterThan(0);
     expect(bars[bars.length - 1]?.y).toBeGreaterThan(0);
+  };
 
-    if (!includesDowngradedStream) {
-      return;
-    }
-
+  const assertDowngradeBoundary = async ({ pageObjects }: LensFixtures): Promise<void> => {
     await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.datePicker.setAbsoluteRange({
       from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
@@ -209,11 +206,7 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
     expect(bars[bars.length - 1]?.y).toBeGreaterThan(0);
   };
 
-  const assertAnnotation = async (
-    timeField: string,
-    extraFields: string[],
-    { page, pageObjects }: LensFixtures
-  ): Promise<void> => {
+  const configureAnnotationLayer = async ({ page, pageObjects }: LensFixtures): Promise<void> => {
     await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -235,6 +228,13 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
 
     await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
     await page.testSubj.click('lnsXY_annotation_query');
+  };
+
+  const assertAnnotation = async (
+    timeField: string,
+    extraFields: string[],
+    { page, pageObjects }: LensFixtures
+  ): Promise<void> => {
     await pageObjects.lens.style.configureQueryAnnotation({
       queryString: 'host.name: *',
       timeField,
@@ -272,7 +272,9 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
     setup,
     cleanup: cleanupScenario,
     assertTimestampHistogram,
+    assertDowngradeBoundary,
     assertAlternateDateHistogram,
+    configureAnnotationLayer,
     assertTimestampAnnotation,
     assertAlternateTimeFieldAnnotation,
     assertEsqlVisualization,

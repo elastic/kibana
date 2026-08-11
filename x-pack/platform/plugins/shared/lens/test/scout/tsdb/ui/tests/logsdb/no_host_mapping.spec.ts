@@ -29,7 +29,9 @@ test.describe(
     test.afterAll(async () => scenario.cleanup());
 
     test('renders a timestamp histogram', async ({ page, pageObjects }) => {
-      await scenario.assertTimestampHistogram({ page, pageObjects });
+      await test.step('visualize the full-range timestamp histogram', async () => {
+        await scenario.assertTimestampHistogram({ page, pageObjects });
+      });
     });
 
     test('renders an alternate-date histogram', async ({ page, pageObjects }) => {
@@ -37,11 +39,21 @@ test.describe(
     });
 
     test('renders a timestamp annotation', async ({ page, pageObjects }) => {
-      await scenario.assertTimestampAnnotation({ page, pageObjects });
+      await test.step('configure the chart and annotation layer', async () => {
+        await scenario.configureAnnotationLayer({ page, pageObjects });
+      });
+      await test.step('configure the timestamp annotation and verify rendering', async () => {
+        await scenario.assertTimestampAnnotation({ page, pageObjects });
+      });
     });
 
     test('renders an alternate-time-field annotation', async ({ page, pageObjects }) => {
-      await scenario.assertAlternateTimeFieldAnnotation({ page, pageObjects });
+      await test.step('configure the chart and annotation layer', async () => {
+        await scenario.configureAnnotationLayer({ page, pageObjects });
+      });
+      await test.step('configure the alternate-time-field annotation and verify rendering', async () => {
+        await scenario.assertAlternateTimeFieldAnnotation({ page, pageObjects });
+      });
     });
 
     test('opens an ES|QL visualization from Discover', async ({ page, pageObjects }) => {
