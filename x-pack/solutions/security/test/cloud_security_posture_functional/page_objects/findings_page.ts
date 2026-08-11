@@ -333,8 +333,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
     },
     async openDropDown() {
+      // The grouping popover stays open on selection and persists across tests, so a blind
+      // toggle can close it. Anchor on its actual state: wait for closed, click, confirm open.
+      await testSubjects.missingOrFail('groupByContextMenu');
       const element = await this.getElement();
       await element.click();
+      await testSubjects.existOrFail('groupByContextMenu');
     },
   });
 
