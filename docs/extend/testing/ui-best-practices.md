@@ -277,20 +277,25 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 :::::
 
-## Use the EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
+## Use EUI component helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-When a page object has to drive an EUI component, use the [EUI test helpers](./eui-test-helpers.md) exposed through `page.components` instead of hand-rolling selectors against EUI's DOM. Each helper is a *Component Object*: a wrapper around one component that encapsulates its interactions. Assign it to a `readonly` class field, like any other stable locator.
+EUI components are awkward to drive by hand (portals, virtualization, async state), so prefer a ready-made helper and keep it in a `readonly` class field. Scout has two, depending on the component:
+
+- **`page.components`** — the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Combo boxes today, with more moving over time.
+- **`@kbn/scout` wrappers** (or your solution's Scout package) — for components that don't have a published helper yet: data grids, toasts, super selects, checkboxes, text fields, selectables, and code blocks.
 
 :::::{dropdown} Example
 
 ```ts
-import type { EuiComboBoxObject, ScoutPage } from '@kbn/scout';
+import { EuiDataGridWrapper, type EuiComboBoxObject, type ScoutPage } from '@kbn/scout';
 
-export class StreamsAppPage {
+export class MyAppPage {
   public readonly fieldComboBox: EuiComboBoxObject;
+  public readonly resultsGrid: EuiDataGridWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.fieldComboBox = this.page.components.comboBox('fieldSelectorComboBox');
+    this.resultsGrid = new EuiDataGridWrapper(this.page, 'resultsTable-loaded');
   }
 
   async selectField(value: string) {
@@ -301,7 +306,7 @@ export class StreamsAppPage {
 
 :::::
 
-If a Component Object lacks what you need, don't subclass it or drive the component yourself — that puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
+If neither covers your component, `page.testSubj` locators are fine for simple ones. For a component that's genuinely hard to drive reliably, add a wrapper under `kbn-scout`'s `eui_components/` instead of solving it privately in your page object — that's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
