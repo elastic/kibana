@@ -156,12 +156,7 @@ class Package {
 
   /**
    * Returns the group to which this package belongs
-<<<<<<< HEAD
-   * @readonly
    * @returns {import('@kbn/repo-info/types').ModuleGroup}
-=======
-   * @returns {import('@kbn/projects-solutions-groups').ModuleGroup}
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
    */
   getGroup() {
     return this.group;
@@ -169,12 +164,7 @@ class Package {
 
   /**
    * Returns the package visibility, i.e. whether it can be accessed by everybody or only packages in the same group
-<<<<<<< HEAD
-   * @readonly
    * @returns {import('@kbn/repo-info/types').ModuleVisibility}
-=======
-   * @returns {import('@kbn/projects-solutions-groups').ModuleVisibility}
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
    */
   getVisibility() {
     return this.visibility;

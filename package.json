@@ -1944,12 +1944,8 @@
     "tree-kill": "1.2.2",
     "ts-morph": "15.1.0",
     "tsd": "0.33.0",
-<<<<<<< HEAD
-    "typescript": "5.9.3",
-=======
     "typescript": "6.0.3",
     "typescript-7": "npm:typescript@7.0.2",
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.0",
     "watchpack": "1.7.5",

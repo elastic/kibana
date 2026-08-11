@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
-import { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods/dist-types/generated/parameters-and-response-types';
-=======
 import type { RestEndpointMethodTypes } from '@octokit/rest';
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
 import { buildkite, octokit, SELECTED_COMMIT_META_KEY, CURRENT_COMMIT_META_KEY } from '../shared';
 
 export type GithubCommitType = RestEndpointMethodTypes['repos']['getCommit']['response']['data'];

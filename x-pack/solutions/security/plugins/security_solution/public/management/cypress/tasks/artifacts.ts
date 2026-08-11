@@ -27,11 +27,7 @@ export const removeAllArtifacts = () => {
   }
 };
 
-<<<<<<< HEAD
-export const removeAllArtifactsPromise = () =>
-=======
 export const removeAllArtifactsPromise = (): PromiseLike<number> =>
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
     (result) => result.filter(Boolean).length
   );
