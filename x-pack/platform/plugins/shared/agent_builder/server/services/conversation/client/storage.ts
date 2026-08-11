@@ -34,12 +34,8 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
-      // Append-only event timeline (events-native conversations). Stored as an opaque blob,
-      // mirroring conversation_rounds; the timeline is read whole and in order.
       events: types.object({ dynamic: false, properties: {} }),
-      // The run lock held while an execution is active (CAS enforcement lands later).
       active_execution: types.object({ dynamic: false, properties: {} }),
-      // Doc-format discriminator: present (CONVERSATION_SCHEMA_VERSION) on events-native docs.
       schema_version: types.long({}),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
