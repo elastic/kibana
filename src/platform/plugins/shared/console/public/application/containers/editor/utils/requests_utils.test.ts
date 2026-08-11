@@ -434,6 +434,42 @@ describe('requests_utils', () => {
       expect(mockAddToastWarning).not.toHaveBeenCalled();
     });
 
+    it('SHOULD preserve following selected lines when a request expands during formatting', () => {
+      const editorTextLines = [
+        'GET _search',
+        '{"query":{"match_all":{}}}',
+        '',
+        '// after the request',
+      ];
+      const formattedData = getAutoIndentedRequests(
+        [
+          {
+            startLineNumber: 1,
+            endLineNumber: 2,
+            startOffset: 0,
+            endOffset: 0,
+          },
+        ],
+        editorTextLines.join('\n'),
+        editorTextLines.join('\n'),
+        mockAddToastWarning
+      );
+
+      expect(formattedData).toBe(
+        [
+          'GET _search',
+          '{',
+          '  "query": {',
+          '    "match_all": {}',
+          '  }',
+          '}',
+          '',
+          '// after the request',
+        ].join('\n')
+      );
+      expect(mockAddToastWarning).not.toHaveBeenCalled();
+    });
+
     it(`auto-indents method line but doesn't auto-indent data with comments`, () => {
       const methodLine = sampleEditorTextLines[TEST_REQUEST_4.startLineNumber - 1];
       const dataText = sampleEditorTextLines

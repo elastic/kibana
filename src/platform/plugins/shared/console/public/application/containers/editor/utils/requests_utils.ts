@@ -162,6 +162,68 @@ export function expandTripleQuoteStrings(data: string, tripleQuoteStrings: strin
   return allData.join('');
 }
 
+const getIndentedRequestDataLines = (dataLines: string[]): string[] => {
+  const dataString = dataLines.join('\n');
+  const dataJsons = splitDataIntoJsonObjects(dataString);
+
+  return dataJsons.map((data) => {
+    // Since triple-quote strings are not valid JSON syntax, collapse them before indenting.
+    const { collapsedTripleQuotesData, tripleQuoteStrings } = collapseTripleQuoteStrings(data);
+    const indentedData = indentData(collapsedTripleQuotesData);
+    return expandTripleQuoteStrings(indentedData, tripleQuoteStrings);
+  });
+};
+
+const getFormattedRequestLines = (
+  request: AdjustedParsedRequest,
+  allTextLines: string[],
+  addToastWarning: (text: string) => void
+): string[] => {
+  const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
+  const firstLine = cleanUpWhitespaces(requestLines[0]);
+  const dataLines = requestLines.slice(1);
+
+  if (containsComments(dataLines.join(''))) {
+    addToastWarning(
+      i18n.translate('console.notification.monaco.warning.nonSupportedAutoindentation', {
+        defaultMessage:
+          'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.',
+      })
+    );
+    return [firstLine, ...dataLines];
+  }
+
+  return requestLines.length > 1
+    ? [firstLine, ...getIndentedRequestDataLines(dataLines)]
+    : [firstLine];
+};
+
+const formatSelectedTextLines = (
+  requests: AdjustedParsedRequest[],
+  selectedTextLines: string[],
+  allTextLines: string[],
+  addToastWarning: (text: string) => void
+): string[] => {
+  const formattedTextLines: string[] = [];
+  let requestIndex = 0;
+
+  for (let lineIndex = 0; lineIndex < selectedTextLines.length; lineIndex++) {
+    const request = requests[requestIndex];
+    const selectedLine = selectedTextLines[lineIndex];
+
+    if (!request || selectedLine !== allTextLines[request.startLineNumber - 1]) {
+      formattedTextLines.push(cleanUpWhitespaces(selectedLine));
+      continue;
+    }
+
+    formattedTextLines.push(...getFormattedRequestLines(request, allTextLines, addToastWarning));
+    lineIndex += request.endLineNumber - request.startLineNumber;
+    requestIndex++;
+  }
+
+  return formattedTextLines;
+};
+
 /**
  * This function takes a string containing unformatted Console requests and
  * returns a text in which the requests are auto-indented.
@@ -177,62 +239,9 @@ export const getAutoIndentedRequests = (
 ): string => {
   const selectedTextLines = selectedText.split(`\n`);
   const allTextLines = allText.split(`\n`);
-  const formattedTextLines: string[] = [];
-
-  let currentLineIndex = 0;
-  let currentRequestIndex = 0;
-
-  while (currentLineIndex < selectedTextLines.length) {
-    const request = requests[currentRequestIndex];
-    // Check if the current line is the start of the next request
-    if (
-      request &&
-      selectedTextLines[currentLineIndex] === allTextLines[request.startLineNumber - 1]
-    ) {
-      // Start of a request
-      const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
-      const firstLine = cleanUpWhitespaces(requestLines[0]);
-      formattedTextLines.push(firstLine);
-      const dataLines = requestLines.slice(1);
-      if (containsComments(dataLines.join(''))) {
-        // If data has comments, add it as it is - without formatting
-        // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
-        formattedTextLines.push(...dataLines);
-        addToastWarning(
-          i18n.translate('console.notification.monaco.warning.nonSupportedAutoindentation', {
-            defaultMessage:
-              'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.',
-          })
-        );
-      } else {
-        // If no comments, indent data
-        if (requestLines.length > 1) {
-          const dataString = dataLines.join('\n');
-          const dataJsons = splitDataIntoJsonObjects(dataString);
-          formattedTextLines.push(
-            ...dataJsons.map((data) => {
-              // Since triple-quote strings are not a valid JSON syntax, we need to first collapse them before indenting the data
-              const { collapsedTripleQuotesData, tripleQuoteStrings } =
-                collapseTripleQuoteStrings(data);
-              const indentedData = indentData(collapsedTripleQuotesData);
-              // Return any collapsed triple-quote strings
-              return expandTripleQuoteStrings(indentedData, tripleQuoteStrings);
-            })
-          );
-        }
-      }
-
-      currentLineIndex = currentLineIndex + requestLines.length;
-      currentRequestIndex++;
-    } else {
-      // Current line is a comment or whitespaces
-      // Trim white spaces and add it to the formatted text
-      formattedTextLines.push(cleanUpWhitespaces(selectedTextLines[currentLineIndex]));
-      currentLineIndex++;
-    }
-  }
-
-  return formattedTextLines.join('\n');
+  return formatSelectedTextLines(requests, selectedTextLines, allTextLines, addToastWarning).join(
+    '\n'
+  );
 };
 
 /*
