@@ -83,7 +83,7 @@ export const ActionPolicySnoozeModal = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>
-      <EuiModalBody>
+      <EuiModalBody css={{ '.euiModalBody__overflow': { paddingBlockEnd: 0 } }}>
         <EuiText size="xs" color="subdued">
           <p>{SUBTITLE}</p>
         </EuiText>
@@ -94,7 +94,7 @@ export const ActionPolicySnoozeModal = ({
           onScheduleChange={(endDate) => setSnoozedUntil(endDate ?? undefined)}
         />
       </EuiModalBody>
-      <EuiModalFooter>
+      <EuiModalFooter css={{ paddingBlockStart: 0 }}>
         <EuiButton
           fill
           fullWidth
