@@ -19,7 +19,6 @@ interface StructuralPiece {
 type RequestDataPiece = RequestDataToken | StructuralPiece;
 
 interface SplitState {
-  readonly dataObjects: string[];
   readonly currentObject: string;
   readonly depth: number;
   readonly hasCompletedTopLevelObject: boolean;
@@ -57,10 +56,13 @@ const appendPiece = (state: SplitState, piece: RequestDataPiece): SplitState => 
   return { ...state, currentObject: state.currentObject + piece.value };
 };
 
-const completeCurrentObject = (state: SplitState): SplitState => {
+const completeCurrentObject = (state: SplitState, dataObjects: string[]): SplitState => {
   const object = state.currentObject.trim();
+  if (object) {
+    dataObjects.push(object);
+  }
+
   return {
-    dataObjects: object ? [...state.dataObjects, object] : state.dataObjects,
     currentObject: '',
     depth: 0,
     hasCompletedTopLevelObject: false,
@@ -89,22 +91,29 @@ const isTrailingPiece = (piece: RequestDataPiece): boolean => {
   );
 };
 
-const consumeSplitPiece = (state: SplitState, piece: RequestDataPiece): SplitState => {
+const consumeSplitPiece = (
+  state: SplitState,
+  piece: RequestDataPiece,
+  dataObjects: string[]
+): SplitState => {
   if (!state.hasCompletedTopLevelObject || isTrailingPiece(piece)) {
     return consumeObjectPiece(state, piece);
   }
 
-  return consumeObjectPiece(completeCurrentObject(state), piece);
+  return consumeObjectPiece(completeCurrentObject(state, dataObjects), piece);
 };
 
 export const splitRequestDataObjects = (dataString: string): string[] => {
-  const state = getRequestDataPieces(dataString).reduce<SplitState>(consumeSplitPiece, {
-    dataObjects: [],
-    currentObject: '',
-    depth: 0,
-    hasCompletedTopLevelObject: false,
-  });
+  const dataObjects: string[] = [];
+  const state = getRequestDataPieces(dataString).reduce<SplitState>(
+    (currentState, piece) => consumeSplitPiece(currentState, piece, dataObjects),
+    {
+      currentObject: '',
+      depth: 0,
+      hasCompletedTopLevelObject: false,
+    }
+  );
   const lastObject = state.currentObject.trim();
 
-  return lastObject ? [...state.dataObjects, lastObject] : state.dataObjects;
+  return lastObject ? [...dataObjects, lastObject] : dataObjects;
 };

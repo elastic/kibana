@@ -21,12 +21,16 @@ describe('request data splitter', () => {
 
   describe('WHEN opaque values contain braces', () => {
     it.each([
-      ['double-quoted strings', '{"a":"}"}\n{"b":2}'],
-      ['single-quoted strings', "{'a': '}'}\n{'b': 2}"],
-      ['triple-quoted strings', '{"script":"""return "}";"""}\n{"b":2}'],
-      ['comments', '{\n// }\n"a":1\n}\n{"b":2}'],
-    ])('SHOULD ignore braces in %s', (_description, source) => {
-      expect(splitRequestDataObjects(source)).toHaveLength(2);
+      ['double-quoted strings', '{"a":"}"}\n{"b":2}', ['{"a":"}"}', '{"b":2}']],
+      ['single-quoted strings', "{'a': '}'}\n{'b': 2}", ["{'a': '}'}", "{'b': 2}"]],
+      [
+        'triple-quoted strings',
+        '{"script":"""return "}";"""}\n{"b":2}',
+        ['{"script":"""return "}";"""}', '{"b":2}'],
+      ],
+      ['comments', '{\n// }\n"a":1\n}\n{"b":2}', ['{\n// }\n"a":1\n}', '{"b":2}']],
+    ])('SHOULD ignore braces in %s', (_description, source, expected) => {
+      expect(splitRequestDataObjects(source)).toEqual(expected);
     });
   });
 
