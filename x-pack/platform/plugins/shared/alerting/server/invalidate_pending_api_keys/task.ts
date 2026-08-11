@@ -13,6 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { runInvalidate } from '@kbn/task-manager-plugin/server';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
@@ -62,7 +63,7 @@ function registerApiKeyInvalidatorTaskDefinition(
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
       stateSchemaByVersion,
-      taskTypeGroup: 'alerting',
+      taskTypeGroup: TaskTypeGroup.Alerting,
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });

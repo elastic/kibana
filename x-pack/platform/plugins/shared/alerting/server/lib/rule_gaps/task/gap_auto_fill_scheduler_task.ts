@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import dateMath from '@kbn/datemath';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import { findGapsSearchAfter } from '../find_gaps';
 import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch';
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
@@ -386,7 +387,7 @@ export function registerGapAutoFillSchedulerTask({
     [GAP_AUTO_FILL_SCHEDULER_TASK_TYPE]: {
       title: 'Gap Auto Fill Scheduler',
       timeout: schedulerConfig?.timeout ?? DEFAULT_GAP_AUTO_FILL_SCHEDULER_TIMEOUT,
-      taskTypeGroup: 'alerting',
+      taskTypeGroup: TaskTypeGroup.Alerting,
       createTaskRunner: ({ taskInstance, fakeRequest, signal }) => {
         return {
           async run() {

@@ -17,6 +17,7 @@ import { type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import https from 'https';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ActionsConfig } from '../config';
 import type { ConnectorUsageReport } from './types';
 import type { ActionsPluginsStart } from '../plugin';
@@ -74,7 +75,7 @@ export class ConnectorUsageReportingTask {
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
         title: 'Connector usage reporting task',
         timeout: '1m',
-        taskTypeGroup: 'actions',
+        taskTypeGroup: TaskTypeGroup.Actions,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => this.runTask(taskInstance, core),

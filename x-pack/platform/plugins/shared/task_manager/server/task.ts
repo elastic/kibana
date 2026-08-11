@@ -295,7 +295,10 @@ export const taskDefinitionSchema = schema.object(
  * Defines a task which can be scheduled and run by the Kibana
  * task manager.
  */
-export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
+export type TaskDefinition = Omit<
+  TypeOf<typeof taskDefinitionSchema>,
+  'paramsSchema' | 'taskTypeGroup'
+> & {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
@@ -309,6 +312,7 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
+  taskTypeGroup?: TaskTypeGroup;
 };
 
 export enum TaskStatus {
