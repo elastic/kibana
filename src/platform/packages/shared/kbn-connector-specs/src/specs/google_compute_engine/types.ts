@@ -259,7 +259,7 @@ export const InsertFirewallInputSchema = lazySchema(() =>
         .max(1024)
         .optional()
         .describe(
-          'The network the rule attaches to, by name (for example "default") or full URL. Defaults to the project\'s default network.'
+          'The network the rule attaches to, by bare name (for example "default", as returned by getFirewall) or by full URL. A bare name is qualified to a full network URL before the call, because Compute Engine rejects an unqualified name. Defaults to the project\'s default network.'
         ),
       direction: z
         .enum(['INGRESS', 'EGRESS'])

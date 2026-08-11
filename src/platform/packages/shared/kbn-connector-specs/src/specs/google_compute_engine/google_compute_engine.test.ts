@@ -199,7 +199,7 @@ describe('GoogleComputeEngine', () => {
           status: 'RUNNING',
           zone: `${API}/projects/${PROJECT}/zones/${ZONE}`,
           machineType: `${API}/projects/${PROJECT}/zones/${ZONE}/machineTypes/n2-standard-4`,
-          tags: { items: ['estec-node'], fingerprint: 'rsQi2P9akjM=' },
+          tags: { items: ['web-node'], fingerprint: 'AAAAAAAAAAA=' },
           labels: { env: 'dev' },
           networkInterfaces: [
             {
@@ -239,7 +239,7 @@ describe('GoogleComputeEngine', () => {
         machineType: 'n2-standard-4',
         creationTimestamp: undefined,
         deletionProtection: false,
-        networkTags: ['estec-node'],
+        networkTags: ['web-node'],
         labels: { env: 'dev' },
         internalIps: ['10.128.0.43'],
         externalIps: ['35.202.12.11'],
@@ -430,7 +430,7 @@ describe('GoogleComputeEngine', () => {
   });
 
   describe('setInstanceTags', () => {
-    const withCurrentTags = (items: string[], fingerprint = 'rsQi2P9akjM=') => {
+    const withCurrentTags = (items: string[], fingerprint = 'AAAAAAAAAAA=') => {
       mockClient.get.mockResolvedValue({
         data: { name: INSTANCE, tags: { items, fingerprint } },
       });
@@ -440,7 +440,7 @@ describe('GoogleComputeEngine', () => {
     it('MERGES addTags with existing tags and sends the required fingerprint', async () => {
       // The whole point: network tags are what firewall rules match on, so a quarantine tag
       // must not drop the tags existing rules already target.
-      withCurrentTags(['estec-node', 'web']);
+      withCurrentTags(['web-node', 'web']);
 
       const result = (await getAction('setInstanceTags').handler(mockContext, {
         projectId: PROJECT,
@@ -453,16 +453,16 @@ describe('GoogleComputeEngine', () => {
         params: { fields: expect.stringContaining('tags/fingerprint') },
       });
       expect(mockClient.post).toHaveBeenCalledWith(`${INSTANCE_URL}/setTags`, {
-        items: ['estec-node', 'web', 'quarantine'],
-        fingerprint: 'rsQi2P9akjM=',
+        items: ['web-node', 'web', 'quarantine'],
+        fingerprint: 'AAAAAAAAAAA=',
       });
       expect(result.changed).toBe(true);
-      expect(result.previousTags).toEqual(['estec-node', 'web']);
-      expect(result.networkTags).toEqual(['estec-node', 'web', 'quarantine']);
+      expect(result.previousTags).toEqual(['web-node', 'web']);
+      expect(result.networkTags).toEqual(['web-node', 'web', 'quarantine']);
     });
 
     it('removes only the named tag and keeps the rest', async () => {
-      withCurrentTags(['estec-node', 'quarantine']);
+      withCurrentTags(['web-node', 'quarantine']);
 
       await getAction('setInstanceTags').handler(mockContext, {
         projectId: PROJECT,
@@ -472,11 +472,11 @@ describe('GoogleComputeEngine', () => {
       });
 
       const [, body] = mockClient.post.mock.calls[0];
-      expect(body.items).toEqual(['estec-node']);
+      expect(body.items).toEqual(['web-node']);
     });
 
     it('replaces the whole list when replaceTags is used', async () => {
-      withCurrentTags(['estec-node', 'web']);
+      withCurrentTags(['web-node', 'web']);
 
       await getAction('setInstanceTags').handler(mockContext, {
         projectId: PROJECT,
@@ -490,7 +490,7 @@ describe('GoogleComputeEngine', () => {
     });
 
     it('does not write when the tag set would not change', async () => {
-      withCurrentTags(['estec-node', 'quarantine']);
+      withCurrentTags(['web-node', 'quarantine']);
 
       const result = (await getAction('setInstanceTags').handler(mockContext, {
         projectId: PROJECT,
@@ -704,6 +704,48 @@ describe('GoogleComputeEngine', () => {
       });
       // Firewall operations are GLOBAL, so no zone may be attached or the poll 404s.
       expect(result.zone).toBeUndefined();
+    });
+
+    it('qualifies a bare network name to a full URL on insert', async () => {
+      // Compute Engine rejects an unqualified network with
+      // `400 Invalid value for field 'resource.network': 'default'. The URL is malformed.`,
+      // verified against the live API, even though getFirewall trims networks to that bare name.
+      mockClient.post.mockResolvedValue(operationResponse({ operationType: 'insert' }));
+
+      await getAction('insertFirewall').handler(mockContext, {
+        projectId: PROJECT,
+        firewallName: 'quarantine-deny-all',
+        network: 'default',
+        denied: [{ IPProtocol: 'all' }],
+      });
+
+      const [, body] = mockClient.post.mock.calls[0];
+      expect(body.network).toBe(`${API}/projects/${PROJECT}/global/networks/default`);
+    });
+
+    it('passes an already-qualified network reference through untouched', async () => {
+      mockClient.post.mockResolvedValue(operationResponse({ operationType: 'insert' }));
+      const qualified = `${API}/projects/${PROJECT}/global/networks/wf-net`;
+
+      await getAction('insertFirewall').handler(mockContext, {
+        projectId: PROJECT,
+        firewallName: 'quarantine-deny-all',
+        network: qualified,
+        denied: [{ IPProtocol: 'all' }],
+      });
+
+      expect(mockClient.post.mock.calls[0][1].network).toBe(qualified);
+
+      // A relative structural path is also already qualified: it must not be re-prefixed.
+      mockClient.post.mockClear();
+      mockClient.post.mockResolvedValue(operationResponse({ operationType: 'insert' }));
+      await getAction('insertFirewall').handler(mockContext, {
+        projectId: PROJECT,
+        firewallName: 'quarantine-deny-all',
+        network: 'global/networks/wf-net',
+        denied: [{ IPProtocol: 'all' }],
+      });
+      expect(mockClient.post.mock.calls[0][1].network).toBe('global/networks/wf-net');
     });
 
     it('requires either denied or allowed on insert', () => {

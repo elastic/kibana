@@ -56,6 +56,23 @@ const instancePath = (projectId: string, zone: string, instanceName: string): st
 const shortName = (selfLink?: string): string | undefined => selfLink?.split('/').pop();
 
 /**
+ * The inverse of shortName for a network reference on a WRITE.
+ *
+ * Compute Engine rejects a bare network name on firewall insert/patch with
+ * `400 Invalid value for field 'resource.network': 'default'. The URL is malformed.`, even though
+ * the reads in this spec trim networks down to exactly that bare name. Accepting the short form and
+ * qualifying it here keeps the round trip symmetrical: a name read from getFirewall can be written
+ * straight back without the caller reconstructing a URL.
+ *
+ * An already-qualified value (absolute URL, or a `projects/...`/`global/...` relative path) is a
+ * structural reference and is passed through untouched.
+ */
+const qualifyNetwork = (projectId: string, network: string): string =>
+  network.includes('/')
+    ? network
+    : `${projectPath(projectId)}/global/networks/${encodeURIComponent(network)}`;
+
+/**
  * Google's partial-response `fields` mask, requesting only what trimInstance returns.
  *
  * This is a correctness requirement, not an optimization. An unmasked
@@ -628,7 +645,7 @@ Gotchas:
             `${projectPath(input.projectId)}/global/firewalls`,
             {
               name: input.firewallName,
-              ...(input.network ? { network: input.network } : {}),
+              ...(input.network ? { network: qualifyNetwork(input.projectId, input.network) } : {}),
               ...(input.direction ? { direction: input.direction } : {}),
               ...(input.priority !== undefined ? { priority: input.priority } : {}),
               ...(input.targetTags ? { targetTags: input.targetTags } : {}),
