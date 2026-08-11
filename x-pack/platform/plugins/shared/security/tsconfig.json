@@ -118,6 +118,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/unsaved-changes-prompt",
     "@kbn/ui-callout",
+    "@kbn/zod",
   ],
   "exclude": ["target/**/*"]
 }

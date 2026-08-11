@@ -18,6 +18,9 @@ import {
 } from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
+  ServiceAccount,
+  ServiceAccountAssumableBy,
+  ServiceAccountRoleAssignments,
   UiamOAuthClientLogo,
   UiamOAuthClientResponse,
   UiamOAuthClientType,
@@ -35,6 +38,18 @@ import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
+
+/**
+ * Represents the request body for creating a service account via UIAM.
+ */
+export interface CreateServiceAccountRequestBody {
+  /** A descriptive name for the service account. */
+  name: string;
+  /** Roles granted to the service account, referenced by name. */
+  role_assignments: ServiceAccountRoleAssignments;
+  /** Principals allowed to exchange the service account's credentials for a token. */
+  assumable_by: ServiceAccountAssumableBy[];
+}
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -249,6 +264,20 @@ export interface UiamServicePublic {
    * @returns A promise that resolves to a response containing per-key success/failure results.
    */
   convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
+
+  /**
+   * Creates a service account via the UIAM service.
+   *
+   * Called with the caller's own credential, so UIAM downscopes the new account
+   * to a subset of that caller's privileges.
+   *
+   * @param accessToken UIAM session access token.
+   * @param body The request body for creating the service account.
+   */
+  createServiceAccount(
+    accessToken: string,
+    body: CreateServiceAccountRequestBody
+  ): Promise<ServiceAccount>;
 
   /**
    * Creates an OAuth client via the UIAM service.
@@ -673,6 +702,43 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamService.createServiceAccount}.
+   */
+  async createServiceAccount(
+    accessToken: string,
+    body: CreateServiceAccountRequestBody
+  ): Promise<ServiceAccount> {
+    try {
+      this.#logger.debug('Attempting to create service account.');
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': this.#userAgentHeader,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            ...body,
+            type: 'project',
+          }),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully created service account with id ${response.id}`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to create service account: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

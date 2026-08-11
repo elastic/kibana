@@ -14,6 +14,7 @@ import {
   HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
+import type { ServiceAccount } from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -1052,6 +1053,81 @@ describe('UiamService', () => {
         }),
         dispatcher: AGENT_MOCK,
       });
+    });
+  });
+
+  describe('#createServiceAccount', () => {
+    const body = {
+      name: 'nightshift-relay',
+      role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+      assumable_by: [
+        {
+          type: 'project-service-account' as const,
+          organization_id: 'organization-id',
+          project_type: 'security',
+          project_id: 'project-id',
+        },
+      ],
+    };
+
+    it('properly calls UIAM service to create a service account', async () => {
+      const mockResponse: ServiceAccount = {
+        id: 'service-account-id',
+        type: 'project',
+        name: 'nightshift-relay',
+        organization_id: 'organization-id',
+        role_assignments: body.role_assignments,
+        assumable_by: body.assumable_by,
+      };
+
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+      await expect(uiamService.createServiceAccount('access-token', body)).resolves.toEqual(
+        mockResponse
+      );
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+          Authorization: 'Bearer access-token',
+        },
+        body: JSON.stringify({
+          ...body,
+          type: 'project',
+        }),
+        dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('reproduces the UIAM status code and payload when creation fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 409,
+        headers: new Headers(),
+        json: async () => ({
+          error: {
+            code: 'SERVICE_ACCOUNT_LIMIT_REACHED',
+            type: 'conflict',
+            message: 'Project has reached its service account limit',
+          },
+        }),
+      });
+
+      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
+
+    it('logs and rethrows transport errors', async () => {
+      fetchSpy.mockRejectedValue(new Error('socket hang up'));
+
+      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toThrowError(
+        'socket hang up'
+      );
     });
   });
 

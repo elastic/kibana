@@ -44,6 +44,7 @@ describe('convertSecurityApi', () => {
       },
       serviceAccounts: {
         isEnabled: jest.fn(),
+        create: jest.fn(),
       },
       fakeRequestEnricher: jest.fn(),
     };

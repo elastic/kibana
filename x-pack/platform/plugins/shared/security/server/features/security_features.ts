@@ -101,10 +101,31 @@ const applicationConnectionsManagementFeature: ElasticsearchFeatureConfig = {
   ],
 };
 
+// The management entry is inert until a management app with this id is registered
+// (https://github.com/elastic/kibana/issues/284466); without it, that app would start out disabled.
+const serviceAccountsManagementFeature: ElasticsearchFeatureConfig = {
+  id: 'service_accounts',
+  management: {
+    security: ['service_accounts'],
+  },
+  catalogue: ['security'],
+  privileges: [
+    {
+      requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
+      ui: [],
+    },
+  ],
+};
+
 export const securityFeatures = [
   userManagementFeature,
   rolesManagementFeature,
   apiKeysManagementFeature,
   roleMappingsManagementFeature,
   applicationConnectionsManagementFeature,
+  serviceAccountsManagementFeature,
 ];
