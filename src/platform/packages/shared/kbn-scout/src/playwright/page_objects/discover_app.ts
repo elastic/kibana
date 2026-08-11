@@ -157,9 +157,13 @@ export class DiscoverApp {
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
     const title = name.endsWith('*') ? name : `${name}*`;
+    const timestampCombo = this.page.components.comboBox('timestampField');
 
     // Retry: title validation can race its debounced index lookup and get stuck
     // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    // Re-submitting also covers serverless, where the form's submission re-validation can
+    // transiently report "no matching indices" even though the matching sources panel already
+    // shows results, leaving the flyout open with its submit buttons disabled.
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const isLastAttempt = attempt === maxAttempts;
@@ -173,10 +177,23 @@ export class DiscoverApp {
         .and(this.page.locator('[data-validation-error="0"]'))
         .waitFor({ state: 'visible' });
 
-      // wait for timestamp options; default @timestamp applies.
-      await timestampField
-        .and(this.page.locator('[data-is-loading="0"]'))
-        .waitFor({ state: 'visible', timeout: 30_000 });
+      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
+      // field's initial state, so on its own it cannot tell "options loaded" apart from
+      // "loading has not started". Submitting too early still passes validation, but creates
+      // the data view with no time field, so no time filter is applied and hit counts include
+      // documents outside the selected range.
+      await expect
+        .poll(
+          async () => {
+            const isLoading = await timestampField.getAttribute('data-is-loading');
+            if (isLoading !== '0') {
+              return false;
+            }
+            return (await timestampCombo.getSelectedOptions()).length > 0;
+          },
+          { timeout: 30_000, intervals: [200] }
+        )
+        .toBe(true);
 
       if (adHoc) {
         await this.page.testSubj.click('exploreIndexPatternButton');
@@ -273,7 +290,52 @@ export class DiscoverApp {
       await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async editDataViewFromSearchBar({
+    newIndexPattern,
+    newTimeField,
+  }: {
+    newIndexPattern?: string;
+    newTimeField?: string;
+  }) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (newIndexPattern) {
+      const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+      await titleInput.fill(newIndexPattern);
+      const form = this.page.testSubj.locator('indexPatternEditorForm');
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+    }
+
+    if (newTimeField) {
+      const timestampField = this.page.testSubj.locator('timestampField');
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      await this.page.components.comboBox('timestampField').setSelectedOptions([newTimeField]);
+    }
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    const confirmVisible = await confirmButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) {
+      await confirmButton.click();
+    }
+
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -291,6 +353,42 @@ export class DiscoverApp {
     await this.codeEditor.setCodeEditorValue(script);
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async getCurrentDataViewId(): Promise<string> {
+    const currentUrl = this.page.url();
+    const matches = [...currentUrl.matchAll(/dataViewId:[^,]*/g)];
+    const ids = matches.map(([m]) =>
+      decodeURIComponent(m).replace('dataViewId:', '').replaceAll("'", '')
+    );
+    if (!ids.length) {
+      throw new Error(
+        `Discover URL state doesn't contain a dataViewId reference. URL: ${currentUrl}`
+      );
+    }
+    const first = ids[0];
+    if (!ids.every((id) => id === first)) {
+      throw new Error('Discover URL state contains different dataViewId references.');
+    }
+    return first;
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    // The field may appear in multiple sidebar sections (Popular + Available);
+    // scope to Available fields to avoid strict-mode violations.
+    const fieldItem = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await fieldItem.waitFor({ state: 'visible' });
+    await fieldItem.click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`discoverFieldListPanelDelete-${fieldName}`);
+    const confirmModal = this.page.testSubj.locator('runtimeFieldDeleteConfirmModal');
+    await confirmModal.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('deleteModalConfirmText', 'remove');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await confirmModal.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -355,20 +453,6 @@ export class DiscoverApp {
     const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     await confirmButton.click();
     await fieldEditor.waitFor({ state: 'hidden' });
-  }
-
-  async deleteRuntimeField(fieldName: string) {
-    await this.searchFieldInSidebar(fieldName);
-    const field = this.page.testSubj
-      .locator('fieldListGroupedAvailableFields')
-      .locator(`[data-test-subj="field-${fieldName}"]`);
-    await field.waitFor({ state: 'visible' });
-    await field.click();
-    const deleteButton = this.page.testSubj.locator(`discoverFieldListPanelDelete-${fieldName}`);
-    await deleteButton.click();
-    await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.waitUntilTabIsLoaded();
   }
 
   async clickAppMenuItem(
@@ -679,6 +763,15 @@ export class DiscoverApp {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    await this.waitUntilHitCountHasSettled();
+  }
+
+  private async waitUntilHitCountHasSettled() {
+    const loadingCounter = this.page.testSubj
+      .locator('discoverQueryTotalHits')
+      .and(this.page.locator('[data-fetch-status="loading"]'));
+
+    await loadingCounter.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {

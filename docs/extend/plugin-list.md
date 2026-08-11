@@ -98,7 +98,7 @@ mapped_pages:
 | [visTypeTagcloud](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/tagcloud) | WARNING: Missing or empty README. |
 | [visTypeTimelion](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/timelion/README.md) | Contains the timelion visualization and the timelion backend. |
 | [visTypeTimeseries](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/vis_types/timeseries) | WARNING: Missing or empty README. |
-| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
+| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega/README.md) | Dashboard supports a dedicated by-value vega panel. Its stored config holds a spec string (JSON or HJSON); title, time range, and drilldown fields are optional. The string is preserved exactly, so comments and formatting round-trip. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
