@@ -462,7 +462,9 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         </>
       )}
 
-      <EuiHorizontalRule margin="xl" />
+      {/* Steps 3-5 end in bordered cards, so a rule above the footer reads as
+          a duplicate line there — keep it only on the first two steps. */}
+      {currentStep < 3 ? <EuiHorizontalRule margin="xl" /> : <EuiSpacer size="xl" />}
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={onCancel} flush="left">
