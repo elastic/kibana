@@ -157,9 +157,11 @@ describe('utils', () => {
         canEditCustomHighlightedFields: false,
         canEditInvestigationGuides: false,
       };
-      const ruleUpdate = { exceptions_list: [], investigation_fields: undefined, note: null } as unknown as Parameters<
-        typeof validateEditedFieldWritePermissions
-      >[0];
+      const ruleUpdate = {
+        exceptions_list: [],
+        investigation_fields: undefined,
+        note: null,
+      } as unknown as Parameters<typeof validateEditedFieldWritePermissions>[0];
 
       expect(() => validateEditedFieldWritePermissions(ruleUpdate, rulesAuthz)).toThrow(
         expect.objectContaining({
