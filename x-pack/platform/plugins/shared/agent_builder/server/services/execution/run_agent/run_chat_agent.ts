@@ -56,6 +56,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import type { PromptImageResolver } from './prompts/types';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 
@@ -297,6 +298,51 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   }
 
+  // POC: image resolver — fetches base64 from the files plugin for a given attachment.
+  // Results are memoized so the file is only downloaded once per LLM call even if the
+  // image appears multiple times in the action history.
+  // No actor is recorded; this is prompt-building, not an agent-initiated access.
+  const imageResolverCache = new Map<string, { base64: string; mimeType: string } | null>();
+  const imageResolver: PromptImageResolver = async ({ attachmentId, version }) => {
+    const cacheKey = `${attachmentId}:${version ?? 'current'}`;
+    if (imageResolverCache.has(cacheKey)) {
+      return imageResolverCache.get(cacheKey) ?? undefined;
+    }
+    try {
+      const snapshot = context.attachmentStateManager.get(attachmentId, { version });
+      if (!snapshot) {
+        imageResolverCache.set(cacheKey, null);
+        return undefined;
+      }
+      const definition = context.attachments.getTypeDefinition(snapshot.type);
+      if (!definition) {
+        imageResolverCache.set(cacheKey, null);
+        return undefined;
+      }
+      const formatted = await definition.format(
+        { id: snapshot.id, type: snapshot.type, data: snapshot.data.data },
+        { request, spaceId: context.spaceId }
+      );
+      if (!formatted.getRepresentation) {
+        imageResolverCache.set(cacheKey, null);
+        return undefined;
+      }
+      const representation = await formatted.getRepresentation();
+      if (representation.type !== 'image') {
+        imageResolverCache.set(cacheKey, null);
+        return undefined;
+      }
+      const base64 = await representation.getBase64();
+      const result = { base64, mimeType: representation.mimeType };
+      imageResolverCache.set(cacheKey, result);
+      return result;
+    } catch (e) {
+      logger.debug(`imageResolver failed for attachment "${attachmentId}": ${e}`);
+      imageResolverCache.set(cacheKey, null);
+      return undefined;
+    }
+  };
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
@@ -310,6 +356,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    imageResolver,
   });
 
   const agentGraph = createAgentGraph({

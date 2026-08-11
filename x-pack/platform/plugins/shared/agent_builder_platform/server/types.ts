@@ -16,6 +16,7 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FilesStart } from '@kbn/files-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -29,6 +30,7 @@ export interface PluginStartDependencies {
   actions: ActionsPluginStart;
   llmTasks?: LlmTasksPluginStart;
   spaces?: SpacesPluginStart;
+  files: FilesStart;
 }
 
 export interface AgentBuilderPlatformTracingFeaturesStart {

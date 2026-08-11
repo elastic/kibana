@@ -18,6 +18,9 @@ export enum ToolResultType {
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
+  // POC: image result type — carries only the identity (attachment_id, mime_type, name).
+  // Bytes never appear here; the prompt builder fetches them lazily from the files plugin.
+  image = 'image',
 }
 
 interface ToolResultTypeDataMap {
@@ -30,6 +33,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
+  [ToolResultType.image]: ImageResultData;
 }
 
 export type ToolResultDataOf<Type extends ToolResultType> = ToolResultTypeDataMap[Type];
@@ -206,4 +210,20 @@ export const isFileReferenceResult = (result: ToolResult): result is FileReferen
 
 export const isVisualizationResult = (result: ToolResult): result is VisualizationResult => {
   return result.type === ToolResultType.visualization;
+};
+
+// image
+
+export interface ImageResultData {
+  attachment_id: string;
+  mime_type: string;
+  name?: string;
+  /** One-line description shown to the LLM inside the tool result. */
+  description: string;
+}
+
+export type ImageResult = ToolResultMixin<ToolResultType.image>;
+
+export const isImageResult = (result: ToolResult): result is ImageResult => {
+  return result.type === ToolResultType.image;
 };

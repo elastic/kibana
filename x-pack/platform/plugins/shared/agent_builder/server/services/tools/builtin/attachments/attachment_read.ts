@@ -54,7 +54,9 @@ export const createAttachmentReadTool = ({
 
     const { data: versionData, type } = attachment;
 
-    let formattedData: unknown = versionData.data;
+    // Check if this is an image attachment — if so, return a small marker instead of inlining bytes.
+    // The bytes are fetched lazily by the prompt builder (formatActions via imageResolver).
+    // Base64 must never enter tool results: it would be persisted to ES and ~350k tokens large.
     if (attachmentsService && formatContext) {
       const definition = attachmentsService.getTypeDefinition(attachment.type);
       const typeReadonly = definition?.isReadonly ?? false;
@@ -70,13 +72,43 @@ export const createAttachmentReadTool = ({
           );
           if (formatted.getRepresentation) {
             const representation = await formatted.getRepresentation();
-            formattedData =
-              representation.type === 'text'
-                ? representation.value
-                : JSON.stringify(representation);
+            if (representation.type === 'image') {
+              // Return an image marker — ~200 bytes, safe to persist.
+              // getBase64 is intentionally NOT called here.
+              const imageData = versionData.data as { mime_type?: string; name?: string };
+              return {
+                results: [
+                  {
+                    tool_result_id: getToolResultId(),
+                    type: ToolResultType.image,
+                    data: {
+                      attachment_id: attachmentId,
+                      mime_type: representation.mimeType,
+                      name: imageData.name,
+                      description: `Image attachment "${imageData.name ?? attachmentId}" (${representation.mimeType}). The image is provided as visual input in the message following this tool result.`,
+                    },
+                  },
+                ],
+              };
+            }
+            // For text representations, inline as before
+            return {
+              results: [
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.other,
+                  data: {
+                    attachment_id: attachmentId,
+                    type,
+                    version: attachment.version,
+                    data: representation.value,
+                  },
+                },
+              ],
+            };
           }
         } catch {
-          formattedData = versionData.data;
+          // fall through to raw data below
         }
       }
     }
@@ -90,7 +122,7 @@ export const createAttachmentReadTool = ({
             attachment_id: attachmentId,
             type,
             version: attachment.version,
-            data: formattedData,
+            data: versionData.data,
           },
         },
       ],
@@ -99,6 +131,9 @@ export const createAttachmentReadTool = ({
   summarizeToolReturn: (toolReturn) => {
     if (toolReturn.results.length === 0) return undefined;
     const result = toolReturn.results[0];
+
+    // POC: image results skip summarization — they're already minimal (~200 bytes).
+    // Future improvement: add an isImageResult branch that returns the result unchanged.
     if (!isOtherResult(result)) return undefined;
     const data = result.data as Record<string, unknown>;
 

@@ -17,7 +17,6 @@ import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachme
 type ImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
 
 const getImageSrc = (attachment: ImageAttachment, http: HttpStart): string | undefined => {
-  if (attachment.data.content) return attachment.data.content;
   if (attachment.data.file_id) {
     return http.basePath.prepend(
       `/api/files/files/${AGENT_BUILDER_IMAGE_FILE_KIND}/${attachment.data.file_id}/blob`

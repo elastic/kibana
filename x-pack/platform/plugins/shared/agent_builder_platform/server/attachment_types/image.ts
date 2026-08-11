@@ -5,17 +5,30 @@
  * 2.0.
  */
 
+import type { Readable } from 'stream';
 import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, imageAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { FilesStart } from '@kbn/files-plugin/server';
+
+const streamToBuffer = (stream: Readable): Promise<Buffer> =>
+  new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+    stream.on('end', () => resolve(Buffer.concat(chunks)));
+    stream.on('error', reject);
+  });
 
 /**
  * Creates the definition for the `image` attachment type.
+ *
+ * `getFilesPlugin` is a lazy accessor so the Files plugin is resolved after start().
  */
-export const createImageAttachmentType = (): AttachmentTypeDefinition<
-  AttachmentType.image,
-  ImageAttachmentData
-> => {
+export const createImageAttachmentType = ({
+  getFilesPlugin,
+}: {
+  getFilesPlugin: () => Promise<FilesStart>;
+}): AttachmentTypeDefinition<AttachmentType.image, ImageAttachmentData> => {
   return {
     id: AttachmentType.image,
     isReadonly: true,
@@ -29,21 +42,25 @@ export const createImageAttachmentType = (): AttachmentTypeDefinition<
     },
     format: (attachment) => {
       return {
-        // getRepresentation is used here (despite being @deprecated) because the image content
-        // must not appear in the system prompt — the placeholder prevents base64 leaking into
-        // the text channel; there is no other override mechanism today.
-        getRepresentation: () => {
-          const { mime_type: mimeType, filename } = attachment.data;
-          const label = filename ? `"${filename}" (${mimeType})` : `(${mimeType})`;
-          return {
-            type: 'text' as const,
-            value: `[Image attachment ${label} — provided directly to the model as visual input]`,
-          };
-        },
+        getRepresentation: () => ({
+          type: 'image' as const,
+          mimeType: attachment.data.mime_type,
+          // POC: bytes are fetched lazily from the files plugin here.
+          // The tool-result path (attachment_read) must never call getBase64() —
+          // only the prompt builder (formatActions) does, and only once per LLM call.
+          getBase64: async () => {
+            const filesPlugin = await getFilesPlugin();
+            const fileService = filesPlugin.fileServiceFactory.asInternal();
+            const file = await fileService.getById({ id: attachment.data.file_id });
+            const readable = await file.downloadContent();
+            const buffer = await streamToBuffer(readable);
+            return buffer.toString('base64');
+          },
+        }),
       };
     },
     getAgentDescription: () => {
-      return 'An image attachment contains an image provided directly to the model as visual input.';
+      return 'An image attachment. Call attachment_read(attachment_id) — the image will be shown to you directly as visual input in the message following the tool result.';
     },
     getTools: () => [],
   };

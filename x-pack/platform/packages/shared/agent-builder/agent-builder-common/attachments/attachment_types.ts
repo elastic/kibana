@@ -132,14 +132,9 @@ export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number]
 
 export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
 
-const IMAGE_DATA_URL_REGEX = new RegExp(
-  `^data:(${SUPPORTED_IMAGE_MIME_TYPES.map((m) => m.replace('/', '\\/')).join('|')});base64,`
-);
-
 export const imageAttachmentDataSchema = z.object({
   file_id: z.string(),
   name: z.string(),
-  content: z.string().max(3_000_000).regex(IMAGE_DATA_URL_REGEX).optional(),
   mime_type: z.string(),
 });
 
@@ -151,12 +146,6 @@ export interface ImageAttachmentData {
   file_id: string;
   /** Original filename */
   name: string;
-  /**
-   * base64 data URL — present in-memory during the round so the LLM can see the image.
-   * Stripped before ES persistence; never stored in the conversation document.
-   * Backward compat: old conversations may still have this field populated.
-   */
-  content?: string;
   /** MIME type of the image */
   mime_type: string;
 }

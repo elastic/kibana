@@ -28,9 +28,8 @@ import type {
   UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
-import type { AttachmentVersionRef, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
@@ -194,7 +193,7 @@ export const addRoundCompleteEvent = ({
               round,
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
-              attachments: stripImageContent(attachmentStateManager.getAll()),
+              attachments: attachmentStateManager.getAll(),
               ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
@@ -315,19 +314,6 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
     message: next.message || previous.message,
     ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };
-};
-
-const stripImageContent = (attachments: VersionedAttachment[]): VersionedAttachment[] => {
-  return attachments.map((attachment) => {
-    if (attachment.type !== AttachmentType.image) return attachment;
-    return {
-      ...attachment,
-      versions: attachment.versions.map((version) => {
-        const { content: _content, ...dataWithoutContent } = version.data as ImageAttachmentData;
-        return { ...version, data: dataWithoutContent };
-      }),
-    };
-  });
 };
 
 export const mergeAttachmentRefs = (

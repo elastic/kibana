@@ -122,11 +122,22 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Representation of an attachment when exposed to the LLM.
- *
- * Only plain text (inlined into the message) is supported for now.
+ * Image representation of an attachment when exposed to the LLM.
+ * The base64 bytes are fetched lazily — callers on the tool-result path
+ * must never call getBase64(), only the prompt builder does.
  */
-export type AttachmentRepresentation = TextAttachmentRepresentation;
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  // POC: getBase64 is called once per prompt build and memoized externally.
+  // Future improvement: cache inside the representation itself.
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
 
 /**
  * Structure containing all methods which will be used to present the attachment to the agent.

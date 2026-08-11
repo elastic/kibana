@@ -87,7 +87,10 @@ const storybookAttachmentsService = new AttachmentsService({
 storybookAttachmentsService.addAttachmentType(AttachmentType.image, {
   getLabel: (attachment) => (attachment.data as { name?: string }).name ?? 'Image',
   getIcon: () => 'image' as const,
-  getPillThumbnail: (attachment) => (attachment.data as { content?: string }).content,
+  getPillThumbnail: (attachment) => {
+    const fileId = (attachment.data as { file_id?: string }).file_id;
+    return fileId ? `/api/files/files/agentBuilderImages/${fileId}/blob` : undefined;
+  },
 });
 
 const defaultAgentBuilderServices = {

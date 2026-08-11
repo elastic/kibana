@@ -47,6 +47,10 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      getFilesPlugin: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.files;
+      },
     });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();

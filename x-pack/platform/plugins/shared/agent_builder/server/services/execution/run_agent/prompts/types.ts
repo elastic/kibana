@@ -17,6 +17,18 @@ import type { ToolCallResultTransformer } from '../utils/tool_summarization';
 import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
 import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
 
+/**
+ * Resolver that fetches image bytes from the files plugin for a given attachment.
+ * Called by the prompt builder (formatActions) to inject images as visual input
+ * in the HumanMessage immediately following an attachment_read tool result.
+ *
+ * Must never be called from the tool-result path — bytes must not enter tool results.
+ */
+export type PromptImageResolver = (ref: {
+  attachmentId: string;
+  version?: number;
+}) => Promise<{ base64: string; mimeType: string } | undefined>;
+
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
@@ -43,6 +55,13 @@ export interface PromptFactoryParams {
    */
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
+  /**
+   * Optional resolver for image bytes. When present, formatActions will append a
+   * HumanMessage carrying image_url parts after any attachment_read image result.
+   *
+   * POC: optional so existing call sites and tests compile without changes.
+   */
+  imageResolver?: PromptImageResolver;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

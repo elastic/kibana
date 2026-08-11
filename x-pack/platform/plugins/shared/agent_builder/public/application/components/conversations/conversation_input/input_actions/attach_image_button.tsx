@@ -12,7 +12,6 @@ import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType, SUPPORTED_IMAGE_MIME_TYPES } from '@kbn/agent-builder-common/attachments';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
-import { readBlobAsDataUrl } from '../../../../utils/data_url';
 import { labels } from '../../../../utils/i18n';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
@@ -72,15 +71,12 @@ export const processImageFile = async ({
   const name = providedName ?? getUniqueName(file.name, existingNames);
 
   try {
-    const [dataUrl, { file: fileEntry }] = await Promise.all([
-      readBlobAsDataUrl(file),
-      filesClient.create({ name, mimeType: file.type }),
-    ]);
+    const { file: fileEntry } = await filesClient.create({ name, mimeType: file.type });
     await filesClient.upload({ id: fileEntry.id, body: file, contentType: file.type });
     upsertAttachments([
       {
         type: AttachmentType.image,
-        data: { file_id: fileEntry.id, name, content: dataUrl, mime_type: file.type },
+        data: { file_id: fileEntry.id, name, mime_type: file.type },
       } as ConversationAttachment,
     ]);
   } catch {
