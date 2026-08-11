@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/agent-builder-visualizations-common
   channel: ''
   owner: '@elastic/kibana-presentation'
-  sourceRoot: x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common
+  sourceRoot: x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations-common
 dependsOn: []
 tags:
   - shared-common

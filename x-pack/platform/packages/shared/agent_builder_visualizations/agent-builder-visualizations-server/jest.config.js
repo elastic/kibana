@@ -9,6 +9,6 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/packages/shared/agent-builder/agent-builder-visualizations-common',
+    '<rootDir>/x-pack/platform/packages/shared/agent_builder_visualizations/agent-builder-visualizations-server',
   ],
 };
