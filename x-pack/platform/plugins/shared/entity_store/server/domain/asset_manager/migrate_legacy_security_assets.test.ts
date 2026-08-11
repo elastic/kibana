@@ -7,6 +7,7 @@
 
 import {
   ensureLegacyCompatibilityAliases,
+  hasCollidingNeutralNamespaceAssets,
   hasLegacySecurityAssets,
   isConcreteIndexOrDataStream,
   migrateLegacySecurityAssets,
@@ -120,6 +121,42 @@ describe('migrateLegacySecurityAssets', () => {
   it('returns false from hasLegacySecurityAssets when no legacy assets exist', async () => {
     mockConcrete([]);
     await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
+  });
+
+  it('returns false when candidate names belong to space security_{namespace}', async () => {
+    const collidingNamespace = `security_${namespace}`;
+    const collidingLatest = getLegacySecurityLatestEntitiesIndexName(namespace);
+    mockConcrete([collidingLatest]);
+    esClient.indices.getAlias.mockImplementation(async ({ name }: { name: string }) => {
+      if (name === `entities-latest-${collidingNamespace}`) {
+        return { [collidingLatest]: { aliases: { [name]: {} } } };
+      }
+      throw notFoundError();
+    });
+
+    await expect(hasCollidingNeutralNamespaceAssets(esClient, namespace)).resolves.toBe(true);
+    await expect(hasLegacySecurityAssets(esClient, namespace)).resolves.toBe(false);
+  });
+
+  it('does not migrate or delete when assets belong to space security_{namespace}', async () => {
+    const collidingNamespace = `security_${namespace}`;
+    const collidingLatest = getLegacySecurityLatestEntitiesIndexName(namespace);
+    const collidingMetadata = `.entities.v2.metadata.security_${namespace}`;
+    mockConcrete([collidingLatest, collidingMetadata]);
+    esClient.indices.getAlias.mockImplementation(async ({ name }: { name: string }) => {
+      if (name === `entities-latest-${collidingNamespace}`) {
+        return { [collidingLatest]: { aliases: { [name]: {} } } };
+      }
+      throw notFoundError();
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockCreateIndex).not.toHaveBeenCalled();
+    expect(mockReindex).not.toHaveBeenCalled();
+    expect(mockDeleteIndex).not.toHaveBeenCalled();
+    expect(mockDeleteDataStream).not.toHaveBeenCalled();
+    expect(mockDeleteIndexTemplate).not.toHaveBeenCalled();
   });
 
   it('returns false from hasLegacySecurityAssets when only compatibility aliases exist', async () => {

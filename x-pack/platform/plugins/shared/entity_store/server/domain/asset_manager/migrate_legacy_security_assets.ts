@@ -76,6 +76,13 @@ const getLegacyLatestCompatibilityAlias = (namespace: string) =>
     namespace,
   });
 
+/**
+ * Neutral assets for space `security_{namespace}` reuse the exact concrete names that
+ * legacy Security-scoped assets used for `namespace`. Entity aliases are the only
+ * reliable ownership signal (`entities-latest-security_foo` vs `entities-latest-foo`).
+ */
+const getCollidingNeutralNamespace = (namespace: string) => `security_${namespace}`;
+
 const resolveLegacyHistorySnapshotIndices = async (
   esClient: ElasticsearchClient,
   namespace: string
@@ -88,6 +95,41 @@ const resolveLegacyHistorySnapshotIndices = async (
     return [];
   }
 };
+
+async function entityAliasExists(
+  esClient: ElasticsearchClient,
+  alias: string
+): Promise<boolean> {
+  try {
+    await esClient.indices.getAlias({ name: alias });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * True when space `security_{namespace}` already owns Entity Store assets under the
+ * names this migration would treat as legacy for `namespace`. Matching is via the
+ * colliding space's `entities-{dataset}-security_{namespace}` aliases.
+ */
+export async function hasCollidingNeutralNamespaceAssets(
+  esClient: ElasticsearchClient,
+  namespace: string
+): Promise<boolean> {
+  const collidingNamespace = getCollidingNeutralNamespace(namespace);
+  const collidingAliases = [
+    getEntitiesAlias(ENTITY_LATEST, collidingNamespace),
+    getEntitiesAlias(ENTITY_UPDATES, collidingNamespace),
+    getEntitiesAlias(ENTITY_METADATA, collidingNamespace),
+  ];
+  for (const alias of collidingAliases) {
+    if (await entityAliasExists(esClient, alias)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * True when `name` is a concrete index or data stream. Returns false when the name
@@ -117,12 +159,19 @@ export async function isConcreteIndexOrDataStream(
 
 /**
  * Returns true when any Security-scoped v2 entity-store assets still exist for the
- * namespace (pre platform / shared-index rename). Compatibility aliases alone do not count.
+ * namespace (pre platform / shared-index rename). Compatibility aliases alone do not
+ * count. Also returns false when the candidate names belong to space
+ * `security_{namespace}` (same concrete names as this namespace's legacy assets).
  */
 export async function hasLegacySecurityAssets(
   esClient: ElasticsearchClient,
   namespace: string
 ): Promise<boolean> {
+  // Avoid treating another space's live neutral assets as our legacy sources.
+  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+    return false;
+  }
+
   const candidates = [
     getLegacySecurityLatestEntitiesIndexName(namespace),
     getLegacyUpdatesDataStreamName(namespace),
@@ -141,6 +190,10 @@ export async function hasLegacySecurityAssets(
  * Migrates Security-scoped `.entities.v2.*.security_{namespace}` assets to the
  * solution-neutral `.entities.v2.*.{namespace}` names. Safe to call when no legacy
  * assets exist (no-op). New templates/pipelines must already be installed.
+ *
+ * Name collision: legacy names for `namespace` equal neutral names for space
+ * `security_{namespace}`. Migration is skipped when that colliding space already
+ * owns those assets (detected via its `entities-*-security_{namespace}` aliases).
  *
  * Failure / retry model (no automatic rollback — re-run on next install):
  * - Legacy sources are deleted only after a successful reindex (or intentional drop
@@ -162,6 +215,14 @@ export async function migrateLegacySecurityAssets({
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
   const log = logger.get('migrate_legacy_security_assets');
+
+  if (await hasCollidingNeutralNamespaceAssets(esClient, namespace)) {
+    log.info(
+      `Skipping legacy migration in ${namespace}: assets at security_${namespace} names ` +
+        `belong to space security_${namespace} (neutral), not this space's legacy sources`
+    );
+    return;
+  }
 
   if (!(await hasLegacySecurityAssets(esClient, namespace))) {
     log.debug(`No legacy security-scoped entity store assets found in ${namespace}`);
