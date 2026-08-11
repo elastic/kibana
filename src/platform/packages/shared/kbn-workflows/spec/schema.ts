@@ -63,7 +63,6 @@ export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 const IfConditionSchema = z
   .string()
-  .optional()
   .describe(
     'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
   );
@@ -73,7 +72,7 @@ export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
   'max-step-size': ByteSizeSchema.optional(),
-  if: IfConditionSchema,
+  if: IfConditionSchema.optional(),
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -627,11 +626,7 @@ export const getSwitchStepSchema = (stepSchema: z.ZodType, loose: boolean = fals
 };
 
 export const IfStepConfigSchema = z.object({
-  condition: z
-    .string()
-    .describe(
-      'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
-    ),
+  condition: IfConditionSchema,
   // This step already gates on `condition`; a step-level `if` would be a second,
   // invisible gate. Reject it instead of stripping it, so the author sees why.
   if: z
