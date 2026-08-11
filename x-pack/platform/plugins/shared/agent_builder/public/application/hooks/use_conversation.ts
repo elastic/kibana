@@ -24,6 +24,7 @@ import { useStreamingContext, useStreamRecord } from '../context/streaming/strea
 import { useActiveSpaceId } from '../context/active_space_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
+import { useEffectiveSpaceDefaultAgent } from './use_space_default_agent';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -110,13 +111,27 @@ export const useConversationError = () => {
   };
 };
 
+/**
+ * Resolves the agent id used to start a *new* conversation.
+ *
+ * Priority — mirrors {@link useLastAgentId} so all "which agent should this
+ * user land on" decisions agree:
+ * 1. The effective space-assigned default agent (when configured and reachable).
+ * 2. The per-space "last used" agent stored in localStorage — but only if the
+ *    validator confirms it is still in the accessible agent list. This
+ *    prevents restricted users from re-using an agent they no longer see.
+ * 3. The plugin-wide default agent id.
+ */
 const useGetNewConversationAgentId = () => {
   const spaceId = useActiveSpaceId();
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
   const validateAgentId = useValidateAgentId();
+  const { effectiveDefaultAgentId, isReady } = useEffectiveSpaceDefaultAgent();
 
-  // Ensure we always return a string
   return (): string => {
+    if (isReady && effectiveDefaultAgentId) {
+      return effectiveDefaultAgentId;
+    }
     const isAgentIdValid = validateAgentId(agentIdStorage);
     if (isAgentIdValid) {
       return agentIdStorage;

@@ -159,6 +159,7 @@ export function registerAgentRoutes({
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getRegistry({ request });
         const agents = await service.list();
+
         return response.ok<ListAgentResponse>({
           body: { results: agents },
         });

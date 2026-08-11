@@ -43,6 +43,7 @@ jest.mock('./services', () => ({
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),
+  SpaceSettingsService: jest.fn(),
   AgentBuilderAccessChecker: jest.fn(),
 }));
 

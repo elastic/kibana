@@ -13,6 +13,7 @@ import type {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -23,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import type { AgentDefinitionWithPermissions } from '../../../../../common/http_api/agents';
@@ -33,6 +34,11 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import {
+  useSetSpaceDefaultAgent,
+  useSpaceDefaultAgent,
+} from '../../../hooks/use_space_default_agent';
+import { useToasts } from '../../../hooks/use_toasts';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -66,13 +72,73 @@ const actionLabels = {
   deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
+  setSpaceDefault: i18n.translate('xpack.agentBuilder.agents.actions.setSpaceDefault', {
+    defaultMessage: 'Set as space default',
+  }),
+  setSpaceDefaultDescription: i18n.translate(
+    'xpack.agentBuilder.agents.actions.setSpaceDefaultDescription',
+    { defaultMessage: 'Make this the default agent for users in this space' }
+  ),
+  setSpaceDefaultDisabledPrivateDescription: i18n.translate(
+    'xpack.agentBuilder.agents.actions.setSpaceDefaultDisabledPrivateDescription',
+    {
+      defaultMessage:
+        'Private agents can only be used by their owner and explicitly granted users, so they can\u2019t be a space default. Change the agent access to public or shared first.',
+    }
+  ),
+  clearSpaceDefault: i18n.translate('xpack.agentBuilder.agents.actions.clearSpaceDefault', {
+    defaultMessage: 'Remove as space default',
+  }),
+  clearSpaceDefaultDescription: i18n.translate(
+    'xpack.agentBuilder.agents.actions.clearSpaceDefaultDescription',
+    { defaultMessage: 'Users in this space will no longer be pinned to this agent' }
+  ),
 };
+
+const spaceDefaultBadgeLabel = i18n.translate('xpack.agentBuilder.agents.spaceDefaultBadge', {
+  defaultMessage: 'Space default',
+});
+
+const spaceDefaultBadgeTooltip = i18n.translate(
+  'xpack.agentBuilder.agents.spaceDefaultBadgeTooltip',
+  {
+    defaultMessage:
+      'This agent is assigned as the default for this space. Users without agent-management privileges are restricted to it when they open Agent Builder here.',
+  }
+);
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
+  const { addSuccessToast, addErrorToast } = useToasts();
+  // The space's currently assigned default agent id (null if unconfigured).
+  // Used to render the "Space default" badge and to switch the row action
+  // between "Set as space default" and "Remove as space default".
+  const { defaultAgentId: spaceDefaultAgentId } = useSpaceDefaultAgent();
+  const setSpaceDefaultAgent = useSetSpaceDefaultAgent({
+    onSuccess: (defaultAgentId) => {
+      addSuccessToast({
+        title:
+          defaultAgentId === null
+            ? i18n.translate('xpack.agentBuilder.agents.spaceDefaultClearedToast', {
+                defaultMessage: 'Space default agent removed',
+              })
+            : i18n.translate('xpack.agentBuilder.agents.spaceDefaultSetToast', {
+                defaultMessage: 'Space default agent updated',
+              }),
+      });
+    },
+    onError: (err) => {
+      addErrorToast({
+        title: i18n.translate('xpack.agentBuilder.agents.spaceDefaultErrorToast', {
+          defaultMessage: 'Failed to update the space default agent',
+        }),
+        text: err.message,
+      });
+    },
+  });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
   const [aclAgent, setAclAgent] = React.useState<AgentDefinitionWithPermissions | null>(null);
@@ -112,6 +178,7 @@ export const AgentsList: React.FC = () => {
             <EuiText size="m">{name}</EuiText>
           </EuiLink>
         );
+        const isSpaceDefault = spaceDefaultAgentId === agent.id;
         return (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
@@ -120,6 +187,23 @@ export const AgentsList: React.FC = () => {
                 {isPreconfiguredAgentType(agent.type) && (
                   <EuiFlexItem grow={false}>
                     <AgentTypeBadge agentType={agent.type} />
+                  </EuiFlexItem>
+                )}
+                {isSpaceDefault && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip position="top" content={spaceDefaultBadgeTooltip}>
+                      <EuiBadge
+                        color="hollow"
+                        iconType="starFilled"
+                        // tabIndex makes the badge keyboard-focusable so the
+                        // tooltip is reachable without a mouse (EUI a11y rule
+                        // `@elastic/eui/tooltip-focusable-anchor`).
+                        tabIndex={0}
+                        data-test-subj={`agentBuilderAgentsListSpaceDefaultBadge-${agent.id}`}
+                      >
+                        {spaceDefaultBadgeLabel}
+                      </EuiBadge>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -203,6 +287,44 @@ export const AgentsList: React.FC = () => {
           available: canManageAgentAccess,
         },
         {
+          // Toggle between assigning this agent as the space default and
+          // clearing the assignment. Only offered to users who can manage
+          // agents; the button is a no-op mutation call that updates the
+          // per-space settings singleton via the internal API.
+          //
+          // We also gate against Private agents client-side. The server will
+          // reject the assignment anyway (see `space_settings.ts` PUT), but
+          // catching it here gives the admin proactive feedback via the
+          // action's tooltip instead of a delayed toast. We still allow the
+          // action for a Private agent that is _currently_ the space default
+          // (a legacy/broken state) so the admin can clear the assignment.
+          type: 'icon',
+          icon: (agent) => (spaceDefaultAgentId === agent.id ? 'starFilled' : 'starEmpty'),
+          name: (agent) =>
+            spaceDefaultAgentId === agent.id
+              ? actionLabels.clearSpaceDefault
+              : actionLabels.setSpaceDefault,
+          description: (agent) => {
+            if (spaceDefaultAgentId === agent.id) {
+              return actionLabels.clearSpaceDefaultDescription;
+            }
+            if (agent.access_control?.access_mode === AgentAccessControlMode.Private) {
+              return actionLabels.setSpaceDefaultDisabledPrivateDescription;
+            }
+            return actionLabels.setSpaceDefaultDescription;
+          },
+          'data-test-subj': (agent) => `agentBuilderAgentsListSpaceDefault-${agent.id}`,
+          showOnHover: true,
+          available: () => manageAgents,
+          enabled: (agent) =>
+            spaceDefaultAgentId === agent.id ||
+            agent.access_control?.access_mode !== AgentAccessControlMode.Private,
+          onClick: (agent) => {
+            const isCurrent = spaceDefaultAgentId === agent.id;
+            setSpaceDefaultAgent.mutate(isCurrent ? null : agent.id);
+          },
+        },
+        {
           // Have to use a custom action to display the danger color
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
           render: (agent) => {
@@ -240,7 +362,14 @@ export const AgentsList: React.FC = () => {
       agentLabels,
       agentActions,
     ];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess]);
+  }, [
+    createAgentBuilderUrl,
+    deleteAgent,
+    manageAgents,
+    canManageAgentAccess,
+    spaceDefaultAgentId,
+    setSpaceDefaultAgent,
+  ]);
 
   const errorMessage = useMemo(
     () =>

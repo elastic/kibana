@@ -17,6 +17,7 @@ import {
   apiPrivileges,
   subFeaturePrivilegeIds,
 } from '../common/features';
+import { AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE } from './saved_objects';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -36,9 +37,13 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           ApiPrivileges.manage('llm_product_doc'),
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
+        // Every Agent Builder user needs to read the space-settings singleton
+        // so the UI can resolve the space's assigned default agent (if any)
+        // before it decides which agent to land on. Writes are gated on the
+        // `manageAgents` sub-feature below.
         savedObject: {
           all: [],
-          read: [],
+          read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show, uiPrivileges.write],
       },
@@ -48,7 +53,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
           all: [],
-          read: [],
+          read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show],
       },
@@ -70,7 +75,13 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 ),
                 includeIn: 'all',
                 api: [apiPrivileges.manageAgents],
-                savedObject: { all: [], read: [] },
+                // Writing the per-space default-agent assignment is an
+                // administrative action, so it is bundled with the agent
+                // management privilege rather than the base read privilege.
+                savedObject: {
+                  all: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
+                  read: [],
+                },
                 ui: [uiPrivileges.manageAgents],
               },
               {

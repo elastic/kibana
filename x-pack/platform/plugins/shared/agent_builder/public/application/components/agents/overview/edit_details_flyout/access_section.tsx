@@ -113,6 +113,10 @@ const accessControlModeOptions = [
 export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessControlMode }) => {
   const { control, formState } = useFormContext<EditDetailsFormData>();
 
+  const helpText = !canChangeAccessControlMode
+    ? flyoutLabels.accessControlModeDisabledReason
+    : undefined;
+
   return (
     <>
       <EuiTitle size="xs">
@@ -125,9 +129,7 @@ export const AccessSection: React.FC<AccessSectionProps> = ({ canChangeAccessCon
       <EuiSpacer size="l" />
       <EuiFormRow
         label={flyoutLabels.accessControlModeLabel}
-        helpText={
-          !canChangeAccessControlMode ? flyoutLabels.accessControlModeDisabledReason : undefined
-        }
+        helpText={helpText}
         isInvalid={!!formState.errors.access_control?.access_mode}
         error={formState.errors.access_control?.access_mode?.message}
         fullWidth

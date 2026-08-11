@@ -28,6 +28,7 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useEffectiveSpaceDefaultAgent } from '../../../hooks/use_space_default_agent';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import {
@@ -148,8 +149,16 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // When the space has a default agent and the user cannot manage agents, the
+  // selector only exposes that agent — they are pinned to the space default.
+  // Admins keep the full list so they can switch to test other agents.
+  const { effectiveDefaultAgentId, isRestricted } = useEffectiveSpaceDefaultAgent();
+  const visibleAgents = isRestricted
+    ? agents.filter((agent) => agent.id === effectiveDefaultAgentId)
+    : agents;
+
   const { agentOptions, renderAgentOption } = useAgentOptions({
-    agents,
+    agents: visibleAgents,
     selectedAgentId: selectedAgent?.id,
   });
 

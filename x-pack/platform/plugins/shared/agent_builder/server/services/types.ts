@@ -41,6 +41,7 @@ import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 import type { CallbackDeliveryService } from './execution/callback';
+import type { SpaceSettingsService } from './space_settings';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -74,6 +75,7 @@ export interface InternalStartServices {
   consumption: ConsumptionServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
+  spaceSettings: SpaceSettingsService;
 }
 
 export interface ServiceSetupDeps {

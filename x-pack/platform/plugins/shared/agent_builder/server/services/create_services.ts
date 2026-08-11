@@ -33,6 +33,7 @@ import {
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
+import { createSpaceSettingsService } from './space_settings';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -266,6 +267,15 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
+    // Per-space Agent Builder settings (e.g. the space's assigned default
+    // agent). Backed by a hidden saved object type; the service resolves the
+    // active space id from each request.
+    const spaceSettings = createSpaceSettingsService({
+      savedObjects,
+      spaces,
+      logger: logger.get('space-settings'),
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -287,6 +297,7 @@ export class ServiceManager {
       consumption,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      spaceSettings,
     };
 
     return this.internalStart;

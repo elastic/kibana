@@ -669,6 +669,7 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
+        // Execution options need the spaceId to derive the idempotency key.
         const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
 
         const { executionId } = await executeAgent({
