@@ -61,8 +61,8 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
     await lens.typeInFormula('*', { focus: false });
     await lens.waitForVisualization();
     // Exact archive counts → #280444. UI asserts autocomplete produced a positive count.
-    await expect(lens.datatable.getDatatableCellLocator(0, 0)).toHaveText(/\d/);
-    const count = Number((await lens.datatable.getDatatableCellText(0, 0)).replace(/,/g, ''));
+    await expect(lens.datatable.getCellLocator(0, 0)).toHaveText(/\d/);
+    const count = Number((await lens.datatable.getCellText(0, 0)).replace(/,/g, ''));
     expect(count).toBeGreaterThan(0);
   });
 
@@ -119,6 +119,6 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
     });
 
     await lens.waitForVisualization();
-    expect(await lens.workspace.getWorkspaceErrorCount()).toBe(0);
+    expect(await lens.workspace.getErrorCount()).toBe(0);
   });
 });
