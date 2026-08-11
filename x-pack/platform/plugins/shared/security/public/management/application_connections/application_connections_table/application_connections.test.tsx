@@ -1317,6 +1317,101 @@ describe('ApplicationConnections', () => {
       });
     }
 
+    it('narrows a list view select-all to the revocable connections', async () => {
+      setupMixedStatusClient();
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-1', status: 'revoked' }],
+      });
+
+      const { findByText, findByTestId, getByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('My MCP app');
+      fireEvent.click(getByTestId('applicationConnectionsViewModeList'));
+
+      const listView = await findByTestId('applicationConnectionsListView');
+      await within(listView).findByText('Laptop session');
+
+      fireEvent.click(within(listView).getByTestId('checkboxSelectAll'));
+
+      const bulkRevokeButton = await findByTestId('applicationConnectionsBulkRevokeButton');
+      expect(bulkRevokeButton).toHaveTextContent('Revoke 1 connection');
+      expect(queryByTestId('applicationConnectionsBulkDeleteButton')).not.toBeInTheDocument();
+
+      fireEvent.click(bulkRevokeButton);
+      const modal = await findByTestId('applicationConnectionsRevokeModal');
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_revoke',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-1' }],
+            }),
+          }
+        );
+      });
+    });
+
+    it('excludes a fully revoked client from a grouped select-all', async () => {
+      setupHttpResponses(coreStart, {
+        clients: {
+          clients: [
+            { id: 'client-a', client_name: 'Mixed app', resource: 'cluster:elastic' },
+            { id: 'client-b', client_name: 'Dead app', resource: 'cluster:elastic' },
+          ],
+        },
+        connections: {
+          connections: [
+            { id: 'conn-1', client_id: 'client-a', name: 'Laptop', resource: 'cluster:elastic' },
+            {
+              id: 'conn-2',
+              client_id: 'client-a',
+              name: 'Desktop',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+            {
+              id: 'conn-3',
+              client_id: 'client-b',
+              name: 'Old',
+              resource: 'cluster:elastic',
+              revoked: true,
+            },
+          ],
+        },
+      });
+      coreStart.http.post.mockResolvedValue({
+        results: [{ client_id: 'client-a', connection_id: 'conn-1', status: 'revoked' }],
+      });
+
+      const { findByText, findByTestId, queryByTestId } = renderPage(coreStart);
+
+      await findByText('Mixed app');
+      const groupedTable = await findByTestId('applicationConnectionsInMemoryTable');
+      fireEvent.click(within(groupedTable).getByTestId('checkboxSelectAll'));
+
+      const bulkRevokeButton = await findByTestId('applicationConnectionsBulkRevokeButton');
+      expect(bulkRevokeButton).toHaveTextContent('Revoke 1 connection');
+      expect(queryByTestId('applicationConnectionsBulkDeleteButton')).not.toBeInTheDocument();
+
+      fireEvent.click(bulkRevokeButton);
+      const modal = await findByTestId('applicationConnectionsRevokeModal');
+      expect(within(modal).queryByText('Old')).not.toBeInTheDocument();
+      fireEvent.click(within(modal).getByTestId('applicationConnectionsRevokeConfirmButton'));
+
+      await waitFor(() => {
+        expect(coreStart.http.post).toHaveBeenCalledWith(
+          '/internal/security/oauth/connections/_bulk_revoke',
+          {
+            body: JSON.stringify({
+              connections: [{ client_id: 'client-a', connection_id: 'conn-1' }],
+            }),
+          }
+        );
+      });
+    });
+
     it('offers Delete instead of Revoke on a revoked row and calls the bulk-delete API', async () => {
       setupMixedStatusClient();
       coreStart.http.post.mockResolvedValue({

@@ -16,6 +16,7 @@ import {
   isRevocable,
   matchesActionMode,
   toApplicationConnectionList,
+  toSingleModeSelection,
 } from './application_connections_filters';
 import { labels } from '../constants/i18n';
 import type { ApplicationConnection, ApplicationConnections } from '../constants/types';
@@ -474,6 +475,32 @@ describe('#matchesActionMode', () => {
     expect(matchesActionMode(revoked, 'revoke')).toBe(false);
     expect(matchesActionMode(revoked, 'delete')).toBe(true);
     expect(matchesActionMode(connected, 'delete')).toBe(false);
+  });
+});
+
+describe('#toSingleModeSelection', () => {
+  const connected = createApplicationConnection({ connection: createConnection({ id: 'conn-1' }) });
+  const revoked = createApplicationConnection({
+    connection: createConnection({ id: 'conn-2', revoked: true }),
+  });
+
+  it('keeps only the entries matching the preferred mode when the selection spans both', () => {
+    expect(toSingleModeSelection([connected, revoked], 'revoke')).toEqual([connected]);
+    expect(toSingleModeSelection([connected, revoked], 'delete')).toEqual([revoked]);
+  });
+
+  it('leaves a selection that already belongs to a single mode untouched', () => {
+    expect(toSingleModeSelection([connected], 'revoke')).toEqual([connected]);
+    expect(toSingleModeSelection([revoked], 'delete')).toEqual([revoked]);
+  });
+
+  it('falls back to the selection when nothing matches the preferred mode', () => {
+    expect(toSingleModeSelection([revoked], 'revoke')).toEqual([revoked]);
+    expect(toSingleModeSelection([connected], 'delete')).toEqual([connected]);
+  });
+
+  it('returns an empty selection unchanged', () => {
+    expect(toSingleModeSelection([], 'revoke')).toEqual([]);
   });
 });
 

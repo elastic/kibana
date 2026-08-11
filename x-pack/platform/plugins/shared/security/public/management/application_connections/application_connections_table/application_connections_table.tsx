@@ -7,10 +7,9 @@
 
 import { EuiButton, EuiFlexGroup, EuiSearchBar } from '@elastic/eui';
 import { groupBy, intersectionBy, keyBy, sumBy } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
-import useMap from 'react-use/lib/useMap';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { getActionMode } from './application_connections_filters';
+import { getActionMode, toSingleModeSelection } from './application_connections_filters';
 import { useApplicationConnectionsTableSearch } from './application_connections_table_search';
 import { ConnectionsByClientTable } from './connections_by_client_table';
 import { ConnectionsListTable } from './connections_list_table';
@@ -25,10 +24,7 @@ import { useApplicationConnections } from '../hooks/use_application_connections'
 import type { OAuthConnection } from '../service/application_connections_api_client';
 
 export const ApplicationConnectionsTable = () => {
-  const [
-    selectedByClient,
-    { set: setClientSelection, remove: removeClientSelection, setAll: setSelectedByClient },
-  ] = useMap<Record<string, OAuthConnection[]>>({});
+  const [selectedByClient, setSelectedByClient] = useState<Record<string, OAuthConnection[]>>({});
 
   const { applicationConnections, isLoading } = useApplicationConnections();
   const { revokeConnections, deleteConnections } = useApplicationConnectionsActions();
@@ -42,22 +38,49 @@ export const ApplicationConnectionsTable = () => {
     [applicationConnections]
   );
 
+  const clientById = useMemo(
+    () => keyBy(applicationConnections, (applicationConnection) => applicationConnection.client.id),
+    [applicationConnections]
+  );
+
+  const normalizeSelection = useCallback(
+    (selectionByClient: Record<string, OAuthConnection[]>) => {
+      const selection = Object.entries(selectionByClient).flatMap(([clientId, connections]) => {
+        const client = clientById[clientId]?.client;
+        return client ? connections.map((connection) => ({ client, connection })) : [];
+      });
+      const singleMode = toSingleModeSelection(selection, 'revoke');
+      if (singleMode.length === selection.length) {
+        return selectionByClient;
+      }
+      return groupBy(
+        singleMode.map(({ connection }) => connection),
+        'client_id'
+      );
+    },
+    [clientById]
+  );
+
   const handleClientSelectionChange = useCallback(
     (clientId: string, selection: OAuthConnection[]) => {
-      if (selection.length === 0) {
-        removeClientSelection(clientId);
-      } else {
-        setClientSelection(clientId, selection);
-      }
+      setSelectedByClient((previousSelection) => {
+        const nextSelection = { ...previousSelection };
+        if (selection.length === 0) {
+          delete nextSelection[clientId];
+        } else {
+          nextSelection[clientId] = selection;
+        }
+        return normalizeSelection(nextSelection);
+      });
     },
-    [setClientSelection, removeClientSelection]
+    [normalizeSelection]
   );
 
   const handleListSelectionChange = useCallback(
     (selection: OAuthConnection[]) => {
-      setSelectedByClient(groupBy(selection, 'client_id'));
+      setSelectedByClient(normalizeSelection(groupBy(selection, 'client_id')));
     },
-    [setSelectedByClient]
+    [normalizeSelection]
   );
 
   const activeConnections = useMemo(
@@ -73,11 +96,6 @@ export const ApplicationConnectionsTable = () => {
         (connection) => `${connection.client_id}/${connection.id}`
       ),
     [selectedByClient, activeConnections]
-  );
-
-  const clientById = useMemo(
-    () => keyBy(applicationConnections, (applicationConnection) => applicationConnection.client.id),
-    [applicationConnections]
   );
 
   const selectedApplicationConnections = useMemo<ApplicationConnection[]>(
@@ -102,25 +120,26 @@ export const ApplicationConnectionsTable = () => {
     (affectedConnections: ApplicationConnectionTarget[]) => {
       const affectedByClient = groupBy(affectedConnections, 'clientId');
 
-      const nextSelectedByClient = Object.entries(selectedByClient).reduce<
-        Record<string, OAuthConnection[]>
-      >((selectionsByClient, [clientId, prevSelections]) => {
-        const affectedIds = new Set(
-          (affectedByClient[clientId] ?? []).map(({ connectionId }) => connectionId)
-        );
-        const remaining =
-          affectedIds.size === 0
-            ? prevSelections
-            : prevSelections.filter((connection) => !affectedIds.has(connection.id));
-        if (remaining.length > 0) {
-          selectionsByClient[clientId] = remaining;
-        }
-        return selectionsByClient;
-      }, {});
-
-      setSelectedByClient(nextSelectedByClient);
+      setSelectedByClient((previousSelection) =>
+        Object.entries(previousSelection).reduce<Record<string, OAuthConnection[]>>(
+          (selectionsByClient, [clientId, prevSelections]) => {
+            const affectedIds = new Set(
+              (affectedByClient[clientId] ?? []).map(({ connectionId }) => connectionId)
+            );
+            const remaining =
+              affectedIds.size === 0
+                ? prevSelections
+                : prevSelections.filter((connection) => !affectedIds.has(connection.id));
+            if (remaining.length > 0) {
+              selectionsByClient[clientId] = remaining;
+            }
+            return selectionsByClient;
+          },
+          {}
+        )
+      );
     },
-    [selectedByClient, setSelectedByClient]
+    [setSelectedByClient]
   );
 
   const handleBulkAction = useCallback(() => {
