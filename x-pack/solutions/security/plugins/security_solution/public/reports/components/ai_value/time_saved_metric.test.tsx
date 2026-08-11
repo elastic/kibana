@@ -114,7 +114,6 @@ describe('TimeSavedMetric', () => {
         scopeId: PageScope.alerts,
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
           VisualizationContextMenuActions.inspect,
         ],
       }),

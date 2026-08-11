@@ -55,7 +55,6 @@ const ID = 'CostSavingsTrendQuery';
 
 const VISUALIZATION_ACTIONS = [
   VisualizationContextMenuActions.addToExistingCase,
-  VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.inspect,
 ];
 

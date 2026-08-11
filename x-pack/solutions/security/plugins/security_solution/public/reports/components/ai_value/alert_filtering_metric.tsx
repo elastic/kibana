@@ -33,7 +33,6 @@ const ID = 'AlertFilteringMetricQuery';
 
 const VISUALIZATION_ACTIONS = [
   VisualizationContextMenuActions.addToExistingCase,
-  VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.inspect,
 ];
 

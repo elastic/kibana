@@ -84,7 +84,6 @@ describe('AlertProcessingDonut', () => {
         timerange: { from: defaultProps.from, to: defaultProps.to },
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
-          VisualizationContextMenuActions.addToNewCase,
           VisualizationContextMenuActions.inspect,
         ],
         getLensAttributes: expect.any(Function),

@@ -60,7 +60,6 @@ export interface UseLensAttributesProps {
 
 export enum VisualizationContextMenuActions {
   addToExistingCase = 'addToExistingCase',
-  addToNewCase = 'addToNewCase',
   inspect = 'inspect',
   openInLens = 'openInLens',
   saveToLibrary = 'saveToLibrary',
@@ -113,7 +112,6 @@ export type OnEmbeddableLoaded = (data: EmbeddableData) => void;
 
 export enum VisualizationContextMenuDefaultActionName {
   addToExistingCase = 'addToExistingCase',
-  addToNewCase = 'addToNewCase',
   inspect = 'inspect',
   openInLens = 'openInLens',
   saveToLibrary = 'saveToLibrary',

@@ -34,7 +34,6 @@ const ChartSize = 250;
 
 const VISUALIZATION_ACTIONS = [
   VisualizationContextMenuActions.addToExistingCase,
-  VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.inspect,
 ];
 const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
