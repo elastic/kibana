@@ -49,11 +49,15 @@ export const createDashboardGeneration = (
 ): DashboardGuidanceModule => ({
   guidance: `## Building a Dashboard
 
-The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+The ${
+    dashboardTools.generateDashboard
+  } tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
 Every dashboard MUST have a non-empty \`title\`. If the current dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
 
-Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
+Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${
+    dashboardTools.generateDashboard
+  } call whenever possible.
 
 When a dashboard needs sections, prefer a single batched call:
 1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
