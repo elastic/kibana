@@ -1,6 +1,94 @@
 {
-  "sha1": "e4e838d0e803e7be4051845fa83b6c724ac4cd12",
+  "sha1": "02fdf6bb41d66384c3c5f9d4257e4b16b61886ac",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "e2c048a8bafe4ea-bf0430867774bc4",
+      "title": "Task Manager execution control routes _status: returns not paused by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-a01e08e805f7288",
+      "title": "Task Manager execution control routes _pause / _resume: toggles the global pause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-439b9c317b4f48d",
+      "title": "Task Manager execution control routes _pause / _resume: toggles a specific task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-cb775ef29b8a65a",
+      "title": "Task Manager execution control routes _pause: returns 400 for an unknown task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-c08f9aa562ba86b",
+      "title": "Task Manager execution control routes _pause: returns 403 when called by a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "e2c048a8bafe4ea-09bed95a7ddbfdf",
+      "title": "Task Manager execution control routes _status: returns 403 when called by a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout/api/tests/execution_control_routes.spec.ts",
+        "line": 120,
+        "column": 12
+      }
+    },
     {
       "id": "eb284a668bfb2df-2953aa4df2b67e6",
       "title": "Task Manager internal routes schedule: creates a task and returns it",

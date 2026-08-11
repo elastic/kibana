@@ -95,7 +95,13 @@ export class DiscoverApp {
     await dataViewSwitch.click();
   }
 
-  async selectDataView(name: string) {
+  async selectDataView(
+    name: string,
+    {
+      createAdHocIfMissing = true,
+      waitForFieldList = true,
+    }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
+  ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
@@ -107,13 +113,19 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await switcher.waitFor({ state: 'hidden' });
-    await this.waitUntilFieldListHasCountOfFields();
+    if (waitForFieldList) {
+      await this.waitUntilFieldListHasCountOfFields();
+    }
   }
 
   getSelectedDataView(): Locator {
@@ -144,21 +156,48 @@ export class DiscoverApp {
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    const title = name.endsWith('*') ? name : `${name}*`;
 
-    // wait for timestamp options; default @timestamp applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    // Retry: title validation can race its debounced index lookup and get stuck
+    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
 
-    if (adHoc) {
-      await this.page.testSubj.click('exploreIndexPatternButton');
-    } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
+      if (attempt > 1) {
+        await titleInput.fill(''); // force a real value change to re-trigger validation
+      }
+      await titleInput.fill(title);
+      // wait for async title validation to settle before continuing.
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+
+      // wait for timestamp options; default @timestamp applies.
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+
+      if (adHoc) {
+        await this.page.testSubj.click('exploreIndexPatternButton');
+      } else {
+        await this.page.testSubj.click('saveIndexPatternButton');
+      }
+
+      const flyoutClosed = await flyout
+        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (flyoutClosed) {
+        break;
+      }
+      if (isLastAttempt) {
+        throw new Error(
+          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
+        );
+      }
     }
-    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -264,6 +303,71 @@ export class DiscoverApp {
     await this.page.testSubj.fill('saveModalConfirmText', 'change');
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
+    const row = this.page.testSubj.locator('customLabelRow');
+    await row.waitFor({ state: 'visible' });
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
+    }
+    const input = row.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(label);
+  }
+
+  async setCustomDescription(
+    description: string,
+    { enableToggle = false }: { enableToggle?: boolean } = {}
+  ) {
+    const row = this.page.testSubj.locator('customDescriptionRow');
+    await row.waitFor({ state: 'visible' });
+    if (enableToggle) {
+      await row.locator('[data-test-subj="toggle"]').click();
+    }
+    const input = row.locator('textarea, input');
+    await input.fill(description);
+  }
+
+  getCustomDescriptionFormError(): Locator {
+    return this.page.testSubj.locator('customDescriptionRow').locator('.euiFormErrorText');
+  }
+
+  async saveOpenFieldEditor({ confirmChange = false }: { confirmChange?: boolean } = {}) {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('fieldSaveButton');
+    if (confirmChange) {
+      const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await this.page.testSubj.fill('saveModalConfirmText', 'change');
+      await confirmButton.waitFor({ state: 'visible' });
+      await confirmButton.click();
+    }
+    await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async discardOpenFieldEditorChanges() {
+    const fieldEditor = this.page.testSubj.locator('fieldEditor');
+    await fieldEditor.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('closeFlyoutButton');
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    await confirmButton.click();
+    await fieldEditor.waitFor({ state: 'hidden' });
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    await this.searchFieldInSidebar(fieldName);
+    const field = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await field.waitFor({ state: 'visible' });
+    await field.click();
+    const deleteButton = this.page.testSubj.locator(`discoverFieldListPanelDelete-${fieldName}`);
+    await deleteButton.click();
+    await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
+    await this.page.testSubj.click('confirmModalConfirmButton');
     await this.waitUntilTabIsLoaded();
   }
 
@@ -521,6 +625,28 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('discoverQueryHits');
   }
 
+  getRefreshDataButton(): Locator {
+    return this.page.testSubj.locator('refreshDataButton');
+  }
+
+  getQuerySubmitButton(): Locator {
+    return this.page.testSubj.locator('querySubmitButton');
+  }
+
+  getQueryCancelButton(): Locator {
+    return this.page.testSubj.locator('queryCancelButton');
+  }
+
+  getSearchResponseWarningsEmptyPrompt(): Locator {
+    return this.page.testSubj.locator('searchResponseWarningsEmptyPrompt');
+  }
+
+  async getSearchFetchCount(): Promise<number> {
+    const fetchCounter = this.page.locator('[data-fetch-counter]');
+    await fetchCounter.waitFor({ state: 'attached' });
+    return Number(await fetchCounter.getAttribute('data-fetch-counter'));
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -531,6 +657,12 @@ export class DiscoverApp {
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
+  }
+
+  async getHistogramSuggestionType(): Promise<string | null> {
+    const chart = this.page.testSubj.locator('unifiedHistogramChart');
+    await chart.waitFor({ state: 'visible' });
+    return chart.getAttribute('data-suggestion-type');
   }
 
   async clickHistogramBar() {
@@ -674,12 +806,14 @@ export class DiscoverApp {
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
+  getDocHeaderLabels(): Locator {
+    return this.page.locator(
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+    );
+  }
+
   async getDocHeader(): Promise<string[]> {
-    const headers = await this.page
-      .locator(
-        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-      )
-      .allInnerTexts();
+    const headers = await this.getDocHeaderLabels().allInnerTexts();
     return headers.map((h) => h.trim());
   }
 
@@ -787,6 +921,22 @@ export class DiscoverApp {
     }
   }
 
+  /**
+   * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
+   * `dragFieldWithKeyboardToTable` implementation.
+   */
+  async dragFieldToGridWithKeyboard(fieldName: string) {
+    const keyboardHandler = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await keyboardHandler.focus();
+    await this.page.keyboard.press('Enter'); // enter DnD mode
+    // domDroppable_overlay renders when DnD is active — use it as a sync point
+    await this.page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
+    await this.page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
+    await this.page.keyboard.press('Enter'); // drop
+  }
+
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
     const viewButtons: Locator[] = await this.page.testSubj
       .locator('dataVisualizerActionViewInLensButton')
@@ -840,13 +990,6 @@ export class DiscoverApp {
 
     if (currentMode !== 'classic') {
       await this.clickAppMenuItem('select-classic-mode-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'visible',
-      });
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'hidden',
-      });
     }
 
     await this.waitUntilSearchingHasFinished();

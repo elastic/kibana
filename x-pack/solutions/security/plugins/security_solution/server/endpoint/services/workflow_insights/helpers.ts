@@ -33,6 +33,7 @@ import { securityWorkflowInsightsFieldMap } from './field_map_configurations';
 
 export interface FileEventDoc {
   process: {
+    name?: string;
     code_signature?: {
       subject_name: string;
       trusted: boolean;
