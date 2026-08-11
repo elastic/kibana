@@ -162,10 +162,10 @@ export async function runSetupModuleTest(
       for (const { jobId, jobState, datafeedState } of data.expected.jobs) {
         const datafeedId = `datafeed-${jobId}`;
         if (data.startDatafeed) {
-          await anomalyDetection.waitForJobRecordCountToBePositive(jobId, 4 * 60 * 1000);
+          await anomalyDetection.waitForJobRecordCountToBePositive(jobId);
         }
-        await anomalyDetection.waitForDatafeedState(datafeedId, datafeedState, 4 * 60 * 1000);
-        await anomalyDetection.waitForJobState(jobId, jobState, 4 * 60 * 1000);
+        await anomalyDetection.waitForDatafeedState(datafeedId, datafeedState);
+        await anomalyDetection.waitForJobState(jobId, jobState);
       }
     });
 

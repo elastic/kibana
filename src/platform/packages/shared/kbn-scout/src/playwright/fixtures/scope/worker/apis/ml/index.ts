@@ -581,7 +581,7 @@ export const getMlApiHelper = (
     async waitForJobState(
       jobId: string,
       expectedState: string,
-      timeout = 4 * 60 * 1000
+      timeout = 2 * 60 * 1000
     ): Promise<void> {
       await waitForCondition(
         `job '${jobId}' to be in state '${expectedState}'`,
@@ -599,7 +599,7 @@ export const getMlApiHelper = (
     async waitForDatafeedState(
       datafeedId: string,
       expectedState: string,
-      timeout = 4 * 60 * 1000
+      timeout = 2 * 60 * 1000
     ): Promise<void> {
       await waitForCondition(
         `datafeed '${datafeedId}' to be in state '${expectedState}'`,
@@ -614,7 +614,7 @@ export const getMlApiHelper = (
       );
     },
 
-    async waitForJobRecordCountToBePositive(jobId: string, timeout = 4 * 60 * 1000): Promise<void> {
+    async waitForJobRecordCountToBePositive(jobId: string, timeout = 2 * 60 * 1000): Promise<void> {
       await waitForCondition(
         `job '${jobId}' to have positive record count`,
         async () => {
