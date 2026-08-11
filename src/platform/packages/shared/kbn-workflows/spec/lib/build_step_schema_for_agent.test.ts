@@ -138,7 +138,7 @@ describe('build_step_schema_for_agent', () => {
       expect(shape).toHaveProperty('timeout');
     });
 
-    it('includes if but omits timeout for FlowControl steps (other than the `if` step itself)', () => {
+    it('includes `if` but omits `timeout` for FlowControl steps', () => {
       const schema = buildBuiltInStepSchema(
         makeBuiltInStep({ id: 'wait', category: StepCategory.FlowControl })
       );
@@ -148,7 +148,7 @@ describe('build_step_schema_for_agent', () => {
       expect(shape).not.toHaveProperty('timeout');
     });
 
-    it('omits if for the `if` step itself (branching uses `condition`, a top-level `if` would double up)', () => {
+    it('omits `if` for the `if` step', () => {
       const schema = buildBuiltInStepSchema(
         makeBuiltInStep({ id: 'if', category: StepCategory.FlowControl })
       );

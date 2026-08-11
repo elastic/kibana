@@ -1155,8 +1155,7 @@ describe('ParallelStepSchema', () => {
 });
 
 describe('`if` condition on step schemas', () => {
-  // `if` comes from `BaseStepSchema`, so every step type gets it. These cases pin
-  // that down per type, since a schema can drop it by overriding the key.
+  // `if` comes from `BaseStepSchema`, but a schema can drop it by overriding the key.
   const cases = [
     {
       name: 'wait',
