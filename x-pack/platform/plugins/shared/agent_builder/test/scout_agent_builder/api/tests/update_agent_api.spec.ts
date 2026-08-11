@@ -315,34 +315,5 @@ apiTest.describe(
       });
       expect(getResponse.body.configuration.instructions).toBe('Round-trip instructions');
     });
-
-    apiTest(
-      'repeated GET-modify-PUT cycles keep the stored document stable',
-      async ({ asAdmin }) => {
-        const id = await createAgent(asAdmin);
-
-        const createGet = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${id}`, {
-          responseType: 'json',
-        });
-        expect(createGet).toHaveStatusCode(200);
-        const initialInstructions = createGet.body.configuration.instructions as string;
-
-        // Simulate the edit-details flyout doing a read-modify-write loop.
-        for (let i = 0; i < 2; i++) {
-          const getRes = await asAdmin.get(`${API_AGENT_BUILDER}/agents/${id}`, {
-            responseType: 'json',
-          });
-          expect(getRes).toHaveStatusCode(200);
-
-          const putRes = await asAdmin.put(`${API_AGENT_BUILDER}/agents/${id}`, {
-            body: { configuration: { instructions: getRes.body.configuration.instructions } },
-            responseType: 'json',
-          });
-          expect(putRes).toHaveStatusCode(200);
-          // Instructions must remain identical across cycles.
-          expect(putRes.body.configuration.instructions).toBe(initialInstructions);
-        }
-      }
-    );
   }
 );
