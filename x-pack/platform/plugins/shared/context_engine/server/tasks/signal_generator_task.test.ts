@@ -20,11 +20,10 @@ import {
 import type { Signal } from '../../common/http_api/signals';
 import type { SignalsServiceApi } from '../signals/service';
 import {
-  buildConvAgentMap,
   registerSignalGeneratorTaskDefinition,
   scheduleSignalGenerator,
-  spaceFromTracesIndex,
 } from './signal_generator_task';
+import { buildConvAgentMap, spaceFromTracesIndex } from './traces_repository';
 
 describe('spaceFromTracesIndex', () => {
   it('derives space from the data-stream name', () => {
