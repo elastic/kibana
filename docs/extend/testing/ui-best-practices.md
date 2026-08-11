@@ -279,23 +279,18 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 ## Use EUI test helpers in page objects [use-eui-test-helpers-in-page-objects]
 
-Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. Scout has two sources:
-
-- **`page.components`**: the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Prefer these where your component is covered; autocomplete shows what's available.
-- **`@kbn/scout` wrappers** (or your solution's Scout package): the `Eui*Wrapper` classes, for components the published helpers don't reach yet.
+Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. `page.components` exposes the published [EUI test helpers](./eui-test-helpers.md) pre-bound to the page, so you never construct one yourself and autocomplete lists the components that are covered.
 
 :::::{dropdown} Example
 
 ```ts
-import { EuiDataGridWrapper, type EuiComboBoxObject, type ScoutPage } from '@kbn/scout';
+import type { EuiComboBoxObject, ScoutPage } from '@kbn/scout';
 
 export class MyAppPage {
   public readonly fieldComboBox: EuiComboBoxObject;
-  public readonly resultsGrid: EuiDataGridWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.fieldComboBox = this.page.components.comboBox('fieldSelectorComboBox');
-    this.resultsGrid = new EuiDataGridWrapper(this.page, 'resultsTable-loaded');
   }
 
   async selectField(value: string) {
@@ -306,7 +301,7 @@ export class MyAppPage {
 
 :::::
 
-If neither covers your component, `page.testSubj` locators are fine. When an EUI component has no wrapper, or its helper is missing a method, [add it to the shared helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
+If your component isn't covered yet, `page.testSubj` locators are fine for now. When an EUI component has no helper, or its helper is missing a method, request it from the Apps DX team with a short justification of what your test needs, so the addition is [designed and owned together](./eui-test-helpers.md#scout-eui-test-helpers-contribute) rather than duplicated per suite. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
