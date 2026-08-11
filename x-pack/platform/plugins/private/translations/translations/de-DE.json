@@ -661,7 +661,6 @@
     "console.notification.monaco.error.nonSupportedRequest": "Die ausgewählte Anfrage ist nicht gültig.",
     "console.notification.monaco.error.noRequestSelectedTitle": "Keine Anfrage ausgewählt. Wählen Sie eine Anfrage aus, indem Sie den Cursor darauf platzieren.",
     "console.notification.monaco.error.unknownErrorTitle": "Unbekannter Anforderungsfehler",
-    "console.notification.monaco.warning.nonSupportedAutoindentation": "Die automatische Einrückung wird momentan für Anfragen mit Kommentaren nicht unterstützt. Bitte entfernen Sie die Kommentare, um die Formatierung zu ermöglichen.",
     "console.openFullscreenButton": "Öffnen Sie diese Konsole als Vollbildansicht",
     "console.outputEmptyState.description": "Wenn Sie im Eingabebereich eine Anfrage ausführen, wird hier die Reaktion angezeigt.",
     "console.outputEmptyState.docsLink": "Lesen Sie die Konsolen-Dokumentation",

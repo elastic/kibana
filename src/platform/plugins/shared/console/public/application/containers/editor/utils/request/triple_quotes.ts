@@ -7,32 +7,82 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  decodeStringToken,
+  getRequestDataScannerTokens,
+  getRequestDataTokens,
+  isStringToken,
+  replaceRequestDataTokens,
+  type RequestDataToken,
+} from './tokens';
+
 export const TRIPLE_QUOTE_STRINGS_MARKER = '"{tripleQuoteString}"';
 
-/**
- * This function replaces all triple-quote strings with {@link TRIPLE_QUOTE_STRINGS_MARKER}
- */
-export function collapseTripleQuoteStrings(data: string) {
-  const splitData = data.split(`"""`);
-  const tripleQuoteStrings = [];
-  for (let i = 1; i < splitData.length - 1; i += 2) {
-    tripleQuoteStrings.push('"""' + splitData[i] + '"""');
-    splitData[i] = TRIPLE_QUOTE_STRINGS_MARKER;
-  }
-  return { collapsedTripleQuotesData: splitData.join(''), tripleQuoteStrings };
+export interface CollapsedTripleQuoteStrings {
+  readonly collapsedTripleQuotesData: string;
+  readonly tripleQuoteStrings: string[];
+  readonly marker: string;
 }
 
-/**
- * This function replaces all {@link TRIPLE_QUOTE_STRINGS_MARKER}s in the provided text with the corresponding provided triple-quote strings.
- */
-export function expandTripleQuoteStrings(data: string, tripleQuoteStrings: string[]) {
-  const splitData = data.split(TRIPLE_QUOTE_STRINGS_MARKER);
-  const allData = [];
-  for (let i = 0; i < splitData.length; i++) {
-    allData.push(splitData[i]);
-    if (i < tripleQuoteStrings.length) {
-      allData.push(tripleQuoteStrings[i]);
+const doesTripleQuoteMarkerCollide = (data: string, marker: string): boolean => {
+  if (data.includes(marker)) {
+    return true;
+  }
+
+  const decodedMarker = marker.slice(1, -1);
+  return getRequestDataTokens(data).some(
+    (token) =>
+      token.kind !== 'tripleQuotedString' &&
+      isStringToken(token) &&
+      decodeStringToken(token.value) === decodedMarker
+  );
+};
+
+const createCollisionSafeTripleQuoteMarker = (data: string): string => {
+  for (let index = -1; ; index += 1) {
+    const marker = index === -1 ? TRIPLE_QUOTE_STRINGS_MARKER : `"{tripleQuoteString_${index}}"`;
+
+    if (!doesTripleQuoteMarkerCollide(data, marker)) {
+      return marker;
     }
   }
-  return allData.join('');
-}
+};
+
+const isClosedTripleQuoteString = (token: RequestDataToken): boolean => {
+  return (
+    token.kind === 'tripleQuotedString' && token.value.length > 3 && token.value.endsWith('"""')
+  );
+};
+
+/**
+ * Replaces triple-quote strings with a collision-safe marker, ignoring markers inside comments.
+ */
+export const collapseTripleQuoteStrings = (data: string): CollapsedTripleQuoteStrings => {
+  const marker = createCollisionSafeTripleQuoteMarker(data);
+  const tokens = getRequestDataScannerTokens(data);
+  const tripleQuoteStrings = tokens.filter(isClosedTripleQuoteString).map(({ value }) => value);
+
+  return {
+    collapsedTripleQuotesData: replaceRequestDataTokens(data, tokens, (token) =>
+      isClosedTripleQuoteString(token) ? marker : token.value
+    ),
+    tripleQuoteStrings,
+    marker,
+  };
+};
+
+/**
+ * Replaces collapsed triple-quote markers with the original triple-quote strings.
+ */
+export const expandTripleQuoteStrings = (
+  data: string,
+  tripleQuoteStrings: string[],
+  marker: string = TRIPLE_QUOTE_STRINGS_MARKER
+): string => {
+  return data
+    .split(marker)
+    .flatMap((part, index) =>
+      index < tripleQuoteStrings.length ? [part, tripleQuoteStrings[index]] : [part]
+    )
+    .join('');
+};

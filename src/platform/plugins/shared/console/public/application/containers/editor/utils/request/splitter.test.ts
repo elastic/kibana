@@ -9,19 +9,41 @@
 
 import { splitRequestDataObjects } from './splitter';
 
-describe('splitter', () => {
-  it('SHOULD split concatenated request objects', () => {
-    expect(splitRequestDataObjects('{"first":true}{"second":true}')).toEqual([
-      '{"first":true}',
-      '{"second":true}',
-    ]);
+describe('request data splitter', () => {
+  describe('WHEN request bodies are concatenated', () => {
+    it('SHOULD split only at completed top-level objects', () => {
+      expect(splitRequestDataObjects('{"a":{"b":1}}\n{"c":2}')).toEqual([
+        '{"a":{"b":1}}',
+        '{"c":2}',
+      ]);
+    });
   });
 
-  it('SHOULD preserve braces within strings', () => {
-    expect(splitRequestDataObjects('{"query":"{a} {b}"}')).toEqual(['{"query":"{a} {b}"}']);
+  describe('WHEN opaque values contain braces', () => {
+    it.each([
+      ['double-quoted strings', '{"a":"}"}\n{"b":2}'],
+      ['single-quoted strings', "{'a': '}'}\n{'b': 2}"],
+      ['triple-quoted strings', '{"script":"""return "}";"""}\n{"b":2}'],
+      ['comments', '{\n// }\n"a":1\n}\n{"b":2}'],
+    ])('SHOULD ignore braces in %s', (_description, source) => {
+      expect(splitRequestDataObjects(source)).toHaveLength(2);
+    });
   });
 
-  it('SHOULD preserve invalid request data', () => {
-    expect(splitRequestDataObjects('{"query":')).toEqual(['{"query":']);
+  describe('WHEN a top-level object has a trailing comment', () => {
+    it('SHOULD attach the comment to that object', () => {
+      expect(splitRequestDataObjects('{"a":1} // tail\n{"b":2}')).toEqual([
+        '{"a":1} // tail',
+        '{"b":2}',
+      ]);
+    });
+  });
+
+  describe('WHEN a triple quote is unclosed', () => {
+    it('SHOULD retain the source as one object', () => {
+      const source = '{"script": """unclosed }\n{"next":true}';
+
+      expect(splitRequestDataObjects(source)).toEqual([source]);
+    });
   });
 });

@@ -661,7 +661,6 @@
     "console.notification.monaco.error.nonSupportedRequest": "选定的请求无效。",
     "console.notification.monaco.error.noRequestSelectedTitle": "未选择任何请求。将鼠标置于请求内即可选择。",
     "console.notification.monaco.error.unknownErrorTitle": "未知请求错误",
-    "console.notification.monaco.warning.nonSupportedAutoindentation": "对于包含注释的请求，目前不支持自动缩进。请删除注释以启用格式化。",
     "console.openFullscreenButton": "打开此控制台，将其作为一次整页体验",
     "console.outputEmptyState.description": "在输入面板中运行请求时，您将在此处看到输出响应。",
     "console.outputEmptyState.docsLink": "阅读 Console 文档",

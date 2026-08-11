@@ -7,39 +7,127 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse } from 'hjson';
+
+export type RequestDataTokenKind =
+  | 'tripleQuotedString'
+  | 'doubleQuotedString'
+  | 'singleQuotedString'
+  | 'lineComment'
+  | 'blockComment';
+
+export interface RequestDataToken {
+  readonly kind: RequestDataTokenKind;
+  readonly value: string;
+  readonly start: number;
+  readonly end: number;
+}
+
 const requestDataTokensRegex = new RegExp(
   [
-    /"""[\s\S]*?"""/.source, // Triple-quoted strings
-    /"(?:\\.|[^"\\])*"/.source, // JSON strings
-    /\/\/[^\r\n]*/.source, // // comments
-    /#[^\r\n]*/.source, // # comments
-    /\/\*[\s\S]*?\*\//.source, // Block comments
+    /"""[\s\S]*?"""/.source,
+    /"(?:\\.|[^"\\])*"/.source,
+    /'(?:\\.|[^'\\])*'/.source,
+    /\/\/[^\r\n]*/.source,
+    /#[^\r\n]*/.source,
+    /\/\*[\s\S]*?\*\//.source,
   ].join('|'),
   'g'
 );
 
-const isSlashCommentToken = (token: string) => token.startsWith('//') || token.startsWith('/*');
-export const isCommentToken = (token: string) =>
-  isSlashCommentToken(token) || token.startsWith('#');
+const requestDataScannerRegex = new RegExp(
+  [
+    /"""[\s\S]*?(?:"""|$)/.source,
+    /"(?:\\[\s\S]|[^"\\])*(?:"|$)/.source,
+    /'(?:\\[\s\S]|[^'\\])*(?:'|$)/.source,
+    /\/\/[^\n]*(?:\n|$)/.source,
+    /#[^\n]*(?:\n|$)/.source,
+    /\/\*[\s\S]*?(?:\*\/|$)/.source,
+  ].join('|'),
+  'g'
+);
 
-export const containsCommentToken = (requestData: string): boolean => {
-  requestDataTokensRegex.lastIndex = 0;
-  let match = requestDataTokensRegex.exec(requestData);
+const requestDataSemanticTokensRegex = new RegExp(
+  [requestDataTokensRegex.source, /[{}\[\]:]/.source, /[^\s{}\[\]:,\/#]+/.source].join('|'),
+  'g'
+);
 
-  while (match) {
-    if (isCommentToken(match[0])) {
-      requestDataTokensRegex.lastIndex = 0;
-      return true;
-    }
-    match = requestDataTokensRegex.exec(requestData);
+const getRequestDataTokenKind = (value: string): RequestDataTokenKind => {
+  if (value.startsWith('"""')) {
+    return 'tripleQuotedString';
   }
-
-  requestDataTokensRegex.lastIndex = 0;
-  return false;
+  if (value.startsWith('"')) {
+    return 'doubleQuotedString';
+  }
+  if (value.startsWith("'")) {
+    return 'singleQuotedString';
+  }
+  return value.startsWith('/*') ? 'blockComment' : 'lineComment';
 };
 
-export const replaceCommentTokens = (requestData: string): string => {
-  return requestData.replace(requestDataTokensRegex, (token) =>
-    isCommentToken(token) ? ' ' : token
+const getTokens = (source: string, regex: RegExp): RequestDataToken[] => {
+  return Array.from(source.matchAll(new RegExp(regex.source, 'g')), (match) => {
+    const value = match[0];
+    const start = match.index ?? 0;
+
+    return {
+      kind: getRequestDataTokenKind(value),
+      value,
+      start,
+      end: start + value.length,
+    };
+  });
+};
+
+export const getRequestDataTokens = (source: string): RequestDataToken[] => {
+  return getTokens(source, requestDataTokensRegex);
+};
+
+export const getRequestDataScannerTokens = (source: string): RequestDataToken[] => {
+  return getTokens(source, requestDataScannerRegex);
+};
+
+export const getRequestDataSemanticTokens = (source: string): string[] => {
+  return Array.from(
+    source.matchAll(new RegExp(requestDataSemanticTokensRegex.source, 'g')),
+    ([token]) => token
   );
+};
+
+export const isCommentToken = (token: RequestDataToken): boolean => {
+  return token.kind === 'lineComment' || token.kind === 'blockComment';
+};
+
+export const isStringToken = (token: RequestDataToken): boolean => {
+  return (
+    token.kind === 'tripleQuotedString' ||
+    token.kind === 'doubleQuotedString' ||
+    token.kind === 'singleQuotedString'
+  );
+};
+
+export const decodeStringToken = (token: string): string | undefined => {
+  try {
+    const decoded = parse(token);
+    return typeof decoded === 'string' ? decoded : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+export const replaceRequestDataTokens = (
+  source: string,
+  tokens: RequestDataToken[],
+  replaceToken: (token: RequestDataToken) => string
+): string => {
+  const parts: string[] = [];
+  let cursor = 0;
+
+  for (const token of tokens) {
+    parts.push(source.slice(cursor, token.start), replaceToken(token));
+    cursor = token.end;
+  }
+
+  parts.push(source.slice(cursor));
+  return parts.join('');
 };

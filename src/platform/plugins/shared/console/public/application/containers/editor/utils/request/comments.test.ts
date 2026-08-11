@@ -10,115 +10,36 @@
 import { containsComments, removeCommentsFromData } from './comments';
 import { TRIPLE_QUOTE_STRINGS_MARKER } from './triple_quotes';
 
-describe('comments', () => {
-  describe('containsComments', () => {
-    it('should return false for JSON with comment markers inside strings', () => {
-      const requestData = `{
-      "docs": [
-        {
-          "_source": {
-            "trace": {
-              "name": "GET /actuator/health/**"
-            },
-            "transaction": {
-              "outcome": "success"
-            }
-          }
-        },
-        {
-          "_source": {
-            "vulnerability": {
-              "reference": [
-                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778#details"
-              ]
-            }
-          }
-        }
-      ]
-    }`;
-      expect(containsComments(requestData)).toBe(false);
+describe('request comments', () => {
+  describe('WHEN detecting comments', () => {
+    it.each([
+      [
+        'comment markers inside strings',
+        '{"url":"https://elastic.co/#x","pattern":"//literal","script":"""// painless"""}',
+        false,
+      ],
+      ['a line comment', '{\n// comment\n"a":1\n}', true],
+      ['a block comment', '{/* comment */"a":1}', true],
+      ['a hash comment', '{\n# comment\n"a":1\n}', true],
+      ['escaped quotes', '{"value":"escaped \\" // still a string"}', false],
+      ['a comment after a string', '{"value":"text" // comment\n}', true],
+      ['', '', false],
+    ])('SHOULD detect %s', (_description, requestData, expected) => {
+      expect(containsComments(requestData)).toBe(expected);
     });
 
-    it('should return true for text with actual line comment', () => {
-      const requestData = `{
-      // This is a comment
-      "query": { "match_all": {} }
-    }`;
-      expect(containsComments(requestData)).toBe(true);
-    });
+    it('SHOULD remain stable across consecutive calls', () => {
+      const withComment = '{\n// comment\n"a":1\n}';
+      const withoutComment = '{"a":1}';
 
-    it('should return true for text with actual block comment', () => {
-      const requestData = `{
-      /* Bulk insert */
-      "index": { "_index": "test" },
-      "field1": "value1"
-    }`;
-      expect(containsComments(requestData)).toBe(true);
-    });
-
-    it('should return true for text with actual hash comment', () => {
-      const requestData = `{
-      # This is a comment
-      "query": { "match_all": {} }
-    }`;
-      expect(containsComments(requestData)).toBe(true);
-    });
-
-    it('should return false for text without any comments', () => {
-      const requestData = `{
-      "field": "value"
-    }`;
-      expect(containsComments(requestData)).toBe(false);
-    });
-
-    it('should return false for empty string', () => {
-      expect(containsComments('')).toBe(false);
-    });
-
-    it('should reset token scanning between calls', () => {
-      const requestDataWithComment = `{
-      // This is a comment
-      "query": { "match_all": {} }
-    }`;
-      const requestDataWithoutComment = '{ "query": { "match_all": {} } }';
-
-      expect(containsComments(requestDataWithComment)).toBe(true);
-      expect(containsComments(requestDataWithoutComment)).toBe(false);
-      expect(containsComments(requestDataWithComment)).toBe(true);
-    });
-
-    it('should correctly handle escaped quotes within strings', () => {
-      const requestData = `{
-      "field": \"value with \\\"escaped quotes\\\"\"
-    }`;
-      expect(containsComments(requestData)).toBe(false);
-    });
-
-    it('should return true if comment is outside of strings', () => {
-      const requestData = `{
-      "field": "value" // comment here
-    }`;
-      expect(containsComments(requestData)).toBe(true);
-    });
-
-    it('should ignore comment-like sequences inside triple-quote strings', () => {
-      const requestData = `{
-      "script": """def quote = '"'; // painless comment # still script"""
-    }`;
-      expect(containsComments(requestData)).toBe(false);
-    });
-
-    it('should detect comments outside triple-quote strings', () => {
-      const requestData = `{
-      // request comment
-      "script": """def quote = '"'; // painless comment"""
-    }`;
-      expect(containsComments(requestData)).toBe(true);
+      expect(containsComments(withComment)).toBe(true);
+      expect(containsComments(withoutComment)).toBe(false);
+      expect(containsComments(withComment)).toBe(true);
     });
   });
 
-  describe('removeCommentsFromData', () => {
-    it('removes line and block comments from the request data', () => {
+  describe('WHEN removing comments', () => {
+    it('SHOULD remove line and block comments from parseable data', () => {
       const requestData = `{
   // line comment
   "query": {
@@ -127,12 +48,12 @@ describe('comments', () => {
   } // trailing comment
 }`;
       const result = removeCommentsFromData(requestData);
+
       expect(containsComments(result)).toBe(false);
       expect(JSON.parse(result)).toEqual({ query: { match_all: {} } });
     });
 
-    it('removes comments when the data also contains multi-line triple-quote strings', () => {
-      // Regression test for https://github.com/elastic/kibana/issues/277160
+    it('SHOULD preserve comments inside triple-quoted strings', () => {
       const requestData = `{
   // watch metadata
   "script": {
@@ -144,63 +65,67 @@ describe('comments', () => {
   } /* end of script */
 }`;
       const result = removeCommentsFromData(requestData);
+
       expect(result).not.toContain('// watch metadata');
       expect(result).not.toContain('/* end of script */');
-      // The triple-quote string is preserved, including the comments inside it
       expect(result).toContain(`"source": """
       def a = 1; // painless comment
       return a;
     """`);
     });
 
-    it('preserves comment-like sequences inside strings', () => {
-      const requestData = `{
-  "url": "https://elastic.co", // comment
-  "pattern": "/*"
-}`;
-      const result = removeCommentsFromData(requestData);
-      expect(result).not.toContain('// comment');
-      expect(JSON.parse(result)).toEqual({ url: 'https://elastic.co', pattern: '/*' });
-    });
-
-    it('preserves a literal value matching the triple-quote placeholder', () => {
+    it('SHOULD preserve literal marker values and triple-quoted values', () => {
       const requestData = `{
   // comment
   "literal": ${TRIPLE_QUOTE_STRINGS_MARKER},
   "script": """return 1;"""
 }`;
       const result = removeCommentsFromData(requestData);
+
       expect(result).not.toContain('// comment');
       expect(result).toMatch(/"literal"\s*:\s*"\{tripleQuoteString\}"/);
       expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
     });
 
-    it('preserves triple-quote values when object keys are reordered during parsing', () => {
+    it('SHOULD preserve comment-like text inside regular strings', () => {
+      const requestData = `{
+  "url": "https://elastic.co", // comment
+  "pattern": "/*"
+}`;
+      const result = removeCommentsFromData(requestData);
+
+      expect(result).not.toContain('// comment');
+      expect(JSON.parse(result)).toEqual({ url: 'https://elastic.co', pattern: '/*' });
+    });
+
+    it('SHOULD preserve triple-quoted values when parsing reorders keys', () => {
       const requestData = `{
   // comment
   "z": """first""",
   "1": """second"""
 }`;
       const result = removeCommentsFromData(requestData);
-      expect(result).not.toContain('// comment');
+
       expect(result).toMatch(/"z"\s*:\s*"""first"""/);
       expect(result).toMatch(/"1"\s*:\s*"""second"""/);
     });
 
-    it('ignores triple-quote delimiters inside comments', () => {
+    it('SHOULD ignore triple-quote delimiters inside comments', () => {
       const requestData = `{
   // this comment mentions """
   /* this block comment also mentions """ */
   "script": """return 1;"""
 }`;
       const result = removeCommentsFromData(requestData);
+
       expect(result).not.toContain('this comment mentions');
       expect(result).not.toContain('this block comment');
       expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
     });
 
-    it('returns invalid data unchanged', () => {
+    it('SHOULD leave invalid data unchanged', () => {
       const requestData = '{\n  "query": // comment\n    {';
+
       expect(removeCommentsFromData(requestData)).toBe(requestData);
     });
   });

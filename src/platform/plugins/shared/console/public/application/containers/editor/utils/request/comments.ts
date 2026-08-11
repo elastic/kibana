@@ -9,14 +9,18 @@
 
 import { parse } from 'hjson';
 import { collapseTripleQuoteStrings } from './triple_quotes';
-import { containsCommentToken, replaceCommentTokens } from './tokens';
+import { getRequestDataTokens, isCommentToken, replaceRequestDataTokens } from './tokens';
 
 export const containsComments = (requestData: string): boolean => {
-  return containsCommentToken(requestData);
+  return getRequestDataTokens(requestData).some(isCommentToken);
 };
 
 const removeCommentsFromDataWithTripleQuotes = (dataString: string): string | null => {
-  const dataWithoutComments = replaceCommentTokens(dataString);
+  const dataWithoutComments = replaceRequestDataTokens(
+    dataString,
+    getRequestDataTokens(dataString),
+    (token) => (isCommentToken(token) ? ' ' : token.value)
+  );
   const { collapsedTripleQuotesData } = collapseTripleQuoteStrings(dataWithoutComments);
 
   try {
@@ -28,13 +32,7 @@ const removeCommentsFromDataWithTripleQuotes = (dataString: string): string | nu
 };
 
 /**
- * This function removes comments from the request data.
- *
- * The comment removal is done by parsing the data with hjson and stringifying the result.
- * Since hjson can't parse multi-line strings in triple quotes, a token-aware fallback removes
- * comments outside quoted strings and validates the result after collapsing triple-quote strings.
- * Comments inside triple-quote strings (e.g. Painless comments) are preserved.
- * If the data can't be parsed at all, it is returned unchanged.
+ * Removes comments outside triple-quoted strings, or returns the original data when it is invalid.
  */
 export const removeCommentsFromData = (dataString: string): string => {
   try {

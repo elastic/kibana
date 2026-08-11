@@ -661,7 +661,6 @@
     "console.notification.monaco.error.nonSupportedRequest": "選択したリクエストが無効です。",
     "console.notification.monaco.error.noRequestSelectedTitle": "リクエストを選択していません。リクエストの中にカーソルを置いて選択します。",
     "console.notification.monaco.error.unknownErrorTitle": "不明なリクエストエラー",
-    "console.notification.monaco.warning.nonSupportedAutoindentation": "自動インデントは、コメントを含むリクエストで現在サポートされていません。フォーマットを有効にするには、コメントを削除してください。",
     "console.openFullscreenButton": "完全なページエクスペリエンスとしてこのコンソールを開く",
     "console.outputEmptyState.description": "入力パネルで要求を実行すると、ここに出力応答が表示されます。",
     "console.outputEmptyState.docsLink": "コンソールドキュメントを読む",

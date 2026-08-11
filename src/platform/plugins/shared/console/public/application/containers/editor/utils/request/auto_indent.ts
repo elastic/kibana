@@ -7,95 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import type { AdjustedParsedRequest } from '../../types';
-import { containsComments } from './comments';
-import { indentData } from './formatter';
+import { formatRequestData } from './formatter';
 import { splitRequestDataObjects } from './splitter';
-import { collapseTripleQuoteStrings, expandTripleQuoteStrings } from './triple_quotes';
 
 const cleanUpWhitespaces = (line: string): string => {
   return line.trim().replaceAll(/\s+/g, ' ');
 };
 
-const getIndentedRequestDataLines = (dataLines: string[]): string[] => {
-  const dataString = dataLines.join('\n');
-  const dataJsons = splitRequestDataObjects(dataString);
-
-  return dataJsons.map((data) => {
-    // Since triple-quote strings are not valid JSON syntax, collapse them before indenting.
-    const { collapsedTripleQuotesData, tripleQuoteStrings } = collapseTripleQuoteStrings(data);
-    const indentedData = indentData(collapsedTripleQuotesData);
-    return expandTripleQuoteStrings(indentedData, tripleQuoteStrings);
-  });
-};
-
 const getFormattedRequestLines = (
   request: AdjustedParsedRequest,
-  allTextLines: string[],
-  addToastWarning: (text: string) => void
+  allTextLines: string[]
 ): string[] => {
   const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
-  const firstLine = cleanUpWhitespaces(requestLines[0]);
-  const dataLines = requestLines.slice(1);
+  const data = requestLines.slice(1).join('\n');
 
-  if (containsComments(dataLines.join(''))) {
-    addToastWarning(
-      i18n.translate('console.notification.monaco.warning.nonSupportedAutoindentation', {
-        defaultMessage:
-          'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.',
-      })
-    );
-    return [firstLine, ...dataLines];
-  }
-
-  return requestLines.length > 1
-    ? [firstLine, ...getIndentedRequestDataLines(dataLines)]
-    : [firstLine];
+  return [
+    cleanUpWhitespaces(requestLines[0]),
+    ...splitRequestDataObjects(data).map(formatRequestData),
+  ];
 };
 
 const formatSelectedTextLines = (
-  requests: AdjustedParsedRequest[],
   selectedTextLines: string[],
   allTextLines: string[],
-  addToastWarning: (text: string) => void
+  requests: AdjustedParsedRequest[]
 ): string[] => {
   const formattedTextLines: string[] = [];
   let requestIndex = 0;
 
-  for (let lineIndex = 0; lineIndex < selectedTextLines.length; lineIndex++) {
+  for (let lineIndex = 0; lineIndex < selectedTextLines.length; lineIndex += 1) {
+    const line = selectedTextLines[lineIndex];
     const request = requests[requestIndex];
-    const selectedLine = selectedTextLines[lineIndex];
-
-    if (!request || selectedLine !== allTextLines[request.startLineNumber - 1]) {
-      formattedTextLines.push(cleanUpWhitespaces(selectedLine));
+    if (!request || line !== allTextLines[request.startLineNumber - 1]) {
+      formattedTextLines.push(cleanUpWhitespaces(line));
       continue;
     }
 
-    formattedTextLines.push(...getFormattedRequestLines(request, allTextLines, addToastWarning));
+    formattedTextLines.push(...getFormattedRequestLines(request, allTextLines));
     lineIndex += request.endLineNumber - request.startLineNumber;
-    requestIndex++;
+    requestIndex += 1;
   }
 
   return formattedTextLines;
 };
 
 /**
- * This function takes a string containing unformatted Console requests and
- * returns a text in which the requests are auto-indented.
- * @param requests The list of {@link AdjustedParsedRequest} that are in the selected text in the editor.
- * @param selectedText The selected text in the editor.
- * @param allText The whole text input in the editor.
+ * Formats the selected Console requests while preserving lines between them.
  */
 export const getAutoIndentedRequests = (
   requests: AdjustedParsedRequest[],
   selectedText: string,
-  allText: string,
-  addToastWarning: (text: string) => void
+  allText: string
 ): string => {
-  const selectedTextLines = selectedText.split(`\n`);
-  const allTextLines = allText.split(`\n`);
-  return formatSelectedTextLines(requests, selectedTextLines, allTextLines, addToastWarning).join(
+  return formatSelectedTextLines(selectedText.split('\n'), allText.split('\n'), requests).join(
     '\n'
   );
 };

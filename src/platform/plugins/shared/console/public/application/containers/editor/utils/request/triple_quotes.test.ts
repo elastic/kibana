@@ -13,9 +13,8 @@ import {
   TRIPLE_QUOTE_STRINGS_MARKER,
 } from './triple_quotes';
 
-describe('triple_quotes', () => {
-  describe('collapseTripleQuoteStrings and expandTripleQuoteStrings', () => {
-    const input = `{
+describe('triple quote request data', () => {
+  const input = `{
   "query1": """FROM sample_data | LIMIT 3""",
   "query2": """
     FROM sample_data
@@ -24,31 +23,28 @@ describe('triple_quotes', () => {
     """
 }`;
 
-    it('should collapse and re-expand both inline and multi-line triple-quote strings correctly', () => {
+  describe('WHEN collapsing complete triple-quoted strings', () => {
+    it('SHOULD preserve their order for expansion', () => {
       const { collapsedTripleQuotesData, tripleQuoteStrings } = collapseTripleQuoteStrings(input);
 
-      // Validate that both triple-quoted strings were replaced with the marker
       expect(collapsedTripleQuotesData).toBe(`{
   "query1": ${TRIPLE_QUOTE_STRINGS_MARKER},
   "query2": ${TRIPLE_QUOTE_STRINGS_MARKER}
 }`);
-
-      // Validate extracted strings match expected format
       expect(tripleQuoteStrings).toEqual([
-        `"""FROM sample_data | LIMIT 3"""`,
+        '"""FROM sample_data | LIMIT 3"""',
         `"""
     FROM sample_data
     | WHERE message LIKE "Connected*"
     | SORT @timestamp DESC
     """`,
       ]);
-
-      // Ensure re-expansion gives the original input back
-      const expanded = expandTripleQuoteStrings(collapsedTripleQuotesData, tripleQuoteStrings);
-      expect(expanded).toBe(input);
+      expect(expandTripleQuoteStrings(collapsedTripleQuotesData, tripleQuoteStrings)).toBe(input);
     });
+  });
 
-    it('should be idempotent if run multiple times on collapsed data', () => {
+  describe('WHEN collapsing data twice', () => {
+    it('SHOULD leave already-collapsed data unchanged', () => {
       const firstCollapse = collapseTripleQuoteStrings(input);
       const secondCollapse = collapseTripleQuoteStrings(firstCollapse.collapsedTripleQuotesData);
 
@@ -56,6 +52,42 @@ describe('triple_quotes', () => {
       expect(secondCollapse.collapsedTripleQuotesData).toBe(
         firstCollapse.collapsedTripleQuotesData
       );
+    });
+  });
+
+  describe('WHEN the triple quote is unclosed', () => {
+    it('SHOULD preserve the source', () => {
+      const unclosed = '{\n  "script": """return 1;\n}';
+      const { collapsedTripleQuotesData, tripleQuoteStrings, marker } =
+        collapseTripleQuoteStrings(unclosed);
+
+      expect(collapsedTripleQuotesData).toBe(unclosed);
+      expect(tripleQuoteStrings).toEqual([]);
+      expect(expandTripleQuoteStrings(collapsedTripleQuotesData, tripleQuoteStrings, marker)).toBe(
+        unclosed
+      );
+    });
+  });
+
+  describe('WHEN the normal marker collides with source values', () => {
+    it('SHOULD choose a distinct marker and restore every value', () => {
+      const source = [
+        '{',
+        '// "{tripleQuoteString}"',
+        '"literal":"\\u007btripleQuoteString_0}",',
+        '"script":"""return 1;"""',
+        '}',
+      ].join('\n');
+      const collapsed = collapseTripleQuoteStrings(source);
+
+      expect(collapsed.marker).toBe('"{tripleQuoteString_1}"');
+      expect(
+        expandTripleQuoteStrings(
+          collapsed.collapsedTripleQuotesData,
+          collapsed.tripleQuoteStrings,
+          collapsed.marker
+        )
+      ).toBe(source);
     });
   });
 });

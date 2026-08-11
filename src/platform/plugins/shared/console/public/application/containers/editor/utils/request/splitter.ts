@@ -7,71 +7,104 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Splits a concatenated string of JSON objects into individual JSON objects.
- *
- * This function takes a string containing one or more JSON objects concatenated together,
- * separated by optional whitespace, and splits them into an array of individual JSON strings.
- * It ensures that nested objects and strings containing braces do not interfere with the splitting logic.
- *
- * Example inputs:
- * - '{ "query": "test"} { "query": "test" }' -> ['{ "query": "test"}', '{ "query": "test" }']
- * - '{ "query": "test"}' -> ['{ "query": "test"}']
- * - '{ "query": "{a} {b}"}' -> ['{ "query": "{a} {b}"}']
- *
- */
+import { getRequestDataScannerTokens, type RequestDataToken } from './tokens';
+
+type StructuralPieceKind = 'openBrace' | 'closeBrace' | 'text';
+
+interface StructuralPiece {
+  readonly kind: StructuralPieceKind;
+  readonly value: string;
+}
+
+type RequestDataPiece = RequestDataToken | StructuralPiece;
+
+interface SplitState {
+  readonly dataObjects: string[];
+  readonly currentObject: string;
+  readonly depth: number;
+  readonly hasCompletedTopLevelObject: boolean;
+}
+
+const getStructuralPieceKind = (value: string): StructuralPieceKind => {
+  if (value === '{') {
+    return 'openBrace';
+  }
+  if (value === '}') {
+    return 'closeBrace';
+  }
+  return 'text';
+};
+
+const getStructuralPieces = (source: string): StructuralPiece[] => {
+  return source
+    .split(/([{}])/)
+    .filter(Boolean)
+    .map((value) => ({ kind: getStructuralPieceKind(value), value }));
+};
+
+const getRequestDataPieces = (source: string): RequestDataPiece[] => {
+  const tokens = getRequestDataScannerTokens(source);
+  const piecesBeforeTokens = tokens.flatMap((token, index) => {
+    const previousTokenEnd = tokens[index - 1]?.end ?? 0;
+    return [...getStructuralPieces(source.slice(previousTokenEnd, token.start)), token];
+  });
+  const trailingTokenEnd = tokens.at(-1)?.end ?? 0;
+
+  return [...piecesBeforeTokens, ...getStructuralPieces(source.slice(trailingTokenEnd))];
+};
+
+const appendPiece = (state: SplitState, piece: RequestDataPiece): SplitState => {
+  return { ...state, currentObject: state.currentObject + piece.value };
+};
+
+const completeCurrentObject = (state: SplitState): SplitState => {
+  const object = state.currentObject.trim();
+  return {
+    dataObjects: object ? [...state.dataObjects, object] : state.dataObjects,
+    currentObject: '',
+    depth: 0,
+    hasCompletedTopLevelObject: false,
+  };
+};
+
+const consumeObjectPiece = (state: SplitState, piece: RequestDataPiece): SplitState => {
+  const nextState = appendPiece(state, piece);
+
+  if (piece.kind === 'openBrace') {
+    return { ...nextState, depth: state.depth + 1 };
+  }
+  if (piece.kind === 'closeBrace') {
+    const depth = state.depth - 1;
+    return { ...nextState, depth, hasCompletedTopLevelObject: depth === 0 };
+  }
+
+  return nextState;
+};
+
+const isTrailingPiece = (piece: RequestDataPiece): boolean => {
+  return (
+    piece.kind === 'lineComment' ||
+    piece.kind === 'blockComment' ||
+    (piece.kind === 'text' && /^\s*$/.test(piece.value))
+  );
+};
+
+const consumeSplitPiece = (state: SplitState, piece: RequestDataPiece): SplitState => {
+  if (!state.hasCompletedTopLevelObject || isTrailingPiece(piece)) {
+    return consumeObjectPiece(state, piece);
+  }
+
+  return consumeObjectPiece(completeCurrentObject(state), piece);
+};
+
 export const splitRequestDataObjects = (dataString: string): string[] => {
-  const jsonObjects = [];
-  // Tracks the depth of nested braces
-  let depth = 0;
-  // Holds the current JSON object as we iterate
-  let currentObject = '';
-  // Tracks whether the current position is inside a string
-  let insideString = false;
-  // Tracks whether the current position is inside a triple-quote string
-  let insideTripleQuoteString = false;
+  const state = getRequestDataPieces(dataString).reduce<SplitState>(consumeSplitPiece, {
+    dataObjects: [],
+    currentObject: '',
+    depth: 0,
+    hasCompletedTopLevelObject: false,
+  });
+  const lastObject = state.currentObject.trim();
 
-  let i = 0;
-  // Iterate through each character in the input string
-  while (i < dataString.length) {
-    const char = dataString[i];
-    // Append the character to the current JSON object string
-    currentObject += char;
-
-    if (char === '"' && dataString.substring(i + 1, i + 3) === '""') {
-      // If the character is a quote and the next two characters are also quotes,
-      // toggle the `insideString` state
-      insideTripleQuoteString = !insideTripleQuoteString;
-      currentObject += '""';
-      // Skip the next two quotes
-      i += 2;
-    } else if (!insideTripleQuoteString && char === '"' && dataString[i - 1] !== '\\') {
-      // If the character is a quote, it is not escaped, and it's not inside a triple-quote string,
-      // toggle the `insideString` state
-      insideString = !insideString;
-    } else if (!insideTripleQuoteString && !insideString) {
-      // Only modify depth if not inside a string
-
-      if (char === '{') {
-        depth++;
-      } else if (char === '}') {
-        depth--;
-      }
-
-      // If depth is zero, we have completed a JSON object
-      if (depth === 0) {
-        jsonObjects.push(currentObject.trim());
-        currentObject = '';
-      }
-    }
-    i++;
-  }
-
-  // If there's remaining data in currentObject, add it as the last JSON object
-  if (currentObject.trim()) {
-    jsonObjects.push(currentObject.trim());
-  }
-
-  // Filter out any empty strings from the result array
-  return jsonObjects.filter((obj) => obj !== '');
+  return lastObject ? [...state.dataObjects, lastObject] : state.dataObjects;
 };
