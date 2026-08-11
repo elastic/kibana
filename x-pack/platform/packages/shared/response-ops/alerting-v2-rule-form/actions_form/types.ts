@@ -7,7 +7,10 @@
 
 import { parse } from 'yaml';
 
-export type InlineActionStepType = 'slack2.sendMessage' | 'elastic_slack.sendMessage' | 'email';
+export type InlineActionStepType =
+  | 'slack2.sendMessage'
+  | 'elastic_apps_slack.sendMessage'
+  | 'email';
 export type ActionSource = 'existing' | 'inline';
 
 export interface ExistingWorkflowActionDraft {

@@ -24,7 +24,10 @@ import {
 } from './saved_object';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
-import { registerElasticSlackConnector, unregisterElasticSlackConnector } from './connector';
+import {
+  registerElasticAppsSlackConnector,
+  unregisterElasticAppsSlackConnector,
+} from './connector';
 
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
@@ -69,7 +72,7 @@ export class SlackAppService {
    * plugin start (see `syncConnector`) for a deployment that was already connected.
    */
   private publishConnector(tenantKey: string): void {
-    registerElasticSlackConnector({
+    registerElasticAppsSlackConnector({
       actions: this.server.actions,
       logger: this.logger,
       tenantKey,
@@ -78,7 +81,7 @@ export class SlackAppService {
 
   /** Withdraw the connector whenever the connection stops being usable. */
   private withdrawConnector(): void {
-    unregisterElasticSlackConnector({ actions: this.server.actions, logger: this.logger });
+    unregisterElasticAppsSlackConnector({ actions: this.server.actions, logger: this.logger });
   }
 
   /**

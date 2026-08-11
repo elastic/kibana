@@ -9,7 +9,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const ElasticSlackSendMessageInputSchema = lazySchema(() =>
+export const ElasticAppsSlackSendMessageInputSchema = lazySchema(() =>
   z.object({
     channel: z
       .string()
@@ -24,13 +24,17 @@ export const ElasticSlackSendMessageInputSchema = lazySchema(() =>
       .describe('Timestamp of another message to reply to (creates a threaded reply)'),
   })
 );
-export type ElasticSlackSendMessageInput = z.infer<typeof ElasticSlackSendMessageInputSchema>;
+export type ElasticAppsSlackSendMessageInput = z.infer<
+  typeof ElasticAppsSlackSendMessageInputSchema
+>;
 
-export const ElasticSlackListChannelsInputSchema = lazySchema(() => z.object({}));
-export type ElasticSlackListChannelsInput = z.infer<typeof ElasticSlackListChannelsInputSchema>;
+export const ElasticAppsSlackListChannelsInputSchema = lazySchema(() => z.object({}));
+export type ElasticAppsSlackListChannelsInput = z.infer<
+  typeof ElasticAppsSlackListChannelsInputSchema
+>;
 
 /** A single connected channel, as surfaced to channel pickers and workflows. */
-export interface ElasticSlackChannel {
+export interface ElasticAppsSlackChannel {
   /** Slack channel id — the value `sendMessage` expects in `channel`. */
   id: string;
   /** Display name from the Relay's persisted snapshot, falling back to the id. */

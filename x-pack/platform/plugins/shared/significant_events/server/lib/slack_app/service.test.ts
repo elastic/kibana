@@ -13,7 +13,7 @@ import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
-import { ELASTIC_SLACK_CONNECTOR_ID, ELASTIC_SLACK_CONNECTOR_TYPE_ID } from './connector';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID, ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID } from './connector';
 
 const request = {} as unknown as KibanaRequest;
 
@@ -766,8 +766,8 @@ describe('SlackAppService', () => {
 
   describe('elastic slack connector registration', () => {
     const connectedConnector = expect.objectContaining({
-      id: ELASTIC_SLACK_CONNECTOR_ID,
-      actionTypeId: ELASTIC_SLACK_CONNECTOR_TYPE_ID,
+      id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+      actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
       config: { tenantKey: 'tenant-A' },
     });
 
@@ -811,7 +811,7 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).getStatus(request);
 
-      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_SLACK_CONNECTOR_ID);
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });
 
     it('withdraws the stale connector when a reconnect starts', async () => {
@@ -824,7 +824,7 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).connect(request);
 
-      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_SLACK_CONNECTOR_ID);
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });
 
     it('replaces the connector on reconnect so a new tenant key takes effect', async () => {
@@ -841,7 +841,7 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).getStatus(request);
 
-      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_SLACK_CONNECTOR_ID);
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
       expect(registerDynamicConnector).toHaveBeenCalledWith(
         expect.objectContaining({ config: { tenantKey: 'tenant-B' } })
       );
@@ -860,7 +860,7 @@ describe('SlackAppService', () => {
 
       await new SlackAppService(server).disconnect(request);
 
-      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_SLACK_CONNECTOR_ID);
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });
 
     it('still unregisters when the Relay unbind fails and the connection is left in error', async () => {
@@ -876,7 +876,7 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).disconnect(request)).rejects.toThrow();
 
-      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_SLACK_CONNECTOR_ID);
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
     });
 
     describe('syncConnector', () => {

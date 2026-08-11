@@ -7,7 +7,7 @@ applies_to:
   serverless: preview
 ---
 
-# Slack (Elastic app) connector [elastic-slack-action-type]
+# Slack (Elastic app) connector [elastic-apps-slack-action-type]
 
 The Slack (Elastic app) connector posts messages to Slack channels through the Elastic Slack app that your deployment has installed. Unlike the [Slack](/reference/connectors-kibana/slack-action-type.md) connector, it holds no Slack credentials of its own: the Slack token is held by Elastic's Relay service, which only lets a deployment post to the channels that deployment has connected.
 
@@ -21,7 +21,7 @@ The connector can only reach **connected channels** — channels that a user has
 The connector exists only while the Elastic Slack app is connected. Disconnecting the app removes it, and any rule or workflow referencing it stops sending until the app is reconnected.
 ::::
 
-## Connect the Elastic Slack app [elastic-slack-connect-app]
+## Connect the Elastic Slack app [elastic-apps-slack-connect-app]
 
 1. In {{kib}}, go to **Streams > Significant events > Settings**, and connect the Slack app. This starts a Slack OAuth flow and installs the Elastic app into your workspace.
 2. In Slack, invite `@Elastic` to each channel you want to post to.
@@ -29,7 +29,7 @@ The connector exists only while the Elastic Slack app is connected. Disconnectin
 
 Each connected channel becomes selectable in the rule form and in the workflow YAML editor.
 
-## Available actions [elastic-slack-available-actions]
+## Available actions [elastic-apps-slack-available-actions]
 
 | Action | Description |
 |--------|-------------|
@@ -40,17 +40,17 @@ Each connected channel becomes selectable in the rule form and in the workflow Y
 
 `sendMessage` returns a `ref` for the posted message; pass it back as `threadTs` to reply in the same thread.
 
-## Use in workflows [elastic-slack-workflows]
+## Use in workflows [elastic-apps-slack-workflows]
 
 ```yaml
 - name: notify_slack
-  type: elastic_slack.sendMessage
-  connector-id: elastic-slack
+  type: elastic_apps_slack.sendMessage
+  connector-id: elastic-apps-slack
   with:
     channel: "C0123456789"
     text: "Alert fired: {{ event.alerts[0].kibana.alert.reason }}"
 ```
 
-## Connector networking configuration [elastic-slack-connector-networking-configuration]
+## Connector networking configuration [elastic-apps-slack-connector-networking-configuration]
 
 Calls go to the Relay service configured by `xpack.actions.relay`, not directly to Slack. The Relay host must be reachable from {{kib}} and permitted by [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings).

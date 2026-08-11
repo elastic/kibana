@@ -11,7 +11,10 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { parse } from 'yaml';
-import { ElasticSlackChannelSelectorWrapper, SlackChannelSelector } from './slack_channel_selector';
+import {
+  ElasticAppsSlackChannelSelectorWrapper,
+  SlackChannelSelector,
+} from './slack_channel_selector';
 import { type SlackChannel, useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
 import type { UseQueryResult } from '@kbn/react-query';
 
@@ -204,17 +207,17 @@ describe('SlackChannelSelector', () => {
   });
 });
 
-describe('ElasticSlackChannelSelectorWrapper', () => {
+describe('ElasticAppsSlackChannelSelectorWrapper', () => {
   const renderWrapper = (params: string) => {
     const onChange = jest.fn();
     render(
       <I18nProvider>
-        <ElasticSlackChannelSelectorWrapper
+        <ElasticAppsSlackChannelSelectorWrapper
           value={{
             id: 'draft-1',
             source: 'inline',
-            stepType: 'elastic_slack.sendMessage',
-            connectorId: 'elastic-slack',
+            stepType: 'elastic_apps_slack.sendMessage',
+            connectorId: 'elastic-apps-slack',
             params,
           }}
           onChange={onChange}
@@ -235,7 +238,7 @@ describe('ElasticSlackChannelSelectorWrapper', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     const { onChange } = renderWrapper('channel: ""\ntext: "hello"\n');
 
-    expect(screen.getByTestId('elasticSlackChannelSelector')).toBeInTheDocument();
+    expect(screen.getByTestId('elasticAppsSlackChannelSelector')).toBeInTheDocument();
 
     await user.click(screen.getByRole('combobox'));
     await user.click(screen.getByText('#general'));

@@ -9,9 +9,9 @@
 
 import type { ActionContext, RelayActionClient } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { ElasticSlack } from './elastic_slack';
+import { ElasticAppsSlack } from './elastic_apps_slack';
 
-describe('ElasticSlack', () => {
+describe('ElasticAppsSlack', () => {
   const trigger = jest.fn();
   const listBindings = jest.fn();
   const relay = { trigger, listBindings } as unknown as RelayActionClient;
@@ -29,15 +29,15 @@ describe('ElasticSlack', () => {
   });
 
   it('is discoverable via getConnectorSpec', () => {
-    const spec = getConnectorSpec('.elastic_slack');
+    const spec = getConnectorSpec('.elastic_apps_slack');
 
-    expect(spec).toBe(ElasticSlack);
+    expect(spec).toBe(ElasticAppsSlack);
     expect(spec?.actions.sendMessage).toBeDefined();
     expect(spec?.actions.listChannels).toBeDefined();
   });
 
   it('declares no auth, since the Relay authenticates the deployment itself', () => {
-    expect(ElasticSlack.auth).toBeUndefined();
+    expect(ElasticAppsSlack.auth).toBeUndefined();
   });
 
   describe('sendMessage', () => {
@@ -45,7 +45,7 @@ describe('ElasticSlack', () => {
       trigger.mockResolvedValue({ ref: 'C123:1700000000.000100', tenantKey: 'team-A' });
 
       await expect(
-        ElasticSlack.actions.sendMessage.handler(createContext(), {
+        ElasticAppsSlack.actions.sendMessage.handler(createContext(), {
           channel: 'C123',
           text: 'alert fired',
         })
@@ -62,7 +62,7 @@ describe('ElasticSlack', () => {
     it('forwards threadTs when replying in a thread', async () => {
       trigger.mockResolvedValue({ ref: 'ref-1', tenantKey: 'team-A' });
 
-      await ElasticSlack.actions.sendMessage.handler(createContext(), {
+      await ElasticAppsSlack.actions.sendMessage.handler(createContext(), {
         channel: 'C123',
         text: 'reply',
         threadTs: '1700000000.000100',
@@ -75,7 +75,7 @@ describe('ElasticSlack', () => {
 
     it('fails with a reconnect hint when the app is no longer connected', async () => {
       await expect(
-        ElasticSlack.actions.sendMessage.handler(createContext({ config: {} }), {
+        ElasticAppsSlack.actions.sendMessage.handler(createContext({ config: {} }), {
           channel: 'C123',
           text: 'alert fired',
         })
@@ -86,7 +86,7 @@ describe('ElasticSlack', () => {
 
     it('fails when the Relay is not configured on the deployment', async () => {
       await expect(
-        ElasticSlack.actions.sendMessage.handler(createContext({ relay: undefined }), {
+        ElasticAppsSlack.actions.sendMessage.handler(createContext({ relay: undefined }), {
           channel: 'C123',
           text: 'alert fired',
         })
@@ -100,15 +100,15 @@ describe('ElasticSlack', () => {
         bindings: [{ scope_id: 'C123', display_name: 'general' }, { scope_id: 'C456' }],
       });
 
-      await expect(ElasticSlack.actions.listChannels.handler(createContext(), {})).resolves.toEqual(
-        {
-          ok: true,
-          channels: [
-            { id: 'C123', name: 'general' },
-            { id: 'C456', name: 'C456' },
-          ],
-        }
-      );
+      await expect(
+        ElasticAppsSlack.actions.listChannels.handler(createContext(), {})
+      ).resolves.toEqual({
+        ok: true,
+        channels: [
+          { id: 'C123', name: 'general' },
+          { id: 'C456', name: 'C456' },
+        ],
+      });
 
       expect(listBindings).toHaveBeenCalledWith('team-A', { cursor: undefined });
     });
@@ -116,9 +116,9 @@ describe('ElasticSlack', () => {
     it('skips entries without a channel id', async () => {
       listBindings.mockResolvedValue({ bindings: [{ display_name: 'orphan' }] });
 
-      await expect(ElasticSlack.actions.listChannels.handler(createContext(), {})).resolves.toEqual(
-        { ok: true, channels: [] }
-      );
+      await expect(
+        ElasticAppsSlack.actions.listChannels.handler(createContext(), {})
+      ).resolves.toEqual({ ok: true, channels: [] });
     });
 
     it('follows the cursor across pages', async () => {
@@ -129,15 +129,15 @@ describe('ElasticSlack', () => {
         })
         .mockResolvedValueOnce({ bindings: [{ scope_id: 'C456', display_name: 'random' }] });
 
-      await expect(ElasticSlack.actions.listChannels.handler(createContext(), {})).resolves.toEqual(
-        {
-          ok: true,
-          channels: [
-            { id: 'C123', name: 'general' },
-            { id: 'C456', name: 'random' },
-          ],
-        }
-      );
+      await expect(
+        ElasticAppsSlack.actions.listChannels.handler(createContext(), {})
+      ).resolves.toEqual({
+        ok: true,
+        channels: [
+          { id: 'C123', name: 'general' },
+          { id: 'C456', name: 'random' },
+        ],
+      });
 
       expect(listBindings).toHaveBeenNthCalledWith(2, 'team-A', { cursor: 'cursor-2' });
     });
@@ -149,7 +149,7 @@ describe('ElasticSlack', () => {
       });
       const ctx = createContext();
 
-      const result = (await ElasticSlack.actions.listChannels.handler(ctx, {})) as {
+      const result = (await ElasticAppsSlack.actions.listChannels.handler(ctx, {})) as {
         channels: unknown[];
       };
 
@@ -163,7 +163,7 @@ describe('ElasticSlack', () => {
     it('reports the number of connected channels', async () => {
       listBindings.mockResolvedValue({ bindings: [{ scope_id: 'C123' }, { scope_id: 'C456' }] });
 
-      await expect(ElasticSlack.test?.handler(createContext())).resolves.toEqual({
+      await expect(ElasticAppsSlack.test?.handler(createContext())).resolves.toEqual({
         ok: true,
         message: expect.stringContaining('2 channels'),
       });

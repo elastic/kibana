@@ -380,7 +380,7 @@ export class SignificantEventsPlugin
 
       this.server.relayClient = plugins.actions.getRelayClient();
 
-      this.restoreElasticSlackConnector(core, this.server);
+      this.restoreElasticAppsSlackConnector(core, this.server);
     }
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
@@ -601,7 +601,7 @@ export class SignificantEventsPlugin
    * UI to poll status. Failures are logged and swallowed: a missing connector degrades Slack
    * actions but must not take down plugin start.
    */
-  private restoreElasticSlackConnector(core: CoreStart, server: StreamsServer): void {
+  private restoreElasticAppsSlackConnector(core: CoreStart, server: StreamsServer): void {
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
     );

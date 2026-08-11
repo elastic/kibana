@@ -128,7 +128,7 @@ export const SlackChannelSelectorWrapper = ({
  * The Elastic Slack app posts through the Relay, which resolves the deployment's binding by
  * channel id — a channel name would be rejected as unbound.
  */
-export const ElasticSlackChannelSelectorWrapper = ({
+export const ElasticAppsSlackChannelSelectorWrapper = ({
   value,
   onChange,
 }: {
@@ -140,6 +140,6 @@ export const ElasticSlackChannelSelectorWrapper = ({
     params={value.params}
     onParamsChange={(params) => onChange({ ...value, params })}
     channelValueField="id"
-    dataTestSubj="elasticSlackChannelSelector"
+    dataTestSubj="elasticAppsSlackChannelSelector"
   />
 );

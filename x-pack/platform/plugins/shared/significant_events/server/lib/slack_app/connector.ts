@@ -9,21 +9,21 @@ import type { Logger } from '@kbn/core/server';
 import type { InMemoryConnector, PluginStartContract } from '@kbn/actions-plugin/server';
 
 /** Connector type id of the `@kbn/connector-specs` spec backed by the Relay. */
-export const ELASTIC_SLACK_CONNECTOR_TYPE_ID = '.elastic_slack';
+export const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.elastic_apps_slack';
 
 /**
  * Id of the single in-memory connector instance. A deployment installs the Elastic Slack app
  * once, so there is exactly one instance and its id is stable — rules and workflows reference
  * it directly, and it must survive restarts and reconnects unchanged.
  */
-export const ELASTIC_SLACK_CONNECTOR_ID = 'elastic-slack';
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
-const ELASTIC_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
+const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 
 const buildConnector = (tenantKey: string): InMemoryConnector => ({
-  id: ELASTIC_SLACK_CONNECTOR_ID,
-  actionTypeId: ELASTIC_SLACK_CONNECTOR_TYPE_ID,
-  name: ELASTIC_SLACK_CONNECTOR_NAME,
+  id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+  actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
+  name: ELASTIC_APPS_SLACK_CONNECTOR_NAME,
   // The Relay holds the Slack credentials and authenticates this deployment at the transport
   // layer, so the connector itself has nothing secret to store.
   config: { tenantKey },
@@ -43,7 +43,7 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
  * It always unregisters first: `registerDynamicConnector` is a no-op when the id is taken, so
  * a reconnect to a different workspace would otherwise keep serving the previous tenant key.
  */
-export const registerElasticSlackConnector = ({
+export const registerElasticAppsSlackConnector = ({
   actions,
   logger,
   tenantKey,
@@ -52,20 +52,20 @@ export const registerElasticSlackConnector = ({
   logger: Logger;
   tenantKey: string;
 }): void => {
-  actions.unregisterDynamicConnector(ELASTIC_SLACK_CONNECTOR_ID);
+  actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID);
   actions.registerDynamicConnector(buildConnector(tenantKey));
-  logger.debug(`Registered the ${ELASTIC_SLACK_CONNECTOR_ID} connector`);
+  logger.debug(`Registered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
 };
 
 /** Withdraw the connector once the workspace is no longer connected. */
-export const unregisterElasticSlackConnector = ({
+export const unregisterElasticAppsSlackConnector = ({
   actions,
   logger,
 }: {
   actions: Pick<PluginStartContract, 'unregisterDynamicConnector'>;
   logger: Logger;
 }): void => {
-  if (actions.unregisterDynamicConnector(ELASTIC_SLACK_CONNECTOR_ID)) {
-    logger.debug(`Unregistered the ${ELASTIC_SLACK_CONNECTOR_ID} connector`);
+  if (actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID)) {
+    logger.debug(`Unregistered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
   }
 };

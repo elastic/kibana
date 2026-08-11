@@ -46,7 +46,7 @@ export class InternalStepsEditorHandlers {
     // Connector-derived step types get their contracts from the actions plugin, which cannot
     // carry browser handlers, so their editor handlers are registered here alongside the
     // built-in ones.
-    const elasticSlackChannelSelectionHandler = getConnectorChannelSelectionHandler(services, {
+    const elasticAppsSlackChannelSelectionHandler = getConnectorChannelSelectionHandler(services, {
       subAction: 'listChannels',
     });
 
@@ -63,8 +63,8 @@ export class InternalStepsEditorHandlers {
       'elasticsearch.indices.delete': {
         input: { index: { selection: deleteIndexSelectionHandler } },
       },
-      'elastic_slack.sendMessage': {
-        input: { channel: { selection: elasticSlackChannelSelectionHandler } },
+      'elastic_apps_slack.sendMessage': {
+        input: { channel: { selection: elasticAppsSlackChannelSelectionHandler } },
       },
     };
   };

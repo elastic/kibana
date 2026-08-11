@@ -16,7 +16,7 @@ import {
 
 const contextWithConnector = (connectorId?: string): SelectionContext =>
   ({
-    stepType: 'elastic_slack.sendMessage',
+    stepType: 'elastic_apps_slack.sendMessage',
     scope: 'input',
     propertyKey: 'channel',
     values: { config: connectorId ? { 'connector-id': connectorId } : {}, input: {} },
@@ -51,9 +51,9 @@ describe('getConnectorChannelSelectionHandler', () => {
 
   describe('search', () => {
     it('executes the configured sub-action on the step connector', async () => {
-      await createHandler().search('', contextWithConnector('elastic-slack'));
+      await createHandler().search('', contextWithConnector('elastic-apps-slack'));
 
-      expect(post).toHaveBeenCalledWith('/api/actions/connector/elastic-slack/_execute', {
+      expect(post).toHaveBeenCalledWith('/api/actions/connector/elastic-apps-slack/_execute', {
         body: JSON.stringify({ params: { subAction: 'listChannels', subActionParams: {} } }),
       });
     });

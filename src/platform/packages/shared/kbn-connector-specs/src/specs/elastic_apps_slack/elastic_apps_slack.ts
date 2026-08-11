@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec, RelayActionClient } from '../../connector_spec';
 import {
-  ElasticSlackListChannelsInputSchema,
-  ElasticSlackSendMessageInputSchema,
-  type ElasticSlackChannel,
-  type ElasticSlackSendMessageInput,
+  ElasticAppsSlackListChannelsInputSchema,
+  ElasticAppsSlackSendMessageInputSchema,
+  type ElasticAppsSlackChannel,
+  type ElasticAppsSlackSendMessageInput,
 } from './types';
 
 /**
@@ -39,7 +39,7 @@ const getRelayConnection = (ctx: ActionContext): RelayConnection => {
   const { relay, config } = ctx;
   if (!relay) {
     throw new Error(
-      i18n.translate('core.kibanaConnectorSpecs.elasticSlack.errors.relayNotConfigured', {
+      i18n.translate('core.kibanaConnectorSpecs.elasticAppsSlack.errors.relayNotConfigured', {
         defaultMessage: 'The Relay service is not configured on this deployment.',
       })
     );
@@ -48,7 +48,7 @@ const getRelayConnection = (ctx: ActionContext): RelayConnection => {
   const tenantKey = config?.tenantKey;
   if (typeof tenantKey !== 'string' || tenantKey.length === 0) {
     throw new Error(
-      i18n.translate('core.kibanaConnectorSpecs.elasticSlack.errors.notConnected', {
+      i18n.translate('core.kibanaConnectorSpecs.elasticAppsSlack.errors.notConnected', {
         defaultMessage:
           'The Elastic Slack app is not connected. Reconnect it from the Significant Events settings.',
       })
@@ -58,10 +58,10 @@ const getRelayConnection = (ctx: ActionContext): RelayConnection => {
   return { relay, tenantKey };
 };
 
-const listConnectedChannels = async (ctx: ActionContext): Promise<ElasticSlackChannel[]> => {
+const listConnectedChannels = async (ctx: ActionContext): Promise<ElasticAppsSlackChannel[]> => {
   const { relay, tenantKey } = getRelayConnection(ctx);
 
-  const channels: ElasticSlackChannel[] = [];
+  const channels: ElasticAppsSlackChannel[] = [];
   let cursor: string | undefined;
 
   for (let page = 0; page < MAX_BINDING_PAGES; page++) {
@@ -92,18 +92,18 @@ const listConnectedChannels = async (ctx: ActionContext): Promise<ElasticSlackCh
  * credentials of its own — the Relay owns the Slack token and enforces that a deployment can
  * only reach the channels it has claimed.
  */
-export const ElasticSlack: ConnectorSpec = {
+export const ElasticAppsSlack: ConnectorSpec = {
   metadata: {
-    id: '.elastic_slack',
+    id: '.elastic_apps_slack',
     displayName: 'Slack (Elastic app)',
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticSlack.metadata.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.elasticAppsSlack.metadata.description', {
       defaultMessage:
         'Send messages to Slack channels connected to this deployment through the Elastic Slack app',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['alerting', 'workflows'],
-    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/elastic-slack-action-type`,
+    docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/elastic-apps-slack-action-type`,
   },
 
   // The Relay authenticates this deployment at the transport layer (mTLS), so the connector
@@ -120,7 +120,7 @@ export const ElasticSlack: ConnectorSpec = {
       isTool: true,
       description:
         'List the Slack channels connected to this deployment through the Elastic Slack app. Returns each channel id and display name. Use this to discover valid channel ids before sendMessage — messages to channels that are not connected are rejected.',
-      input: ElasticSlackListChannelsInputSchema,
+      input: ElasticAppsSlackListChannelsInputSchema,
       handler: async (ctx) => {
         const channels = await listConnectedChannels(ctx);
         return { ok: true as const, channels };
@@ -131,8 +131,8 @@ export const ElasticSlack: ConnectorSpec = {
       isTool: true,
       description:
         'Send a message to a Slack channel connected to this deployment through the Elastic Slack app. Requires a connected channel id — use listChannels to discover them. Returns the Relay reference for the posted message, which can be used as threadTs to reply in a thread.',
-      input: ElasticSlackSendMessageInputSchema,
-      handler: async (ctx, input: ElasticSlackSendMessageInput) => {
+      input: ElasticAppsSlackSendMessageInputSchema,
+      handler: async (ctx, input: ElasticAppsSlackSendMessageInput) => {
         const { relay, tenantKey } = getRelayConnection(ctx);
         const { channel, text, threadTs } = input;
 
@@ -146,14 +146,14 @@ export const ElasticSlack: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.elasticSlack.test.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.elasticAppsSlack.test.description', {
       defaultMessage: 'Verifies the Elastic Slack app connection by listing connected channels',
     }),
     handler: async (ctx) => {
       const channels = await listConnectedChannels(ctx);
       return {
         ok: true,
-        message: i18n.translate('core.kibanaConnectorSpecs.elasticSlack.test.successMessage', {
+        message: i18n.translate('core.kibanaConnectorSpecs.elasticAppsSlack.test.successMessage', {
           defaultMessage:
             'Connected to Slack through the Elastic app. {count, plural, one {# channel} other {# channels}} connected.',
           values: { count: channels.length },
