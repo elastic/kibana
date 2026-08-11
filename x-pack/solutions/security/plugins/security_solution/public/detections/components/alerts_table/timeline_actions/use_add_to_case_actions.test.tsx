@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { render, screen, renderHook, act } from '@testing-library/react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
@@ -54,8 +55,11 @@ const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
 const useKibanaMock = useKibana as jest.Mock;
 
-const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
-  const panels = [{ id: 0, items }];
+const renderContextMenu = (
+  items: AlertTableContextMenuItem[],
+  actionPanels: EuiContextMenuPanelDescriptor[]
+) => {
+  const panels = [{ id: 0, items }, ...actionPanels];
   render(
     <EuiPopover
       aria-label="Context menu"
@@ -93,13 +97,9 @@ describe('useAddToCaseActions', () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
-    expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual(
-      'add-to-existing-case-action'
-    );
-    expect(result.current.addToCaseActionItems[1]['data-test-subj']).toEqual(
-      'add-to-new-case-action'
-    );
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
+    expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual('add-to-case-action');
+    expect(result.current.addToCaseActionPanels).toHaveLength(1);
   });
 
   it('should render case options when event is not alert ', () => {
@@ -109,7 +109,7 @@ describe('useAddToCaseActions', () => {
         wrapper: TestProviders,
       }
     );
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
   });
 
   it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
@@ -145,12 +145,13 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
 
-    renderContextMenu(result.current.addToCaseActionItems);
+    renderContextMenu(result.current.addToCaseActionItems, result.current.addToCaseActionPanels);
 
-    expect(screen.getByTestId('add-to-new-case-action')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('add-to-new-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-case-action'));
+    expect(await screen.findByTestId('add-to-new-case-action')).toBeInTheDocument();
+    fireEvent.click(await screen.findByTestId('add-to-new-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });
@@ -160,7 +161,7 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
 
     addToNewCase.mock.calls[0][0].onSuccess();
 
@@ -172,12 +173,13 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
 
-    renderContextMenu(result.current.addToCaseActionItems);
+    renderContextMenu(result.current.addToCaseActionItems, result.current.addToCaseActionPanels);
 
-    expect(screen.getByTestId('add-to-existing-case-action')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('add-to-existing-case-action'));
+    await userEvent.click(screen.getByTestId('add-to-case-action'));
+    expect(await screen.findByTestId('add-to-existing-case-action')).toBeInTheDocument();
+    fireEvent.click(await screen.findByTestId('add-to-existing-case-action'));
 
     expect(refetch).toHaveBeenCalled();
   });
@@ -187,7 +189,7 @@ describe('useAddToCaseActions', () => {
       wrapper: TestProviders,
     });
 
-    expect(result.current.addToCaseActionItems.length).toEqual(2);
+    expect(result.current.addToCaseActionItems.length).toEqual(1);
 
     addToExistingCase.mock.calls[0][0].onSuccess();
 
