@@ -75,6 +75,7 @@ export interface ConnectorMetadata {
     | 'endpointSecurity'
     | 'workflows'
     | 'agentBuilder'
+    | 'contextEngine'
   >;
 }
 
@@ -127,12 +128,15 @@ export interface AuthContext {
 
 export type AuthMode = 'per-user' | 'shared';
 
-export interface AuthTypeSpec<T extends Record<string, unknown>> {
+export interface AuthTypeDefinition {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
-  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
   authMode?: AuthMode;
+}
+
+export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
+  configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -262,16 +266,10 @@ export interface Transformations {
 export const TEST_CONNECTOR_SUB_ACTION = '_test';
 
 /**
- * Success = return data; failure = throw (mapped to error by the executor).
- *
- * Transitional union: new handlers return arbitrary data (`Record<string, unknown>`,
- * use `{}` when there's nothing to report), while not-yet-migrated handlers may still
- * return the legacy `{ ok, message }` shape. Once every handler follows the
- * throw-on-failure contract this can be narrowed to `Record<string, unknown>`.
+ * Success = return data (use `{}` when there's nothing to report); failure = throw.
+ * The `ok?: never` intersection prevents accidentally returning the legacy `{ ok: false }` shape.
  */
-export type ConnectorTestHandlerResult =
-  | Record<string, unknown>
-  | { ok: boolean; message?: string };
+export type ConnectorTestHandlerResult = Record<string, unknown> & { ok?: never };
 
 export interface ConnectorTest {
   /**
@@ -280,8 +278,8 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Flag to opt-in for testing */
-  enabled?: boolean;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  enabled: boolean;
 }
 
 // ============================================================================
@@ -324,7 +322,7 @@ export interface ConnectorSpec {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
 
   transformations?: Transformations;
 

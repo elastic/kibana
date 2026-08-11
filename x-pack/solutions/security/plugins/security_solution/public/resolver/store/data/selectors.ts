@@ -6,7 +6,7 @@
  */
 
 import rbush from 'rbush';
-import { createSelector, defaultMemoize } from 'reselect';
+import { createSelector, defaultMemoize } from 'reselect-v4';
 import { panelViewAndParameters as panelViewAndParametersFromLocationSearchAndResolverComponentInstanceID } from '../panel_view_and_parameters';
 import type {
   DataState,

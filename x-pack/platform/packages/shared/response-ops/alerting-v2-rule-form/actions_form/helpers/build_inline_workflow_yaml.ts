@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX,
+} from '@kbn/workflows';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { parse } from 'yaml';
 import { INLINE_WORKFLOW_TAG } from '../constants';
@@ -18,8 +22,10 @@ export class InvalidInlineWorkflowError extends Error {
   }
 }
 
-const stepTypeFromConnectorType = (connectorTypeId: string): string =>
-  connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
+export const stepTypeFromConnectorType = (connectorTypeId: string, subAction?: string): string => {
+  const typeId = connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
+  return subAction ? `${typeId}.${subAction}` : typeId;
+};
 
 const parseParams = (params: string): Record<string, unknown> => {
   let parsed: unknown;
@@ -57,11 +63,27 @@ export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): stri
     name: `${definition.label} notification`,
     enabled: true,
     tags: [INLINE_WORKFLOW_TAG],
-    triggers: [{ type: 'manual' }],
+    triggers: [
+      {
+        type: 'manual',
+        inputs: {
+          type: 'object',
+          properties: {
+            payload: {
+              $ref: `${KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX}${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}`,
+            },
+          },
+          required: ['payload'],
+        },
+      },
+    ],
     steps: [
       {
         name: 'notify',
-        type: stepTypeFromConnectorType(definition.connectorTypeId),
+        type: stepTypeFromConnectorType(
+          definition.connectorTypeId,
+          definition.connectorTypeSubAction
+        ),
         'connector-id': action.connectorId,
         with: parseParams(action.params),
       },

@@ -9,25 +9,23 @@
 
 require('@kbn/setup-node-env');
 
-const test = require('tape');
+const test = require('node:test');
 
-test('Object.prototype', (t) => {
-  t.test('Prevents new properties from being added to the prototype', (t) => {
+test('Object.prototype', async (t) => {
+  await t.test('Prevents new properties from being added to the prototype', (t) => {
     Object.prototype.test = 'whoops'; // eslint-disable-line no-extend-native
-    t.equal({}.test, undefined);
-    t.end();
+    t.assert.strictEqual({}.test, undefined);
   });
 
-  t.test('Permits overriding Object.prototype.toString', (t) => {
+  await t.test('Permits overriding Object.prototype.toString', async (t) => {
     let originalToString;
-    t.test('setup', (t) => {
+    await t.test('setup', () => {
       originalToString = Object.prototype.toString;
-      t.end();
     });
 
-    t.test('test', (t) => {
+    await t.test('test', (t) => {
       // Assert native toString behavior
-      t.equal({}.toString(), '[object Object]');
+      t.assert.strictEqual({}.toString(), '[object Object]');
 
       const {
         writable: originalWritable,
@@ -39,43 +37,38 @@ test('Object.prototype', (t) => {
       Object.prototype.toString = function toString() {
         return 'my new toString function';
       };
-      t.equal({}.toString(), 'my new toString function');
+      t.assert.strictEqual({}.toString(), 'my new toString function');
 
       const toStringDescriptor = Object.getOwnPropertyDescriptor(Object.prototype, 'toString');
 
       // Overwriting a property should not change its descriptor.
-      t.equal(toStringDescriptor.writable, originalWritable);
-      t.equal(toStringDescriptor.enumerable, originalEnumerable);
-      t.equal(toStringDescriptor.configurable, originalConfigurable);
-
-      t.end();
+      t.assert.strictEqual(toStringDescriptor.writable, originalWritable);
+      t.assert.strictEqual(toStringDescriptor.enumerable, originalEnumerable);
+      t.assert.strictEqual(toStringDescriptor.configurable, originalConfigurable);
     });
 
-    t.test('teardown', (t) => {
+    await t.test('teardown', () => {
       // eslint-disable-next-line no-extend-native
       Object.prototype.toString = originalToString;
-      t.end();
     });
   });
 });
 
-test('Number.prototype', (t) => {
-  t.test('Prevents new properties from being added to the prototype', (t) => {
+test('Number.prototype', async (t) => {
+  await t.test('Prevents new properties from being added to the prototype', (t) => {
     Number.prototype.test = 'whoops'; // eslint-disable-line no-extend-native
-    t.equal((12).test, undefined);
-    t.end();
+    t.assert.strictEqual((12).test, undefined);
   });
 
-  t.test('Permits overriding Number.prototype.toString', (t) => {
+  await t.test('Permits overriding Number.prototype.toString', async (t) => {
     let originalToString;
-    t.test('setup', (t) => {
+    await t.test('setup', () => {
       originalToString = Number.prototype.toString;
-      t.end();
     });
 
-    t.test('test', (t) => {
+    await t.test('test', (t) => {
       // Assert native toString behavior
-      t.equal((1).toString(), '1');
+      t.assert.strictEqual((1).toString(), '1');
 
       const {
         writable: originalWritable,
@@ -87,43 +80,38 @@ test('Number.prototype', (t) => {
       Number.prototype.toString = function toString() {
         return 'my new Number.toString function';
       };
-      t.equal((12).toString(), 'my new Number.toString function');
+      t.assert.strictEqual((12).toString(), 'my new Number.toString function');
 
       const toStringDescriptor = Object.getOwnPropertyDescriptor(Number.prototype, 'toString');
 
       // Overwriting a property should not change its descriptor.
-      t.equal(toStringDescriptor.writable, originalWritable);
-      t.equal(toStringDescriptor.enumerable, originalEnumerable);
-      t.equal(toStringDescriptor.configurable, originalConfigurable);
-
-      t.end();
+      t.assert.strictEqual(toStringDescriptor.writable, originalWritable);
+      t.assert.strictEqual(toStringDescriptor.enumerable, originalEnumerable);
+      t.assert.strictEqual(toStringDescriptor.configurable, originalConfigurable);
     });
 
-    t.test('teardown', (t) => {
+    await t.test('teardown', () => {
       // eslint-disable-next-line no-extend-native
       Number.prototype.toString = originalToString;
-      t.end();
     });
   });
 });
 
-test('String.prototype', (t) => {
-  t.test('Prevents new properties from being added to the prototype', (t) => {
+test('String.prototype', async (t) => {
+  await t.test('Prevents new properties from being added to the prototype', (t) => {
     String.prototype.test = 'whoops'; // eslint-disable-line no-extend-native
-    t.equal('hello'.test, undefined);
-    t.end();
+    t.assert.strictEqual('hello'.test, undefined);
   });
 
-  t.test('Permits overriding String.prototype.toString', (t) => {
+  await t.test('Permits overriding String.prototype.toString', async (t) => {
     let originalToString;
-    t.test('setup', (t) => {
+    await t.test('setup', () => {
       originalToString = String.prototype.toString;
-      t.end();
     });
 
-    t.test('test', (t) => {
+    await t.test('test', (t) => {
       // Assert native toString behavior
-      t.equal((1).toString(), '1');
+      t.assert.strictEqual((1).toString(), '1');
 
       const {
         writable: originalWritable,
@@ -135,45 +123,40 @@ test('String.prototype', (t) => {
       String.prototype.toString = function toString() {
         return 'my new String.toString function';
       };
-      t.equal('test'.toString(), 'my new String.toString function');
+      t.assert.strictEqual('test'.toString(), 'my new String.toString function');
 
       const toStringDescriptor = Object.getOwnPropertyDescriptor(String.prototype, 'toString');
 
       // Overwriting a property should not change its descriptor.
-      t.equal(toStringDescriptor.writable, originalWritable);
-      t.equal(toStringDescriptor.enumerable, originalEnumerable);
-      t.equal(toStringDescriptor.configurable, originalConfigurable);
-
-      t.end();
+      t.assert.strictEqual(toStringDescriptor.writable, originalWritable);
+      t.assert.strictEqual(toStringDescriptor.enumerable, originalEnumerable);
+      t.assert.strictEqual(toStringDescriptor.configurable, originalConfigurable);
     });
 
-    t.test('teardown', (t) => {
+    await t.test('teardown', () => {
       // eslint-disable-next-line no-extend-native
       String.prototype.toString = originalToString;
-      t.end();
     });
   });
 });
 
-test('Function.prototype', (t) => {
-  t.test('Prevents new properties from being added to the prototype', (t) => {
+test('Function.prototype', async (t) => {
+  await t.test('Prevents new properties from being added to the prototype', (t) => {
     Function.prototype.test = 'whoops'; // eslint-disable-line no-extend-native
     const fn = function testFn() {};
-    t.equal(fn.test, undefined);
-    t.end();
+    t.assert.strictEqual(fn.test, undefined);
   });
 
-  t.test('Permits overriding Function.prototype.toString', (t) => {
+  await t.test('Permits overriding Function.prototype.toString', async (t) => {
     let originalToString;
-    t.test('setup', (t) => {
+    await t.test('setup', () => {
       originalToString = Function.prototype.toString;
-      t.end();
     });
 
-    t.test('test', (t) => {
+    await t.test('test', (t) => {
       // Assert native toString behavior
       const fn = function testFn() {};
-      t.equal(fn.toString(), 'function testFn() {}');
+      t.assert.strictEqual(fn.toString(), 'function testFn() {}');
 
       const {
         writable: originalWritable,
@@ -185,22 +168,19 @@ test('Function.prototype', (t) => {
       Function.prototype.toString = function toString() {
         return 'my new Function.toString function';
       };
-      t.equal(fn.toString(), 'my new Function.toString function');
+      t.assert.strictEqual(fn.toString(), 'my new Function.toString function');
 
       const toStringDescriptor = Object.getOwnPropertyDescriptor(Function.prototype, 'toString');
 
       // Overwriting a property should not change its descriptor.
-      t.equal(toStringDescriptor.writable, originalWritable);
-      t.equal(toStringDescriptor.enumerable, originalEnumerable);
-      t.equal(toStringDescriptor.configurable, originalConfigurable);
-
-      t.end();
+      t.assert.strictEqual(toStringDescriptor.writable, originalWritable);
+      t.assert.strictEqual(toStringDescriptor.enumerable, originalEnumerable);
+      t.assert.strictEqual(toStringDescriptor.configurable, originalConfigurable);
     });
 
-    t.test('teardown', (t) => {
+    await t.test('teardown', () => {
       // eslint-disable-next-line no-extend-native
       Function.prototype.toString = originalToString;
-      t.end();
     });
   });
 });

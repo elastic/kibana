@@ -80,6 +80,36 @@ describe('RulesApi', () => {
     });
   });
 
+  describe('enableRule', () => {
+    it('sends a POST request to the _enable path with the rule id', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1', enabled: true });
+
+      await api.enableRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_enable`);
+    });
+  });
+
+  describe('disableRule', () => {
+    it('sends a POST request to the _disable path with the rule id', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1', enabled: false });
+
+      await api.disableRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_disable`);
+    });
+  });
+
+  describe('runRule', () => {
+    it('sends a POST request to the _run path with the rule id', async () => {
+      http.post.mockResolvedValue(undefined);
+
+      await api.runRule('rule-1');
+
+      expect(http.post).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1/_run`);
+    });
+  });
+
   describe('listTags', () => {
     it('GET /rules/tags with no params when called with defaults', async () => {
       http.get.mockResolvedValue({ tags: ['cpu', 'memory'] });

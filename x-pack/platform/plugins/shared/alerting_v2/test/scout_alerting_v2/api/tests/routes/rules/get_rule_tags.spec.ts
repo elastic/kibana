@@ -188,14 +188,44 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
     }
   );
 
+  apiTest(
+    'search: should escape Elasticsearch-only regexp operators in the prefix',
+    async ({ apiClient, apiServices }) => {
+      // `<` opens an interval and `"` a quoted literal in the Lucene regexp the
+      // terms aggregation `include` uses. Unescaped, either one makes the pattern
+      // unparsable and the aggregation fails.
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'rule-operators', tags: ['<lt-real', '"quote-real'] },
+        })
+      );
+
+      for (const [search, expectedTag] of [
+        ['<', '<lt-real'],
+        ['"', '"quote-real'],
+      ]) {
+        const response = await apiClient.get(tagsUrl({ search }), {
+          headers: readerHeaders,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.tags).toContain(expectedTag);
+      }
+    }
+  );
+
   apiTest('cap: should return at most 20 tags', async ({ apiClient, apiServices }) => {
-    const rule = buildCreateRuleData({
-      metadata: {
-        name: 'many-tags-rule',
-        tags: Array.from({ length: 25 }, (_, i) => `tag-${String(i).padStart(2, '0')}`),
-      },
-    });
-    await apiServices.alertingV2.rules.create(rule);
+    // Each rule may have at most 20 tags, so create 21 rules each with a distinct tag
+    // to produce 21 unique tags in total — enough to exercise the aggregation cap.
+    await Promise.all(
+      Array.from({ length: 21 }, (_, i) =>
+        apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: `cap-rule-${i}`, tags: [`tag-${String(i).padStart(2, '0')}`] },
+          })
+        )
+      )
+    );
 
     const response = await apiClient.get(TAGS_URL, { headers: readerHeaders });
 
@@ -220,6 +250,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
 

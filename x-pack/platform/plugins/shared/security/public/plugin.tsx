@@ -155,7 +155,6 @@ export class SecurityPlugin
         management,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
-        uiSettings: core.uiSettings,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
       });
@@ -250,6 +249,7 @@ export class SecurityPlugin
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
         userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
         enabled$: this.securityApiClients.userProfiles.enabled$,
+        dataUpdates$: this.securityApiClients.userProfiles.dataUpdates$,
       },
     };
   }

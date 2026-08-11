@@ -82,7 +82,7 @@ fields:
 fields:
   - name: requires_escalation
     control: TOGGLE
-    type: keyword
+    type: boolean
 `;
 
     const result = updateYamlFieldDefault(toggleYaml, 'requires_escalation', true);

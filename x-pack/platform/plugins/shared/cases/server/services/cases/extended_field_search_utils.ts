@@ -8,7 +8,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { Template } from '../../../common/types/domain/template/v1';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils/template_fields';
 
 export interface ExtendedFieldFilter {
   label: string;
@@ -21,6 +23,7 @@ export interface ResolvedExtendedFieldFilter {
   esType: string;
   control: string;
   templateVersions: Array<{ id: string; version: number }>;
+  isGlobal?: boolean;
 }
 
 export interface LabelSearchToken {
@@ -33,6 +36,7 @@ export interface ResolvedFieldLabelFilter {
   esType: string;
   control: string;
   templateVersions: Array<{ id: string; version: number }>;
+  isGlobal?: boolean;
 }
 
 type RuntimeType = 'keyword' | 'long' | 'double' | 'date';
@@ -120,6 +124,11 @@ const buildPainlessScript = (
     return `${readRaw}${splitArrayScript}`;
   }
 
+  // Free-text controls can legitimately start with `[`, so preserve their punctuation verbatim.
+  if (control === INPUT_TEXT || control === TEXTAREA) {
+    return `${readRaw}emit(raw);`;
+  }
+
   // Auto-detect JSON arrays for keyword fields (e.g. legacy templates without a control type).
   if (runtimeType === 'keyword') {
     return `${readRaw}if (raw.startsWith('[')) { ${splitArrayScript} } else { emit(raw); }`;
@@ -137,21 +146,25 @@ const buildPainlessScript = (
 
 export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): ResolvedExtendedFieldFilter[][] => {
-  const labelToMetas = buildLabelToMetasIndex(templates);
+  const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
 
-  return extendedFieldFilters.flatMap(({ label, value }) => {
+  // One entry per input filter — including an empty group `[]` for a label that didn't resolve
+  // to any known field. Preserving the (empty) group lets buildExtendedFieldFilterClauses turn it
+  // into a `match_none` clause instead of the filter being silently dropped (see that function).
+  return extendedFieldFilters.map(({ label, value }) => {
     const metas = labelToMetas.get(label.toLowerCase());
     if (metas == null) return [];
-    const group = [...metas.values()].map((meta) => ({
+    return [...metas.values()].map((meta) => ({
       storageKey: meta.storageKey,
       value,
       esType: meta.esType,
       control: meta.control,
       templateVersions: meta.templateVersions,
+      isGlobal: meta.isGlobal,
     }));
-    return group.length > 0 ? [group] : [];
   });
 };
 
@@ -183,7 +196,13 @@ export const parseDateFilterToRange = (value: string): { gte: string; lt: string
   }
 
   const end = new Date(start.getTime() + 86_400_000);
-  return { gte: start.toISOString(), lt: end.toISOString() };
+  // Both bounds are sliced to bare YYYY-MM-DD: the flattened/keyword field can hold either a
+  // bare date or a full ISO timestamp depending on how it was stored, and range queries on it
+  // compare lexicographically, not chronologically. A bare-date bound still correctly brackets a
+  // full timestamp within the same day (e.g. "2026-08-01" <= "2026-08-01T13:45:00.000Z" < "2026-08-02"
+  // holds lexicographically), whereas a full ISO `gte` bound would sort *after* a bare-date value
+  // for the same day and never match it.
+  return { gte: start.toISOString().slice(0, 10), lt: end.toISOString().slice(0, 10) };
 };
 
 /** Builds ES runtime field mappings only for filters that can't use the flattened mapping directly. */
@@ -207,9 +226,18 @@ export const buildExtendedFieldRuntimeMappings = (
   return runtimeMappings;
 };
 
+/**
+ * Builds the template-version scoping clause, or `null` when the field is global.
+ * Global fields are not tied to a specific template version, so no scoping clause
+ * should be applied — callers must treat a `null` return as "no clause needed",
+ * not as an unsatisfiable filter.
+ */
 const buildTemplateVersionFilter = (
-  templateVersions: Array<{ id: string; version: number }>
-): estypes.QueryDslQueryContainer => {
+  templateVersions: Array<{ id: string; version: number }>,
+  isGlobal?: boolean
+): estypes.QueryDslQueryContainer | null => {
+  if (isGlobal) return null;
+
   const templateVersionFilters = templateVersions.map(({ id, version }) => ({
     bool: {
       must: [
@@ -277,7 +305,7 @@ const buildRuntimeFilterClause = ({
 const buildSingleFilterClause = (
   filter: ResolvedExtendedFieldFilter
 ): estypes.QueryDslQueryContainer | null => {
-  const { esType, control, templateVersions } = filter;
+  const { esType, control, templateVersions, isGlobal } = filter;
 
   const valueClause = needsRuntimeScript(control, esType)
     ? buildRuntimeFilterClause(filter)
@@ -285,25 +313,31 @@ const buildSingleFilterClause = (
 
   if (valueClause == null) return null;
 
-  return { bool: { filter: [valueClause, buildTemplateVersionFilter(templateVersions)] } };
+  const versionFilter = buildTemplateVersionFilter(templateVersions, isGlobal);
+
+  return versionFilter == null ? valueClause : { bool: { filter: [valueClause, versionFilter] } };
 };
 
 export const buildExtendedFieldFilterClauses = (
   resolvedFilterGroups: ResolvedExtendedFieldFilter[][]
 ): estypes.QueryDslQueryContainer[] =>
-  resolvedFilterGroups.flatMap((group): estypes.QueryDslQueryContainer[] => {
+  resolvedFilterGroups.map((group): estypes.QueryDslQueryContainer => {
     const clauses = group.flatMap((filter) => {
       const clause = buildSingleFilterClause(filter);
       return clause != null ? [clause] : [];
     });
 
-    if (clauses.length === 0) return [];
+    // An empty group means the filter's label didn't resolve to any known field, or every
+    // candidate value failed to parse (e.g. a non-numeric value for an INPUT_NUMBER field).
+    // Returning match_none makes the filter behave like any other unsatisfiable filter — the
+    // search yields zero results — instead of silently being dropped and matching everything.
+    if (clauses.length === 0) return { match_none: {} };
 
     // Multiple entries in the same group mean the same label resolves to different storage keys
     // across templates — OR them so any matching template's case is returned.
-    if (clauses.length === 1) return clauses;
+    if (clauses.length === 1) return clauses[0];
 
-    return [{ bool: { should: clauses, minimum_should_match: 1 } }];
+    return { bool: { should: clauses, minimum_should_match: 1 } };
   });
 
 /**
@@ -341,59 +375,101 @@ type LabelToMetasMap = Map<
       esType: string;
       control: string;
       templateVersions: Array<{ id: string; version: number }>;
+      isGlobal?: boolean;
     }
   >
 >;
 
 const buildLabelToMetasIndex = (
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): LabelToMetasMap => {
   const labelToMetas: LabelToMetasMap = new Map();
 
+  const upsertMeta = ({
+    label,
+    name,
+    type,
+    control,
+    templateVersion,
+    isGlobal,
+  }: {
+    label: string;
+    name: string;
+    type: string;
+    control: string;
+    templateVersion?: { id: string; version: number };
+    isGlobal?: boolean;
+  }) => {
+    const labelKey = label.toLowerCase();
+    const storageKey = getFieldSnakeKey(name, type);
+
+    let byStorageKey = labelToMetas.get(labelKey);
+    if (byStorageKey == null) {
+      byStorageKey = new Map();
+      labelToMetas.set(labelKey, byStorageKey);
+    }
+
+    let entry = byStorageKey.get(storageKey);
+    if (entry == null) {
+      entry = {
+        storageKey,
+        esType: type,
+        control,
+        templateVersions: [],
+        isGlobal,
+      };
+      byStorageKey.set(storageKey, entry);
+    } else if (isGlobal) {
+      entry.isGlobal = true;
+    }
+
+    if (templateVersion != null) {
+      entry.templateVersions.push(templateVersion);
+    }
+  };
+
   for (const template of templates) {
     for (const field of template.fieldDefinitions ?? []) {
-      const labelKey = field.label.toLowerCase();
-      const storageKey = `${field.name}_as_${field.type}`;
-
-      let byStorageKey = labelToMetas.get(labelKey);
-      if (byStorageKey == null) {
-        byStorageKey = new Map();
-        labelToMetas.set(labelKey, byStorageKey);
-      }
-
-      let entry = byStorageKey.get(storageKey);
-      if (entry == null) {
-        entry = {
-          storageKey,
-          esType: field.type,
-          control: field.control,
-          templateVersions: [],
-        };
-        byStorageKey.set(storageKey, entry);
-      }
-
-      entry.templateVersions.push({
-        id: template.templateId,
-        version: template.templateVersion,
+      upsertMeta({
+        label: field.label,
+        name: field.name,
+        type: field.type,
+        control: field.control,
+        templateVersion: {
+          id: template.templateId,
+          version: template.templateVersion,
+        },
       });
     }
+  }
+
+  for (const field of globalFields) {
+    upsertMeta({
+      label: field.label ?? field.name,
+      name: field.name,
+      type: field.type,
+      control: field.control,
+      isGlobal: true,
+    });
   }
 
   return labelToMetas;
 };
 
 /**
- * Resolves search tokens against template field labels.
+ * Resolves search tokens against template and global field labels.
  * - exact tokens: full label must equal the token text
  * - substring tokens (quoted): label must contain the token text
  */
 export const resolveFieldLabelSearch = (
   tokens: LabelSearchToken[],
-  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>
+  templates: Array<Pick<Template, 'fieldDefinitions' | 'templateId' | 'templateVersion'>>,
+  globalFields: readonly InlineField[] = []
 ): ResolvedFieldLabelFilter[] => {
-  if (tokens.length === 0 || templates.length === 0) return [];
+  if (tokens.length === 0 || (templates.length === 0 && globalFields.length === 0)) return [];
 
-  const labelToMetas = buildLabelToMetasIndex(templates);
+  const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
   const seen = new Set<string>();
   const results: ResolvedFieldLabelFilter[] = [];
 
@@ -403,6 +479,7 @@ export const resolveFieldLabelSearch = (
       esType: string;
       control: string;
       templateVersions: Array<{ id: string; version: number }>;
+      isGlobal?: boolean;
     }> = [];
 
     const normalizedText = token.text.toLowerCase();
@@ -423,6 +500,7 @@ export const resolveFieldLabelSearch = (
           esType: meta.esType,
           control: meta.control,
           templateVersions: meta.templateVersions,
+          isGlobal: meta.isGlobal,
         });
       }
     }
@@ -517,7 +595,9 @@ export const buildFieldLabelExistsClauses = (
       exists: { field: fieldName },
     };
 
+    const versionFilter = buildTemplateVersionFilter(resolved.templateVersions, resolved.isGlobal);
+
     return [
-      { bool: { filter: [existsClause, buildTemplateVersionFilter(resolved.templateVersions)] } },
+      versionFilter == null ? existsClause : { bool: { filter: [existsClause, versionFilter] } },
     ];
   });

@@ -10,7 +10,6 @@
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
-import { KibanaCodeEditorWrapper } from '../ui_components';
 
 const IN_TABLE_SEARCH_BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
@@ -20,6 +19,8 @@ const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
+export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
+export type DataGridPaginationScope = 'discover' | 'docViewer';
 
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
@@ -30,13 +31,16 @@ export class DataGrid {
     );
   }
 
-  private async readFieldTokenLabels(scope: Locator, limit: number): Promise<string[]> {
-    return scope
-      .locator('.kbnFieldIcon svg')
-      .evaluateAll(
-        (icons, max) => icons.slice(0, max).map((icon) => icon.getAttribute('aria-label') ?? ''),
-        limit
-      );
+  private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
+    const headerCellContent = scope.locator(
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+    );
+
+    const labels = await headerCellContent.allInnerTexts();
+    return labels
+      .map((label) => label.trim())
+      .filter(Boolean)
+      .slice(0, limit);
   }
 
   private async resizeColumn(
@@ -69,6 +73,12 @@ export class DataGrid {
     });
   }
 
+  private getPaginationContainer(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.page.testSubj.locator(
+      scope === 'docViewer' ? 'UnifiedDocViewerTableGrid' : 'docTable'
+    );
+  }
+
   async addFieldFromSidebar(field: string) {
     await this.waitUntilFieldListHasCountOfFields();
     await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
@@ -76,8 +86,10 @@ export class DataGrid {
     await this.waitForLoad();
   }
 
-  async changeRowsPerPageTo(rowsPerPage: number) {
-    await this.page.testSubj.click('tablePaginationPopoverButton');
+  async changeRowsPerPageTo(rowsPerPage: number, scope: DataGridPaginationScope = 'discover') {
+    await this.getPaginationContainer(scope)
+      .locator('[data-test-subj="tablePaginationPopoverButton"]')
+      .click();
     const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
     await option.waitFor({ state: 'visible' });
     await option.click();
@@ -119,8 +131,24 @@ export class DataGrid {
     );
   }
 
+  /**
+   * Returns the leaf value node of a data-grid cell. Prefer this over
+   * `getCell` when asserting on the rendered value: the gridcell wrapper's
+   * text content concatenates child nodes (adding stray newlines), whereas the
+   * value node holds the formatted value exactly.
+   */
+  getCellValue(rowIndex: number, columnId: string): Locator {
+    return this.getCell(rowIndex, columnId).locator('.unifiedDataTable__cellValue');
+  }
+
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
+  async getColumnTitles(
+    scope: Locator = this.page.testSubj.locator('docTable')
+  ): Promise<string[]> {
+    return this.readHeaderLabels(scope, Number.MAX_SAFE_INTEGER);
   }
 
   async getColumnWidth(field: string): Promise<number> {
@@ -145,8 +173,16 @@ export class DataGrid {
     return (await selectedButton.innerText()).trim() as DataGridDensity;
   }
 
-  getCurrentPageButton(): Locator {
-    return this.page.locator('.euiPaginationButton[aria-current="page"]');
+  getPageButton(pageIndex: number, scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      `[data-test-subj="pagination-button-${pageIndex}"]`
+    );
+  }
+
+  getCurrentPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      '[data-test-subj^="pagination-button-"][aria-current="page"]'
+    );
   }
 
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
@@ -161,8 +197,10 @@ export class DataGrid {
     return (await selectedButton.innerText()).trim() as DataGridRowHeight;
   }
 
-  async getCurrentRowsPerPage(): Promise<number> {
-    const buttonText = await this.page.testSubj.innerText('tablePaginationPopoverButton');
+  async getCurrentRowsPerPage(scope: DataGridPaginationScope = 'discover'): Promise<number> {
+    const buttonText = await this.getPaginationContainer(scope)
+      .locator('[data-test-subj="tablePaginationPopoverButton"]')
+      .innerText();
     const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
 
     if (!rowsPerPage) {
@@ -170,6 +208,16 @@ export class DataGrid {
     }
 
     return Number(rowsPerPage);
+  }
+
+  async getCurrentPageNumber(scope: DataGridPaginationScope = 'discover'): Promise<string> {
+    const currentPage = this.getCurrentPageButton(scope);
+    await currentPage.waitFor({ state: 'visible' });
+    const pageNumber = await currentPage.evaluate((element) => element.textContent?.trim() ?? '');
+    if (!pageNumber) {
+      throw new Error('Unable to read current pagination page number');
+    }
+    return pageNumber;
   }
 
   async getCurrentSampleSize(): Promise<number> {
@@ -189,10 +237,12 @@ export class DataGrid {
   }
 
   async getDataGridHeaderFieldTokens(limit = 10): Promise<string[]> {
+    await this.waitForDocTableRendered();
     const header = this.page.testSubj
       .locator('euiDataGridBody')
       .locator('[data-test-subj="dataGridHeader"]');
-    return this.readFieldTokenLabels(header, limit);
+    await header.waitFor({ state: 'visible' });
+    return this.readHeaderLabels(header, limit);
   }
 
   async getDocTableRowCount(): Promise<number> {
@@ -222,7 +272,11 @@ export class DataGrid {
 
   async getNumberOfSelectedRows(): Promise<number> {
     const selectedRowsMenu = this.page.testSubj.locator('unifiedDataTableSelectionBtn');
-    if (!(await selectedRowsMenu.isVisible())) {
+    const hasSelectedRows = await selectedRowsMenu
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!hasSelectedRows) {
       return 0;
     }
 
@@ -256,8 +310,70 @@ export class DataGrid {
     await expect(counter).not.toHaveText(previousCounter);
   }
 
+  async getInTableSearchTerm(): Promise<string | null> {
+    const input = this.getInTableSearchInput();
+    const isInputOpen = await input
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!isInputOpen) {
+      return null;
+    }
+    return input.inputValue();
+  }
+
   async isSelectedRowsMenuVisible(): Promise<boolean> {
-    return this.page.testSubj.locator('unifiedDataTableSelectionBtn').isVisible();
+    return this.page.testSubj
+      .locator('unifiedDataTableSelectionBtn')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async clickCompareSelectedButton() {
+    await this.openSelectedRowsMenu();
+    await this.page.testSubj.locator('unifiedDataTableCompareSelectedDocuments').click();
+    await this.page.testSubj.locator('unifiedDataTableCompareDocuments').waitFor({
+      state: 'visible',
+    });
+  }
+
+  async isComparisonModeActive(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async openComparisonSettings() {
+    await this.page.testSubj.locator('unifiedDataTableComparisonSettings').click();
+    await this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu').waitFor({
+      state: 'visible',
+    });
+  }
+
+  async selectComparisonDiffMode(mode: 'basic' | 'chars' | 'words' | 'lines') {
+    await this.openComparisonSettings();
+    const diffMode = this.page.testSubj.locator(`unifiedDataTableDiffMode-${mode}`);
+    await diffMode.click();
+    await expect(diffMode).toHaveAttribute('aria-current', 'true');
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj
+      .locator('unifiedDataTableComparisonSettingsMenu')
+      .waitFor({ state: 'hidden' });
+  }
+
+  async getComparisonDiffMode(): Promise<DataGridComparisonDiffMode> {
+    await this.openComparisonSettings();
+    const selectedMode = await this.page
+      .locator('[data-test-subj^="unifiedDataTableDiffMode-"][aria-current="true"]')
+      .innerText();
+    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu').waitFor({
+      state: 'hidden',
+    });
+    return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
   async openColumnMenuByField(field: string) {
@@ -295,27 +411,6 @@ export class DataGrid {
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
     await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
-  }
-
-  async readJsonFromCodeEditor<T extends Record<string, unknown>>(): Promise<T> {
-    const codeEditor = new KibanaCodeEditorWrapper(this.page);
-    let parsed: T | undefined;
-
-    await expect(async () => {
-      const raw = await codeEditor.getCodeEditorValue();
-
-      if (!raw) {
-        throw new Error('Monaco editor has not rendered a value yet');
-      }
-
-      parsed = JSON.parse(raw) as T;
-    }).toPass({ timeout: 15_000 });
-
-    if (!parsed) {
-      throw new Error('Unable to read JSON from Monaco editor');
-    }
-
-    return parsed;
   }
 
   async resetColumnWidth(field: string) {
@@ -388,6 +483,10 @@ export class DataGrid {
     const minDurationMs = 2_000;
     const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
+
+    // Gate on the data fetch first so the visibility budget below isn't spent
+    // waiting for an in-flight search rather than for the table to render.
+    await this.waitForLoad();
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 

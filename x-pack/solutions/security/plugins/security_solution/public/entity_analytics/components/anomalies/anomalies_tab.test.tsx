@@ -234,12 +234,12 @@ describe('AnomaliesTab', () => {
       );
     });
 
-    it('does not re-include a deselected middle range when critical remains selected', () => {
+    it('allows non-contiguous score selection', () => {
       // Regression test for https://github.com/elastic/kibana/issues/277648: collapsing the
       // selection into a single min/max span silently re-included the deselected Major range
       // whenever critical (which has no upper bound) stayed selected.
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
-      // Select Warning, Minor, and Critical, but deselect Major [50,75).
+      // Select Warning, Minor, and Critical, but not Major [50,75).
       act(() => {
         onSeverityChange!([WARNING, MINOR, CRITICAL] as unknown as SeverityOption[]);
       });

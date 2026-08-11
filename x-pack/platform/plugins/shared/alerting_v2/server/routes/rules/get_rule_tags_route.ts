@@ -20,6 +20,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { ruleTagsOasExamples } from './get_rule_tags_oas_example';
 
 @injectable()
 export class GetRuleTagsRoute extends BaseAlertingRoute {
@@ -32,6 +34,7 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Get rule tags',
+    oasOperationObject: ruleTagsOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -44,7 +47,7 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

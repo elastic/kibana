@@ -51,6 +51,29 @@ export const createMockClassicStreamDefinition = (
   ...overrides,
 });
 
+/**
+ * Returns a bare classic stream {@link Streams.ClassicStream.Definition} (the
+ * `.stream` payload) with a custom name and optional processing steps. Handy for
+ * canvas graph-builder tests that operate on definitions rather than responses.
+ */
+export const createClassicStreamDefinition = (
+  name: string,
+  { withProcessing = false }: { withProcessing?: boolean } = {}
+): Streams.ClassicStream.Definition => {
+  const { stream } = createMockClassicStreamDefinition();
+  return {
+    ...stream,
+    name,
+    ingest: {
+      ...stream.ingest,
+      processing: {
+        steps: withProcessing ? [{ action: 'set', to: 'test_field', value: 'test_value' }] : [],
+        updated_at: stream.ingest.processing.updated_at,
+      },
+    },
+  };
+};
+
 export const createMockWiredStreamDefinition = (
   overrides: Partial<Streams.WiredStream.GetResponse> = {}
 ): Streams.WiredStream.GetResponse => ({

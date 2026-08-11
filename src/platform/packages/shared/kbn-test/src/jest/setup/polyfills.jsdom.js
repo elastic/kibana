@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const MutationObserver = require('mutation-observer');
-Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
-
 // Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
 require('whatwg-fetch');
 

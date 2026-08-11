@@ -17,9 +17,12 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import * as i18n from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> & ConditionRenderProps;
+type RadioGroupProps = z.infer<typeof RadioGroupFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const RadioGroup: React.FC<RadioGroupProps> = ({
   label,
@@ -27,9 +30,11 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, setValue, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -52,7 +57,8 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller
@@ -68,6 +74,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
             path={path}
             label={label ?? ''}
             isRequired={isRequired ?? false}
+            isRequiredOnClose={isRequiredOnClose ?? false}
             options={options}
             firstOption={firstOption}
             value={typeof field.value === 'string' ? field.value : ''}
@@ -101,6 +108,7 @@ interface RadioGroupRenderProps {
   path: string;
   label: string;
   isRequired: boolean;
+  isRequiredOnClose: boolean;
   options: Array<{ id: string; label: string }>;
   firstOption: string;
   value: string;
@@ -116,6 +124,7 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
   path,
   label,
   isRequired,
+  isRequiredOnClose,
   options,
   firstOption,
   value,
@@ -140,7 +149,7 @@ const RadioGroupRender: React.FC<RadioGroupRenderProps> = ({
   return (
     <EuiFormRow
       label={label}
-      labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+      labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth

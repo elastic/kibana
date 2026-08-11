@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiCheckbox,
@@ -39,7 +39,7 @@ export const DownsampleFieldSection = ({
   dataTestSubj,
   isMetricsStream,
 }: DownsampleFieldSectionProps) => {
-  const { control, getFieldState, getValues, resetField, setValue, trigger, formState } =
+  const { control, getFieldState, getValues, setValue, trigger, formState } =
     useFormContext<IlmPhasesFlyoutFormInternal>();
 
   const enabledPath =
@@ -48,8 +48,6 @@ export const DownsampleFieldSection = ({
     `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
   const intervalUnitPath =
     `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
-  const readonlyPath =
-    `_meta.${phaseName}.readonlyEnabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const titleId = useGeneratedHtmlId({ prefix: dataTestSubj });
   const checkboxId = useGeneratedHtmlId({
@@ -57,18 +55,6 @@ export const DownsampleFieldSection = ({
   });
 
   const isEnabled = Boolean(useWatch({ control, name: enabledPath }));
-  const isReadonlyEnabled = Boolean(useWatch({ control, name: readonlyPath }));
-
-  const resetReadonly = useCallback(() => {
-    resetField(readonlyPath, { defaultValue: false });
-    setValue(readonlyPath, false);
-  }, [resetField, readonlyPath, setValue]);
-
-  useEffect(() => {
-    if (isEnabled && isReadonlyEnabled) {
-      resetReadonly();
-    }
-  }, [isEnabled, isReadonlyEnabled, resetReadonly]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -99,12 +85,6 @@ export const DownsampleFieldSection = ({
             onChange={(e) => {
               const nextEnabled = e.target.checked;
               setValue(enabledPath, nextEnabled);
-
-              if (nextEnabled) {
-                // Downsampling is incompatible with the ILM "readonly" action in this flyout.
-                // Clear and unmount the readonly toggle while downsampling is enabled.
-                resetReadonly();
-              }
 
               // When enabling downsampling, default the fixed_interval to 2x the previous enabled downsample interval.
               // Only do this when the current interval is still the schema default (pristine 1d) to avoid clobbering

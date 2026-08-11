@@ -124,7 +124,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         searchItems.dataView,
         transformConfigQuery,
         partialPreviewRequest,
-        stepDefineState.runtimeMappings
+        stepDefineState.runtimeMappings,
+        undefined,
+        stepDefineState.projectRouting
       );
     }, [searchItems.dataView, stepDefineState]);
 

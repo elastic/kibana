@@ -10,15 +10,25 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
-import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../shared/components/test_ids';
+import {
+  ALERT_SUMMARY_PANEL_TEST_ID,
+  DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
+} from '../../shared/components/test_ids';
+import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
-        getUrlForApp: jest.fn().mockReturnValue('https://example.com/rule/test-rule-id'),
+        getUrlForApp: jest.fn().mockReturnValue('/app/security/alerts/redirect/test-id'),
       },
     },
+  }),
+}));
+
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useAppUrl: () => ({
+    getAppUrl: jest.fn(({ path }: { path: string }) => path),
   }),
 }));
 
@@ -72,6 +82,20 @@ jest.mock('./components/assignees', () => ({
   ),
 }));
 
+jest.mock('../../shared/components/share_url_icon_button', () => ({
+  ShareUrlIconButton: ({
+    url,
+    dataTestSubj,
+  }: {
+    url: string | null | undefined;
+    dataTestSubj: string;
+  }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
+}));
+
+jest.mock('../../../flyout/document_details/right/hooks/use_get_flyout_link', () => ({
+  useGetFlyoutLink: jest.fn(),
+}));
+
 jest.mock('../../../common/components/formatted_date', () => ({
   PreferenceFormattedDate: ({ value }: { value: Date }) => (
     <div data-test-subj="mockPreferenceFormattedDate">{value.toISOString()}</div>
@@ -121,7 +145,12 @@ const renderHeader = (props: RenderHeaderProps) =>
     </IntlProvider>
   );
 
+const mockUseGetFlyoutLink = useGetFlyoutLink as jest.Mock;
+
 describe('<DocumentHeader />', () => {
+  beforeEach(() => {
+    mockUseGetFlyoutLink.mockReturnValue(null);
+  });
   it('should pass the hit to the severity component', () => {
     const { getByTestId } = renderHeader({ hit: alertHit });
 
@@ -202,5 +231,26 @@ describe('<DocumentHeader />', () => {
     const { queryByTestId } = renderHeader({ hit: eventHit });
 
     expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render the share button for alerts when a link is available', () => {
+    mockUseGetFlyoutLink.mockReturnValue('https://example.com/alerts/redirect/test-id');
+    const { getByTestId } = renderHeader({ hit: alertHit });
+
+    expect(getByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render the share button for alerts when link is null (e.g. preview index)', () => {
+    mockUseGetFlyoutLink.mockReturnValue(null);
+    const { queryByTestId } = renderHeader({ hit: alertHit });
+
+    expect(queryByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render the share button for non-alert events', () => {
+    mockUseGetFlyoutLink.mockReturnValue('https://example.com/alerts/redirect/test-id');
+    const { queryByTestId } = renderHeader({ hit: eventHit });
+
+    expect(queryByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

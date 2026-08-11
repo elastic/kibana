@@ -7,25 +7,30 @@
 
 export {
   detectionSchema,
-  processedMarkerSchema,
   CHANGE_POINT_TYPES,
   type Detection,
-  type ProcessedMarker,
   type ChangePointType,
 } from './detections';
-export { discoverySchema, type Discovery } from './discoveries';
 export {
-  dependencyEdgeSchema,
-  infraComponentSchema,
-  causeKiSchema,
-  evidenceSchema,
+  blastRadiusEntrySchema,
+  causalFeatureSchema,
+  signalEntrySchema,
+  severitySchema,
+  SEVERITY_OPTIONS,
+  getSeverityLabel,
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type SignalEntry,
+  type Severity,
 } from './common_schemas';
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
   significantEventInvestigationSchema,
   significantEventSchema,
   significantEventStatusSchema,
@@ -35,11 +40,25 @@ export {
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
   INVESTIGATE_STEP_ID,
+  MAX_HYPOTHESIS_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE,
+  MAX_SIGNIFICANT_EVENT_UPDATES,
+  significantEventUpdateSchema,
   investigationStateSchema,
+  type SignificantEventUpdate,
+  type InvestigationEvidence,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';

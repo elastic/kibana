@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObject, SavedObjectError, SavedObjectReference } from '@kbn/core/types';
 import type { Tag, TagAttributes } from '../types';
 import type { TagsCapabilities } from '../capabilities';
 import type { AssignableObject } from '../assignments';
@@ -18,7 +18,9 @@ export const createReference = (type: string, id: string): SavedObjectReference 
 
 export const createTagReference = (id: string) => createReference('tag', id);
 
-export const createSavedObject = (parts: Partial<SavedObject>): SavedObject => ({
+export const createSavedObject = (
+  parts: Partial<SavedObject> & { error?: SavedObjectError }
+): SavedObject => ({
   type: 'tag',
   id: 'id',
   references: [],

@@ -17,6 +17,7 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { RulePanelKey } from '../../../../flyout/rule_details/right';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../pages/use_fetch_alert_data');
@@ -93,7 +94,11 @@ describe('AlertEvent', () => {
 
     fireEvent.click(screen.getByTestId(ruleLinkTestId));
 
-    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+    expect(flyoutApi.openRuleFlyout).toHaveBeenCalledWith({
+      ruleId: 'rule-1',
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+      title: 'Rule: My rule',
+    });
     expect(mockOpenFlyout).not.toHaveBeenCalled();
   });
 
@@ -112,5 +117,36 @@ describe('AlertEvent', () => {
 
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
+  });
+
+  describe('when the alert is a linked/remote (CPS) alert', () => {
+    it('renders the rule name as plain text instead of a clickable link', () => {
+      render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} isRemoteAlert={true} />
+        </TestProviders>
+      );
+
+      // the rule name is still displayed within the user action title
+      expect(screen.getByTestId(`alerts-user-action-${savedObjectId}`)).toHaveTextContent(
+        'My rule'
+      );
+      // but it is no longer rendered as a clickable link
+      expect(screen.queryByTestId(ruleLinkTestId)).not.toBeInTheDocument();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it('does not open any flyout when the rule name is clicked', () => {
+      render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} isRemoteAlert={true} />
+        </TestProviders>
+      );
+
+      fireEvent.click(screen.getByTestId(`alerts-user-action-${savedObjectId}`));
+
+      expect(mockOpenFlyout).not.toHaveBeenCalled();
+      expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
+    });
   });
 });

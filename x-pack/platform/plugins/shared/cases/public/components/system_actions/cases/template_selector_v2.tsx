@@ -25,11 +25,23 @@ import {
   TEMPLATE_SELECT_PLACEHOLDER,
 } from '../../create/translations';
 
+/** Minimal legacy (v1) template shape needed to bridge a stored legacy key to its migrated name. */
+export interface LegacyTemplateRef {
+  key: string;
+  name: string;
+}
+
 interface Props {
   owner: string;
   templateId: string | null;
   isLoading?: boolean;
   isDisabled?: boolean;
+  /**
+   * Legacy (v1) configure templates for this owner. Used only to display a rule that still stores a
+   * legacy template `key`: the key is bridged to the migrated v2 template by name so the selector
+   * shows it instead of appearing empty. Display-only — the stored value is not rewritten.
+   */
+  legacyTemplates?: LegacyTemplateRef[];
   onChange: (params: { templateId: string | null; templateVersion: string | null }) => void;
 }
 
@@ -40,6 +52,7 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
   templateId,
   isLoading = false,
   isDisabled = false,
+  legacyTemplates,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -60,12 +73,45 @@ const TemplateSelectorV2Component: React.FC<Props> = ({
     [templatesData?.templates]
   );
 
+  // A rule authored before the v2 migration stores the legacy template `key`, which never matches a
+  // v2 `templateId`. Bridge it to the migrated template so it still displays. The stored value stays
+  // the legacy key until the user actively picks a template (the connector resolves it at runtime),
+  // preserving the deprecated v1 path until it is removed.
+  const effectiveTemplateId = useMemo(() => {
+    if (!templateId) {
+      return null;
+    }
+    const v2Templates = templatesData?.templates ?? [];
+    if (v2Templates.some((template) => template.templateId === templateId)) {
+      return templateId;
+    }
+    // Prefer the exact v1 lineage recorded by the migration (`legacyKey`). v1 keyed identity on
+    // `key`, not name, so this disambiguates v1 templates that shared a name — and mirrors the
+    // server-side connector bridge (`resolveV2TemplateForLegacyKey`).
+    const byLegacyKey = v2Templates.find((template) => template.legacyKey === templateId);
+    if (byLegacyKey) {
+      return byLegacyKey.templateId;
+    }
+    // Fallback for environments migrated before `legacyKey` was recorded: match by normalized name
+    // (case/whitespace-insensitive, mirroring the template-name uniqueness rule).
+    const legacyName = legacyTemplates?.find((template) => template.key === templateId)?.name;
+    if (legacyName) {
+      const normalizedLegacyName = legacyName.trim().toLocaleLowerCase();
+      return (
+        v2Templates.find(
+          (template) => template.name.trim().toLocaleLowerCase() === normalizedLegacyName
+        )?.templateId ?? null
+      );
+    }
+    return null;
+  }, [templateId, templatesData?.templates, legacyTemplates]);
+
   const selectedOptions = useMemo(
     () =>
-      templateId
-        ? options.filter((opt) => opt.value === templateId)
+      effectiveTemplateId
+        ? options.filter((opt) => opt.value === effectiveTemplateId)
         : [{ label: DEFAULT_EMPTY_TEMPLATE_NAME, value: EMPTY_VALUE }],
-    [options, templateId]
+    [options, effectiveTemplateId]
   );
 
   const handleChange = useCallback(

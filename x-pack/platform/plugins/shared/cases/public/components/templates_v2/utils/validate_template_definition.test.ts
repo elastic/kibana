@@ -106,9 +106,7 @@ describe('validateTemplateDefinitionYaml', () => {
 describe('getMissingRequiredKeys', () => {
   const completeObject = {
     name: 'Case title',
-    description: null,
-    severity: null,
-    category: null,
+    severity: 'low',
     tags: [],
     assignees: [],
     settings: { syncAlerts: false, extractObservables: false },
@@ -120,14 +118,13 @@ describe('getMissingRequiredKeys', () => {
     expect(getMissingRequiredKeys(completeObject)).toEqual([]);
   });
 
-  it('reports every missing case-default key', () => {
+  it('reports no missing keys when the structural fields block is present (case defaults optional)', () => {
     const missing = getMissingRequiredKeys({
       fields: [],
     });
 
-    expect(missing).toEqual(
-      expect.arrayContaining(['name', 'description', 'severity', 'category', 'tags', 'assignees'])
-    );
+    // Every case default is optional now — only the `fields` block is required, and it is present.
+    expect(missing).toEqual([]);
   });
 
   it('reports a missing fields block', () => {

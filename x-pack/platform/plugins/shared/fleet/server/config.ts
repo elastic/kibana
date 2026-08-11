@@ -266,6 +266,13 @@ export const config: PluginConfigDescriptor = {
               interval: schema.maybe(schema.string({ defaultValue: '10m' })),
             })
           ),
+          // Routes agentless policies through the managed `_bulk` endpoint instead of
+          // writing directly to Elasticsearch.
+          managedBulk: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,

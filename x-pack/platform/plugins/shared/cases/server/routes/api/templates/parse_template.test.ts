@@ -99,6 +99,23 @@ describe('parseTemplate', () => {
     expect(result.latestVersion).toBe(1);
   });
 
+  it('defaults latestVersion to this document templateVersion (not a hardcoded 1)', () => {
+    const template = createTemplate({ templateVersion: 3, isLatest: true });
+    const result = parseTemplate(template);
+
+    expect(result.templateVersion).toBe(3);
+    expect(result.latestVersion).toBe(3);
+  });
+
+  it('uses an explicit latestVersion override when fetching a historical revision', () => {
+    const template = createTemplate({ templateVersion: 1, isLatest: false });
+    const result = parseTemplate(template, { latestVersion: 4 });
+
+    expect(result.templateVersion).toBe(1);
+    expect(result.isLatest).toBe(false);
+    expect(result.latestVersion).toBe(4);
+  });
+
   it('parses case defaults from the definition', () => {
     const definition = yamlStringify({
       name: 'Template with severity',
@@ -116,7 +133,7 @@ describe('parseTemplate', () => {
   it('omits optional top-level defaults when not present in the definition', () => {
     const template = createTemplate({
       definition: yamlStringify({
-        // `name` is the required case-default title; the rest are optional.
+        // Every case default is optional; `name` is just provided here to assert the others are omitted.
         name: 'Case default title',
         fields: [],
       }),

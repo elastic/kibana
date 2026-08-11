@@ -11,12 +11,16 @@ import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { useCspFlyoutApi } from './use_csp_flyout_api';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 
-jest.mock('react-redux', () => ({ useStore: () => ({}) }));
+jest.mock('react-redux-v7', () => ({ useStore: () => ({}) }));
 jest.mock('react-router-dom', () => ({ useHistory: () => ({}) }));
 jest.mock('../../common/hooks/is_in_security_app');
 
 jest.mock('../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: unknown }) => children,
+}));
+
+jest.mock('../shared/utils/build_flyout_nav_title', () => ({
+  buildFlyoutNavTitle: (title: string) => title,
 }));
 
 jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
@@ -28,9 +32,15 @@ jest.mock('./vulnerability/main', () => ({ Vulnerability: () => null }));
 
 const mockFlyoutRef = { close: jest.fn(), onClose: Promise.resolve() };
 const mockOpenSystemFlyout = jest.fn().mockReturnValue(mockFlyoutRef);
+const mockReportEvent = jest.fn();
 
 jest.mock('../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { overlays: { openSystemFlyout: mockOpenSystemFlyout } } }),
+  useKibana: () => ({
+    services: {
+      overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      telemetry: { reportEvent: mockReportEvent },
+    },
+  }),
 }));
 
 const useIsInSecurityAppMock = useIsInSecurityApp as jest.Mock;

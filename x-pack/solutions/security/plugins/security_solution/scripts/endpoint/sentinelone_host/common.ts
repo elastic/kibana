@@ -214,7 +214,7 @@ export const installSentinelOneAgent = async ({
     const status = (
       await pRetry(
         async () => {
-          return hostVm.exec(`sudo ${installPath} control status`);
+          return hostVm.exec(`sudo ${installPath} control status`, { silent: true });
         },
         {
           onFailedAttempt: (error) => {

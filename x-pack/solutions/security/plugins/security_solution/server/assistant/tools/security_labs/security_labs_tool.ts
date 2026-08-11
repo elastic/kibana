@@ -12,7 +12,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import type { ContentReference } from '@kbn/elastic-assistant-common';
 import { contentReferenceString } from '@kbn/elastic-assistant-common';
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import {
   hrefReference,
   knowledgeBaseReference,
@@ -67,7 +67,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           let reference: ContentReference | undefined;
           try {
             const yamlString = doc.pageContent.split('---')[1];
-            const parsed = yaml.load(yamlString) as {
+            const parsed = parse(yamlString) as {
               slug: string | undefined;
               title: string | undefined;
             };

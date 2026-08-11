@@ -516,7 +516,6 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
-  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
   [RegistryDataStreamKeys.provider_permissions]?: RegistryProviderPermissions[];
 }
@@ -831,6 +830,8 @@ export interface Installation {
   install_started_at: string;
   install_source: InstallSource;
   installed_kibana_space_id?: string;
+  /** Kibana version running at the time Kibana assets for this package were last installed/updated */
+  installed_kibana_version?: string;
   keep_policies_up_to_date?: boolean;
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;

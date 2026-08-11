@@ -38,6 +38,7 @@ export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, Sl
   return {
     id: SLACK_CONNECTOR_ID,
     subtype,
+    getHideUI: () => false,
     modalWidth: 675,
     iconClass: 'logoSlack',
     selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {

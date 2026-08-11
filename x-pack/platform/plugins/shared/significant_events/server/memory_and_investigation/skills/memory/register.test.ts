@@ -27,7 +27,7 @@ const createOptions = (
     agentBuilder,
     memoryToolsOptions,
     logger: loggerMock.create(),
-    isMemoryEnabled: jest.fn().mockResolvedValue(true),
+    isAvailable: jest.fn().mockResolvedValue(true),
     ...overrides,
   };
   return { agentBuilder, options };
@@ -37,9 +37,9 @@ const getRegisteredIds = (agentBuilder: ReturnType<typeof agentBuilderMocks.crea
   agentBuilder.skills.register.mock.calls.map((call) => call[0].id);
 
 describe('registerStreamsMemoryAgentBuilder', () => {
-  it('registers nothing when the memory flag is disabled', async () => {
+  it('registers nothing when the availability flag is disabled', async () => {
     const { agentBuilder, options } = createOptions({
-      isMemoryEnabled: jest.fn().mockResolvedValue(false),
+      isAvailable: jest.fn().mockResolvedValue(false),
     });
 
     await registerStreamsMemoryAgentBuilder(options);
@@ -47,7 +47,7 @@ describe('registerStreamsMemoryAgentBuilder', () => {
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
   });
 
-  it('registers all memory skills when the memory flag is enabled', async () => {
+  it('registers all memory skills when the availability flag is enabled', async () => {
     const { agentBuilder, options } = createOptions();
 
     await registerStreamsMemoryAgentBuilder(options);
@@ -57,25 +57,25 @@ describe('registerStreamsMemoryAgentBuilder', () => {
     expect(registeredIds).toHaveLength(MEMORY_SKILL_IDS.length);
   });
 
-  it('is idempotent: a second onMemoryEnabled call does not re-register the skills', async () => {
+  it('is idempotent: a second ensureRegistered call does not re-register the skills', async () => {
     const { agentBuilder, options } = createOptions();
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     const callsAfterFirst = agentBuilder.skills.register.mock.calls.length;
 
-    await onMemoryEnabled();
+    await ensureRegistered();
 
     expect(agentBuilder.skills.register.mock.calls.length).toBe(callsAfterFirst);
   });
 
   it('installs on flip: registers nothing while disabled, then registers once it becomes enabled', async () => {
-    const isMemoryEnabled = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({ isMemoryEnabled });
+    const isAvailable = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const { agentBuilder, options } = createOptions({ isAvailable });
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
 
-    await onMemoryEnabled();
+    await ensureRegistered();
 
     expect(getRegisteredIds(agentBuilder)).toEqual(expect.arrayContaining(MEMORY_SKILL_IDS));
   });
@@ -88,11 +88,11 @@ describe('registerStreamsMemoryAgentBuilder', () => {
       }
     });
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     const callsAfterFirst = agentBuilder.skills.register.mock.calls.length;
     expect(options.logger.warn).toHaveBeenCalled();
 
-    await onMemoryEnabled();
+    await ensureRegistered();
 
     expect(agentBuilder.skills.register.mock.calls.length).toBeGreaterThan(callsAfterFirst);
   });
@@ -105,11 +105,11 @@ describe('registerStreamsMemoryAgentBuilder', () => {
       }
     });
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     expect(getRegisteredIds(agentBuilder)).toContain('streams-conversation-scraper');
     agentBuilder.skills.register.mockClear();
 
-    await onMemoryEnabled();
+    await ensureRegistered();
 
     // Only the previously failed skill is retried; the ones that succeeded are not re-registered
     // (a second register() of the same id would throw "already registered").
@@ -125,29 +125,29 @@ describe('registerStreamsMemoryAgentBuilder', () => {
       }
     });
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     failScraper = false;
 
-    await onMemoryEnabled();
+    await ensureRegistered();
 
     expect(options.logger.info).toHaveBeenCalledWith(
-      'Streams memory skills registered (streams.significantEventsMemoryEnabled is enabled)'
+      'Streams memory skills registered (streams.significantEventsAvailable is enabled)'
     );
 
     agentBuilder.skills.register.mockClear();
-    await onMemoryEnabled();
+    await ensureRegistered();
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
   });
 
-  it('serializes concurrent onMemoryEnabled calls and registers each skill exactly once', async () => {
+  it('serializes concurrent ensureRegistered calls and registers each skill exactly once', async () => {
     // Disabled on the initial call so registration happens on the concurrent flips below.
-    const isMemoryEnabled = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
-    const { agentBuilder, options } = createOptions({ isMemoryEnabled });
+    const isAvailable = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+    const { agentBuilder, options } = createOptions({ isAvailable });
 
-    const { onMemoryEnabled } = await registerStreamsMemoryAgentBuilder(options);
+    const { ensureRegistered } = await registerStreamsMemoryAgentBuilder(options);
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
 
-    await Promise.all([onMemoryEnabled(), onMemoryEnabled(), onMemoryEnabled()]);
+    await Promise.all([ensureRegistered(), ensureRegistered(), ensureRegistered()]);
 
     const registeredIds = getRegisteredIds(agentBuilder);
     expect(registeredIds).toHaveLength(new Set(registeredIds).size);

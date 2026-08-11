@@ -77,6 +77,40 @@ describe('buildTemplateYaml', () => {
       });
     });
 
+    it('preserves multiline markdown in the case-default description through the YAML round-trip', () => {
+      // Legacy case descriptions are authored as markdown; the migration must carry the raw markdown
+      // (headings, lists, code fences, links) into the v2 definition unchanged so it renders in the
+      // markdown editor rather than as escaped plain text.
+      const markdownDescription = [
+        '# Investigation steps',
+        '',
+        '1. Review the **source** host',
+        '2. Check `auth.log` for anomalies',
+        '',
+        'See [the runbook](https://example.com/runbook).',
+      ].join('\n');
+
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            title: 'Case title',
+            description: markdownDescription,
+          },
+        },
+        new Map()
+      );
+
+      expect(parse(yaml).description).toBe(markdownDescription);
+
+      const result = ParsedTemplateDefinitionSchema.safeParse(parse(yaml));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.description).toBe(markdownDescription);
+      }
+    });
+
     it('keeps an explicit empty assignees list in YAML', () => {
       const yaml = buildTemplateYaml(
         {
@@ -373,7 +407,9 @@ describe('buildTemplateYaml', () => {
       expect(parse(yaml).fields[0].metadata?.default).toBe(true);
     });
 
-    it('omits $ref metadata when value is null', () => {
+    it('emits an explicit null TEXT default when the legacy value is null (cleared field)', () => {
+      // A cleared v1 template field must stay empty in v2, not inherit the field-library default.
+      // `default: null` is the explicit "clear" marker; an absent override would inherit instead.
       const yaml = buildTemplateYaml(
         {
           key: 'k',
@@ -384,7 +420,56 @@ describe('buildTemplateYaml', () => {
         },
         makeRef('cf_text')
       );
+      expect(parse(yaml).fields[0].metadata).toEqual({ default: null });
+    });
+
+    it('emits an explicit null NUMBER default when the legacy value is null (cleared field)', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_num', type: CustomFieldTypes.NUMBER, value: null }],
+          },
+        },
+        makeRef('cf_num')
+      );
+      expect(parse(yaml).fields[0].metadata).toEqual({ default: null });
+    });
+
+    it('omits $ref metadata for a TOGGLE with a null value (toggles cannot be cleared)', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_toggle', type: CustomFieldTypes.TOGGLE, value: null }],
+          },
+        },
+        makeRef('cf_toggle')
+      );
       expect(parse(yaml).fields[0].metadata).toBeUndefined();
+    });
+
+    it('emits a null default that round-trips through ParsedTemplateDefinitionSchema', () => {
+      const yaml = buildTemplateYaml(
+        {
+          key: 'k',
+          name: 'T',
+          caseFields: {
+            customFields: [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: null }],
+          },
+        },
+        makeRef('cf_text')
+      );
+      const result = ParsedTemplateDefinitionSchema.safeParse(parseYaml(yaml));
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.fields[0]).toMatchObject({
+          $ref: 'cf_text',
+          metadata: { default: null },
+        });
+      }
     });
 
     it('skips unmatched custom field key and logs a warning', () => {
