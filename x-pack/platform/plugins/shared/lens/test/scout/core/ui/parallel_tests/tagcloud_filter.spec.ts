@@ -30,7 +30,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
         field: 'ip',
         keepOpen: true,
       });
-      await lens.setTermsNumberOfValues(5);
+      await lens.dimensions.setTermsNumberOfValues(5);
       await lens.closeDimensionEditor();
 
       await lens.configureDimension({
