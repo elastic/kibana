@@ -158,12 +158,12 @@ export class CasesClientFactory {
     request,
     scopedClusterClient,
     savedObjectsService,
-    clientSource = 'unknown',
+    clientSource,
   }: {
     request: KibanaRequest;
     savedObjectsService: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
-    clientSource?: CasesClientSource;
+    clientSource: CasesClientSource;
   }): Promise<CasesClient> {
     this.validateInitialization();
 

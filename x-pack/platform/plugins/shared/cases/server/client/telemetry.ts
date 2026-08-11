@@ -12,17 +12,15 @@ export type CasesClientSource =
   | 'connector'
   | 'workflow'
   | 'agent_builder'
-  | 'plugin_contract'
-  | 'unknown';
+  | 'plugin_contract';
 
 export function withUsageCounter<TArgs extends unknown[], TReturn>(
   counterName: string,
-  clientArgs: CasesClientArgs,
+  { usageCounter, clientSource }: CasesClientArgs,
   fn: (...args: TArgs) => TReturn
 ): (...args: TArgs) => TReturn {
-  const clientSource = clientArgs.clientSource ? clientArgs.clientSource : 'unknown';
   return (...args: TArgs) => {
-    clientArgs.usageCounter?.incrementCounter({
+    usageCounter?.incrementCounter({
       counterName,
       counterType: `cases_client.${clientSource}`,
     });

@@ -56,22 +56,6 @@ describe('withUsageCounter', () => {
     });
   });
 
-  it('undefined clientSource should default to unknown', async () => {
-    const clientArgsWithoutRequestSource = {
-      usageCounter: { incrementCounter: mockIncrementCounter },
-    } as unknown as CasesClientArgs;
-    const clientWithoutRequestSource = createCasesSubClient(
-      clientArgsWithoutRequestSource,
-      mockCasesClient,
-      mockCasesClientInternal
-    );
-    await clientWithoutRequestSource.create(newCase);
-    expect(mockIncrementCounter).toHaveBeenCalledWith({
-      counterName: 'create_case',
-      counterType: 'cases_client.unknown',
-    });
-  });
-
   it('should not throw if usageCounter is undefined', async () => {
     const clientArgsWithoutUsageCounter = {
       clientSource: 'rest_api',

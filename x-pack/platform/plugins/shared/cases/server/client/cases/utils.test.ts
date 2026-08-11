@@ -18,7 +18,6 @@ import {
   commentExternalReference,
   commentPersistableState,
 } from './mock';
-import { mappings, mockCases } from '../../mocks';
 
 import {
   createIncident,
@@ -61,6 +60,7 @@ import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
+import { mappings, mockCases } from '../../mocks';
 import type { ObservablePost, CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
