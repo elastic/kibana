@@ -38,6 +38,7 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  SOURCE_COLUMN,
 } from '@kbn/unified-data-table';
 import {
   MAX_DOC_FIELDS_DISPLAYED,
@@ -389,6 +390,12 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
+  // This is temporary, sourceDisplayMode should be get from the app state.
+  const sourceDisplayMode = useMemo(
+    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
+    [discoverFeatureFlags]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
     () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
@@ -415,9 +422,14 @@ function DiscoverDocumentsComponent({
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers(cellRendererParams);
-  }, [cellRendererParams, getCellRenderersAccessor]);
+    const renderers = getCellRenderersAccessor(() => ({}))(cellRendererParams);
+    if (sourceDisplayMode !== 'json') return renderers;
+    // User explicitly chose the JSON document view; Show it instead of the profile
+    // customized column. Today profiles customize the _source column based on current Summary display,
+    // this is the less intrusive option, we can evaluate if they need to build on top of the JSON mode too.
+    const { [SOURCE_COLUMN]: _omit, ...rest } = renderers;
+    return rest;
+  }, [cellRendererParams, getCellRenderersAccessor, sourceDisplayMode]);
 
   const callouts = useMemo(
     () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
@@ -436,12 +448,6 @@ function DiscoverDocumentsComponent({
         />
       ) : null,
     [isDataLoading, styles.progress]
-  );
-
-  // This is temporary, sourceDisplayMode should be get from the app state.
-  const sourceDisplayMode = useMemo(
-    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
-    [discoverFeatureFlags]
   );
 
   const canSaveDiscoverTable = services.embeddableEditor.canSaveToDashboard();
