@@ -32,9 +32,6 @@ export class AlertsTablePage {
   public readonly flyoutViewRuleDetailsLink: Locator;
   // Add-to-case row actions / dialogs
   public readonly addToCaseAction: Locator;
-  public readonly addToExistingCaseAction: Locator;
-  public readonly addToNewCaseAction: Locator;
-  public readonly createCaseFlyout: Locator;
   public readonly addToExistingCaseModal: Locator;
   public readonly queryInput: Locator;
   public readonly dataGrid: EuiDataGridObject;
@@ -72,9 +69,6 @@ export class AlertsTablePage {
     this.flyoutAlertDetailsButton = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
     this.flyoutViewRuleDetailsLink = this.page.testSubj.locator('viewRuleDetailsFlyout');
     this.addToCaseAction = this.page.testSubj.locator('add-to-case-action');
-    this.addToExistingCaseAction = this.page.testSubj.locator('add-to-existing-case-action');
-    this.addToNewCaseAction = this.page.testSubj.locator('add-to-new-case-action');
-    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
     this.addToExistingCaseModal = this.page.testSubj.locator('all-cases-modal');
     this.queryInput = this.page.testSubj.locator('queryInput');
   }
@@ -209,18 +203,8 @@ export class AlertsTablePage {
   }
 
   // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
-  async openAddToCasePanel() {
+  async clickAddToCase() {
     await this.addToCaseAction.click();
-  }
-
-  async clickAddToNewCase() {
-    await this.openAddToCasePanel();
-    await this.addToNewCaseAction.click();
-  }
-
-  async clickAddToExistingCase() {
-    await this.openAddToCasePanel();
-    await this.addToExistingCaseAction.click();
   }
 
   // Pagination
