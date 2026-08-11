@@ -724,26 +724,19 @@ describe('Pack utils', () => {
       ).toEqual({ query: 'SELECT 1', interval: 30, schedule_type: 'interval' });
     });
 
-    // Regression guard for #279946: legacy→interval transition must drop bare
-    // interval values (stale prebuilt-pack copies) from queries without an
-    // explicit schedule_type marker. Uses 80 (not the synthesized default 3600)
-    // so the dropped value is distinguishable from the default.
-    test('legacy→interval transition — drops bare interval without schedule_type marker', () => {
-      expect(
-        stripPriorModePerQueryFields(
-          { query: 'SELECT 1', interval: 80 },
-          'interval',
-          undefined // prior mode: legacy (no pack schedule_type)
-        )
-      ).toEqual({ query: 'SELECT 1' });
-    });
-
-    test('legacy→interval transition — preserves explicit interval override (schedule_type: interval)', () => {
+    // strip is only responsible for cross-mode fields; a bare interval is left
+    // alone (convergePerQueryIntervals drops stale prebuilt-pack copies separately).
+    test('interval mode — bare interval and explicit override both pass through', () => {
+      expect(stripPriorModePerQueryFields({ query: 'SELECT 1', interval: 80 }, 'interval')).toEqual(
+        {
+          query: 'SELECT 1',
+          interval: 80,
+        }
+      );
       expect(
         stripPriorModePerQueryFields(
           { query: 'SELECT 1', interval: 80, schedule_type: 'interval' },
-          'interval',
-          undefined // prior mode: legacy
+          'interval'
         )
       ).toEqual({ query: 'SELECT 1', interval: 80, schedule_type: 'interval' });
     });

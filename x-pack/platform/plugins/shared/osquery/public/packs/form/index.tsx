@@ -239,8 +239,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     );
   }, [packType, shards]);
 
+  // RHF clears dirtyFields.schedule when the value equals the synthesized default
+  // (e.g. a legacy pack whose default interval is 3600s), so value-equality alone
+  // would drop a deliberate "set it to 3600" choice. Track raw interaction instead.
+  const scheduleInteractedRef = useRef(false);
   const handleScheduleChange = useCallback(
     (next: ScheduleFormData) => {
+      scheduleInteractedRef.current = true;
       setValue('schedule', next, { shouldDirty: true });
     },
     [setValue]
@@ -298,7 +303,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
         // legacy→interval transition that strips every bare per-query interval.
-        const scheduleIsDirtyOrExplicit = Boolean(dirtyFields.schedule) || packHasExplicitSchedule;
+        const scheduleIsDirtyOrExplicit =
+          Boolean(dirtyFields.schedule) || scheduleInteractedRef.current || packHasExplicitSchedule;
         const scheduleFields =
           isRruleSchedulingEnabled && scheduleFormState && scheduleIsDirtyOrExplicit
             ? serializeSchedule(scheduleFormState)

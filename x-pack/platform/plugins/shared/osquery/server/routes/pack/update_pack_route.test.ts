@@ -26,20 +26,6 @@ jest.mock('../../lib/get_user_info', () => ({
   getUserInfo: jest.fn(),
 }));
 
-// uuid@11 is ESM-only, so `v4` is uncallable under jest ("_uuid.v4 is not a
-// function"). Mock it UUID-v4-shaped (callers assert the format) and unique.
-jest.mock('uuid', () => {
-  let counter = 0;
-
-  return {
-    v4: () => {
-      const n = (++counter).toString(16).padStart(12, '0');
-
-      return `00000000-0000-4000-8000-${n}`;
-    },
-  };
-});
-
 const mockFetchAllItems = (items: unknown[] = []) =>
   jest.fn().mockResolvedValue(
     (async function* () {
@@ -1164,9 +1150,9 @@ describe('updatePackRoute', () => {
     });
 
     // Regression guard for #279946: duplicated prebuilt pack has stale per-query
-    // intervals. After the user sets a pack-level interval (120s), the
-    // legacy→interval transition must strip the bare intervals so the wire emits
-    // only default_native_schedule, not per-query overrides that would shadow it.
+    // intervals. After the user sets a pack-level interval (120s), convergence must
+    // drop the bare intervals so the wire emits only default_native_schedule, not
+    // per-query overrides that would shadow it.
     // Uses distinct non-default values (80/100) to make the drop observable.
     it('legacy→interval transition: duplicated prebuilt pack — bare stale intervals stripped from SO and wire', async () => {
       const currentSO = {

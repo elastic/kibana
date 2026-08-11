@@ -285,8 +285,7 @@ export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string
 
 export const stripPriorModePerQueryFields = (
   query: PackQueryInput,
-  newPackMode: ScheduleType | undefined,
-  priorPackMode?: ScheduleType | null
+  newPackMode: ScheduleType | undefined
 ): PackQueryInput => {
   if (newPackMode === 'rrule') {
     // Drop legacy interval override; preserve a same-mode rrule override.
@@ -307,14 +306,8 @@ export const stripPriorModePerQueryFields = (
       return rest;
     }
 
-    // Legacy→interval transition: drop bare intervals (stale prebuilt-pack copies);
-    // only an explicit schedule_type: 'interval' marker survives.
-    if (scheduleType === undefined && priorPackMode == null) {
-      const { interval: _interval, ...stripped } = rest;
-
-      return stripped;
-    }
-
+    // Bare intervals (stale prebuilt-pack copies) are converged away separately by
+    // convergePerQueryIntervals; here we only preserve an explicit same-mode override.
     return scheduleType === undefined ? rest : { ...rest, schedule_type: scheduleType };
   }
 

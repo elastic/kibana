@@ -212,11 +212,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ? (mapValues(baseQueries, (queryData, queryId) => {
               const existing = resolvedExistingByKey[queryId];
               const carried = resolved.transitioned
-                ? stripPriorModePerQueryFields(
-                    queryData,
-                    resolved.scheduleType,
-                    currentPackSO.attributes.schedule_type
-                  )
+                ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
                 : queryData;
 
               const existingRrule = existing?.rrule_schedule;

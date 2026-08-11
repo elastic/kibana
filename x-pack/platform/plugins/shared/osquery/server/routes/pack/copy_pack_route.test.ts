@@ -21,20 +21,6 @@ jest.mock('../../lib/get_user_info', () => ({
   getUserInfo: jest.fn(),
 }));
 
-// uuid@11 is ESM-only, so `v4` is uncallable under jest ("_uuid.v4 is not a
-// function"). Mock it UUID-v4-shaped (callers assert the format) and unique.
-jest.mock('uuid', () => {
-  let counter = 0;
-
-  return {
-    v4: () => {
-      const n = (++counter).toString(16).padStart(12, '0');
-
-      return `00000000-0000-4000-8000-${n}`;
-    },
-  };
-});
-
 describe('copyPackRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
