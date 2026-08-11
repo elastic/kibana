@@ -9,10 +9,6 @@
  * End-to-end API integration tests for the Agent Builder "update agent" endpoint
  * (PUT /api/agent_builder/agents/:id).
  *
- * These tests exist to prevent the class of regression described in
- * elastic/search-team#15698 where new properties added to Agent documents caused
- * the update endpoint's strict schema to reject previously-valid UI payloads.
- *
  * Test coverage:
  *   - Happy-path updates for every independently editable field.
  *   - access_control schema contract: `access_mode` accepted, `entries` rejected.
