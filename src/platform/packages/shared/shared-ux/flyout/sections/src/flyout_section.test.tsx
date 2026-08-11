@@ -42,7 +42,7 @@ describe('FlyoutSection', () => {
         body
       </FlyoutSection>
     );
-    expect(screen.getByRole('link', { name: 'Edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument();
   });
 
   it('sets data-bordered when hasBorder is true', () => {
@@ -156,6 +156,6 @@ describe('FlyoutAccordion', () => {
         content
       </FlyoutAccordion>
     );
-    expect(screen.getByRole('link', { name: 'View all' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'View all' })).toBeInTheDocument();
   });
 });
