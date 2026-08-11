@@ -166,6 +166,24 @@ describe('WatchesService', () => {
       expect(schedule).toEqual({ outcome: 'rejected', what: 'trigger settings' });
     });
 
+    it('leaves the workflow untouched when a settings patch in the same body is rejected', async () => {
+      const { client, updateWorkflow } = createFakeClient();
+      const service = createService(client);
+
+      const result = await service.update(
+        FLOOR,
+        { enabled: false, triggers: { scheduleId: 'every-century' } },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'rejected', what: 'trigger settings' });
+      // `enabled` is the one field with a real persisted side effect, so settings must validate first:
+      // a rejected patch has to leave the workflow alone rather than disable it and report 400.
+      expect(updateWorkflow).not.toHaveBeenCalled();
+      expect((await service.get(FLOOR, SPACE))?.watch.enabled).toBe(true);
+    });
+
     it('refuses settings writes when not backed by the store', async () => {
       const service = createService(createFakeClient().client, false);
 

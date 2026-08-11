@@ -294,13 +294,10 @@ export class WatchesService {
       return { outcome: 'unavailable' };
     }
 
-    if (enabled != null) {
-      const applied = await this.applyEnabled(watchId, enabled, spaceId, request);
-      if (applied === 'not-found') {
-        return { outcome: 'not-found' };
-      }
-    }
-
+    // Settings are validated and applied before `enabled`, deliberately. `enabled` is the one field
+    // that leaves a real, persisted side effect on the backing workflow, so a rejected patch must not
+    // reach it: a body carrying both would otherwise disable the workflow and then return 400 for the
+    // invalid setting, telling the caller that nothing had changed.
     if (touchesSettings) {
       if (!getStoredWatchSettings(watchId)) {
         return { outcome: 'not-found' };
@@ -326,6 +323,13 @@ export class WatchesService {
       }
       if (skill && !setWatchSkillEnabled(watchId, skill.skillId, skill.enabled)) {
         return { outcome: 'rejected', what: `skill "${skill.skillId}"` };
+      }
+    }
+
+    if (enabled != null) {
+      const applied = await this.applyEnabled(watchId, enabled, spaceId, request);
+      if (applied === 'not-found') {
+        return { outcome: 'not-found' };
       }
     }
 
