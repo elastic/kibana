@@ -7,6 +7,7 @@
 
 import { isEqual, mapValues, omitBy } from 'lodash';
 
+import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import type { CustomizeSpaceFormValues } from '../types';
 
@@ -18,11 +19,20 @@ import type { CustomizeSpaceFormValues } from '../types';
  *
  * List values (`disabledFeatures`) are sorted because the form appends re-added entries to the end
  * of the list, so toggling a value off and back on is a re-order rather than a change.
+ *
+ * A space without a solution renders as Classic when editing, and the picker writes `'classic'`
+ * back, so the two are the same to the user. `hasSolutionViewChanged` on the create form treats
+ * them the same way.
  */
 const normalize = (values: CustomizeSpaceFormValues) =>
   mapValues(
     omitBy(
-      { ...values, initials: getSpaceInitials(values), color: getSpaceColor(values) },
+      {
+        ...values,
+        initials: getSpaceInitials(values),
+        color: getSpaceColor(values),
+        solution: values.solution === SOLUTION_VIEW_CLASSIC ? undefined : values.solution,
+      },
       (value) =>
         value == null ||
         value === '' ||

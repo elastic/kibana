@@ -31,6 +31,26 @@ describe('haveFormValuesChanged', () => {
     expect(haveFormValuesChanged(initialValues, { ...initialValues, solution: 'oblt' })).toBe(true);
   });
 
+  it('treats an unset solution view as Classic', () => {
+    // an existing space without a solution renders as Classic on the edit form, so selecting
+    // Classic is not a change the user can see
+    expect(haveFormValuesChanged(initialValues, { ...initialValues, solution: 'classic' })).toBe(
+      false
+    );
+    expect(haveFormValuesChanged({ ...initialValues, solution: 'classic' }, initialValues)).toBe(
+      false
+    );
+    expect(
+      haveFormValuesChanged(
+        { ...initialValues, solution: 'oblt' },
+        {
+          ...initialValues,
+          solution: 'classic',
+        }
+      )
+    ).toBe(true);
+  });
+
   it('reports no changes when the derived initials and color are filled in', () => {
     // the form hands these back to us as the user interacts with it, even when they are untouched
     expect(
