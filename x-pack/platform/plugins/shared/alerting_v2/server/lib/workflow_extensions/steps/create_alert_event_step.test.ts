@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { getCreateAlertEventStepDefinition } from './create_alert_event_step';
 
@@ -34,12 +34,15 @@ const createMockContext = () => {
   } as any;
 };
 
+const allowedPrivilege = jest.fn().mockResolvedValue(true);
+const deniedPrivilege = jest.fn().mockResolvedValue(false);
+
 describe('getCreateAlertEventStepDefinition', () => {
   it('returns group_hash and episode_id on success', async () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'abc123', episode_id: 'ep-456' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const result = await handler(createMockContext());
 
     expect(result).toEqual({ output: { group_hash: 'abc123', episode_id: 'ep-456' } });
@@ -49,7 +52,7 @@ describe('getCreateAlertEventStepDefinition', () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const context = createMockContext();
     await handler(context);
 
@@ -60,7 +63,7 @@ describe('getCreateAlertEventStepDefinition', () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'h', episode_id: 'e' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: mockIngest });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const context = createMockContext();
     await handler(context);
 
@@ -73,7 +76,7 @@ describe('getCreateAlertEventStepDefinition', () => {
   it('throws ValidationError when source violates schema refinements', async () => {
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: jest.fn() });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const context = createMockContext();
     context.input = { ...context.input, source: 'elastic_monitoring' };
     const thrown = await handler(context).catch((e) => e);
@@ -82,15 +85,15 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(thrown.type).toBe('ValidationError');
   });
 
-  it('propagates PermissionError from the factory unchanged', async () => {
-    const permissionError = new ExecutionError({ type: 'PermissionError', message: 'Forbidden' });
-    const getAlertEventsClient = jest.fn().mockRejectedValue(permissionError);
+  it('throws PermissionError and does not fetch the client when privilege check fails', async () => {
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent: jest.fn() });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, deniedPrivilege);
     const thrown = await handler(createMockContext()).catch((e) => e);
 
-    expect(thrown).toBe(permissionError);
+    expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('PermissionError');
+    expect(getAlertEventsClient).not.toHaveBeenCalled();
   });
 
   it('propagates AbortError from createAlertEvent unchanged', async () => {
@@ -99,7 +102,7 @@ describe('getCreateAlertEventStepDefinition', () => {
       .fn()
       .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(abortError) });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const thrown = await handler(createMockContext()).catch((e) => e);
 
     expect(thrown).toBe(abortError);
@@ -112,7 +115,7 @@ describe('getCreateAlertEventStepDefinition', () => {
       .fn()
       .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(cause) });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const thrown = await handler(createMockContext()).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
@@ -126,7 +129,7 @@ describe('getCreateAlertEventStepDefinition', () => {
       .fn()
       .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue('string error') });
 
-    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient);
+    const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
     const thrown = await handler(createMockContext()).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);

@@ -34,7 +34,7 @@ export const createAlertEventStepCommonDefinition: CommonStepDefinition<
       'xpack.alertingV2.workflow.steps.createAlertEvent.documentation.details',
       {
         defaultMessage:
-          'Writes an alert event to the alerting v2 event stream. ' +
+          'Writes an alert event to the alerting event stream. ' +
           'The event participates in the same lifecycle, UI, and action policies as ' +
           'Elastic-produced alerts.',
       }

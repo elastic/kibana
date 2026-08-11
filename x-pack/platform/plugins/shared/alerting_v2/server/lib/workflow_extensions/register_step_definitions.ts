@@ -12,9 +12,10 @@ import { getCreateAlertEventStepDefinition } from './steps/create_alert_event_st
 
 export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>
+  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>,
+  checkAlertWritePrivilege: (request: KibanaRequest) => Promise<boolean>
 ): void {
   workflowsExtensions.registerStepDefinition(
-    getCreateAlertEventStepDefinition(getAlertEventsClient)
+    getCreateAlertEventStepDefinition(getAlertEventsClient, checkAlertWritePrivilege)
   );
 }

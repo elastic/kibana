@@ -13,12 +13,23 @@ import { createAlertEventStepCommonDefinition } from '../../../../common/workflo
 import type { AlertEventsClientApi } from '../../../types';
 
 export function getCreateAlertEventStepDefinition(
-  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>
+  getAlertEventsClient: (request: KibanaRequest) => Promise<AlertEventsClientApi>,
+  checkAlertWritePrivilege: (request: KibanaRequest) => Promise<boolean>
 ) {
   return createServerStepDefinition({
     ...createAlertEventStepCommonDefinition,
     handler: async (context) => {
-      const client = await getAlertEventsClient(context.contextManager.getFakeRequest());
+      const request = context.contextManager.getFakeRequest();
+
+      const canWrite = await checkAlertWritePrivilege(request);
+      if (!canWrite) {
+        throw new ExecutionError({
+          type: 'PermissionError',
+          message: 'Insufficient privileges to create alert events',
+        });
+      }
+
+      const client = await getAlertEventsClient(request);
 
       try {
         const parsed = createAlertEventDataSchema.parse(context.input);
