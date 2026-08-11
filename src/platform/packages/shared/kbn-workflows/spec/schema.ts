@@ -61,11 +61,19 @@ export const WorkflowRetrySchema = z.object({
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
+const IfConditionSchema = z
+  .string()
+  .optional()
+  .describe(
+    'KQL condition that controls whether this step runs, e.g. "steps.prev.output.status : \'success\'"'
+  );
+
 // Base step schema, with recursive steps property
 export const BaseStepSchema = z.object({
   name: z.string().min(1),
   type: z.string(),
   'max-step-size': ByteSizeSchema.optional(),
+  if: IfConditionSchema,
 });
 export type BaseStep = z.infer<typeof BaseStepSchema>;
 
@@ -222,7 +230,7 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
 export const StepWithIfConditionSchema = z.object({
-  if: z.string().optional().describe('KQL condition that controls whether this step runs'),
+  if: IfConditionSchema,
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
@@ -234,7 +242,6 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
   with: z.record(z.string(), z.any()).optional(),
 })
-  .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
   .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
@@ -263,7 +270,6 @@ export const WaitStepInputSchema = z.object({
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait').describe('Pause execution for a specified duration'),
   with: WaitStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
 
@@ -327,7 +333,6 @@ export const WaitForInputStepInputSchema = z
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 }).merge(TimeoutPropSchema);
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
 
@@ -357,7 +362,6 @@ export const WaitForApprovalStepSchema = BaseStepSchema.extend({
     .literal('waitForApproval')
     .describe('Pause execution until approval or rejection is received'),
   with: WaitForApprovalStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 }).merge(TimeoutPropSchema);
 export type WaitForApprovalStep = z.infer<typeof WaitForApprovalStepSchema>;
 
@@ -369,7 +373,6 @@ export const DataSetStepInputSchema = z
 export const DataSetStepSchema = BaseStepSchema.extend({
   type: z.literal('data.set').describe('Set variables in the workflow context'),
   with: DataSetStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 });
 export type DataSetStep = z.infer<typeof DataSetStepSchema>;
 
@@ -433,7 +436,6 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -495,7 +497,6 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
-  ...StepWithIfConditionSchema.shape,
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
@@ -515,7 +516,6 @@ export const ForEachStepSchema = BaseStepSchema.extend({
       'Loop over a list. Access current item via {{ foreach.item }}, index via {{ foreach.index }}, total via {{ foreach.total }}'
     ),
   ...ForEachStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -560,7 +560,6 @@ export const WhileStepSchema = BaseStepSchema.extend({
       'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
     ),
   ...WhileStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -606,7 +605,6 @@ export const SwitchStepSchema = BaseStepSchema.extend({
       'Multi-way branching. Evaluates expression and runs the steps of the first case whose match equals the expression'
     ),
   ...SwitchStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...TimeoutPropSchema.shape,
 });
 export type SwitchStep = z.infer<typeof SwitchStepSchema>;
@@ -634,6 +632,11 @@ export const IfStepConfigSchema = z.object({
     .describe(
       'Condition expression in KQL format that evaluates to true/false, e.g. "steps.prev.output.status : \'success\'"'
     ),
+  // This step already gates on `condition`; a step-level `if` would be a second,
+  // invisible gate. Reject it instead of stripping it, so the author sees why.
+  if: z
+    .never({ error: 'The `if` step gates on `condition`; a step-level `if` is not supported here' })
+    .optional(),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute when the condition is true'),
   else: z.array(BaseStepSchema).optional().describe('Steps to execute when the condition is false'),
 });
@@ -791,7 +794,6 @@ export const ParallelStepObjectSchema = BaseStepSchema.extend({
         'per branch with aggregate counts.'
     ),
   ...ParallelStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
   ...TimeoutPropSchema.shape,
 });
 
@@ -867,7 +869,6 @@ export const MergeStepSchema = BaseStepSchema.extend({
     .literal('merge')
     .describe('Merge results from parallel branches and continue with subsequent steps'),
   ...MergeStepConfigSchema.shape,
-  ...StepWithIfConditionSchema.shape,
 });
 export type MergeStep = z.infer<typeof MergeStepSchema>;
 
@@ -888,7 +889,6 @@ export const LoopBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('loop.break')
     .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopBreakStep = z.infer<typeof LoopBreakStepSchema>;
 
@@ -898,7 +898,6 @@ export const LoopContinueStepSchema = BaseStepSchema.extend({
     .describe(
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
     ),
-  ...StepWithIfConditionSchema.shape,
 });
 export type LoopContinueStep = z.infer<typeof LoopContinueStepSchema>;
 
@@ -918,13 +917,11 @@ const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
-  ...StepWithIfConditionSchema.shape,
 });
 export type WorkflowExecuteStep = z.infer<typeof WorkflowExecuteStepSchema>;
 
 export const WorkflowExecuteAsyncStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.executeAsync'),
-  ...StepWithIfConditionSchema.shape,
 });
 export type WorkflowExecuteAsyncStep = z.infer<typeof WorkflowExecuteAsyncStepSchema>;
 
@@ -940,7 +937,7 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
   type: z.literal('workflow.output'),
   status: z.enum(['completed', 'cancelled', 'failed']).optional().default('completed'),
   with: z.record(z.string(), z.any()),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
 export const WorkflowFailStepSchema = BaseStepSchema.extend({
@@ -951,7 +948,7 @@ export const WorkflowFailStepSchema = BaseStepSchema.extend({
       reason: z.string().optional(),
     })
     .optional(),
-}).extend(StepWithIfConditionSchema.shape);
+});
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */

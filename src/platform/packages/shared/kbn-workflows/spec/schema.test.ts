@@ -15,6 +15,7 @@ import {
   DEFAULT_PARALLEL_MAX_CONCURRENCY,
   ElasticsearchStepSchema,
   EventTimestampSchema,
+  IfStepSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
   LIQUID_PARSE_LIMIT_MAX,
@@ -36,6 +37,7 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
+import { getShape } from '../common/utils/zod';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -1151,17 +1153,10 @@ describe('ParallelStepSchema', () => {
   });
 });
 
-describe('if (skip condition) on step schemas', () => {
-  // Every step type that resolves to something the graph builder can wrap in an
-  // implicit `if`, per the runtime contract in
-  // packages/kbn-workflows/graph/build_execution_graph/build_execution_graph.ts
-  // (`createIfGraphForIfStepLevel`). The parallel step goes through the refined
-  // export so we exercise the same path callers use.
-  const cases: Array<{
-    name: string;
-    schema: { safeParse: (v: unknown) => { success: boolean } };
-    step: Record<string, unknown>;
-  }> = [
+describe('`if` condition on step schemas', () => {
+  // `if` comes from `BaseStepSchema`, so every step type gets it. These cases pin
+  // that down per type, since a schema can drop it by overriding the key.
+  const cases = [
     {
       name: 'wait',
       schema: WaitStepSchema,
@@ -1198,6 +1193,7 @@ describe('if (skip condition) on step schemas', () => {
     },
     {
       name: 'parallel',
+      // The refined export, not the object schema, so this matches what callers use.
       schema: ParallelStepSchema,
       step: {
         name: 's',
@@ -1228,8 +1224,23 @@ describe('if (skip condition) on step schemas', () => {
     },
   ];
 
-  it.each(cases)('accepts an `if` skip condition on the $name step', ({ schema, step }) => {
-    const result = schema.safeParse({ ...step, if: '{{ inputs.enabled }}' });
-    expect(result.success).toBe(true);
+  it.each(cases)('accepts an `if` condition on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('if');
+    expect(schema.parse({ ...step, if: '{{ inputs.enabled }}' }).if).toBe('{{ inputs.enabled }}');
+  });
+
+  it('rejects a step-level `if` on the `if` step, which gates on `condition`', () => {
+    const ifStep = {
+      name: 's',
+      type: 'if',
+      condition: 'inputs.enabled : true',
+      steps: [{ name: 'inner', type: 'console', with: { message: 'hi' } }],
+    };
+
+    expect(IfStepSchema.safeParse(ifStep).success).toBe(true);
+
+    const result = IfStepSchema.safeParse({ ...ifStep, if: '{{ inputs.enabled }}' });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].path).toEqual(['if']);
   });
 });
