@@ -43,7 +43,7 @@ export class LensWorkspace {
   private readonly settingsButton;
   private readonly settingsMenu;
   private readonly emptyWorkspacePrompt;
-  private readonly workspaceApplyChangesPrompt;
+  private readonly applyChangesPrompt;
   private readonly suggestionPanelToggle;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
@@ -63,7 +63,7 @@ export class LensWorkspace {
     this.settingsButton = this.page.testSubj.locator('lnsApp_settingsButton');
     this.settingsMenu = this.page.testSubj.locator('lnsApp__settingsMenu');
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
-    this.workspaceApplyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
+    this.applyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
   }
 
@@ -263,7 +263,7 @@ export class LensWorkspace {
    * pagination. Excludes the prev/next controls, which also share the `pagination-button-`
    * prefix as `pagination-button-previous` / `pagination-button-next`.
    */
-  async getWorkspaceErrorCount(): Promise<number> {
+  async getErrorCount(): Promise<number> {
     const errors = this.page.testSubj.locator('lnsWorkspaceErrors');
     if ((await errors.count()) === 0) {
       return 0;
@@ -305,7 +305,7 @@ export class LensWorkspace {
 
   /** Waits for the workspace "apply changes" prompt (shown when auto-apply is disabled). */
   async waitForWorkspaceWithApplyChangesPrompt() {
-    await this.workspaceApplyChangesPrompt.waitFor({ state: 'visible' });
+    await this.applyChangesPrompt.waitFor({ state: 'visible' });
   }
 
   /**
