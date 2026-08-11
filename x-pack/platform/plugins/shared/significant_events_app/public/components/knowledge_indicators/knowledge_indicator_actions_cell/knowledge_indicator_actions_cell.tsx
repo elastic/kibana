@@ -73,7 +73,7 @@ export function KnowledgeIndicatorActionsCell({
         items.push(
           <EuiContextMenuItem
             key="feature-exclude"
-            icon="eyeClosed"
+            icon="eyeSlash"
             disabled={isMutating || blocksActivity}
             onClick={() => {
               setIsActionsMenuOpen(false);
@@ -123,7 +123,7 @@ export function KnowledgeIndicatorActionsCell({
     return [
       <EuiContextMenuItem
         key="query-promote"
-        icon="plusInCircle"
+        icon="plusCircle"
         disabled={isPromoteDisabled}
         toolTipContent={promoteTooltip}
         onClick={() => {

@@ -9,8 +9,10 @@ import { MAX_ID_LENGTH, type Feature } from '@kbn/significant-events-schema';
 import { getCodeFeatureStreamPrefix } from '../../../../lib/knowledge_indicators/code_intelligence';
 import { internalKICodeFeaturesRoutes } from './route';
 
+const mockClassifyLoggingSites = jest.fn();
 const mockClassifyOtelSignals = jest.fn();
 const mockDiscoverLoggingSites = jest.fn();
+const mockIdentifyCodeQueries = jest.fn();
 const mockExtractOtelSignalsResult = jest.fn();
 const mockGenerateOtelQueries = jest.fn();
 const mockResolveSignalStreams = jest.fn();
@@ -24,8 +26,10 @@ jest.mock('../../../utils/resolve_connector_for_feature', () => ({
 }));
 jest.mock('../../../../lib/knowledge_indicators/code_intelligence', () => ({
   ...jest.requireActual('../../../../lib/knowledge_indicators/code_intelligence'),
+  classifyLoggingSites: (...args: unknown[]) => mockClassifyLoggingSites(...args),
   classifyOtelSignals: (...args: unknown[]) => mockClassifyOtelSignals(...args),
   discoverLoggingSites: (...args: unknown[]) => mockDiscoverLoggingSites(...args),
+  identifyCodeQueries: (...args: unknown[]) => mockIdentifyCodeQueries(...args),
   extractOtelSignalsResult: (...args: unknown[]) => mockExtractOtelSignalsResult(...args),
   generateOtelQueries: (...args: unknown[]) => mockGenerateOtelQueries(...args),
   resolveSignalStreams: (...args: unknown[]) => mockResolveSignalStreams(...args),
@@ -255,6 +259,61 @@ describe('Code Intelligence routes', () => {
     ).rejects.toThrow('write failed');
 
     expect(mockDiscoverLoggingSites).not.toHaveBeenCalled();
+  });
+
+  it('uses the template fallback after typed source extraction fails', async () => {
+    const sourceEsClient = { source: true };
+    const streamDataEsClient = { streamData: true };
+    mockExtractOtelSignalsResult.mockResolvedValue({ signals: [], failed: true });
+    mockDiscoverLoggingSites.mockResolvedValue([]);
+    mockClassifyLoggingSites.mockResolvedValue([]);
+    mockIdentifyCodeQueries.mockResolvedValue({ generatedCount: 1 });
+    mockResolveConnectorForFeature.mockResolvedValue('connector');
+
+    await expect(
+      identifyOtelSignalsRoute.handler({
+        params: {
+          body: {
+            repository: 'repository',
+            gitSha: 'sha',
+            serviceRoot: 'service',
+            name: 'service',
+            language: 'typescript',
+            hasOtel: true,
+            signalCounts: {
+              instrumentation_grpc: 0,
+              instrumentation_http: 0,
+              instrumentation_other: 0,
+              start_span: 0,
+              set_attribute: 0,
+              add_event: 0,
+              record_exception: 0,
+              set_status_error: 0,
+              create_metric: 0,
+            },
+          },
+        },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          inferenceClient: {},
+          scopedClusterClient: { asCurrentUser: sourceEsClient },
+          streamDataEsClient,
+          streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
+          getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+        }),
+        server: {},
+        logger: { get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn() }) },
+        maintenanceService: createMaintenanceService(),
+      } as unknown as IdentifyOtelHandlerParams)
+    ).resolves.toEqual({ status: 'gate_bypassed', queriesGenerated: 1 });
+
+    expect(mockExtractOtelSignalsResult).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: sourceEsClient })
+    );
+    expect(mockIdentifyCodeQueries).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: streamDataEsClient, otelGateBypassed: true })
+    );
   });
 
   it('bounds OTel workflow input strings before they reach source-code queries', () => {

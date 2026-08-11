@@ -750,7 +750,7 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientNameInput', name);
   }
 
-  async selectMcpClientLogo(label: string = 'MCP client logo') {
+  async selectMcpClientLogo(label: string) {
     const combo = this.page.testSubj.locator('mcpClientLogoSelect');
     await combo.click();
     const option = this.page.getByRole('option', { name: label });
@@ -778,6 +778,30 @@ export class AgentBuilderApp {
     ]);
     const { id }: { id: string } = await response.json();
     return id;
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
   }
 
   async closeMcpClientDetails() {

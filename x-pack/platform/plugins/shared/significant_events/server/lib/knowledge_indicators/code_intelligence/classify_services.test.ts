@@ -148,8 +148,9 @@ describe('classifyServices', () => {
       connectorId: 'c',
       ...opts(candidates),
     });
-    // The classified `checkout` service, plus the always-on repo-level service
-    // synthesized for the (app-code) repo since none was named after it.
+    // The classified `checkout` service. No repo-root service is synthesized:
+    // the repository already has a discovered service, so synthesizing one would
+    // persist child signals under a `service.name` that does not exist.
     expect(services).toContainEqual({
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
@@ -160,9 +161,7 @@ describe('classifyServices', () => {
       hasOtel: false,
       signalCounts: expect.any(Object),
     });
-    expect(services).toContainEqual(
-      expect.objectContaining({ name: 'opentelemetry-demo', serviceRoot: '', language: 'Go' })
-    );
+    expect(services.some((service) => service.serviceRoot === '')).toBe(false);
   });
 
   it('feeds repo-root README lines into the classifier prompt', async () => {

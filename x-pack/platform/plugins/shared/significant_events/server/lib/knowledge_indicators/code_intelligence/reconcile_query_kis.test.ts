@@ -87,31 +87,6 @@ describe('esqlStructuralSignature', () => {
       )
     ).not.toEqual(esqlStructuralSignature('FROM traces | WHERE status.code == "Error"'));
   });
-
-  it('distinguishes aggregation shapes over the same source and fields', () => {
-    expect(
-      esqlStructuralSignature(
-        'FROM traces | WHERE service.name == "checkout" AND status.code == "Error" | STATS c = COUNT(*) BY name'
-      )
-    ).not.toEqual(
-      esqlStructuralSignature(
-        'FROM traces | WHERE service.name == "checkout" AND status.code == "Error" | STATS p95 = PERCENTILE(duration, 95) BY name'
-      )
-    );
-  });
-
-  it('distinguishes typed TS metric sources and backtick-quoted fields', () => {
-    expect(
-      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.requests` IS NOT NULL')
-    ).not.toEqual(
-      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.errors` IS NOT NULL')
-    );
-    expect(
-      esqlStructuralSignature('TS metrics.a | WHERE `metrics.checkout.requests` IS NOT NULL')
-    ).not.toEqual(
-      esqlStructuralSignature('TS metrics.b | WHERE `metrics.checkout.requests` IS NOT NULL')
-    );
-  });
 });
 
 describe('computeClusters', () => {
@@ -243,6 +218,32 @@ describe('reconcileCodeAndLogQueries', () => {
     expect(bulk).toHaveBeenCalledTimes(1);
     const ops = bulk.mock.calls[0][1];
     expect(ops).toContainEqual({ delete: { type: 'query', id: 'log1' } });
+  });
+
+  it('never reconciles typed OTel KIs (they carry a tier= evidence marker)', async () => {
+    const checkout = link({
+      id: 'checkout',
+      title: 'checkout errors',
+      evidence: ['code: acme/repo@sha:app.ts:1 tier=error_status'],
+      esql: 'FROM traces | WHERE service.name == "checkout" AND status.code == "Error" | STATS c = COUNT(*) BY name',
+    });
+    const payments = link({
+      id: 'payments',
+      title: 'payments errors',
+      evidence: ['code: acme/repo@sha:app.ts:1 tier=error_status'],
+      esql: 'FROM traces | WHERE service.name == "payments" AND status.code == "Error" | STATS c = COUNT(*) BY name',
+    });
+    const { kiClient, bulk } = createKiClient([checkout, payments], {
+      checkout: [payments],
+      payments: [checkout],
+    });
+    const result = await reconcileCodeAndLogQueries({
+      streamName: 'logs.checkout',
+      kiClient,
+      logger: loggerMock.create(),
+    });
+    expect(result.clustersMerged).toBe(0);
+    expect(bulk).not.toHaveBeenCalled();
   });
 
   it('does not merge one-directional (non-mutual) matches', async () => {

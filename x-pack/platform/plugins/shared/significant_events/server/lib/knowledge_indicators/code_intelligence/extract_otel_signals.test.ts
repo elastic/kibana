@@ -48,6 +48,44 @@ describe('extractOtelSignals', () => {
     );
   });
 
+  it('extracts attribute keys from Go, Rust, and Java nested constructors', () => {
+    const signals = extract({
+      'src/a.go':
+        'span.SetAttributes(attribute.String("app.user.id", id), attribute.Bool("app.feature.enabled", f))',
+      'src/a.rs': 'span.set_attribute(KeyValue::new("app.tenant.id", tenant))',
+      'src/A.java': 'span.setAttribute(AttributeKey.stringKey("app.order.id"), order)',
+    });
+    const attrs = signals
+      .filter(({ kind }) => kind === 'attr_key')
+      .map(({ value }) => value)
+      .sort();
+    expect(attrs).toEqual(['app.feature.enabled', 'app.order.id', 'app.tenant.id', 'app.user.id']);
+    expect(signals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ value: 'app.feature.enabled', valueHint: 'bool' }),
+      ])
+    );
+  });
+
+  it('marks concatenated (runtime-built) span and metric names as templated', () => {
+    const signals = extract({
+      'src/a.ts': [
+        'tracer.startSpan("checkout." + operation)',
+        'meter.createCounter("orders." + region)',
+      ].join('\n'),
+    });
+    expect(signals.find(({ kind }) => kind === 'span_name')).toMatchObject({ templated: true });
+    expect(signals.find(({ kind }) => kind === 'metric_name')).toMatchObject({ templated: true });
+  });
+
+  it('ignores OTel snippets in docs and example paths', () => {
+    const signals = extract({
+      'README.md': 'tracer.startSpan("docs.span")',
+      'examples/demo.ts': 'meter.createCounter("examples.count")',
+    });
+    expect(signals).toEqual([]);
+  });
+
   it('extracts error and metric signals and excludes test paths', () => {
     const signals = extract({
       'src/a.ts': [

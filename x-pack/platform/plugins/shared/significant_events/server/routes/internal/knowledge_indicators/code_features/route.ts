@@ -12,7 +12,7 @@ import {
   getStreamSamplingSource,
   isOtelStream,
   normalizeEsqlSafe,
-  type Streams,
+  Streams,
 } from '@kbn/streams-schema';
 import {
   deriveKnowledgeIndicatorSource,
@@ -26,10 +26,17 @@ import {
   type SignificantEventsWorkflowStatusResult,
 } from '@kbn/significant-events-schema';
 import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
-import { KI_TYPE_FEATURE } from '../../../../lib/knowledge_indicators/fields';
-import type { KIBulkOperation } from '../../../../lib/knowledge_indicators/knowledge_indicator_client';
+import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../../../../lib/knowledge_indicators/fields';
+import type {
+  KIBulkOperation,
+  KnowledgeIndicatorClient,
+} from '../../../../lib/knowledge_indicators/knowledge_indicator_client';
 import { REVISION_SIZE_LIMIT } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/revision_reader';
 import type { SignificantEventsCodeExtractionClient } from '../../../../lib/workflows/code_extraction_workflow_client';
+import {
+  CODE_FEATURE_SUBTYPE_SERVICE_NAME,
+  FALLBACK_LOG_STREAM,
+} from '../../../../lib/knowledge_indicators/code_intelligence/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
@@ -52,7 +59,7 @@ import {
   listIndexedRepos,
   discoverCandidateRoots,
   buildLanguageHistogram,
-  detectOtelInstrumentation,
+  detectOtelInstrumentationForRoots,
   classifyServices,
   type ServiceCandidateRoot,
   type IacSignal,
@@ -85,6 +92,51 @@ const isPurelyCodeSource = (
   return resolved.length === 1 && resolved[0] === 'code';
 };
 
+const isStaleTemplateQuery = (
+  { query, rule_backed: ruleBacked }: QueryLink,
+  serviceName: string,
+  repository: string
+): boolean =>
+  !ruleBacked &&
+  query.type === 'match' &&
+  query.features?.some(({ id }) => id === CODE_FEATURE_SUBTYPE_SERVICE_NAME) === true &&
+  query.description.startsWith('Predictive: log.') &&
+  query.description.includes(`for service "${serviceName}"`) &&
+  (query.evidence?.length ?? 0) > 0 &&
+  query.evidence!.every((evidence) => evidence.startsWith(`code: ${repository}@`));
+
+/** Removes only unpromoted, pure code template KIs once typed coverage exists. */
+const removeStaleTemplateQueries = async ({
+  streams,
+  kiClient,
+  serviceName,
+  repository,
+  authorizedStreamNames,
+}: {
+  streams: StreamSamplingSource[];
+  kiClient: Pick<KnowledgeIndicatorClient, 'getStreamToQueryLinksMap' | 'bulk'>;
+  serviceName: string;
+  repository: string;
+  authorizedStreamNames: Set<string>;
+}): Promise<void> => {
+  // Only clean the root `logs` fallback owner when the caller can access it.
+  const fallbackOwners = authorizedStreamNames.has(FALLBACK_LOG_STREAM)
+    ? [FALLBACK_LOG_STREAM]
+    : [];
+  const streamNames = [...new Set([...fallbackOwners, ...streams.map(({ name }) => name)])];
+  for (const streamName of streamNames) {
+    // The revision reader caps a combined request. Fetch 1 owner at a time so
+    // large deployments cannot silently leave an old template behind.
+    const { [streamName]: links = [] } = await kiClient.getStreamToQueryLinksMap([streamName]);
+    const deletions = links
+      .filter((link) => isStaleTemplateQuery(link, serviceName, repository))
+      .map((link) => ({ delete: { type: KI_TYPE_QUERY, id: link.query.id } }));
+    if (deletions.length > 0) {
+      await kiClient.bulk(streamName, deletions);
+    }
+  }
+};
+
 const CODE_KNOWLEDGE_INDICATORS_LIMIT = REVISION_SIZE_LIMIT;
 // Keep each synchronous destructive batch aligned with the existing bounded
 // cross-stream reconciliation endpoint.
@@ -113,6 +165,7 @@ const listStreamSamplingSources = async (streamsClient: {
           name: definition.name,
           index,
           convention: isOtelStream(definition) ? 'otel' : 'ecs',
+          isQueryStream: Streams.QueryStream.Definition.is(definition),
         });
       }
     } catch {
@@ -235,14 +288,36 @@ const reconcileCodeQueriesRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: codeIntelligenceInput }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    getSpaceId,
+    server,
+    logger,
+    maintenanceService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing } = scopedClients;
+    const { licensing, streamsClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
     const { streamName } = params.path;
+
+    // The KI store is plugin-owned and read with an internal client, so confirm
+    // the caller can reach this stream before mutating its KIs. A real stream
+    // must be listable by the scoped Streams client; a virtual code-feature
+    // stream must belong to the caller's active space.
+    const spaceId = await getSpaceId(request);
+    const accessibleStreams = new Set(await listAccessibleStreamNames(streamsClient));
+    if (
+      !accessibleStreams.has(streamName) &&
+      !streamName.startsWith(getCodeFeatureStreamPrefix(spaceId))
+    ) {
+      throw new StatusError(`Stream "${streamName}" is not accessible.`, 404);
+    }
+
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     await assertNotPaused({ maintenanceService, request });
 
@@ -694,18 +769,23 @@ const identifyOtelSignalsRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
+    const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
     const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
-    const esClient = scopedClusterClient.asCurrentUser;
+    // Sourcerer is always in the origin project. Stream sampling may route to a
+    // connected project, so it must use the space-routed data client.
+    const sourceEsClient = scopedClusterClient.asCurrentUser;
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
+    const authorizedStreamNames = new Set(
+      await listAccessibleStreamNames(scopedClients.streamsClient)
+    );
 
     const runTemplateFallback = async () => {
       const candidates = await discoverLoggingSites({
-        esClient,
+        esClient: sourceEsClient,
         repository,
         gitSha,
         serviceRoot,
@@ -732,24 +812,45 @@ const identifyOtelSignalsRoute = createServerRoute({
         streams,
         kiClient,
         loggingChunks,
-        esClient,
+        esClient: streamDataEsClient,
         logger: routeLogger,
         hasOtel: true,
         otelGateBypassed: true,
+        authorizedStreamNames,
       });
     };
 
+    // Both fallback causes (failed extraction, no typed stream coverage) must
+    // leave the service with real coverage. An idempotent rerun that regenerates
+    // nothing but still owns fallback streams counts as covered; producing no
+    // coverage at all fails the iteration so the workflow retries visibly.
+    const runTemplateFallbackOrThrow = async (reason: string) => {
+      await assertNotPaused({ maintenanceService, request });
+      const fallback = await runTemplateFallback();
+      if ((fallback.generatedCount ?? 0) === 0 && (fallback.streams?.length ?? 0) === 0) {
+        throw new Error(`OTel service "${name}" ${reason} and produced no query coverage.`);
+      }
+      return { status: 'gate_bypassed' as const, queriesGenerated: fallback.generatedCount ?? 0 };
+    };
+
     const extraction = await extractOtelSignalsResult({
-      esClient,
+      esClient: sourceEsClient,
       repository,
       gitSha,
       serviceRoot,
       logger: routeLogger,
     });
     if (extraction.failed) {
-      throw new Error(`OTel signal extraction failed for service "${name}".`);
+      routeLogger.warn(
+        `OTel signal extraction failed for service "${name}"; using template query fallback`
+      );
+      return runTemplateFallbackOrThrow('failed source extraction');
     }
-    const resolved = await resolveSignalStreams({ streams, esClient, logger: routeLogger });
+    const resolved = await resolveSignalStreams({
+      streams,
+      esClient: streamDataEsClient,
+      logger: routeLogger,
+    });
     const generated = generateOtelQueries({
       serviceName: name,
       repository,
@@ -764,9 +865,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     // typed/message-string result for this OTel service.
     if (generated.gateBypassed) {
       routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
-      await assertNotPaused({ maintenanceService, request });
-      const fallback = await runTemplateFallback();
-      return { status: 'gate_bypassed' as const, queriesGenerated: fallback.generatedCount ?? 0 };
+      return runTemplateFallbackOrThrow('had no typed stream coverage');
     }
 
     let classified = generated.queries;
@@ -814,7 +913,20 @@ const identifyOtelSignalsRoute = createServerRoute({
       );
       queriesGenerated += fresh.length;
       await assertNotPaused({ maintenanceService, request });
-      await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
+      // Typed OTel KIs have deterministic IDs and are exact-ES|QL deduplicated
+      // above. They must not enter the destructive semantic reconciler.
+    }
+    // A prior no-stream run can have persisted message templates. Remove them
+    // only after all typed writes succeed, so a transient typed failure retains
+    // the fallback coverage for retry.
+    if (classified.length > 0) {
+      await removeStaleTemplateQueries({
+        streams,
+        kiClient,
+        serviceName: name,
+        repository,
+        authorizedStreamNames,
+      });
     }
     return { status: 'generated' as const, queriesGenerated };
   },
@@ -906,7 +1018,7 @@ const identifyServiceRoute = createServerRoute({
     queriesGenerated: number;
   }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
+    const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -926,32 +1038,35 @@ const identifyServiceRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const esClient = scopedClusterClient.asCurrentUser;
 
-    // Stage 3: deterministically grep candidate logging call sites (idiom union
-    // string-anchored phrase lexicon, each with a +/-1 line window), then judge
-    // them with a single batched classifier call (keep/drop + level + message).
-    // The classifier connector is the KI-extraction inference feature's mapping.
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository,
-      gitSha,
-      serviceRoot: service.serviceRoot,
-      language: service.language,
-      logger: routeLogger,
-    });
+    const hasOtel = params.body.hasOtel ?? false;
 
-    const classifierConnectorId = await resolveConnectorForFeature({
-      searchInferenceEndpoints: server.searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
-      featureName: 'logging-site classification',
-      request,
-    });
-
-    const loggingChunks = await classifyLoggingSites({
-      inferenceClient,
-      connectorId: classifierConnectorId,
-      candidates,
-      logger: routeLogger,
-    });
+    // Stage 3 (non-OTel only): deterministically grep candidate logging call
+    // sites and classify them. OTel services use typed queries, so their
+    // message-string queries are gated off in identifyCodeQueries; running the
+    // grep + classification for them only produces a result that is discarded.
+    let loggingChunks: Awaited<ReturnType<typeof classifyLoggingSites>> = [];
+    if (!hasOtel) {
+      const candidates = await discoverLoggingSites({
+        esClient,
+        repository,
+        gitSha,
+        serviceRoot: service.serviceRoot,
+        language: service.language,
+        logger: routeLogger,
+      });
+      const classifierConnectorId = await resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+        featureName: 'logging-site classification',
+        request,
+      });
+      loggingChunks = await classifyLoggingSites({
+        inferenceClient,
+        connectorId: classifierConnectorId,
+        candidates,
+        logger: routeLogger,
+      });
+    }
 
     // Stage 1: derive code Feature KIs (repo type, language, predicted service name).
     await assertNotPaused({ maintenanceService, request });
@@ -971,6 +1086,9 @@ const identifyServiceRoute = createServerRoute({
     });
 
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
+    const authorizedStreamNames = new Set(
+      await listAccessibleStreamNames(scopedClients.streamsClient)
+    );
 
     // Stage 2: generate predictive Query KIs from the service's logger call
     // sites, written to the real stream(s) that ingest the service.
@@ -983,9 +1101,10 @@ const identifyServiceRoute = createServerRoute({
       metadata,
       kiClient,
       loggingChunks,
-      esClient,
+      esClient: streamDataEsClient,
       logger: routeLogger,
-      hasOtel: params.body.hasOtel ?? false,
+      hasOtel,
+      authorizedStreamNames,
     });
 
     // Reconcile code- and log-derived Query KIs on each ingesting stream that
@@ -1008,7 +1127,7 @@ const identifyServiceRoute = createServerRoute({
         citations: service.evidence ?? undefined,
         metadata,
         streams,
-        esClient,
+        esClient: streamDataEsClient,
         kiClient,
         runId,
         logger: routeLogger,
@@ -1100,17 +1219,17 @@ const discoverServicesRoute = createServerRoute({
         logger: routeLogger,
       });
       candidates.push(...roots);
-      for (const root of roots) {
-        otelDetectionByRoot.set(
-          `${repo.repository}::${root.serviceRoot}`,
-          await detectOtelInstrumentation({
-            esClient,
-            repository: repo.repository,
-            gitSha: repo.gitSha,
-            serviceRoot: root.serviceRoot,
-            logger: routeLogger,
-          })
-        );
+      // Batched: 1 repo-scoped grep per pattern, bucketed to every root, instead
+      // of O(roots × patterns) searches inside this single request handler.
+      const detectionByRoot = await detectOtelInstrumentationForRoots({
+        esClient,
+        repository: repo.repository,
+        gitSha: repo.gitSha,
+        serviceRoots: roots.map((root) => root.serviceRoot),
+        logger: routeLogger,
+      });
+      for (const [serviceRoot, detection] of detectionByRoot) {
+        otelDetectionByRoot.set(`${repo.repository}::${serviceRoot}`, detection);
       }
       manifestPathsByRepo.set(repo.repository, manifestPaths);
       manifestLinesByRepo.set(repo.repository, manifestLines);

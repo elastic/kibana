@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import pLimit from 'p-limit';
 import {
   normalizeFeatureSlug,
   type Feature,
@@ -22,6 +23,8 @@ export interface StreamSamplingSource {
   index: string;
   /** The telemetry convention used by this stream. */
   convention: 'otel' | 'ecs';
+  /** Query Streams expose an ES|QL view, not an index accepted by field_caps/count. */
+  isQueryStream?: boolean;
 }
 
 /**
@@ -94,6 +97,11 @@ const keywordVariantOf = (
  * and the message field to query each with. A stream qualifies when it exposes a
  * usable message field (keyword → `LIKE`, or `text` → `MATCH_PHRASE`).
  */
+// Stream data probes run per service across every visible stream; bound the
+// concurrency so a deployment with many services and data streams cannot storm
+// Elasticsearch with unbounded parallel field_caps/count/ES|QL requests.
+const STREAM_PROBE_CONCURRENCY = 5;
+
 export async function resolveLogBearingStreams({
   streams,
   esClient,
@@ -104,63 +112,82 @@ export async function resolveLogBearingStreams({
   logger: Logger;
 }): Promise<LogStreamBinding[]> {
   const bindings: LogStreamBinding[] = [];
+  const limit = pLimit(STREAM_PROBE_CONCURRENCY);
 
   await Promise.all(
-    streams.map(async ({ name, index, convention }) => {
-      try {
-        const { fields } = await esClient.fieldCaps({
-          index,
-          fields: [
-            ...MESSAGE_FIELD_CANDIDATES,
-            ...MESSAGE_FIELD_CANDIDATES.map((f) => `${f}.keyword`),
-          ],
-          ignore_unavailable: true,
-        });
-        const caps = fields as Record<string, FieldCapsEntry>;
-
-        // Prefer a keyword message field (usable with LIKE); else the first
-        // searchable text field (usable with MATCH_PHRASE).
-        let messageField: string | undefined;
-        let messageIsText = false;
-        for (const candidate of MESSAGE_FIELD_CANDIDATES) {
-          const keywordField = keywordVariantOf(candidate, caps);
-          if (keywordField) {
-            messageField = keywordField;
-            messageIsText = false;
-            break;
-          }
-          if (caps[candidate]?.text) {
-            messageField = candidate;
-            messageIsText = true;
-            break;
-          }
-        }
-
-        if (!messageField) {
-          return;
-        }
-
-        // Probe whether the stream actually carries data. A stream can be mapped
-        // (template) yet empty (e.g. `logs.ecs`); binding predictive queries to
-        // it wastes them. We keep the flag rather than dropping here so the
-        // chicken-vs-egg fallback (all candidates empty) still works.
-        let hasDocs = false;
+    streams.map((stream) =>
+      limit(async () => {
+        const { name, index, convention, isQueryStream } = stream;
         try {
-          const { count } = await esClient.count({ index, ignore_unavailable: true });
-          hasDocs = count > 0;
-        } catch {
-          hasDocs = true; // On probe failure, do not exclude the stream.
-        }
+          if (isQueryStream) {
+            const response = await esClient.esql.query({
+              query: `FROM ${index} | KEEP message | LIMIT 1`,
+            });
+            const hasDocs = response.values.length > 0;
+            bindings.push({
+              stream: name,
+              index,
+              convention,
+              messageField: 'message',
+              messageIsText: true,
+              hasDocs,
+            });
+            return;
+          }
+          const { fields } = await esClient.fieldCaps({
+            index,
+            fields: [
+              ...MESSAGE_FIELD_CANDIDATES,
+              ...MESSAGE_FIELD_CANDIDATES.map((f) => `${f}.keyword`),
+            ],
+            ignore_unavailable: true,
+          });
+          const caps = fields as Record<string, FieldCapsEntry>;
 
-        bindings.push({ stream: name, index, convention, messageField, messageIsText, hasDocs });
-      } catch (error) {
-        logger.debug(
-          `code_features: log-stream probe failed for "${name}": ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    })
+          // Prefer a keyword message field (usable with LIKE); else the first
+          // searchable text field (usable with MATCH_PHRASE).
+          let messageField: string | undefined;
+          let messageIsText = false;
+          for (const candidate of MESSAGE_FIELD_CANDIDATES) {
+            const keywordField = keywordVariantOf(candidate, caps);
+            if (keywordField) {
+              messageField = keywordField;
+              messageIsText = false;
+              break;
+            }
+            if (caps[candidate]?.text) {
+              messageField = candidate;
+              messageIsText = true;
+              break;
+            }
+          }
+
+          if (!messageField) {
+            return;
+          }
+
+          // Probe whether the stream actually carries data. A stream can be mapped
+          // (template) yet empty (e.g. `logs.ecs`); binding predictive queries to
+          // it wastes them. We keep the flag rather than dropping here so the
+          // chicken-vs-egg fallback (all candidates empty) still works.
+          let hasDocs = false;
+          try {
+            const { count } = await esClient.count({ index, ignore_unavailable: true });
+            hasDocs = count > 0;
+          } catch {
+            hasDocs = true; // On probe failure, do not exclude the stream.
+          }
+
+          bindings.push({ stream: name, index, convention, messageField, messageIsText, hasDocs });
+        } catch (error) {
+          logger.debug(
+            `code_features: log-stream probe failed for "${name}": ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      })
+    )
   );
 
   // Prefer streams that actually ingest data; fall back to all candidates only
@@ -189,6 +216,10 @@ export async function resolveSignalStreams({
   ): Promise<StreamSamplingSource | undefined> => {
     const { name, index } = stream;
     try {
+      if (stream.isQueryStream) {
+        const response = await esClient.esql.query({ query: `FROM ${index} | LIMIT 1` });
+        return response.values.length > 0 ? stream : undefined;
+      }
       const { count } = await esClient.count({ index, ignore_unavailable: true });
       return count > 0 ? stream : undefined;
     } catch (error) {
@@ -200,21 +231,22 @@ export async function resolveSignalStreams({
       return undefined;
     }
   };
-  const traceCandidates = streams.filter(
-    ({ name, index }) => name.startsWith('traces-') || index.startsWith('traces-')
-  );
-  const metricCandidates = streams.filter(
-    ({ name, index }) => name.startsWith('metrics-') || index.startsWith('metrics-')
-  );
+  const belongsToSignalFamily = (stream: StreamSamplingSource, family: string): boolean =>
+    [stream.name, stream.index].some((source) =>
+      new RegExp(`(?:^|[-_.])${family}(?:[-_.]|$)`, 'i').test(source.replace(/^[$.]+/, ''))
+    );
+  const traceCandidates = streams.filter((stream) => belongsToSignalFamily(stream, 'traces'));
+  const metricCandidates = streams.filter((stream) => belongsToSignalFamily(stream, 'metrics'));
+  const limit = pLimit(STREAM_PROBE_CONCURRENCY);
   const [traces, metrics, logBindings] = await Promise.all([
-    Promise.all(traceCandidates.map(hasDocs)),
-    Promise.all(metricCandidates.map(hasDocs)),
+    Promise.all(traceCandidates.map((stream) => limit(() => hasDocs(stream)))),
+    Promise.all(metricCandidates.map((stream) => limit(() => hasDocs(stream)))),
     resolveLogBearingStreams({
       streams: streams.filter(
-        ({ name, index }) =>
-          (name.startsWith('logs') || index.startsWith('logs')) &&
-          !name.startsWith('traces') &&
-          !name.startsWith('metrics')
+        (stream) =>
+          belongsToSignalFamily(stream, 'logs') &&
+          !belongsToSignalFamily(stream, 'traces') &&
+          !belongsToSignalFamily(stream, 'metrics')
       ),
       esClient,
       logger,
@@ -225,13 +257,18 @@ export async function resolveSignalStreams({
     Boolean(stream)
   );
   const resolvedLogBindings = logBindings.filter((binding) => binding.hasDocs);
+  // Sort bindings as units. Sorting indexes and owner names independently can
+  // pair a query with the wrong Stream when their lexical orders differ.
+  const orderedTraces = [...resolvedTraces].sort((a, b) => a.name.localeCompare(b.name));
+  const orderedMetrics = [...resolvedMetrics].sort((a, b) => a.name.localeCompare(b.name));
+  const orderedLogs = [...resolvedLogBindings].sort((a, b) => a.stream.localeCompare(b.stream));
   return {
-    traceStreams: resolvedTraces.map(({ index }) => index).sort(),
-    metricStreams: resolvedMetrics.map(({ index }) => index).sort(),
-    logStreams: resolvedLogBindings.map(({ index }) => index).sort(),
-    traceStreamNames: resolvedTraces.map(({ name }) => name).sort(),
-    metricStreamNames: resolvedMetrics.map(({ name }) => name).sort(),
-    logStreamNames: resolvedLogBindings.map(({ stream }) => stream).sort(),
+    traceStreams: orderedTraces.map(({ index }) => index),
+    metricStreams: orderedMetrics.map(({ index }) => index),
+    logStreams: orderedLogs.map(({ index }) => index),
+    traceStreamNames: orderedTraces.map(({ name }) => name),
+    metricStreamNames: orderedMetrics.map(({ name }) => name),
+    logStreamNames: orderedLogs.map(({ stream }) => stream),
   };
 }
 

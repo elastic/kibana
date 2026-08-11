@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { uniq } from 'lodash';
+import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { QueryLink } from '@kbn/significant-events-schema';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
 import { queryFromLink } from '../knowledge_indicator_client/serializers';
@@ -67,7 +68,6 @@ const FIELD_COMPARISON_RE =
   /([a-zA-Z_@][\w.]*)\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL\b|\bLIKE\b|\bRLIKE\b|\bIN\s*\()/gi;
 const MATCH_FN_RE = /\b(?:MATCH|MATCH_PHRASE|MATCH_OPERATOR|QSTR|KQL)\s*\(\s*([a-zA-Z_@][\w.]*)/gi;
 const BY_CLAUSE_RE = /\bBY\s+((?:[a-zA-Z_@][\w.]*\s*,\s*)*[a-zA-Z_@][\w.]*)/gi;
-const BACKTICK_FIELD_RE = /`([^`]+)`\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL\b)/gi;
 
 /**
  * Deterministic structural signature of an ES|QL query: the sorted source
@@ -80,9 +80,9 @@ const BACKTICK_FIELD_RE = /`([^`]+)`\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL
 export function esqlStructuralSignature(esqlText: string): string {
   const text = esqlText.replace(/\s+/g, ' ').trim();
 
-  const sourceMatch = text.match(/^\s*(?:FROM|TS)\s+([^|]+)/i);
-  const sources = sourceMatch
-    ? sourceMatch[1]
+  const fromMatch = text.match(/^\s*FROM\s+([^|]+)/i);
+  const sources = fromMatch
+    ? fromMatch[1]
         .replace(/\bMETADATA\b.*$/i, '')
         .split(',')
         .map((source) => source.trim().toLowerCase())
@@ -108,16 +108,8 @@ export function esqlStructuralSignature(esqlText: string): string {
       addField(field.trim());
     }
   }
-  for (const match of text.matchAll(BACKTICK_FIELD_RE)) {
-    addField(match[1]);
-  }
 
-  // The aggregation clause distinguishes otherwise identical filter shapes
-  // such as error count and p95 latency. Omitting it permits reconciliation to
-  // tombstone a materially different typed query.
-  const aggregation = text.match(/\|\s*STATS\s+(.+)$/i)?.[1].toLowerCase() ?? null;
-
-  return JSON.stringify({ sources, fields: [...fields].sort(), aggregation });
+  return JSON.stringify({ sources, fields: [...fields].sort() });
 }
 
 /** Connected components over an undirected adjacency map. */
@@ -329,6 +321,27 @@ export async function reconcileCodeAndLogQueries({
       if (signatureById.get(id) !== signatureById.get(other)) {
         logger.debug(
           `reconcile_queries: skipping semantic pair with different ES|QL structure: ${id} vs ${other}`
+        );
+        continue;
+      }
+      // Additive guard (does not modify the structural signature): typed OTel KIs
+      // are deterministic and differ only by literal values (service/span/event)
+      // that the field-level signature cannot see. When either side is typed,
+      // require exact normalized ES|QL so distinct typed queries are never
+      // tombstoned, while an exact typed/log duplicate can still corroborate.
+      const left = byId.get(id);
+      const right = byId.get(other);
+      const eitherTyped =
+        left?.query.evidence?.some((evidence) => evidence.includes(' tier=')) === true ||
+        right?.query.evidence?.some((evidence) => evidence.includes(' tier=')) === true;
+      if (
+        eitherTyped &&
+        left &&
+        right &&
+        normalizeEsqlSafe(left.query.esql.query) !== normalizeEsqlSafe(right.query.esql.query)
+      ) {
+        logger.debug(
+          `reconcile_queries: skipping typed OTel pair with different ES|QL: ${id} vs ${other}`
         );
         continue;
       }

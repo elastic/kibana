@@ -64,6 +64,39 @@ const link = async (
 };
 
 describe('resolveSignalStreams', () => {
+  it('probes Query Stream ES|QL views instead of index-only APIs', async () => {
+    const esql = jest.fn(async ({ query }: { query: string }) => ({
+      columns: [],
+      values: query.includes('$.cps-traces') ? [[1]] : [],
+    }));
+    const esClient = {
+      esql: { query: esql },
+      count: jest.fn(),
+      fieldCaps: jest.fn(),
+    } as unknown as ElasticsearchClient;
+
+    const result = await resolveSignalStreams({
+      streams: [
+        {
+          name: 'cps.traces',
+          index: '$.cps-traces',
+          convention: 'otel',
+          isQueryStream: true,
+        },
+      ],
+      esClient,
+      logger: loggerMock.create(),
+    });
+
+    expect(result.traceStreams).toEqual(['$.cps-traces']);
+    expect(result.traceStreamNames).toEqual(['cps.traces']);
+    expect(esql).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM $.cps-traces | LIMIT 1' })
+    );
+    expect(esClient.count).not.toHaveBeenCalled();
+    expect(esClient.fieldCaps).not.toHaveBeenCalled();
+  });
+
   it('resolves non-empty trace/metric/log streams and excludes empty logs', async () => {
     const esClient = {
       fieldCaps: jest.fn(async () => ({

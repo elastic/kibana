@@ -110,6 +110,36 @@ describe('generateOtelQueries', () => {
     );
   });
 
+  it('creates 1 single-source typed query per owning Stream', () => {
+    const result = generateOtelQueries({
+      serviceName: 'checkout',
+      repository: 'acme/repo',
+      gitSha: 'abc',
+      signals: [signal({ kind: 'span_name', value: 'checkout' })],
+      signalCounts: EMPTY_OTEL_SIGNAL_COUNTS,
+      traceStreams: ['traces-index-a', 'traces-index-b'],
+      traceStreamNames: ['traces-owner-b', 'traces-owner-a'],
+      metricStreams: [],
+      logStreams: [],
+    });
+
+    expect(result.queries).toHaveLength(4);
+    expect(result.queries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ stream: 'traces-owner-b' }),
+        expect.objectContaining({ stream: 'traces-owner-a' }),
+      ])
+    );
+    expect(
+      result.queries.every(({ query }) => !/^(?:FROM|TS)\s+[^|]*,/.test(query.esql.query))
+    ).toBe(true);
+    expect(
+      result.queries
+        .filter(({ stream }) => stream === 'traces-owner-b')
+        .every(({ query }) => query.esql.query.startsWith('FROM traces-index-a '))
+    ).toBe(true);
+  });
+
   it('does not generate queries for templated signals', () => {
     expect(generate([signal({ value: 'checkout', templated: true })])).toEqual({
       queries: [],

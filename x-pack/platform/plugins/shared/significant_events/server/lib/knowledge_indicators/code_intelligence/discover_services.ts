@@ -175,7 +175,26 @@ export async function listIndexedRepos({
         ref: refCol === -1 ? undefined : String(row[refCol] ?? '') || undefined,
       });
     }
-    return refs;
+
+    // One deterministic ref per repository. Sourcerer can index multiple refs,
+    // but downstream discovery state (candidate roots, evidence, OTel detection,
+    // gitSha) is keyed by repository; collapsing here keeps a service discovered
+    // from one ref from being extracted against another ref's commit. Prefer a
+    // default branch, else the lexicographically greatest commit for stability.
+    const isDefaultRef = (ref?: string): boolean => !!ref && /(^|\/)(main|master)$/i.test(ref);
+    const preferred = new Map<string, IndexedRepoRef>();
+    for (const candidate of refs) {
+      const current = preferred.get(candidate.repository);
+      const better =
+        !current ||
+        (isDefaultRef(candidate.ref) && !isDefaultRef(current.ref)) ||
+        (isDefaultRef(candidate.ref) === isDefaultRef(current.ref) &&
+          candidate.gitSha > current.gitSha);
+      if (better) {
+        preferred.set(candidate.repository, candidate);
+      }
+    }
+    return [...preferred.values()].sort((a, b) => a.repository.localeCompare(b.repository));
   } catch (error) {
     logger.warn(
       `discover_services: failed to list indexed repos: ${

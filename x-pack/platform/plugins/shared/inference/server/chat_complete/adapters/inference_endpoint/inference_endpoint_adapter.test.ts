@@ -45,6 +45,13 @@ function createOpenAIChunk({
   };
 }
 
+const anthropicChunkBase = {
+  id: 'chatcmpl-anthropic',
+  object: null,
+  created: 1753747200,
+  model: 'claude-sonnet-4',
+} as const;
+
 describe('inferenceEndpointAdapter', () => {
   const executorMock: InferenceEndpointExecutor & {
     invoke: jest.MockedFn<InferenceEndpointExecutor['invoke']>;
@@ -97,6 +104,155 @@ describe('inferenceEndpointAdapter', () => {
           type: ChatCompletionEventType.ChatCompletionChunk,
         },
       ]);
+    });
+
+    it('emits Anthropic chunks with a null object', async () => {
+      const source$ = of(
+        {
+          ...anthropicChunkBase,
+          choices: [
+            {
+              index: 0,
+              delta: { content: 'I will search.' },
+              finish_reason: null,
+            },
+          ],
+          usage: null,
+        },
+        {
+          ...anthropicChunkBase,
+          choices: [
+            {
+              index: 0,
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    id: 'toolu_01',
+                    function: { name: 'search', arguments: '{"query":"' },
+                  },
+                ],
+              },
+              finish_reason: null,
+            },
+          ],
+          usage: null,
+        },
+        {
+          ...anthropicChunkBase,
+          choices: [
+            {
+              index: 0,
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    function: { arguments: 'kibana"}' },
+                  },
+                ],
+              },
+              finish_reason: 'tool_use',
+            },
+          ],
+          usage: null,
+        },
+        {
+          ...anthropicChunkBase,
+          choices: [],
+          usage: {
+            completion_tokens: 12,
+            prompt_tokens: 8,
+            total_tokens: 20,
+          },
+        }
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response = await lastValueFrom(
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'Search Kibana' }],
+          })
+          .pipe(toArray())
+      );
+
+      expect(response).toEqual([
+        {
+          content: 'I will search.',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: '',
+          tool_calls: [
+            {
+              function: { name: 'search', arguments: '{"query":"' },
+              index: 0,
+              toolCallId: 'toolu_01',
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: '',
+          tool_calls: [
+            {
+              function: { name: '', arguments: 'kibana"}' },
+              index: 0,
+              toolCallId: '',
+            },
+          ],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          model: 'claude-sonnet-4',
+          tokens: {
+            completion: 12,
+            prompt: 8,
+            total: 20,
+          },
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+        },
+      ]);
+    });
+
+    it('ignores null-object events without array choices and unrelated object values', async () => {
+      const source$ = of(
+        {
+          id: 'non-array-choices',
+          object: null,
+          choices: {},
+          usage: {
+            completion_tokens: 1,
+            prompt_tokens: 1,
+            total_tokens: 2,
+          },
+        },
+        {
+          id: 'missing-object',
+          choices: [{ index: 0, delta: { content: 'ignored' }, finish_reason: null }],
+        },
+        {
+          id: 'unrelated-object',
+          object: 'content_block_delta',
+          choices: [{ index: 0, delta: { content: 'ignored' }, finish_reason: null }],
+        }
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const chunks = await lastValueFrom(
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'Hello' }],
+          })
+          .pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(chunks).toEqual([]);
     });
 
     it('emits token count event when provided by the response', async () => {
@@ -414,6 +570,66 @@ describe('inferenceEndpointAdapter', () => {
           body: expect.objectContaining({
             tools: expect.any(Array),
             tool_choice: 'auto',
+          }),
+        })
+      );
+    });
+
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(
+          of({
+            choices: [{ finish_reason: null, index: 0, delta: { content: '' } }],
+            created: Date.now(),
+            id: 'test-chunk',
+            model: 'gpt-4o',
+            object: 'chat.completion.chunk',
+          }),
+          logger
+        )
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            {
+              role: MessageRole.Assistant,
+              content: '',
+              toolCalls: [
+                {
+                  toolCallId: '1',
+                  function: { name: 'myTool', arguments: {} },
+                },
+              ],
+            },
+            {
+              role: MessageRole.Tool,
+              name: 'myTool',
+              toolCallId: '1',
+              response: { ok: true },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'doNotCallThisTool',
+                  description: 'Do not call this tool, it is strictly forbidden',
+                  parameters: {
+                    type: 'object',
+                    properties: {},
+                  },
+                },
+              },
+            ],
           }),
         })
       );

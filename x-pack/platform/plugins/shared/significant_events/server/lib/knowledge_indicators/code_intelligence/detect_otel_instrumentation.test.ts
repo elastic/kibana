@@ -7,9 +7,15 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { detectOtelInstrumentation, EMPTY_OTEL_SIGNAL_COUNTS } from './detect_otel_instrumentation';
+import {
+  detectOtelInstrumentation,
+  detectOtelInstrumentationForRoots,
+  EMPTY_OTEL_SIGNAL_COUNTS,
+} from './detect_otel_instrumentation';
 
-const createEsClient = (lines: string[], fail = false): ElasticsearchClient =>
+type SourceLine = string | { content: string; filePath: string };
+
+const createEsClient = (lines: SourceLine[], fail = false): ElasticsearchClient =>
   ({
     esql: {
       query: jest.fn(async ({ params }) => {
@@ -19,7 +25,11 @@ const createEsClient = (lines: string[], fail = false): ElasticsearchClient =>
           String(parameters?.find((parameter) => 'regex' in parameter)?.regex ?? '')
         );
         const matches = lines
-          .map((content, index) => ({ content, index }))
+          .map((line, index) =>
+            typeof line === 'string'
+              ? { content: line, filePath: 'src/service.ts', index }
+              : { ...line, index }
+          )
           .filter(({ content }) => regex.test(content));
         return {
           columns: [
@@ -27,13 +37,13 @@ const createEsClient = (lines: string[], fail = false): ElasticsearchClient =>
             { name: 'line.number', type: 'integer' },
             { name: 'line.content', type: 'keyword' },
           ],
-          values: matches.map(({ content, index }) => ['src/service.ts', index + 1, content]),
+          values: matches.map(({ content, filePath, index }) => [filePath, index + 1, content]),
         };
       }),
     },
   } as unknown as ElasticsearchClient);
 
-const detect = (lines: string[], fail = false) =>
+const detect = (lines: SourceLine[], fail = false) =>
   detectOtelInstrumentation({
     esClient: createEsClient(lines, fail),
     repository: 'acme/repo',
@@ -51,12 +61,33 @@ describe('detectOtelInstrumentation', () => {
     ],
     ['@opentelemetry/instrumentation-http', 'instrumentation_http'],
   ] as const)('detects %s imports', async (line, count) => {
-    const result = await detect([line]);
+    const result = await detect([`import instrumentation from "${line}"`]);
     expect(result.hasOtel).toBe(true);
     expect(result.signalCounts[count]).toBeGreaterThan(0);
   });
 
-  it('requires 3 idiom sites without an import', async () => {
+  it('detects a Go grouped-import module line', async () => {
+    const result = await detect([
+      {
+        filePath: 'cmd/service/main.go',
+        content: '"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"',
+      },
+    ]);
+    expect(result.hasOtel).toBe(true);
+    expect(result.signalCounts.instrumentation_http).toBeGreaterThan(0);
+  });
+
+  it('does not count lockfile references as instrumentation', async () => {
+    const result = await detect([
+      {
+        filePath: 'package-lock.json',
+        content: '"@opentelemetry/instrumentation-http": "1.0.0"',
+      },
+    ]);
+    expect(result).toEqual({ hasOtel: false, signalCounts: EMPTY_OTEL_SIGNAL_COUNTS });
+  });
+
+  it('gates on 3 idiom sites when one is an unambiguous OTel idiom', async () => {
     expect((await detect(['tracer.startSpan("x")', 'span.setAttribute("x", 1)'])).hasOtel).toBe(
       false
     );
@@ -64,6 +95,37 @@ describe('detectOtelInstrumentation', () => {
       (await detect(['tracer.startSpan("x")', 'span.setAttribute("x", 1)', 'span.addEvent("y")']))
         .hasOtel
     ).toBe(true);
+  });
+
+  it('does not treat 3 ambiguous idiom sites as OTel without an import', async () => {
+    expect(
+      (
+        await detect([
+          'element.setAttribute("x", 1)',
+          'element.setAttribute("y", 2)',
+          'element.setAttribute("z", 3)',
+        ])
+      ).hasOtel
+    ).toBe(false);
+  });
+
+  it('batches detection across roots with inclusive attribution', async () => {
+    const esClient = createEsClient([
+      { filePath: 'src/a.go', content: 'import "go.opentelemetry.io/otel"' },
+      {
+        filePath: 'services/b/main.go',
+        content: 'import "go.opentelemetry.io/contrib/instrumentation/x/otelgrpc"',
+      },
+    ]);
+    const result = await detectOtelInstrumentationForRoots({
+      esClient,
+      repository: 'acme/repo',
+      gitSha: 'abc',
+      serviceRoots: ['src', 'services/b'],
+      logger: loggerMock.create(),
+    });
+    expect(result.get('src')?.hasOtel).toBe(true);
+    expect(result.get('services/b')?.hasOtel).toBe(true);
   });
 
   it('returns a false zero result for plain loggers and grep failures', async () => {

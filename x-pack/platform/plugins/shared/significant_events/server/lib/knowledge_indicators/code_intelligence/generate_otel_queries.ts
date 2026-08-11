@@ -108,6 +108,14 @@ export function generateOtelQueries({
   const candidates: OtelQueryCandidate[] = [];
   const seen = new Set<string>();
   const serviceFilter = `service.name == "${escapeString(serviceName)}"`;
+  // `resolveSignalStreams()` preserves these index/name pairs. A KI belongs to
+  // exactly 1 real Stream, so a multi-source ES|QL query is expanded below into
+  // one single-source candidate per owner.
+  const ownerBySource = new Map([
+    ...traceStreams.map((source, index) => [source, traceStreamNames[index] ?? source] as const),
+    ...metricStreams.map((source, index) => [source, metricStreamNames[index] ?? source] as const),
+    ...logStreams.map((source, index) => [source, logStreamNames[index] ?? source] as const),
+  ]);
   const add = ({
     esql,
     tier,
@@ -299,8 +307,32 @@ export function generateOtelQueries({
   const instrumentationHasTraceTier =
     (signalCounts.instrumentation_grpc > 0 || signalCounts.instrumentation_http > 0) &&
     traceStreams.length > 0;
+  const queries = candidates.flatMap((candidate) => {
+    const sourceMatch = candidate.query.esql.query.match(/^(FROM|TS)\s+([^|]+?)\s+\|/i);
+    if (!sourceMatch) return [candidate];
+    const [, command, rawSources] = sourceMatch;
+    return rawSources.split(',').map((source) => {
+      const index = source.trim();
+      const stream = ownerBySource.get(index);
+      if (!stream) return candidate;
+      const esql = candidate.query.esql.query.replace(
+        /^(FROM|TS)\s+[^|]+(?=\|)/i,
+        `${command} ${index} `
+      );
+      return {
+        ...candidate,
+        stream,
+        query: {
+          ...candidate.query,
+          id: uuidv5(`${serviceName}:${esql}`, OTEL_QUERY_NAMESPACE),
+          esql: { query: esql },
+        },
+      };
+    });
+  });
+
   return {
-    queries: candidates,
+    queries,
     gateBypassed: !hasResolvableSignalTier && !instrumentationHasTraceTier,
   };
 }

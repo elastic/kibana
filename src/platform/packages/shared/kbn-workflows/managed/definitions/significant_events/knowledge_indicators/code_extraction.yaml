@@ -95,7 +95,9 @@ steps:
         foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
         max-concurrency: 1
         iteration-on-failure:
-          continue: false
+          # A bad service must not prevent later tenant services from getting
+          # their typed queries; each failed iteration remains visible.
+          continue: true
         steps:
           - name: identify_otel_signals
             type: kibana.request

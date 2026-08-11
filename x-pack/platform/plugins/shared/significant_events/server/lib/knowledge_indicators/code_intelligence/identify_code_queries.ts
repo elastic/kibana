@@ -59,6 +59,12 @@ export interface IdentifyCodeQueriesOptions {
   /** OTel services use typed queries unless their OTel stream resolution was bypassed. */
   hasOtel?: boolean;
   otelGateBypassed?: boolean;
+  /**
+   * Stream names the request is authorized to access. When the predictive
+   * fallback would target the root `logs` stream, it is only allowed if `logs`
+   * is in this set, so a caller cannot write KIs to a stream it cannot access.
+   */
+  authorizedStreamNames?: Set<string>;
 }
 
 /**
@@ -85,6 +91,7 @@ export async function identifyCodeQueries({
   logger,
   hasOtel = false,
   otelGateBypassed = false,
+  authorizedStreamNames,
 }: IdentifyCodeQueriesOptions): Promise<IdentifyCodeQueriesResult> {
   // The KI key is the service name; the service identity itself is represented as
   // an entity/service KI on the ingesting stream (not a code_analysis feature).
@@ -120,6 +127,16 @@ export async function identifyCodeQueries({
   // on the root `logs` stream, matching the conventional `message` field. They
   // lie dormant until log data arrives, then match automatically.
   const usingFallback = resolvedBindings.length === 0;
+  if (
+    usingFallback &&
+    authorizedStreamNames !== undefined &&
+    !authorizedStreamNames.has(FALLBACK_LOG_STREAM)
+  ) {
+    logger.debug(
+      `code_queries: fallback stream "${FALLBACK_LOG_STREAM}" is not accessible to the request for service "${serviceName}"; skipping`
+    );
+    return { status: 'no_ingesting', serviceName };
+  }
   const bindings: LogStreamBinding[] = usingFallback
     ? [
         {
@@ -164,6 +181,9 @@ export async function identifyCodeQueries({
     );
 
     if (newQueries.length === 0) {
+      // Existing templates are valid fallback coverage on retry. Report their
+      // owner so callers do not mistake an idempotent run for no coverage.
+      writtenStreams.push(binding.stream);
       continue;
     }
 

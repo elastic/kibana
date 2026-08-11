@@ -141,7 +141,7 @@ export async function classifyServices({
     name: string,
     language: string
   ): DiscoveredService => {
-    const detection = otelDetectionByRoot.get(`${repository}::${serviceRoot}`) ?? {
+    const emptyDetection = {
       hasOtel: false,
       signalCounts: {
         instrumentation_grpc: 0,
@@ -155,6 +155,39 @@ export async function classifyServices({
         create_metric: 0,
       },
     };
+    const directDetection = otelDetectionByRoot.get(`${repository}::${serviceRoot}`);
+    // A synthesized repository root has no direct grep result. Carry OTel
+    // evidence from its discovered child roots instead of forcing templates.
+    const childDetections =
+      serviceRoot === ''
+        ? [...otelDetectionByRoot.entries()]
+            .filter(([key]) => key.startsWith(`${repository}::`))
+            .map(([, detection]) => detection)
+        : [];
+    const detection =
+      directDetection ??
+      (childDetections.some(({ hasOtel }) => hasOtel)
+        ? {
+            hasOtel: true,
+            signalCounts: childDetections.reduce(
+              (counts, child) => ({
+                instrumentation_grpc:
+                  counts.instrumentation_grpc + child.signalCounts.instrumentation_grpc,
+                instrumentation_http:
+                  counts.instrumentation_http + child.signalCounts.instrumentation_http,
+                instrumentation_other:
+                  counts.instrumentation_other + child.signalCounts.instrumentation_other,
+                start_span: counts.start_span + child.signalCounts.start_span,
+                set_attribute: counts.set_attribute + child.signalCounts.set_attribute,
+                add_event: counts.add_event + child.signalCounts.add_event,
+                record_exception: counts.record_exception + child.signalCounts.record_exception,
+                set_status_error: counts.set_status_error + child.signalCounts.set_status_error,
+                create_metric: counts.create_metric + child.signalCounts.create_metric,
+              }),
+              emptyDetection.signalCounts
+            ),
+          }
+        : emptyDetection);
     return {
       repository,
       gitSha: gitShaByRepo.get(repository) ?? '',
@@ -167,12 +200,18 @@ export async function classifyServices({
     };
   };
 
+  // A service name is the ES|QL `service.name` predicate, so it must never be
+  // empty. A repository-root candidate has `serviceRoot === ''`; fall back to
+  // the repository basename.
+  const serviceNameFor = (repository: string, serviceRoot: string): string =>
+    serviceRoot.split('/').pop() || repository.split('/').pop() || repository;
+
   const degrade = (): DiscoveredService[] =>
     candidates.map((candidate) =>
       toService(
         candidate.repository,
         candidate.serviceRoot,
-        candidate.serviceRoot.split('/').pop() || candidate.serviceRoot,
+        serviceNameFor(candidate.repository, candidate.serviceRoot),
         candidate.language
       )
     );
@@ -279,8 +318,15 @@ export async function classifyServices({
   // app-language deploy marker or a discovered entrypoint. Repos already carrying
   // a service named after the repo are left as-is (already repo-represented), and
   // pure IaC/docs repos (no app-language marker, no entrypoint) get nothing.
+  const reposWithService = new Set(discovered.map((service) => service.repository));
   for (const repo of repos) {
     const { repository } = repo;
+    // A repository that already has a discovered service must not also get a
+    // synthetic repo-root service: that would persist child signals under
+    // `service.name == "<repo>"`, a service name that does not exist.
+    if (reposWithService.has(repository)) {
+      continue;
+    }
     const roots = rootsByRepo.get(repository) ?? [];
     const appRoots = roots.filter(
       (candidate) => isApplicationLanguage(candidate.language) || candidate.hasEntrypoint

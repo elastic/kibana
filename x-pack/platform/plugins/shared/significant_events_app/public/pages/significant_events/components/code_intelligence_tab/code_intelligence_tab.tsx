@@ -55,7 +55,6 @@ import { useFetchCodeKnowledgeIndicators } from '../../../../hooks/use_fetch_cod
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../hooks/use_knowledge_indicators_bulk_delete';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
-import { useSignificantEventsPrivileges } from '../../../../hooks/use_significant_events_privileges';
 import {
   CodeIntelligenceAvailabilityError,
   CodeIntelligencePlaceholder,
@@ -140,12 +139,13 @@ export function CodeIntelligenceTab() {
   const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
   const {
     core: {
+      application: {
+        capabilities: { streams },
+      },
       notifications: { toasts },
     },
   } = useKibana();
-  const {
-    ui: { manage: canManage },
-  } = useSignificantEventsPrivileges();
+  const canManage = streams?.manage === true;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
   const [selectedKnowledgeIndicatorId, setSelectedKnowledgeIndicatorId] = useState<

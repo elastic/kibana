@@ -6,14 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isExcludedLoggingPath } from './constants';
 import { codeGrep, fetchLineWindows, splitRepository } from './discover_logging_sites';
+import { isProductionOtelPath } from './detect_otel_instrumentation';
 import type { OtelMetricKind, OtelSignal, OtelSignalKind, OtelValueHint } from './types';
 
 const EXTRACT_PATTERNS: readonly string[] = [
   '.*(startSpan|start_as_current_span|startActiveSpan|spanBuilder|StartActivity|[.]Start[(]).*',
   '.*(addEvent|add_event|AddEvent|ActivityEvent).*',
   '.*(setAttribute|setAttributes|set_attribute|SetTag|SpanAttribute).*',
+  '.*(attribute[.](String|Bool|Int|Int64|Float64|StringSlice)|AttributeKey[.](stringKey|longKey|booleanKey|doubleKey)|KeyValue::new).*',
   '.*(createCounter|createUpDownCounter|createHistogram|createObservableGauge|createObservableCounter|create_counter|create_histogram|Int64Counter|Float64Counter|counterBuilder|histogramBuilder|Gauge).*',
   '.*(setStatus|set_status|SetStatus).*(ERROR|Error|kError|codes[.]Error).*',
   '.*(recordException|record_exception|RecordError|record_error).*',
@@ -73,6 +74,7 @@ const literalSignal = ({
   line,
   valueHint,
   metricKind,
+  concatenated,
 }: {
   kind: OtelSignalKind;
   raw: string;
@@ -81,9 +83,11 @@ const literalSignal = ({
   line: number;
   valueHint?: OtelValueHint;
   metricKind?: OtelMetricKind;
+  /** The literal is one operand of a `+` concatenation, so the runtime value differs. */
+  concatenated?: boolean;
 }): OtelSignal | undefined => {
   const interpolation = raw.search(/\$\{|#\{|%[a-zA-Z]|\{[^}]+\}/);
-  const templated = interpolation !== -1;
+  const templated = interpolation !== -1 || concatenated === true;
   const value = (templated ? raw.slice(0, interpolation) : raw).trim().replace(/[.\s_-]+$/, '');
   if (!value) return undefined;
   return {
@@ -97,6 +101,10 @@ const literalSignal = ({
     ...(metricKind ? { metricKind } : {}),
   };
 };
+
+/** True when the matched literal is immediately followed by `+` (runtime concatenation). */
+const isConcatenated = (content: string, match: RegExpMatchArray): boolean =>
+  /^\s*\+/.test(content.slice((match.index ?? 0) + match[0].length));
 
 export interface OtelSourceWindow {
   file: string;
@@ -118,18 +126,36 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
   };
 
   for (const { file, line, content } of windows) {
-    if (isExcludedLoggingPath(file)) continue;
+    if (!isProductionOtelPath(file)) continue;
     const language = languageOf(file);
     const spanPattern =
       /(?:startSpan|startActiveSpan|start_as_current_span|spanBuilder|StartActivity|in_span)\s*\(\s*(["'`])([^"'`]+)\1|(?:tracer\s*\.)?Start\s*\(\s*[^,]+,\s*(["'`])([^"'`]+)\3/gi;
     for (const match of content.matchAll(spanPattern)) {
-      add(literalSignal({ kind: 'span_name', raw: match[2] ?? match[4], language, file, line }));
+      add(
+        literalSignal({
+          kind: 'span_name',
+          raw: match[2] ?? match[4],
+          language,
+          file,
+          line,
+          concatenated: isConcatenated(content, match),
+        })
+      );
     }
 
     const eventPattern =
       /(?:addEvent|add_event|AddEvent)\s*\(\s*(?:new\s+(?:ActivityEvent)?\s*\(\s*)?(["'`])([^"'`]+)\1/gi;
     for (const match of content.matchAll(eventPattern)) {
-      add(literalSignal({ kind: 'event_name', raw: match[2], language, file, line }));
+      add(
+        literalSignal({
+          kind: 'event_name',
+          raw: match[2],
+          language,
+          file,
+          line,
+          concatenated: isConcatenated(content, match),
+        })
+      );
     }
 
     const attributePattern =
@@ -147,6 +173,23 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
           })
         );
       }
+    }
+
+    // Cross-language attribute constructors carry the key even when it is not a
+    // direct string argument of the setter: Go `attribute.String("k", v)`, Rust
+    // `KeyValue::new("k", v)`, Java `AttributeKey.stringKey("k")` / `stringKey("k")`.
+    const attributeCtorPattern =
+      /(?:attribute\.(String|Bool|Int|Int64|Float64|StringSlice)|AttributeKey\.(stringKey|longKey|booleanKey|doubleKey)|KeyValue::new|(string|long|boolean|double)Key)\s*\(\s*(["'`])([a-zA-Z][\w.-]+)\4/g;
+    for (const match of content.matchAll(attributeCtorPattern)) {
+      const key = match[5];
+      if (!key || isSemconvAttribute(key)) continue;
+      const typeToken = (match[1] ?? match[2] ?? match[3] ?? '').toLowerCase();
+      const valueHint: OtelValueHint = /bool/.test(typeToken)
+        ? 'bool'
+        : /int|long|float|double/.test(typeToken)
+        ? 'number'
+        : inferValueHint(key);
+      add(literalSignal({ kind: 'attr_key', raw: key, valueHint, language, file, line }));
     }
 
     const objectCallPattern = /setAttributes\s*\(\s*\{([\s\S]*?)\}\s*\)/gi;
@@ -180,6 +223,7 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
           file,
           line,
           metricKind: metricKindFromToken(match[1]),
+          concatenated: isConcatenated(content, match),
         })
       );
     }
@@ -243,7 +287,7 @@ export async function extractOtelSignalsResult({
         limit: perPatternLimit,
       });
       for (const hit of hits) {
-        if (isExcludedLoggingPath(hit.filePath)) continue;
+        if (!isProductionOtelPath(hit.filePath)) continue;
         const lines = hitsByFile.get(hit.filePath) ?? new Set<number>();
         lines.add(hit.lineNumber);
         hitsByFile.set(hit.filePath, lines);

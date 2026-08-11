@@ -73,6 +73,8 @@ export {
 export { classifyServices, type ClassifyServicesOptions } from './classify_services';
 export {
   detectOtelInstrumentation,
+  detectOtelInstrumentationForRoots,
+  isProductionOtelPath,
   EMPTY_OTEL_SIGNAL_COUNTS,
   type DetectOtelInstrumentationOptions,
 } from './detect_otel_instrumentation';

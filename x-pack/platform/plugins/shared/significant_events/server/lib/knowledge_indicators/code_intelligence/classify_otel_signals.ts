@@ -94,9 +94,31 @@ export async function classifyOtelSignals({
     }
   }
 
-  const classified = candidates.flatMap((candidate, id) => {
+  const tierOwnerKey = (candidate: OtelQueryCandidate): string =>
+    `${candidate.stream}:${candidate.tier}`;
+  const keptTierOwners = new Set(
+    candidates.flatMap((candidate, id) =>
+      decisions.get(id)?.keep === false ? [] : [tierOwnerKey(candidate)]
+    )
+  );
+  const restoredTierOwners = new Set(
+    candidates.flatMap((candidate) =>
+      keptTierOwners.has(tierOwnerKey(candidate)) ? [] : [tierOwnerKey(candidate)]
+    )
+  );
+  if (restoredTierOwners.size > 0) {
+    logger.warn(
+      `classify_otel_signals: classifier dropped deterministic stream-tier(s) ${[
+        ...restoredTierOwners,
+      ].join(', ')}; keeping their original candidates`
+    );
+  }
+
+  return candidates.flatMap((candidate, id) => {
     const decision = decisions.get(id);
-    if (decision?.keep === false) return [];
+    if (decision?.keep === false) {
+      return restoredTierOwners.has(tierOwnerKey(candidate)) ? [candidate] : [];
+    }
     const score = decision?.severity_score;
     return [
       {
@@ -113,12 +135,4 @@ export async function classifyOtelSignals({
       },
     ];
   });
-
-  if (classified.length === 0 && candidates.length > 0) {
-    logger.warn(
-      'classify_otel_signals: classifier dropped every candidate; keeping deterministic queries'
-    );
-    return candidates;
-  }
-  return classified;
 }
