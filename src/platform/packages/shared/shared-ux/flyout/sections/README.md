@@ -1,4 +1,4 @@
-# @kbn/shared-ux-flyout-section
+# @kbn/flyout-sections
 
 Prop-driven primitives for flyout body content. Three components: a section, its
 collapsible variant (accordion), and a subsection for nesting within either.
@@ -10,7 +10,7 @@ collapsible variant (accordion), and a subsection for nesting within either.
 A titled content block rendered as `<section>` with an `<h4>` heading.
 
 ```tsx
-import { FlyoutSection } from '@kbn/shared-ux-flyout-section';
+import { FlyoutSection } from '@kbn/flyout-sections';
 
 <FlyoutSection title="Summary">
   <AlertSummary alert={alert} />
@@ -36,7 +36,7 @@ with a `<span>` (not `<h4>`) to keep heading elements out of the button's phrasi
 content. Content defaults to bordered (`hasBorder={true}`).
 
 ```tsx
-import { FlyoutAccordion } from '@kbn/shared-ux-flyout-section';
+import { FlyoutAccordion } from '@kbn/flyout-sections';
 
 <FlyoutAccordion title="Advanced settings" initialIsOpen>
   <SettingsForm />
@@ -62,7 +62,7 @@ import { FlyoutAccordion } from '@kbn/shared-ux-flyout-section';
 A titled content block nested inside a `FlyoutSection` or `FlyoutAccordion`.
 
 ```tsx
-import { FlyoutSection, FlyoutSubsection } from '@kbn/shared-ux-flyout-section';
+import { FlyoutSection, FlyoutSubsection } from '@kbn/flyout-sections';
 
 <FlyoutSection title="Configuration">
   <FlyoutSubsection title="Runtime" hasBorder>
