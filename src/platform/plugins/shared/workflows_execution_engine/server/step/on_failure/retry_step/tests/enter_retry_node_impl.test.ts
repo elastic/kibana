@@ -379,4 +379,88 @@ describe('EnterRetryNodeImpl', () => {
       });
     });
   });
+
+  describe('server Retry-After hint', () => {
+    beforeEach(() => {
+      node.configuration.delay = '5s';
+      node.configuration['respect-retry-after'] = true;
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
+      (stepExecutionRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+        error: new ExecutionError({
+          type: 'KibanaApiCallError',
+          message: 'HTTP 429',
+          details: { status: 429, retryAfterMs: 47000 },
+        }),
+      });
+      stepExecutionRuntime.tryEnterWaitUntil = jest.fn().mockReturnValue(true);
+    });
+
+    it.each(['fixed', 'exponential'] as const)(
+      'calls tryEnterWaitUntil with now + 47000ms for strategy %s',
+      async (strategy) => {
+        node.configuration.strategy = strategy;
+        await underTest.run();
+
+        expect(stepExecutionRuntime.tryEnterWaitUntil).toHaveBeenCalledTimes(1);
+        const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as jest.Mock).mock.calls[0];
+        expect(resumeDate).toBeInstanceOf(Date);
+        expect(resumeDate.getTime()).toBeGreaterThanOrEqual(Date.now() + 46500);
+        expect(resumeDate.getTime()).toBeLessThanOrEqual(Date.now() + 47500);
+      }
+    );
+
+    it('logs the server-hint delay', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(expect.stringContaining('47000ms'));
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('server Retry-After hint')
+      );
+    });
+
+    it('does not call tryEnterDelay when the server hint wins for fixed strategy', async () => {
+      node.configuration.strategy = 'fixed';
+      stepExecutionRuntime.tryEnterDelay = jest.fn().mockReturnValue(true);
+      await underTest.run();
+      expect(stepExecutionRuntime.tryEnterDelay).not.toHaveBeenCalled();
+    });
+
+    it('clamps the hint to max-delay', async () => {
+      node.configuration.strategy = 'fixed';
+      node.configuration['max-delay'] = '10s';
+      (stepExecutionRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+        error: new ExecutionError({
+          type: 'KibanaApiCallError',
+          message: 'HTTP 429',
+          details: { status: 429, retryAfterMs: 60000 },
+        }),
+      });
+      await underTest.run();
+      const [resumeDate] = (stepExecutionRuntime.tryEnterWaitUntil as jest.Mock).mock.calls[0];
+      expect(resumeDate.getTime() - Date.now()).toBeGreaterThanOrEqual(9950);
+      expect(resumeDate.getTime() - Date.now()).toBeLessThanOrEqual(10050);
+    });
+  });
+
+  describe('server Retry-After hint ignored when flag disabled', () => {
+    beforeEach(() => {
+      node.configuration.delay = '5s';
+      node.configuration.strategy = 'fixed';
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({ attempt: 1 });
+      (stepExecutionRuntime.getCurrentStepResult as jest.Mock).mockReturnValue({
+        error: new ExecutionError({
+          type: 'KibanaApiCallError',
+          message: 'HTTP 429',
+          details: { status: 429, retryAfterMs: 47000 },
+        }),
+      });
+      stepExecutionRuntime.tryEnterWaitUntil = jest.fn();
+      stepExecutionRuntime.tryEnterDelay = jest.fn().mockReturnValue(true);
+    });
+
+    it('does not honour the server hint and falls back to the fixed delay', async () => {
+      await underTest.run();
+      expect(stepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+      expect(stepExecutionRuntime.tryEnterDelay).toHaveBeenCalledWith('5s');
+    });
+  });
 });

@@ -58,6 +58,8 @@ export const WorkflowRetrySchema = z.object({
   'max-delay': DurationSchema.optional(),
   /** Add jitter to delay to avoid thundering herd. Default: false. */
   jitter: z.boolean().optional(),
+  /** Honour a server-supplied Retry-After / rate-limit reset over the computed delay. Default: false. */
+  'respect-retry-after': z.boolean().optional(),
 });
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
