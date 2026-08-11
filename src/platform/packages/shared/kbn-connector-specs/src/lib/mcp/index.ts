@@ -14,4 +14,5 @@ export { createFetchFromAxios } from './create_fetch_from_axios';
 export { createMcpFetch } from './create_mcp_fetch';
 export { createMcpClientType } from './mcp_client_type';
 export type { McpClientTypeDeps } from './mcp_client_type';
+export type { McpFetchFactory, McpFetchOptions, McpFetchResource } from './mcp_fetch_types';
 export { parseJsonTextFromContentParts, callToolContent, callToolJson } from './call_tool_helpers';

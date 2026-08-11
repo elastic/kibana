@@ -23,7 +23,7 @@ describe('createConnectorTypeFromSpec', () => {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
     getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn().mockResolvedValue({}) }),
-    getConfiguredFetchFactory: jest
+    getMcpFetchFactory: jest
       .fn()
       .mockReturnValue(
         jest

@@ -46,7 +46,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { ConfiguredFetchFactory, CredentialAccessor } from '@kbn/connector-specs';
+import type { McpFetchFactory, CredentialAccessor } from '@kbn/connector-specs';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -128,7 +128,7 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
-import { buildConfiguredFetch } from './lib/configured_fetch';
+import { buildMcpFetchFactory } from './lib/mcp_fetch';
 
 export interface PluginSetupContract {
   registerType<
@@ -151,8 +151,8 @@ export interface PluginSetupContract {
 
   getCredential(opts: GetCredentialFnOpts): CredentialAccessor;
 
-  /** Provides fetch resources configured with the Actions proxy, certificate, and TLS policy. */
-  getConfiguredFetchFactory(): ConfiguredFetchFactory;
+  /** Actions-policy fetch factory for the pooled MCP client type (proxy, TLS, allowlist, limits). */
+  getMcpFetchFactory(): McpFetchFactory;
 
   /**
    * Process-wide pool for reusable, long-lived connector clients. Empty until a client
@@ -519,8 +519,8 @@ export class ActionsPlugin
         plugins.cloud
       ),
       getCredential: this.getCredentialHelper(actionsConfigUtils),
-      getConfiguredFetchFactory: () =>
-        buildConfiguredFetch(actionsConfigUtils, this.logger, plugins.cloud),
+      getMcpFetchFactory: () =>
+        buildMcpFetchFactory(actionsConfigUtils, this.logger, plugins.cloud),
       getClientLeasePool: () => this.clientLeasePool,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConfiguredFetchResource } from '../clients/configured_fetch_types';
+import type { McpFetchResource } from './mcp_fetch_types';
 import { createMcpFetch } from './create_mcp_fetch';
 
-const makeResource = (fetchImpl?: jest.Mock): ConfiguredFetchResource => ({
+const makeResource = (fetchImpl?: jest.Mock): McpFetchResource => ({
   fetch: fetchImpl ?? jest.fn(),
   close: jest.fn().mockResolvedValue(undefined),
 });
@@ -24,7 +24,7 @@ const makeResponse = (status = 200, headers: Record<string, string> = {}): Respo
 
 describe('createMcpFetch', () => {
   let mockFetch: jest.Mock;
-  let resource: ConfiguredFetchResource;
+  let resource: McpFetchResource;
   let fetch: ReturnType<typeof createMcpFetch>;
 
   beforeEach(() => {

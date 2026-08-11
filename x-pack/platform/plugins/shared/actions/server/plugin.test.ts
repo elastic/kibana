@@ -379,11 +379,11 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('getConfiguredFetchFactory()', () => {
+    describe('getMcpFetchFactory()', () => {
       it('exposes an Actions-configured fetch factory', async () => {
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-        expect(pluginSetup.getConfiguredFetchFactory()).toEqual(expect.any(Function));
+        expect(pluginSetup.getMcpFetchFactory()).toEqual(expect.any(Function));
       });
     });
 

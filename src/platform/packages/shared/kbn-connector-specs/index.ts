@@ -55,8 +55,7 @@ export type {
   ClientTypeId,
   ClientTypeSpecs,
   McpClientTypeDeps,
-  FetchLike,
-  ConfiguredFetchResource,
-  ConfiguredFetchOptions,
-  ConfiguredFetchFactory,
+  McpFetchResource,
+  McpFetchOptions,
+  McpFetchFactory,
 } from './src/lib/clients';

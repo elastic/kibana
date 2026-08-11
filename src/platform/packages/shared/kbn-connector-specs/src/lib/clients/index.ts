@@ -13,6 +13,7 @@ import { createMcpClientType } from '../mcp/mcp_client_type';
 
 export { createMcpClientType } from '../mcp/mcp_client_type';
 export type { McpClientTypeDeps } from '../mcp/mcp_client_type';
+export type { McpFetchFactory, McpFetchOptions, McpFetchResource } from '../mcp/mcp_fetch_types';
 
 export type {
   ClientTypeSpec,
@@ -21,13 +22,6 @@ export type {
   ConnectorResponseSettings,
   CredentialAccessor,
 } from './client_type_spec';
-
-export type {
-  FetchLike,
-  ConfiguredFetchResource,
-  ConfiguredFetchOptions,
-  ConfiguredFetchFactory,
-} from './configured_fetch_types';
 
 export interface ClientRegistry {
   mcp: McpClient;

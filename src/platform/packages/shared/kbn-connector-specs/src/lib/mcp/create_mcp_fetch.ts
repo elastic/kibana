@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConfiguredFetchResource, FetchLike } from '../clients/configured_fetch_types';
+import type { FetchLike } from '@kbn/mcp-client';
+import type { McpFetchResource } from './mcp_fetch_types';
 
 // How long to wait for the GET SSE channel before proceeding anyway.
 const SSE_READY_TIMEOUT_MS = 5_000;
@@ -19,14 +20,14 @@ interface SseChannelGate {
 }
 
 /**
- * Wraps a `ConfiguredFetchResource` (returned by `ConfiguredFetchFactory`) with the SSE gate
- * logic required by the MCP Streamable HTTP transport. The gate coordinates between the GET SSE
- * channel and subsequent POST tool-calls so that POSTs do not race the channel open.
+ * Wraps an Actions {@link McpFetchResource} with the SSE gate logic required by the MCP Streamable
+ * HTTP transport. The gate coordinates between the GET SSE channel and subsequent POST tool-calls
+ * so that POSTs do not race the channel open.
  *
- * The underlying `ConfiguredFetchResource.fetch` already applies SSL/TLS, proxy, User-Agent, and
- * body-size policy; this wrapper adds only the MCP-specific SSE ordering guarantee.
+ * The underlying resource already applies SSL/TLS, proxy, User-Agent, and body-size policy; this
+ * wrapper adds only the MCP-specific SSE ordering guarantee.
  */
-export function createMcpFetch(resource: ConfiguredFetchResource): FetchLike {
+export function createMcpFetch(resource: McpFetchResource): FetchLike {
   const gates = new Map<string, SseChannelGate>();
 
   const ensureChannelGate = (sessionId: string): SseChannelGate => {

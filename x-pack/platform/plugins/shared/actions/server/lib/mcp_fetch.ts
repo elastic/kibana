@@ -9,11 +9,8 @@ import { Agent, ProxyAgent, type Dispatcher } from 'undici';
 import type { Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { getNodeSSLOptions, type CustomHostSettings, type SSLSettings } from '@kbn/actions-utils';
-import type {
-  ConfiguredFetchFactory,
-  ConfiguredFetchResource,
-  FetchLike,
-} from '@kbn/connector-specs';
+import type { FetchLike } from '@kbn/mcp-client';
+import type { McpFetchFactory, McpFetchResource } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { buildUserAgent } from './get_axios_instance';
 
@@ -185,20 +182,20 @@ const enforceResponseContentLength = (response: Response, maxContentLength: numb
 };
 
 /**
- * Creates a `ConfiguredFetchResource` for a given target URL.
+ * Creates an {@link McpFetchResource} for a given MCP server URL.
  *
  * The resource owns a cache of Undici dispatchers (keyed by destination origin).
  * Dispatchers are built lazily on first request to a destination and reused within the same
  * resource lifetime. Call `close()` when the resource is no longer needed so all open sockets
  * are released.
  */
-function createConfiguredFetchResource(
+function createMcpFetchResource(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   cloud: CloudSetup | undefined,
   targetUrl: string,
   defaultHeaders?: Readonly<Record<string, string>>
-): ConfiguredFetchResource {
+): McpFetchResource {
   // Validate the initial target URL up front so callers get an immediate error
   // rather than a deferred failure on the first network hop.
   configurationUtilities.ensureUriAllowed(targetUrl);
@@ -225,7 +222,7 @@ function createConfiguredFetchResource(
     redirectCount = 0
   ): Promise<Response> => {
     if (closed) {
-      throw new Error('Configured fetch resource is closed.');
+      throw new Error('MCP fetch resource is closed.');
     }
 
     const urlStr = typeof url === 'string' ? url : url.toString();
@@ -294,7 +291,7 @@ function createConfiguredFetchResource(
 
     // Validate each redirect destination against the allowlist.
     configurationUtilities.ensureUriAllowed(resolvedUrl);
-    logger.debug(`configured-fetch: following redirect (${response.status}) to ${resolvedUrl}`);
+    logger.debug(`mcp-fetch: following redirect (${response.status}) to ${resolvedUrl}`);
 
     try {
       await response.body?.cancel();
@@ -353,19 +350,18 @@ function createConfiguredFetchResource(
 }
 
 /**
- * Returns a `ConfiguredFetchFactory` that applies Kibana's actions-plugin
- * SSL/TLS, proxy, User-Agent, timeout, and body-size settings to every
- * outbound fetch request.
+ * Returns an {@link McpFetchFactory} that applies Actions SSL/TLS, proxy, User-Agent, timeout,
+ * and body-size settings to outbound MCP Streamable HTTP requests.
  *
- * The factory validates the `targetUrl` on creation, caches Undici dispatchers
- * per destination policy so that different redirect hops can use different
- * transports, and returns a `close()` method that drains all open sockets.
+ * The factory validates the `targetUrl` on creation, caches Undici dispatchers per destination
+ * so redirect hops can use different transports, and returns a `close()` method that drains
+ * open sockets.
  */
-export function buildConfiguredFetch(
+export function buildMcpFetchFactory(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   cloud?: CloudSetup
-): ConfiguredFetchFactory {
+): McpFetchFactory {
   return ({ targetUrl, headers }) =>
-    createConfiguredFetchResource(configurationUtilities, logger, cloud, targetUrl, headers);
+    createMcpFetchResource(configurationUtilities, logger, cloud, targetUrl, headers);
 }

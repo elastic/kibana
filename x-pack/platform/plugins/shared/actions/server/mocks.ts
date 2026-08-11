@@ -35,7 +35,7 @@ const createSetupMock = () => {
     registerSubActionConnectorType: jest.fn(),
     getAxiosInstanceWithAuth: jest.fn(),
     getCredential: jest.fn(),
-    getConfiguredFetchFactory: jest
+    getMcpFetchFactory: jest
       .fn()
       .mockReturnValue(
         jest

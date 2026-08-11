@@ -9,38 +9,33 @@
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../clients/client_type_spec';
-import type {
-  ConfiguredFetchFactory,
-  ConfiguredFetchResource,
-} from '../clients/configured_fetch_types';
+import type { McpFetchFactory, McpFetchResource } from './mcp_fetch_types';
 import { createMcpFetch } from './create_mcp_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
 
 /**
- * Tracks the `ConfiguredFetchResource` backing each pooled client so `terminate` can close it
+ * Tracks the `McpFetchResource` backing each pooled client so `terminate` can close it
  * (release the undici dispatcher) when the pool evicts the client. Keyed by client instance so
  * entries drop automatically if a client is GC'd without an explicit terminate.
  */
-const fetchResources = new WeakMap<McpClient, ConfiguredFetchResource>();
+const fetchResources = new WeakMap<McpClient, McpFetchResource>();
 
 /**
- * Dependencies the MCP client type closes over. These are outbound-HTTP concerns specific to the
- * MCP client type and intentionally do not travel through the generic `BuildContext`, so non-HTTP
- * client types stay unaffected.
+ * Dependencies the MCP client type closes over. Outbound-HTTP policy is injected here rather than
+ * through generic `BuildContext`, so non-HTTP client types stay unaffected.
  */
 export interface McpClientTypeDeps {
-  configuredFetchFactory?: ConfiguredFetchFactory;
+  mcpFetchFactory?: McpFetchFactory;
   defaultHeaders?: Readonly<Record<string, string>>;
 }
 
 /**
  * Factory for the registered client type behind `ctx.getClient('mcp')`.
  *
- * Build creates an `McpClient` using the `ConfiguredFetchFactory` closed over via `deps` (which
- * applies SSL/TLS, proxy, and User-Agent policy from the Actions config). If no factory is
- * available, falls back to the built-in Fetch API so the type remains usable in unit tests and
- * contexts where the factory has not been wired yet.
+ * Build creates an `McpClient` using the Actions `McpFetchFactory` closed over via `deps` (SSL/TLS,
+ * proxy, User-Agent policy). If no factory is available, falls back to the built-in Fetch API so
+ * the type remains usable in unit tests and contexts where the factory has not been wired yet.
  *
  * `isUserError` classifies unauthorized / forbidden failures as user errors so the executor can
  * surface them as non-retryable USER errors rather than FRAMEWORK errors. Relies on the SDK error
@@ -73,10 +68,10 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     const hasHeaders = Object.keys(headers).length > 0;
 
     let customFetch: ((url: string | URL, init?: RequestInit) => Promise<Response>) | undefined;
-    let resource: ConfiguredFetchResource | undefined;
+    let resource: McpFetchResource | undefined;
 
-    if (deps.configuredFetchFactory) {
-      resource = deps.configuredFetchFactory({
+    if (deps.mcpFetchFactory) {
+      resource = deps.mcpFetchFactory({
         targetUrl: serverUrl,
         ...(hasHeaders ? { headers } : {}),
       });
@@ -108,7 +103,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   async terminate(client: McpClient): Promise<void> {
     await client.disconnect();
 
-    // Release the configured-fetch resource (undici dispatcher) tied to this client, if any.
+    // Release the MCP fetch resource (undici dispatcher) tied to this client, if any.
     const resource = fetchResources.get(client);
     if (resource) {
       fetchResources.delete(client);
