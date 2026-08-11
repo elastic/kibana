@@ -1,5 +1,5 @@
 {
-  "sha1": "cbb860e983c4a6f42d4721ae11ff0ace225d1ed9",
+  "sha1": "f0051d10fc4dd7f4d8b5199a4ce8d26084cdb78d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -144,45 +144,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/annotations/annotation_library.spec.ts",
         "line": 26,
         "column": 13
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-ec0ed097095fb0e",
-      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 25,
-        "column": 51
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-e2feb0cd547afef",
-      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 52,
-        "column": 60
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-42fc5ed07c9cb92",
-      "title": "Lens chart creation switches the first layer to a different data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 71,
-        "column": 15
       }
     },
     {

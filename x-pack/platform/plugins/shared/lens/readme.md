@@ -247,6 +247,9 @@ Run all tests from the `x-pack` root directory
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group1/config.ts`
   - Run `node ../scripts/functional_test_runner.js --config ./test/functional/apps/lens/group2/config.ts`
   - ...
+- Scout UI tests:
+  - Smokescreen (chart creation): `node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts`
+  - See `test/scout/README.md` for other Scout namespaces
 - API Functional tests:
   - Run `node scripts/functional_tests_server`
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`

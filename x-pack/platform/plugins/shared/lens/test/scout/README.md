@@ -9,10 +9,11 @@ lens/test/scout/
 ├── common/ui/fixtures/   shared page objects, helpers, constants and archives
 ├── core/                 the Lens editor itself, plus the public visualizations API
 ├── open_in_lens/         agg-based and TSVB conversion into Lens
+├── smokescreen/          Lens editor smokescreen (chart creation)
 └── tsdb/                 time series / downsampled index behavior
 ```
 
-`common/` holds no tests and no config; it only exists so the three namespaces can share fixtures. Each namespace re-exports it from its own `ui/fixtures/index.ts`, which is why specs import from `'../fixtures'` regardless of which namespace they live in.
+`common/` holds no tests and no config; it only exists so the namespaces can share fixtures. Each namespace re-exports it from its own `ui/fixtures/index.ts`, which is why specs import from `'../fixtures'` regardless of which namespace they live in.
 
 | Config | Environments |
 |---|---|
@@ -20,6 +21,7 @@ lens/test/scout/
 | `core/ui/playwright.config.ts` | stateful only |
 | `core/api/playwright.config.ts` | all |
 | `open_in_lens/ui/parallel.playwright.config.ts` | all |
+| `smokescreen/ui/parallel.playwright.config.ts` | stateful only |
 | `tsdb/ui/playwright.config.ts` | all |
 
 ## Running tests
@@ -47,6 +49,9 @@ node scripts/playwright test --project local --config x-pack/platform/plugins/sh
 # Open in Lens conversions
 node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/open_in_lens/ui/parallel.playwright.config.ts
 
+# Smokescreen (chart creation)
+node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
+
 # TSDB
 node scripts/playwright test --project local --config x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/playwright.config.ts
 ```
@@ -55,7 +60,7 @@ Add `--ui` to any of these to open the Playwright UI runner.
 
 ### Serverless
 
-Only the configs marked `all` in the table above have serverless coverage: `core/api`, `open_in_lens` and `tsdb`. The two `core/ui` configs are stateful-only, so they would match nothing here.
+Only the configs marked `all` in the table above have serverless coverage: `core/api`, `open_in_lens` and `tsdb`. The `core/ui` and `smokescreen/ui` configs are stateful-only, so they would match nothing here.
 
 Start a project type — `search`, `observability_complete` or `security_complete`:
 
