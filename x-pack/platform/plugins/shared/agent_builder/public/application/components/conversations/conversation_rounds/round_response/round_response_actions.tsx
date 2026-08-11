@@ -60,24 +60,6 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
 
-  const {
-    vote,
-    chips,
-    comment,
-    modalOpen,
-    inviteVisible,
-    submitted,
-    submittedFading,
-    isSubmitting,
-    setVote,
-    toggleChip,
-    setComment,
-    openModal,
-    closeModal,
-    dismissInvite,
-    submit,
-  } = useFeedback(rawRound?.id ?? '', rawRound?.feedback);
-
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
     if (isSuccess) {
@@ -99,6 +81,33 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     if (!id) return undefined;
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound?.trace_id]);
+
+  const ebtContext = useMemo(
+    () => ({
+      traceId,
+      connectorId: rawRound?.model_usage?.connector_id,
+      model: rawRound?.model_usage?.model,
+    }),
+    [traceId, rawRound?.model_usage?.connector_id, rawRound?.model_usage?.model]
+  );
+
+  const {
+    vote,
+    chips,
+    comment,
+    modalOpen,
+    inviteVisible,
+    submitted,
+    submittedFading,
+    isSubmitting,
+    setVote,
+    toggleChip,
+    setComment,
+    openModal,
+    closeModal,
+    dismissInvite,
+    submit,
+  } = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);
 
   // `services.plugins.evals` is optional — the evals plugin isn't installed
   // in every Kibana deployment. When absent, the 'Add to Dataset' button hides.

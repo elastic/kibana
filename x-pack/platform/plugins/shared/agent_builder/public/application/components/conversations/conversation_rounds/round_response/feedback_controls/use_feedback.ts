@@ -13,8 +13,10 @@ import type {
   ConversationRoundFeedback,
   FeedbackChipId,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { useToasts } from '../../../../../hooks/use_toasts';
 import { queryKeys } from '../../../../../query_keys';
 
@@ -54,15 +56,23 @@ export interface UseFeedbackReturn extends FeedbackState {
   submit: () => void;
 }
 
+export interface FeedbackEbtContext {
+  traceId?: string;
+  connectorId?: string;
+  model?: string;
+}
+
 const SUBMITTED_VISIBLE_MS = 2500;
 const SUBMITTED_FADE_MS = 500;
 
 export const useFeedback = (
   roundId: string,
-  initialFeedback?: { vote: 'up' | 'down' }
+  initialFeedback?: { vote: 'up' | 'down' },
+  ebtContext?: FeedbackEbtContext
 ): UseFeedbackReturn => {
   const conversationId = useConversationId();
   const { conversationsService } = useAgentBuilderServices();
+  const { services } = useKibana();
   const { addErrorToast } = useToasts();
   const queryClient = useQueryClient();
   const serverVote = initialFeedback?.vote ?? null;
@@ -242,6 +252,18 @@ export const useFeedback = (
           comment,
           submitted_at: new Date().toISOString(),
         });
+
+        services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+          round_id: roundId,
+          conversation_id: conversationId,
+          vote: currentVote,
+          chips: chips as string[],
+          has_comment: comment.trim().length > 0,
+          trace_id: ebtContext?.traceId,
+          connector_id: ebtContext?.connectorId,
+          model: ebtContext?.model,
+        });
+
         setSubmittedPhase('visible');
 
         clearSubmittedTimers();
@@ -266,6 +288,8 @@ export const useFeedback = (
     roundId,
     chips,
     comment,
+    ebtContext,
+    services.analytics,
     clearSubmittedTimers,
     addErrorToast,
     resetTo,
