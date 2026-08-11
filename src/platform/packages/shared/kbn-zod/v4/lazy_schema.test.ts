@@ -153,6 +153,21 @@ describe('lazySchema', () => {
       });
     });
 
+    it('preserves top-level .describe() metadata in the JSON schema output', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }).describe('my description'));
+      expect(z.toJSONSchema(Schema)).toMatchObject({ description: 'my description' });
+    });
+
+    it('preserves top-level .meta() title and description in the JSON schema output', () => {
+      const Schema = lazySchema(() =>
+        z.object({ id: z.string() }).meta({ title: 'My Schema', description: 'a description' })
+      );
+      expect(z.toJSONSchema(Schema)).toMatchObject({
+        title: 'My Schema',
+        description: 'a description',
+      });
+    });
+
     it('does not crash when the factory returns an optional-wrapped schema', () => {
       const Schema = lazySchema(() => z.object({ id: z.string() }).optional());
       expect(() => z.toJSONSchema(Schema)).not.toThrow();

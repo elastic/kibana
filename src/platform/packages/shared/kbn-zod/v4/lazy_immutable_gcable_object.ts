@@ -66,12 +66,29 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
         // getters like `value`) rather than a spread which silently drops them.
         const wrapped = Object.create(value as object) as Record<PropertyKey, unknown>;
         wrapped.processJSONSchema = (
-          ctx: { seen?: Map<unknown, unknown> },
+          ctx: {
+            seen?: Map<unknown, unknown>;
+            metadataRegistry?: {
+              has(k: unknown): boolean;
+              get(k: unknown): unknown;
+              add(k: unknown, v: unknown): void;
+            };
+          },
           json: unknown,
           params: unknown
         ) => {
           if (ctx?.seen instanceof Map && ctx.seen.has(self) && !ctx.seen.has(real)) {
             ctx.seen.set(real, ctx.seen.get(self));
+          }
+          // process() calls metadataRegistry.get(proxy) after processJSONSchema returns
+          // to merge title/description into the output. The registry is keyed by real
+          // object identity, so alias the entry onto the proxy so the lookup hits.
+          if (
+            ctx?.metadataRegistry != null &&
+            ctx.metadataRegistry.has(real) &&
+            !ctx.metadataRegistry.has(self)
+          ) {
+            ctx.metadataRegistry.add(self, ctx.metadataRegistry.get(real));
           }
           return originalPJS(ctx, json, params);
         };
