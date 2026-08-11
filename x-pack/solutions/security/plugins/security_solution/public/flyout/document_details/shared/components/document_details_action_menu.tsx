@@ -30,7 +30,6 @@ import { RESPOND_ACTION_ID } from '../../../../common/components/endpoint/respon
 
 interface DocumentDetailsActionMenuProps {
   addToCaseItems: EuiContextMenuPanelItemDescriptor[];
-  addToCasePanels: EuiContextMenuPanelDescriptor[];
   alertAssigneeItems: EuiContextMenuPanelItemDescriptor[];
   alertAssigneePanels: EuiContextMenuPanelDescriptor[];
   alertTagItems: EuiContextMenuPanelItemDescriptor[];
@@ -78,7 +77,6 @@ const ACTION_ICONS_BY_ID = {
 
 export const DocumentDetailsActionMenu = ({
   addToCaseItems,
-  addToCasePanels,
   alertAssigneeItems,
   alertAssigneePanels,
   alertTagItems,
@@ -163,7 +161,6 @@ export const DocumentDetailsActionMenu = ({
 
   const panels = useMemo(
     () => [
-      ...(!isRemoteDocument ? addToCasePanels : []),
       ...(!isRemoteDocument ? alertTagPanels : []),
       ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanels : runDocumentWorkflowPanels) : []),
       ...(!isRemoteDocument ? alertAssigneePanels : []),
@@ -172,7 +169,6 @@ export const DocumentDetailsActionMenu = ({
     [
       alertAssigneePanels,
       alertTagPanels,
-      addToCasePanels,
       isAlert,
       isRemoteDocument,
       runAlertWorkflowPanels,

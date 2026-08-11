@@ -65,6 +65,15 @@ describe('useCasePermission', () => {
     expect(hookResult.result.current).toEqual(false);
   });
 
+  it('should return false if user can only create cases', () => {
+    const ProviderComponent = getProviderComponent(
+      getMockedServices({ create: true, createComment: true, update: false })
+    );
+
+    hookResult = renderHook(() => useCaseDisabled('abc'), { wrapper: ProviderComponent });
+    expect(hookResult.result.current).toEqual(false);
+  });
+
   it(`should return true if user doesn't have correct permissions`, () => {
     const ProviderComponent = getProviderComponent(
       getMockedServices({ createComment: false, update: true })

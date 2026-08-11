@@ -20,8 +20,7 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';
 export const INVESTIGATE_IN_TIMELINE_TEST_ID = 'tiIndicatorFlyoutInvestigateInTimelineContextMenu';
-export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseContextMenu';
-export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
+export const ADD_TO_CASE_TEST_ID = 'tiIndicatorFlyoutAddToCaseContextMenu';
 export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
 export const TAKE_ACTION_POPOVER_MIN_WIDTH = 240;
 
@@ -63,8 +62,7 @@ export const TakeAction = memo(({ indicator }: TakeActionProps) => {
         key="attachmentsCase"
         indicator={indicator}
         onClick={closePopover}
-        addToNewCaseTestSubj={ADD_TO_NEW_CASE_TEST_ID}
-        addToExistingCaseTestSubj={ADD_TO_EXISTING_CASE_TEST_ID}
+        data-test-subj={ADD_TO_CASE_TEST_ID}
       />,
       <AddToBlockListContextMenu
         key={'addToBlocklist'}

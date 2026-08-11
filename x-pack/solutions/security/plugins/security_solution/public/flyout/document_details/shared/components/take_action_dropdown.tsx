@@ -294,13 +294,12 @@ export const TakeActionDropdown = memo(
       agentId: osqueryAgentId,
     });
 
-    const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
+    const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: dataAsNestedObject,
       nonEcsData:
         dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
-      useNestedCaseActions: true,
       refetch,
     });
 
@@ -380,7 +379,6 @@ export const TakeActionDropdown = memo(
       >
         <DocumentDetailsActionMenu
           addToCaseItems={addToCaseActionItems}
-          addToCasePanels={addToCaseActionPanels}
           alertAssigneeItems={alertAssigneesItems}
           alertAssigneePanels={alertAssigneesPanels}
           alertTagItems={alertTagsItems}

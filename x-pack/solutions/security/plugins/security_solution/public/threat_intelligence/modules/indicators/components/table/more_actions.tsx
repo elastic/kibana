@@ -13,12 +13,7 @@ import { AddToBlockListContextMenu } from '../../../block_list/components/add_to
 import { IndicatorAddToCaseContextMenuItem } from '../../../../../cases/attachments/indicator/components/add_to_case_context_menu_item';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from '../../../block_list/utils/can_add_to_block_list';
-import {
-  ADD_TO_BLOCK_LIST_TEST_ID,
-  ADD_TO_EXISTING_TEST_ID,
-  ADD_TO_NEW_CASE_TEST_ID,
-  MORE_ACTIONS_TEST_ID,
-} from './test_ids';
+import { ADD_TO_BLOCK_LIST_TEST_ID, ADD_TO_CASE_TEST_ID, MORE_ACTIONS_TEST_ID } from './test_ids';
 import { MORE_ACTIONS_BUTTON_LABEL } from './translations';
 
 export interface TakeActionProps {
@@ -50,8 +45,7 @@ export const MoreActions = memo(({ indicator }: TakeActionProps) => {
         key="attachmentsCase"
         indicator={indicator}
         onClick={closePopover}
-        addToNewCaseTestSubj={ADD_TO_NEW_CASE_TEST_ID}
-        addToExistingCaseTestSubj={ADD_TO_EXISTING_TEST_ID}
+        data-test-subj={ADD_TO_CASE_TEST_ID}
       />,
       <AddToBlockListContextMenu
         key={'addToBlocklist'}
