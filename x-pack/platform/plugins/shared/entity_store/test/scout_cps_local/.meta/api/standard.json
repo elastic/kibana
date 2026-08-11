@@ -35,7 +35,7 @@
     },
     {
       "id": "395fb291fcac059-758e64ba98d6192",
-      "title": "Entity Store CPS logs extraction (linked serverless project) produces a correct entity document after the CPS extract → promote round-trip",
+      "title": "Entity Store CPS logs extraction (linked serverless project) produces a correct entity document after the CPS extract \u2192 promote round-trip",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "e1869ae0a4737d6520cf8b6823eee5034e16becb",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -7,7 +7,7 @@
   "tests": [
     {
       "id": "1880b7c8ee4aaac-e395ce97cca539e",
-      "title": "Automated email resolution integration tests Basic email matching — two entities with same email",
+      "title": "Automated email resolution integration tests Basic email matching \u2014 two entities with same email",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -23,7 +23,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-2925171d96b5532",
-      "title": "Automated email resolution integration tests Namespace priority — AD entity selected as target over Okta and Entra",
+      "title": "Automated email resolution integration tests Namespace priority \u2014 AD entity selected as target over Okta and Entra",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,7 +39,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-a99ccef61b945a2",
-      "title": "Automated email resolution integration tests Alphabetical fallback — unknown namespaces use entity ID tiebreaker",
+      "title": "Automated email resolution integration tests Alphabetical fallback \u2014 unknown namespaces use entity ID tiebreaker",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -55,7 +55,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-c07a229a984ea45",
-      "title": "Automated email resolution integration tests Extend existing group — new entity with matching email joins pre-existing resolution group",
+      "title": "Automated email resolution integration tests Extend existing group \u2014 new entity with matching email joins pre-existing resolution group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -71,7 +71,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-5571f3104035a1d",
-      "title": "Automated email resolution integration tests Incremental pickup — watermark advances; second run processes only new entities",
+      "title": "Automated email resolution integration tests Incremental pickup \u2014 watermark advances; second run processes only new entities",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -87,7 +87,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-a84792155c15c5b",
-      "title": "Automated email resolution integration tests Multi-value email excluded — entity with array user.email is not matched",
+      "title": "Automated email resolution integration tests Multi-value email excluded \u2014 entity with array user.email is not matched",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -103,7 +103,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-d8f28015196c6d3",
-      "title": "Automated email resolution integration tests Ambiguous buckets skipped — multiple existing targets for same email",
+      "title": "Automated email resolution integration tests Ambiguous buckets skipped \u2014 multiple existing targets for same email",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -119,7 +119,7 @@
     },
     {
       "id": "1880b7c8ee4aaac-bfb4b3b43243881",
-      "title": "Automated email resolution integration tests Manual override preserved — manually linked entity not re-resolved; new entity extends group",
+      "title": "Automated email resolution integration tests Manual override preserved \u2014 manually linked entity not re-resolved; new entity extends group",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -534,8 +534,8 @@
       }
     },
     {
-      "id": "e26348cce6a1520-83bc236f03503c6",
-      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate by priority target, then preserves link when disabled",
+      "id": "e26348cce6a1520-272fcc149650c56",
+      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate to the seed target, then preserves link when disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -545,7 +545,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 105,
+        "line": 108,
         "column": 46
       }
     },
@@ -561,13 +561,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 198,
+        "line": 207,
         "column": 19
       }
     },
     {
-      "id": "e26348cce6a1520-138d45ef641d800",
-      "title": "Related user alias resolution integration tests cascades candidate aliases to the priority target",
+      "id": "e26348cce6a1520-d34261d1940580b",
+      "title": "Related user alias resolution integration tests cascades candidate aliases to the seed target",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -577,7 +577,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 231,
+        "line": 240,
         "column": 10
       }
     },
