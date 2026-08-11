@@ -15,7 +15,12 @@ import {
 } from '@kbn/rule-data-utils';
 import React, { useMemo } from 'react';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
-import type { BulkActionsConfig, BulkActionsPanelConfig, TimelineItem } from '../types';
+import type {
+  BulkActionGroupId,
+  BulkActionsConfig,
+  BulkActionsPanelConfig,
+  TimelineItem,
+} from '../types';
 import {
   BULK_ADD_TO_CASE_ACTION_ID,
   BULK_ADD_TO_CHAT_ACTION_ID,
@@ -40,9 +45,9 @@ const ACTION_GROUP_ORDER = [
   ['custom'],
   ['workflow'],
   ['chat'],
-] as const;
+] as const satisfies ReadonlyArray<ReadonlyArray<BulkActionGroupId>>;
 
-const ACTION_GROUP_BY_ID: Readonly<Record<string, string>> = {
+const ACTION_GROUP_BY_ID: Readonly<Record<string, BulkActionGroupId>> = {
   [BULK_ADD_TO_CASE_ACTION_ID]: 'cases',
   [BULK_ADD_TO_CHAT_ACTION_ID]: 'chat',
   [BULK_EDIT_TAGS_ACTION_ID]: 'tags',
@@ -66,17 +71,19 @@ const getGroupedItems = (
   items: BulkActionsConfig[],
   toMenuItem: (item: BulkActionsConfig) => EuiContextMenuPanelItemDescriptor
 ): EuiContextMenuPanelItemDescriptor[] => {
-  const groups = new Map<string, EuiContextMenuPanelItemDescriptor[]>(
+  const groups = new Map<BulkActionGroupId, EuiContextMenuPanelItemDescriptor[]>(
     ACTION_GROUP_ORDER.flatMap((groupIds) =>
-      groupIds.map((groupId): [string, EuiContextMenuPanelItemDescriptor[]] => [groupId, []])
+      groupIds.map((groupId): [BulkActionGroupId, EuiContextMenuPanelItemDescriptor[]] => [
+        groupId,
+        [],
+      ])
     )
   );
 
   items.forEach((item) => {
-    const groupId = item.groupId ?? ACTION_GROUP_BY_ID[item.key] ?? 'custom';
-    const groupItems = groups.get(groupId) ?? [];
-    groupItems.push(toMenuItem(item));
-    groups.set(groupId, groupItems);
+    const requestedGroupId = item.groupId ?? ACTION_GROUP_BY_ID[item.key] ?? 'custom';
+    const groupId = groups.has(requestedGroupId) ? requestedGroupId : 'custom';
+    groups.get(groupId)?.push(toMenuItem(item));
   });
 
   const visibleGroups = ACTION_GROUP_ORDER.map((groupIds) => ({

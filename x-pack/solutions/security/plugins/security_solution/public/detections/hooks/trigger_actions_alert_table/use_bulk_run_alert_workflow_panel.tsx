@@ -44,7 +44,7 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
     return <AlertWorkflowsPanel alertIds={alertIds} onClose={props.closePopoverMenu} />;
   }, []);
 
-  const runWorkflowItems = useMemo(
+  const runWorkflowItems = useMemo<BulkActionsConfig[]>(
     () =>
       canRunWorkflow
         ? [
@@ -56,7 +56,7 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
               panel: RUN_WORKFLOW_BULK_PANEL_ID,
               disableOnQuery: false,
               icon: 'workflow' as const,
-              groupId: 'workflow',
+              groupId: 'workflow' as const,
             },
           ]
         : [],
