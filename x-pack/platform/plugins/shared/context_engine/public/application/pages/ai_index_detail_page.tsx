@@ -66,7 +66,7 @@ export const AiIndexDetailPage = () => {
             actions={[
               <EuiButton
                 key="back-to-list"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 href={landingUrl}
                 data-test-subj="contextAiIndexBackToListButton"
               >
@@ -110,7 +110,7 @@ export const AiIndexDetailPage = () => {
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-list"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={landingUrl}
             data-test-subj="contextAiIndexBackToListButton"
           >
