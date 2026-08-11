@@ -175,15 +175,20 @@ export const setWatchScopeRouting = (
   }
 
   const { scopeRouting } = settings;
+
+  // Validate the full patch before mutating anything — a partially-applied patch would leave
+  // the store diverged from what the 400 response led the client to expect.
   for (const key of SCOPE_ROUTING_SELECTS) {
     const selectedId = patch[key];
-    if (selectedId == null) {
-      continue;
-    }
-    if (!scopeRouting[key].optionIds.includes(selectedId)) {
+    if (selectedId != null && !scopeRouting[key].optionIds.includes(selectedId)) {
       return undefined;
     }
-    scopeRouting[key].selectedId = selectedId;
+  }
+  for (const key of SCOPE_ROUTING_SELECTS) {
+    const selectedId = patch[key];
+    if (selectedId != null) {
+      scopeRouting[key].selectedId = selectedId;
+    }
   }
   return settings;
 };
@@ -200,17 +205,21 @@ export const setWatchApprovalGate = (
   }
 
   const { requirement, approverRoleId } = patch;
+
+  // Validate both fields before mutating either — writing `requirement` then finding
+  // `approverRoleId` invalid would silently loosen a gate while returning 400 to the caller.
   // A locked gate always gates — refuse to weaken it however the request is shaped.
+  if (requirement != null && gate.requirementLocked) {
+    return undefined;
+  }
+  if (approverRoleId != null && !gate.approverRoleOptionIds?.includes(approverRoleId)) {
+    return undefined;
+  }
+
   if (requirement != null) {
-    if (gate.requirementLocked) {
-      return undefined;
-    }
     gate.requirement = requirement;
   }
   if (approverRoleId != null) {
-    if (!gate.approverRoleOptionIds?.includes(approverRoleId)) {
-      return undefined;
-    }
     gate.approverRoleId = approverRoleId;
   }
   return settings;
