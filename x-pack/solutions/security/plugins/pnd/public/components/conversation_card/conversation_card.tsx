@@ -8,23 +8,19 @@
 import React, { useCallback, memo } from 'react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
-import { CONVERSATION_CARD_LABELS, CONVERSATION_CARD_ACTIONS } from './translations';
+import { CONVERSATION_CARD_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
-
+import { ConversationsActionsGroup } from './actions_group';
 const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 
 export const ConversationCard = memo<{
@@ -32,7 +28,6 @@ export const ConversationCard = memo<{
   hasBorder: boolean;
 }>(({ investigation, hasBorder }) => {
   const { euiTheme } = useEuiTheme();
-  const inMotion = investigation.status === 'in-progress';
   const emptyValue = getEmptyValue();
   const history = useHistory();
 
@@ -72,9 +67,14 @@ export const ConversationCard = memo<{
         }
       }}
     >
-      <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="flexStart"
+        gutterSize="l"
+        responsive={false}
+      >
         {investigation.priorityScore != null ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} alignSelf="center" justifyContent="center">
             <EuiText
               size="s"
               component="span"
@@ -118,42 +118,11 @@ export const ConversationCard = memo<{
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  direction="row"
-                  justifyContent="flexEnd"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      size="s"
-                      color={inMotion ? 'text' : 'primary'}
-                      onClick={(event: React.MouseEvent) => {
-                        event.stopPropagation();
-                        onOpen();
-                      }}
-                    >
-                      {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={CONVERSATION_CARD_ACTIONS.openChat}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        aria-label={CONVERSATION_CARD_ACTIONS.openChat}
-                        iconType="comment"
-                        color="text"
-                        onClick={(event: React.MouseEvent) => {
-                          event.stopPropagation();
-                          onOpenChat();
-                        }}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <ConversationsActionsGroup
+                  investigation={investigation}
+                  onOpen={onOpen}
+                  onOpenChat={onOpenChat}
+                />
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
