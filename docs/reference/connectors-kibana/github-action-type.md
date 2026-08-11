@@ -87,7 +87,7 @@ The GitHub connector exposes the following actions:
 `getIssueComments`
 :   Get comments for a specific issue in a repository.
 
-`createIssue`
+`createIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new issue in a repository.
 
 `addIssueComment`
