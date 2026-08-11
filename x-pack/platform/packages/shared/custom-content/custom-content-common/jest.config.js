@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CustomContentPlugin } from './plugin';
-
-export type { CustomContentEmbeddableState } from '../server';
-
-export const plugin = () => new CustomContentPlugin();
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/custom-content/custom-content-common'],
+};
