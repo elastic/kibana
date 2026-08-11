@@ -235,7 +235,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // pagination is driven by the external pagination store. Keep the two in
     // sync so the icon follows the document currently displayed in the flyout.
     useEffect(() => {
-      if (!enableNewFlyout || flyoutDocumentIndex == null) return;
+      if (!enableNewFlyout) return;
+      if (flyoutDocumentIndex == null) {
+        setExpandedDoc((prev) => (prev ? undefined : prev));
+        return;
+      }
       const paginatedDocument = tableRows[flyoutDocumentIndex];
       if (paginatedDocument) {
         setExpandedDoc(paginatedDocument);
