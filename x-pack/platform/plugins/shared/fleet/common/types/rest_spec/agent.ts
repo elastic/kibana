@@ -322,7 +322,9 @@ export interface GetAgentStatusResponse {
 
 export interface GetAgentIncomingDataRequest {
   query: {
-    agentsIds: string[];
+    agentsIds?: string[];
+    /** Agent policy ID — used in standalone agentless mode when there is no Fleet agent ID. */
+    policyId?: string;
     pkgName?: string;
     pkgVersion?: string;
     previewData?: boolean;

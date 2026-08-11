@@ -27,12 +27,16 @@ import { NextSteps } from './next_steps';
 
 export const AgentlessStepConfirmData = ({
   agent,
+  policyId,
   packageName,
   packageVersion,
   setConfirmDataStatus,
   policyTemplates,
 }: {
-  agent: Agent;
+  /** Enrolled Fleet agent. Mutually exclusive with `policyId`. */
+  agent?: Agent;
+  /** Agent policy ID used in standalone agentless mode when there is no Fleet agent. */
+  policyId?: string;
   packageName: string;
   packageVersion: string;
   setConfirmDataStatus: (status: EuiStepStatus) => void;
@@ -42,7 +46,8 @@ export const AgentlessStepConfirmData = ({
   const [overallState, setOverallState] = useState<'pending' | 'success' | 'failure'>('pending');
 
   const { incomingData, hasReachedTimeout } = usePollingIncomingData({
-    agentIds: [agent.id],
+    agentIds: agent ? [agent.id] : undefined,
+    policyId,
     pkgName: packageName,
     pkgVersion: packageVersion,
   });

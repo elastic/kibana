@@ -789,11 +789,23 @@ export const GetAgentStatusResponseSchema = schema.object({
 
 export const GetAgentDataRequestSchema = {
   query: schema.object({
-    agentsIds: schema.oneOf(
-      [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
-      {
-        meta: { description: 'Agent IDs to check data for, as an array or comma-separated string' },
-      }
+    agentsIds: schema.maybe(
+      schema.oneOf(
+        [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
+        {
+          meta: {
+            description: 'Agent IDs to check data for, as an array or comma-separated string',
+          },
+        }
+      )
+    ),
+    policyId: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Agent policy ID. When provided, checks data streams for the policy without needing agent IDs (standalone agentless mode). Requires pkgName and pkgVersion.',
+        },
+      })
     ),
     pkgName: schema.maybe(
       schema.string({ meta: { description: 'Filter by integration package name' } })
