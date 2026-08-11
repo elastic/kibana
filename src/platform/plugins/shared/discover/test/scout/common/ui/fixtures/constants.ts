@@ -13,6 +13,12 @@
  */
 export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 
+export const DATE_NESTED_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/date_nested';
+
+export const DATE_NESTED_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/date_nested';
+
 export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 

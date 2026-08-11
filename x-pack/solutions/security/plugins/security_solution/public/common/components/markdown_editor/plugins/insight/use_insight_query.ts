@@ -44,8 +44,8 @@ export const useInsightQuery = ({
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const { dataView } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const browserFields = useBrowserFields(dataView);
 
   const [hasError, setHasError] = useState(false);
   const combinedQueries = useMemo(() => {

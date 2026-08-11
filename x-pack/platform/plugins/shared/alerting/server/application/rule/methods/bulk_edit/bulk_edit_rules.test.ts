@@ -16,6 +16,7 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule } from '../../../../types';
@@ -3395,7 +3396,7 @@ describe('bulkEdit()', () => {
   });
 
   describe('change tracking', () => {
-    const updatedRuleSO = (id: string, error?: SavedObject<RawRule>['error']) =>
+    const updatedRuleSO = (id: string, error?: SavedObjectError) =>
       ({
         id,
         type: RULE_SAVED_OBJECT_TYPE,

@@ -258,4 +258,55 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.queryByText('Snoozed by')).not.toBeInTheDocument();
     expect(screen.queryByText('Snoozed until')).not.toBeInTheDocument();
   });
+
+  it('renders View in source system for an absolute http(s) data.alert_url', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: 'https://monitoring.example/alerts/1',
+          }}
+        />
+      </I18nProvider>
+    );
+
+    const link = screen.getByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl');
+    expect(link).toHaveAttribute('href', 'https://monitoring.example/alerts/1');
+  });
+
+  it('does not render a link for javascript: or data: alert_url values', () => {
+    // Built dynamically so eslint no-script-url does not flag the XSS fixture string.
+    const javascriptAlertUrl = ['java', 'script:alert(document.domain)'].join('');
+    const { rerender } = render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: javascriptAlertUrl,
+          }}
+        />
+      </I18nProvider>
+    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl')
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupingData={{
+            ...baseProps.groupingData,
+            alert_url: 'data:text/html,<script>alert(1)</script>',
+          }}
+        />
+      </I18nProvider>
+    );
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsOverviewListAlertUrl')
+    ).not.toBeInTheDocument();
+  });
 });

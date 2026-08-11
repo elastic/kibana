@@ -54,13 +54,14 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
     const sharedUrl = await spaceTest.step('create share URL for unsaved tab', async () => {
       await pageObjects.unifiedTabs.editTabLabel(0, 'first tab');
       await pageObjects.discover.waitUntilTabIsLoaded();
-      expect(await pageObjects.discover.getHitCountInt()).toBe(14_004);
+      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(14_004);
 
       await pageObjects.unifiedTabs.createNewTab();
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.unifiedTabs.editTabLabel(1, 'second tab');
       await pageObjects.discover.writeAndSubmitKqlQuery('bytes > 1000');
-      expect(await pageObjects.discover.getHitCountInt()).toBe(12_653);
+      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(12_653);
+
       expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual([
         'first tab',
         'second tab',
@@ -77,7 +78,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       );
       const { discover, queryBar, unifiedTabs } = sharedPageObjects;
 
-      expect(await discover.getHitCount()).toBe('12,653');
+      await expect.poll(() => discover.getHitCountInt()).toBe(12_653);
       expect(await queryBar.getQuery()).toBe('bytes > 1000');
       expect(await unifiedTabs.getTabLabels()).toStrictEqual(['first tab', 'second tab']);
       expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
@@ -85,7 +86,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
       await unifiedTabs.editTabLabel(1, 'second tab (modified)');
       await discover.writeAndSubmitKqlQuery('bytes > 500');
-      expect(await discover.getHitCount()).toBe('13,129');
+      await expect.poll(() => discover.getHitCountInt()).toBe(13_129);
 
       await sharedPage.close();
     });
@@ -97,7 +98,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       const { discover, queryBar, unifiedTabs } = pageObjects;
 
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getHitCountInt()).toBe(12_653);
+      await expect.poll(() => discover.getHitCountInt()).toBe(12_653);
       expect(await queryBar.getQuery()).toBe('bytes > 1000');
       expect(await unifiedTabs.getTabLabels()).toStrictEqual([
         'first tab',
@@ -117,7 +118,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       );
       const { discover, queryBar, unifiedTabs } = sharedPageObjects;
 
-      expect(await discover.getHitCount()).toBe('12,653');
+      await expect.poll(() => discover.getHitCountInt()).toBe(12_653);
       expect(await queryBar.getQuery()).toBe('bytes > 1000');
       expect(await unifiedTabs.getTabLabels()).toStrictEqual(['second tab']);
       expect(await unifiedTabs.getRecentlyClosedTabLabels()).toStrictEqual([]);
@@ -144,7 +145,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
           await pageObjects.discover.waitUntilTabIsLoaded();
           await pageObjects.unifiedTabs.editTabLabel(1, 'esql2');
           await pageObjects.discover.writeAndSubmitEsqlQuery(queryEsql);
-          expect(await pageObjects.discover.getHitCountInt()).toBe(20);
+          await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(20);
           expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
 
           await pageObjects.discover.saveSearch(savedSearchName);
@@ -162,7 +163,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         );
         const { discover, unifiedTabs } = sharedPageObjects;
 
-        expect(await discover.getHitCount()).toBe('20');
+        await expect.poll(() => discover.getHitCountInt()).toBe(20);
         expect(await discover.getEsqlQueryValue()).toBe(queryEsql);
         expect(await unifiedTabs.getSelectedTabLabel()).toBe('esql2');
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
@@ -171,7 +172,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
         await unifiedTabs.editTabLabel(1, 'esql2 (modified)');
         await discover.writeAndSubmitEsqlQuery(queryEsqlModified);
-        expect(await discover.getHitCount()).toBe('22');
+        await expect.poll(() => discover.getHitCountInt()).toBe(22);
 
         await sharedPage.close();
       });
@@ -183,7 +184,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         const { discover, unifiedTabs } = pageObjects;
 
         await discover.waitUntilTabIsLoaded();
-        expect(await discover.getHitCountInt()).toBe(20);
+        await expect.poll(() => discover.getHitCountInt()).toBe(20);
         expect(await discover.getEsqlQueryValue()).toBe(queryEsql);
         expect(await unifiedTabs.getSelectedTabLabel()).toBe('esql2 (modified)');
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2 (modified)']);
@@ -203,7 +204,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
           );
           const { discover, unifiedTabs } = sharedPageObjects;
 
-          expect(await discover.getHitCount()).toBe('20');
+          await expect.poll(() => discover.getHitCountInt()).toBe(20);
           expect(await discover.getEsqlQueryValue()).toBe(queryEsql);
           expect(await unifiedTabs.getSelectedTabLabel()).toBe('esql2');
           expect(await unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
@@ -239,7 +240,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
             value: 'jpg',
           });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          expect(await pageObjects.discover.getHitCountInt()).toBe(9_109);
+          await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(9_109);
           expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
 
           const url = await pageObjects.discover.getSharedUrl();
@@ -262,7 +263,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         );
         const { discover, filterBar, unifiedTabs } = sharedPageObjects;
 
-        expect(await discover.getHitCount()).toBe('9,109');
+        await expect.poll(() => discover.getHitCountInt()).toBe(9_109);
         expect(await filterBar.hasFilter({ field: 'extension', value: 'jpg' })).toBe(true);
         expect(await unifiedTabs.getSelectedTabLabel()).toBe('unsaved');
         expect(await unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
@@ -279,7 +280,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
         await unifiedTabs.editTabLabel(1, 'unsaved (modified)');
         await discover.writeAndSubmitKqlQuery('bytes > 1000');
-        expect(await discover.getHitCount()).toBe('8,830');
+        await expect.poll(() => discover.getHitCountInt()).toBe(8_830);
 
         await sharedPage.close();
       });
@@ -292,7 +293,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
         await discover.loadSavedSearch(savedSearchName);
         await discover.waitUntilTabIsLoaded();
 
-        expect(await discover.getHitCountInt()).toBe(14_004);
+        await expect.poll(() => discover.getHitCountInt()).toBe(14_004);
         expect(await filterBar.getFilterCount()).toBe(0);
         expect(await queryBar.getQuery()).toBe('');
         expect(await unifiedTabs.getSelectedTabLabel()).toBe('saved');
