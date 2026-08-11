@@ -234,7 +234,15 @@ const assertDowngradeResult = (
   }
 };
 
-test.describe('Lens LogsDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
+// Cloud serverless is excluded due to https://github.com/elastic/kibana/issues/195089.
+const logsDBDeploymentTags = [
+  ...tags.stateful.classic,
+  '@local-serverless-search',
+  '@local-serverless-observability_complete',
+  '@local-serverless-security_complete',
+];
+
+test.describe('Lens LogsDB stream downgrade scenarios', { tag: logsDBDeploymentTags }, () => {
   let cleanupBaseStream: (() => Promise<void>) | undefined;
 
   test.beforeAll(async ({ tsdbHelper }) => {
