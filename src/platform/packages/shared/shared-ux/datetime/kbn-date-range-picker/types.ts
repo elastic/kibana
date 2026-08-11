@@ -55,8 +55,7 @@ export interface TimeRangeBoundsOption extends TimeRangeBounds {
   label?: string;
   /**
    * Whether the option belongs to the user. Options owned by configuration set
-   * this to `false` so they cannot be removed from the UI; everything else is
-   * editable, and its actions depend on the callbacks the consumer wires.
+   * this to `false` so they cannot be removed from the UI.
    * @default true
    */
   isEditable?: boolean;

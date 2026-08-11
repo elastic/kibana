@@ -16,14 +16,14 @@ export interface PresetItem {
   start: string;
   end: string;
   label?: string;
-  /** Presets from `timepicker:quickRanges` set this to `false`: they are administrator-owned. */
+  /** Presets from `timepicker:quickRanges` set this to `false`. */
   isEditable?: boolean;
 }
 
 /**
  * Legacy shape, where the stored list was the *whole* displayed list: on first
- * save the quick ranges were copied into storage alongside the user's own
- * presets, which made them deletable. `null` meant "not yet seeded".
+ * save the quick ranges from UI settings were copied into storage alongside
+ * the user's own presets, which made them deletable. `null` meant "not yet seeded".
  */
 export interface StoredPresetsV1 {
   version: 1;

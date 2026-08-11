@@ -29,8 +29,7 @@ export interface UseDateRangePickerPresetsArgs {
   service: DateRangePickerPresetsService;
   /**
    * When `false`, presets are the locked quick ranges alone: no stored value is
-   * read and save/delete are unavailable. Consumers gate this on their
-   * persistence feature flag.
+   * read and save/delete are unavailable.
    */
   persistenceEnabled: boolean;
   notifications: NotificationsStart;
