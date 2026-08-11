@@ -27,7 +27,7 @@ const ESQL_JSON_STRUCTURED_ES_TYPES = new Set([
 // Max number of values the document will show. The rest will be truncated.
 // Applies before search, so truncated values do not participate in it.
 // Prevents blocking the main thread on massive documents.
-export const MAX_TREE_VALUES = 3;
+export const MAX_TREE_VALUES = 10_000;
 interface ValueBudget {
   remaining: number;
   truncated: boolean;

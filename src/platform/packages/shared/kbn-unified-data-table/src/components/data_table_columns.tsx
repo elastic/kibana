@@ -296,6 +296,10 @@ function buildEuiGridColumn({
         tooltipContent={sourceDisplayMode === 'json' ? null : undefined}
       />
     );
+    if (sourceDisplayMode === 'json') {
+      column.isExpandable = false;
+      column.cellActions = EMPTY_CELL_ACTIONS;
+    }
   }
 
   if (column.id === dataView.timeFieldName) {
