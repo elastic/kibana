@@ -127,10 +127,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
-  const { data: savedRule } = useRule(attachment.origin ?? '', false, {
+  const { data: originalRule = null } = useRule(attachment.origin ?? '', false, {
     enabled: Boolean(attachment.origin),
   });
-  const originalRule = savedRule ?? null;
 
   const hasDiff = useMemo(() => {
     if (!originalRule || !rule) return false;
