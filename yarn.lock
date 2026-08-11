@@ -6739,6 +6739,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-attack-discovery-agent-builder@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-attack-discovery@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery":
   version "0.0.0"
   uid ""
@@ -7008,6 +7012,10 @@
   uid ""
 
 "@kbn/flot-charts@link:src/platform/packages/shared/kbn-flot-charts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/flyout-meta-blocks@link:src/platform/packages/shared/shared-ux/flyout/meta-blocks":
   version "0.0.0"
   uid ""
 

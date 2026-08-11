@@ -45,6 +45,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/index-management-shared-types",
     "@kbn/code-editor",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/logging-mocks"
   ]
 }
