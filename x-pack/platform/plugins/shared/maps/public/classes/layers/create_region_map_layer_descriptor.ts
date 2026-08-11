@@ -13,8 +13,8 @@ import type {
   ESTermSourceDescriptor,
   LayerDescriptor,
 } from '../../../common/descriptor_types';
+import { createLegacyRegionMapAggDescriptor } from '../../../common/legacy_maps_conversion';
 import {
-  AGG_TYPE,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   SOURCE_TYPES,
@@ -43,18 +43,7 @@ export interface CreateRegionMapLayerDescriptorParams {
 }
 
 export function createAggDescriptor(metricAgg: string, metricFieldName?: string): AggDescriptor {
-  const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
-    return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
-  });
-  const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
-
-  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
-    return { type: AGG_TYPE.COUNT };
-  } else if (aggType === AGG_TYPE.PERCENTILE) {
-    return { type: aggType, field: metricFieldName, percentile: 50 };
-  } else {
-    return { type: aggType, field: metricFieldName };
-  }
+  return createLegacyRegionMapAggDescriptor(metricAgg, metricFieldName);
 }
 
 export function createRegionMapLayerDescriptor({

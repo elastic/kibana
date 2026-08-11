@@ -13,9 +13,11 @@ import type {
   VectorStylePropertiesDescriptor,
 } from '../../../common/descriptor_types';
 import {
-  AGG_TYPE,
+  createLegacyTileMapAggDescriptor,
+  getLegacyGeoGridRequestType,
+} from '../../../common/legacy_maps_conversion';
+import {
   COLOR_MAP_TYPE,
-  DEFAULT_PERCENTILE,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -29,7 +31,6 @@ import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getSourceAggKey } from '../../../common/get_agg_key';
-import { isMetricCountable } from '../util/is_metric_countable';
 
 const defaultDynamicProperties = getDefaultDynamicProperties();
 
@@ -43,44 +44,12 @@ export interface CreateTileMapLayerDescriptorParams {
   metricFieldName?: string;
 }
 
-function isHeatmap(mapType: string): boolean {
-  return mapType.toLowerCase() === 'heatmap';
-}
-
-function getGeoGridRequestType(mapType: string): RENDER_AS {
-  if (isHeatmap(mapType)) {
-    return RENDER_AS.HEATMAP;
-  }
-
-  if (mapType.toLowerCase() === 'shaded geohash grid') {
-    return RENDER_AS.GRID;
-  }
-
-  return RENDER_AS.POINT;
-}
-
 export function createAggDescriptor(
   mapType: string,
   metricAgg: string,
   metricFieldName?: string
 ): AggDescriptor {
-  const aggTypeKey = Object.keys(AGG_TYPE).find((key) => {
-    return AGG_TYPE[key as keyof typeof AGG_TYPE] === metricAgg;
-  });
-  const aggType = aggTypeKey ? AGG_TYPE[aggTypeKey as keyof typeof AGG_TYPE] : undefined;
-
-  if (
-    !aggType ||
-    aggType === AGG_TYPE.COUNT ||
-    !metricFieldName ||
-    (isHeatmap(mapType) && !isMetricCountable(aggType))
-  ) {
-    return { type: AGG_TYPE.COUNT };
-  }
-
-  return aggType === AGG_TYPE.PERCENTILE
-    ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
-    : { type: aggType, field: metricFieldName };
+  return createLegacyTileMapAggDescriptor(mapType, metricAgg, metricFieldName);
 }
 
 export function createTileMapLayerDescriptor({
@@ -96,16 +65,17 @@ export function createTileMapLayerDescriptor({
     return null;
   }
 
+  const requestType = getLegacyGeoGridRequestType(mapType);
   const metricsDescriptor = createAggDescriptor(mapType, metricAgg, metricFieldName);
   const geoGridSourceDescriptor = ESGeoGridSource.createDescriptor({
     indexPatternId,
     geoField: geoFieldName,
     metrics: [metricsDescriptor],
-    requestType: getGeoGridRequestType(mapType),
+    requestType,
     resolution: GRID_RESOLUTION.MOST_FINE,
   });
 
-  if (isHeatmap(mapType)) {
+  if (requestType === RENDER_AS.HEATMAP) {
     return HeatmapLayer.createDescriptor({
       label,
       sourceDescriptor: geoGridSourceDescriptor,

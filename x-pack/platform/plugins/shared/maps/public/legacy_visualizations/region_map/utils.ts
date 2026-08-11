@@ -6,25 +6,15 @@
  */
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
+import { getEmsLayerIdFromSelectedLayer } from '../../../common/legacy_maps_conversion';
 import type { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
-
-function getEmsLayerId(id: string | number, layerId: string) {
-  if (typeof id === 'string') {
-    return id;
-  }
-
-  // Region maps from 6.x will have numerical EMS id refering to S3 bucket id.
-  // In this case, use layerId with contains the EMS layer name.
-  const split = layerId.split('.');
-  return split.length === 2 ? split[1] : undefined;
-}
 
 export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
   const params: { [key: string]: any } = {
     label: vis.title ? vis.title : title,
     emsLayerId: vis.params.selectedLayer.isEMS
-      ? getEmsLayerId(vis.params.selectedLayer.id, vis.params.selectedLayer.layerId)
+      ? getEmsLayerIdFromSelectedLayer(vis.params.selectedLayer)
       : undefined,
     leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
     colorSchema: vis.params.colorSchema,

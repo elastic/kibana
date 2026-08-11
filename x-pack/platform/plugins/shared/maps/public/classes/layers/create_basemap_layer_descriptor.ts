@@ -6,14 +6,13 @@
  */
 
 import _ from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { LayerDescriptor } from '../../../common/descriptor_types';
+import { createEmsVectorTileBasemapLayerDescriptor } from '../../../common/legacy_maps_conversion';
 import { getKibanaTileMap } from '../../util';
 import { getEMSSettings } from '../../kibana_services';
 import { KibanaTilemapSource } from '../sources/kibana_tilemap_source';
 import { RasterTileLayer } from './raster_tile_layer/raster_tile_layer';
-import { EmsVectorTileLayer } from './ems_vector_tile_layer/ems_vector_tile_layer';
-import { EMSTMSSource } from '../sources/ems_tms_source';
-import { AUTOSELECT_EMS_LOCALE } from '../../../common/constants';
 
 export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   const tilemapSourceFromKibana = getKibanaTileMap();
@@ -26,11 +25,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
 
   const isEmsEnabled = getEMSSettings()!.isEMSEnabled();
   if (isEmsEnabled) {
-    const layerDescriptor = EmsVectorTileLayer.createDescriptor({
-      locale: AUTOSELECT_EMS_LOCALE,
-      sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
-    });
-    return layerDescriptor;
+    return createEmsVectorTileBasemapLayerDescriptor({ id: uuidv4() });
   }
 
   return null;
