@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/test-eui-helpers'
   - '@kbn/core-feature-flags-browser-mocks'
+  - '@kbn/ebt-click'
 tags:
   - shared-browser
   - package
