@@ -96,6 +96,7 @@ export const MonacoEditor = ({
   const editorDispatch = useEditorActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
+  const [selectedRequestsCount, setSelectedRequestsCount] = useState(0);
 
   const setInputEditor = useSetInputEditor();
   const styles = useStyles();
@@ -133,7 +134,8 @@ export const MonacoEditor = ({
         editor,
         setEditorActionsCss,
         highlightedLinesClassName,
-        customProvider
+        customProvider,
+        setSelectedRequestsCount
       );
       setInputEditor(provider);
       actionsProvider.current = provider;
@@ -221,6 +223,7 @@ export const MonacoEditor = ({
       `}
       ref={divRef}
       data-test-subj="consoleMonacoEditorContainer"
+      data-currently-selected-requests={selectedRequestsCount}
     >
       <EuiFlexGroup
         css={styles.editorActions}

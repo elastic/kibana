@@ -39,13 +39,18 @@ import type {
   AttachmentTotals,
   DocumentAttachmentAttributesV2,
 } from '../../../../common/types/domain';
-import { AttachmentType, DocumentAttachmentAttributesRtV2 } from '../../../../common/types/domain';
+import {
+  AttachmentType,
+  DocumentAttachmentAttributesRtV2,
+  UnifiedAttachmentAttributesRt,
+} from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
+  GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
   ServiceContext,
 } from '../types';
@@ -325,6 +330,83 @@ export class AttachmentGetter {
 
       return Object.assign(so, { attributes: validatedAttributes });
     });
+  }
+
+  /**
+   * Retrieves unified attachments of the given `types`, preserving full metadata
+   * (unlike {@link getAllDocumentsAttachedToCase}, which only keeps alert/event fields).
+   */
+  public async getUnifiedAttachmentsByTypes({
+    caseId,
+    types,
+    filter,
+  }: GetUnifiedAttachmentsByTypesArgs): Promise<Array<SavedObject<UnifiedAttachmentAttributes>>> {
+    if (types.length === 0) {
+      return [];
+    }
+
+    try {
+      this.context.log.debug(
+        `Attempting to GET unified attachments [${types.join(', ')}] for case id ${caseId}`
+      );
+
+      const typeFilter = buildFilter({
+        filters: types,
+        field: 'type',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      });
+      const combinedFilter = combineFilters([typeFilter, filter]);
+
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<UnifiedAttachmentAttributes>(
+          {
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            filter: combinedFilter,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let result: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+      for await (const page of finder.find()) {
+        result = result.concat(this.decodeUnifiedAttachments(page));
+      }
+
+      return result;
+    } catch (error) {
+      this.context.log.error(
+        `Error on GET unified attachments [${types.join(', ')}] for case id ${caseId}: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Decodes each attachment individually and skips (with a warning) any that fail: unlike
+   * {@link decodeDocuments}, callers of this method (e.g. case metrics) can still return
+   * useful data derived from the other attachments, so one non-conforming `security.entity`
+   * document shouldn't fail the whole call.
+   */
+  private decodeUnifiedAttachments(
+    response: SavedObjectsFindResponse<UnifiedAttachmentAttributes>
+  ): Array<SavedObject<UnifiedAttachmentAttributes>> {
+    const decoded: Array<SavedObject<UnifiedAttachmentAttributes>> = [];
+
+    for (const so of response.saved_objects) {
+      try {
+        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(so.attributes);
+        decoded.push(Object.assign(so, { attributes: validatedAttributes }));
+      } catch (error) {
+        this.context.log.warn(
+          `Failed to decode unified attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
+        );
+      }
+    }
+
+    return decoded;
   }
 
   /**
