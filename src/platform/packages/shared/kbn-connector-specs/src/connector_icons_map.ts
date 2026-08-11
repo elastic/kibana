@@ -257,6 +257,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.trello',
+    lazy(() => import(/* webpackChunkName: "connectorIcontrello" */ './specs/trello/icon')),
+  ],
   [
     '.workday',
     lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
