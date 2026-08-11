@@ -69,6 +69,24 @@ describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
     );
   });
 
+  it('always excludes the unbounded task.output/example.input/example.metadata/evaluator.metadata fields', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source_excludes: [
+          'task.output',
+          'example.input',
+          'example.metadata',
+          'evaluator.metadata',
+        ],
+      })
+    );
+  });
+
   it('returns scores and total count on success', async () => {
     const { handler, context, evaluationScoreService } = setup();
     const scoreDoc = {
