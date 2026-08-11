@@ -7,8 +7,6 @@
 
 export { createEmsVectorTileLayerDescriptor } from './ems_vector_tile_layer_descriptor';
 export { createEmsVectorTileStyleDescriptor } from './ems_vector_tile_style_descriptor';
-export { createEsGeoGridSourceDescriptor } from './es_geo_grid_source_descriptor';
-export { createEsTermSourceDescriptor } from './es_term_source_descriptor';
 export { createHeatmapStyleDescriptor } from './heatmap_style_descriptor';
 export { createEmsTmsSourceDescriptor } from './ems_tms_source_descriptor';
 export { createEmsFileSourceDescriptor } from './ems_file_source_descriptor';

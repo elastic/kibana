@@ -13,7 +13,6 @@ import type {
   HeatmapLayerDescriptor,
   SizeDynamicOptions,
   VectorLayerDescriptor,
-  VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../descriptor_types';
 import {
@@ -33,8 +32,7 @@ import {
   createEmsFileSourceDescriptor,
   createHeatmapStyleDescriptor,
 } from '../descriptor_factories';
-import { createRegionMapAggDescriptor, createTileMapAggDescriptor } from './agg_descriptors';
-import { getGeoGridRequestType } from './geo_grid_request_type';
+import { createMapAggDescriptor } from './agg_descriptors';
 
 // Matches numerical (gradient) palette `value`s from public color_palettes.
 const NUMERICAL_COLOR_PALETTE_VALUES = [
@@ -62,13 +60,11 @@ function resolveLegacyColorSchema(colorSchema: string): string {
   return match ?? DEFAULT_LEGACY_COLOR_SCHEMA;
 }
 
-function buildVectorStyle(
-  properties: Partial<VectorStylePropertiesDescriptor>
-): VectorStyleDescriptor {
-  return {
-    type: LAYER_STYLE_TYPE.VECTOR,
-    properties,
-  };
+function getGeoGridRequestType(mapType: string): RENDER_AS {
+  const mt = mapType.toLowerCase();
+  if (mt === 'heatmap') return RENDER_AS.HEATMAP;
+  if (mt === 'shaded geohash grid') return RENDER_AS.GRID;
+  return RENDER_AS.POINT;
 }
 
 export interface CreateTileMapLayerDescriptorParams {
@@ -80,7 +76,6 @@ export interface CreateTileMapLayerDescriptorParams {
   metricAgg?: string;
   metricFieldName?: string;
   alpha?: number;
-  idGenerator?: () => string;
 }
 
 export function createTileMapLayerDescriptor(
@@ -91,19 +86,18 @@ export function createTileMapLayerDescriptor(
     return null;
   }
 
-  const idGenerator = args.idGenerator ?? uuidv4;
   const color = resolveLegacyColorSchema(args.colorSchema);
   const alpha = args.alpha ?? DEFAULT_LAYER_ALPHA;
   const requestType = getGeoGridRequestType(args.mapType);
-  const metricsDescriptor = createTileMapAggDescriptor(
-    args.mapType,
+  const metricsDescriptor = createMapAggDescriptor(
     args.metricAgg ?? AGG_TYPE.COUNT,
-    args.metricFieldName
+    args.metricFieldName,
+    args.mapType
   );
 
   const geoGridSourceDescriptor: ESGeoGridSourceDescriptor = {
     type: SOURCE_TYPES.ES_GEO_GRID,
-    id: idGenerator(),
+    id: uuidv4(),
     indexPatternId,
     geoField: geoFieldName,
     metrics: [metricsDescriptor],
@@ -116,7 +110,7 @@ export function createTileMapLayerDescriptor(
 
   if (requestType === RENDER_AS.HEATMAP) {
     return {
-      id: idGenerator(),
+      id: uuidv4(),
       type: LAYER_TYPE.HEATMAP,
       label: args.label,
       visible: true,
@@ -174,7 +168,7 @@ export function createTileMapLayerDescriptor(
   }
 
   return {
-    id: idGenerator(),
+    id: uuidv4(),
     type: LAYER_TYPE.GEOJSON_VECTOR,
     label: args.label,
     visible: true,
@@ -182,7 +176,10 @@ export function createTileMapLayerDescriptor(
     minZoom: 0,
     maxZoom: 24,
     sourceDescriptor: geoGridSourceDescriptor,
-    style: buildVectorStyle(styleProperties),
+    style: {
+      type: LAYER_STYLE_TYPE.VECTOR,
+      properties: styleProperties,
+    },
     joins: [],
     disableTooltips: false,
   };
@@ -199,7 +196,6 @@ export interface CreateRegionMapLayerDescriptorParams {
   metricAgg?: string;
   metricFieldName?: string;
   alpha?: number;
-  idGenerator?: () => string;
 }
 
 export function createRegionMapLayerDescriptor(
@@ -210,15 +206,14 @@ export function createRegionMapLayerDescriptor(
     return null;
   }
 
-  const idGenerator = args.idGenerator ?? uuidv4;
   const color = resolveLegacyColorSchema(args.colorSchema);
   const alpha = args.alpha ?? DEFAULT_LAYER_ALPHA;
-  const metricsDescriptor = createRegionMapAggDescriptor(
+  const metricsDescriptor = createMapAggDescriptor(
     args.metricAgg ?? AGG_TYPE.COUNT,
     args.metricFieldName
   );
 
-  const joinId = idGenerator();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
@@ -254,7 +249,7 @@ export function createRegionMapLayerDescriptor(
   };
 
   return {
-    id: idGenerator(),
+    id: uuidv4(),
     type: LAYER_TYPE.GEOJSON_VECTOR,
     label: args.label,
     visible: true,
@@ -271,7 +266,10 @@ export function createRegionMapLayerDescriptor(
         right: termSourceDescriptor,
       },
     ],
-    style: buildVectorStyle(styleProperties),
+    style: {
+      type: LAYER_STYLE_TYPE.VECTOR,
+      properties: styleProperties,
+    },
     disableTooltips: false,
   };
 }

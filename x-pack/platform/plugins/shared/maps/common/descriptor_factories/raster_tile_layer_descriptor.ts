@@ -11,29 +11,19 @@ import type { RasterLayerDescriptor, SourceDescriptor } from '../descriptor_type
 export function createRasterTileLayerDescriptor({
   id,
   sourceDescriptor,
-  alpha = 1,
-  visible = true,
-  minZoom = 0,
-  maxZoom = 24,
-  includeInFitToBounds = true,
 }: {
   id: string;
   sourceDescriptor: SourceDescriptor;
-  alpha?: number;
-  visible?: boolean;
-  minZoom?: number;
-  maxZoom?: number;
-  includeInFitToBounds?: boolean;
 }): RasterLayerDescriptor {
   return {
     id,
     type: LAYER_TYPE.RASTER_TILE,
     sourceDescriptor,
-    alpha,
-    visible,
-    minZoom,
-    maxZoom,
-    includeInFitToBounds,
+    alpha: 1,
+    visible: true,
+    minZoom: 0,
+    maxZoom: 24,
+    includeInFitToBounds: true,
     __dataRequests: [],
   };
 }

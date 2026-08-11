@@ -14,7 +14,7 @@ import type {
 import { AGG_TYPE } from '../../../../common/constants';
 import type { TileMetaFeature } from '../../../../common/descriptor_types';
 import { CountAggField } from './count_agg_field';
-import { isMetricCountable } from '../../util/is_metric_countable';
+import { isMetricCountable } from '../../../../common/is_metric_countable';
 import type { CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import type { IField } from '../field';

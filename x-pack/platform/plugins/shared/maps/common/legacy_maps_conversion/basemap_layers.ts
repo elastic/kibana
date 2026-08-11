@@ -6,6 +6,7 @@
  */
 
 import isPlainObject from 'lodash/isPlainObject';
+import { v4 as uuidv4 } from 'uuid';
 import {
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
   DEFAULT_EMS_ROADMAP_ID,
@@ -22,42 +23,21 @@ export function createEmsVectorTileBasemapLayerDescriptor({
   id,
   // When undefined, default to desaturated (current Maps default for light mode).
   lightModeDefault = DEFAULT_EMS_ROADMAP_DESATURATED_ID,
-  // Always use auto select so dark mode uses dark basemap.
-  isAutoSelect = true,
 }: {
   id: string;
   lightModeDefault?: string;
-  isAutoSelect?: boolean;
 }): EMSVectorTileLayerDescriptor {
   return createEmsVectorTileLayerDescriptor({
     id,
     sourceDescriptor: createEmsTmsSourceDescriptor({
-      isAutoSelect,
+      isAutoSelect: true,
       lightModeDefault,
     }),
   });
 }
 
-function createWmsOverlayLayerDescriptor({
-  id,
-  serviceUrl,
-  layers,
-  styles,
-}: {
-  id: string;
-  serviceUrl: string;
-  layers: string;
-  styles: string;
-}): RasterLayerDescriptor {
-  return createRasterTileLayerDescriptor({
-    id,
-    sourceDescriptor: createWmsSourceDescriptor({ serviceUrl, layers, styles }),
-  });
-}
-
 export function createLegacyCompatibleBasemapLayersFromLegacyParams(
-  legacyParams: unknown,
-  idGenerator: () => string
+  legacyParams: unknown
 ): Array<EMSVectorTileLayerDescriptor | RasterLayerDescriptor> {
   let lightModeDefault: string | undefined;
   if (isPlainObject(legacyParams)) {
@@ -84,7 +64,7 @@ export function createLegacyCompatibleBasemapLayersFromLegacyParams(
   }
 
   const basemap = createEmsVectorTileBasemapLayerDescriptor({
-    id: idGenerator(),
+    id: uuidv4(),
     lightModeDefault: lightModeDefault ?? undefined,
   });
 
@@ -112,11 +92,13 @@ export function createLegacyCompatibleBasemapLayersFromLegacyParams(
 
   return [
     basemap,
-    createWmsOverlayLayerDescriptor({
-      id: idGenerator(),
-      serviceUrl: wmsRecord.url as string,
-      layers,
-      styles,
+    createRasterTileLayerDescriptor({
+      id: uuidv4(),
+      sourceDescriptor: createWmsSourceDescriptor({
+        serviceUrl: wmsRecord.url as string,
+        layers,
+        styles,
+      }),
     }),
   ];
 }

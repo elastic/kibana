@@ -18,15 +18,8 @@ const TERMS = 'terms';
 const DEFAULT_COLOR_SCHEMA = 'Yellow to Red';
 const DEFAULT_METRIC_AGG = 'count';
 
-export type ExtractedTileMapLayerDescriptorParams = Omit<
-  CreateTileMapLayerDescriptorParams,
-  'alpha' | 'idGenerator'
->;
-
-export type ExtractedRegionMapLayerDescriptorParams = Omit<
-  CreateRegionMapLayerDescriptorParams,
-  'alpha' | 'idGenerator'
->;
+type ExtractedTileMapLayerDescriptorParams = Omit<CreateTileMapLayerDescriptorParams, 'alpha'>;
+type ExtractedRegionMapLayerDescriptorParams = Omit<CreateRegionMapLayerDescriptorParams, 'alpha'>;
 
 function getAggFieldName(agg: AggConfigSerialized | undefined): string | undefined {
   const params = agg?.params;
@@ -43,7 +36,7 @@ function getTermsSize(agg: AggConfigSerialized | undefined): number | undefined 
 }
 
 function getFirstBucketAgg(aggs: AggConfigSerialized[]): AggConfigSerialized | undefined {
-  return aggs.find((agg) => agg.schema === 'segment' || agg.schema === 'bucket');
+  return aggs.find((agg) => agg.schema === 'segment');
 }
 
 function getFirstMetricAgg(aggs: AggConfigSerialized[]): AggConfigSerialized | undefined {

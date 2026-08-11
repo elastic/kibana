@@ -5,40 +5,47 @@
  * 2.0.
  */
 
-import { createTileMapAggDescriptor } from './agg_descriptors';
+import { createMapAggDescriptor } from './agg_descriptors';
 
-describe('createTileMapAggDescriptor', () => {
+describe('createMapAggDescriptor', () => {
   test('Should allow supported metric aggs', () => {
-    expect(createTileMapAggDescriptor('Scaled Circle Markers', 'sum', 'bytes')).toEqual({
+    expect(createMapAggDescriptor('sum', 'bytes', 'Scaled Circle Markers')).toEqual({
       type: 'sum',
       field: 'bytes',
     });
   });
 
   test('Should fallback to count when field not provided', () => {
-    expect(createTileMapAggDescriptor('Scaled Circle Markers', 'sum', undefined)).toEqual({
+    expect(createMapAggDescriptor('sum', undefined, 'Scaled Circle Markers')).toEqual({
       type: 'count',
     });
   });
 
   test('Should fallback to count when metric agg is not supported in maps', () => {
-    expect(createTileMapAggDescriptor('Scaled Circle Markers', 'top_hits', 'bytes')).toEqual({
+    expect(createMapAggDescriptor('top_hits', 'bytes', 'Scaled Circle Markers')).toEqual({
       type: 'count',
     });
   });
 
   describe('heatmap', () => {
     test('Should allow countable metric aggs', () => {
-      expect(createTileMapAggDescriptor('Heatmap', 'sum', 'bytes')).toEqual({
+      expect(createMapAggDescriptor('sum', 'bytes', 'Heatmap')).toEqual({
         type: 'sum',
         field: 'bytes',
       });
     });
 
     test('Should fallback to count for non-countable metric aggs', () => {
-      expect(createTileMapAggDescriptor('Heatmap', 'avg', 'bytes')).toEqual({
+      expect(createMapAggDescriptor('avg', 'bytes', 'Heatmap')).toEqual({
         type: 'count',
       });
+    });
+  });
+
+  test('Should allow non-heatmap region-style metrics without mapType', () => {
+    expect(createMapAggDescriptor('avg', 'bytes')).toEqual({
+      type: 'avg',
+      field: 'bytes',
     });
   });
 });

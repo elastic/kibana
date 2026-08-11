@@ -8,7 +8,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import isPlainObject from 'lodash/isPlainObject';
-import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { safeJsonParse } from '@kbn/std';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
@@ -160,8 +159,25 @@ function getAggsFromSavedVis(savedVis: unknown): AggConfigSerialized[] {
   return Array.isArray(record.aggs) ? (record.aggs as AggConfigSerialized[]) : [];
 }
 
-function getAggsFromVisState(visState: LegacyVisState): AggConfigSerialized[] {
-  return Array.isArray(visState.aggs) ? (visState.aggs as AggConfigSerialized[]) : [];
+function buildMapAttributes(args: {
+  title: string;
+  params: LegacyTileMapParams | LegacyRegionMapParams;
+  uiState: LegacyUiState | undefined;
+  layer: ReturnType<typeof createTileMapLayerDescriptor>;
+}): Record<string, unknown> | undefined {
+  if (!args.layer) return undefined;
+
+  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params);
+  const { center, zoom } = getMapCenterAndZoom(args.uiState);
+
+  return {
+    title: args.title,
+    isLayerTOCOpen: true,
+    settings: { projection: 'mercator' },
+    layers: [...basemapLayers, args.layer],
+    ...(center ? { center } : {}),
+    ...(zoom !== undefined ? { zoom } : {}),
+  };
 }
 
 function buildMapAttributesFromTileMap(args: {
@@ -185,24 +201,15 @@ function buildMapAttributesFromTileMap(args: {
     aggs: args.aggs,
   });
 
-  const layer = createTileMapLayerDescriptor({
-    ...layerDescriptorParams,
-    alpha: 1,
-  });
-  if (!layer) return undefined;
-
-  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
-
-  const { center, zoom } = getMapCenterAndZoom(args.uiState);
-
-  return {
+  return buildMapAttributes({
     title: args.title,
-    isLayerTOCOpen: true,
-    settings: { projection: 'mercator' },
-    layers: [...basemapLayers, layer],
-    ...(center ? { center } : {}),
-    ...(zoom !== undefined ? { zoom } : {}),
-  };
+    params: args.params,
+    uiState: args.uiState,
+    layer: createTileMapLayerDescriptor({
+      ...layerDescriptorParams,
+      alpha: 1,
+    }),
+  });
 }
 
 function buildMapAttributesFromRegionMap(args: {
@@ -224,24 +231,15 @@ function buildMapAttributesFromRegionMap(args: {
     aggs: args.aggs,
   });
 
-  const layer = createRegionMapLayerDescriptor({
-    ...layerDescriptorParams,
-    alpha: 1,
-  });
-  if (!layer) return undefined;
-
-  const basemapLayers = createLegacyCompatibleBasemapLayersFromLegacyParams(args.params, uuidv4);
-
-  const { center, zoom } = getMapCenterAndZoom(args.uiState);
-
-  return {
+  return buildMapAttributes({
     title: args.title,
-    isLayerTOCOpen: true,
-    settings: { projection: 'mercator' },
-    layers: [...basemapLayers, layer],
-    ...(center ? { center } : {}),
-    ...(zoom !== undefined ? { zoom } : {}),
-  };
+    params: args.params,
+    uiState: args.uiState,
+    layer: createRegionMapLayerDescriptor({
+      ...layerDescriptorParams,
+      alpha: 1,
+    }),
+  });
 }
 
 function getByValueMapResult(
@@ -310,7 +308,7 @@ function getByReferenceMapResult(args: {
   if (visType !== TILE_MAP_VIS_TYPE && visType !== REGION_MAP_VIS_TYPE) return undefined;
 
   const title = typeof visState.title === 'string' ? visState.title : 'Map';
-  const aggs = getAggsFromVisState(visState);
+  const aggs = Array.isArray(visState.aggs) ? (visState.aggs as AggConfigSerialized[]) : [];
   const uiState = getUiStateFromSavedObjectAttributes(args.attributes);
   const searchSource = getSearchSourceFromSavedObjectAttributes(
     args.attributes.kibanaSavedObjectMeta?.searchSourceJSON,

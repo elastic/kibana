@@ -9,9 +9,6 @@ export {
   createEmsVectorTileBasemapLayerDescriptor,
   createLegacyCompatibleBasemapLayersFromLegacyParams,
 } from './basemap_layers';
-export { getEmsLayerIdFromSelectedLayer } from './ems_layer_id';
-export { createRegionMapAggDescriptor, createTileMapAggDescriptor } from './agg_descriptors';
-export { getGeoGridRequestType } from './geo_grid_request_type';
 export {
   createRegionMapLayerDescriptor,
   createTileMapLayerDescriptor,
@@ -23,8 +20,4 @@ export type {
 export {
   extractRegionMapLayerDescriptorParams,
   extractTileMapLayerDescriptorParams,
-} from './extract_layer_descriptor_params';
-export type {
-  ExtractedRegionMapLayerDescriptorParams,
-  ExtractedTileMapLayerDescriptorParams,
 } from './extract_layer_descriptor_params';

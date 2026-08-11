@@ -7,6 +7,7 @@
 
 import type { AggDescriptor } from '../descriptor_types';
 import { AGG_TYPE, DEFAULT_PERCENTILE } from '../constants';
+import { isMetricCountable } from '../is_metric_countable';
 
 function getAggType(metricAgg: string): AGG_TYPE | undefined {
   return (Object.values(AGG_TYPE) as string[]).includes(metricAgg)
@@ -14,40 +15,22 @@ function getAggType(metricAgg: string): AGG_TYPE | undefined {
     : undefined;
 }
 
-function isMetricCountable(aggType: AGG_TYPE): boolean {
-  return [AGG_TYPE.COUNT, AGG_TYPE.SUM, AGG_TYPE.UNIQUE_COUNT].includes(aggType);
-}
-
-export function createTileMapAggDescriptor(
-  mapType: string,
+export function createMapAggDescriptor(
   metricAgg: string,
-  metricFieldName?: string
+  metricFieldName?: string,
+  mapType?: string
 ): AggDescriptor {
   const aggType = getAggType(metricAgg);
   if (
     !aggType ||
     aggType === AGG_TYPE.COUNT ||
     !metricFieldName ||
-    (mapType.toLowerCase() === 'heatmap' && !isMetricCountable(aggType))
+    (mapType?.toLowerCase() === 'heatmap' && !isMetricCountable(aggType))
   ) {
     return { type: AGG_TYPE.COUNT };
   }
 
   return aggType === AGG_TYPE.PERCENTILE
     ? { type: aggType, field: metricFieldName, percentile: DEFAULT_PERCENTILE }
-    : { type: aggType, field: metricFieldName };
-}
-
-export function createRegionMapAggDescriptor(
-  metricAgg: string,
-  metricFieldName?: string
-): AggDescriptor {
-  const aggType = getAggType(metricAgg);
-  if (!aggType || aggType === AGG_TYPE.COUNT || !metricFieldName) {
-    return { type: AGG_TYPE.COUNT };
-  }
-
-  return aggType === AGG_TYPE.PERCENTILE
-    ? { type: aggType, field: metricFieldName, percentile: 50 }
     : { type: aggType, field: metricFieldName };
 }

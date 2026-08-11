@@ -6,45 +6,27 @@
  */
 
 import { AUTOSELECT_EMS_LOCALE, LAYER_TYPE } from '../constants';
-import type {
-  EMSVectorTileLayerDescriptor,
-  EMSVectorTileStyleDescriptor,
-  EMSTMSSourceDescriptor,
-} from '../descriptor_types';
+import type { EMSVectorTileLayerDescriptor, EMSTMSSourceDescriptor } from '../descriptor_types';
 import { createEmsVectorTileStyleDescriptor } from './ems_vector_tile_style_descriptor';
 
 export function createEmsVectorTileLayerDescriptor({
   id,
   sourceDescriptor,
-  alpha = 1,
-  visible = true,
-  minZoom = 0,
-  maxZoom = 24,
-  includeInFitToBounds = true,
-  locale = AUTOSELECT_EMS_LOCALE,
-  style = createEmsVectorTileStyleDescriptor(),
 }: {
   id: string;
   sourceDescriptor: EMSTMSSourceDescriptor;
-  alpha?: number;
-  visible?: boolean;
-  minZoom?: number;
-  maxZoom?: number;
-  includeInFitToBounds?: boolean;
-  locale?: string;
-  style?: EMSVectorTileStyleDescriptor;
 }): EMSVectorTileLayerDescriptor {
   return {
     id,
     type: LAYER_TYPE.EMS_VECTOR_TILE,
     sourceDescriptor,
-    alpha,
-    visible,
-    minZoom,
-    maxZoom,
-    includeInFitToBounds,
-    locale,
-    style,
+    alpha: 1,
+    visible: true,
+    minZoom: 0,
+    maxZoom: 24,
+    includeInFitToBounds: true,
+    locale: AUTOSELECT_EMS_LOCALE,
+    style: createEmsVectorTileStyleDescriptor(),
     __dataRequests: [],
   };
 }
