@@ -12,6 +12,8 @@ import * as connectorsSpecs from './all_specs';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
+import { buildEventId } from './event_type_id';
+import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
 const MAX_CONNECTOR_ID_LENGTH = 64;
@@ -82,5 +84,42 @@ describe('connector spec contracts', () => {
     const mappedIconIds = [...ConnectorIconsMap.keys()].sort();
 
     expect(mappedIconIds).toEqual(connectorIdsRequiringMappedIcons);
+  });
+
+  it.each(allSpecs)('%s does not declare events unless allowlisted', (_exportName, spec) => {
+    if (spec.events === undefined) {
+      return;
+    }
+    expect(SPECS_ALLOWED_EVENTS.has(spec.metadata.id)).toBe(true);
+  });
+
+  it.each(allSpecs)('%s eventIds match metadata.id when events present', (_exportName, spec) => {
+    if (spec.events === undefined) {
+      return;
+    }
+    for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
+      expect(def.eventId).toBe(buildEventId(spec.metadata.id, eventKey));
+    }
+  });
+
+  it('uses unique eventIds across connector specs', () => {
+    const eventIdOwners = new Map<string, string>();
+    const duplicates: string[] = [];
+
+    for (const [exportName, spec] of allSpecs) {
+      if (spec.events !== undefined) {
+        for (const [eventKey, def] of Object.entries(spec.events.definitions)) {
+          const owner = `${exportName} (${spec.metadata.id}.${eventKey})`;
+          const existing = eventIdOwners.get(def.eventId);
+          if (existing !== undefined) {
+            duplicates.push(`${def.eventId}: ${existing} and ${owner}`);
+          } else {
+            eventIdOwners.set(def.eventId, owner);
+          }
+        }
+      }
+    }
+
+    expect(duplicates).toEqual([]);
   });
 });

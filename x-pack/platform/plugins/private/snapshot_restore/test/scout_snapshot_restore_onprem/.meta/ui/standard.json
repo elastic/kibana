@@ -1,0 +1,22 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "c46be32ddf5db8d-a4a1a8d67a9bd14",
+      "title": "Snapshot & Restore — register source-only fs repository wizard registers a source-only fs repository and lists it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/snapshot_restore/test/scout_snapshot_restore_onprem/ui/tests/register_repository_wizard.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    }
+  ]
+}
