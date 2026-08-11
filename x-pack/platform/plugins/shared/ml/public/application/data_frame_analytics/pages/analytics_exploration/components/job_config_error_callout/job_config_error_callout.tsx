@@ -44,7 +44,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
     jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
     jobCapsServiceErrorMessage.includes('click here to re-create');
 
-  const messageText = jobConfigErrorMessage ?? jobCapsServiceErrorMessage;
+  const message = jobConfigErrorMessage ?? jobCapsServiceErrorMessage;
   const newDataViewUrl = useMemo(
     () =>
       getUrlForApp('management', {
@@ -59,17 +59,14 @@ export const JobConfigErrorCallout: FC<Props> = ({
       <EuiSpacer />
       <KbnDangerCallout
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
-        text={messageText}
+        text={!containsDataViewLink && message}
         actionProps={
           containsDataViewLink
             ? {
                 primary: {
                   href: newDataViewUrl,
                   target: '_blank',
-                  children: i18n.translate(
-                    'xpack.ml.dataframe.analytics.jobConfig.recreateDataViewLinkLabel',
-                    { defaultMessage: 'Re-create data view' }
-                  ),
+                  children: message,
                 },
               }
             : undefined
