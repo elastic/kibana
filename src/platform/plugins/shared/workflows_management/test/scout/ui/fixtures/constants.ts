@@ -18,12 +18,15 @@ export const EXECUTION_TIMEOUT = 30_000;
 /** Timeout for a long-running workflow execution (e.g. many iterations, alert trigger chain). */
 export const LONG_EXECUTION_TIMEOUT = 60_000;
 
-/** Timeout for waiting on asynchronous alert-triggered executions to appear in the list. */
+/**
+ * Timeout for waiting on asynchronous alert-triggered executions to appear, both
+ * when repeatedly forcing the rule to run and when asserting on the list in the UI.
+ */
 export const ALERT_PROPAGATION_TIMEOUT = 60_000;
 
 /**
  * Overall test timeout for alert trigger tests.
- * These tests involve a multi-hop async chain: rule creation → rule scheduling (15s interval)
- * → document indexing → alert detection → workflow execution → UI navigation.
+ * These tests involve a multi-hop async chain: rule creation → document indexing
+ * → forced rule run → alert detection → workflow execution → UI navigation.
  */
 export const ALERT_TRIGGER_TEST_TIMEOUT = 120_000;
