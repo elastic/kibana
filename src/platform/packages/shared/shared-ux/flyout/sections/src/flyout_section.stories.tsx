@@ -10,13 +10,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiTitle } from '@elastic/eui';
 import { FlyoutSection } from './flyout_section';
 import { FlyoutSubsection } from './flyout_subsection';
 import { FlyoutAccordion } from './flyout_accordion';
@@ -26,7 +20,13 @@ const meta: Meta = {
 };
 export default meta;
 
-const SECTION_TITLES = ['Summary', 'Configuration', 'Related alerts', 'Findings', 'Advanced settings'];
+const SECTION_TITLES = [
+  'Summary',
+  'Configuration',
+  'Related alerts',
+  'Findings',
+  'Advanced settings',
+];
 const SUBSECTION_TITLES = ['Runtime', 'Environment', 'Dependencies'];
 
 const FlyoutWrapper: React.FC<{ children: React.ReactNode; title: string }> = ({
@@ -99,7 +99,13 @@ export const Sections: StoryObj<SectionArgs> = {
       control: { type: 'range', min: 0, max: 3, step: 1 },
     },
   },
-  render: ({ showIconAndTooltip, showAction, hasBorder, numberOfSections, numberOfSubsections }) => (
+  render: ({
+    showIconAndTooltip,
+    showAction,
+    hasBorder,
+    numberOfSections,
+    numberOfSubsections,
+  }) => (
     <FlyoutWrapper title="FlyoutSection">
       {Array.from({ length: numberOfSections }, (_, i) => (
         <FlyoutSection
@@ -112,17 +118,19 @@ export const Sections: StoryObj<SectionArgs> = {
           }
           hasBorder={hasBorder && numberOfSubsections === 0}
         >
-          {numberOfSubsections === 0
-            ? <SampleText />
-            : Array.from({ length: numberOfSubsections }, (_, j) => (
-                <FlyoutSubsection
-                  key={j}
-                  title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}
-                  hasBorder={hasBorder}
-                >
-                  <SampleText />
-                </FlyoutSubsection>
-              ))}
+          {numberOfSubsections === 0 ? (
+            <SampleText />
+          ) : (
+            Array.from({ length: numberOfSubsections }, (_, j) => (
+              <FlyoutSubsection
+                key={j}
+                title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}
+                hasBorder={hasBorder}
+              >
+                <SampleText />
+              </FlyoutSubsection>
+            ))
+          )}
         </FlyoutSection>
       ))}
     </FlyoutWrapper>
@@ -189,16 +197,15 @@ export const Accordions: StoryObj<AccordionArgs> = {
           }
           initialIsOpen={initialIsOpen}
         >
-          {numberOfSubsections === 0
-            ? <SampleText />
-            : Array.from({ length: numberOfSubsections }, (_, j) => (
-                <FlyoutSubsection
-                  key={j}
-                  title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}
-                >
-                  <SampleText />
-                </FlyoutSubsection>
-              ))}
+          {numberOfSubsections === 0 ? (
+            <SampleText />
+          ) : (
+            Array.from({ length: numberOfSubsections }, (_, j) => (
+              <FlyoutSubsection key={j} title={SUBSECTION_TITLES[j] ?? `Subsection ${j + 1}`}>
+                <SampleText />
+              </FlyoutSubsection>
+            ))
+          )}
         </FlyoutAccordion>
       ))}
     </FlyoutWrapper>
