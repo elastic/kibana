@@ -13,7 +13,7 @@ import {
   isInlineField,
   isRefField,
 } from '../types/domain/template/fields';
-import type { Field, InlineField, RefField } from '../types/domain/template/fields';
+import type { Field, InlineField, RefField, Validation } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 import { CustomFieldTypes } from '../types/domain/custom_field/v1';
 
@@ -69,6 +69,49 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
 };
 
 /**
+ * The requirement-related `Validation` keys. These are mutually exclusive ways of expressing
+ * "when is this field required" — a field is meant to be driven by exactly one of them at a
+ * time. See {@link mergeValidationOverride} for how a `$ref` override interacts with them.
+ */
+const REQUIRED_FAMILY_KEYS = ['required', 'required_when', 'required_on_close'] as const;
+
+/**
+ * Shallow-merges a `$ref` entry's local `validation` onto the library field's own `validation`:
+ * every ordinary key (`pattern`, `min`, `max`, `min_length`, `max_length`) from the library
+ * survives unless the override explicitly redeclares it, so a template that only wants to
+ * change requiredness doesn't silently lose the library's format constraints.
+ *
+ * The requirement keys (`required` / `required_when` / `required_on_close`) are treated as one
+ * family rather than merged individually: if the override declares *any* of them, all three are
+ * taken from the override alone (the library's own requirement keys are dropped), because a
+ * naive per-key merge could otherwise leave e.g. the library's `required: true` sitting next to
+ * a template's `required_when`, with both then applying at once. In other words, whichever
+ * required* key was defined last (the override, when it defines one) wins outright over the
+ * whole family.
+ */
+export const mergeValidationOverride = (
+  libraryValidation: Validation | undefined,
+  refValidation: Validation | undefined
+): Validation | undefined => {
+  if (!refValidation) return libraryValidation;
+  if (!libraryValidation) return refValidation;
+
+  const overridesRequiredFamily = REQUIRED_FAMILY_KEYS.some(
+    (key) => refValidation[key] !== undefined
+  );
+
+  const base = overridesRequiredFamily
+    ? Object.fromEntries(
+        Object.entries(libraryValidation).filter(
+          ([key]) => !(REQUIRED_FAMILY_KEYS as readonly string[]).includes(key)
+        )
+      )
+    : libraryValidation;
+
+  return { ...base, ...refValidation };
+};
+
+/**
  * Applies a `$ref` entry's overrides onto its resolved library (inline) field:
  * - `name` acts as a local alias replacing the library field's name.
  * - `metadata.default` overrides the library default. Three cases:
@@ -76,6 +119,10 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
  *     - explicit `null`: clear the inherited default so the field stays empty (this is what the
  *       v1→v2 migration emits for a legacy template field whose value was explicitly cleared),
  *     - any other value: use it as the field's default.
+ * - `display`, when present on the `$ref` entry, fully replaces the library field's own
+ *   `display` (its only key is `show_when`, so there is nothing to preserve from the library).
+ * - `validation`, when present on the `$ref` entry, is merged onto the library field's own
+ *   `validation` — see {@link mergeValidationOverride} for the requirement-family exception.
  *
  * Shared by `resolveTemplateFields` (server / case-creation) and `useResolvedFields` (editor) so
  * both paths resolve `$ref` overrides identically.
@@ -100,6 +147,17 @@ export const applyRefFieldOverride = (
     resolved = {
       ...resolved,
       metadata: { ...(resolved.metadata ?? {}), default: overrideDefault },
+    } as InlineField;
+  }
+
+  if (refField.display !== undefined) {
+    resolved = { ...resolved, display: refField.display } as InlineField;
+  }
+
+  if (refField.validation !== undefined) {
+    resolved = {
+      ...resolved,
+      validation: mergeValidationOverride(resolved.validation, refField.validation),
     } as InlineField;
   }
 
