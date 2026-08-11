@@ -6,7 +6,11 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_EXTENDED_FIELDS,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
+} from '../../../common/constants';
 import type { Template } from '../../../common/types/domain/template/v1';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { FieldType } from '../../../common/types/domain/template/fields';
@@ -533,8 +537,9 @@ export const buildFieldLabelRuntimeMappings = (
 export const EF_ALL_VALUES_FIELD = `${CASE_SAVED_OBJECT}.ef_all_values`;
 
 /**
- * Builds a runtime field mapping that tokenizes ALL extended field values
- * on whitespace, enabling word-level partial matching across every extended field.
+ * Builds a runtime field mapping that combines ALL extended field values into
+ * one normalized keyword value per case, enabling word-level matching without
+ * exceeding Elasticsearch's per-document runtime emit limit (100).
  */
 export const buildAllExtendedFieldValuesRuntimeMapping = (): Record<
   string,
@@ -543,14 +548,70 @@ export const buildAllExtendedFieldValuesRuntimeMapping = (): Record<
   [EF_ALL_VALUES_FIELD]: {
     type: 'keyword',
     script: {
-      source: buildAllValuesTokenizingScript(),
+      source: buildAllValuesCombinedScript(),
     },
   },
 });
 
-const buildAllValuesTokenizingScript = (): string => {
+/**
+ * Splits a free-text search into normalized words for extended-field matching.
+ * Empty / whitespace-only input yields no words.
+ */
+export const getAllExtendedFieldSearchWords = (search: string): string[] =>
+  search
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length > 0);
+
+/**
+ * Builds a query clause that requires every normalized search word to appear
+ * as a substring of the combined extended-field runtime value.
+ */
+export const buildAllExtendedFieldValuesSearchClause = (
+  search: string,
+  field: string = EF_ALL_VALUES_FIELD
+): estypes.QueryDslQueryContainer | undefined => {
+  const words = getAllExtendedFieldSearchWords(search);
+  if (words.length === 0) {
+    return undefined;
+  }
+
+  const wordClauses: estypes.QueryDslQueryContainer[] = words.map((word) => ({
+    wildcard: {
+      [field]: {
+        value: `*${escapeWildcard(word)}*`,
+        case_insensitive: true,
+      },
+    },
+  }));
+
+  if (wordClauses.length === 1) {
+    return wordClauses[0];
+  }
+
+  return {
+    bool: {
+      filter: wordClauses,
+    },
+  };
+};
+
+/**
+ * Collects every extended-field value into one lowercased string and emits it
+ * once. USER_PICKER values contribute extracted display names; other values are
+ * cleaned of JSON punctuation with separators normalized to spaces.
+ *
+ * Truncation uses a UTF-16 code-unit budget of MAX_EXTENDED_FIELD_VALUE_BYTES / 3
+ * so the emitted keyword stays under Lucene's UTF-8 byte limit even for
+ * multi-byte characters. Painless runtime fields cannot use StandardCharsets /
+ * getBytes, so a conservative char cap is required instead of true byte counting.
+ */
+const buildAllValuesCombinedScript = (): string => {
   const soType = `'${CASE_SAVED_OBJECT}'`;
   const efKey = `'${CASE_EXTENDED_FIELDS}'`;
+  // Max 3 UTF-8 bytes per UTF-16 code unit for BMP; keeps emit under Lucene's limit.
+  const maxChars = Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3);
 
   return (
     `if (params._source == null) { return; }` +
@@ -558,21 +619,32 @@ const buildAllValuesTokenizingScript = (): string => {
     `if (so == null) { return; }` +
     `def ef = so.get(${efKey});` +
     `if (ef == null || !(ef instanceof Map)) { return; }` +
+    `def parts = new ArrayList();` +
     `for (def entry : ef.entrySet()) {` +
     `if (entry.getValue() != null) {` +
     `def raw = entry.getValue().toString();` +
     `def nm = /"name":"([^"]*)"/.matcher(raw);` +
     `boolean found = false;` +
-    `while (nm.find()) { found = true; def t = nm.group(1).trim().toLowerCase(Locale.ROOT); if (!t.isEmpty()) { emit(t); } }` +
+    `while (nm.find()) {` +
+    `found = true;` +
+    `def t = nm.group(1).trim().toLowerCase(Locale.ROOT);` +
+    `if (!t.isEmpty()) { parts.add(t); }` +
+    `}` +
     `if (!found) {` +
-    `def cleaned = /[\\[\\]"{}]/.matcher(raw).replaceAll('').trim();` +
-    `for (def word : /[\\s,=]+/.split(cleaned)) {` +
-    `def t = word.trim().toLowerCase(Locale.ROOT);` +
-    `if (!t.isEmpty()) { emit(t); }` +
+    `def cleaned = /[\\[\\]"{}]/.matcher(raw).replaceAll('').trim().toLowerCase(Locale.ROOT);` +
+    `cleaned = /[\\s,=]+/.matcher(cleaned).replaceAll(' ').trim();` +
+    `if (!cleaned.isEmpty()) { parts.add(cleaned); }` +
     `}` +
     `}` +
     `}` +
-    `}`
+    `if (parts.isEmpty()) { return; }` +
+    `def combined = '';` +
+    `for (int i = 0; i < parts.size(); i++) {` +
+    `if (i > 0) { combined += ' '; }` +
+    `combined += parts.get(i);` +
+    `}` +
+    `if (combined.length() > ${maxChars}) { combined = combined.substring(0, ${maxChars}); }` +
+    `emit(combined);`
   );
 };
 

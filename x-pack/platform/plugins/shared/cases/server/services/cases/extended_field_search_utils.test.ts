@@ -16,6 +16,8 @@ import {
   buildFieldLabelRuntimeMappings,
   buildFieldLabelExistsClauses,
   buildAllExtendedFieldValuesRuntimeMapping,
+  buildAllExtendedFieldValuesSearchClause,
+  getAllExtendedFieldSearchWords,
   EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 
@@ -1874,12 +1876,13 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).toContain('extended_fields');
   });
 
-  it('generates a Painless script that lowercases and splits on whitespace', () => {
+  it('generates a Painless script that lowercases and emits one combined value', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('toLowerCase(Locale.ROOT)');
-    expect(src).toContain('emit(t)');
+    expect(src).toContain('emit(combined)');
+    expect(src.match(/emit\(/g)).toHaveLength(1);
   });
 
   it('generates a Painless script that strips JSON punctuation', () => {
@@ -1896,14 +1899,14 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).not.toContain('?.');
   });
 
-  it('extracts USER_PICKER names via regex before falling back to tokenization', () => {
+  it('extracts USER_PICKER names via regex before falling back to combined text', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('"name":"([^"]*)"');
   });
 
-  it('uses = as a word separator in the fallback tokenization', () => {
+  it('normalizes whitespace, commas, and equals as separators in the combined value', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
@@ -1915,5 +1918,90 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('instanceof Map');
+  });
+
+  it('truncates the combined value using a Lucene-safe UTF-8 character budget', () => {
+    const mappings = buildAllExtendedFieldValuesRuntimeMapping();
+    const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
+    const maxChars = Math.floor(30000 / 3);
+
+    expect(src).toContain(`substring(0, ${maxChars})`);
+    expect(src).toContain(`combined.length() > ${maxChars}`);
+    expect(src).not.toContain('StandardCharsets');
+    expect(src).not.toContain('getBytes');
+  });
+});
+
+describe('getAllExtendedFieldSearchWords', () => {
+  it('lowercases and splits on whitespace', () => {
+    expect(getAllExtendedFieldSearchWords('  Test   TEXT  ')).toEqual(['test', 'text']);
+  });
+
+  it('returns an empty array for blank search', () => {
+    expect(getAllExtendedFieldSearchWords('   ')).toEqual([]);
+  });
+});
+
+describe('buildAllExtendedFieldValuesSearchClause', () => {
+  it('builds a single wildcard clause for one word', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('distributed')).toEqual({
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '*distributed*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('ANDs wildcard clauses for multi-word search', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('distributed malware')).toEqual({
+      bool: {
+        filter: [
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '*distributed*',
+                case_insensitive: true,
+              },
+            },
+          },
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '*malware*',
+                case_insensitive: true,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('escapes wildcard metacharacters in search words', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('foo*bar')).toEqual({
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '*foo\\*bar*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('returns undefined for blank search', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('   ')).toBeUndefined();
+  });
+
+  it('uses the provided field name', () => {
+    expect(buildAllExtendedFieldValuesSearchClause('spy', 'custom.field')).toEqual({
+      wildcard: {
+        'custom.field': {
+          value: '*spy*',
+          case_insensitive: true,
+        },
+      },
+    });
   });
 });
