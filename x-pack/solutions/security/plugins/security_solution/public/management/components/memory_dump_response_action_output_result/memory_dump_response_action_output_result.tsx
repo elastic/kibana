@@ -7,11 +7,25 @@
 
 import React, { memo, useMemo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiToolTip,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { KeyValueDisplay } from '../key_value_display';
-import { CONSOLE_COMMANDS, RESPONSE_ACTION_STATUS } from '../../common/translations';
+import {
+  CONSOLE_COMMANDS,
+  RESPONSE_ACTION_STATUS,
+  YES_LABEL,
+  NO_LABEL,
+} from '../../common/translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
@@ -73,7 +87,32 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                 <EuiSpacer size="xs" />
                 <KeyValueDisplay
                   name={CONSOLE_COMMANDS.memoryDump.resultFileLabel}
-                  value={agentActionResult.content.path}
+                  value={
+                    <>
+                      {agentActionResult.content.path}{' '}
+                      <EuiCopy textToCopy={agentActionResult.content.path}>
+                        {(copy) => (
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'xpack.securitySolution.memoryDumpResponseActionOutputResult.copyFilePathTooltip',
+                              { defaultMessage: 'Copy file path' }
+                            )}
+                          >
+                            <EuiButtonIcon
+                              aria-label={i18n.translate(
+                                'xpack.securitySolution.memoryDumpResponseActionOutputResult.copyFilePathAriaLabel',
+                                { defaultMessage: 'Copy file path to clipboard' }
+                              )}
+                              color="text"
+                              iconType="copy"
+                              iconSize="s"
+                              onClick={copy}
+                            />
+                          </EuiToolTip>
+                        )}
+                      </EuiCopy>
+                    </>
+                  }
                 />
                 <EuiSpacer size="xs" />
                 <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -92,6 +131,61 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+
+                {/* Properties return with `raw` memory dump */}
+                {(agentActionResult?.content.total_memory_size ||
+                  agentActionResult?.content.total_bytes_captured) && (
+                  <EuiFlexGroup gutterSize="m" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <KeyValueDisplay
+                        name={CONSOLE_COMMANDS.memoryDump.resultTotalMemorySizeLabel}
+                        value={
+                          <EuiToolTip
+                            content={`${numeral(
+                              agentActionResult.content.total_memory_size ?? 0
+                            ).format('0,0')} ${CONSOLE_COMMANDS.memoryDump.bytesValue}`}
+                          >
+                            <>
+                              {numeral(agentActionResult.content.total_memory_size ?? 0).format(
+                                '0.00b'
+                              )}
+                            </>
+                          </EuiToolTip>
+                        }
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <KeyValueDisplay
+                        name={CONSOLE_COMMANDS.memoryDump.resultTotalBytesCapturedLabel}
+                        value={
+                          <EuiToolTip
+                            content={`${numeral(
+                              agentActionResult.content.total_bytes_captured ?? 0
+                            ).format('0,0')} ${CONSOLE_COMMANDS.memoryDump.bytesValue}`}
+                          >
+                            <>
+                              {numeral(agentActionResult.content.total_bytes_captured ?? 0).format(
+                                '0.00b'
+                              )}
+                            </>
+                          </EuiToolTip>
+                        }
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+
+                {/* Properties returned with `kernel` memory dump */}
+                {agentActionResult?.content.user_space_included !== undefined && (
+                  <EuiFlexGroup gutterSize="m" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <KeyValueDisplay
+                        name={CONSOLE_COMMANDS.memoryDump.resultUserSpaceIncludedLabel}
+                        value={agentActionResult.content.user_space_included ? YES_LABEL : NO_LABEL}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </div>
             ) : (
               <span data-test-subj={testId('agentResultMissing')}>
