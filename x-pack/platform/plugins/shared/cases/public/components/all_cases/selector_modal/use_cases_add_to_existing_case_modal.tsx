@@ -15,12 +15,14 @@ import type { CaseUI } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
+import type { CreateCaseFlyoutProps } from '../../create/flyout/create_case_flyout';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
 import { NO_ATTACHMENTS_ADDED } from '../translations';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
+  createCaseFlyout?: Pick<CreateCaseFlyoutProps, 'headerContent' | 'initialValue'>;
   successToaster?: {
     title?: string;
     content?: string;
@@ -35,6 +37,7 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
 export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
 
 export const useCasesAddToExistingCaseModal = ({
+  createCaseFlyout,
   successToaster,
   noAttachmentsToaster,
   onSuccess,
@@ -50,6 +53,7 @@ export const useCasesAddToExistingCaseModal = ({
     [onSuccess]
   );
   const { open: openCreateNewCaseFlyout } = useCasesAddToNewCaseFlyout({
+    initialValue: createCaseFlyout?.initialValue,
     onClose,
     onSuccess: handleSuccess,
     toastTitle: successToaster?.title,
@@ -86,7 +90,10 @@ export const useCasesAddToExistingCaseModal = ({
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        openCreateNewCaseFlyout({ attachments });
+        openCreateNewCaseFlyout({
+          attachments,
+          headerContent: createCaseFlyout?.headerContent,
+        });
         return;
       }
 
@@ -125,6 +132,7 @@ export const useCasesAddToExistingCaseModal = ({
     },
     [
       closeModal,
+      createCaseFlyout?.headerContent,
       openCreateNewCaseFlyout,
       startTransaction,
       appId,

@@ -24,11 +24,13 @@ import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 jest.mock('../../../analytics/use_attach_events_ebt');
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../containers/use_create_attachments');
+jest.mock('../../create/flyout/use_cases_add_to_new_case_flyout');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
   return {
@@ -40,6 +42,8 @@ const onSuccess = jest.fn();
 const getAttachments = jest.fn().mockReturnValue([alertComment]);
 const useCasesToastMock = useCasesToast as jest.Mock;
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
+const useCasesAddToNewCaseFlyoutMock = useCasesAddToNewCaseFlyout as jest.Mock;
+const openCreateNewCaseFlyout = jest.fn();
 
 // test component to test the hook integration
 const TestComponent: React.FC<AddToExistingCaseModalProps> = (
@@ -99,6 +103,11 @@ describe('use cases add to existing case modal hook', () => {
   beforeEach(() => {
     dispatch.mockReset();
     AllCasesSelectorModalMock.mockReset();
+    useCasesAddToNewCaseFlyoutMock.mockReturnValue({
+      close: jest.fn(),
+      open: openCreateNewCaseFlyout,
+    });
+    openCreateNewCaseFlyout.mockReset();
     onSuccess.mockReset();
   });
 
@@ -162,6 +171,33 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     expect(getAttachments).toHaveBeenCalledWith({ theCase: { id: 'test', owner: 'cases' } });
+  });
+
+  it('should forward create case flyout options when creating from the selector', async () => {
+    const headerContent = <div>{'Attack discovery'}</div>;
+    const initialValue = {
+      description: 'Attack discovery details',
+      title: 'Attack discovery title',
+    };
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick();
+      return null;
+    });
+
+    renderWithTestingProviders(
+      <TestComponent createCaseFlyout={{ headerContent, initialValue }} />
+    );
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(openCreateNewCaseFlyout).toHaveBeenCalledWith({
+        attachments: [alertComment],
+        headerContent,
+      });
+    });
+    expect(useCasesAddToNewCaseFlyoutMock).toHaveBeenCalledWith(
+      expect.objectContaining({ initialValue })
+    );
   });
 
   it('should show a toaster info when no attachments are defined and noAttachmentsToaster is defined', async () => {
