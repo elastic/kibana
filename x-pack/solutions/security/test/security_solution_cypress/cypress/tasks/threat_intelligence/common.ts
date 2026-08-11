@@ -99,8 +99,14 @@ export const waitForViewToBeLoaded = () => {
   recurse(
     () => {
       if (attempt > 0) {
-        cy.get(REFRESH_BUTTON).should('exist').click();
-        cy.get(UPDATE_STATUS, { timeout: 30000 }).should('contain.text', 'Updated');
+        cy.get('body').then(($body) => {
+          if ($body.find(REFRESH_BUTTON).length > 0) {
+            cy.get(REFRESH_BUTTON).click();
+            cy.get(UPDATE_STATUS, { timeout: 30000 }).should('contain.text', 'Updated');
+          } else {
+            cy.reload();
+          }
+        });
       }
       attempt++;
       return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
