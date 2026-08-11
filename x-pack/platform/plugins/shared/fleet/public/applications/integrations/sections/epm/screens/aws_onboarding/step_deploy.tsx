@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { CardHeader } from './card_header';
-import type { AwsServiceEntry } from './aws_services_data';
+import { MANAGED_INTEGRATION_EXAMPLES, type AwsServiceEntry } from './aws_services_data';
 
 const STATUS_BADGE_SIZE = 32;
 
@@ -49,17 +49,6 @@ const ServiceStatusBadge: React.FunctionComponent<{ receiving: boolean }> = ({ r
     )}
   </div>
 );
-
-// Example (non-CloudFormation) services surfaced under Managed Integrations
-// while their data streams spin up — demo data for the prototype.
-const MANAGED_INTEGRATION_EXAMPLES = [
-  'Amazon RDS',
-  'Amazon S3',
-  'Amazon SQS',
-  'Amazon SNS',
-  'AWS Billing',
-  'Amazon DynamoDB',
-];
 
 const ServiceDetectionCard: React.FunctionComponent<{
   service: { name: string };
@@ -166,7 +155,7 @@ export const StepDeploy: React.FunctionComponent<{
             <>
               <EuiSpacer size="l" />
               <EuiText size="s">
-                <p>Copy the stack name from AWS Console and paste it below:</p>
+                <p>Copy the stack name and stack version from AWS Console and paste it below:</p>
               </EuiText>
               <EuiSpacer size="s" />
               <EuiFormRow

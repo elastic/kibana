@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CardHeader } from './card_header';
-import type { AwsServiceEntry } from './aws_services_data';
+import { MANAGED_INTEGRATION_EXAMPLES, type AwsServiceEntry } from './aws_services_data';
 import {
   CONTENT_BY_SERVICE,
   DETECTION_RULES_BY_SERVICE,
@@ -73,63 +73,86 @@ const DeploymentSummaryCard: React.FunctionComponent<{
   identityName: string;
   stackName: string;
   receivedCount: number;
-}> = ({ services, triggerSources, region, identityName, stackName, receivedCount }) => (
-  <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-    <CardHeader iconType="checkCircle" title="Deployment summary" servicesCount={services.length} />
-    <EuiSpacer size="m" />
-    <EuiFlexGrid columns={4} gutterSize="l">
-      <EuiFlexItem>
-        <SummaryItem label="Deployment method" value="Elastic Managed Integration" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SummaryItem label="Region" value={REGION_LABELS[region] ?? region} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SummaryItem label="Federated Identity Name" value={identityName || '—'} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SummaryItem label="CloudFormation stack" value={stackName || '—'} />
-      </EuiFlexItem>
-    </EuiFlexGrid>
-    <EuiHorizontalRule margin="m" />
-    <EuiText size="s" color="subdued">
-      {`${receivedCount} of ${services.length} service${
-        services.length === 1 ? '' : 's'
-      } receiving data`}
-    </EuiText>
-    <EuiSpacer size="s" />
-    <EuiFlexGrid columns={4} gutterSize="m">
-      {services.map((service, i) => (
-        <EuiFlexItem key={service.id}>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={i < receivedCount ? 'checkCircle' : 'clock'}
-                  color={i < receivedCount ? 'success' : 'subdued'}
-                  size="l"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem style={{ minWidth: 0 }}>
-                <EuiText size="s" className="eui-textTruncate">
-                  <strong>{service.name}</strong>
-                </EuiText>
-                <EuiText size="xs" color="subdued">
-                  {i < receivedCount ? 'Receiving data' : 'Waiting for data'}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {`Trigger: ${triggerSources[service.id] ?? 'S3'}`}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+}> = ({ services, triggerSources, region, identityName, stackName, receivedCount }) => {
+  // Mirror step 4: the selected CloudFormation services plus the Managed
+  // Integrations examples, so the summary covers everything shown there.
+  const allServices = [
+    ...services.map((service, i) => ({
+      key: service.id,
+      name: service.name,
+      receiving: i < receivedCount,
+      badge: `Trigger: ${triggerSources[service.id] ?? 'S3'}`,
+    })),
+    ...MANAGED_INTEGRATION_EXAMPLES.map((name) => ({
+      key: name,
+      name,
+      receiving: true,
+      badge: 'Managed Integration',
+    })),
+  ];
+  const receivingCount = allServices.filter((s) => s.receiving).length;
+
+  return (
+    <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
+      <CardHeader
+        iconType="checkCircle"
+        title="Deployment summary"
+        servicesCount={allServices.length}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={4} gutterSize="l">
+        <EuiFlexItem>
+          <SummaryItem label="Deployment method" value="Elastic Managed Integration" />
         </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
-  </EuiPanel>
-);
+        <EuiFlexItem>
+          <SummaryItem label="Region" value={REGION_LABELS[region] ?? region} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SummaryItem label="Federated Identity Name" value={identityName || '—'} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <SummaryItem label="CloudFormation stack" value={stackName || '—'} />
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiHorizontalRule margin="m" />
+      <EuiText size="s" color="subdued">
+        {`${receivingCount} of ${allServices.length} service${
+          allServices.length === 1 ? '' : 's'
+        } receiving data`}
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={4} gutterSize="m">
+        {allServices.map((service) => (
+          <EuiFlexItem key={service.key} style={{ minWidth: 0 }}>
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={service.receiving ? 'checkCircle' : 'clock'}
+                    color={service.receiving ? 'success' : 'subdued'}
+                    size="l"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem style={{ minWidth: 0 }}>
+                  <EuiText size="s" className="eui-textTruncate">
+                    <strong>{service.name}</strong>
+                  </EuiText>
+                  <EuiText size="xs" color="subdued">
+                    {service.receiving ? 'Receiving data' : 'Waiting for data'}
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <div>
+                    <EuiBadge color="hollow">{service.badge}</EuiBadge>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+    </EuiPanel>
+  );
+};
 
 type InstallState = 'idle' | 'installing' | 'installed';
 

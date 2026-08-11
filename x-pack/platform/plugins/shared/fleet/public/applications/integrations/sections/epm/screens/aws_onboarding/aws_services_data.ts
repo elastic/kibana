@@ -20,6 +20,17 @@ export interface AwsServiceCategory {
   services: AwsServiceEntry[];
 }
 
+// Example (non-CloudFormation) services surfaced under Managed Integrations
+// on steps 4 and 5 — demo data for the prototype.
+export const MANAGED_INTEGRATION_EXAMPLES = [
+  'Amazon RDS',
+  'Amazon S3',
+  'Amazon SQS',
+  'Amazon SNS',
+  'AWS Billing',
+  'Amazon DynamoDB',
+];
+
 // Real inventory from this instance: the `aws` package's 33 policy templates
 // plus the standalone aws_* packages (incl. OpenTelemetry variants), grouped
 // by AWS product category.
