@@ -24,9 +24,10 @@ describe('save_automation tool', () => {
         throw new Error('not used');
       },
       getSecurityStart: async () => undefined,
-      getWorkflowsManagement: () => ({
-        getWorkflow: getWorkflowMock,
-      }),
+      getWorkflowsManagement: () =>
+        ({
+          getWorkflow: getWorkflowMock,
+        } as never),
     });
 
   const createAttachments = (): AttachmentStateManager =>
