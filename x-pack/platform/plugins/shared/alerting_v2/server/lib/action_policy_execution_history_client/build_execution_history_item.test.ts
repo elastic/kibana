@@ -198,7 +198,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toMatchObject({
       policy: { id: 'policy-1' },
       rules: [],
-      totalRuleCount: 0,
+      total_rule_count: 0,
     });
   });
 
