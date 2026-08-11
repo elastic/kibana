@@ -61,7 +61,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
     maxSize: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
     meta: {
       description:
-        'Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored, and repeated ids are collapsed.',
+        'Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored, and repeated ids are collapsed. Must be empty when `access_mode` is `public`.',
     },
   }
 );

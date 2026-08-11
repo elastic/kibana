@@ -14,7 +14,7 @@ requestBody:
                 id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
                 role: member
         publishConversationRequestExample:
-          description: "Switch the conversation to `public` so any user with access to its agent can read and continue it. Entries stay additive and can be sent alongside a public mode."
+          description: "Switch the conversation to `public` so any user with access to its agent can read and continue it. A public conversation is already open to everyone with agent access, so `entries` must be empty."
           value:
             access_mode: public
             entries: []
@@ -53,6 +53,12 @@ responses:
               statusCode: 400
               error: "Bad Request"
               message: "[request body.entries]: array size is [101], but cannot be greater than [100]"
+          entriesWithPublicModeResponseExample:
+            description: "`entries` must be empty when `access_mode` is `public` — a public conversation is already open to everyone with agent access."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "ACL entries are not supported when access_mode is \"public\""
   404:
     description: "Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist."
     content:

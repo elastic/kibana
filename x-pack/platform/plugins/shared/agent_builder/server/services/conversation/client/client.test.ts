@@ -1257,12 +1257,12 @@ describe('ConversationClient', () => {
       });
 
       const result = await client.updateAccessControl('conversation-1', {
-        access_mode: ConversationAccessControlMode.Public,
+        access_mode: ConversationAccessControlMode.Private,
         entries: [newMember],
       });
 
       expect(result).toEqual({
-        access_mode: ConversationAccessControlMode.Public,
+        access_mode: ConversationAccessControlMode.Private,
         entries: [{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }],
       });
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -1271,6 +1271,34 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({ access_control: result }),
         })
       );
+    });
+
+    it('rejects entries when publishing the conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Public,
+          entries: [newMember],
+        })
+      ).rejects.toThrow('ACL entries are not supported when access_mode is "public"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows publishing the conversation with an empty entries list', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+
+      expect(result).toEqual({ access_mode: ConversationAccessControlMode.Public, entries: [] });
     });
 
     it('preserves added_at for members that are already listed', async () => {

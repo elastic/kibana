@@ -8,6 +8,7 @@
 import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntryInput } from './update_validation';
@@ -19,16 +20,36 @@ const memberEntry = (id: string): ConversationAccessControlEntryInput => ({
   role: ConversationAccessControlRole.Member,
 });
 
+const normalize = (
+  entries: ConversationAccessControlEntryInput[],
+  {
+    accessMode = ConversationAccessControlMode.Private,
+    ownerId = 'owner',
+  }: { accessMode?: ConversationAccessControlMode; ownerId?: string | undefined } = {}
+) => normalizeAccessControlUpdate({ accessMode, entries, ownerId });
+
 describe('normalizeAccessControlUpdate', () => {
   it('returns the entries unchanged when the input is valid', () => {
     const entries = [memberEntry('alice'), memberEntry('bob')];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({ entries });
+    expect(normalize(entries)).toEqual({ entries });
   });
 
   it('accepts an empty entries list', () => {
-    expect(normalizeAccessControlUpdate({ entries: [], ownerId: 'owner' })).toEqual({
+    expect(normalize([])).toEqual({ entries: [] });
+  });
+
+  it('accepts an empty entries list with a public access mode', () => {
+    expect(normalize([], { accessMode: ConversationAccessControlMode.Public })).toEqual({
       entries: [],
+    });
+  });
+
+  it('rejects entries when access_mode is public', () => {
+    const entries = [memberEntry('alice')];
+
+    expect(normalize(entries, { accessMode: ConversationAccessControlMode.Public })).toEqual({
+      error: 'ACL entries are not supported when access_mode is "public"',
     });
   });
 
@@ -38,7 +59,7 @@ describe('normalizeAccessControlUpdate', () => {
       (_, index) => memberEntry(`user-${index}`)
     );
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       error: `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`,
     });
   });
@@ -48,13 +69,13 @@ describe('normalizeAccessControlUpdate', () => {
       { ...memberEntry('alice'), type: 'role' },
     ] as unknown as ConversationAccessControlEntryInput[];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       error: 'Each ACL entry requires a type of "user"',
     });
   });
 
   it('rejects an empty id', () => {
-    expect(normalizeAccessControlUpdate({ entries: [memberEntry('')], ownerId: 'owner' })).toEqual({
+    expect(normalize([memberEntry('')])).toEqual({
       error: 'Each ACL entry requires a non-empty id',
     });
   });
@@ -64,7 +85,7 @@ describe('normalizeAccessControlUpdate', () => {
       memberEntry('a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1)),
     ];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       error: `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`,
     });
   });
@@ -74,7 +95,7 @@ describe('normalizeAccessControlUpdate', () => {
       { ...memberEntry('alice'), role: 'manager' },
     ] as unknown as ConversationAccessControlEntryInput[];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       error: 'Unknown ACL role: manager',
     });
   });
@@ -82,7 +103,7 @@ describe('normalizeAccessControlUpdate', () => {
   it('drops an entry naming the owner', () => {
     const entries = [memberEntry('owner'), memberEntry('alice')];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       entries: [memberEntry('alice')],
     });
   });
@@ -90,13 +111,13 @@ describe('normalizeAccessControlUpdate', () => {
   it('keeps every entry when the conversation has no owner id', () => {
     const entries = [memberEntry('alice'), memberEntry('bob')];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: undefined })).toEqual({ entries });
+    expect(normalize(entries, { ownerId: undefined })).toEqual({ entries });
   });
 
   it('dedupes repeated ids, keeping the first occurrence', () => {
     const entries = [memberEntry('alice'), memberEntry('bob'), memberEntry('alice')];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       entries: [memberEntry('alice'), memberEntry('bob')],
     });
   });
@@ -106,7 +127,7 @@ describe('normalizeAccessControlUpdate', () => {
       { ...memberEntry('alice'), added_at: '2026-01-01T00:00:00.000Z' },
     ] as unknown as ConversationAccessControlEntryInput[];
 
-    expect(normalizeAccessControlUpdate({ entries, ownerId: 'owner' })).toEqual({
+    expect(normalize(entries)).toEqual({
       entries: [memberEntry('alice')],
     });
   });

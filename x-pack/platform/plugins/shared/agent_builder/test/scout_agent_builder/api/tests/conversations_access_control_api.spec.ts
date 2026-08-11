@@ -1032,6 +1032,14 @@ apiTest.describe(
           expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
         });
 
+        await apiTest.step('entries are rejected alongside a public access mode', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Public,
+            entries: [{ type: 'user', id: bobId, role: ConversationAccessControlRole.Member }],
+          });
+          expect(response).toHaveStatusCode(400);
+        });
+
         await apiTest.step('the owner can publish the conversation instead', async () => {
           const response = await setAccessControlAs(apiClient, alice, conversationId, {
             access_mode: ConversationAccessControlMode.Public,

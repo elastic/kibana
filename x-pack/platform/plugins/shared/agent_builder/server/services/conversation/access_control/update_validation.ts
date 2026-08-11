@@ -8,6 +8,7 @@
 import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  ConversationAccessControlMode,
   isConversationAccessControlRole,
   type ConversationAccessControlEntry,
 } from '@kbn/agent-builder-common';
@@ -24,14 +25,22 @@ export type NormalizeAccessControlUpdateResult =
  * since neither is a security boundary and the sharing UI can send either.
  */
 export const normalizeAccessControlUpdate = ({
+  accessMode,
   entries,
   ownerId,
 }: {
+  accessMode: ConversationAccessControlMode;
   entries: ConversationAccessControlEntryInput[];
   ownerId: string | undefined;
 }): NormalizeAccessControlUpdateResult => {
   if (!Array.isArray(entries)) {
     return { error: 'ACL entries must be an array' };
+  }
+
+  // Entries are additive to private mode; a public conversation is already open to everyone
+  // with agent access, so per-user grants would be meaningless and are rejected outright.
+  if (accessMode === ConversationAccessControlMode.Public && entries.length > 0) {
+    return { error: 'ACL entries are not supported when access_mode is "public"' };
   }
 
   if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {

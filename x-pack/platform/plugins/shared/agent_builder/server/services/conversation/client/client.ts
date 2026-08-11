@@ -380,6 +380,7 @@ class ConversationClientImpl implements ConversationClient {
     update: UpdateConversationAccessControlRequestBody;
   }): ConversationAccessControl {
     const normalized = normalizeAccessControlUpdate({
+      accessMode: update.access_mode,
       entries: update.entries,
       ownerId: current.user.id,
     });
