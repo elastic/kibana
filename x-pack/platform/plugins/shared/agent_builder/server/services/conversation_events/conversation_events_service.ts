@@ -16,15 +16,7 @@ import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { ConversationEventsClient } from './client';
 import { createClient } from './client';
-
-/**
- * Entry point to the conversation event timeline.
- */
 export interface ConversationEventsService {
-  /**
-   * Returns a client scoped to the caller: reads and writes run as the request's user and are
-   * confined to the request's space. Resolve one per request; do not cache it across requests.
-   */
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationEventsClient>;
 }
 
@@ -35,11 +27,6 @@ interface ConversationEventsServiceDeps {
   spaces?: SpacesPluginStart;
 }
 
-/**
- * Default implementation. Constructed once at plugin start with core dependencies; each
- * `getScopedClient` call resolves the request's user and space and hands the client a
- * correspondingly scoped Elasticsearch client.
- */
 export class ConversationEventsServiceImpl implements ConversationEventsService {
   private readonly logger: Logger;
   private readonly security: SecurityServiceStart;

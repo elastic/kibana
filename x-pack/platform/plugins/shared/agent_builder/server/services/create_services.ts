@@ -218,8 +218,6 @@ export class ServiceManager {
       agents,
     });
 
-    // Events-native conversation timeline. Wired in so it can be exercised in tests; not yet
-    // consumed by any route or UI (the API handlers come in a later phase).
     const conversationEvents = new ConversationEventsServiceImpl({
       logger: logger.get('conversationEvents'),
       security,
