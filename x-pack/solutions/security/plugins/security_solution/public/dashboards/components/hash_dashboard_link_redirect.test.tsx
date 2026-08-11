@@ -56,11 +56,7 @@ describe('HashDashboardLinkRedirect', () => {
   it.each([['#/dashboard/target-dashboard-id'], ['#/view/target-dashboard-id']])(
     'redirects to the security dashboard url and clears the hash for %s',
     async (hash) => {
-      window.history.replaceState(
-        null,
-        '',
-        `/app/security/dashboards/current-id${hash}`
-      );
+      window.history.replaceState(null, '', `/app/security/dashboards/current-id${hash}`);
 
       render(<HashDashboardLinkRedirect />);
 
