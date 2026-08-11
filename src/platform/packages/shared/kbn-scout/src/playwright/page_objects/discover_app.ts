@@ -97,7 +97,10 @@ export class DiscoverApp {
 
   async selectDataView(
     name: string,
-    { waitForFieldList = true }: { waitForFieldList?: boolean } = {}
+    {
+      createAdHocIfMissing = true,
+      waitForFieldList = true,
+    }: { createAdHocIfMissing?: boolean; waitForFieldList?: boolean } = {}
   ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
@@ -110,7 +113,11 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    if (await matchingDataViewLocator.isVisible()) {
+    if (!createAdHocIfMissing) {
+      // Let Playwright wait for the filtered option to render instead of checking visibility
+      // immediately after the final keystroke.
+      await matchingDataViewLocator.click();
+    } else if (await matchingDataViewLocator.isVisible()) {
       await matchingDataViewLocator.click();
     } else {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
@@ -149,21 +156,48 @@ export class DiscoverApp {
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
+    const title = name.endsWith('*') ? name : `${name}*`;
 
-    // wait for timestamp options; default @timestamp applies.
-    await timestampField
-      .and(this.page.locator('[data-is-loading="0"]'))
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    // Retry: title validation can race its debounced index lookup and get stuck
+    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
 
-    if (adHoc) {
-      await this.page.testSubj.click('exploreIndexPatternButton');
-    } else {
-      await this.page.testSubj.click('saveIndexPatternButton');
+      if (attempt > 1) {
+        await titleInput.fill(''); // force a real value change to re-trigger validation
+      }
+      await titleInput.fill(title);
+      // wait for async title validation to settle before continuing.
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+
+      // wait for timestamp options; default @timestamp applies.
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+
+      if (adHoc) {
+        await this.page.testSubj.click('exploreIndexPatternButton');
+      } else {
+        await this.page.testSubj.click('saveIndexPatternButton');
+      }
+
+      const flyoutClosed = await flyout
+        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (flyoutClosed) {
+        break;
+      }
+      if (isLastAttempt) {
+        throw new Error(
+          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
+        );
+      }
     }
-    await flyout.waitFor({ state: 'hidden' });
 
     await this.waitUntilTabIsLoaded();
   }
@@ -887,6 +921,22 @@ export class DiscoverApp {
     }
   }
 
+  /**
+   * Drags a sidebar field onto the grid using the keyboard, mirroring the FTR
+   * `dragFieldWithKeyboardToTable` implementation.
+   */
+  async dragFieldToGridWithKeyboard(fieldName: string) {
+    const keyboardHandler = this.page.locator(
+      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+    );
+    await keyboardHandler.focus();
+    await this.page.keyboard.press('Enter'); // enter DnD mode
+    // domDroppable_overlay renders when DnD is active — use it as a sync point
+    await this.page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
+    await this.page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
+    await this.page.keyboard.press('Enter'); // drop
+  }
+
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
     const viewButtons: Locator[] = await this.page.testSubj
       .locator('dataVisualizerActionViewInLensButton')
@@ -940,13 +990,6 @@ export class DiscoverApp {
 
     if (currentMode !== 'classic') {
       await this.clickAppMenuItem('select-classic-mode-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'visible',
-      });
-      await this.page.testSubj.click('discover-esql-to-dataview-no-save-btn');
-      await this.page.testSubj.waitForSelector('discover-esql-to-dataview-modal', {
-        state: 'hidden',
-      });
     }
 
     await this.waitUntilSearchingHasFinished();

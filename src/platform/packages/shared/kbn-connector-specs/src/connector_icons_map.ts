@@ -51,6 +51,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
   ],
   [
+    '.censys',
+    lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -335,6 +339,25 @@ export const ConnectorIconsMap: Map<
       () =>
         import(
           /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
+  ],
+
+  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
+  [
+    '.gcp_iam',
+    lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
+  [
+    '.gcp_secret_manager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpSecretManager" */ './specs/gcp_secret_manager/icon'
         )
     ),
   ],

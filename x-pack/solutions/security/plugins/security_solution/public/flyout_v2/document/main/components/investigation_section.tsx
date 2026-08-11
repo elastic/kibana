@@ -31,6 +31,7 @@ import {
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { INVESTIGATION_SECTION_TITLE } from '../../../shared/constants/flyout_titles';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -64,6 +65,7 @@ export const InvestigationSection = memo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
       () =>
         (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal
@@ -118,19 +120,19 @@ export const InvestigationSection = memo(
         }
         // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
         // UUID) while keeping the rule name as the displayed text. When no UUID is available,
-        // render plain text to avoid opening the rule flyout with an invalid id.
+        // or when in rule preview (the rule doesn't exist yet), render plain text.
         if (
           props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
           props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
         ) {
-          if (!ruleId) {
+          if (!ruleId || isRulePreview) {
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} />;
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId, ancestorsIndexName, openDocumentFlyoutFromIndex]
+      [ruleId, isRulePreview, ancestorsIndexName, openDocumentFlyoutFromIndex]
     );
 
     return (
@@ -145,7 +147,7 @@ export const InvestigationSection = memo(
         {isAlert && !isRemoteDocument ? (
           <InvestigationGuide
             hit={hit}
-            isAvailable={true}
+            isAvailable={!isRulePreview}
             onShowInvestigationGuide={onShowInvestigationGuide}
           />
         ) : null}

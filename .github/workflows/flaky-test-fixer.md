@@ -46,6 +46,7 @@ env:
 
 imports:
   - .github/workflows/buildkite-cli-setup.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 
 engine:
   id: claude
@@ -55,7 +56,6 @@ engine:
   env:
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
-    ENABLE_PROMPT_CACHING_1H: '1'
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-4.8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: anthropic/claude-haiku-4.5
     ANTHROPIC_DEFAULT_SONNET_MODEL: anthropic/claude-sonnet-4.6
@@ -114,8 +114,17 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [flaky-test-fixer, release_note:skip]
-    allowed-labels: ['backport:skip', 'backport:all-open', 'backport:version', 'v9.*', 'v8.*']
+    labels: [flaky-test-fixer]
+    allowed-labels:
+      [
+        'release_note:skip',
+        'release_note:fix',
+        'backport:skip',
+        'backport:all-open',
+        'backport:version',
+        'v9.*',
+        'v8.*',
+      ]
     # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
     # reviewer, so the handler just logs a warning and the PR is still created.
     reviewers: ${{ github.actor }}
@@ -232,7 +241,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if any of the following is true:
+Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
 - you cannot identify a credible fix; or
@@ -251,15 +260,19 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 ## Steps
 
 1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
-2. Read the failing test and the helpers, fixtures, and page objects it imports.
+2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
-4. Apply the smallest test-side patch that addresses the root cause on the target branch. Don't add explanatory code comments to the patch by default — a good test-side fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it to 1–2 sentences; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
+5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
 10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+
+## Fix guardrails
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
 
 ## Validate the investigation is current
 
@@ -272,6 +285,27 @@ The investigator's comment is a starting hint, not a verdict you can trust blind
 To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills/flaky-test-investigator/SKILL.md` end to end (read the files in that folder directly; do not invoke the skill).
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
+
+## Verifying a Jest fix
+
+Run this loop twice: once on the unpatched test, once with the fix applied.
+
+```bash
+: > /tmp/gh-aw/agent/jest-durations
+fails=0
+for i in $(seq 1 25); do
+  node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
+  node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
+done
+echo "$fails/25 runs failed"
+awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
+```
+
+- **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
+- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
+- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
+- **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
 ## PR format
 
@@ -286,6 +320,15 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
 
+  <only when the test failed by running past its time budget, add this table right below the Summary, so the numbers are visible without opening Verification. Fill it from the two loops in "Verifying a Jest fix", and name the budget the test failed against (5s unless the file raises it with `jest.setTimeout`):
+
+  | Runtime vs. 5s budget | Failed | Avg | Max |
+  | --- | --- | --- | --- |
+  | Before fix | 4/25 | 4.6s | 5.0s |
+  | After fix | 0/25 | 0.9s | 1.1s |
+
+  Omit the table for every other kind of flake.>
+
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
@@ -296,10 +339,11 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command; on a `⚠️` line, add a short note after the command explaining what failed, e.g.
-  `✅ Passed: node scripts/eslint <files>`
-  `✅ Passed: node scripts/type_check --project <tsconfig>`
-  `⚠️ node scripts/jest <test> — 1 assertion still failing (<one-line reason>)`>
+  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
+  ✅ Passed: `node scripts/eslint <files>`
+  ✅ Passed: `node scripts/type_check --project <tsconfig>`
+  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
+  ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
 
@@ -310,7 +354,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <details>
   <summary>Backporting guidance</summary>
 
-  <one or two sentences: which backport label(s) you applied — `backport:skip`, `backport:all-open`, or `backport:version` with the per-branch `vX.Y.Z` labels — or that you applied none because you weren't sure, and why. Say which open release branches (from `versions.json`) the failing test exists on and whether this patch applies there unchanged. If you left it unlabeled, note which versions a reviewer should consider.>
+  <one or two sentences: which backport label(s) you applied — `backport:skip`, `backport:all-open`, or `backport:version` with the per-branch `vX.Y.Z` labels — or that you applied none because you weren't sure, and why. Say which open release branches (from `versions.json`) the patched file(s) exist on and whether this patch applies there unchanged. If you left it unlabeled, note which versions a reviewer should consider.>
 
   </details>
   ```
@@ -329,17 +373,21 @@ Add the following at the very end of the PR description (and outside of the deta
 
 (Per "Requester mention", drop `Requested by @${{ env.REQUESTED_BY }}.` from the NOTE if the requester is a bot or `kibanamachine`, leaving the rest of the NOTE.)
 
+## Release note label
+
+Pass exactly one release-note label in the `labels` field of the `create_pull_request` safe output: `release_note:skip` when the patch only touches test code, `release_note:fix` when it changes application code (the fix is user-facing).
+
 ## Backport label
 
 The guiding principle is to backport a fix to every older active version branch where it still applies — don't leave older branches flaky, so propagate the fix as widely as it safely fits.
 
 Only apply backport labels when you are **confident** about the decision. If you're unsure, apply **no** backport label at all and explain the uncertainty in the "Backporting guidance" section so a human can decide. Never guess.
 
-When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically) — or, for a version-branch fix, list them in the outcome comment's **Labels** line. First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the failing test's file exists at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
+When you are confident, pick the backport policy and pass the matching label(s) in the `labels` field of the `create_pull_request` safe output (the `flaky-test-fixer` label is added automatically) — or, for a version-branch fix, list them in the outcome comment's **Labels** line. First figure out which open `release` branches (listed in `versions.json` at the repository root) the fix belongs on by confirming the file(s) you patched exist at each branch's `ref` (e.g. read the path at that ref via the GitHub API), then choose:
 
 - **`backport:skip`** — the fix is effectively main-only: the failing test (or the file you patched) doesn't exist on any open release branch, it was recently added, or the flakiness is specific to `main`.
-- **`backport:all-open`** — the same test exists on **every** open release branch and your patch applies there unchanged, so fixing it across all of them is safe.
-- **`backport:version` + one `vX.Y.Z` label per target branch** — only *some* open release branches need the fix. Pass `backport:version` **together with** the version label for each target branch, mapping the branch to its current version in `versions.json` (e.g. `9.4` → `v9.4.4`, `9.3` → `v9.3.8`). Include a branch's label only when you've confirmed the test exists there.
+- **`backport:all-open`** — the patched file(s) exist on **every** open release branch and your patch applies there unchanged, so fixing it across all of them is safe.
+- **`backport:version` + one `vX.Y.Z` label per target branch** — only *some* open release branches need the fix. Pass `backport:version` **together with** the version label for each target branch, mapping the branch to its current version in `versions.json` (e.g. `9.4` → `v9.4.4`, `9.3` → `v9.3.8`). Include a branch's label only when you've confirmed the patched file(s) exist there.
 
 Always explain the choice — including a deliberate no-label decision — in the "Backporting guidance" section.
 
@@ -386,7 +434,7 @@ Follow this format:
   Open this PR against <version-branch> manually — this workflow can only target `main`. Everything you need is below. cc @<requester-github-handle-here-if-not-a-bot>
 
   - **Title:** `<PR title, per "PR format">`
-  - **Labels:** `flaky-test-fixer`, `release_note:skip`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
+  - **Labels:** `flaky-test-fixer`, `<release_note:skip or release_note:fix, per "Release note label">`, `<backport label(s), per "Backport label" — write "no backport label" if you weren't sure>`
 
   <details>
   <summary>PR description</summary>
@@ -424,9 +472,9 @@ Follow this format:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), not test-side, so there's nothing to patch here. cc @<requester-github-handle-here-if-not-a-bot>
+  The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
-  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure / not test-side, or the root cause can't be confidently identified.
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
 - **Backport the existing fix** (fix already on `main`, contained PR — no PR opened):
   ```markdown
   ### The fix is already on `main` — it needs backporting
