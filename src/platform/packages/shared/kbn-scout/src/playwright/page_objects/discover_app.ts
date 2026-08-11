@@ -821,22 +821,6 @@ export class DiscoverApp {
     }, cellSelector);
   }
 
-  async isChartVisible(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('unifiedHistogramChart')
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-  }
-
-  async isTableVisible(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('discoverDocTable')
-      .waitFor({ state: 'visible', timeout: 1_000 })
-      .then(() => true)
-      .catch(() => false);
-  }
-
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
     await this.waitUntilTabIsLoaded();

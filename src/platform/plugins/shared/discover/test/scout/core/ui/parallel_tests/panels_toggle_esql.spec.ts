@@ -58,7 +58,7 @@ spaceTest.describe(
       'panels can be toggled in ES|QL mode with a histogram chart',
       async ({ page, pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
-        const expectPanels = createPanelsStateAssertion({ page, discover });
+        const expectPanels = createPanelsStateAssertion(page);
 
         await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 1000');
         await discover.waitUntilTabIsLoaded();
@@ -109,7 +109,7 @@ spaceTest.describe(
       'panels can be toggled in ES|QL mode with an aggs chart',
       async ({ page, pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
-        const expectPanels = createPanelsStateAssertion({ page, discover });
+        const expectPanels = createPanelsStateAssertion(page);
 
         await discover.writeAndSubmitEsqlQuery(
           'from logstash-* | stats avg(bytes) by extension | limit 100'
@@ -169,7 +169,7 @@ spaceTest.describe(
       'sidebar can be toggled in ES|QL mode without a time field',
       async ({ page, pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
-        const expectPanels = createChartlessPanelsStateAssertion({ page, discover });
+        const expectPanels = createChartlessPanelsStateAssertion(page);
 
         await discover.selectDataView(testData.NO_TIME_FIELD_DATA_VIEW);
         await discover.waitUntilTabIsLoaded();
@@ -184,6 +184,9 @@ spaceTest.describe(
         await dataGrid.waitForDocTableRendered();
 
         await spaceTest.step('initial state — sidebar open, no chart', async () => {
+          // Guards against the table rendering empty: every panel assertion below
+          // would still pass against a grid with no documents.
+          await expect.poll(() => discover.getHitCountInt()).toBeGreaterThan(0);
           await expectPanels({ sidebar: true });
         });
 

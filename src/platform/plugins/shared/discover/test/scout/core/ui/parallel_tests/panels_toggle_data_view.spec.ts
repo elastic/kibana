@@ -50,7 +50,7 @@ spaceTest.describe(
 
     spaceTest('panels can be toggled in a time-based data view', async ({ page, pageObjects }) => {
       const { discover } = pageObjects;
-      const expectPanels = createPanelsStateAssertion({ page, discover });
+      const expectPanels = createPanelsStateAssertion(page);
 
       await spaceTest.step('initial state — all panels open', async () => {
         await expect.poll(() => discover.getHitCount()).toBe('14,004');
@@ -96,7 +96,7 @@ spaceTest.describe(
       'panels can be toggled in a non-time-based data view',
       async ({ page, pageObjects }) => {
         const { discover, dataGrid } = pageObjects;
-        const expectPanels = createChartlessPanelsStateAssertion({ page, discover });
+        const expectPanels = createChartlessPanelsStateAssertion(page);
 
         // Without a time field Discover renders no histogram at all, so only the
         // sidebar is collapsible.
@@ -105,6 +105,9 @@ spaceTest.describe(
         await dataGrid.waitForDocTableRendered();
 
         await spaceTest.step('initial state — sidebar open, no chart', async () => {
+          // Guards against the table rendering empty: every panel assertion below
+          // would still pass against a grid with no documents.
+          await expect.poll(() => discover.getHitCountInt()).toBeGreaterThan(0);
           await expectPanels({ sidebar: true });
         });
 

@@ -7,19 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverApp, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-interface PanelsAssertionContext {
-  page: ScoutPage;
-  discover: DiscoverApp;
-}
-
-const expectSidebarState = async (
-  { page, discover }: PanelsAssertionContext,
-  expanded: boolean
-) => {
-  expect(await discover.isSidebarPanelOpen()).toBe(expanded);
+const expectSidebarState = async (page: ScoutPage, expanded: boolean) => {
+  await expect(page.testSubj.locator('fieldList')).toBeVisible({ visible: expanded });
   await expect(page.testSubj.locator('dscHideSidebarButton')).toBeVisible({ visible: expanded });
   await expect(page.testSubj.locator('dscShowSidebarButton')).toBeVisible({ visible: !expanded });
 };
@@ -30,14 +22,12 @@ const expectSidebarState = async (
  * state it expects.
  */
 export const createPanelsStateAssertion =
-  (context: PanelsAssertionContext) =>
+  (page: ScoutPage) =>
   async ({ sidebar, chart, table }: { sidebar: boolean; chart: boolean; table: boolean }) => {
-    const { page, discover } = context;
+    await expectSidebarState(page, sidebar);
 
-    await expectSidebarState(context, sidebar);
-
-    expect(await discover.isChartVisible()).toBe(chart);
-    expect(await discover.isTableVisible()).toBe(table);
+    await expect(page.testSubj.locator('unifiedHistogramChart')).toBeVisible({ visible: chart });
+    await expect(page.testSubj.locator('discoverDocTable')).toBeVisible({ visible: table });
 
     // The toggle renders inside the histogram while it is expanded, and falls
     // back to the page once the histogram is collapsed.
@@ -69,14 +59,12 @@ export const createPanelsStateAssertion =
  * and only the sidebar can be toggled.
  */
 export const createChartlessPanelsStateAssertion =
-  (context: PanelsAssertionContext) =>
+  (page: ScoutPage) =>
   async ({ sidebar }: { sidebar: boolean }) => {
-    const { page, discover } = context;
+    await expectSidebarState(page, sidebar);
 
-    await expectSidebarState(context, sidebar);
-
-    expect(await discover.isChartVisible()).toBe(false);
-    expect(await discover.isTableVisible()).toBe(true);
+    await expect(page.testSubj.locator('unifiedHistogramChart')).toBeHidden();
+    await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
 
     // With no chart there is nothing to collapse, so the toggle lives in the
     // page and offers neither a histogram nor a table control.

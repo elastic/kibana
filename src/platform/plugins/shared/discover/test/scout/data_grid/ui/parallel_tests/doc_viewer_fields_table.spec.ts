@@ -18,6 +18,9 @@
  * Dropped (covered at the unit layer):
  * - `hide null values switch - ES|QL mode` (table.test.tsx)
  * - both `should disable the switch when no fields are selected` tests (table.test.tsx)
+ * - `should reveal and hide the filter form when the toggle is clicked`
+ *   (field_type_filter.test.tsx) — a popover show/hide with no API call, so the
+ *   browser round-trip adds nothing over the unit test
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -51,20 +54,6 @@ spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful
 
     await docViewer.findFieldByNameOrValue('.sr');
     await expect(docViewer.getFieldNames()).toHaveCount(2);
-  });
-
-  spaceTest('toggles the field type filter panel', async ({ page, pageObjects }) => {
-    const { docViewer } = pageObjects;
-
-    await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-
-    await docViewer.openFieldTypeFilter();
-    await expect(docViewer.getFieldTypeFilterOptions()).toHaveCount(6);
-
-    await docViewer.closeFieldTypeFilter();
-    await expect(
-      page.testSubj.locator('unifiedDocViewerFieldsTableFieldTypeFilterOptions')
-    ).toBeHidden();
   });
 
   spaceTest('filters fields by type', async ({ pageObjects }) => {
