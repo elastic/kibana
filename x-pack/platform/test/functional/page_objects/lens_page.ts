@@ -247,13 +247,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        if (opts.isPreviousIncompatible) {
-          // Incomplete → field must commit before close, or close discards the transition.
-          await retry.waitFor('incompatible field transition to complete', async () => {
-            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-            return await comboBox.isOptionSelected(fieldCombo, opts.field!);
-          });
-        }
+        // Field must commit to Lens state before close, or close discards the transition.
+        await retry.waitFor('field selection to commit', async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+        });
       }
 
       if (opts.formula) {
