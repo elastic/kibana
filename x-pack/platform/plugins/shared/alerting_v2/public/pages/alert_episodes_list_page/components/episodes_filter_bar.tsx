@@ -19,7 +19,7 @@ import {
   EuiFieldSearch,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';

@@ -20,9 +20,9 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'security serverless side nav, breadcrumbs, Launchpad panel, and active nav highlight',
+      'security serverless navigation, Launchpad panel, and active nav highlight',
       async ({ page, pageObjects, browserAuth }) => {
-        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
+        const { serverlessProjectChromePage, collapsibleNav, chrome } = pageObjects;
 
         await browserAuth.loginAsPrivilegedUser();
         await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
@@ -31,18 +31,16 @@ spaceTest.describe(
           await expect(serverlessProjectChromePage.primaryNav).toBeVisible();
         });
 
-        await spaceTest.step('breadcrumbs reflect navigation state', async () => {
-          await expect(serverlessProjectChromePage.breadcrumbs).toBeVisible();
-
+        await spaceTest.step('updates the page title and navigates back home', async () => {
           // Alerts is nested inside the "Detections" panel opener; open it before clicking Alerts.
           await collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
           await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
-          await expect(serverlessProjectChromePage.getBreadcrumbByText('Alerts')).toBeVisible();
+          await page.waitForURL(/\/app\/security\/alerts/);
+          await expect(chrome.pageTitle).toHaveText('Alerts');
 
           const alertsUrl = page.url();
-          await serverlessProjectChromePage.clickLogo();
+          await chrome.clickLogo();
           await expect(page).not.toHaveURL(alertsUrl);
-          await expect(serverlessProjectChromePage.getBreadcrumbByText('Alerts')).toBeHidden();
         });
 
         await spaceTest.step(

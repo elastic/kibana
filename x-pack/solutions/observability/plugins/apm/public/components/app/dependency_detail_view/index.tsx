@@ -43,20 +43,9 @@ export function DependencyDetailView({ children }: { children: React.ReactChild 
           },
         }),
       },
+      // No href on the current entity — Chrome Next Back would self-link.
       {
         title: dependencyName,
-        href: apmRouter.link('/dependencies', {
-          query: {
-            dependencyName,
-            rangeFrom,
-            rangeTo,
-            refreshInterval,
-            refreshPaused,
-            environment,
-            kuery,
-            comparisonEnabled,
-          },
-        }),
       },
     ],
     [
