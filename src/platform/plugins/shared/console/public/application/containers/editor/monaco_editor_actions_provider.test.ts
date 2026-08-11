@@ -114,6 +114,50 @@ describe('Editor actions provider', () => {
     );
   });
 
+  describe('WHEN the opening brace key is released', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('SHOULD trigger autocomplete after the debounce period', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      editor.getModel.mockReturnValue({
+        getLineContent: () => '{',
+        getValueInRange: () => '{',
+      } as unknown as monaco.editor.ITextModel);
+      editor.getPosition.mockReturnValue({ lineNumber: 1, column: 2 } as monaco.Position);
+
+      const onKeyUp = editor.onKeyUp.mock.calls[0][0];
+      onKeyUp({ browserEvent: { key: '{' } } as monaco.IKeyboardEvent);
+      await jest.runAllTimersAsync();
+
+      expect(editor.trigger).toHaveBeenCalledWith(
+        'Trigger suggestions',
+        'editor.action.triggerSuggest',
+        {}
+      );
+    });
+
+    it('SHOULD ignore other keys', async () => {
+      mockGetParsedRequests.mockResolvedValue([]);
+      editor.getModel.mockReturnValue({
+        getLineContent: () => ' "a',
+        getValueInRange: () => ' "a',
+      } as unknown as monaco.editor.ITextModel);
+      editor.getPosition.mockReturnValue({ lineNumber: 1, column: 4 } as monaco.Position);
+
+      const onKeyUp = editor.onKeyUp.mock.calls[0][0];
+      onKeyUp({ browserEvent: { key: 'a' } } as monaco.IKeyboardEvent);
+      await jest.runAllTimersAsync();
+
+      expect(editor.trigger).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getCurl', () => {
     it('returns an empty string if no requests', async () => {
       mockGetParsedRequests.mockResolvedValue([]);

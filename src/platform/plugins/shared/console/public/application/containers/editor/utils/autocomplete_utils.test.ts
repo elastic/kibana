@@ -27,6 +27,7 @@ import {
   getUrlPathCompletionItems,
   getBodyCompletionItems,
   shouldTriggerSuggestions,
+  shouldInsertAutocompleteTemplate,
   getInsertText,
 } from './autocomplete_utils';
 
@@ -157,6 +158,47 @@ describe('autocomplete_utils', () => {
     it('triggers no suggestions for the property value when the value is typed (number)', () => {
       const actual = shouldTriggerSuggestions(' "propertyName": 5');
       expect(actual).toBe(false);
+    });
+
+    // #259250 C1: opening `{` leaves the cursor inside `{}` and should trigger suggestions.
+    it('triggers suggestions after an opening curly brace', () => {
+      expect(shouldTriggerSuggestions('{')).toBe(true);
+      expect(shouldTriggerSuggestions('  {')).toBe(true);
+      expect(shouldTriggerSuggestions('\t{')).toBe(true);
+    });
+
+    it('does not treat a brace followed by object content as a trigger position', () => {
+      expect(shouldTriggerSuggestions('{ "already": 1')).toBe(false);
+      expect(shouldTriggerSuggestions('{foo')).toBe(false);
+      expect(shouldTriggerSuggestions('{"partial')).toBe(false);
+    });
+  });
+
+  describe('shouldInsertAutocompleteTemplate', () => {
+    it('allows template when the rest of the line is empty or a lone quote', () => {
+      expect(shouldInsertAutocompleteTemplate('')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('   ')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('"')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('  "')).toBe(true);
+    });
+
+    it('allows template when the rest of the line is only closing braces', () => {
+      expect(shouldInsertAutocompleteTemplate('}')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('}}')).toBe(true);
+    });
+
+    it('rejects template when other content follows the cursor', () => {
+      expect(shouldInsertAutocompleteTemplate(': 1')).toBe(false);
+      expect(shouldInsertAutocompleteTemplate(', "other"')).toBe(false);
+      expect(shouldInsertAutocompleteTemplate('"already": 1')).toBe(false);
+    });
+
+    // #259250 C2: Monaco auto-closes `"` inside `{}`, leaving `"}` after the cursor.
+    it('allows template when Monaco auto-closed quote sits before closing braces', () => {
+      expect(shouldInsertAutocompleteTemplate('"}')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('  "}')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('"}]')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('"}}}')).toBe(true);
     });
   });
 
@@ -511,6 +553,54 @@ describe('autocomplete_utils', () => {
 
       expect(items.map((item) => item.label)).toEqual(['type']);
     });
+
+    describe('WHEN Monaco auto-closes a quote before closing delimiters', () => {
+      it.each([
+        { lineContentAfterPosition: '"}]', expectedEndColumn: 10 },
+        { lineContentAfterPosition: '  "}]', expectedEndColumn: 12 },
+      ])(
+        'SHOULD expand the template and replace the closing quote in $lineContentAfterPosition',
+        async ({ lineContentAfterPosition, expectedEndColumn }) => {
+          mockPopulateContext.mockImplementation((...args) => {
+            const context = args[0][1];
+            context.autoCompleteSet = [
+              { name: 'append', template: { field: '', value: [] } },
+            ] as AutoCompleteContext['autoCompleteSet'];
+          });
+
+          const mockModel = {
+            getLineContent: () => 'POST _ingest/pipeline/_simulate',
+            getValueInRange: jest.fn((range: monaco.IRange) => {
+              if (range.startLineNumber === 2) {
+                return '{\n  "pipeline": {\n    "processors": [\n      {"';
+              }
+              if (range.startLineNumber === 5 && range.startColumn === 1) {
+                return '      {"';
+              }
+              return lineContentAfterPosition;
+            }),
+            getWordUntilPosition: () => ({ startColumn: 9, word: '' }),
+            getLineMaxColumn: () => 9 + lineContentAfterPosition.length,
+          } as unknown as monaco.editor.ITextModel;
+          const mockPosition = { lineNumber: 5, column: 9 } as monaco.Position;
+
+          const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+          expect(items).toHaveLength(1);
+          expect(items[0]).toEqual(
+            expect.objectContaining({
+              insertText: 'append": {\n  "field": "",\n  "value": []\n}',
+              range: {
+                startLineNumber: 5,
+                startColumn: 9,
+                endLineNumber: 5,
+                endColumn: expectedEndColumn,
+              },
+            })
+          );
+        }
+      );
+    });
   });
 
   describe('getInsertText', () => {
@@ -571,6 +661,17 @@ describe('autocomplete_utils', () => {
           addTemplate: true,
         })
       ).toBe('"query": {$0}');
+    });
+
+    it('expands ingest append processor template when addTemplate is true', () => {
+      const body =
+        'POST _ingest/pipeline/_simulate\n{\n  "pipeline": {\n    "processors": [\n      {"';
+      expect(
+        getInsertText({ name: 'append', template: { field: '', value: [] } }, body, {
+          ...mockContext,
+          addTemplate: true,
+        })
+      ).toBe('append": {\n' + '  "field": "",\n' + '  "value": []\n' + '}');
     });
 
     it('inserts template when provided directly and context.addTemplate is true', () => {

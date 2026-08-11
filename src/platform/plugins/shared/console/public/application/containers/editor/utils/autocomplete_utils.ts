@@ -345,16 +345,16 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  // if the rest of the line is empty or there is only " or ends with closing parentheses
-  // then template can be inserted, otherwise only name
-  context.addTemplate =
-    isEmptyOrDoubleQuote(lineContentAfterPosition) || /^}*$/.test(lineContentAfterPosition);
+  // Expand templates only when nothing except an auto-closed quote and closing delimiters follows.
+  const canInsertTemplate = shouldInsertAutocompleteTemplate(lineContentAfterPosition);
+  context.addTemplate = canInsertTemplate;
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
+  const closingQuoteIndex = lineContentAfterPosition.indexOf('"');
 
-  if (lineContentAfterPosition.startsWith('"')) {
-    endColumn = endColumn + 1;
+  if (closingQuoteIndex === 0 || (canInsertTemplate && closingQuoteIndex > 0)) {
+    endColumn = endColumn + closingQuoteIndex + 1;
   }
   // Check if we're typing a field name with a trailing dot
   const lineContentBeforePosition = model.getValueInRange({
@@ -543,7 +543,8 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
     methodWhitespaceRegex.test(lineContent) ||
     methodWithUrlRegex.test(lineContent) ||
     propertyNameRegex.test(lineContent) ||
-    propertyValueRegex.test(lineContent)
+    propertyValueRegex.test(lineContent) ||
+    /^\s*\{\s*$/.test(lineContent)
   );
 };
 
@@ -554,6 +555,17 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
 export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
   lineContent = lineContent.trim();
   return !lineContent || lineContent === '"';
+};
+
+/*
+ * Whether selecting a body suggestion may expand its __template based on
+ * the remainder of the line after the cursor.
+ */
+export const shouldInsertAutocompleteTemplate = (lineContentAfterPosition: string): boolean => {
+  return (
+    isEmptyOrDoubleQuote(lineContentAfterPosition) ||
+    /^"?[}\]]+$/.test(lineContentAfterPosition.trim())
+  );
 };
 
 export const hasUnclosedQuote = (lineContent: string): boolean => {

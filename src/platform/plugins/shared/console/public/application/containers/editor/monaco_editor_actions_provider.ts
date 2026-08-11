@@ -120,6 +120,10 @@ export class MonacoEditorActionsProvider {
       if (event.keyCode === monaco.KeyCode.Period) {
         debouncedTriggerSuggestions();
       }
+      // trigger body autocomplete after opening an object
+      if (event.browserEvent?.key === '{') {
+        debouncedTriggerSuggestions();
+      }
     });
   }
 
