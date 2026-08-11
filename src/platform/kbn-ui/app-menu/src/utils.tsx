@@ -33,8 +33,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuSwitch,
 } from './types';
-import { APP_MENU_EBT_ELEMENT } from './types';
-import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { APP_MENU_EBT_ELEMENT, APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
 /**

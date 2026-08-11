@@ -6,12 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-/**
- * Compatibility re-exports from `@kbn/ui-app-menu`.
- * Prefer importing from `@kbn/ui-app-menu` directly in new code.
- */
-
 export {
   AppMenuComponent,
   AppMenuItem,
@@ -21,6 +15,7 @@ export {
   AppMenuPopoverActionButtons,
   APP_MENU_ITEM_LIMIT,
   APP_MENU_EBT_ELEMENT,
+  APP_MENU_EBT_OPEN_MORE_ACTION,
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
   getAppMenuActionButtonTestSubj,

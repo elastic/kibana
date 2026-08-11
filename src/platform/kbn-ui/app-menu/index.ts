@@ -26,7 +26,7 @@ export type {
   AppMenuStaticItem,
 } from './src';
 
-export { APP_MENU_ITEM_LIMIT, APP_MENU_EBT_ELEMENT } from './src';
+export { APP_MENU_ITEM_LIMIT, APP_MENU_EBT_ELEMENT, APP_MENU_EBT_OPEN_MORE_ACTION } from './src';
 
 export {
   APP_MENU_TEST_SUBJECTS,

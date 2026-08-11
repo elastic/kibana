@@ -28,9 +28,12 @@ export type {
   AppMenuSwitch,
 } from './types';
 
-export { APP_MENU_EBT_ELEMENT } from './types';
-
-export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+export {
+  APP_MENU_ITEM_LIMIT,
+  DEFAULT_POPOVER_WIDTH,
+  APP_MENU_EBT_ELEMENT,
+  APP_MENU_EBT_OPEN_MORE_ACTION,
+} from './constants';
 
 export {
   APP_MENU_TEST_SUBJECTS,
