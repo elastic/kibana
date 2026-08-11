@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 
 export class SnapshotRestorePage {
@@ -153,28 +152,19 @@ export class SnapshotRestorePage {
   }
 
   /**
-   * Reloads the snapshots table until the named snapshot's row shows a terminal state. Callers wait
-   * on Elasticsearch first (`waitForSlmSnapshotToFinish`), so this only absorbs the render gap.
+   * Reloads the snapshots table once then waits for the named snapshot's row to show a terminal
+   * state. Callers wait on Elasticsearch first (`waitForSlmSnapshotToFinish`), so a single reload
+   * is enough to surface the completed state in the UI.
    */
   async waitUntilSnapshotComplete(nameContains: string) {
-    await expect
-      .poll(
-        async () => {
-          await this.page.testSubj
-            .locator('reloadButton')
-            .click({ timeout: 5_000 })
-            .catch(() => {});
-          const row = this.snapshotRow(nameContains);
-          // The prefix is unique to this run, so exactly one row is expected; anything else means
-          // the table has not settled.
-          if ((await row.count()) !== 1) return null;
-          const stateLocator = row.locator('[data-test-subj="snapshotState"]');
-          if (!(await stateLocator.isVisible())) return null;
-          return stateLocator.innerText();
-        },
-        { timeout: 20_000, intervals: [500, 1_000, 2_000] }
-      )
-      .toMatch(/Complete|Partial/);
+    await this.page.testSubj
+      .locator('reloadButton')
+      .click()
+      .catch(() => {});
+    await this.snapshotRow(nameContains)
+      .locator('[data-test-subj="snapshotState"]')
+      .filter({ hasText: /Complete|Partial/ })
+      .waitFor({ state: 'visible' });
   }
 
   async closeSnapshotFlyout() {
