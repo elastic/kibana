@@ -107,8 +107,15 @@ export function LensWrapper({
         query: resolvedQuery,
         tabLabel: lensProps.attributes.title,
         timeRange: lensProps.timeRange,
+        isApproximate: lensProps.isApproximate,
       }),
-    [resolvedQuery, lensProps.attributes.title, lensProps.timeRange, onExploreInDiscoverTab]
+    [
+      resolvedQuery,
+      lensProps.attributes.title,
+      lensProps.timeRange,
+      lensProps.isApproximate,
+      onExploreInDiscoverTab,
+    ]
   );
 
   const extraActions = useLensExtraActions({
