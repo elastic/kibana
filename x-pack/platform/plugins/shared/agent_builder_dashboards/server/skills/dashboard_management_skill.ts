@@ -7,13 +7,11 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { generateDashboardTool } from '../tools';
-import { createDashboardGeneration } from './generation_guidance';
+import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const createDashboardManagementSkill = (customContentEnabled: boolean) => {
-  const dashboardGeneration = createDashboardGeneration(customContentEnabled);
-
-  return defineSkillType({
+export const createDashboardManagementSkill = (getCustomContentEnabled: () => Promise<boolean>) =>
+  defineSkillType({
     id: 'dashboard-management',
     name: 'dashboard-management',
     basePath: 'skills/platform/dashboard',
@@ -39,6 +37,8 @@ ${kibanaRendering.guidance}
       ...(dashboardGeneration.referencedContent ?? []),
       ...(kibanaRendering.referencedContent ?? []),
     ],
-    getInlineTools: () => [generateDashboardTool()],
+    getInlineTools: async () => {
+      const customContentEnabled = await getCustomContentEnabled();
+      return [generateDashboardTool({ customContentEnabled })];
+    },
   });
-};

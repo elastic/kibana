@@ -58,17 +58,9 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    (async () => {
+    registerSkills(setupDeps.agentBuilder, async () => {
       const [coreStart] = await coreSetup.getStartServices();
-      const customContentEnabled = await coreStart.featureFlags.getBooleanValue(
-        CUSTOM_CONTENT_ENABLED_FLAG_KEY,
-        false
-      );
-      registerSkills(setupDeps.agentBuilder, customContentEnabled);
-    })().catch((err) => {
-      this.logger.error(
-        `Failed to register dashboard skills: ${err instanceof Error ? err.message : String(err)}`
-      );
+      return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
     });
 
     return {};
