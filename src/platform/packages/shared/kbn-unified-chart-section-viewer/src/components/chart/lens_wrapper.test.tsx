@@ -194,7 +194,7 @@ describe('LensWrapper', () => {
           disabledActions: expect.arrayContaining([
             'ACTION_CUSTOMIZE_PANEL',
             'ACTION_EXPORT_CSV',
-
+            'ACTION_FILTERS_NOTIFICATION',
             'alertRule',
           ]),
         }),
