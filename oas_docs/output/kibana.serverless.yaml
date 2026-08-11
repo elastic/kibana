@@ -118929,6 +118929,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Per-query interval override in seconds. Only persisted and applied when `schedule_type: "interval"` is also set on this query; a bare `interval` without the marker is converged away on write and the agent runs the pack-level default instead. Ignored in rrule-mode packs.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
