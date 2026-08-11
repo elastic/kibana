@@ -183,30 +183,34 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-transactionhistory',
+      feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-ledgerwriter',
+      feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'ledgerwriter-balancereader',
+      feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
@@ -214,13 +218,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       feature_id: 'ledgerwriter-postgresql',
       source: 'ledgerwriter',
       target: 'postgresql',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'transactionhistory-postgresql',
-      source: 'transactionhistory',
-      target: 'postgresql',
+      protocol: 'jdbc',
       stream_name: 'logs',
     },
   ],
@@ -261,7 +259,6 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 /** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
@@ -295,7 +292,6 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
@@ -393,7 +389,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, frontend connection-refused failures, and ledgerwriter JDBC connectivity)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -401,7 +397,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States one sentence connecting every grouped detection through the transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses confirming rows where available and compatible exact-query KI context for sparse rows, without presenting KI context as proof of current activity. Does not introduce another endpoint or claim a final root cause.',
+          text: 'States one sentence connecting every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend connection refusals/timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
@@ -411,12 +407,12 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed postgresql/cache failure hypothesis rather than split into separate service-scoped discoveries.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
           id: 'dependency-chain',
-          text: 'Names the dependency from transactionhistory to postgresql and the downstream impact on the frontend read/write paths across balancereader and ledgerwriter.',
+          text: 'Names KI-grounded dependency paths in the cascade — at minimum frontend→transactionhistory, frontend→balancereader, and frontend→ledgerwriter HTTP impacts, plus ledgerwriter→balancereader and ledgerwriter→postgresql where topology supports them — and describes downstream user-journey impact across balance, transaction-history, payment, and deposit flows.',
           score: 1,
         },
         {

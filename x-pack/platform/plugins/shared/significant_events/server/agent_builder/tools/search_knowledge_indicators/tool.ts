@@ -65,7 +65,7 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe(
-      'Seed the feature search with these IDs. Exact feature IDs are returned; when dependency, entity, or infrastructure types are requested, connected dependency endpoints and matching entity identity fields may also be returned. Use only when `kind: ["feature"]` is specified.'
+      'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Use only when `kind: ["feature"]` is specified.'
     ),
   query_types: z
     .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))

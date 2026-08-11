@@ -147,14 +147,14 @@ Never retry completed checks or run a third wave. Note any checks skipped becaus
 
 Build one topology graph for the batch. `query.features[]` seeds the graph; it never limits it. Evaluate every fetched `dependency`, `entity`, and `infrastructure` KI once. Do not issue another KI search.
 
-1. **Correlate signal verdicts and create active paths.** Review every `signals` entry with its `verdict`. Only `confirms` signals can establish an active path. For each confirming signal, apply this order:
+1. **Correlate signal verdicts and create active paths.** Review every `signals` entry with its `verdict`. Only `confirms` signals can establish an active path. If no signal has verdict `confirms`, emit empty `causal_features` and `blast_radius` and skip the remaining sub-steps. For each confirming signal, apply this order:
    - Match the failed service or component named by the signal's found row to a fetched dependency's `source`.
    - If that dependency's fetched `evidence`, `description`, or `meta` documents a connection, timeout, refusal, or protocol failure, activate the dependency path even when the current row does not repeat the dependency target and even when the dependency is absent from `query.features[]`.
    - Resolve the dependency's `target` to fetched entity or infrastructure KIs by feature ID, `properties.name`, or stable identity properties such as `technology`. Use the dependency's authored fields and the candidate's attribution metadata to disambiguate; technology alone is insufficient when multiple candidates match.
-   Correlate activated paths across rules before assigning fields.
+   - Correlate activated paths across all confirming signals in the batch before assigning fields.
    Example: a confirming signal identifies `service-a` as unable to connect to a database; a fetched dependency has `source: service-a`, `target: sql`, and connection-timeout evidence; and one fetched entity has `name: orders-db`, `technology: sql`, with metadata attributing it to `service-a`. Activate the path, select `orders-db` as causal, and retain the dependency as blast radius. If multiple entities match `sql` without attribution, select no target and use `service-a` as the causal fallback.
 2. **Build `causal_features`.** Add the entity or infrastructure that a confirming signal's found row identifies as failed. Otherwise, for an activated dependency path with a confirmed source match, add the uniquely attributed fetched target. If no target entity or infrastructure KI resolves, add the activated path's fetched source instead. Do not invent missing targets.
-3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source entity when the active path's signal shows that source is affected, and add any other affected entity or infrastructure component only when a confirming signal's found row shows that impact. A `causal_features` entry cannot also appear in `blast_radius`. Use:
+3. **Build `blast_radius`.** Add every dependency edge in an active path. Add the confirmed source entity when the active path's signal shows that source is affected and it is not already in `causal_features`, and add any other affected entity or infrastructure component only when a confirming signal's found row shows that impact. A `causal_features` entry cannot also appear in `blast_radius`. Use:
    - cause: `{ feature_id, name, stream_name? }`
    - dependency: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`
    - entity: `{ type: "entity", feature_id, name, stream_name? }`
