@@ -6,7 +6,6 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 
@@ -2307,7 +2306,7 @@ describe('WorkflowPipelineMonitor', () => {
       expect(screen.queryByTestId('inspectValidation')).not.toBeInTheDocument();
     });
 
-    it('calls onViewData with "retrieval" and metadata when alert retrieval Inspect is clicked', async () => {
+    it('calls onViewData with "retrieval" and metadata when alert retrieval Inspect is clicked', () => {
       const mockOnViewData = jest.fn();
 
       render(
@@ -2321,7 +2320,7 @@ describe('WorkflowPipelineMonitor', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('inspectAlertRetrieval'));
+      fireEvent.click(screen.getByTestId('inspectAlertRetrieval'));
 
       expect(mockOnViewData).toHaveBeenCalledWith('retrieval', {
         workflowId: 'workflow-123',
@@ -2330,7 +2329,7 @@ describe('WorkflowPipelineMonitor', () => {
       });
     });
 
-    it('calls onViewData with "generation" and metadata when generation Inspect is clicked', async () => {
+    it('calls onViewData with "generation" and metadata when generation Inspect is clicked', () => {
       const mockOnViewData = jest.fn();
 
       render(
@@ -2344,7 +2343,7 @@ describe('WorkflowPipelineMonitor', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('inspectGeneration'));
+      fireEvent.click(screen.getByTestId('inspectGeneration'));
 
       expect(mockOnViewData).toHaveBeenCalledWith('generation', {
         workflowId: 'workflow-123',
@@ -2353,7 +2352,7 @@ describe('WorkflowPipelineMonitor', () => {
       });
     });
 
-    it('calls onViewData with "validation" and metadata when validation Inspect is clicked', async () => {
+    it('calls onViewData with "validation" and metadata when validation Inspect is clicked', () => {
       const mockOnViewData = jest.fn();
 
       render(
@@ -2367,7 +2366,7 @@ describe('WorkflowPipelineMonitor', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('inspectValidation'));
+      fireEvent.click(screen.getByTestId('inspectValidation'));
 
       expect(mockOnViewData).toHaveBeenCalledWith('validation', {
         workflowId: 'workflow-123',
@@ -2596,7 +2595,7 @@ describe('WorkflowPipelineMonitor', () => {
       expect(screen.queryByTestId('missingAlertIdWarning-run-custom')).not.toBeInTheDocument();
     });
 
-    it('calls onViewData with "retrieval:<workflowRunId>" when per-workflow inspect buttons are clicked', async () => {
+    it('calls onViewData with "retrieval:<workflowRunId>" when per-workflow inspect buttons are clicked', () => {
       const mockOnViewData = jest.fn();
 
       const multiRetrievalPipelineData: PipelineDataResponse = {
@@ -2656,7 +2655,7 @@ describe('WorkflowPipelineMonitor', () => {
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('inspectAlertRetrieval-run-legacy'));
+      fireEvent.click(screen.getByTestId('inspectAlertRetrieval-run-legacy'));
 
       expect(mockOnViewData).toHaveBeenCalledWith('retrieval:run-legacy', {
         workflowId: 'workflow-legacy',
@@ -2666,7 +2665,7 @@ describe('WorkflowPipelineMonitor', () => {
 
       mockOnViewData.mockClear();
 
-      await userEvent.click(screen.getByTestId('inspectAlertRetrieval-run-custom'));
+      fireEvent.click(screen.getByTestId('inspectAlertRetrieval-run-custom'));
 
       expect(mockOnViewData).toHaveBeenCalledWith('retrieval:run-custom', {
         workflowId: 'workflow-custom',
@@ -2898,7 +2897,7 @@ describe('WorkflowPipelineMonitor', () => {
         expect(screen.queryByTestId('inspectCombinedAlerts')).not.toBeInTheDocument();
       });
 
-      it('calls onViewData with "combined_retrieval" when the combined inspect button is clicked', async () => {
+      it('calls onViewData with "combined_retrieval" when the combined inspect button is clicked', () => {
         const mockOnViewData = jest.fn();
 
         render(
@@ -2912,7 +2911,7 @@ describe('WorkflowPipelineMonitor', () => {
           </TestProviders>
         );
 
-        await userEvent.click(screen.getByTestId('inspectCombinedAlerts'));
+        fireEvent.click(screen.getByTestId('inspectCombinedAlerts'));
 
         expect(mockOnViewData).toHaveBeenCalledWith('combined_retrieval');
       });
