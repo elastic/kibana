@@ -82,7 +82,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Before implementing UI, look for an existing reusable component in the target module and the shared packages it is allowed to depend on, including `@kbn/ui-*` under `src/platform/kbn-ui`. When both `@kbn/ui-*` and `@elastic/eui` provide a suitable component for the same pattern, prefer `@kbn/ui-*`.
 - If no existing component or pattern fits, implement the UI in the module that owns the feature. Keep simple one-off markup in its parent; extract a component only for reuse or non-trivial UI logic.
 - Create or modify `@kbn/ui-*` packages only when explicitly asked; otherwise consume them as-is.
-- If an existing `@kbn/ui-*` or `@elastic/eui` component matches the required pattern but cannot provide the required behavior through supported props or composition, call out the gap and recommend involving product and design before working around it (rebuilding from lower-level primitives, overriding the component's internals with CSS, or similar).
+- If an existing `@kbn/ui-*` or `@elastic/eui` component matches the required pattern but cannot provide the required behavior through supported props or composition, call out the gap and recommend consulting the component's owning team before working around it (rebuilding from lower-level primitives, overriding the component's internals with CSS, or similar).
 - Style with Emotion (`@emotion/react`) and EUI design tokens. Use inline styles only for runtime-computed values such as animation progress or measured coordinates.
 
 ### Schema validation
