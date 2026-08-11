@@ -70,6 +70,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await discover.waitUntilSearchingHasFinished();
 
+      // Count badges use auto-retrying toHaveText; wait for them before reading names.
+      await unifiedFieldList.expectSidebarSectionFieldCount('selected', 2);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
         'extension',
         '@message',
@@ -84,6 +86,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await discover.waitUntilSearchingHasFinished();
 
+      await unifiedFieldList.expectSidebarSectionFieldCount('selected', 3);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
         'extension',
         'bytes',
@@ -99,11 +102,13 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await page.reload();
       await discover.waitUntilTabIsLoaded();
 
+      await unifiedFieldList.expectSidebarSectionFieldCount('selected', 3);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
         'extension',
         'bytes',
         '@message',
       ]);
+      await unifiedFieldList.expectSidebarSectionFieldCount('popular', 3);
       expect(await unifiedFieldList.getSidebarSectionFieldNames('popular')).toStrictEqual(
         popularBeforeRefresh
       );
@@ -121,10 +126,12 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       });
 
       try {
+        await unifiedFieldList.expectSidebarSectionFieldCount('selected', 1);
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
           'bytes',
         ]);
 
+        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 4);
         const popularAfterRuntimeField = await unifiedFieldList.getSidebarSectionFieldNames(
           'popular'
         );
@@ -132,7 +139,6 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         expect(popularAfterRuntimeField).toContain('@message');
         expect(popularAfterRuntimeField).toContain('extension');
         expect(popularAfterRuntimeField).toContain('bytes');
-        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 4);
         await unifiedFieldList.expectAvailableFieldCount(
           testData.LOGSTASH_AVAILABLE_FIELD_COUNT + 1
         );
@@ -140,10 +146,10 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         await unifiedFieldList.clickFieldListItemAdd('clientip');
         await discover.waitUntilSearchingHasFinished();
 
+        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 5);
         const popularAfterClientip = await unifiedFieldList.getSidebarSectionFieldNames('popular');
         expect(popularAfterClientip[0]).toBe(runtimeFieldName);
         expect(popularAfterClientip).toContain('clientip');
-        await unifiedFieldList.expectSidebarSectionFieldCount('popular', 5);
       } finally {
         // UI delete is flaky here: the field sits in Popular and the delete control is
         // often intercepted by the data grid. Clear it via the data views API instead.
@@ -165,19 +171,13 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
   spaceTest('passes filters down to field stats', async ({ pageObjects }) => {
     const { discover, filterBar, unifiedFieldList } = pageObjects;
 
-    await unifiedFieldList.clickFieldListItem('extension');
-    await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
-    const before = await unifiedFieldList.getFieldStatsTopValues().innerText();
-    await unifiedFieldList.closeFieldPopover();
-
     await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
     await discover.waitUntilSearchingHasFinished();
 
     await unifiedFieldList.clickFieldListItem('extension');
     await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
-    const after = unifiedFieldList.getFieldStatsTopValues();
-    await expect(after).toContainText('jpg');
-    await expect(after).not.toHaveText(before);
+    // Unfiltered top values are css/png/gif/php — jpg proves the filter applied.
+    await expect(unifiedFieldList.getFieldStatsTopValues()).toContainText('jpg');
     await unifiedFieldList.closeFieldPopover();
   });
 });

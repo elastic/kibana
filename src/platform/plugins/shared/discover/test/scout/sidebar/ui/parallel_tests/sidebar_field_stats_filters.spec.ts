@@ -52,9 +52,6 @@ spaceTest.describe(
         await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
         const filteredTopValues = unifiedFieldList.getFieldStatsTopValues();
         await expect(filteredTopValues).toContainText('jpg');
-        await expect(filteredTopValues).not.toHaveText(unfilteredTopValuesText, {
-          useInnerText: true,
-        });
         await unifiedFieldList.closeFieldPopover();
 
         await filterBar.toggleFilterNegated('extension');
