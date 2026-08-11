@@ -291,14 +291,14 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
-: > /tmp/jest-durations
+mkdir -p /tmp/gh-aw/agent && : > /tmp/gh-aw/agent/jest-durations
 fails=0
 for i in $(seq 1 25); do
-  node scripts/jest <path-to-test-file> --json --outputFile=/tmp/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
-  node -e 'const [r] = require("/tmp/jest-run.json").testResults; console.log(r ? r.assertionResults.reduce((total, a) => total + (a.duration || 0), 0) : 0)' >> /tmp/jest-durations
+  node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
+  node -e 'const [r] = require("/tmp/gh-aw/agent/jest-run.json").testResults; console.log(r ? r.assertionResults.reduce((total, a) => total + (a.duration || 0), 0) : 0)' >> /tmp/gh-aw/agent/jest-durations
 done
 echo "$fails/25 runs failed"
-awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/jest-durations
+awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
 ```
 
 - **Run it before the fix, not only after.** `git stash` the patch if you have already written it. A pre-fix loop that fails is what turns the post-fix loop into evidence; if the unpatched test survives all 25 runs, the flake doesn't reproduce here and a clean post-fix loop confirms nothing. Fix the root cause you diagnosed anyway, but say so under "Not verified locally".
