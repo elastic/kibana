@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { healthRoute } from './health';
-export { backgroundTaskUtilizationRoute } from './background_task_utilization';
-export { metricsRoute } from './metrics';
-export { executionControlRoutes } from './execution_control';
+export {
+  TaskExecutionControlService,
+  DEFAULT_EXECUTION_CONTROL_STATE,
+} from './task_execution_control_service';
+export type {
+  TaskExecutionControlState,
+  TaskExecutionControlMutator,
+} from './task_execution_control_service';
