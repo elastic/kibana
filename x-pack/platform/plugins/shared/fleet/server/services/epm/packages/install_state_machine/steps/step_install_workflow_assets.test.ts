@@ -380,7 +380,9 @@ describe('stepInstallWorkflowAssets', () => {
     appContextService.stop();
   });
 
-  const createContext = (overrides: Record<string, unknown> = {}): StepInstallWorkflowAssetsParam => ({
+  const createContext = (
+    overrides: Record<string, unknown> = {}
+  ): StepInstallWorkflowAssetsParam => ({
     logger: loggingSystemMock.createLogger(),
     savedObjectsClient,
     spaceId,
@@ -389,7 +391,12 @@ describe('stepInstallWorkflowAssets', () => {
       packageInfo: {
         name: pkgName,
         version: pkgVersion,
+        title: pkgName,
+        owner: { github: 'elastic/fleet' },
+        format_version: '1.0.0',
+        description: 'test package',
       },
+      paths: [`${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`],
       archiveIterator: createArchiveIteratorFromMap(
         new Map([
           [
@@ -429,6 +436,15 @@ describe('stepInstallWorkflowAssets', () => {
     workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
       id: workflowId,
       managed: true,
+      name: workflowId,
+      enabled: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      createdBy: 'test-user',
+      lastUpdatedAt: '2024-01-01T00:00:00Z',
+      lastUpdatedBy: 'test-user',
+      definition: null,
+      yaml: workflowYaml,
+      valid: true,
     });
 
     await stepInstallWorkflowAssets(createContext());
@@ -508,8 +524,6 @@ describe('stepInstallWorkflowAssets', () => {
 
     await stepInstallWorkflowAssets(context);
 
-    expect(logger.warn).not.toHaveBeenCalledWith(
-      expect.stringContaining('forcing disabled')
-    );
+    expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('forcing disabled'));
   });
 });
