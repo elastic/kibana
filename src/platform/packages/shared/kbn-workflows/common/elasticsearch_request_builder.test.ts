@@ -87,6 +87,42 @@ describe('buildElasticsearchRequest', () => {
     ).toThrow('Missing id_field "id" at document 1');
   });
 
+  it('should throw when id_field value is an object', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 'id',
+        operations: [
+          { id: { repo: 'kibana', num: 1 }, v: 1 },
+          { id: { repo: 'elasticsearch', num: 2 }, v: 2 },
+        ],
+      })
+    ).toThrow('id_field "id" at document 0 must be a string, number, or boolean');
+  });
+
+  it('should throw when id_field value is an array', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 'id',
+        operations: [
+          { id: ['a', 'b'], v: 1 },
+          { id: ['a,b'], v: 2 },
+        ],
+      })
+    ).toThrow('id_field "id" at document 0 must be a string, number, or boolean');
+  });
+
+  it('should throw when id_field parameter is not a string', () => {
+    expect(() =>
+      buildElasticsearchRequest('elasticsearch.bulk', {
+        index: 'test-index',
+        id_field: 7 as unknown as string,
+        operations: [{ id: 'a' }],
+      })
+    ).toThrow('id_field must be a string');
+  });
+
   it('should coerce a non-string id_field value to a string', () => {
     const result = buildElasticsearchRequest('elasticsearch.bulk', {
       index: 'test-index',

@@ -111,6 +111,9 @@ export function buildElasticsearchRequest(
     }
 
     if (stepType === 'elasticsearch.bulk' && 'operations' in params) {
+      if (params.id_field !== undefined && typeof params.id_field !== 'string') {
+        throw new Error('id_field must be a string');
+      }
       bulkBody = buildBulkBody(
         params.operations as Array<Record<string, unknown>>,
         typeof params.id_field === 'string' ? params.id_field : undefined
@@ -198,6 +201,11 @@ function buildBulkBody(
         const id = doc[idField];
         if (id === undefined || id === null) {
           throw new Error(`Missing id_field "${idField}" at document ${index}`);
+        }
+        if (typeof id === 'object') {
+          throw new Error(
+            `id_field "${idField}" at document ${index} must be a string, number, or boolean`
+          );
         }
         (action.index as Record<string, unknown>)._id = String(id);
       }
