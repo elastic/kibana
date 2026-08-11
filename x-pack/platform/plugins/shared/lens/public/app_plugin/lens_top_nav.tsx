@@ -1171,22 +1171,28 @@ export const LensTopNavMenu = ({
   });
 
   // AppHeader badges (Chrome Next project). Classic chrome keeps TopNavMenuBadges in the portal.
-  const appHeaderBadges: AppHeaderBadge[] | undefined =
-    isChromeNextAppHeader && managed
-      ? [
-          {
-            label: i18n.translate('xpack.lens.managedBadgeLabel', {
-              defaultMessage: 'Managed',
-            }),
-            color: 'primary',
-            tooltip: managedBadgeTooltip,
-            'data-test-subj': 'managedContentBadge',
-          },
-        ]
-      : undefined;
+  const appHeaderBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      isChromeNextAppHeader && managed
+        ? [
+            {
+              label: i18n.translate('xpack.lens.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              }),
+              color: 'primary',
+              tooltip: managedBadgeTooltip,
+              'data-test-subj': 'managedContentBadge',
+            },
+          ]
+        : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
 
-  const legacyBadges =
-    !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined;
+  const legacyBadges = useMemo(
+    () =>
+      !isChromeNextAppHeader && managed ? [getManagedContentBadge(managedBadgeTooltip)] : undefined,
+    [isChromeNextAppHeader, managed, managedBadgeTooltip]
+  );
 
   // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
   // When not coming from a dashboard, omit `back` so chrome can fall back to breadcrumbs.
