@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
-import type { InternalSecurityServiceStart } from '../internal_contracts';
-
-export const convertSecurityApi = (
-  privateApi: CoreSecurityDelegateContract
-): InternalSecurityServiceStart => {
-  // shapes are the same for now, so the delegate can be re-exposed as-is.
-  return privateApi;
-};
+/**
+ * Core's service accounts service
+ *
+ * @public
+ */
+export interface CoreServiceAccountsService {
+  /**
+   * Check if service accounts are available in the current environment.
+   */
+  isEnabled(): boolean;
+}
