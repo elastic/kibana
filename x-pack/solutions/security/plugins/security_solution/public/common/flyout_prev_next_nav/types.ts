@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './translation_results';
-export * from './is_migration_item_navigable_with_flyout';
+export interface FlyoutPrevNextNavigation {
+  hasNext: boolean;
+  hasPrevious: boolean;
+  goToNext: () => void;
+  goToPrevious: () => void;
+}
