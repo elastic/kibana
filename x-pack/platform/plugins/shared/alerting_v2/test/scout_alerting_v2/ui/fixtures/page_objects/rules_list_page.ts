@@ -36,7 +36,7 @@ export class RulesListPage {
   }
 
   tagsFilterOption(tag: string) {
-    return this.page.testSubj.locator('rulesListTagsFilter-list').getByText(tag, { exact: true });
+    return this.page.testSubj.locator(`rulesListTagsFilterOption-${tag}`);
   }
 
   rowCheckbox(ruleId: string) {

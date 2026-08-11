@@ -67,6 +67,7 @@ const StatusFilterComponent = ({
     fieldName={ENABLED_FILTER_ID}
     title={STATUS_FILTER_TITLE}
     query={query}
+    hideSearch={true}
     onChange={onChange}
     options={STATUS_FILTER_OPTIONS}
     renderOption={(option, { isActive }) => (
@@ -95,6 +96,7 @@ const ModeFilterComponent = ({
     fieldName={KIND_FILTER_ID}
     title={MODE_FILTER_TITLE}
     query={query}
+    hideSearch={true}
     onChange={onChange}
     options={MODE_FILTER_OPTIONS}
     renderOption={(option, { isActive }) => (
@@ -129,7 +131,9 @@ const TagsFilterComponent = ({
       onChange={onChange}
       options={options}
       renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
+        <StandardFilterOption isActive={isActive}>
+          <span data-test-subj={`rulesListTagsFilterOption-${option.key}`}>{option.label}</span>
+        </StandardFilterOption>
       )}
       data-test-subj="rulesListTagsFilter"
     />
