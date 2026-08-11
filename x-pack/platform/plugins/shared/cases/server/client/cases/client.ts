@@ -55,7 +55,7 @@ import {
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
-import { withUsageCounter } from '../telemetry';
+import { withUsageCounter } from '../usage_counters';
 
 /**
  * API for interacting with the cases entities.

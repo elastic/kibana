@@ -37,7 +37,7 @@ import { bulkGet } from './bulk_get';
 import { update } from './update';
 import { bulkDeleteFileAttachments } from './bulk_delete';
 import { addFile } from './add_file';
-import { withUsageCounter } from '../telemetry';
+import { withUsageCounter } from '../usage_counters';
 
 /**
  * API for interacting with the attachments to a case.

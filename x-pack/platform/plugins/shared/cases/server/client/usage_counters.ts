@@ -7,18 +7,11 @@
 
 import type { CasesClientArgs } from './types';
 
-export type CasesClientSource =
-  | 'rest_api'
-  | 'connector'
-  | 'workflow'
-  | 'agent_builder'
-  | 'plugin_contract';
-
-export function withUsageCounter<TArgs extends unknown[], TReturn>(
+export const withUsageCounter = <TArgs extends unknown[], TReturn>(
   counterName: string,
   { usageCounter, clientSource }: CasesClientArgs,
   fn: (...args: TArgs) => TReturn
-): (...args: TArgs) => TReturn {
+): ((...args: TArgs) => TReturn) => {
   return (...args: TArgs) => {
     usageCounter?.incrementCounter({
       counterName,
@@ -26,4 +19,4 @@ export function withUsageCounter<TArgs extends unknown[], TReturn>(
     });
     return fn(...args);
   };
-}
+};

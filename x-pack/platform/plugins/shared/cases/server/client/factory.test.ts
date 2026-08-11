@@ -13,7 +13,6 @@ import { createCasesClientFactoryMockArgs } from './mocks';
 import { createCasesClient } from './client';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { CasesClientSource } from './telemetry';
 
 jest.mock('./client');
 
@@ -51,7 +50,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        clientSource: 'rest_api' as CasesClientSource,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -76,7 +75,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        clientSource: 'rest_api' as CasesClientSource,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -96,7 +95,7 @@ describe('CasesClientFactory', () => {
         request: fakeRequest,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        clientSource: 'rest_api' as CasesClientSource,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
@@ -115,7 +114,7 @@ describe('CasesClientFactory', () => {
         request,
         savedObjectsService: coreStart.savedObjects,
         scopedClusterClient,
-        clientSource: 'rest_api' as CasesClientSource,
+        clientSource: 'rest_api',
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();

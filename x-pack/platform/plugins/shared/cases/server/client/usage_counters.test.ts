@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { createCasesClientInternalMock, createCasesClientMock } from './mocks';
+import {
+  createCasesClientInternalMock,
+  createCasesClientMock,
+  createCasesClientMockArgs,
+} from './mocks';
 import { newCase } from '../mocks';
-import type { CasesClientArgs } from './types';
 import { createCasesSubClient } from './cases/client';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { CasesClientSource } from './types';
 
 jest.mock('./cases/create', () => ({ create: jest.fn().mockResolvedValue({ id: 123 }) }));
 jest.mock('./cases/get', () => ({
@@ -25,19 +30,19 @@ describe('withUsageCounter', () => {
     jest.clearAllMocks();
   });
 
-  const mockIncrementCounter = jest.fn();
-
+  const usageCounter = usageCollectionPluginMock.createSetupContract().createUsageCounter('cases');
   const clientArgs = {
-    usageCounter: { incrementCounter: mockIncrementCounter },
-    clientSource: 'rest_api',
-  } as unknown as CasesClientArgs;
+    ...createCasesClientMockArgs(),
+    usageCounter,
+    clientSource: 'rest_api' as CasesClientSource,
+  };
   const mockCasesClient = createCasesClientMock();
   const mockCasesClientInternal = createCasesClientInternalMock();
   const client = createCasesSubClient(clientArgs, mockCasesClient, mockCasesClientInternal);
 
   it('should call incrementCounter with correct parameters', async () => {
     await client.create(newCase);
-    expect(mockIncrementCounter).toHaveBeenCalledWith({
+    expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
       counterName: 'create_case',
       counterType: 'cases_client.rest_api',
     });
@@ -46,22 +51,20 @@ describe('withUsageCounter', () => {
   it('resolve and get method are ignored from telemetry', async () => {
     await client.get({ id: '1' });
     await client.resolve({ id: '1' });
-    expect(mockIncrementCounter).not.toHaveBeenCalledWith({
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith({
       counterName: 'get_case',
       counterType: 'cases_client.rest_api',
     });
-    expect(mockIncrementCounter).not.toHaveBeenCalledWith({
+    expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith({
       counterName: 'resolve_case',
       counterType: 'cases_client.rest_api',
     });
   });
 
   it('should not throw if usageCounter is undefined', async () => {
-    const clientArgsWithoutUsageCounter = {
-      clientSource: 'rest_api',
-    } as unknown as CasesClientArgs;
+    const baseArgs = createCasesClientMockArgs();
     const clientWithoutUsageCounter = createCasesSubClient(
-      clientArgsWithoutUsageCounter,
+      baseArgs,
       mockCasesClient,
       mockCasesClientInternal
     );

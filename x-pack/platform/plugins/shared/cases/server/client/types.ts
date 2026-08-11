@@ -15,7 +15,6 @@ import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import type { CasesClientSource } from './telemetry';
 import type { CasesSearchRequest } from '../../common/types/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
@@ -93,3 +92,10 @@ export type CasesSearchParams = Partial<
     | 'customFields'
   > & { authorizationFilter?: KueryNode }
 >;
+
+export type CasesClientSource =
+  | 'rest_api'
+  | 'connector'
+  | 'workflow'
+  | 'agent_builder'
+  | 'plugin_contract';
