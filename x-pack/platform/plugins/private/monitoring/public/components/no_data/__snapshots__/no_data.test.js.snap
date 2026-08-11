@@ -101,28 +101,25 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
           </div>
         </div>
       </div>
-      <div
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
         style="position:absolute;top:8px;inset-inline-end:8px"
       >
-        <span
-          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          id="generated-id_euiToolTipAnchor"
+        <button
+          aria-label="Dismiss AutoOps promotion"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+          type="button"
         >
-          <button
-            aria-label="Dismiss AutoOps promotion"
-            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-            data-test-subj="autoOpsPromotionCallout-dismiss"
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="cross"
-            />
-          </button>
-        </span>
-      </div>
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+        </button>
+      </span>
     </div>
     <div
       class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -326,28 +323,25 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
           </div>
         </div>
       </div>
-      <div
+      <span
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id_euiToolTipAnchor"
         style="position:absolute;top:8px;inset-inline-end:8px"
       >
-        <span
-          class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          id="generated-id_euiToolTipAnchor"
+        <button
+          aria-label="Dismiss AutoOps promotion"
+          class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+          type="button"
         >
-          <button
-            aria-label="Dismiss AutoOps promotion"
-            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
-            data-test-subj="autoOpsPromotionCallout-dismiss"
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="cross"
-            />
-          </button>
-        </span>
-      </div>
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+        </button>
+      </span>
     </div>
     <div
       class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
