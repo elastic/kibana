@@ -18,13 +18,7 @@ export const signalsSchema = {
     '@timestamp': types.date({}),
     trace_ids: types.keyword({}),
     signal_type: types.keyword({}),
-    tags: types.nested({
-      properties: {
-        type: types.keyword({}),
-        sub_type: types.keyword({}),
-        confidence: types.double({}),
-      },
-    }),
+    tags: types.keyword({}),
     data: types.flattened({ ignore_above: 1024 }),
   },
 } satisfies StorageSchema;

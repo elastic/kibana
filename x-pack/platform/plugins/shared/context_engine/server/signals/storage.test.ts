@@ -29,11 +29,8 @@ describe('signals storage', () => {
     expect(props.data.ignore_above).toBe(1024);
   });
 
-  it('maps `tags` as nested with the classifier fields', () => {
-    expect(props.tags.type).toBe('nested');
-    expect(props.tags.properties?.type.type).toBe('keyword');
-    expect(props.tags.properties?.sub_type.type).toBe('keyword');
-    expect(props.tags.properties?.confidence.type).toBe('double');
+  it('maps `tags` as a keyword array', () => {
+    expect(props.tags.type).toBe('keyword');
   });
 
   it('types the envelope fields', () => {

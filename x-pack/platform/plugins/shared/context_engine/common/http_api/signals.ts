@@ -15,21 +15,14 @@ export const buildSignalsIndexName = (spaceId: string): string =>
 /** The set of signal types; `tool_call` is the first. */
 export type SignalType = 'tool_call';
 
-/** A classification label attached by a classifier. */
-export interface SignalTag {
-  type: string;
-  sub_type?: string;
-  confidence: number;
-}
-
 /** Common envelope shared by every signal. `signal_id` is the ES `_id`, so re-processing overwrites rather than duplicates. */
 export interface SignalEnvelope {
   signal_id: string;
   '@timestamp': string;
   trace_ids?: string[];
   signal_type: SignalType;
-  /** Empty for a clean signal. */
-  tags: SignalTag[];
+  /** Classification labels; empty for a clean signal. */
+  tags: string[];
   /** Per-type observation; opaque at the envelope level. */
   data: Record<string, unknown>;
 }
