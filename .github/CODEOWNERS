@@ -502,7 +502,7 @@ src/platform/packages/shared/controls/control-group-renderer @elastic/kibana-pre
 src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
 src/platform/packages/shared/dashboards/dashboards-selector @elastic/actionable-obs-team
-src/platform/packages/shared/deeplinks/agent_builder @elastic/search-ml-ux
+src/platform/packages/shared/deeplinks/agent_builder @elastic/workchat-eng
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/context-engine @elastic/context-eng
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
