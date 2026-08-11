@@ -118,9 +118,9 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
 
-## Don't assume your fixtures are the only data [dont-assume-your-fixtures-are-the-only-data]
+## Write list assertions for data you didn't create [write-list-assertions-for-data-you-didnt-create]
 
-Your fixtures are never the only data on the deployment. Suites share one stack, earlier runs leave objects behind, and a Cloud project starts out with content a local stack doesn't have: Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors. Any assertion over a list has to tolerate entries your test didn't create.
+A Scout run starts from a stack that already has data on it. Other suites run in it before and after yours, earlier runs leave objects behind, and a Cloud project starts out with content a local stack doesn't have: Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors. Any assertion over a list has to tolerate entries your test didn't create.
 
 - **Narrow the query to your fixtures.** Search or filter by a term only they match before asserting. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
 - **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
