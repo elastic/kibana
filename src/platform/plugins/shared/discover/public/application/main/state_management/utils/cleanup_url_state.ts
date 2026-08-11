@@ -107,7 +107,10 @@ export function cleanupUrlState(
   }
 
   // Migrate legacy isApproximate
-  if (typeof appStateFromUrl.esqlApproximation !== 'boolean' && typeof appStateFromUrl.isApproximate === 'boolean') {
+  if (
+    typeof appStateFromUrl.esqlApproximation !== 'boolean' &&
+    typeof appStateFromUrl.isApproximate === 'boolean'
+  ) {
     appStateFromUrl.esqlApproximation = appStateFromUrl.isApproximate;
   }
 
