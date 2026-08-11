@@ -120,21 +120,23 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ## Expect a shared test environment [expect-a-shared-test-environment]
 
-A Scout run starts from a stack that already has data on it. Other suites run in it before and after yours, earlier runs leave objects behind, and a Cloud project starts out with content a local stack doesn't have: Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors. Any assertion over a list has to tolerate entries your test didn't create.
+Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Also, Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors).
 
-- **Narrow the query to your fixtures.** Search or filter by a term only they match before asserting. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
+Any assertion over a list has to tolerate entries your test didn't create:
+
+- **Narrow the query to your test data.** Search or filter by a term only it matches before asserting. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
 - **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
 - **Assert containment, not totality.** `toContainText('my-fixture')` survives a busy deployment; `toHaveCount(4)` does not.
 
 :::::{dropdown} Examples
-❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your fixtures past global search's cap of 40 results per provider:
+❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your test data past global search's cap of 40 results per provider:
 
 ```ts
 await pageObjects.globalSearch.searchFor('type:dashboard');
 await expect(pageObjects.globalSearch.resultLabels).toHaveCount(4);
 ```
 
-✔️ **Do:** include a term only your fixtures match, and assert on those:
+✔️ **Do:** include a term only your test data matches, and assert on those:
 
 ```ts
 await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
