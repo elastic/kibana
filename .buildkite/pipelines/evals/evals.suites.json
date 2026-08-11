@@ -31,6 +31,21 @@
       ]
     },
     {
+      "id": "ml",
+      "name": "ML Agent Builder Skills",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/plugins/shared/ml/evals/playwright.config.ts",
+      "serverConfigSet": "evals_agent_builder",
+      "tags": [
+        "platform",
+        "ml",
+        "agent-builder"
+      ],
+      "ciLabels": [
+        "evals:ml"
+      ]
+    },
+    {
       "id": "alerting-v2",
       "name": "Alerting V2",
       "slackChannel": "#rna-program-notify",
@@ -81,6 +96,29 @@
       ],
       "ciLabels": [
         "evals:significant-events"
+      ],
+      "stepTimeoutInMinutes": 150,
+      "shards": [
+        {
+          "id": "discovery-and-queries",
+          "specFiles": [
+            "evals/discovery/discovery.spec.ts",
+            "evals/ki_query_generation/ki_query_generation.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-extraction",
+          "specFiles": [
+            "evals/ki_feature_extraction/ki_feature_extraction.spec.ts"
+          ]
+        },
+        {
+          "id": "feature-dedup-and-exclusion",
+          "specFiles": [
+            "evals/ki_feature_deduplication/ki_feature_deduplication.spec.ts",
+            "evals/ki_feature_exclusion/ki_feature_exclusion.spec.ts"
+          ]
+        }
       ],
       "weeklyEisModelGroups": [
         "eis/anthropic-claude-4.6-sonnet",
@@ -151,6 +189,35 @@
       ]
     },
     {
+      "id": "security-persona-matrix",
+      "name": "Security Persona Matrix",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix"
+      ],
+      "serverConfigSet": "evals_security_persona_matrix"
+    },
+    {
+      "id": "security-persona-matrix-attack-discovery",
+      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
+      "tags": [
+        "security",
+        "persona-matrix",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-persona-matrix-attack-discovery"
+      ],
+      "serverConfigSet": "evals_tracing"
+    },
+    {
       "id": "endpoint",
       "name": "Endpoint (Elastic Defend)",
       "slackChannel": "#security-defend-workflows-tests",
@@ -201,7 +268,8 @@
       ],
       "ciLabels": [
         "evals:attack-discovery"
-      ]
+      ],
+      "serverConfigSet": "evals_tracing"
     },
     {
       "id": "lead-generation",
@@ -303,6 +371,25 @@
       ]
     },
     {
+      "id": "agent-builder-visualizations",
+      "name": "Agent Builder Visualizations",
+      "slackChannel": "#kibana-presentation-reminders",
+      "configPath": "x-pack/platform/packages/shared/agent_builder_visualizations/kbn-evals-suite-agent-builder-visualizations/playwright.config.ts",
+      "tags": [
+        "platform",
+        "agent-builder-visualizations"
+      ],
+      "ciLabels": [
+        "evals:agent-builder-visualizations"
+      ],
+      "weeklyEisModelGroups": [
+        "eis/anthropic-claude-4.6-sonnet",
+        "eis/anthropic-claude-4.6-opus",
+        "eis/openai-gpt-5.2",
+        "eis/openai-gpt-5.4"
+      ]
+    },
+    {
       "id": "security-alert-triage",
       "name": "Security Alert Triage",
       "slackChannel": "#security-generative-ai-evals",
@@ -320,8 +407,13 @@
       "name": "Alert Analysis Workflow",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/playwright.config.ts",
-      "tags": ["security", "alert-analysis"],
-      "ciLabels": ["evals:security-alert-analysis-workflow"]
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow"
+      ]
     },
     {
       "id": "skill-selection-benchmark",

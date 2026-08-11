@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -31,6 +32,10 @@ import type { FlyoutWrapperProps } from './types';
 
 const applyAndCloseLabel = i18n.translate('xpack.lens.config.applyFlyoutLabel', {
   defaultMessage: 'Apply and close',
+});
+
+const closeConfigurationLabel = i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+  defaultMessage: 'Close configuration',
 });
 
 export const FlyoutWrapper = ({
@@ -60,7 +65,7 @@ export const FlyoutWrapper = ({
           `}
           data-test-subj="editFlyoutHeader"
         >
-          {/* Header row 1: Title */}
+          {/* Header row 1: Title + close (same onCancel as footer Cancel) */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
@@ -98,6 +103,17 @@ export const FlyoutWrapper = ({
                   </EuiFlexGroup>
                 </h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={closeConfigurationLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="text"
+                  iconType="cross"
+                  onClick={onCancel}
+                  data-test-subj="euiFlyoutCloseButton"
+                  aria-label={closeConfigurationLabel}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="xs" />

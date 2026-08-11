@@ -78,3 +78,37 @@ export const ACTION_POLICY_MAX_DESTINATIONS = 10;
  * and `PUT /{id}`.
  */
 export const VERSION_MAX_LENGTH = 256;
+
+/** Maximum number of execution-history events returned per page (rule + action policy streams). */
+export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of execution-history events returned per page when `perPage` is omitted. */
+export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of events that can be paged through.
+ */
+export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
+
+/**
+ * Maximum number of rule ids accepted by the execution-history rule-id
+ * filter.
+ */
+export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
+
+/**
+ * Maximum length of the `episode_data` JSON string snapshotted into an episode
+ * attachment. Bounds open-ended user JSON so attachment payloads stay finite.
+ */
+export const MAX_EPISODE_DATA_LENGTH = 32_000;
+
+/** Maximum number of rule change-history events returned per page. */
+export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of rule change-history events returned per page when `per_page` is omitted. */
+export const RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of rule change-history events that can be paged through.
+ */
+export const RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW = 10_000;

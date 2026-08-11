@@ -17,8 +17,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { bulkSnoozeActionPoliciesOasExamples } from './bulk_snooze_action_policies_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
@@ -31,6 +33,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Snooze action policies in bulk by ID',
+    oasOperationObject: bulkSnoozeActionPoliciesOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -43,7 +46,7 @@ export class BulkSnoozeActionPoliciesRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

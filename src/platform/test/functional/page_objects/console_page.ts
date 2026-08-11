@@ -204,6 +204,18 @@ export class ConsolePageObject extends FtrService {
     await textArea.pressKeys([selectionKey, 'a']);
   }
 
+  public async getSelectedRequestsCount() {
+    const container = await this.testSubjects.find('consoleMonacoEditorContainer');
+    const count = await container.getAttribute('data-currently-selected-requests');
+    return Number(count ?? 0);
+  }
+
+  public async waitForSelectedRequestsCount(expectedCount: number) {
+    await this.retry.waitFor(`editor to recognize ${expectedCount} selected requests`, async () => {
+      return (await this.getSelectedRequestsCount()) === expectedCount;
+    });
+  }
+
   public async getEditor() {
     return await this.testSubjects.find('consoleMonacoEditor');
   }
@@ -404,6 +416,11 @@ export class ConsolePageObject extends FtrService {
     });
 
     await this.testSubjects.click('addNewVariableButton');
+
+    await this.retry.waitFor(`variable \${${name}} to appear in the table`, async () => {
+      const variables = await this.getVariables();
+      return variables.some((variable) => variable.name === `\${${name}}`);
+    });
   }
 
   public async removeVariables() {

@@ -52,13 +52,14 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.kind).toBe(body.kind);
-      expect(response.body.metadata).toStrictEqual(body.metadata);
+      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
 
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.id).toBe(response.body.id);
       expect(persisted.metadata.name).toBe('created-rule');
+      expect(persisted.metadata.version).toBe(1);
     }
   );
 
@@ -359,7 +360,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata).toStrictEqual(body.metadata);
+      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
       expect(response.body.state_transition).toStrictEqual(body.state_transition);
