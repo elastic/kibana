@@ -417,7 +417,7 @@ const DocumentationRowActions: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
-              iconType="returnKey"
+              iconType="return"
               onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
               isDisabled={isActionDisabled}
               data-test-subj={`documentation-uninstall-${item.id}`}
@@ -432,7 +432,7 @@ const DocumentationRowActions: React.FC<{
     return wrapWithPrivilegeTooltip(
       <EuiButtonEmpty
         size="xs"
-        iconType="returnKey"
+        iconType="return"
         onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
         isDisabled={isActionDisabled}
         data-test-subj={`documentation-uninstall-${item.id}`}
