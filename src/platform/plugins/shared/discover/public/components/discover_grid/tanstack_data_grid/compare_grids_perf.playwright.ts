@@ -28,8 +28,7 @@ const KIBANA_USER = process.env.KIBANA_USER ?? 'elastic';
 const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
 /** Same synthetic dataset for both grids; marker selects implementation. */
-const ROW_BASE =
-  'ROW a=1,b="hello",c=3.14,d="x",e="y",f=42,g="more",h="data" // 200x';
+const ROW_BASE = 'ROW a=1,b="hello",c=3.14,d="x",e="y",f=42,g="more",h="data" // 200x';
 const QUERY_TANSTACK = `${ROW_BASE} // TanStackGrid`;
 const QUERY_UNIFIED = `${ROW_BASE} // UnifiedDataTable`;
 

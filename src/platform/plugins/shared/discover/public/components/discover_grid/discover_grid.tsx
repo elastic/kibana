@@ -126,10 +126,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
       );
     }, [query]);
 
-    if (
-      isCascadedDocumentsAvailable &&
-      cascadedDocumentsContext.selectedCascadeGroups.length
-    ) {
+    if (isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length) {
       return (
         <CascadedDocumentsProvider value={cascadedDocumentsContext}>
           <LazyCascadedDocumentsLayout
