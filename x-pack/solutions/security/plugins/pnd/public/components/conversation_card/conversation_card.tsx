@@ -20,10 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { Investigation } from '@kbn/pnd-common';
+import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
-import { WATCH_TIER_LABELS, BRIEFING_CARD_LABELS, CONVERSATION_CARD_ACTIONS } from './translations';
+import { CONVERSATION_CARD_LABELS, CONVERSATION_CARD_ACTIONS } from './translations';
 import { getEmptyValue } from '../helpers';
+
+const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 
 export const ConversationCard = memo<{
   investigation: Investigation;
@@ -44,7 +46,7 @@ export const ConversationCard = memo<{
 
   return (
     <EuiPanel
-      paddingSize="m"
+      paddingSize="l"
       role="button"
       tabIndex={0}
       aria-label={investigation.title}
@@ -70,90 +72,105 @@ export const ConversationCard = memo<{
         }
       }}
     >
-      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
+      <EuiFlexGroup alignItems="flexStart" gutterSize="l" responsive={false}>
         {investigation.priorityScore != null ? (
           <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              <strong>{investigation.priorityScore}</strong>
+            <EuiText
+              size="s"
+              component="span"
+              color="danger"
+              css={{
+                flexShrink: 0,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: euiTheme.colors.backgroundLightDanger,
+                width: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
+                height: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
+                fontWeight: euiTheme.font.weight.semiBold,
+                borderRadius: '50%',
+              }}
+            >
+              {investigation.priorityScore}
             </EuiText>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+          <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{investigation.title}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {investigation.recordId ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {investigation.recordId}
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-            {inMotion ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{BRIEFING_CARD_LABELS.inMotion}</EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            {investigation.pendingProposalCount > 0 ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">
-                  {BRIEFING_CARD_LABELS.pendingProposals(investigation.pendingProposalCount)}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow />
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedRelative value={investigation.updatedAt} />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {investigation.summary ? (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="s" color="subdued">
-                <p>{investigation.summary}</p>
-              </EuiText>
-            </>
-          ) : null}
-          <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <strong>{BRIEFING_CARD_LABELS.watchedBy}</strong>{' '}
-                {investigation.watch_tier
-                  ? WATCH_TIER_LABELS[investigation.watch_tier]
-                  : emptyValue}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow />
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color={inMotion ? 'text' : 'primary'}
-                onClick={(event: React.MouseEvent) => {
-                  event.stopPropagation();
-                  onOpen();
-                }}
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+                direction="row"
+                justifyContent="flexStart"
               >
-                {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
-              </EuiButton>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={'hollow'}>
+                      {CONVERSATION_CARD_LABELS.templateTypes[investigation.template_id] ??
+                        emptyValue}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" component="span">
+                      <FormattedRelative value={investigation.updatedAt} />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  direction="row"
+                  justifyContent="flexEnd"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      color={inMotion ? 'text' : 'primary'}
+                      onClick={(event: React.MouseEvent) => {
+                        event.stopPropagation();
+                        onOpen();
+                      }}
+                    >
+                      {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={CONVERSATION_CARD_ACTIONS.openChat}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={CONVERSATION_CARD_ACTIONS.openChat}
+                        iconType="comment"
+                        color="text"
+                        onClick={(event: React.MouseEvent) => {
+                          event.stopPropagation();
+                          onOpenChat();
+                        }}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={CONVERSATION_CARD_ACTIONS.openChat} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={CONVERSATION_CARD_ACTIONS.openChat}
-                  iconType="comment"
-                  color="text"
-                  onClick={(event: React.MouseEvent) => {
-                    event.stopPropagation();
-                    onOpenChat();
-                  }}
-                />
-              </EuiToolTip>
+              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xs">
+                    <h3>{investigation.title}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {investigation.summary ? (
+                <EuiText size="s" color="subdued">
+                  <p>{investigation.summary}</p>
+                </EuiText>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
