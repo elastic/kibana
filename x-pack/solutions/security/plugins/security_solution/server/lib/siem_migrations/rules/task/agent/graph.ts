@@ -9,10 +9,10 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AIMessage } from '@langchain/core/messages';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
-import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
-import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
+import { getMatchPrebuiltRuleGraph } from './sub_graphs/match_prebuilt_rule';
+import type { GraphNode, MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
 import { getSourceRuleToNaturalLanguageNode } from './nodes/source_rule_to_natural_language/source_rule_to_natural_language';
 
 export function getRuleMigrationAgent({
@@ -23,12 +23,25 @@ export function getRuleMigrationAgent({
   telemetryClient,
   tools,
 }: MigrateRuleGraphParams) {
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
+  const matchPrebuiltRuleSubGraph = getMatchPrebuiltRuleGraph({
     model,
-    logger,
     ruleMigrationsRetriever,
     telemetryClient,
+    tools,
   });
+
+  const matchPrebuiltRuleNode: GraphNode = async (state) => {
+    const result = await matchPrebuiltRuleSubGraph.invoke({
+      original_rule: state.original_rule,
+      nl_query: state.nl_query,
+    });
+
+    return {
+      ...(result.elastic_rule?.prebuilt_rule_id ? { elastic_rule: result.elastic_rule } : {}),
+      ...(result.translation_result ? { translation_result: result.translation_result } : {}),
+      ...(result.comments?.length ? { comments: result.comments } : {}),
+    };
+  };
 
   const resolveDepsTools = [tools.getRulesByName, tools.getResourceByType];
   const resolveDepsToolNode = new ToolNode(resolveDepsTools);
