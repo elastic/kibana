@@ -137,7 +137,7 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       normalizeRule({ ...rule, threat: rule.threat ?? [] }),
       ...HIDDEN_PROPERTIES
     );
-    const normalizedOld = omit(pick(normalizeRule(originalRule), Object.keys(normalizedNew)));
+    const normalizedOld = pick(normalizeRule(originalRule), Object.keys(normalizedNew));
     return (
       stringifyWithExpandedEmpties(normalizedOld) !== stringifyWithExpandedEmpties(normalizedNew)
     );
