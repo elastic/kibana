@@ -109,7 +109,6 @@
 @types/eslint@8.44.2
 @types/estree@1.0.9
 @types/express-serve-static-core@4.19.8
-@types/express@4.17.21
 @types/express@4.17.25
 @types/gensync@1.0.5
 @types/http-errors@2.0.5
@@ -124,7 +123,6 @@
 @types/send@1.2.1
 @types/serve-index@1.9.4
 @types/serve-static@1.15.10
-@types/serve-static@2.2.0
 @types/sockjs@0.3.36
 @types/ws@8.18.1
 @webassemblyjs/ast@1.14.1
