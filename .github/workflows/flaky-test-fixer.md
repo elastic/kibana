@@ -263,7 +263,7 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, one green run says nothing about a flake — repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -288,7 +288,7 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 
 ## Verifying a Jest fix
 
-The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, run this loop twice: once on the unpatched test, once with the fix applied.
+Run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
 : > /tmp/gh-aw/agent/jest-durations
@@ -301,11 +301,11 @@ echo "$fails/25 runs failed"
 awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
 ```
 
-- **Run it before the fix, not only after.** `git stash` the patch if you have already written it. A pre-fix loop that fails is what turns the post-fix loop into evidence; if the unpatched test survives all 25 runs, the flake doesn't reproduce here and a clean post-fix loop confirms nothing. Fix the root cause you diagnosed anyway, but say so under "Not verified locally".
-- **Report both loops** on the Jest line of the PR's "Verified locally" block, as `<failures>/<runs> before the fix (avg, max), then the same after`. The counts show whether the loop had any power to detect this flake, and the timings show what the fix cost. Under "Not verified locally", note that both loops ran without CI's parallel load, so they can't rule out a flake driven by contention on a busy agent.
-- **Read the timings, not only the counts.** These are the flaky test's own durations as Jest measured them, so they exclude startup and compare cleanly across the two loops. An average that jumps after the patch means it bought its reliability by waiting longer, which the PR body has to justify; a max far above the average means a slow path is still racing something, whichever loop it shows up in.
-- **Scale the count to the runtime.** 25 runs is the floor; go to 50 when a run takes only a few seconds. A loop this size catches a test that fails every few runs, not one that fails once a week.
-- **Run the test's neighbours at least once** (`node scripts/jest <directory-containing-the-test>`), so sibling tests share a worker with it. A flake caused by state leaking between tests in the same worker never reproduces while the file runs on its own.
+- **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
+- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
+- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
+- **Run the whole directory once** (`node scripts/jest <directory-containing-the-test>`) so siblings share a worker with it. State leaking between tests never reproduces while the file runs alone.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
 ## PR format
