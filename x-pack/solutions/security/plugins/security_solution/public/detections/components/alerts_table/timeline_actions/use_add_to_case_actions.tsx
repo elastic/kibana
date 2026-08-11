@@ -37,6 +37,7 @@ export interface UseAddToCaseActions {
       | typeof ADD_TO_CASE_ACTION_IDS.addToNewCase
       | typeof ADD_TO_CASE_ACTION_IDS.addToExistingCase
   ) => void;
+  useNestedCaseActions?: boolean;
   refetch?: (() => void) | undefined;
 }
 
@@ -47,6 +48,7 @@ export const useAddToCaseActions = ({
   nonEcsData,
   onSuccess,
   onActionClick,
+  useNestedCaseActions = false,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -126,7 +128,11 @@ export const useAddToCaseActions = ({
   }, [caseAttachments, onActionClick, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (userCasesPermissions.createComment && userCasesPermissions.read) {
+    if (!userCasesPermissions.createComment || !userCasesPermissions.read) {
+      return [];
+    }
+
+    if (useNestedCaseActions) {
       return [
         {
           'aria-label': ariaLabel,
@@ -137,11 +143,34 @@ export const useAddToCaseActions = ({
         },
       ];
     }
-    return [];
-  }, [userCasesPermissions.createComment, userCasesPermissions.read, ariaLabel]);
+
+    return [
+      {
+        'aria-label': ariaLabel,
+        'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToExistingCase,
+        key: ADD_TO_CASE_ACTION_IDS.addToExistingCase,
+        onClick: handleAddToExistingCaseClick,
+        name: ADD_TO_EXISTING_CASE,
+      },
+      {
+        'aria-label': ariaLabel,
+        'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToNewCase,
+        key: ADD_TO_CASE_ACTION_IDS.addToNewCase,
+        onClick: handleAddToNewCaseClick,
+        name: ADD_TO_NEW_CASE,
+      },
+    ];
+  }, [
+    ariaLabel,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    useNestedCaseActions,
+    userCasesPermissions.createComment,
+    userCasesPermissions.read,
+  ]);
   const addToCaseActionPanels: EuiContextMenuPanelDescriptor[] = useMemo(
     () =>
-      userCasesPermissions.createComment && userCasesPermissions.read
+      useNestedCaseActions && userCasesPermissions.createComment && userCasesPermissions.read
         ? [
             {
               id: ADD_TO_CASE_PANEL_ID,
@@ -170,6 +199,7 @@ export const useAddToCaseActions = ({
     [
       handleAddToExistingCaseClick,
       handleAddToNewCaseClick,
+      useNestedCaseActions,
       userCasesPermissions.createComment,
       userCasesPermissions.read,
     ]
