@@ -7,7 +7,6 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 /**
  * Attributes stored on the per-space Agent Builder settings singleton.
@@ -32,13 +31,11 @@ export interface AgentBuilderSpaceSettingsAttributes {
 export const AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE = 'agent_builder_space_settings';
 
 /**
- * Singleton object id per space. There is at most one settings document per
- * Kibana space, so we key the document by the space id to keep lookups O(1).
+ * Fixed id of the settings singleton. With `namespaceType: 'single'` a
+ * request-scoped saved-objects client is already isolated to the caller's
+ * space, so a constant id resolves to exactly one document per space.
  */
-export const getAgentBuilderSpaceSettingsObjectId = (spaceId?: string): string => {
-  const resolved = !spaceId || spaceId === DEFAULT_SPACE_ID ? DEFAULT_SPACE_ID : spaceId;
-  return `agent-builder-space-settings-${resolved}`;
-};
+export const AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID = 'agent-builder-space-settings';
 
 /**
  * Saved object type definition for the per-space Agent Builder settings.
@@ -59,10 +56,9 @@ export const agentBuilderSpaceSettingsType: SavedObjectsType<AgentBuilderSpaceSe
       },
     },
     management: {
-      displayName: i18n.translate(
-        'xpack.agentBuilder.savedObjects.spaceSettings.displayName',
-        { defaultMessage: 'Agent Builder Space Settings' }
-      ),
+      displayName: i18n.translate('xpack.agentBuilder.savedObjects.spaceSettings.displayName', {
+        defaultMessage: 'Agent Builder Space Settings',
+      }),
       importableAndExportable: false,
     },
   };

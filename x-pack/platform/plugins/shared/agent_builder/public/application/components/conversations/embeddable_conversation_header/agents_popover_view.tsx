@@ -24,7 +24,6 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
-import { useEffectiveSpaceDefaultAgent } from '../../../hooks/use_space_default_agent';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { useAgentOptions } from '../../common/agent_selector/use_agent_options';
@@ -61,16 +60,8 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   const { agentId, setAgentId } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
-  // Restricted users (no `manageAgents`) in a configured space only see the
-  // space default agent; admins see the full list. Mirrors AgentSelectorDropdown.
-  const { effectiveDefaultAgentId, isRestricted } = useEffectiveSpaceDefaultAgent();
-  const visibleAgents = isRestricted
-    ? agents.filter((agent) => agent.id === effectiveDefaultAgentId)
-    : agents;
-  const { agentOptions, renderAgentOption } = useAgentOptions({
-    agents: visibleAgents,
-    selectedAgentId: agentId,
-  });
+  // useAgentOptions restricts the list to the space default for non-admins.
+  const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
   const agentListStyles = css`
     ${useSelectorListStyles({ listId: 'agentBuilderEmbeddableAgentsList' })}

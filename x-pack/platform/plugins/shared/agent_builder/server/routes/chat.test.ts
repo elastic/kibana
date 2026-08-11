@@ -335,12 +335,6 @@ describe('registerChatRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
-        // Space enforcement is skipped when no assignment exists in the space,
-        // which lets these tests focus on the callback-specific behavior.
-        spaceSettings: { get: jest.fn().mockResolvedValue({ defaultAgentId: null }) },
-        agents: {
-          getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
-        },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -431,11 +425,6 @@ describe('registerChatRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
-        // No per-space assignment configured; enforcement short-circuits.
-        spaceSettings: { get: jest.fn().mockResolvedValue({ defaultAgentId: null }) },
-        agents: {
-          getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
-        },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -536,11 +525,6 @@ describe('registerChatRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
-        // No per-space assignment configured; enforcement short-circuits.
-        spaceSettings: { get: jest.fn().mockResolvedValue({ defaultAgentId: null }) },
-        agents: {
-          getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
-        },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -630,12 +614,6 @@ describe('registerChatRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent },
         callbackDeliveryService: { validateCallbackUrl },
-        // Callback URL rejection happens before enforcement runs, but wire the
-        // enforcement mocks in for parity so the handler cannot regress silently.
-        spaceSettings: { get: jest.fn().mockResolvedValue({ defaultAgentId: null }) },
-        agents: {
-          getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
-        },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -721,13 +699,6 @@ describe('registerChatRoutes', () => {
         getInternalServices: jest.fn().mockReturnValue({
           execution: { executeAgent },
           skills: { getRegistry: jest.fn().mockResolvedValue(skillRegistry) },
-          // Skill override validation runs before enforcement, but wire the
-          // enforcement mocks up regardless so we do not need to reason about
-          // ordering when this test evolves.
-          spaceSettings: { get: jest.fn().mockResolvedValue({ defaultAgentId: null }) },
-          agents: {
-            getRegistry: jest.fn().mockResolvedValue({ has: jest.fn().mockResolvedValue(true) }),
-          },
         }),
         coreSetup: {} as never,
         pluginsSetup: {},

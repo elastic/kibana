@@ -9,12 +9,12 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom-v5-compat';
 
-import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
 
-import { useLastAgentId, useLastAgentIdReady } from '../../hooks/use_last_agent_id';
+import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
+import { RedirectLoading } from './redirect_loading';
 
 /**
  * Redirects legacy `/conversations/:conversationId` URLs to their agent-scoped
@@ -26,8 +26,7 @@ import { appPaths } from '../../utils/app_paths';
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const navigate = useNavigate();
-  const isLastAgentIdReady = useLastAgentIdReady();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
   const { conversationsService } = useAgentBuilderServices();
 
   const isNewConversation = !conversationId || conversationId === 'new';
@@ -64,25 +63,13 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   if (isNewConversation) {
     if (!isLastAgentIdReady) {
-      return (
-        <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+      return <RedirectLoading />;
     }
     return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
   }
 
   if (isLoading || !isLastAgentIdReady) {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <RedirectLoading />;
   }
 
   return null;

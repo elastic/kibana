@@ -6,11 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  AgentAccessControlMode,
-  createAgentNotFoundError,
-  createBadRequestError,
-} from '@kbn/agent-builder-common';
+import { AgentAccessControlMode, createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   SpaceSettingsResponse,
   UpdateSpaceSettingsRequestBody,
@@ -85,26 +81,12 @@ export function registerSpaceSettingsRoutes({
       const { spaceSettings, agents } = getInternalServices();
       const payload = request.body as UpdateSpaceSettingsRequestBody;
 
-      // When setting a new default, confirm the agent id resolves in the
-      // caller's current space. This uses the same registry the converse and
-      // list endpoints use, so `manageAgents` admins can only pin agents that
-      // are actually visible in the space.
       if (payload.default_agent_id !== null) {
+        // `registry.get` throws an agent-not-found error (404) for ids that do
+        // not resolve in the caller's space, so it doubles as the existence
+        // check. A Private agent is only visible to its owner and ACL entries,
+        // so it cannot be a space default that every user is pinned to.
         const registry = await agents.getRegistry({ request });
-        const exists = await registry.has(payload.default_agent_id);
-        if (!exists) {
-          throw createAgentNotFoundError({ agentId: payload.default_agent_id });
-        }
-        // Guard against setting to a value that is technically present but
-        // trimmed/whitespace-only after validation would allow.
-        if (payload.default_agent_id.trim() !== payload.default_agent_id) {
-          throw createBadRequestError('default_agent_id must not contain surrounding whitespace');
-        }
-        // Enforce the "reachable by every user in the space" invariant: a
-        // Private agent grants access only to its owner + explicit ACL
-        // entries + wildcard admins, so it cannot serve as a space default
-        // that every restricted user is pinned to. Public and Shared both
-        // grant read/use to anyone with the base Agent Builder privilege.
         const profile = await registry.get(payload.default_agent_id);
         if (profile.access_control?.access_mode === AgentAccessControlMode.Private) {
           throw createBadRequestError(

@@ -12,13 +12,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
-  getAgentBuilderSpaceSettingsObjectId,
+  AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID,
   type AgentBuilderSpaceSettingsAttributes,
 } from '../../saved_objects';
-import { getCurrentSpaceId } from '../../utils/spaces';
 
 /**
  * Domain shape returned to route handlers and enforcement logic. `null` means
@@ -65,25 +63,25 @@ const toDomain = (
  */
 export const createSpaceSettingsService = ({
   savedObjects,
-  spaces,
   logger,
 }: {
   savedObjects: SavedObjectsServiceStart;
-  spaces?: SpacesPluginStart;
   logger: Logger;
 }): SpaceSettingsService => {
+  // `namespaceType: 'single'` on the SO type means the request-scoped client is
+  // already isolated to the caller's space, so a fixed id reads/writes exactly
+  // one document per space without resolving the space id here.
   const getScopedClient = (request: KibanaRequest): SavedObjectsClientContract =>
     savedObjects.getScopedClient(request, {
       includedHiddenTypes: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
     });
 
   const readForRequest = async (request: KibanaRequest): Promise<AgentBuilderSpaceSettings> => {
-    const spaceId = getCurrentSpaceId({ request, spaces });
     const client = getScopedClient(request);
     try {
       const so = await client.get<AgentBuilderSpaceSettingsAttributes>(
         AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
-        getAgentBuilderSpaceSettingsObjectId(spaceId)
+        AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID
       );
       return toDomain(so.attributes);
     } catch (err) {
@@ -98,9 +96,7 @@ export const createSpaceSettingsService = ({
     request: KibanaRequest,
     defaultAgentId: string | null
   ): Promise<AgentBuilderSpaceSettings> => {
-    const spaceId = getCurrentSpaceId({ request, spaces });
     const client = getScopedClient(request);
-    const id = getAgentBuilderSpaceSettingsObjectId(spaceId);
     const attributes: AgentBuilderSpaceSettingsAttributes = {
       defaultAgentId: defaultAgentId ?? undefined,
     };
@@ -110,13 +106,9 @@ export const createSpaceSettingsService = ({
     const saved = await client.create<AgentBuilderSpaceSettingsAttributes>(
       AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
       attributes,
-      { id, overwrite: true }
+      { id: AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID, overwrite: true }
     );
-    logger.debug(
-      `Updated Agent Builder space default agent for space=${spaceId} to ${
-        defaultAgentId ?? '<cleared>'
-      }`
-    );
+    logger.debug(`Updated Agent Builder space default agent to ${defaultAgentId ?? '<cleared>'}`);
     return toDomain(saved.attributes);
   };
 

@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { ActiveSpaceProvider } from '../context/active_space_context';
 import { storageKeys } from '../storage_keys';
-import { getLastAgentId, useLastAgentId, useLastAgentIdReady } from './use_last_agent_id';
+import { getLastAgentId, useLastAgentId } from './use_last_agent_id';
 
 // `useLastAgentId` resolves the space default via `useEffectiveSpaceDefaultAgent`
 // (which cross-checks the assignment against the agents list). We mock it so we
@@ -44,7 +44,7 @@ describe('use_last_agent_id', () => {
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
 
-    expect(result.current).toBe('agent-a');
+    expect(result.current.agentId).toBe('agent-a');
   });
 
   it('does not leak agents between spaces', () => {
@@ -52,7 +52,7 @@ describe('use_last_agent_id', () => {
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('marketing') });
 
-    expect(result.current).toBe(agentBuilderDefaultAgentId);
+    expect(result.current.agentId).toBe(agentBuilderDefaultAgentId);
   });
 
   it('getLastAgentId reads from the active space key once the provider has mounted', () => {
@@ -73,12 +73,12 @@ describe('use_last_agent_id', () => {
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
 
-    expect(result.current).toBe('siemens-agent');
+    expect(result.current.agentId).toBe('siemens-agent');
   });
 
-  it('returns the last-used localStorage agent while the effective default is not ready', () => {
-    // Redirects gate on useLastAgentIdReady (spinner) until ready, so this
-    // transient value never drives navigation.
+  it('returns the last-used localStorage agent, and isReady:false, while not ready', () => {
+    // Redirects gate on isReady (spinner) until ready, so this transient value
+    // never drives navigation.
     localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('agent-a'));
     mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
       effectiveDefaultAgentId: null,
@@ -88,28 +88,17 @@ describe('use_last_agent_id', () => {
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
 
-    expect(result.current).toBe('agent-a');
+    expect(result.current.agentId).toBe('agent-a');
+    expect(result.current.isReady).toBe(false);
   });
 
-  it('exposes isReady via useLastAgentIdReady', () => {
-    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
-      effectiveDefaultAgentId: null,
-      isReady: false,
-      isRestricted: false,
-    });
-    const { result: notReady } = renderHook(() => useLastAgentIdReady(), {
-      wrapper: wrapperFor('default'),
-    });
-    expect(notReady.current).toBe(false);
-
+  it('exposes isReady from the effective space default', () => {
     mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
       effectiveDefaultAgentId: null,
       isReady: true,
       isRestricted: false,
     });
-    const { result: ready } = renderHook(() => useLastAgentIdReady(), {
-      wrapper: wrapperFor('default'),
-    });
-    expect(ready.current).toBe(true);
+    const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
+    expect(result.current.isReady).toBe(true);
   });
 });

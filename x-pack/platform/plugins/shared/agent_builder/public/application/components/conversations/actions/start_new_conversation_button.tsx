@@ -27,7 +27,7 @@ export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
   const { removeError } = useConversationStream();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId } = useLastAgentId();
 
   const handleClick = useCallback(() => {
     if (isEmbeddedContext) {

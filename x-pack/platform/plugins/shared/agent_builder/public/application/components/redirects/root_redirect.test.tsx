@@ -10,13 +10,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom-v5-compat';
 
-// Stub the underlying hooks so we can independently control the readiness
-// signal and the resolved agent id.
+// Stub the hook so we can independently control the readiness signal and the
+// resolved agent id.
 const mockUseLastAgentId = jest.fn();
-const mockUseLastAgentIdReady = jest.fn();
 jest.mock('../../hooks/use_last_agent_id', () => ({
   useLastAgentId: () => mockUseLastAgentId(),
-  useLastAgentIdReady: () => mockUseLastAgentIdReady(),
 }));
 
 import { RootRedirect } from './root_redirect';
@@ -27,12 +25,11 @@ describe('RootRedirect', () => {
   });
 
   it('renders a spinner while the space settings query is still loading', () => {
-    // While `useLastAgentIdReady` is false the redirect must not fire —
-    // otherwise a restricted user in a space with an assigned default would
-    // briefly navigate to `elastic-ai-agent` and hit the "Agent has been
-    // deleted" error before we know the correct agent id.
-    mockUseLastAgentIdReady.mockReturnValue(false);
-    mockUseLastAgentId.mockReturnValue('elastic-ai-agent');
+    // While `isReady` is false the redirect must not fire — otherwise a
+    // restricted user in a space with an assigned default would briefly
+    // navigate to `elastic-ai-agent` and hit the "Agent has been deleted"
+    // error before we know the correct agent id.
+    mockUseLastAgentId.mockReturnValue({ agentId: 'elastic-ai-agent', isReady: false });
 
     render(
       <MemoryRouter>
@@ -44,8 +41,7 @@ describe('RootRedirect', () => {
   });
 
   it('navigates once the space settings query has resolved', () => {
-    mockUseLastAgentIdReady.mockReturnValue(true);
-    mockUseLastAgentId.mockReturnValue('siemens-agent');
+    mockUseLastAgentId.mockReturnValue({ agentId: 'siemens-agent', isReady: true });
 
     const { container } = render(
       <MemoryRouter initialEntries={['/']}>

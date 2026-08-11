@@ -95,7 +95,7 @@ export const ConversationSidebarView: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const validateAgentId = useValidateAgentId();
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId } = useLastAgentId();
   const routeAccessConfig = useRouteAccessConfig();
 
   const { conversations = [] } = useConversationList({ agentId });

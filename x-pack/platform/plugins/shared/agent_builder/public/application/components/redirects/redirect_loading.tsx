@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+
+/**
+ * Centered spinner the redirect components render while they resolve which
+ * agent to navigate to (e.g. waiting on the space-default query).
+ */
+export const RedirectLoading: React.FC<{ 'data-test-subj'?: string }> = ({
+  'data-test-subj': dataTestSubj,
+}) => (
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    css={{ minHeight: '200px' }}
+    data-test-subj={dataTestSubj}
+  >
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="l" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

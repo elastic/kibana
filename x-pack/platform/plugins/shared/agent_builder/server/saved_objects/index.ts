@@ -5,27 +5,9 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
-import { agentBuilderSpaceSettingsType } from './space_settings';
-
-/**
- * Registers all saved object types owned by the Agent Builder plugin.
- *
- * Currently only registers the per-space settings singleton. Kept as a
- * dedicated helper so future SO types (rather than the ES `.chat-*` indices)
- * can be added in one place.
- */
-export const registerSavedObjectTypes = ({
-  savedObjects,
-}: {
-  savedObjects: SavedObjectsServiceSetup;
-}) => {
-  savedObjects.registerType(agentBuilderSpaceSettingsType);
-};
-
 export {
   AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
+  AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID,
   agentBuilderSpaceSettingsType,
-  getAgentBuilderSpaceSettingsObjectId,
 } from './space_settings';
 export type { AgentBuilderSpaceSettingsAttributes } from './space_settings';

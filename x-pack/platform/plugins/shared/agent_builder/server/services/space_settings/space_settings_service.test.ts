@@ -9,42 +9,28 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
-  getAgentBuilderSpaceSettingsObjectId,
+  AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID,
 } from '../../saved_objects';
 import { createSpaceSettingsService } from './space_settings_service';
 
-const createSpacesMock = (spaceId: string): SpacesPluginStart => {
-  return {
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue(spaceId),
-    },
-  } as unknown as SpacesPluginStart;
-};
-
-const setup = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
+const setup = () => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsServiceMock.createStartContract().getScopedClient({} as any);
   savedObjects.getScopedClient.mockReturnValue(soClient);
-  const spaces = createSpacesMock(spaceId);
   const logger = loggingSystemMock.createLogger();
 
-  const service = createSpaceSettingsService({
-    savedObjects,
-    spaces,
-    logger,
-  });
+  const service = createSpaceSettingsService({ savedObjects, logger });
   const request = httpServerMock.createKibanaRequest();
 
-  return { service, soClient, savedObjects, spaces, request, logger, spaceId };
+  return { service, soClient, savedObjects, request, logger };
 };
 
 describe('createSpaceSettingsService', () => {
   describe('get', () => {
     it('returns the persisted default agent id for the request space', async () => {
-      const { service, soClient, request } = setup({ spaceId: 'siemens' });
+      const { service, soClient, request } = setup();
       (soClient.get as jest.Mock).mockResolvedValue({
         attributes: { defaultAgentId: 'siemens-agent' },
       });
@@ -53,7 +39,7 @@ describe('createSpaceSettingsService', () => {
 
       expect(soClient.get).toHaveBeenCalledWith(
         AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
-        getAgentBuilderSpaceSettingsObjectId('siemens')
+        AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID
       );
       expect(result).toEqual({ defaultAgentId: 'siemens-agent' });
     });
@@ -82,7 +68,7 @@ describe('createSpaceSettingsService', () => {
 
   describe('set', () => {
     it('upserts the singleton with the requested default agent id', async () => {
-      const { service, soClient, request } = setup({ spaceId: 'default' });
+      const { service, soClient, request } = setup();
       (soClient.create as jest.Mock).mockResolvedValue({
         attributes: { defaultAgentId: 'agent-a' },
       });
@@ -92,7 +78,7 @@ describe('createSpaceSettingsService', () => {
       expect(soClient.create).toHaveBeenCalledWith(
         AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
         { defaultAgentId: 'agent-a' },
-        { id: getAgentBuilderSpaceSettingsObjectId('default'), overwrite: true }
+        { id: AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID, overwrite: true }
       );
       expect(result).toEqual({ defaultAgentId: 'agent-a' });
     });

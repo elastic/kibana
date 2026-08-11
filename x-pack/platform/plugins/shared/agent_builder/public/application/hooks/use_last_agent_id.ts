@@ -32,37 +32,28 @@ export const getLastAgentId = (): string => {
 };
 
 /**
- * Resolves the initial agent id for the current space.
+ * Resolves the initial agent id for the current space, plus `isReady`.
  *
- * Priority:
+ * `agentId` priority:
  * 1. The effective space-assigned default agent (when configured and reachable)
  *    — this beats localStorage so restricted users land on the assigned agent,
  *    and admins get a consistent starting point.
  * 2. Last agent used in this space (per-space localStorage entry).
  * 3. Plugin-wide default agent id.
  *
- * Callers that navigate based on the result (e.g. the root redirect) should
- * gate on {@link useLastAgentIdReady} and show a spinner until it is `true`, so
- * a restricted first-time visitor never briefly lands on the plugin-wide
- * default they can't access.
+ * `isReady` is `false` until the effective space default resolves. Callers that
+ * navigate on `agentId` must show a spinner until `isReady`, so a restricted
+ * first-time visitor never briefly lands on the plugin-wide default they can't
+ * access. Returning both together keeps the id and its gate inseparable.
  */
-export const useLastAgentId = (): string => {
+export const useLastAgentId = (): { agentId: string; isReady: boolean } => {
   const spaceId = useActiveSpaceId();
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
   const { effectiveDefaultAgentId, isReady } = useEffectiveSpaceDefaultAgent();
 
-  if (isReady && effectiveDefaultAgentId) {
-    return effectiveDefaultAgentId;
-  }
-  return agentIdStorage ?? agentBuilderDefaultAgentId;
-};
-
-/**
- * Reports whether {@link useLastAgentId} has resolved the effective space
- * default. Callers that navigate based on the resolved id should wait for this
- * to be `true` before doing so.
- */
-export const useLastAgentIdReady = (): boolean => {
-  const { isReady } = useEffectiveSpaceDefaultAgent();
-  return isReady;
+  const agentId =
+    isReady && effectiveDefaultAgentId
+      ? effectiveDefaultAgentId
+      : agentIdStorage ?? agentBuilderDefaultAgentId;
+  return { agentId, isReady };
 };

@@ -148,15 +148,6 @@ describe('Agent Routes - experimental access-control gate', () => {
       type: 'badRequest',
       ...params,
     })),
-    // The shared route wrapper (`wrap_handler`) catches Agent Builder errors
-    // and re-emits them via `res.customError` with the error's status code.
-    customError: jest.fn(
-      ({ body, statusCode }: { body?: { message?: string }; statusCode?: number }) => ({
-        type: 'customError',
-        statusCode,
-        body,
-      })
-    ),
   };
 
   describe('POST /agents (create)', () => {

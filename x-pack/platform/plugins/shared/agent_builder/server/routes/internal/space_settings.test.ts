@@ -8,7 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode, createAgentNotFoundError } from '@kbn/agent-builder-common';
 import { registerSpaceSettingsRoutes } from './space_settings';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
@@ -31,7 +31,6 @@ describe('registerSpaceSettingsRoutes', () => {
   let putHandler: (ctx: any, req: any, res: any) => Promise<any>;
   let mockSpaceSettingsGet: jest.Mock;
   let mockSpaceSettingsSet: jest.Mock;
-  let mockRegistryHas: jest.Mock;
   let mockRegistryGet: jest.Mock;
 
   beforeEach(() => {
@@ -39,10 +38,9 @@ describe('registerSpaceSettingsRoutes', () => {
 
     mockSpaceSettingsGet = jest.fn();
     mockSpaceSettingsSet = jest.fn();
-    mockRegistryHas = jest.fn();
-    // Registry.get is what the PUT "reject Private as default" guard consults;
-    // default to a permissive Public agent so PUT tests that don't care about
-    // access mode keep passing.
+    // PUT resolves the agent via registry.get: it throws not-found for missing
+    // ids and returns the profile whose access mode the Private guard checks.
+    // Default to a permissive Public agent.
     mockRegistryGet = jest.fn().mockResolvedValue({
       id: 'agent-a',
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
@@ -55,7 +53,6 @@ describe('registerSpaceSettingsRoutes', () => {
       },
       agents: {
         getRegistry: jest.fn().mockResolvedValue({
-          has: mockRegistryHas,
           get: mockRegistryGet,
         }),
       },
@@ -136,7 +133,6 @@ describe('registerSpaceSettingsRoutes', () => {
 
   describe('PUT /internal/agent_builder/space_settings', () => {
     it('persists the assignment when the agent exists in the space', async () => {
-      mockRegistryHas.mockResolvedValue(true);
       mockSpaceSettingsSet.mockResolvedValue({ defaultAgentId: 'agent-a' });
 
       const response = await putHandler(
@@ -149,16 +145,16 @@ describe('registerSpaceSettingsRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(mockRegistryHas).toHaveBeenCalledWith('agent-a');
+      expect(mockRegistryGet).toHaveBeenCalledWith('agent-a');
       expect(mockSpaceSettingsSet).toHaveBeenCalledWith(expect.anything(), 'agent-a');
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ default_agent_id: 'agent-a' });
     });
 
     it('returns a 404 when the assigned agent id does not resolve in the space', async () => {
-      // The route wrapper turns Agent Builder errors into customError
-      // responses using the error's own status code (404 for not-found).
-      mockRegistryHas.mockResolvedValue(false);
+      // registry.get throws a not-found error; the route wrapper maps Agent
+      // Builder errors to customError responses using their status code (404).
+      mockRegistryGet.mockRejectedValue(createAgentNotFoundError({ agentId: 'missing-agent' }));
 
       const response = await putHandler(
         createContext() as any,
@@ -174,7 +170,7 @@ describe('registerSpaceSettingsRoutes', () => {
       expect(mockSpaceSettingsSet).not.toHaveBeenCalled();
     });
 
-    it('clears the assignment when body carries null and skips existence check', async () => {
+    it('clears the assignment when body carries null and skips the agent lookup', async () => {
       mockSpaceSettingsSet.mockResolvedValue({ defaultAgentId: null });
 
       const response = await putHandler(
@@ -187,36 +183,16 @@ describe('registerSpaceSettingsRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(mockRegistryHas).not.toHaveBeenCalled();
+      expect(mockRegistryGet).not.toHaveBeenCalled();
       expect(mockSpaceSettingsSet).toHaveBeenCalledWith(expect.anything(), null);
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ default_agent_id: null });
-    });
-
-    it('rejects with 400 when default_agent_id has surrounding whitespace', async () => {
-      // The route enforces a strict-trimmed id after the registry check so that
-      // padded ids like " agent-a " cannot be stored via a benign-looking write.
-      mockRegistryHas.mockResolvedValue(true);
-
-      const response = await putHandler(
-        createContext() as any,
-        httpServerMock.createKibanaRequest({
-          method: 'put',
-          path: PUT_PATH,
-          body: { default_agent_id: ' agent-a ' },
-        }),
-        kibanaResponseFactory
-      );
-
-      expect(response.status).toBe(400);
-      expect(mockSpaceSettingsSet).not.toHaveBeenCalled();
     });
 
     it('rejects with 400 when the target agent is Private', async () => {
       // Private grants access to owner + explicit ACL entries + wildcard
       // admins only, so it can't be a valid space default that every
       // restricted user is pinned to.
-      mockRegistryHas.mockResolvedValue(true);
       mockRegistryGet.mockResolvedValue({
         id: 'private-agent',
         access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
@@ -240,7 +216,6 @@ describe('registerSpaceSettingsRoutes', () => {
       // Shared grants read/use to every user with the base Agent Builder
       // privilege, so it is safe to pin — only writes are restricted to the
       // owner.
-      mockRegistryHas.mockResolvedValue(true);
       mockRegistryGet.mockResolvedValue({
         id: 'shared-agent',
         access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
