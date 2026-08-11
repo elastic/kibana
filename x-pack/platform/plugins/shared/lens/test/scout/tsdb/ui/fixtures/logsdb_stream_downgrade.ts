@@ -110,7 +110,9 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
         title: scenario.dataViewTitle,
         timeFieldName: '@timestamp',
       });
-      cleanupActions.push(async () => apiServices.dataViews.delete(dataView.id));
+      cleanupActions.push(async () => {
+        await apiServices.dataViews.delete(dataView.id);
+      });
       cleanupActions.push(async () =>
         uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults')
       );
