@@ -96,6 +96,12 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
 
+/**
+ * Maximum length of the `episode_data` JSON string snapshotted into an episode
+ * attachment. Bounds open-ended user JSON so attachment payloads stay finite.
+ */
+export const MAX_EPISODE_DATA_LENGTH = 32_000;
+
 /** Maximum number of rule change-history events returned per page. */
 export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
 
