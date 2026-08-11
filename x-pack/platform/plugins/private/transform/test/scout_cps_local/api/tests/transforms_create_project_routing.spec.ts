@@ -9,7 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
-import { generateDestIndex, generateTransformConfig } from '../../../scout/api/helpers/transform_config';
+import {
+  generateDestIndex,
+  generateTransformConfig,
+} from '../../../scout/api/helpers/transform_config';
 import { transformApiTest as apiTest } from '../../../scout/api/fixtures';
 import { COMMON_HEADERS } from '../../../scout/api/constants';
 
