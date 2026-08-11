@@ -246,11 +246,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        // A freshly added operation is an incomplete column until its field commits; closing the editor before then discards the transition.
-        await retry.waitFor('field selection to commit', async () => {
+        // Re-select until the field commits: on slow data views the options list can still be loading when the field is clicked, so the click misses and closing the editor would discard the incomplete column.
+        await retry.try(async () => {
+          await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field!);
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+          if (!(await comboBox.isOptionSelected(fieldCombo, opts.field!))) {
+            throw new Error(`field "${opts.field}" did not commit`);
+          }
         });
       }
 
