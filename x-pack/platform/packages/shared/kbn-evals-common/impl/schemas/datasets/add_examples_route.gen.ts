@@ -27,7 +27,7 @@ export type AddExamplesPayload = z.infer<typeof AddExamplesPayload>;
 
 export const AddEvaluationDatasetExamplesRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
+    datasetId: z.string().max(1024),
   })
 );
 export type AddEvaluationDatasetExamplesRequestParams = z.infer<
