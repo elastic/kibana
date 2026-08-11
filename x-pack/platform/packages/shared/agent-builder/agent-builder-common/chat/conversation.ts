@@ -493,7 +493,7 @@ export interface Conversation {
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
   /** Arbitrary key/value pairs seeded from a template or set by callers. */
-  metadata?: Record<string, string | boolean>;
+  metadata?: Record<string, string>;
   /** ID of the template that was last applied to this conversation. */
   template_id?: string;
   /** Whether the conversation has been pinned by the user. */

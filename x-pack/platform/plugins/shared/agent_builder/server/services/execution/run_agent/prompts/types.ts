@@ -36,7 +36,7 @@ export interface PromptFactoryParams {
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
   /** Key/value pairs from the active conversation template, injected into the system prompt. */
-  conversationMetadata?: Record<string, string | boolean>;
+  conversationMetadata?: Record<string, string>;
   /** ID of the active template, used to look up field schemas for the system prompt. */
   conversationTemplateId?: string;
   /**

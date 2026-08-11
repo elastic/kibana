@@ -1079,7 +1079,7 @@ describe('ConversationClient', () => {
     metadata = {},
   }: {
     templateId?: string;
-    metadata?: Record<string, string | boolean>;
+    metadata?: Record<string, string>;
   } = {}): Document =>
     ({
       _id: 'conversation-1',
@@ -1222,6 +1222,26 @@ describe('ConversationClient', () => {
       );
     });
 
+    it('serializes boolean field defaults to strings when applying a template', async () => {
+      const template = makeTemplate('tmpl-bool', [
+        { name: 'mfa_enabled', type: 'boolean', description: 'MFA flag', value: false },
+      ]);
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-bool');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: { mfa_enabled: 'false' },
+          }),
+        })
+      );
+    });
+
     it('enforces owner access — throws for conversations owned by another user', async () => {
       getTemplateMock.mockReturnValue(makeTemplate('tmpl-a'));
       mockEsClient.search.mockResolvedValue({
@@ -1265,6 +1285,32 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({
             metadata: { priority: 'medium' }, // only fields with defaults
             template_id: 'tmpl-seed',
+          }),
+        })
+      );
+    });
+
+    it('serializes boolean field defaults to strings in metadata', async () => {
+      const template = makeTemplate('tmpl-bool', [
+        { name: 'mfa_enabled', type: 'boolean', description: 'MFA flag', value: false },
+        { name: 'containment_applied', type: 'boolean', description: 'Containment', value: true },
+        { name: 'label', type: 'keyword', description: 'Label', value: 'active' },
+      ]);
+      getTemplateMock.mockReturnValue(template);
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        template_id: 'tmpl-bool',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            // Booleans are serialized to strings for the flattened field mapping.
+            metadata: { mfa_enabled: 'false', containment_applied: 'true', label: 'active' },
           }),
         })
       );

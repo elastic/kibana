@@ -52,7 +52,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+  'id' | 'title' | 'attachments' | 'read' | 'pinned' | 'metadata' | 'template_id'
 >;
 
 /**

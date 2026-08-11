@@ -12,6 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { validateSingleField } from '../../conversation/templates/validation';
+import { serializeMetadataValue } from '../../conversation/templates/serialize';
 
 const setConversationMetadataSchema = z.object({
   updates: z
@@ -47,7 +48,7 @@ export const createSetConversationMetadataTool = ({
   updateConversationMetadata,
   template,
 }: {
-  updateConversationMetadata: (updates: Record<string, string | boolean>) => Promise<void>;
+  updateConversationMetadata: (updates: Record<string, string>) => Promise<void>;
   template: ConversationTemplate;
 }): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,
@@ -64,7 +65,10 @@ export const createSetConversationMetadataTool = ({
       }
       validateSingleField(template.id, field, value);
     }
-    await updateConversationMetadata(updates);
+    const serialized = Object.fromEntries(
+      Object.entries(updates).map(([k, v]) => [k, serializeMetadataValue(v)])
+    );
+    await updateConversationMetadata(serialized);
     return {
       results: [
         {

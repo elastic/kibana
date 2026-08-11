@@ -50,7 +50,7 @@ const storageSettings = {
         },
         dynamic: false,
       }),
-      metadata: types.object({ dynamic: false, properties: {} }),
+      metadata: types.flattened({}),
       template_id: types.keyword({}),
     },
   },
@@ -73,7 +73,7 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
-  metadata?: Record<string, string | boolean>;
+  metadata?: Record<string, string>;
   template_id?: string;
   // legacy field
   rounds?: PersistentConversationRound[];

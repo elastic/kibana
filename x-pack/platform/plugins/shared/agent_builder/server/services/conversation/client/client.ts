@@ -49,6 +49,7 @@ import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateFields } from '../templates/validation';
+import { serializeMetadataValue } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
@@ -63,9 +64,9 @@ import {
 
 const buildMetadataFromFields = (
   fields: ConversationTemplateField[] | undefined
-): Record<string, string | boolean> =>
-  (fields ?? []).reduce<Record<string, string | boolean>>((acc, { name, value }) => {
-    if (value !== undefined) acc[name] = value;
+): Record<string, string> =>
+  (fields ?? []).reduce<Record<string, string>>((acc, { name, value }) => {
+    if (value !== undefined) acc[name] = serializeMetadataValue(value);
     return acc;
   }, {});
 
@@ -383,7 +384,7 @@ class ConversationClientImpl implements ConversationClient {
     );
 
     // New template defaults always win for template-owned keys; user-defined keys survive.
-    const metadata: Record<string, string | boolean> = {
+    const metadata: Record<string, string> = {
       ...cleanedExistingMetadata,
       ...templateMetadata,
     };

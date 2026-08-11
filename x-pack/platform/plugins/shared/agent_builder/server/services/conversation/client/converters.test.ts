@@ -869,14 +869,14 @@ describe('conversation model converters', () => {
             created_at: creationDate,
             updated_at: updateDate,
             template_id: 'security.account-compromise',
-            metadata: { severity: 'high', is_confirmed: true },
+            metadata: { severity: 'high', is_confirmed: 'true' },
           },
         };
 
         const result = fromEs(doc);
 
         expect(result.template_id).toBe('security.account-compromise');
-        expect(result.metadata).toEqual({ severity: 'high', is_confirmed: true });
+        expect(result.metadata).toEqual({ severity: 'high', is_confirmed: 'true' });
       });
 
       it('omits metadata and template_id when absent from the document', () => {
@@ -912,13 +912,13 @@ describe('conversation model converters', () => {
           updated_at: updateDate,
           rounds: [],
           template_id: 'security.phishing',
-          metadata: { severity: 'low', is_confirmed: false },
+          metadata: { severity: 'low', is_confirmed: 'false' },
         };
 
         const result = toEs(conversation, 'space');
 
         expect(result.template_id).toBe('security.phishing');
-        expect(result.metadata).toEqual({ severity: 'low', is_confirmed: false });
+        expect(result.metadata).toEqual({ severity: 'low', is_confirmed: 'false' });
       });
 
       it('does not include template_id or metadata when absent', () => {
@@ -946,7 +946,7 @@ describe('conversation model converters', () => {
           title: 'Template conv',
           rounds: [] as Conversation['rounds'],
           template_id: 'security.malware',
-          metadata: { severity: 'critical' } as Record<string, string | boolean>,
+          metadata: { severity: 'critical' },
         };
 
         const result = createRequestToEs({
