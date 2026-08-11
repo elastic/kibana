@@ -61,22 +61,28 @@ export const getStepSeverity = (step: StepInfo, errors: YamlValidationResult[]):
  * Total: O(errors + steps × unique_error_lines_in_range), which is significantly
  * cheaper than the naive O(steps × errors) when the error list is large.
  */
+const buildWorstByLine = (errors: YamlValidationResult[]): Map<number, StepSeverity> => {
+  const worstByLine = new Map<number, StepSeverity>();
+  for (const err of errors) {
+    if (err.severity === 'error' || err.severity === 'warning') {
+      const line = err.startLineNumber;
+      const prev = worstByLine.get(line);
+      if (prev !== 'error') {
+        // 'error' beats 'warning'; set on first visit or upgrade warning → error.
+        worstByLine.set(line, err.severity === 'error' ? 'error' : prev ?? err.severity);
+      }
+    }
+  }
+  return worstByLine;
+};
+
 export const buildStepSeverityMap = (
   stepEntries: Array<[string, StepInfo]>,
   errors: YamlValidationResult[],
   effectiveLineEnd: Map<string, number>
 ): Map<string, StepSeverityInfo> => {
   // Bucket errors by start line, keeping the highest severity per line — O(errors).
-  const worstByLine = new Map<number, StepSeverity>();
-  for (const err of errors) {
-    if (err.severity === null) continue;
-    const line = err.startLineNumber;
-    const prev = worstByLine.get(line);
-    if (prev !== 'error') {
-      // 'error' beats 'warning'; set on first visit or upgrade warning → error.
-      worstByLine.set(line, err.severity === 'error' ? 'error' : prev ?? err.severity);
-    }
-  }
+  const worstByLine = buildWorstByLine(errors);
 
   const result = new Map<string, StepSeverityInfo>();
   for (const [stepId, step] of stepEntries) {
@@ -86,11 +92,13 @@ export const buildStepSeverityMap = (
     let inheritedWorst: StepSeverity = null;
 
     for (const [line, sev] of worstByLine) {
-      if (line < step.lineStart || line > step.lineEnd) continue;
-      if (line <= ownEnd) {
-        if (!ownWorst || (sev === 'error' && ownWorst === 'warning')) ownWorst = sev;
-      } else {
-        if (!inheritedWorst || (sev === 'error' && inheritedWorst === 'warning')) inheritedWorst = sev;
+      if (line >= step.lineStart && line <= step.lineEnd) {
+        if (line <= ownEnd) {
+          if (!ownWorst || (sev === 'error' && ownWorst === 'warning')) ownWorst = sev;
+        } else {
+          if (!inheritedWorst || (sev === 'error' && inheritedWorst === 'warning'))
+            inheritedWorst = sev;
+        }
       }
     }
 
