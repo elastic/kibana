@@ -21,6 +21,8 @@ import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detect
 export const ATTACK_ADD_TO_CASE_ACTION_ID = 'attack-add-to-case';
 
 export interface UseBulkAttackCaseItemsProps {
+  /** Title used to initialize the create-case flyout */
+  title: string;
   /** Optional callback when add-to-case action is triggered */
   onCasesAdd?: () => void;
   /** Optional callback to close the popover after triggering action */
@@ -33,6 +35,7 @@ export interface UseBulkAttackCaseItemsProps {
  * Hook that provides a bulk action item for adding attacks to a case.
  */
 export const useBulkAttackCaseItems = ({
+  title,
   onCasesAdd,
   closePopover,
   telemetrySource,
@@ -50,6 +53,7 @@ export const useBulkAttackCaseItems = ({
   const { onAddToCase, disabled } = useAddToCase({
     canUserCreateAndReadCases,
     onClick: onCasesAdd,
+    title,
   });
 
   const onAddToCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(

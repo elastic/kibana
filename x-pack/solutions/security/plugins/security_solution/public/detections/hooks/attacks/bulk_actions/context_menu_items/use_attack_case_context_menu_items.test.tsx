@@ -17,6 +17,7 @@ const mockUseBulkAttackCaseItems = useBulkAttackCaseItems as jest.MockedFunction
 
 describe('useAttackCaseContextMenuItems', () => {
   const closePopover = jest.fn();
+  const title = 'Attack title';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -45,6 +46,7 @@ describe('useAttackCaseContextMenuItems', () => {
           },
         ],
         closePopover,
+        title,
       })
     );
 
@@ -71,11 +73,13 @@ describe('useAttackCaseContextMenuItems', () => {
             markdownComment: 'markdown',
           },
         ],
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
       closePopover: undefined,
+      title,
     });
   });
 
@@ -90,12 +94,14 @@ describe('useAttackCaseContextMenuItems', () => {
           },
         ],
         telemetrySource: 'attacks_page_group_take_action',
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
       closePopover: undefined,
       telemetrySource: 'attacks_page_group_take_action',
+      title,
     });
   });
 
@@ -110,11 +116,13 @@ describe('useAttackCaseContextMenuItems', () => {
           },
         ],
         closePopover,
+        title,
       })
     );
 
     expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith({
       closePopover,
+      title,
     });
   });
 
@@ -122,6 +130,7 @@ describe('useAttackCaseContextMenuItems', () => {
     const { result } = renderHook(() =>
       useAttackCaseContextMenuItems({
         attacksWithCase: [],
+        title,
       })
     );
 

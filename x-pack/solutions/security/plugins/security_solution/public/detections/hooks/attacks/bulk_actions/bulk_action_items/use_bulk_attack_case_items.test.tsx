@@ -50,6 +50,7 @@ const alertItems: TimelineItem[] = [
 describe('useBulkAttackCaseItems', () => {
   const onAddToCase = jest.fn();
   const reportEvent = jest.fn();
+  const title = 'Attack title';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -73,7 +74,7 @@ describe('useBulkAttackCaseItems', () => {
   });
 
   it('returns one modal-backed case action and no panels', () => {
-    const { result } = renderHook(() => useBulkAttackCaseItems({}));
+    const { result } = renderHook(() => useBulkAttackCaseItems({ title }));
 
     expect(result.current.items).toEqual([
       expect.objectContaining({
@@ -85,6 +86,11 @@ describe('useBulkAttackCaseItems', () => {
       }),
     ]);
     expect(result.current.panels).toEqual([]);
+    expect(useAddToCase).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title,
+      })
+    );
   });
 
   it('returns no case action without permissions', () => {
@@ -102,14 +108,14 @@ describe('useBulkAttackCaseItems', () => {
       },
     });
 
-    const { result } = renderHook(() => useBulkAttackCaseItems({}));
+    const { result } = renderHook(() => useBulkAttackCaseItems({ title }));
 
     expect(result.current.items).toEqual([]);
   });
 
   it('opens the selector with unique alert ids and markdown comments', async () => {
     const closePopover = jest.fn();
-    const { result } = renderHook(() => useBulkAttackCaseItems({ closePopover }));
+    const { result } = renderHook(() => useBulkAttackCaseItems({ closePopover, title }));
 
     await act(async () => {
       await result.current.items[0].onClick?.(alertItems, false, jest.fn(), jest.fn(), jest.fn());
@@ -126,6 +132,7 @@ describe('useBulkAttackCaseItems', () => {
     const { result } = renderHook(() =>
       useBulkAttackCaseItems({
         telemetrySource: 'attacks_page_group_take_action',
+        title,
       })
     );
 

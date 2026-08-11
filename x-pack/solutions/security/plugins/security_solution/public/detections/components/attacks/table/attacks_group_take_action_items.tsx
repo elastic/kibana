@@ -161,6 +161,7 @@ export function AttacksGroupTakeActionItems({
     closePopover,
     attacksWithCase,
     telemetrySource,
+    title: attack.title,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,

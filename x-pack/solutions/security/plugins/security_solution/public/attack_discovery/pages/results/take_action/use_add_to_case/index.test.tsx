@@ -27,6 +27,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 
 describe('useAddToCase', () => {
   const mockCanUserCreateAndReadCases = jest.fn();
+  const mockTitle = 'Attack discovery title';
   const mockAlertIds = ['alert1', 'alert2'];
   const mockMarkdownComments = ['Comment 1', 'Comment 2'];
   const mockReplacements = { alert1: 'replacement1', alert2: 'replacement2' };
@@ -42,7 +43,11 @@ describe('useAddToCase', () => {
     mockCanUserCreateAndReadCases.mockReturnValue(canUseCases);
 
     const { result } = renderHook(
-      () => useAddToCase({ canUserCreateAndReadCases: mockCanUserCreateAndReadCases }),
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          title: mockTitle,
+        }),
       { wrapper: TestProviders }
     );
 
@@ -65,7 +70,11 @@ describe('useAddToCase', () => {
     });
 
     const { result } = renderHook(
-      () => useAddToCase({ canUserCreateAndReadCases: mockCanUserCreateAndReadCases }),
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          title: mockTitle,
+        }),
       { wrapper: TestProviders }
     );
 
@@ -94,5 +103,44 @@ describe('useAddToCase', () => {
         type: 'alert',
       },
     ]);
+  });
+
+  it('preserves the create-case prefill in the selector modal', () => {
+    const useCasesAddToExistingCaseModal = jest.fn().mockReturnValue({
+      open: jest.fn(),
+    });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal,
+          },
+        },
+      },
+    });
+
+    renderHook(
+      () =>
+        useAddToCase({
+          canUserCreateAndReadCases: mockCanUserCreateAndReadCases,
+          title: mockTitle,
+        }),
+      { wrapper: TestProviders }
+    );
+
+    expect(useCasesAddToExistingCaseModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        createCaseFlyout: {
+          headerContent: expect.anything(),
+          initialValue: {
+            description: `This case was opened for attack discovery: _${mockTitle}_`,
+            title: mockTitle,
+          },
+        },
+        successToaster: {
+          content: 'Successfully added attack discovery to the case',
+        },
+      })
+    );
   });
 });

@@ -79,6 +79,8 @@ const TakeActionComponent: React.FC<Props> = ({
   );
   const { disabled: addToCaseDisabled, onAddToCase } = useAddToCase({
     canUserCreateAndReadCases,
+    onSuccess: refetchFindAttackDiscoveries,
+    title: attackDiscoveries.map((discovery) => discovery.title).join(', '),
   });
 
   const { hasAlertsUpdate } = useAlertsPrivileges();
