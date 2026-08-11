@@ -59,6 +59,8 @@
 **Identity management**
 
 - [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
+- [Okta](/reference/connectors-kibana/okta-action-type.md): Contain compromised identities — suspend users, revoke sessions, reset MFA, manage group membership, and query System Log events.
+- [Google Cloud IAM](/reference/connectors-kibana/gcp-iam-action-type.md): Disable service accounts, revoke leaked keys, and grant or revoke IAM role bindings.
 
 **Email security**
 
