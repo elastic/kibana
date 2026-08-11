@@ -28,7 +28,8 @@ const ProjectPickerRoutingObserver = ({
   onProjectRoutingChange,
   projectRouting,
 }: Pick<ProjectPickerProps, 'onProjectRoutingChange' | 'projectRouting'>) => {
-  const { availableProjects, selectedProjects } = useProjectPickerState();
+  const { availableProjects, excludedOverrides, filterExpressions, selectedProjects } =
+    useProjectPickerState();
 
   useEffect(() => {
     if (!onProjectRoutingChange) {
@@ -36,20 +37,35 @@ const ProjectPickerRoutingObserver = ({
     }
 
     const allProjectIds = Array.from(availableProjects.keys());
+    const activeFilterExpressions = Array.from(filterExpressions.values())
+      .filter((entry) => entry.enabled)
+      .map(({ expression }) => expression);
+    const hasActiveFilters = activeFilterExpressions.length > 0;
+    const hasExcludedOverrides = excludedOverrides.length > 0;
+    const isAllProjectsSelected =
+      selectedProjects.length === 0 || selectedProjects.length === allProjectIds.length;
     const nextProjectRouting =
-      selectedProjects.length === 0 || selectedProjects.length === allProjectIds.length
+      !hasActiveFilters && !hasExcludedOverrides && isAllProjectsSelected
         ? PROJECT_ROUTING.ALL
         : projectRoutingCodec.encode({
-            excludedProjectIds: [],
-            filterExpressions: [],
+            excludedProjectIds: excludedOverrides,
+            filterExpressions: activeFilterExpressions,
             selectedProjectIds: selectedProjects,
-            projectRoutingStrategy: 'snapshot',
+            projectRoutingStrategy:
+              hasActiveFilters || hasExcludedOverrides ? 'dynamic' : 'snapshot',
           });
 
     if (nextProjectRouting !== projectRouting) {
       onProjectRoutingChange(nextProjectRouting);
     }
-  }, [availableProjects, onProjectRoutingChange, projectRouting, selectedProjects]);
+  }, [
+    availableProjects,
+    excludedOverrides,
+    filterExpressions,
+    onProjectRoutingChange,
+    projectRouting,
+    selectedProjects,
+  ]);
 
   return null;
 };
