@@ -13,6 +13,8 @@ import type { DeepLinkId } from '.';
 
 /** Keep in sync with `WORKFLOWS_LIBRARY_ENABLED_SETTING_ID` in `@kbn/workflows`. */
 const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
+const WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
+  'workflowsManagement:globalExecutionsView:enabled';
 
 const workflowsDeepLink = (page: WorkflowsPageNameType): DeepLinkId =>
   `${WORKFLOWS_APP_ID}:${page}`;
@@ -53,8 +55,25 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
     WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
     false
   );
+  const executionsViewEnabled = core.settings.globalClient.get<boolean>(
+    WORKFLOWS_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
+    false
+  );
 
-  if (!libraryEnabled) {
+  const links: NonNullable<WorkflowsNavNode['children']> = [];
+
+  if (libraryEnabled) {
+    links.push({ link: workflowsDeepLink(WorkflowsPageName.library), breadcrumbStatus: 'hidden' });
+  }
+
+  if (executionsViewEnabled) {
+    links.push({
+      link: workflowsDeepLink(WorkflowsPageName.executions),
+      breadcrumbStatus: 'hidden',
+    });
+  }
+
+  if (!links.length) {
     return [{ link: WORKFLOWS_APP_ID }];
   }
 
@@ -65,7 +84,7 @@ export const getWorkflowsNavPanel = (core: WorkflowsNavPanelCore): WorkflowsNavN
       renderAs: 'panelOpener',
       children: [
         { link: workflowsDeepLink(WorkflowsPageName.list), breadcrumbStatus: 'hidden' },
-        { link: workflowsDeepLink(WorkflowsPageName.library), breadcrumbStatus: 'hidden' },
+        ...links,
       ],
     },
   ];

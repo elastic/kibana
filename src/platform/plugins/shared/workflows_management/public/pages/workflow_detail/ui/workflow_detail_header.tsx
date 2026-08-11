@@ -39,6 +39,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import { getAddConnectorsMenuItem } from '../../../shared/ui/get_add_connectors_menu_item';
 import {
   getReturnDestinationFromSearch,
   navigateToWorkflowsList,
@@ -116,6 +117,7 @@ export interface WorkflowDetailHeaderProps {
 export const WorkflowDetailHeader = React.memo(
   ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
+    const { application } = useKibana().services;
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
     const dispatch = useDispatch();
@@ -334,6 +336,10 @@ export const WorkflowDetailHeader = React.memo(
     ]);
 
     const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
+    const addConnectorsMenuItem = useMemo(
+      () => getAddConnectorsMenuItem(application),
+      [application]
+    );
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
@@ -406,6 +412,9 @@ export const WorkflowDetailHeader = React.memo(
       if (historyItem) {
         items.push(historyItem);
       }
+      if (addConnectorsMenuItem) {
+        items.push(addConnectorsMenuItem);
+      }
 
       return {
         primaryActionItem: {
@@ -435,6 +444,7 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
+      addConnectorsMenuItem,
       enabledSwitchConfig,
       isVisualEditorEnabled,
       handleSaveWorkflow,
@@ -460,7 +470,6 @@ export const WorkflowDetailHeader = React.memo(
             badges={badges}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
-            showAddIntegrations
           />
         </EuiPageTemplate>
         {runConfirmationModal}
