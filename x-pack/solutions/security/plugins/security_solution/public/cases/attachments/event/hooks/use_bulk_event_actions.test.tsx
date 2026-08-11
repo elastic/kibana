@@ -11,13 +11,14 @@ import { TestProviders } from '../../../../common/mock';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
-const mockOpenNewCase = jest.fn();
 const mockOpenExistingCase = jest.fn();
-const mockCanUseCases = jest.fn(() => ({ create: true, read: true }));
-const mockGetCasesContext = jest.fn(() => ({}));
-const mockUseCasesAddToNewCaseFlyout = jest.fn(() => ({
-  open: mockOpenNewCase,
+const mockCanUseCases = jest.fn(() => ({
+  create: true,
+  createComment: true,
+  read: true,
+  update: false,
 }));
+const mockGetCasesContext = jest.fn(() => ({}));
 const mockUseCasesAddToExistingCaseModal = jest.fn(() => ({
   open: mockOpenExistingCase,
 }));
@@ -33,7 +34,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
           getCasesContext: mockGetCasesContext,
         },
         hooks: {
-          useCasesAddToNewCaseFlyout: mockUseCasesAddToNewCaseFlyout,
           useCasesAddToExistingCaseModal: mockUseCasesAddToExistingCaseModal,
         },
       },
@@ -48,35 +48,26 @@ describe('useBulkAddEventsToCaseActions', () => {
     jest.clearAllMocks();
   });
 
-  it('returns two actions when permissions and services are available', () => {
+  it('returns one action when permissions and services are available', () => {
     const { result } = renderHook(() => useBulkAddEventsToCaseActions({ clearSelection }), {
       wrapper: TestProviders,
     });
-    expect(result.current).toHaveLength(2);
+    expect(result.current).toHaveLength(1);
     expect(result.current[0].label).toBeDefined();
-    expect(result.current[1].label).toBeDefined();
   });
 
-  it('calls createCaseFlyout.open with correct attachments', () => {
+  it('returns one action when the user can only update existing cases', () => {
+    mockCanUseCases.mockReturnValueOnce({
+      create: false,
+      createComment: true,
+      read: true,
+      update: true,
+    });
     const { result } = renderHook(() => useBulkAddEventsToCaseActions({ clearSelection }), {
       wrapper: TestProviders,
     });
-    const events = [
-      { _id: '1', _index: 'foo' },
-      { _id: '2', _index: 'bar' },
-    ] as unknown as TimelineItem[];
-    act(() => {
-      result.current[0].onClick(events);
-    });
-    expect(mockOpenNewCase).toHaveBeenCalledWith({
-      attachments: [
-        {
-          type: SECURITY_EVENT_ATTACHMENT_TYPE,
-          attachmentId: ['1', '2'],
-          metadata: { index: ['foo', 'bar'] },
-        },
-      ],
-    });
+
+    expect(result.current).toHaveLength(1);
   });
 
   it('calls selectCaseModal.open with correct getAttachments', () => {
@@ -88,7 +79,7 @@ describe('useBulkAddEventsToCaseActions', () => {
       { _id: '2', _index: 'bar' },
     ] as unknown as TimelineItem[];
     act(() => {
-      result.current[1].onClick(events);
+      result.current[0].onClick(events);
     });
     expect(mockOpenExistingCase).toHaveBeenCalled();
     const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
@@ -111,19 +102,23 @@ describe('useBulkAddEventsToCaseActions', () => {
       result.current[0].onClick(events);
     });
 
-    expect(mockOpenNewCase).toHaveBeenCalledWith({
-      attachments: [
-        {
-          type: SECURITY_EVENT_ATTACHMENT_TYPE,
-          attachmentId: '1',
-          metadata: { index: 'foo' },
-        },
-      ],
-    });
+    const mappedEvents = mockOpenExistingCase.mock.lastCall[0].getAttachments();
+    expect(mappedEvents).toEqual([
+      {
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        attachmentId: '1',
+        metadata: { index: 'foo' },
+      },
+    ]);
   });
 
   it('returns empty array if permissions are missing', () => {
-    mockCanUseCases.mockReturnValueOnce({ create: false, read: false });
+    mockCanUseCases.mockReturnValueOnce({
+      create: false,
+      createComment: false,
+      read: false,
+      update: false,
+    });
     const { result } = renderHook(() => useBulkAddEventsToCaseActions({ clearSelection }), {
       wrapper: TestProviders,
     });
