@@ -6,8 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextTruncate,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
+import { BLAST_RADIUS_LABELS } from './translations';
 
 interface BlastRadiusProps {
   investigations: Investigation[];
@@ -41,25 +52,30 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
 
   return (
     <>
+      <EuiTitle size="xxs" css={css({ fontWeight: euiTheme.font.weight.semiBold })}>
+        <h3>{BLAST_RADIUS_LABELS.title}</h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup
         gutterSize="s"
         wrap
         responsive={false}
         alignItems="center"
-        aria-label="Affected surfaces"
+        aria-label={BLAST_RADIUS_LABELS.title}
       >
         {surfaces.map((surface) => (
           <EuiFlexItem key={surface} grow={false}>
             <EuiBadge
-              style={{ padding: euiTheme.size.s }}
+              style={{ padding: euiTheme.size.s, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               color={surfaceFilter === surface ? 'primary' : 'hollow'}
               onClick={() => onSurfaceFilterChange(surfaceFilter === surface ? null : surface)}
               onClickAriaLabel={surface}
             >
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">{surface}</EuiText>
+                  <EuiText size="xs">
+                    <EuiTextTruncate text={surface} width={120} truncation="end" />
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="danger">
