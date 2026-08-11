@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useEntityStoreEuidApi, type EntityStoreEuid } from '@kbn/entity-store/public';
+import { type EntityStoreEuid, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -24,7 +24,7 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -45,6 +45,8 @@ export interface ObservedDataSectionProps {
   scopeId: string;
   /** Query id registered with the inspect button. */
   queryId: string;
+  /** When true, omits the "Max anomaly score by job" row and skips anomaly data fetching. Defaults to false*/
+  hideAnomalies: boolean;
 }
 
 const resolveEntityAnomalyConfig = ({
@@ -89,9 +91,17 @@ const resolveEntityAnomalyConfig = ({
 };
 
 export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps) => {
-  const { entityType, observedData, identityFields, entityRecord, contextID, scopeId } = props;
+  const {
+    entityType,
+    observedData,
+    identityFields,
+    entityRecord,
+    contextID,
+    scopeId,
+    hideAnomalies = false,
+  } = props;
 
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const { to, from, isInitializing } = useGlobalTime();
 
@@ -120,7 +130,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     }),
     startDate: from,
     endDate: to,
-    skip: isInitializing,
+    skip: isInitializing || !!hideAnomalies,
     jobIds,
     aggregationInterval: 'auto',
   });
@@ -139,17 +149,17 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
   );
 
   const hostFields = useObservedHostFields(
-    observedDataWithAnomalies as ObservedEntityData<HostItem>
+    observedDataWithAnomalies as ObservedEntityData<HostItem>,
+    hideAnomalies
   );
   const userFields = useObservedUserFields(
-    observedDataWithAnomalies as ObservedEntityData<UserItem>
+    observedDataWithAnomalies as ObservedEntityData<UserItem>,
+    hideAnomalies
   );
   const observedFields = entityType === EntityType.host ? hostFields : userFields;
 
   const renderFlyoutLink = useCallback(
-    (flyoutLinkProps: OpenFlyoutLinkProps) => (
-      <OpenFlyoutLink {...flyoutLinkProps} asParent={false} />
-    ),
+    (flyoutLinkProps: OpenFlyoutLinkProps) => <OpenFlyoutLink {...flyoutLinkProps} />,
     []
   );
 

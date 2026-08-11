@@ -109,6 +109,8 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/esql-utils'
   - '@kbn/app-header'
+  - '@kbn/managed-content-badge'
+  - '@kbn/core-chrome-app-menu'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-mocks'

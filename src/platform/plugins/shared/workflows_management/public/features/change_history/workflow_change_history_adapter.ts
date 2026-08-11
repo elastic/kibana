@@ -12,7 +12,9 @@ import type {
   ChangeHistoryDetail,
   ChangeHistoryListItem,
   ChangeHistoryListItemChanges,
+  ChangeHistoryPendingChange,
 } from '@kbn/change-history-ui';
+import { mapChangeHistoryHttpError } from '@kbn/change-history-ui';
 import type { HttpSetup } from '@kbn/core/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 
@@ -21,7 +23,6 @@ import {
   mapWorkflowHistoryItemToDetail,
   mapWorkflowHistoryItemToListItem,
 } from './map_workflow_history_item';
-import { mapWorkflowRestoreHttpError } from './map_workflow_restore_http_error';
 import { INTERNAL_API_VERSION } from '../../../common/lib/api_constants';
 import { WORKFLOW_CHANGE_HISTORY_LIST_PATH } from '../../../common/lib/workflow_change_history/constants';
 import type {
@@ -98,11 +99,12 @@ const yieldToNextFrame = (signal?: AbortSignal): Promise<void> =>
 
 export interface CreateWorkflowChangeHistoryAdapterOptions {
   onWorkflowRestored?: (objectId: string) => Promise<void>;
+  getPendingChange?: () => ChangeHistoryPendingChange | undefined;
 }
 
 export const createWorkflowChangeHistoryAdapter = (
   http: HttpSetup,
-  { onWorkflowRestored }: CreateWorkflowChangeHistoryAdapterOptions = {}
+  { onWorkflowRestored, getPendingChange }: CreateWorkflowChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => {
   const changeCache = new Map<string, ChangeHistoryDetail>();
   const pageTailByKey = new Map<string, WorkflowHistoryItem>();
@@ -201,8 +203,9 @@ export const createWorkflowChangeHistoryAdapter = (
         await workflowApi.restoreWorkflowVersion(objectId, changeId, { signal });
         await onWorkflowRestored?.(objectId);
       } catch (error) {
-        throw mapWorkflowRestoreHttpError(error);
+        throw mapChangeHistoryHttpError(error);
       }
     },
+    ...(getPendingChange ? { getPendingChange } : {}),
   };
 };

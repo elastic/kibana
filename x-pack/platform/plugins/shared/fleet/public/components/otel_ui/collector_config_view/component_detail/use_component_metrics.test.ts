@@ -13,7 +13,7 @@ describe('buildComponentQuery', () => {
   const timeRangeGte = now - timeRangeMs;
   const fixedInterval = '1m';
 
-  it('uses now - timeRangeMs as @timestamp.gte when enrolledAt is not provided', () => {
+  it('uses now - timeRangeMs as @timestamp.gte and now as lte when enrolledAt/offlineAt are not provided', () => {
     const query = buildComponentQuery(
       'my-host',
       'my-exporter',
@@ -71,6 +71,39 @@ describe('buildComponentQuery', () => {
     );
     const range = getTimestampRange(query!);
     expect(range.gte).toEqual(timeRangeGte);
+  });
+
+  it('caps @timestamp.lte at offlineAt when the collector is offline', () => {
+    const offlineAt = new Date(now - 3 * 60 * 1000).toISOString(); // 3 min ago
+    const offlineAtMs = Date.parse(offlineAt);
+    const query = buildComponentQuery(
+      'my-host',
+      'my-exporter',
+      'exporter',
+      now,
+      timeRangeMs,
+      fixedInterval,
+      undefined,
+      offlineAt
+    );
+    const range = getTimestampRange(query!);
+    expect(range.lte).toEqual(offlineAtMs);
+    expect(range.lte).toBeLessThan(now);
+  });
+
+  it('uses now as lte when offlineAt is an invalid date string', () => {
+    const query = buildComponentQuery(
+      'my-host',
+      'my-exporter',
+      'exporter',
+      now,
+      timeRangeMs,
+      fixedInterval,
+      undefined,
+      'not-a-date'
+    );
+    const range = getTimestampRange(query!);
+    expect(range.lte).toEqual(now);
   });
 
   it('returns undefined for an unknown componentType', () => {

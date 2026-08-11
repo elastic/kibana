@@ -11,12 +11,12 @@ import MEMORY_CONSOLIDATION_YAML from './memory_consolidation.yaml';
 import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID =
-  'system-streams-memory-consolidation';
+  'system-significant-events-memory-consolidation';
 
 export const SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  pluginId: 'streams',
-  version: 1,
+  pluginId: 'significantEvents',
+  version: 4,
   billable: false,
   yaml: MEMORY_CONSOLIDATION_YAML,
   management: {

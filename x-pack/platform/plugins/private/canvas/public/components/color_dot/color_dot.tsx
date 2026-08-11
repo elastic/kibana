@@ -6,8 +6,11 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import chroma from 'chroma-js';
+import { useCanvasCheckeredStyles } from '../../lib/use_canvas_checkered_styles';
 
 interface Props {
   /** Nodes to display within the dot.  Should fit within the constraints. */
@@ -17,6 +20,17 @@ interface Props {
 }
 
 export const ColorDot: FC<Props> = ({ value, children }) => {
+  const { euiTheme } = useEuiTheme();
+  const checkeredStyles = useCanvasCheckeredStyles();
+  const styles = useMemo(
+    () => css`
+      & .canvasColorDot__foreground {
+        border: ${euiTheme.border.thin};
+      }
+    `,
+    [euiTheme]
+  );
+
   let style = {};
 
   if (chroma.valid(value)) {
@@ -24,8 +38,8 @@ export const ColorDot: FC<Props> = ({ value, children }) => {
   }
 
   return (
-    <div className="canvasColorDot">
-      <div className="canvasColorDot__background canvasCheckered" />
+    <div className="canvasColorDot" css={styles}>
+      <div className="canvasColorDot__background canvasCheckered" css={checkeredStyles} />
       <div className="canvasColorDot__foreground" style={style}>
         {children}
       </div>

@@ -11,7 +11,7 @@ import { EuiFacetButton, EuiFacetGroup, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
-import { humanizeCategoryId } from '../lib/humanize_category_id';
+import { getCategoryLabel } from '../lib/category_labels';
 
 export interface CategoryFacetsProps {
   /**
@@ -24,8 +24,13 @@ export interface CategoryFacetsProps {
 }
 
 /**
- * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
- * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`);
+ * Facet sidebar over the closed-vocabulary `categories` field. Labels come from
+ * the localized category vocabulary ({@link getCategoryLabel}), falling back to
+ * a humanized id for categories this build doesn't recognize.
+ *
+ * Selection is single-select like the Integrations catalog: clicking a
+ * category shows only that category; "All categories" resets. The prop shape
+ * stays `string[]` so hosts don't churn, but at most one entry is emitted.
  */
 export const CategoryFacets = React.memo<CategoryFacetsProps>(
   ({ templates, selectedCategories, onChange }) => {
@@ -49,16 +54,7 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
       return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     }, [templates]);
 
-    const toggleCategory = useCallback(
-      (id: string) => {
-        if (selectedCategories.includes(id)) {
-          onChange(selectedCategories.filter((category) => category !== id));
-        } else {
-          onChange([...selectedCategories, id]);
-        }
-      },
-      [selectedCategories, onChange]
-    );
+    const selectCategory = useCallback((id: string) => onChange([id]), [onChange]);
 
     const clearCategories = useCallback(() => onChange([]), [onChange]);
 
@@ -85,11 +81,11 @@ export const CategoryFacets = React.memo<CategoryFacetsProps>(
               key={id}
               quantity={count}
               isSelected={selectedCategories.includes(id)}
-              onClick={() => toggleCategory(id)}
+              onClick={() => selectCategory(id)}
               css={facetWeightCss(selectedCategories.includes(id))}
               data-test-subj={`workflowLibraryCategoryFacet-${id}`}
             >
-              {humanizeCategoryId(id)}
+              {getCategoryLabel(id)}
             </EuiFacetButton>
           ))}
         </EuiFacetGroup>

@@ -20,6 +20,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 export const registerGetDatasetRoute = ({
   router,
@@ -99,7 +100,15 @@ export const registerGetDatasetRoute = ({
             });
           }
 
-          logger.error(`Failed to get evaluation dataset: ${error}`);
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to get evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get evaluation dataset' },

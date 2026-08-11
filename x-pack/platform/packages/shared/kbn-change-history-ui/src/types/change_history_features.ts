@@ -15,6 +15,11 @@ export interface ChangeHistoryFeatures {
   /** When true, restore is shown when the adapter implements `restoreChange`. */
   restore?: boolean;
   /**
+   * When true, the adapter's `getPendingChange` is used to prepend an unsaved
+   * in-editor row and warn on restore.
+   */
+  unsavedChanges?: boolean;
+  /**
    * Opt-out for EBT. Omitted or true: telemetry may fire when the host passes
    * `analytics` and `scope`. Set false to force a no-op reporter.
    */
@@ -31,4 +36,5 @@ export interface ChangeHistoryPermissions {
 export interface ChangeHistorySupports {
   compare: boolean;
   restore: boolean;
+  unsavedChanges: boolean;
 }

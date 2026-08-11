@@ -164,9 +164,9 @@ export const CONDITION_VALUE_PLACEHOLDER = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValuePlaceholder',
   { defaultMessage: 'Value' }
 );
-export const FIELD_NAME_PLACEHOLDER = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.fieldNamePlaceholder',
-  { defaultMessage: 'Field name' }
+export const SELECT_FIELD_PLACEHOLDER = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.selectFieldPlaceholder',
+  { defaultMessage: 'Select a field' }
 );
 export const CONDITION_VALUE_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValueAriaLabel',

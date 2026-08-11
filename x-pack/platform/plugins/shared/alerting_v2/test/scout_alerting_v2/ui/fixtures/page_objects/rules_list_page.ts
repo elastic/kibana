@@ -15,6 +15,8 @@ export class RulesListPage {
   public readonly rulesListTable: Locator;
   public readonly ruleSummaryFlyout: Locator;
   public readonly ruleSummaryQuickEditButton: Locator;
+  /** Header "Create rule" split button; hidden for read-only users. */
+  public readonly createRuleButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
@@ -26,6 +28,7 @@ export class RulesListPage {
     this.ruleSummaryQuickEditButton = this.page.testSubj.locator(
       'ruleSummaryFlyoutQuickEditButton'
     );
+    this.createRuleButton = this.page.testSubj.locator('createRuleButton');
   }
 
   async goto() {
@@ -42,6 +45,15 @@ export class RulesListPage {
 
   expandRuleButton(ruleId: string) {
     return this.page.testSubj.locator(`expandRule-${ruleId}`);
+  }
+
+  enabledSwitch(ruleId: string) {
+    return this.page.testSubj.locator(`ruleEnabledSwitch-${ruleId}`);
+  }
+
+  /** Read-only status badge shown in place of the enabled switch for users without write privilege. */
+  enabledBadge(ruleId: string) {
+    return this.page.testSubj.locator(`ruleEnabledBadge-${ruleId}`);
   }
 
   quickEditButton(ruleId: string) {

@@ -1013,9 +1013,10 @@ describe('Data Streams tab', () => {
 
         test('disables data stream lifecycle when switching to an ILM policy', async () => {
           setupDataStreamsMocks();
-          httpRequestsMockHelpers.setLoadDataStreamsIlmPoliciesResponse([
-            { name: 'my_ilm_policy', phases: { hot: { min_age: '0ms', actions: {} } } },
-          ]);
+          httpRequestsMockHelpers.setLoadDataStreamsIlmPoliciesResponse({
+            hasManageIlm: true,
+            policies: [{ name: 'my_ilm_policy', phases: { hot: { min_age: '0ms', actions: {} } } }],
+          });
           await renderHome(httpSetup, {
             initialEntries: ['/data_streams'],
             appServicesContext: { url: urlServiceMock },

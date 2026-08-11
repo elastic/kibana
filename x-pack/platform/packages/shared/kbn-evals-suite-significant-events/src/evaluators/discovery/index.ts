@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-export { createInvestigatorEvaluators } from './investigator';
-export { createJudgeEvaluators } from './judge';
-export { createContinuationEvaluators } from './investigator/continuation/continuation_stability';
+export { createDiscoveryEvaluators, createContinuationEvaluators } from './discovery';
 
-export type {
-  InvestigatorAgentOutput,
-  InvestigatorEvaluationExample,
-  InvestigatorEvaluator,
-  DiscoveryJudgeAgentOutput,
-  DiscoveryJudgeEvaluationExample,
-  DiscoveryJudgeEvaluator,
-} from './types';
+export type { DiscoveryAgentOutput, DiscoveryEvaluationExample, DiscoveryEvaluator } from './types';

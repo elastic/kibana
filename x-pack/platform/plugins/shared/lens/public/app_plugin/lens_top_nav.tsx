@@ -19,8 +19,9 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import { ChromeAppHeaderRegistration } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import type {
@@ -395,6 +396,7 @@ export const LensTopNavMenu = ({
     dataViewFieldEditor,
     dataViewEditor,
     dataViews: dataViewsService,
+    getOriginatingAppName,
   } = useKibana<LensAppServices>().services;
 
   const isClassicChrome =
@@ -640,6 +642,14 @@ export const LensTopNavMenu = ({
 
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
+  // Opened from a container view (e.g. Dashboard "Edit visualization in Lens"), not from a library listing page.
+  const isComingFromDashboardView = Boolean(
+    incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+
   const appMenuConfig = useMemo<AppMenuConfig>(() => {
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
@@ -649,14 +659,8 @@ export const LensTopNavMenu = ({
     const showReplaceInCanvas =
       initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
 
-    const isComingFromDashboardView =
-      incomingState?.originatingApp &&
-      incomingState.originatingApp !== 'visualize' &&
-      incomingState?.originatingPath &&
-      !incomingState.originatingPath.includes('/list/');
-
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) && Boolean(isComingFromDashboardView);
+      !(showReplaceInDashboard || showReplaceInCanvas) && isComingFromDashboardView;
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -1016,6 +1020,7 @@ export const LensTopNavMenu = ({
     initialContext,
     initialInput?.ref_id,
     incomingState,
+    isComingFromDashboardView,
     activeData,
     isSaveable,
     application,
@@ -1317,83 +1322,115 @@ export const LensTopNavMenu = ({
       'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
   });
 
-  const badges: AppHeaderBadge[] | undefined = managed
-    ? [
-        {
-          label: i18n.translate('xpack.lens.managedBadgeLabel', {
-            defaultMessage: 'Managed',
-          }),
-          color: 'primary',
-          tooltip: managedBadgeTooltip,
-          'data-test-subj': 'managedContentBadge',
-        },
-      ]
-    : undefined;
+  const appHeaderBadges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      !isClassicChrome && managed
+        ? [
+            {
+              label: i18n.translate('xpack.lens.managedBadgeLabel', {
+                defaultMessage: 'Managed',
+              }),
+              color: 'primary',
+              tooltip: managedBadgeTooltip,
+              'data-test-subj': 'managedContentBadge',
+            },
+          ]
+        : undefined,
+    [isClassicChrome, managed, managedBadgeTooltip]
+  );
 
   const breadcrumbsBadges = useMemo<ChromeBreadcrumbsBadge[]>(
     () => (managed ? [getManagedContentBadge(managedBadgeTooltip)] : []),
     [managed, managedBadgeTooltip]
   );
 
+  // Explicit back overrides breadcrumb fallback and mirrors Cancel → redirectToOrigin.
+  const back = useMemo<AppHeaderBack | undefined>(() => {
+    if (!isComingFromDashboardView || !redirectToOrigin || !incomingState?.originatingApp) {
+      return undefined;
+    }
+
+    return {
+      href: application.getUrlForApp(incomingState.originatingApp, {
+        path: incomingState.originatingPath,
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        redirectToOrigin();
+      },
+      label: getOriginatingAppName() ?? incomingState.originatingApp,
+    };
+  }, [
+    isComingFromDashboardView,
+    redirectToOrigin,
+    incomingState?.originatingApp,
+    incomingState?.originatingPath,
+    application,
+    getOriginatingAppName,
+  ]);
+
   useEffect(() => {
     if (!isClassicChrome) {
       return;
     }
-    chrome.setAppMenu(appMenuConfig);
     chrome.setBreadcrumbsBadges(breadcrumbsBadges);
     return () => {
-      chrome.setAppMenu();
       chrome.setBreadcrumbsBadges([]);
     };
-  }, [isClassicChrome, chrome, appMenuConfig, breadcrumbsBadges]);
+  }, [isClassicChrome, chrome, breadcrumbsBadges]);
 
   return (
     <>
-      {!isClassicChrome && (
-        <AppHeader
-          title={
-            title ||
-            i18n.translate('xpack.lens.app.headerTitle', {
-              defaultMessage: 'New visualization',
-            })
-          }
+      {isClassicChrome ? (
+        <AppMenu setAppMenu={chrome.setAppMenu} config={appMenuConfig} />
+      ) : (
+        <ChromeAppHeaderRegistration
+          title={title}
+          back={back}
           menu={appMenuConfig}
-          badges={badges}
+          badges={appHeaderBadges}
+          spacing="compact"
         />
       )}
-      <AggregateQuerySearchBar
-        allowSavingQueries
-        savedQuery={savedQuery}
-        onQuerySubmit={onQuerySubmitWrapped}
-        onSaved={onSavedWrapped}
-        onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
-        onClearSavedQuery={onClearSavedQueryWrapped}
-        indexPatterns={indexPatterns}
-        query={query}
-        dateRangeFrom={from}
-        dateRangeTo={to}
-        indicateNoData={indicateNoData}
-        dataViewPickerComponentProps={dataViewPickerProps}
-        showDatePicker={
-          indexPatterns.some((ip) => ip.isTimeBased()) ||
-          // always show the timepicker for text based languages
-          isOnTextBasedMode ||
-          Boolean(
-            allLoaded &&
-              activeDatasourceId &&
-              datasourceMap[activeDatasourceId].isTimeBased(
-                datasourceStates[activeDatasourceId].state,
-                dataViews.indexPatterns
-              )
-          )
-        }
-        textBasedLanguageModeErrors={textBasedLanguageModeErrors}
-        showFilterBar={true}
-        dataTestSubj="lnsApp_topNav"
-        screenTitle="lens"
-        appName={LENS_APP_NAME}
-        displayStyle="detached"
-      />
+      {/*
+        Do not pass dataTestSubj into SearchBar — that prop overrides the query input's
+        default `queryInput` test subject (used by FTR/Scout). Keep lnsApp_topNav on a wrapper.
+      */}
+      <div data-test-subj="lnsApp_topNav" className="hide-for-sharing">
+        <AggregateQuerySearchBar
+          allowSavingQueries
+          savedQuery={savedQuery}
+          onQuerySubmit={onQuerySubmitWrapped}
+          onSaved={onSavedWrapped}
+          onSavedQueryUpdated={onSavedQueryUpdatedWrapped}
+          onClearSavedQuery={onClearSavedQueryWrapped}
+          indexPatterns={indexPatterns}
+          query={query}
+          dateRangeFrom={from}
+          dateRangeTo={to}
+          indicateNoData={indicateNoData}
+          dataViewPickerComponentProps={dataViewPickerProps}
+          showQueryInput={true}
+          showDatePicker={
+            indexPatterns.some((ip) => ip.isTimeBased()) ||
+            // always show the timepicker for text based languages
+            isOnTextBasedMode ||
+            Boolean(
+              allLoaded &&
+                activeDatasourceId &&
+                datasourceMap[activeDatasourceId].isTimeBased(
+                  datasourceStates[activeDatasourceId].state,
+                  dataViews.indexPatterns
+                )
+            )
+          }
+          textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+          showFilterBar={true}
+          screenTitle="lens"
+          appName={LENS_APP_NAME}
+          displayStyle="detached"
+        />
+      </div>
     </>
   );
 };

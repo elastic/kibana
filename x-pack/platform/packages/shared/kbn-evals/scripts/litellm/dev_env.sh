@@ -110,5 +110,5 @@ echo "export LITELLM_VIRTUAL_KEY=\"$LITELLM_VIRTUAL_KEY\""
 echo "export KIBANA_TESTING_AI_CONNECTORS=\"$KIBANA_TESTING_AI_CONNECTORS\""
 echo ""
 echo "# Then run a suite:"
-echo "# EVALUATION_CONNECTOR_ID=<one-of-the-generated-connector-ids> node scripts/evals run --suite agent-builder"
+echo "# EVAL_CONNECTOR_ID=<one-of-the-generated-connector-ids> node scripts/evals run --suite agent-builder"
 

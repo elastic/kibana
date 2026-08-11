@@ -27,7 +27,7 @@ jest.mock('../../services/epm/elasticsearch/template/default_settings', () => {
 });
 
 describe('runMigrateComponentTemplateILMs', () => {
-  const abortController = new AbortController();
+  const { signal } = new AbortController();
   const logger = {
     info: jest.fn(),
     warn: jest.fn(),
@@ -61,7 +61,7 @@ describe('runMigrateComponentTemplateILMs', () => {
       },
     } as any);
 
-    await runMigrateComponentTemplateILMs({ abortController, logger });
+    await runMigrateComponentTemplateILMs({ signal, logger });
 
     expect(getILMMigrationStatusMock).not.toHaveBeenCalled();
     expect(getILMPoliciesMock).not.toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe('runMigrateComponentTemplateILMs', () => {
       ])
     );
 
-    await runMigrateComponentTemplateILMs({ abortController, logger });
+    await runMigrateComponentTemplateILMs({ signal, logger });
 
     expect(getComponentTemplateMock).not.toHaveBeenCalled();
     expect(putComponentTemplateMock).not.toHaveBeenCalled();
@@ -168,7 +168,7 @@ describe('runMigrateComponentTemplateILMs', () => {
       },
     });
 
-    await runMigrateComponentTemplateILMs({ abortController, logger });
+    await runMigrateComponentTemplateILMs({ signal, logger });
 
     expect(putComponentTemplateMock).toHaveBeenCalledWith({
       name: 'logs-test@package',
@@ -248,7 +248,7 @@ describe('runMigrateComponentTemplateILMs', () => {
       },
     });
 
-    await runMigrateComponentTemplateILMs({ abortController, logger });
+    await runMigrateComponentTemplateILMs({ signal, logger });
 
     expect(putComponentTemplateMock).toHaveBeenCalledWith({
       name: 'metrics-test@package',

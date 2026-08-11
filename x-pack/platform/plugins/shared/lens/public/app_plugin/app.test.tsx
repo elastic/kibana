@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import type { LensAppProps } from './types';
@@ -57,6 +57,18 @@ jest.mock('@elastic/eui', () => ({
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
 
+// ChromeAppHeaderRegistration returns null and registers with chrome; render AppHeader
+// inline in unit tests so menu item test subjects remain assertable.
+jest.mock('@kbn/app-header', () => {
+  const actual = jest.requireActual('@kbn/app-header');
+  return {
+    ...actual,
+    ChromeAppHeaderRegistration: (props: Record<string, unknown>) => (
+      <actual.AppHeader {...props} />
+    ),
+  };
+});
+
 const defaultSavedObjectId: string = faker.string.uuid();
 
 const waitToLoad = async () =>
@@ -92,6 +104,10 @@ describe('Lens App', () => {
     };
 
     services = makeDefaultServices(new Subject<string>(), 'sessionId-1');
+    // Default chrome mock is classic; force project so ChromeAppHeaderRegistration (mocked as
+    // AppHeader) renders the migrated app menu for assertions.
+    (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
+    (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(new BehaviorSubject('project'));
   });
 
   afterEach(() => {
@@ -1495,7 +1511,7 @@ describe('Lens App', () => {
         ],
         type: 'lnsXY',
         savedObjectId: '',
-        visEditorOriginatingAppUrl: '#/tsvb-link',
+        vizEditorOriginatingAppUrl: '#/tsvb-link',
         isVisualizeAction: true,
       } as unknown as VisualizeEditorContext;
 

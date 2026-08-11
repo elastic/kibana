@@ -116,6 +116,7 @@ describe('WorkflowTaskManager', () => {
         },
         {
           request: fakeRequest,
+          cloneApiKey: true,
         }
       );
     });
@@ -215,7 +216,7 @@ describe('WorkflowTaskManager', () => {
           runAt: resumeAt,
           scope: ['workflow', 'workflow:test-workflow-id', 'workflow:execution:test-execution-id'],
         },
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
     });
 
@@ -228,6 +229,33 @@ describe('WorkflowTaskManager', () => {
         id: stableId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
         runAt: resumeAt,
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        },
+      } as any);
+
+      const result = await workflowTaskManager.scheduleWorkflowGlobalTimeoutResumeTask({
+        workflowExecution,
+        resumeAt,
+        fakeRequest,
+      });
+
+      expect(result).toEqual({ taskId: stableId });
+      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    it('skips remove and schedule when the global-timeout task is currently running', async () => {
+      const workflowExecution = createMockWorkflowExecution();
+      const resumeAt = new Date('2025-11-17T12:00:00.000Z');
+      const stableId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecution.id);
+
+      mockTaskManager.get.mockResolvedValue({
+        id: stableId,
+        taskType: WORKFLOW_RESUME_TASK_TYPE,
+        status: TaskStatus.Running,
+        runAt: new Date('2020-01-01T00:00:00.000Z'),
         params: {
           workflowRunId: workflowExecution.id,
           spaceId: workflowExecution.spaceId,
@@ -311,7 +339,7 @@ describe('WorkflowTaskManager', () => {
           state: {},
           scope: [`workflow:execution:${executionId}`],
         },
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
       // runAt must not be set — task runs at the next available slot
       const scheduledTask = (mockTaskManager.schedule as jest.Mock).mock.calls[0][0];
@@ -460,6 +488,45 @@ describe('WorkflowTaskManager', () => {
           fakeRequest,
         })
       ).rejects.toThrow('runSoon failed');
+    });
+  });
+
+  describe('hasActiveTaskForExecution', () => {
+    const workflowExecutionId = 'test-execution-id';
+
+    it('should return true when an idle, claiming, or running task exists for the execution scope', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [{ id: 't1' }] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(true);
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+        size: 1,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'task.status': [TaskStatus.Idle, TaskStatus.Claiming, TaskStatus.Running],
+                },
+              },
+              {
+                term: {
+                  'task.scope': `workflow:execution:${workflowExecutionId}`,
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('should return false when no matching tasks are found', async () => {
+      mockTaskManager.fetch.mockResolvedValue({ docs: [] } as any);
+
+      const hasActive = await workflowTaskManager.hasActiveTaskForExecution(workflowExecutionId);
+
+      expect(hasActive).toBe(false);
     });
   });
 
@@ -656,7 +723,7 @@ describe('WorkflowTaskManager', () => {
           taskType: 'workflow:run',
           runAt: new Date('2025-08-06T20:00:00.000Z'),
         }),
-        { request: fakeRequest }
+        { request: fakeRequest, cloneApiKey: true }
       );
       jest.useRealTimers();
     });

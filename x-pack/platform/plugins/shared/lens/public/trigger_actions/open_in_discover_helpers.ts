@@ -129,7 +129,7 @@ async function getDiscoverLocationParams({
 
   const isApproximate = apiPublishesApproximation(embeddable.parentApi)
     ? embeddable.parentApi.isApproximate$.value
-    : undefined;
+    : false;
 
   return {
     ...args,

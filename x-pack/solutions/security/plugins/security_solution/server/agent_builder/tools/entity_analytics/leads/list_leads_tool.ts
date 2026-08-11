@@ -16,6 +16,7 @@ import { getLeadToolAvailability } from './lead_availability';
 import { createLeadDataClient } from '../../../../lib/entity_analytics/lead_generation/lead_data_client';
 import { getUserLeadPrivileges } from '../../../../lib/entity_analytics/lead_generation/get_user_lead_privileges';
 import { LeadStatusEnum } from '../../../../../common/entity_analytics/lead_generation/types';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
 import { securityTool } from '../../constants';
 
 export const SECURITY_LIST_LEADS_TOOL_ID = securityTool('list_leads');
@@ -61,17 +62,23 @@ export const listLeadsTool = (
         `${SECURITY_LIST_LEADS_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 
+      let success = true;
+      let resultCount = 0;
+      let errorMessage: string | undefined;
+
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
         if (!privileges.adhoc.has_read_permissions || !privileges.scheduled.has_read_permissions) {
+          success = false;
+          errorMessage = 'You do not have permission to read leads in this space.';
           return {
             results: [
               {
                 tool_result_id: getToolResultId(),
                 type: ToolResultType.error,
                 data: {
-                  message: 'You do not have permission to read leads in this space.',
+                  message: errorMessage,
                 },
               },
             ],
@@ -94,6 +101,7 @@ export const listLeadsTool = (
           dataClient.getStatus({ isEnabled: experimentalFeatures.leadGenerationEnabled }),
         ]);
 
+        resultCount = leadsResult.leads.length;
         return {
           results: [
             {
@@ -109,7 +117,8 @@ export const listLeadsTool = (
           ],
         };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        success = false;
+        errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         return {
           results: [
@@ -120,6 +129,16 @@ export const listLeadsTool = (
             },
           ],
         };
+      } finally {
+        const [coreStart] = await core.getStartServices();
+        coreStart.analytics.reportEvent(ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType, {
+          toolId: SECURITY_LIST_LEADS_TOOL_ID,
+          actionType: 'read',
+          spaceId,
+          success,
+          resultCount,
+          errorMessage,
+        });
       }
     },
   };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import Boom from '@hapi/boom';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
@@ -46,6 +47,7 @@ describe('getGapFillAutoScheduler()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -171,20 +173,6 @@ describe('getGapFillAutoScheduler()', () => {
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({ error: expect.objectContaining({ message: 'Unauthorized' }) })
-      );
-    });
-
-    test('should throw when saved object has error payload', async () => {
-      const soErrorLike = {
-        id: 'gap-1',
-        type: GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE,
-        error: { error: 'err', message: 'Unable to get', statusCode: 404 },
-        attributes: { name: 'auto-fill' },
-      } as unknown as SavedObject<GapAutoFillSchedulerSO>;
-      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(soErrorLike);
-
-      await expect(rulesClient.getGapAutoFillScheduler({ id: 'gap-1' })).rejects.toThrowError(
-        'Unable to get'
       );
     });
 

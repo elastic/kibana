@@ -9,19 +9,8 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
-  streamsDescriptionGeneratedEventType,
-  streamsSignificantEventsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
-  streamsFeaturesIdentifiedEventType,
-  streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
-  streamsAgentToolKiIdentificationStartedEventType,
   streamsAgentToolEventCreateEventType,
-  streamsAgentToolEventStatusUpdateEventType,
-  streamsAgentToolEventInvestigationAttachEventType,
-  streamsCodeAnalysisGroundingEventType,
-  streamsSignificantEventsDiscoveryTriggeredEventType,
-  streamsSignificantEventsDetectionScanEventType,
-  streamsOnboardingScheduledEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
 
@@ -34,19 +23,8 @@ export class EbtTelemetryService {
     this.analytics = analytics;
     this.analytics.registerEventType(streamsEndpointLatencyEventType);
     this.analytics.registerEventType(streamsStateErrorEventType);
-    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
-    this.analytics.registerEventType(streamsSignificantEventsGeneratedEventType);
     this.analytics.registerEventType(streamsProcessingPipelineSuggestedEventType);
-    this.analytics.registerEventType(streamsFeaturesIdentifiedEventType);
-    this.analytics.registerEventType(streamsAgentBuilderKnowledgeIndicatorCreatedEventType);
-    this.analytics.registerEventType(streamsAgentToolKiIdentificationStartedEventType);
     this.analytics.registerEventType(streamsAgentToolEventCreateEventType);
-    this.analytics.registerEventType(streamsAgentToolEventStatusUpdateEventType);
-    this.analytics.registerEventType(streamsAgentToolEventInvestigationAttachEventType);
-    this.analytics.registerEventType(streamsCodeAnalysisGroundingEventType);
-    this.analytics.registerEventType(streamsSignificantEventsDiscoveryTriggeredEventType);
-    this.analytics.registerEventType(streamsSignificantEventsDetectionScanEventType);
-    this.analytics.registerEventType(streamsOnboardingScheduledEventType);
   }
 
   public getClient() {

@@ -12,4 +12,6 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '../../../common/constants/attachments
 export const dashboardAttachmentType: UnifiedAttachmentTypeSetup = {
   id: DASHBOARD_ATTACHMENT_TYPE,
   schema: DashboardAttachmentPayloadSchema,
+  // Exclude pesistable data from the workflow schema
+  workflowSchema: DashboardAttachmentPayloadSchema.omit({ data: true }),
 };

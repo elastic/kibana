@@ -5,16 +5,14 @@
  * 2.0.
  */
 import { listSourceMapsRoute } from './list_source_maps';
-import { uploadSourceMapRoute } from './upload_source_map';
 import { deleteSourceMapRoute } from './delete_source_map';
 import { migrateFleetArtifactsRoute } from './migrate_fleet_artifacts';
 
 export const sourceMapsRouteDefinitions = {
   list: listSourceMapsRoute,
-  upload: uploadSourceMapRoute,
   delete: deleteSourceMapRoute,
   migrateFleetArtifacts: migrateFleetArtifactsRoute,
 };
 
-export { sourceMapRt, type SourceMap, type ApmSourceMapArtifactBody } from './source_map_types';
+export { sourceMapSchema, type SourceMap, type ApmSourceMapArtifactBody } from './source_map_types';
 export type { ListSourceMapArtifactsResponse } from './list_source_maps';

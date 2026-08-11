@@ -8,9 +8,9 @@
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { z } from '@kbn/zod/v4';
 import type { getApmTimeseriesRt } from '@kbn/apm-types';
 import { ApmTimeseriesType, type ApmTimeseries } from '@kbn/apm-types';
-import type * as t from 'io-ts';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
@@ -35,7 +35,7 @@ export async function getApmTimeseries({
   arguments: args,
   apmEventClient,
 }: {
-  arguments: t.TypeOf<typeof getApmTimeseriesRt>;
+  arguments: z.infer<typeof getApmTimeseriesRt>;
   apmEventClient: APMEventClient;
 }): Promise<ApmTimeseries[]> {
   const start = datemath.parse(args.start)!.valueOf();

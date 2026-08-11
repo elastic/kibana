@@ -56,6 +56,7 @@ import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
 import { sendRequest } from '../../hooks';
 import { serviceContextMock } from '../../contexts/services_context.mock';
+import { _test as kbTest } from '../../../lib/kb';
 
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
@@ -129,6 +130,57 @@ describe('Editor actions provider', () => {
       const curl = await editorActionsProvider.getCurl('http://localhost');
       expect(curl).toBe('curl -XGET "http://localhost/_search" -H "kbn-xsrf: reporting"');
     });
+
+    it.each(['//', '#'])(
+      'removes %s comments from the request body while preserving triple-quote strings',
+      async (commentMarker) => {
+        // Regression test for https://github.com/elastic/kibana/issues/277160
+        const content = [
+          'POST _watcher/watch/test',
+          '{',
+          `  ${commentMarker} watch metadata`,
+          '  "script": """',
+          '    return 1; // painless comment',
+          '  """',
+          '}',
+        ];
+        const totalLength = content.join('\n').length;
+        editor.getModel.mockReturnValue({
+          getLineContent: (lineNumber: number) => content[lineNumber - 1],
+          getValueInRange: ({
+            startLineNumber,
+            endLineNumber,
+          }: {
+            startLineNumber: number;
+            endLineNumber: number;
+          }) => content.slice(startLineNumber - 1, endLineNumber).join('\n'),
+          getLineMaxColumn: (lineNumber: number) => content[lineNumber - 1].length + 1,
+          getPositionAt: (offset: number) => ({ lineNumber: offset === 0 ? 1 : content.length }),
+          getLineCount: () => content.length,
+        } as unknown as monaco.editor.ITextModel);
+        editor.getSelection.mockReturnValue({
+          startLineNumber: 1,
+          endLineNumber: content.length,
+        } as unknown as monaco.Selection);
+        mockGetParsedRequests.mockResolvedValue([
+          {
+            startOffset: 0,
+            endOffset: totalLength,
+            method: 'POST',
+            url: '_watcher/watch/test',
+          },
+        ]);
+
+        const curl = await editorActionsProvider.getCurl('http://localhost');
+        expect(curl).not.toContain('watch metadata');
+        expect(curl).toContain('return 1; // painless comment');
+        // The body sent in the curl command is valid JSON
+        const body = curl.split(`-d'\n`)[1].slice(0, -1);
+        expect(JSON.parse(body)).toEqual({
+          script: '\n    return 1; // painless comment\n  ',
+        });
+      }
+    );
   });
 
   describe('getDocumentationLink', () => {
@@ -160,6 +212,74 @@ describe('Editor actions provider', () => {
     it('returns the correct link if there is a request in the selection range', async () => {
       const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
       expect(link).toBe(docsLink);
+    });
+
+    it('returns the kibana API reference link for a kbn: request with no matching operation', async () => {
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 26,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 26,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space',
+        },
+      ]);
+      const kibanaApiReferenceLink = 'http://elastic.co/docs/api/doc/kibana/';
+      const link = await editorActionsProvider.getDocumentationLink(
+        docLinkVersion,
+        kibanaApiReferenceLink
+      );
+      expect(link).toBe(kibanaApiReferenceLink);
+    });
+
+    it('returns the specific operation deep link for a kbn: request that matches the doc links map', async () => {
+      kbTest.setKibanaApiDocLinks({
+        '/api/spaces/space/{id}': { get: 'get-spaces-space-id' },
+      });
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 34,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space/default',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 34,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space/default',
+        },
+      ]);
+      const kibanaApiReferenceLink = 'http://elastic.co/docs/api/doc/kibana/';
+      const link = await editorActionsProvider.getDocumentationLink(
+        docLinkVersion,
+        kibanaApiReferenceLink
+      );
+      expect(link).toBe(
+        'http://elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space-id'
+      );
+      kbTest.setKibanaApiDocLinks({});
+    });
+
+    it('returns null for a kbn: request when no kibana API reference link is provided', async () => {
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: () => 26,
+        getPositionAt: () => ({ lineNumber: 1 }),
+        getLineContent: () => 'GET kbn:/api/spaces/space',
+      } as unknown as monaco.editor.ITextModel);
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: 26,
+          method: 'GET',
+          url: 'kbn:/api/spaces/space',
+        },
+      ]);
+      const link = await editorActionsProvider.getDocumentationLink(docLinkVersion);
+      expect(link).toBe(null);
     });
   });
 

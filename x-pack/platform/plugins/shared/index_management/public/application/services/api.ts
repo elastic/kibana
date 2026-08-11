@@ -82,6 +82,13 @@ export function useLoadSnapshotRepositories() {
   });
 }
 
+export function loadSnapshotRepositories() {
+  return sendRequest<SnapshotRepositoriesInfo>({
+    path: `${API_BASE_PATH}/snapshot_repositories`,
+    method: 'get',
+  });
+}
+
 export function useLoadDataStreams({ includeStats }: { includeStats: boolean }) {
   return useRequest<DataStream[]>({
     path: `${API_BASE_PATH}/data_streams`,
@@ -452,6 +459,18 @@ export function useLoadIndexTemplate(name: TemplateDeserialized['name'], isLegac
   });
 }
 
+export interface FailureStoreClusterSettings {
+  enabled?: string[] | string;
+  defaultRetentionPeriod?: string;
+}
+
+export function useLoadFailureStoreSettings() {
+  return useRequest<FailureStoreClusterSettings>({
+    path: `${API_BASE_PATH}/data_streams/failure_store_settings`,
+    method: 'get',
+  });
+}
+
 export async function saveTemplate(template: TemplateDeserialized, isClone?: boolean) {
   const result = await sendRequest({
     path: `${API_BASE_PATH}/index_templates`,
@@ -616,7 +635,7 @@ export function useLoadIndexSettings(indexName: string) {
   });
 }
 
-export function createIndex(indexName: string, indexMode: string) {
+export function createIndex(indexName: string, indexMode?: string) {
   return sendRequest({
     path: `${INTERNAL_API_BASE_PATH}/indices/create`,
     method: 'put',

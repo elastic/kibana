@@ -6,10 +6,12 @@
  */
 
 import * as t from 'io-ts';
+import { isLeft, isRight } from 'fp-ts/Either';
 import { fold } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 
 import { dateType } from './common';
+import { settingsSchema, optionalSettingsSchema } from './slo';
 
 describe('Schema', () => {
   describe('DateType', () => {
@@ -39,6 +41,43 @@ describe('Schema', () => {
           }, t.identity)
         )
       ).toThrow(new Error('decode'));
+    });
+  });
+
+  describe('settingsSchema', () => {
+    it('requires preventCrossProjectSearch', () => {
+      const result = settingsSchema.decode({
+        syncDelay: '1m',
+        frequency: '1m',
+        preventInitialBackfill: false,
+        // preventCrossProjectSearch intentionally absent
+      });
+      expect(isLeft(result)).toBe(true);
+    });
+
+    it('decodes when preventCrossProjectSearch is present', () => {
+      const result = settingsSchema.decode({
+        syncDelay: '1m',
+        frequency: '1m',
+        preventInitialBackfill: false,
+        preventCrossProjectSearch: false,
+      });
+      expect(isRight(result)).toBe(true);
+    });
+  });
+
+  describe('optionalSettingsSchema', () => {
+    it('decodes when preventCrossProjectSearch is absent', () => {
+      const result = optionalSettingsSchema.decode({
+        syncDelay: '1m',
+        frequency: '1m',
+      });
+      expect(isRight(result)).toBe(true);
+    });
+
+    it('decodes when preventCrossProjectSearch is present', () => {
+      const result = optionalSettingsSchema.decode({ preventCrossProjectSearch: true });
+      expect(isRight(result)).toBe(true);
     });
   });
 });

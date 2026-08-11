@@ -41,7 +41,7 @@ const FORMAT_OPTIONS = () => [
   { value: 'tsv', text: createDatasetFlyoutStrings.settingsFormatTsv() },
   { value: 'ndjson', text: createDatasetFlyoutStrings.settingsFormatNdjson() },
   { value: 'parquet', text: createDatasetFlyoutStrings.settingsFormatParquet() },
-  { value: 'orc', text: createDatasetFlyoutStrings.settingsFormatOrc() },
+  // { value: 'orc', text: createDatasetFlyoutStrings.settingsFormatOrc() },
 ];
 
 const SCHEMA_RESOLUTION_OPTIONS = () => [
@@ -148,7 +148,7 @@ export function CreateDatasetFlyoutSettings({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         aria-expanded={isAdvancedOpen}
         aria-controls={advancedId}
         onClick={() => setIsAdvancedOpen((v) => !v)}

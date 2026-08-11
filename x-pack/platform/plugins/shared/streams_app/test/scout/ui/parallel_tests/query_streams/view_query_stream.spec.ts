@@ -17,7 +17,7 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
-const QUERY_STREAM_NAME = 'logs.ecs.test';
+const QUERY_STREAM_NAME = 'logs.ecs.view-test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const TEST_ESQL_QUERY = 'FROM $.logs.ecs | LIMIT 1';
 

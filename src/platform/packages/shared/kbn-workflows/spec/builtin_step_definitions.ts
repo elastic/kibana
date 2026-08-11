@@ -15,6 +15,7 @@ import {
   IfStepConfigSchema,
   ParallelStepConfigSchema,
   SwitchStepConfigSchema,
+  WaitForApprovalStepInputSchema,
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
@@ -22,6 +23,7 @@ import {
   WorkflowExecuteStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
+import { MAX_HITL_RESPONDED_BY_LENGTH, MAX_HITL_RESPONSE_FIELD_KEY_LENGTH } from '../common/hitl';
 
 const EmptyObjectSchema = z.object({});
 
@@ -275,8 +277,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     label: 'Wait For Input',
     description: 'Pause execution until external input is provided (human-in-the-loop)',
     category: StepCategory.FlowControl,
+    stability: 'tech_preview',
     inputSchema: WaitForInputStepInputSchema,
-    outputSchema: z.unknown(),
+    outputSchema: z.object({
+      response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
+      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+    }),
     documentation: {
       examples: [
         `- name: wait_for_approval
@@ -297,6 +303,35 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
           default: medium
       required:
         - reason`,
+      ],
+    },
+  },
+  {
+    id: 'waitForApproval',
+    label: 'Wait For Approval',
+    description: 'Pause execution until approval or rejection is received (human-in-the-loop)',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: WaitForApprovalStepInputSchema,
+    outputSchema: z.object({
+      response: z.object({ approved: z.boolean() }),
+      respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+    }),
+    documentation: {
+      examples: [
+        `- name: request-approval
+  type: waitForApproval
+  timeout: 24h
+  with:
+    message: "Approve isolation for {{ inputs.hostname }}?"
+    approveLabel: Approve
+    rejectLabel: Decline
+    channels:
+      slack:
+        connector-id: my-slack-webhook-connector
+      slack_api:
+        connector-id: my-slack-api-connector
+        channels: ['C0123456789']`,
       ],
     },
   },

@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { next } from './next';
 import type { State } from './state';
 
@@ -15,12 +16,22 @@ describe('migrations v2 next', () => {
   it.todo('when state.retryDelay > 0 delays execution of the next action');
   it('DONE returns null', () => {
     const state = { controlState: 'DONE' } as State;
-    const action = next({} as ElasticsearchClient, (() => {}) as any, [])(state);
+    const action = next(
+      {} as ElasticsearchClient,
+      (() => {}) as any,
+      [],
+      loggerMock.create()
+    )(state);
     expect(action).toEqual(null);
   });
   it('FATAL returns null', () => {
     const state = { controlState: 'FATAL', reason: '' } as State;
-    const action = next({} as ElasticsearchClient, (() => {}) as any, [])(state);
+    const action = next(
+      {} as ElasticsearchClient,
+      (() => {}) as any,
+      [],
+      loggerMock.create()
+    )(state);
     expect(action).toEqual(null);
   });
 });

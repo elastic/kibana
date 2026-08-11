@@ -12,11 +12,14 @@ import { expect } from '@playwright/test';
 import type { ScoutPage } from '../fixtures/scope/test/scout_page';
 import { resolveSelector, type SelectorInput } from '../utils';
 
-// https://eui.elastic.co/next/docs/display/toast/
+/**
+ * @deprecated Use `page.components.toast()` (EuiGlobalToastListObject) or the `toasts` page object instead.
+ * Do not add new usages; this wrapper is removed once all consumers are migrated.
+ * https://eui.elastic.co/docs/components/display/toast/
+ */
 export class EuiToastWrapper {
   private readonly toastWrapper: Locator;
   private readonly toastHeaderTitle: Locator;
-  private readonly toastBody: Locator;
   private readonly toastCloseButton: Locator;
 
   /**
@@ -28,7 +31,6 @@ export class EuiToastWrapper {
   constructor(page: ScoutPage, selector: SelectorInput) {
     this.toastWrapper = resolveSelector(page, selector);
     this.toastHeaderTitle = this.toastWrapper.getByTestId('euiToastHeader__title');
-    this.toastBody = this.toastWrapper.getByTestId('euiToastBody');
     this.toastCloseButton = this.toastWrapper.getByTestId('toastCloseButton');
   }
 
@@ -45,8 +47,12 @@ export class EuiToastWrapper {
   }
 
   async getBody(): Promise<string> {
-    const paragraphs = await this.toastBody.locator('p').all();
-    return (await Promise.all(paragraphs.map((p) => p.textContent()))).join('');
+    const textEl = this.toastWrapper.getByTestId('euiToastText');
+    const count = await textEl.count();
+
+    if (count === 0) return '';
+
+    return (await textEl.textContent()) ?? '';
   }
 
   async close(): Promise<void> {

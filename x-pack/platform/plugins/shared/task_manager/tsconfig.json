@@ -54,6 +54,7 @@
     "@kbn/core-security-server",
     "@kbn/core-security-common",
     "@kbn/scout",
+    "@kbn/std",
   ],
   "exclude": ["target/**/*"]
 }

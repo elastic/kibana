@@ -8,7 +8,8 @@
 import { every, isUndefined } from 'lodash';
 import type { LogChangeHistoryOptions } from '@kbn/change-history';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
-import type { Logger, SavedObject } from '@kbn/core/server';
+import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   RuleChange,
   RuleChangeHistorySnapshot,
@@ -35,7 +36,7 @@ interface LogRuleChanges {
   /**
    * Rule saved objects after applying the changes
    */
-  ruleSOs: Array<SavedObject<RawRule>>;
+  ruleSOs: Array<SavedObjectBulkResult<RawRule>>;
   /**
    * Plaintext encrypted field values keyed by rule id. When provided, the
    * corresponding SO attributes are overlaid before building the snapshot so
@@ -98,7 +99,7 @@ export async function logRuleChanges({
   let securityRuleChangesHistoryEnabled: boolean | undefined;
 
   for (const ruleSO of effectiveRuleSOs) {
-    if (ruleSO.error) {
+    if (isSavedObjectErrorResult(ruleSO)) {
       continue;
     }
 
@@ -264,10 +265,14 @@ function normalizeDate(value: string | number | Date, fallback: Date): string {
 }
 
 function overlayEncryptedFields(
-  ruleSOs: Array<SavedObject<RawRule>>,
+  ruleSOs: Array<SavedObjectBulkResult<RawRule>>,
   encryptedFieldsMap: Map<string, EncryptedRuleFields>
-): Array<SavedObject<RawRule>> {
+): Array<SavedObjectBulkResult<RawRule>> {
   return ruleSOs.map((so) => {
+    if (isSavedObjectErrorResult(so)) {
+      return so;
+    }
+
     const fields = encryptedFieldsMap.get(so.id);
 
     if (!fields?.apiKey && !fields?.uiamApiKey) {

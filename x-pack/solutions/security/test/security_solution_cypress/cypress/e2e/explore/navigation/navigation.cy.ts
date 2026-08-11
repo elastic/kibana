@@ -40,9 +40,11 @@ import {
   verifyNavigatesFromDashboardLandingTo,
   navigateFromHeaderTo,
 } from '../../../tasks/security_header';
+import { enableSiemReadiness } from '../../../tasks/api_calls/kibana_advanced_settings';
 
 import {
   ALERTS_URL,
+  ALERT_DETECTIONS_URL,
   CASES_URL,
   KIBANA_HOME,
   ENDPOINTS_URL,
@@ -89,7 +91,7 @@ import {
 } from '../../../tasks/kibana_navigation';
 import {
   CASES_PAGE,
-  ALERTS_PAGE,
+  DETECTIONS_PAGE,
   EXPLORE_PAGE,
   MANAGE_PAGE,
   DASHBOARDS_PAGE,
@@ -100,6 +102,11 @@ import {
 } from '../../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
+  before(() => {
+    // SIEM Readiness is behind an Advanced Setting (default off); enable it for Launchpad nav coverage.
+    enableSiemReadiness();
+  });
+
   beforeEach(() => {
     login();
     visitWithTimeRange(TIMELINES_URL);
@@ -316,9 +323,9 @@ describe('Kibana navigation to all pages in the Security app ', { tags: '@ess' }
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Alerts page', () => {
-    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
-    cy.url().should('include', ALERTS_URL);
+  it('navigates to the Detections page', () => {
+    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
+    cy.url().should('include', ALERT_DETECTIONS_URL);
   });
 
   it('navigates to the Findings page', () => {

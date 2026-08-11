@@ -7,11 +7,13 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
 import { DashboardLinks } from './page_objects';
 
 export interface ReleaseTestingTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     dashboardLinks: DashboardLinks;
+    docViewer: DocViewer;
   };
 }
 
@@ -29,6 +31,7 @@ export const test = baseTest.extend<ReleaseTestingTestFixtures, ScoutWorkerFixtu
     await use({
       ...pageObjects,
       dashboardLinks: createLazyPageObject(DashboardLinks, page),
+      docViewer: createLazyPageObject(DocViewer, page),
     });
   },
 });

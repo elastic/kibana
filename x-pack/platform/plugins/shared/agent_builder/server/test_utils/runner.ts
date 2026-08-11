@@ -166,6 +166,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
     setEventEmitter: jest.fn(),
+    setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),
@@ -326,6 +327,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
@@ -383,6 +385,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     runContext: { runId: 'mock-run-id', stack: [] },
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
@@ -433,6 +436,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
