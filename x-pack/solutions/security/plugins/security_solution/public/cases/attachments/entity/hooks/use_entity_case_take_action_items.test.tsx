@@ -37,38 +37,18 @@ describe('useEntityCaseTakeActionItems', () => {
     jest.clearAllMocks();
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     mockUseEntityCasePermissions.mockReturnValue({
-      canAddToNewCase: true,
-      canAddToExistingCase: true,
+      canAddToCase: true,
     });
     mockUseKibana().services.cases.config = { attachmentsEnabled: true };
   });
 
-  it('returns the case submenu when the user can add to new and existing cases', () => {
+  it('returns the case action when the user has case permissions', () => {
     expect(renderItemKeys()).toEqual(['addToCase']);
   });
 
-  it('keeps the case submenu when the user can only add to an existing case', () => {
+  it('returns no items when the user has no case permission', () => {
     mockUseEntityCasePermissions.mockReturnValue({
-      canAddToNewCase: false,
-      canAddToExistingCase: true,
-    });
-
-    expect(renderItemKeys()).toEqual(['addToCase']);
-  });
-
-  it('keeps the case submenu when the user can only add to a new case', () => {
-    mockUseEntityCasePermissions.mockReturnValue({
-      canAddToNewCase: true,
-      canAddToExistingCase: false,
-    });
-
-    expect(renderItemKeys()).toEqual(['addToCase']);
-  });
-
-  it('returns no items when the user has neither case permission', () => {
-    mockUseEntityCasePermissions.mockReturnValue({
-      canAddToNewCase: false,
-      canAddToExistingCase: false,
+      canAddToCase: false,
     });
 
     expect(renderItemKeys()).toEqual([]);

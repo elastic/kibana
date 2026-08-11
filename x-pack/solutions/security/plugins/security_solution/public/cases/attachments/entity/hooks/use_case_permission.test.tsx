@@ -32,41 +32,29 @@ describe('useEntityCasePermissions', () => {
     expect(mockCanUseCases).toHaveBeenCalledWith([APP_ID]);
   });
 
-  it('canAddToExistingCase is true when the user has update and createComment', () => {
+  it('allows adding to a case when the user can update existing cases', () => {
     const { current } = renderWithPermissions({ update: true, createComment: true });
-    expect(current.canAddToExistingCase).toEqual(true);
+    expect(current.canAddToCase).toEqual(true);
   });
 
-  it('canAddToExistingCase is false when the user is missing update', () => {
-    const { current } = renderWithPermissions({ update: false, createComment: true });
-    expect(current.canAddToExistingCase).toEqual(false);
-  });
-
-  it('canAddToExistingCase is false when the user is missing createComment', () => {
-    const { current } = renderWithPermissions({ update: true, createComment: false });
-    expect(current.canAddToExistingCase).toEqual(false);
-  });
-
-  it('canAddToNewCase is true when the user has create and createComment', () => {
+  it('allows adding to a case when the user can create cases', () => {
     const { current } = renderWithPermissions({ create: true, createComment: true });
-    expect(current.canAddToNewCase).toEqual(true);
+    expect(current.canAddToCase).toEqual(true);
   });
 
-  it('canAddToNewCase is false when the user is missing create', () => {
-    const { current } = renderWithPermissions({ create: false, createComment: true });
-    expect(current.canAddToNewCase).toEqual(false);
+  it('does not allow adding to a case without createComment', () => {
+    const { current } = renderWithPermissions({
+      create: true,
+      createComment: false,
+      update: true,
+    });
+    expect(current.canAddToCase).toEqual(false);
   });
 
-  it('canAddToNewCase is false when the user is missing createComment', () => {
-    const { current } = renderWithPermissions({ create: true, createComment: false });
-    expect(current.canAddToNewCase).toEqual(false);
-  });
-
-  it('returns both flags as false when the user has no permissions', () => {
+  it('does not allow adding to a case without create or update', () => {
     const { current } = renderWithPermissions({});
     expect(current).toEqual({
-      canAddToExistingCase: false,
-      canAddToNewCase: false,
+      canAddToCase: false,
     });
   });
 });
