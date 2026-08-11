@@ -593,7 +593,11 @@ groups:
 
       - setting: xpack.security.audit.savedObjectDiff.enabled
         description: |
-          Set to `true` to record a field-level diff of a saved object's attributes (in the `kibana.diff` field) on its create, update, and delete audit events. Requires `xpack.security.audit.enabled` to be `true`. **Default:** `false`
+          Set to `true` to record a field-level diff of a saved object's attributes (in the `kibana.diff` field) on a second, post-write audit event for create, update, and delete. The existing pre-write audit event (`event.outcome: unknown`) is still emitted. When counting mutations, filter on `kibana.diff` (or `event.outcome: success` with a diff) so the two events are not double-counted. Requires `xpack.security.audit.enabled` to be `true`. **Default:** `false`
+
+          Diffs cover attributes only (not references, spaces, or access control). `incrementCounter` mutations and writes from clients that exclude the security extension (for example connectors and rules) do not emit diffs. Upsert that creates an object still uses `event.action: saved_object_update` with an empty before-state. A create that overwrites an existing object (for example, saved object import with `overwrite`) still uses `event.action: saved_object_create`, but its diff records the previous state: `replace` and `remove` operations preserve the overwritten values in `oldValue`, while a create of a new object contains only `add` operations. Large objects may list every unchanged leaf path under `kibana.diff.noOps`; `fieldSizeLimit` only caps individual attribute values, not total event size.
+
+          Do not use `xpack.security.audit.ignore_filters` to drop `outcome: unknown` solely to reduce volume — that also removes the only audit trail for writes that fail after authorization.
         datatype: bool
         default: false
         applies_to:
@@ -611,7 +615,7 @@ groups:
 
       - setting: xpack.security.audit.savedObjectDiff.fieldSizeLimit
         description: |
-          Maximum serialized size of an individual attribute value included in a diff. Values larger than this are replaced with the placeholder `Value above fieldSizeLimit` to keep audit events bounded. Accepts a byte-size value (for example, `48kb`). **Default:** `48kb`
+          Maximum serialized size of an individual attribute value included in a diff. Values larger than this are replaced with the placeholder `Value above fieldSizeLimit` to keep per-field values bounded. Accepts a byte-size value (for example, `48kb`). Does not limit the number of `noOps` entries. **Default:** `48kb`
         datatype: string
         default: 48kb
         applies_to:

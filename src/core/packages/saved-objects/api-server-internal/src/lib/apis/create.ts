@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObject,
   type SavedObjectSanitizedDoc,
+  type SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { decodeRequestVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -192,6 +193,30 @@ export const performCreate = async <T>(
 
   const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
+  // When overwriting, fetch the previous attributes so the diff is replace/remove ops
+  // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
+  // get error degrades to before={} (create-shaped diff) instead of failing the write.
+  let beforeAttributes: Record<string, unknown> = {};
+  if (overwrite && securityExtension?.savedObjectDiffEnabled) {
+    try {
+      const existing = await client.get<SavedObjectsRawDocSource>(
+        {
+          id: raw._id,
+          index: commonHelper.getIndexForType(type),
+          _source_includes: [type],
+        },
+        { ignore: [404], meta: true }
+      );
+      beforeAttributes = (existing.body._source?.[type] ?? {}) as Record<string, unknown>;
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on overwrite create ${type}:${id}: ${String(
+          error
+        )}`
+      );
+    }
+  }
+
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,
     index: commonHelper.getIndexForType(type),
@@ -217,7 +242,7 @@ export const performCreate = async <T>(
     logger,
     action: 'saved_object_create',
     savedObject: { type, id },
-    before: {} as Record<string, unknown>,
+    before: beforeAttributes,
     after: (migrated.attributes ?? {}) as Record<string, unknown>,
   });
 

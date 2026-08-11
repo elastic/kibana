@@ -69,7 +69,7 @@ export const emitSavedObjectDiffAuditEvent = ({
     const encryptedAttributes = encryptionExtension?.getEncryptedAttributes(savedObject.type);
     const fieldsToRedact = encryptedAttributes ? [...encryptedAttributes] : undefined;
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action,
       savedObject,
       outcome: 'success',

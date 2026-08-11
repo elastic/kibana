@@ -607,10 +607,11 @@ export interface ISavedObjectsSecurityExtension {
   ) => void;
 
   /**
-   * Emits a post-write audit event with before/after attributes for saved object diff computation.
+   * Emits a post-write audit event carrying a saved-object attribute diff (`kibana.diff`).
    * Called by the SO repository after a successful ES write when saved object diff is enabled.
+   * This is not a general-purpose audit helper — it only emits the diff-bearing success event.
    */
-  emitAuditEvent: (params: {
+  emitSavedObjectDiffAuditEvent: (params: {
     action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
     savedObject: { type: string; id: string; name?: string };
     outcome: 'success';

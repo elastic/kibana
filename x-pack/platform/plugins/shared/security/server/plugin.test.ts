@@ -123,7 +123,11 @@ describe('Security Plugin', () => {
     it('derives enabled + typesToExclude + fieldSizeLimit (in bytes) when the block is on', () => {
       const params = setupWithAudit({
         enabled: true,
-        savedObjectDiff: { enabled: true, typesToExclude: ['dashboard'], fieldSizeLimit: '20kb' },
+        savedObjectDiff: {
+          enabled: true,
+          typesToExclude: ['dashboard'],
+          fieldSizeLimit: '20kb',
+        },
       });
       expect(params).toMatchObject({
         savedObjectDiffEnabled: true,

@@ -8,7 +8,11 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import type {
+  AuthorizeCreateObject,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   errorContent,
@@ -32,6 +36,7 @@ import {
   getBulkOperationError,
   getCurrentTime,
   getExpectedVersionProperties,
+  isMgetDoc,
   normalizeNamespace,
   setManaged,
 } from './utils';
@@ -237,7 +242,12 @@ export const performBulkCreate = async <T>(
   const bulkCreateParams: object[] = [];
   type ExpectedBulkResult = Either<
     { type: string; id?: string; error: Payload },
-    { esRequestIndex: number; requestedId: string; rawMigratedDoc: SavedObjectsRawDoc }
+    {
+      esRequestIndex: number;
+      requestedId: string;
+      rawMigratedDoc: SavedObjectsRawDoc;
+      isOverwrite: boolean;
+    }
   >;
   const expectedBulkResults = await Promise.all(
     (expectedAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
@@ -335,6 +345,7 @@ export const performBulkCreate = async <T>(
           esRequestIndex: bulkRequestIndexCounter++,
           requestedId: object.id,
           rawMigratedDoc: serializer.savedObjectToRaw(migrated),
+          isOverwrite: method === 'index',
         };
 
         bulkCreateParams.push(
@@ -352,6 +363,60 @@ export const performBulkCreate = async <T>(
       }
     )
   );
+
+  // When overwriting, capture previous attributes for diffs. Feature-gated and
+  // failure-isolated so an mget error degrades to before={} instead of failing the write.
+  const beforeAttributesMap = new Map<string, Record<string, unknown>>();
+  if (securityExtension?.savedObjectDiffEnabled) {
+    const overwriteRequests = expectedBulkResults.flatMap((expectedResult) => {
+      if (isLeft(expectedResult) || !expectedResult.value.isOverwrite) {
+        return [];
+      }
+      const { requestedId, rawMigratedDoc } = expectedResult.value;
+      const type = rawMigratedDoc._source.type;
+      return [
+        {
+          rawId: rawMigratedDoc._id,
+          type,
+          id: requestedId,
+        },
+      ];
+    });
+
+    if (overwriteRequests.length > 0) {
+      try {
+        const objectByRawId = new Map(overwriteRequests.map((req) => [req.rawId, req]));
+        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+          {
+            docs: overwriteRequests.map(({ rawId, type }) => ({
+              _id: rawId,
+              _index: commonHelper.getIndexForType(type),
+              _source: [type],
+            })),
+          },
+          { ignore: [404] }
+        );
+        beforeDocs.docs?.forEach((doc) => {
+          if (!isMgetDoc(doc)) return;
+          const target = objectByRawId.get(doc._id);
+          if (!target) return;
+          const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
+          if (attrs) {
+            beforeAttributesMap.set(
+              `${target.type}:${target.id}`,
+              attrs as Record<string, unknown>
+            );
+          }
+        });
+      } catch (error) {
+        logger.error(
+          `Failed to fetch before-state for saved object diff on bulk overwrite create: ${String(
+            error
+          )}`
+        );
+      }
+    }
+  }
 
   const bulkResponse = bulkCreateParams.length
     ? await client.bulk({
@@ -375,17 +440,15 @@ export const performBulkCreate = async <T>(
         return { type: rawMigratedDoc._source.type, id: requestedId, error };
       }
 
+      const type = rawMigratedDoc._source.type;
       emitSavedObjectDiffAuditEvent({
         securityExtension,
         encryptionExtension,
         logger,
         action: 'saved_object_create',
-        savedObject: { type: rawMigratedDoc._source.type, id: requestedId },
-        before: {} as Record<string, unknown>,
-        after: (rawMigratedDoc._source[rawMigratedDoc._source.type] ?? {}) as Record<
-          string,
-          unknown
-        >,
+        savedObject: { type, id: requestedId },
+        before: beforeAttributesMap.get(`${type}:${requestedId}`) ?? {},
+        after: (rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>,
       });
 
       // When method == 'index' the bulkResponse doesn't include the indexed

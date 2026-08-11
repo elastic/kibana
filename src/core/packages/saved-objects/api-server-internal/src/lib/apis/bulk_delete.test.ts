@@ -617,8 +617,8 @@ describe('#bulkDelete', () => {
         await repository.bulkDelete([obj1, obj2]);
 
         expect(client.mget).toHaveBeenCalledTimes(1);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_delete',
             savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
@@ -651,8 +651,8 @@ describe('#bulkDelete', () => {
         await repository.bulkDelete(multiObjs, { namespace });
 
         expect(client.mget).toHaveBeenCalledTimes(2);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_delete',
             savedObject: expect.objectContaining({ type: MULTI_NAMESPACE_TYPE, id: 'diff_m1' }),
@@ -670,12 +670,12 @@ describe('#bulkDelete', () => {
         await bulkDeleteSuccess(client, repository, registry, [obj1, obj2]);
 
         expect(client.mget).not.toHaveBeenCalled();
-        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
       it('does not fail the bulk delete when the diff audit emit throws', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
-        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
           throw new Error('audit boom');
         });
         client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));

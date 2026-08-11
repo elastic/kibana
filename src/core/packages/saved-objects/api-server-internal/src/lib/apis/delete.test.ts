@@ -460,7 +460,7 @@ describe('#delete', () => {
         mockGetCurrentTime.mockReturnValue(mockTimestamp);
       });
 
-      it('calls emitAuditEvent with after={} and before=attributes when savedObjectDiffEnabled is true', async () => {
+      it('calls emitSavedObjectDiffAuditEvent with after={} and before=attributes when savedObjectDiffEnabled is true', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
 
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));
@@ -470,8 +470,8 @@ describe('#delete', () => {
 
         await repository.delete(type, id);
 
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_delete',
             savedObject: expect.objectContaining({ type, id }),
@@ -482,10 +482,29 @@ describe('#delete', () => {
         );
       });
 
-      it('does not call emitAuditEvent when savedObjectDiffEnabled is false', async () => {
-        (securityExtension as any).savedObjectDiffEnabled = false;
-        await deleteSuccess(client, repository, registry, type, id);
-        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      it('emits a diff event even when before-state attributes are empty', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        // get returns no attributes (e.g. object with an empty attribute bag)
+        client.get.mockResponse({
+          _index: '.kibana',
+          _id: `${type}:${id}`,
+          found: true,
+          _source: { type, [type]: {} },
+        } as estypes.GetResponse);
+        client.delete.mockResponseOnce({
+          result: 'deleted',
+        } as estypes.DeleteResponse);
+
+        await repository.delete(type, id);
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            before: {},
+            after: {},
+          })
+        );
       });
 
       it('fetches full attributes for the diff only when savedObjectDiffEnabled is true', async () => {

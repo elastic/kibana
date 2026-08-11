@@ -794,8 +794,8 @@ describe('#bulkUpdate', () => {
 
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
 
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
             savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
@@ -804,7 +804,7 @@ describe('#bulkUpdate', () => {
             after: expect.objectContaining({ title: 'Test One' }),
           })
         );
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
             savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
@@ -817,12 +817,12 @@ describe('#bulkUpdate', () => {
       it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
         (securityExtension as any).savedObjectDiffEnabled = false;
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
       it('does not fail the bulk update when the diff audit emit throws', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
-        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
           throw new Error('audit boom');
         });
         await expect(

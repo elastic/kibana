@@ -850,7 +850,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
-  emitAuditEvent(params: {
+  emitSavedObjectDiffAuditEvent(params: {
     action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
     savedObject: { type: string; id: string; name?: string };
     outcome: 'success';

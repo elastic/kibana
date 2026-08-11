@@ -53,6 +53,7 @@ import {
   createConflictErrorPayload,
   mockTimestampFieldsWithCreated,
   ACCESS_CONTROL_TYPE,
+  getMockGetResponse,
 } from '../../test_helpers/repository.test.common';
 
 describe('#create', () => {
@@ -956,12 +957,12 @@ describe('#create', () => {
         mockGetCurrentTime.mockReturnValue(mockTimestamp);
       });
 
-      it('calls emitAuditEvent with before={} and after=attributes when savedObjectDiffEnabled is true', async () => {
+      it('calls emitSavedObjectDiffAuditEvent with before={} and after=attributes when savedObjectDiffEnabled is true', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         await createSuccess(type, attributes, { id });
 
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_create',
             savedObject: expect.objectContaining({ type, id }),
@@ -972,15 +973,34 @@ describe('#create', () => {
         );
       });
 
-      it('does not call emitAuditEvent when savedObjectDiffEnabled is false', async () => {
+      it('fetches before-state on overwrite when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+
+        await createSuccess(type, { title: 'new-title' }, { id, overwrite: true });
+
+        expect(client.get).toHaveBeenCalledWith(
+          expect.objectContaining({ _source_includes: [type] }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.any(Object),
+          })
+        );
+      });
+
+      it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
         (securityExtension as any).savedObjectDiffEnabled = false;
         await createSuccess(type, attributes, { id });
-        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
       it('does not fail the create when the diff audit emit throws', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
-        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+        securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {
           throw new Error('audit boom');
         });
         await expect(createSuccess(type, attributes, { id })).resolves.toBeDefined();

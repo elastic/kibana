@@ -7171,7 +7171,7 @@ describe('#authorizeChangeAccessControl', () => {
   });
 });
 
-describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
+describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
   function setupForEmit(
     savedObjectDiffEnabled = true,
     extra: { savedObjectDiffTypesToExclude?: string[]; savedObjectDiffFieldSizeLimit?: number } = {}
@@ -7208,7 +7208,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('redacts sensitive field values in the diff when fieldsToRedact is provided', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'connector', id: '1' },
       outcome: 'success',
@@ -7241,7 +7241,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('redacts to a constant sentinel regardless of the underlying secret value', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'connector', id: '1' },
       outcome: 'success',
@@ -7258,7 +7258,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
 
     addAuditEventSpy.mockClear();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'connector', id: '2' },
       outcome: 'success',
@@ -7276,7 +7276,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('produces no ops for redacted fields when their values are unchanged', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'connector', id: '1' },
       outcome: 'success',
@@ -7297,7 +7297,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('does not redact when fieldsToRedact is undefined', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'dashboard', id: '1' },
       outcome: 'success',
@@ -7325,7 +7325,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('redacts nested object fields under an encrypted attribute', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_create',
       savedObject: { type: 'connector', id: '1' },
       outcome: 'success',
@@ -7350,7 +7350,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('redacts values in remove ops when a redacted field is deleted', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_delete',
       savedObject: { type: 'connector', id: '1' },
       outcome: 'success',
@@ -7374,7 +7374,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
       savedObjectDiffTypesToExclude: ['telemetry'],
     });
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'telemetry', id: '1' },
       outcome: 'success',
@@ -7390,7 +7390,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
       savedObjectDiffTypesToExclude: ['telemetry'],
     });
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'dashboard', id: '1' },
       outcome: 'success',
@@ -7404,7 +7404,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('replaces values exceeding savedObjectDiffFieldSizeLimit with the sentinel', () => {
     const { securityExtension } = setupForEmit(true, { savedObjectDiffFieldSizeLimit: 10 });
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'dashboard', id: '1' },
       outcome: 'success',
@@ -7425,7 +7425,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('does not emit a diff event when savedObjectDiffEnabled is false', () => {
     const { securityExtension } = setupForEmit(false);
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_update',
       savedObject: { type: 'dashboard', id: '1' },
       outcome: 'success',
@@ -7439,7 +7439,7 @@ describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
   it('resolves the object name from attributes onto the diff event', () => {
     const { securityExtension } = setupForEmit();
 
-    securityExtension.emitAuditEvent({
+    securityExtension.emitSavedObjectDiffAuditEvent({
       action: 'saved_object_create',
       savedObject: { type: 'dashboard', id: '1' },
       outcome: 'success',

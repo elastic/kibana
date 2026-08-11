@@ -965,13 +965,13 @@ describe('#update', () => {
         mockGetCurrentTime.mockReturnValue(mockTimestamp);
       });
 
-      it('calls emitAuditEvent with diff after successful update when savedObjectDiffEnabled', async () => {
+      it('calls emitSavedObjectDiffAuditEvent with diff after successful update when savedObjectDiffEnabled', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
 
         await updateSuccess(client, repository, registry, type, id, { title: 'New Title' });
 
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
             savedObject: expect.objectContaining({ type, id }),
@@ -982,16 +982,16 @@ describe('#update', () => {
         );
       });
 
-      it('does not call emitAuditEvent when savedObjectDiffEnabled is false', async () => {
+      it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
         (securityExtension as any).savedObjectDiffEnabled = false;
         await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
       it('emits a single audit event per successful update', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         await updateSuccess(client, repository, registry, type, id, attributes);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
       });
 
       it('emits a diff for an upsert that creates the object', async () => {
@@ -1009,8 +1009,8 @@ describe('#update', () => {
           { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse }
         );
 
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
-        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
             savedObject: expect.objectContaining({ type, id }),
