@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-di-browser';
@@ -57,40 +57,37 @@ export const useRulesDataSource = (): DataSourceConfig => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
 
-  const findItems = useCallback<DataSourceConfig['findItems']>(
-    async ({ filters, sort, page }) => {
-      const { filter, search } = toRulesQueryParams(filters);
+  return useMemo(
+    (): DataSourceConfig => ({
+      findItems: async ({ filters, sort, page }) => {
+        const { filter, search } = toRulesQueryParams(filters);
 
-      try {
-        const response = await rulesApi.listRules(
-          toFindRulesRequest({
-            page: page.index + 1,
-            perPage: page.size,
-            filter,
-            search,
-            sortField: toApiSortField(sort?.field),
-            sortOrder: sort?.direction,
-          })
-        );
+        try {
+          const response = await rulesApi.listRules(
+            toFindRulesRequest({
+              page: page.index + 1,
+              perPage: page.size,
+              filter,
+              search,
+              sortField: toApiSortField(sort?.field),
+              sortOrder: sort?.direction,
+            })
+          );
 
-        return {
-          items: response.items.map(toContentListItem),
-          total: response.total,
-        };
-      } catch (error) {
-        // Toast is the user-facing surface. Re-throw so Content List keeps the
-        // query in an error state instead of settling as an empty list (which
-        // would show the create CTA).
-        toasts.addError(error, {
-          title: i18n.translate('xpack.alertingV2.rulesList.fetchError', {
-            defaultMessage: 'Failed to load rules',
-          }),
-        });
-        throw error;
-      }
-    },
+          return {
+            items: response.items.map(toContentListItem),
+            total: response.total,
+          };
+        } catch (error) {
+          toasts.addError(error, {
+            title: i18n.translate('xpack.alertingV2.rulesList.fetchError', {
+              defaultMessage: 'Failed to load rules',
+            }),
+          });
+          throw error;
+        }
+      },
+    }),
     [rulesApi, toasts]
   );
-
-  return useMemo(() => ({ findItems }), [findItems]);
 };

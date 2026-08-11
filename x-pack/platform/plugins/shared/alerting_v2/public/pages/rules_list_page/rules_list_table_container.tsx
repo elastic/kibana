@@ -66,10 +66,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const activeFilters = useActiveFilters();
   const { filter, search } = useMemo(() => toRulesQueryParams(activeFilters), [activeFilters]);
 
-  const items = useMemo(
-    () => contentItems.map((item) => (item as RuleContentListItem).rule),
-    [contentItems]
-  );
+  const items = contentItems.map((item) => (item as RuleContentListItem).rule);
 
   const tableSortField = API_SORT_TO_TABLE_FIELD[sortField];
 
