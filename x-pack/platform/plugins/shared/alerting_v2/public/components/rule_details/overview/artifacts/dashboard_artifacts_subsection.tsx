@@ -322,7 +322,7 @@ export const DashboardArtifactsSubsection: React.FC = () => {
 
   const manageButtonLabel = i18n.translate(
     'xpack.alertingV2.ruleDetails.artifacts.dashboards.manageAriaLabel',
-    { defaultMessage: 'Manage linked dashboards' }
+    { defaultMessage: 'Attach related dashboards' }
   );
 
   const manageControl =
