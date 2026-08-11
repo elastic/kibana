@@ -219,11 +219,7 @@ export const getXState = (
   return state;
 };
 
-export type GetOpId = (input: {
-  path: string;
-  method: string;
-  operationId?: string;
-}) => string;
+export type GetOpId = (input: { path: string; method: string; operationId?: string }) => string;
 
 /**
  * Best effort to generate operation IDs from route values, unless the route

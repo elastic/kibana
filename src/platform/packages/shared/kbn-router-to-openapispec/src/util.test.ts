@@ -370,9 +370,9 @@ describe('createOpIdGenerator', () => {
 
     test('throws when it collides with an already generated ID', () => {
       expect(getOpId({ method: 'get', path: '/api/test' })).toBe('get-test');
-      expect(() =>
-        getOpId({ method: 'get', path: '/api/other', operationId: 'get-test' })
-      ).toThrow(/Duplicate operationId "get-test"/);
+      expect(() => getOpId({ method: 'get', path: '/api/other', operationId: 'get-test' })).toThrow(
+        /Duplicate operationId "get-test"/
+      );
     });
 
     test('still requires method and path', () => {
