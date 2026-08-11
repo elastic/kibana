@@ -120,16 +120,11 @@ export const getEMSSettings: () => EMSSettings = () => {
 };
 
 export const getEmsTileLayerId = () => {
-  // To be updated unce Borealis is the only theme available
-  if (coreStart.theme.getTheme().name !== 'borealis') {
-    return mapsEms.config.emsTileLayerId;
-  } else {
-    return {
-      ...mapsEms.config.emsTileLayerId,
-      dark: EMS_DARKMAP_BOREALIS_ID,
-      desaturated: EMS_ROADMAP_BOREALIS_DESATURATED_ID,
-    };
-  }
+  return {
+    ...mapsEms.config.emsTileLayerId,
+    dark: EMS_DARKMAP_BOREALIS_ID,
+    desaturated: EMS_ROADMAP_BOREALIS_DESATURATED_ID,
+  };
 };
 
 export const getShareService = () => pluginsStart.share;
