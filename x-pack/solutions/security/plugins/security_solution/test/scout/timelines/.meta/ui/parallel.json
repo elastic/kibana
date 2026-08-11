@@ -1,5 +1,5 @@
 {
-  "sha1": "5a3f058ad2552283b6061bdd9717484562b09e09",
+  "sha1": "274730216e5046499b7b2dcdfec876ab5e7f26f7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -102,12 +102,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_super.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 36,
+        "column": 7
       }
     }
   ]

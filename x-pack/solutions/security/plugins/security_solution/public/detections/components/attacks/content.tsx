@@ -268,7 +268,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj={ATTACKS_PAGE_GENERATIONS_BUTTON_TEST_ID}
-                    iconType="list"
+                    iconType="listBullet"
                     onClick={openControlCenter}
                     size="s"
                   >
