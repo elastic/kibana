@@ -288,19 +288,21 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 
 ## Verifying a Jest fix
 
-The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, repeat it:
+The `/flaky` runner only accepts FTR and Scout configs, so a Jest fix never reaches the Flaky Fix Verifier — whatever you run here is the only repeat-execution evidence it will ever get. A single green run proves the test _can_ pass, which it already could; it says nothing about the flake. So when the patch touches a Jest test, run this loop twice: once on the unpatched test, once with the fix applied.
 
 ```bash
+fails=0
 for i in $(seq 1 25); do
-  node scripts/jest <path-to-test-file> || { echo "FAILED on run $i"; break; }
+  node scripts/jest <path-to-test-file> >/dev/null 2>&1 || fails=$((fails + 1))
 done
+echo "$fails/25 runs failed"
 ```
 
-- **Reproduce the flake before you fix it.** Run the loop against the unpatched test first. A loop that fails is what turns the post-fix loop into evidence. If the unpatched test survives 25 runs, the flake doesn't reproduce here — fix the root cause you diagnosed, but say so under "Not verified locally" instead of presenting the clean loop as confirmation.
+- **Run it before the fix, not only after.** `git stash` the patch if you have already written it. A pre-fix loop that fails is what turns the post-fix loop into evidence; if the unpatched test survives all 25 runs, the flake doesn't reproduce here and a clean post-fix loop confirms nothing. Fix the root cause you diagnosed anyway, but say so under "Not verified locally".
+- **Report both counts** on the Jest line of the PR's "Verified locally" block, as `<failures>/<runs> before the fix, <failures>/<runs> after`, so a reviewer can see whether the loop had any power to detect this flake. Under "Not verified locally", note that both loops ran without CI's parallel load, so they can't rule out a flake driven by contention on a busy agent.
 - **Scale the count to the runtime.** 25 runs is the floor; go to 50 when a run takes only a few seconds. A loop this size catches a test that fails every few runs, not one that fails once a week.
 - **Run the test's neighbours at least once** (`node scripts/jest <directory-containing-the-test>`), so sibling tests share a worker with it. A flake caused by state leaking between tests in the same worker never reproduces while the file runs on its own.
-- **One failure in the loop means the fix did not hold.** Revise the patch and start the loop again.
-- Report the command and the number of runs on the Jest line of the PR's "Verified locally" block, and note under "Not verified locally" that the loop ran without CI's parallel load, so it cannot rule out a flake driven by contention on a busy agent.
+- **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
 
 ## PR format
 
@@ -328,7 +330,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
   ✅ Passed: `node scripts/eslint <files>`
   ✅ Passed: `node scripts/type_check --project <tsconfig>`
-  ✅ Passed: `node scripts/jest <test>`: 25 consecutive runs
+  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix, 0/25 after
   ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
