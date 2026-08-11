@@ -72,4 +72,5 @@ export * from './specs/prometheus/prometheus';
 export * from './specs/google_cloud_monitoring/google_cloud_monitoring';
 export * from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensearch_service';
 export * from './specs/zabbix/zabbix';
+export * from './specs/okta/okta';
 export * from './specs/gcp_iam/gcp_iam';
