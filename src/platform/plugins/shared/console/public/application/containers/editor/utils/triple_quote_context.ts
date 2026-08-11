@@ -16,8 +16,6 @@ import {
 } from '@kbn/monaco/src/languages/console/utils';
 import type { AdjustedParsedRequest } from '../types';
 
-export { getFallbackRequestStartPosition };
-
 export interface TripleQuoteContext {
   insideTripleQuotes: boolean;
   insideEsqlQuery: boolean;
@@ -99,10 +97,6 @@ export const getTripleQuoteContext = (
     if (coversLine(request, position.lineNumber)) {
       const anchor = resolveRequestAnchor(model, request, fallbackStart);
       return toTripleQuoteContext(getRangeText(model, anchor, position));
-    }
-    if (request.startLineNumber > position.lineNumber) {
-      // Stop iteration once we pass the cursor position
-      return OUTSIDE_TRIPLE_QUOTES;
     }
   }
 
