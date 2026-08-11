@@ -15,17 +15,17 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
-import {
-  RiskScoreDataClient,
-  estimateLookbackDays,
-  riskScoreSeriesEntityBatchSize,
-} from './risk_score_data_client';
+import { RiskScoreDataClient } from './risk_score_data_client';
 
 import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../utils/elasticsearch_terms_limits';
+import {
+  DEFAULT_MAX_TERMS_QUERY_COUNT,
+  estimateLookbackDays,
+  riskScoreSeriesEntityBatchSize,
+} from '../utils/elasticsearch_terms_limits';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
