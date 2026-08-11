@@ -20,7 +20,7 @@ const makeCtx = (): ActionContext =>
     log: {},
     config: { serverUrl: 'https://mcp.example.com/mcp' },
     getClient: mockGetClient,
-  }) as unknown as ActionContext;
+  } as unknown as ActionContext);
 
 describe('McpV2Connector', () => {
   beforeEach(() => {
