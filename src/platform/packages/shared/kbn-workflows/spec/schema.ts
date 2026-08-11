@@ -229,7 +229,7 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
 export const StepWithIfConditionSchema = z.object({
-  if: IfConditionSchema,
+  if: IfConditionSchema.optional(),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 
