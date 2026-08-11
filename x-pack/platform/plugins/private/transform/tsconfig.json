@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_cps_local/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json"
