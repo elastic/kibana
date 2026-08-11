@@ -6,19 +6,12 @@
  */
 
 import { getTaskTypeGroup } from './get_task_type_group';
+import { TaskTypeGroup } from '../../task';
 
 describe('getTaskTypeGroup', () => {
-  test('should return undefined if prefix is alerting or actions but taskTypeGroup is not set', () => {
-    expect(getTaskTypeGroup('alerting:abc', undefined)).toBeUndefined();
-    expect(getTaskTypeGroup('actions:def', undefined)).toBeUndefined();
-  });
-
-  test('should correctly group ad hoc runs under alerting', () => {
-    expect(getTaskTypeGroup('ad_hoc_run-backfill')).toEqual('alerting');
-  });
-
   test('should return taskTypeGroup when it is one of the accepted values', () => {
-    expect(getTaskTypeGroup('random:task', 'alerting')).toEqual('alerting');
-    expect(getTaskTypeGroup('alerting:abc', 'custom_group')).toBeUndefined();
+    expect(getTaskTypeGroup('alerting')).toEqual(TaskTypeGroup.Alerting);
+    expect(getTaskTypeGroup('actions')).toEqual(TaskTypeGroup.Actions);
+    expect(getTaskTypeGroup('custom_group')).toBeUndefined();
   });
 });

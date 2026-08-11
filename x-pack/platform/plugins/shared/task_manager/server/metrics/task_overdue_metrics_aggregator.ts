@@ -91,12 +91,10 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
             this.histograms[`${TaskOverdueMetricKeys.OVERALL}.${OVERDUE_BY_KEY}`] = hist;
           } else {
             const taskType = key.replaceAll('.', '__');
-            const taskTypeGroup = getTaskTypeGroup(
-              taskType,
-              this.definitions.get(key)?.taskTypeGroup
-            );
+            const taskTypeGroup = getTaskTypeGroup(this.definitions.get(key)?.taskTypeGroup);
             this.histograms[`${TaskOverdueMetricKeys.BY_TYPE}.${taskType}.${OVERDUE_BY_KEY}`] =
               hist;
+
             if (taskTypeGroup) {
               const groupHist =
                 this.histograms[

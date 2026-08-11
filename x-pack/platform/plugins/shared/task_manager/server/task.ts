@@ -24,6 +24,11 @@ export enum TaskPriority {
   Normal = 50,
 }
 
+export enum TaskTypeGroup {
+  Alerting = 'alerting',
+  Actions = 'actions',
+}
+
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,

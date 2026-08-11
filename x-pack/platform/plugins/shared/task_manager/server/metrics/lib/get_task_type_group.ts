@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-const ALERT_GROUP = 'alerting';
-const ACTIONS_GROUP = 'actions';
-const taskTypeGrouping = [ALERT_GROUP, ACTIONS_GROUP];
+import { TaskTypeGroup } from '../../task';
 
-export function getTaskTypeGroup(taskType: string, taskTypeGroup?: string): string | undefined {
-  if (taskTypeGroup !== undefined && taskTypeGrouping.includes(taskTypeGroup)) {
-    return taskTypeGroup;
-  }
+const taskTypeGrouping = [TaskTypeGroup.Actions, TaskTypeGroup.Alerting];
 
-  if (taskType === 'ad_hoc_run-backfill') {
-    return ALERT_GROUP;
+export function getTaskTypeGroup(taskTypeGroup?: string): TaskTypeGroup | undefined {
+  if (taskTypeGroup !== undefined && taskTypeGrouping.includes(taskTypeGroup as TaskTypeGroup)) {
+    return taskTypeGroup as TaskTypeGroup;
   }
 }

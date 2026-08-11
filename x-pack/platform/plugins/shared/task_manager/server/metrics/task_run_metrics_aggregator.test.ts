@@ -8,7 +8,7 @@
 import * as uuid from 'uuid';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskStatus } from '../task';
+import { TaskStatus, TaskTypeGroup } from '../task';
 import type { TaskManagerStats } from '../task_events';
 import { asTaskManagerStatEvent, asTaskRunEvent, TaskPersistence } from '../task_events';
 import { TaskRunResult } from '../task_running';
@@ -19,7 +19,7 @@ const logger = loggingSystemMock.createLogger();
 export const getTaskRunSuccessEvent = (
   type: string,
   isExpired: boolean = false,
-  taskTypeGroup?: string
+  taskTypeGroup?: TaskTypeGroup
 ) => {
   const id = uuid.v4();
   return asTaskRunEvent(
@@ -55,7 +55,7 @@ export const getTaskRunFailedEvent = (
   type: string,
   isExpired: boolean = false,
   result: TaskRunResult = TaskRunResult.Failed,
-  taskTypeGroup?: string
+  taskTypeGroup?: TaskTypeGroup
 ) => {
   const id = uuid.v4();
   return asTaskRunEvent(
@@ -358,34 +358,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:webhook', false, 'actions')
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting')
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:webhook', false, 'actions')
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting')
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:.email', false, 'actions')
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true, 'alerting')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {
@@ -487,34 +487,34 @@ describe('TaskRunMetricsAggregator', () => {
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', true, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', true, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', true, 'alerting')
+      getTaskRunSuccessEvent('alerting:.index-threshold', true, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:webhook', false, 'actions')
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting')
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:webhook', false, 'actions')
+      getTaskRunSuccessEvent('actions:webhook', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:example', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:example', false, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, 'alerting')
+      getTaskRunFailedEvent('alerting:example', false, TaskRunResult.Failed, TaskTypeGroup.Alerting)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('actions:.email', false, 'actions')
+      getTaskRunSuccessEvent('actions:.email', false, TaskTypeGroup.Actions)
     );
     taskRunMetricsAggregator.processTaskLifecycleEvent(
-      getTaskRunSuccessEvent('alerting:.index-threshold', false, 'alerting')
+      getTaskRunSuccessEvent('alerting:.index-threshold', false, TaskTypeGroup.Alerting)
     );
     expect(taskRunMetricsAggregator.collect()).toEqual({
       overall: {

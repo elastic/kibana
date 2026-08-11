@@ -7,7 +7,7 @@
 
 import { monitorEventLoopDelay } from 'perf_hooks';
 
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskTypeGroup } from './task';
 
 import type { Result, Err } from './lib/result_type';
 import type { ClaimAndFillPoolResult } from './lib/fill_pool';
@@ -69,7 +69,7 @@ export interface RanTask {
   persistence: TaskPersistence;
   result: TaskRunResult;
   isExpired: boolean;
-  taskTypeGroup?: string;
+  taskTypeGroup?: TaskTypeGroup;
 }
 export type ErroredTask = RanTask & {
   error: DecoratedError;

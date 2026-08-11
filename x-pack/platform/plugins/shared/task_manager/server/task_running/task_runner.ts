@@ -46,6 +46,7 @@ import type {
   SuccessfulRunResult,
   TaskDefinition,
   TaskEventLogger,
+  TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -856,7 +857,9 @@ export class TaskManagerRunner implements TaskRunner {
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
-        const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup;
+        const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+          | TaskTypeGroup
+          | undefined;
         try {
           const processedResult = {
             task,
@@ -942,7 +945,9 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
-              taskTypeGroup: this.definitions.get(this.taskType)?.taskTypeGroup,
+              taskTypeGroup: this.definitions.get(this.taskType)?.taskTypeGroup as
+                | TaskTypeGroup
+                | undefined,
             }),
             taskTiming
           )
