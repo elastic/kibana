@@ -8,17 +8,17 @@
  */
 
 import { isPromise } from '@kbn/std';
-import type { AppUnmount } from '@kbn/core-application-browser';
+import type { App, AppUnmount } from '@kbn/core-application-browser';
 import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global } from '@kbn/core-di-internal';
 
 export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
-  bind(Application).onSetup(({ get }, definition, application) => {
+  bind(Application).onSetup(({ inject }, definition, application) => {
     application.register({
       ...definition,
-      mount(params) {
-        const scope = get(CoreStart('injection')).fork();
+      mount: inject(CoreStart('injection'), (injection, params) => {
+        const scope = injection.fork();
         scope.bind(ApplicationParameters).toConstantValue(params);
         scope.bind(Global).toConstantValue(ApplicationParameters);
         const unmount = scope.get(definition, { autobind: true }).mount();
@@ -31,7 +31,7 @@ export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
         };
 
         return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
-      },
+      }) as App['mount'],
     });
   }, CoreSetup('application'));
 }
