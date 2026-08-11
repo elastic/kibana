@@ -7,16 +7,35 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ContentList, ContentListToolbar } from '@kbn/content-list';
+import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
 import { useContentListItems } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { CreateAiIndexButton } from './components/create_ai_index_button';
 import {
-  AiIndexListing,
-  AiIndexListingProvider,
+  AiIndexCardGrid,
+  AiIndexListEmpty,
   AiIndexListError,
+  AiIndexListPagination,
 } from './components/ai_index_list';
+import { CreateAiIndexButton } from './components/create_ai_index_button';
+import { useAiIndexFindItems } from './hooks/use_list_ai_indices';
+import { useKibana } from './hooks/use_kibana';
+import {
+  AI_INDICES_PER_PAGE,
+  AI_INDEX_LIST_LABELS,
+  aiIndexOwnerFilter,
+  aiIndexTypeFilter,
+} from './utils/ai_index_content_list_utils';
+
+const AiIndexTypeFilter = createFilterControl(aiIndexTypeFilter, {
+  'data-test-subj': 'contextAiIndexListTypeFilter',
+});
+
+const AiIndexOwnerFilter = createFilterControl(aiIndexOwnerFilter, {
+  'data-test-subj': 'contextAiIndexListOwnerFilter',
+});
 
 const ContextLandingPageContent = () => {
   const { euiTheme } = useEuiTheme();
@@ -42,14 +61,49 @@ const ContextLandingPageContent = () => {
         }
       />
       <KibanaPageTemplate.Section>
-        {error ? <AiIndexListError error={error} /> : <AiIndexListing />}
+        {error ? (
+          <AiIndexListError error={error} />
+        ) : (
+          <ContentList emptyState={<AiIndexListEmpty />}>
+            <ContentListToolbar data-test-subj="contextAiIndexList">
+              <ContentListToolbar.Filters>
+                <AiIndexTypeFilter />
+                <AiIndexOwnerFilter />
+              </ContentListToolbar.Filters>
+            </ContentListToolbar>
+            <AiIndexCardGrid />
+            <AiIndexListPagination />
+          </ContentList>
+        )}
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
 
-export const ContextLandingPage = () => (
-  <AiIndexListingProvider>
-    <ContextLandingPageContent />
-  </AiIndexListingProvider>
-);
+export const ContextLandingPage = () => {
+  const { services } = useKibana();
+  const findItems = useAiIndexFindItems();
+
+  return (
+    <ContentListClientProvider
+      id="context-engine-ai-indices"
+      core={services}
+      labels={AI_INDEX_LIST_LABELS}
+      findItems={findItems}
+      features={{
+        sorting: false,
+        selection: false,
+        pagination: {
+          initialPageSize: AI_INDICES_PER_PAGE,
+          pageSizeOptions: [AI_INDICES_PER_PAGE],
+        },
+        filters: {
+          aiIndexType: aiIndexTypeFilter,
+          aiIndexOwner: aiIndexOwnerFilter,
+        },
+      }}
+    >
+      <ContextLandingPageContent />
+    </ContentListClientProvider>
+  );
+};

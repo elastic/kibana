@@ -7,7 +7,5 @@
 
 export { AiIndexCard } from './ai_index_card';
 export { AiIndexCardGrid } from './ai_index_card_grid';
-export { AiIndexListing } from './ai_index_listing';
-export { AiIndexListingProvider } from './ai_index_listing_provider';
 export { AiIndexListPagination } from './ai_index_list_pagination';
 export { AiIndexListEmpty, AiIndexListError, AiIndexListSkeleton } from './ai_index_list_states';
