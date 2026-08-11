@@ -9,17 +9,15 @@
 
 import type { PublishingSubject } from '../..';
 
-export type FetchSetting = 'visible' | 'all';
-
 /**
  * Parent APIs can publish a fetch setting that determines when child components should fetch data.
  */
-export interface PublishesFetchSetting {
-  fetchSetting$: PublishingSubject<FetchSetting>;
+export interface PublishesFetchOnlyVisible {
+  fetchOnlyVisible$: PublishingSubject<boolean>;
 }
 
-export const apiPublishesFetchSetting = (
+export const apiPublishesFetchOnlyVisible = (
   unknownApi?: unknown
-): unknownApi is PublishesFetchSetting => {
-  return Boolean(unknownApi && (unknownApi as PublishesFetchSetting)?.fetchSetting$ !== undefined);
+): unknownApi is PublishesFetchOnlyVisible => {
+  return Boolean(unknownApi && (unknownApi as PublishesFetchOnlyVisible)?.fetchOnlyVisible$ !== undefined);
 };

@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import {
-  apiPublishesFetchSetting,
+  apiPublishesFetchOnlyVisible,
   type HasPanelCapabilities,
   type HasSerializedChildState,
 } from '@kbn/presentation-publishing';
@@ -63,11 +63,11 @@ export async function buildEmbeddable<
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
-      ...(apiPublishesFetchSetting(parentApi) && {
-        isFetchPaused$: parentApi.fetchSetting$.pipe(
+      ...(apiPublishesFetchOnlyVisible(parentApi) && {
+        isFetchPaused$: parentApi.fetchOnlyVisible$.pipe(
           combineLatestWith(isVisible$),
-          map(([parentFetchSetting, isVisible]) => {
-            return parentFetchSetting === 'visible'
+          map(([parentFetchOnlyVisible, isVisible]) => {
+            return parentFetchOnlyVisible
               ? !isVisible
               : // If the fetch setting is 'all', we do not pause the fetch
                 false;

@@ -80,9 +80,8 @@ export {
   type PublishesApproximation,
 } from './interfaces/fetch/publishes_approximation';
 export {
-  type FetchSetting,
-  type PublishesFetchSetting,
-  apiPublishesFetchSetting,
+  type PublishesFetchOnlyVisible,
+  apiPublishesFetchOnlyVisible,
 } from './interfaces/fetch/fetch_only_visible';
 export {
   apiHasAppContext,

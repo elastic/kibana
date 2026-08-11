@@ -8,7 +8,6 @@
  */
 
 import type {
-  FetchSetting,
   PublishingSubject,
   StateComparators,
   ViewMode,
@@ -74,20 +73,12 @@ export function initializeSettingsManager(
     comparators
   );
 
-  // fetch setting
   const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
-  const getFetchSetting = (): FetchSetting => {
-    if (viewMode$.value === 'print') return 'all';
-    return deferBelowFold ? 'visible' : 'all';
-  };
-  const fetchSetting$ = new BehaviorSubject<FetchSetting>(getFetchSetting());
-  const fetchSettingSubscription = viewMode$
-    .pipe(map(() => getFetchSetting()))
-    .subscribe((nextSetting) => fetchSetting$.next(nextSetting));
-
-  viewMode$
-    .pipe(map(() => getFetchSetting()))
-    .subscribe((nextSetting) => fetchSetting$.next(nextSetting));
+  const getFetchOnlyVisible = () => (viewMode$.value === 'print' ? false : deferBelowFold);
+  const fetchOnlyVisible$ = new BehaviorSubject<boolean>(getFetchOnlyVisible());
+  const fetchOnlyVisibleSubscription = viewMode$
+    .pipe(map(() => getFetchOnlyVisible()))
+    .subscribe((nextSetting) => fetchOnlyVisible$.next(nextSetting));
 
   function serializeSettings() {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
@@ -102,7 +93,7 @@ export function initializeSettingsManager(
 
   return {
     api: {
-      fetchSetting$,
+      fetchOnlyVisible$,
       setTags: stateManager.api.setTags,
       getSettings: stateManager.getLatestState,
       setSettings: (settings: Partial<DashboardSettings>) => {
@@ -167,7 +158,7 @@ export function initializeSettingsManager(
       },
     },
     cleanup: () => {
-      fetchSettingSubscription.unsubscribe();
+      fetchOnlyVisibleSubscription.unsubscribe();
     },
   };
 }

@@ -13,7 +13,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
-  PublishesFetchSetting,
+  PublishesFetchOnlyVisible,
   PublishesHideBorder,
   PublishesTitle,
 } from '@kbn/presentation-publishing';
@@ -159,14 +159,14 @@ export const PresentationPanel = <
   hidePanelChrome,
   ...rest
 }: PresentationPanelProps<ApiType, ComponentPropsType>) => {
-  const [blockingError, panelHideBorder, parentHideBorder, fetchSetting] =
+  const [blockingError, panelHideBorder, parentHideBorder, fetchOnlyVisible] =
     useBatchedPublishingSubjects(
       componentApi.blockingError$ ?? new BehaviorSubject(undefined),
       componentApi.hideBorder$ ?? new BehaviorSubject(false),
       (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
         new BehaviorSubject(false),
-      (componentApi.parentApi as Partial<PublishesFetchSetting>)?.fetchSetting$ ??
-        new BehaviorSubject('all')
+      (componentApi.parentApi as Partial<PublishesFetchOnlyVisible>)?.fetchOnlyVisible$ ??
+        new BehaviorSubject(false)
     );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
@@ -183,7 +183,7 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
-        {fetchSetting === 'visible' && (
+        {fetchOnlyVisible && (
           <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
         )}
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
@@ -203,7 +203,7 @@ export const PresentationPanel = <
     Component,
     componentProps,
     componentInternalApi.setVisibility,
-    fetchSetting,
+    fetchOnlyVisible,
   ]);
 
   return hidePanelChrome ? (
