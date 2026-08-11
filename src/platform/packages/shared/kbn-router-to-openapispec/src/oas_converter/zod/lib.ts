@@ -709,25 +709,11 @@ const isNullBranch = (branch: unknown): boolean =>
   (branch as Record<string, unknown>).type === 'null' &&
   Object.keys(branch as Record<string, unknown>).length === 1;
 
-/**
- * Whether a branch has to stay behind a combiner instead of being merged into
- * its parent. OAS 3.0 ignores keywords sibling to `$ref`, so a merged
- * `{ $ref, nullable: true }` would silently lose the nullability. A branch still
- * carrying `COMPONENT_ID_MARKER` becomes a `$ref` later in `hoistMarkedSchemas`,
- * and merging it would additionally hoist the parent's `nullable` and
- * `description` into the shared component.
- */
+// OAS 3.0 ignores keywords sibling to $ref; COMPONENT_ID_MARKER branches become $ref later.
 const mustStayBoxed = (branch: Record<string, unknown>): boolean =>
   '$ref' in branch || COMPONENT_ID_MARKER in branch;
 
-/**
- * Collapse a `{ type: 'null' }` branch out of `anyOf`/`oneOf`, reporting whether
- * one was found so the caller can set `nullable: true` on the result.
- *
- * Runs before the recursive descent: the descent rewrites a standalone
- * `{ type: 'null' }` into `{ nullable: true }`, which no longer matches
- * `isNullBranch`.
- */
+// Must run before the recursive descent, which rewrites { type: 'null' } to { nullable: true }.
 function collapseNullBranches(node: Record<string, unknown>): {
   node: Record<string, unknown>;
   nullable: boolean;

@@ -32,12 +32,6 @@ const isPathParameter = (value) => {
 };
 
 /**
- * A null branch that survived conversion instead of being folded into its
- * parent as `nullable: true`. Two spellings reach here: `{ enum: [], nullable:
- * true }` from the @kbn/config-schema converter, and a bare `{ nullable: true }`
- * from the Zod converter. Both carry no type and constrain nothing, so a
- * generator sees them as an untyped union member.
- *
  * @param {unknown} value
  * @returns {value is SchemaLike & { nullable: true; type?: undefined }}
  */
