@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 
-import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiPageBody, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
 import { AutoOpsPromotionCallout, AutoOpsEnabledCallout } from '@kbn/autoops-promotion-callout';
 
@@ -27,7 +27,6 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { euiTheme } = useEuiTheme();
   const {
     appBasePath,
     sections,
@@ -94,34 +93,34 @@ export const ManagementLandingPage = ({
     return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
   }
 
+  /* Matches the max-width of the KibanaPageTemplate.EmptyPrompt below */
+  // KibanaPageTemplate.EmptyPrompt (rendered below) constrains its content to this width.
+  // We match it so the callouts visually align with the welcome prompt.
+  const AUTOOPS_CALLOUT_MAX_WIDTH = 556;
+
+  const calloutWrapperCss = css`
+    max-width: ${AUTOOPS_CALLOUT_MAX_WIDTH}px;
+    margin: 0 auto;
+  `;
+
   return (
     <EuiPageBody restrictWidth={true}>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           {shouldShowAutoOpsPromotion && (
-            <div
-              css={css`
-                max-width: 600px;
-              `}
-            >
+            <div css={calloutWrapperCss}>
               <AutoOpsPromotionCallout
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}
-                style={{ margin: `0 ${euiTheme.size.l}` }}
               />
             </div>
           )}
           {shouldShowAutoOpsEnabledBanner && (
-            <div
-              css={css`
-                max-width: 600px;
-              `}
-            >
+            <div css={calloutWrapperCss}>
               <AutoOpsEnabledCallout
                 autoOpsUrl={autoOpsStatus.autoOpsServiceUrl}
                 docsUrl={autoOpsStatus.autoOpsDocsUrl}
-                style={{ margin: `0 ${euiTheme.size.l}` }}
               />
             </div>
           )}

@@ -151,25 +151,30 @@ export const AutoOpsPromotionCallout = ({
         </EuiFlexItem>
         {!compressed && <EuiFlexItem grow={false}>{ctaButton}</EuiFlexItem>}
       </EuiFlexGroup>
-      <div style={{ position: 'absolute', top: euiTheme.size.s, insetInlineEnd: euiTheme.size.s }}>
-        <EuiToolTip
-          content={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
+          defaultMessage: 'Dismiss AutoOps promotion',
+        })}
+        position="bottom"
+        disableScreenReaderOutput
+        anchorProps={{
+          style: {
+            position: 'absolute',
+            top: euiTheme.size.s,
+            insetInlineEnd: euiTheme.size.s,
+          },
+        }}
+      >
+        <EuiButtonIcon
+          iconType="cross"
+          onClick={handleDismiss}
+          color="text"
+          aria-label={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
             defaultMessage: 'Dismiss AutoOps promotion',
           })}
-          position="left"
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={handleDismiss}
-            color="text"
-            aria-label={i18n.translate('management.autoOpsPromotionCallout.dismissAriaLabel', {
-              defaultMessage: 'Dismiss AutoOps promotion',
-            })}
-            data-test-subj="autoOpsPromotionCallout-dismiss"
-          />
-        </EuiToolTip>
-      </div>
+          data-test-subj="autoOpsPromotionCallout-dismiss"
+        />
+      </EuiToolTip>
     </EuiPanel>
   );
 };
