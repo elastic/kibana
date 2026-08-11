@@ -570,9 +570,7 @@ describe('convertToWorkflowGraph', () => {
     });
 
     describe('step level if condition', () => {
-      // Every step type that gained a step-level `if`. The graph builder wraps any
-      // step carrying one, so each must compile to the same if zone. `parallel` is
-      // covered in parallel_step_graph.test.ts, where the body has its own nodes.
+      // `parallel` is covered in parallel_step_graph.test.ts, where the body adds its own nodes.
       const ifEnabledSteps: Array<{ name: string; step: Record<string, unknown> }> = [
         { name: 'wait', step: { type: 'wait', with: { duration: '5s' } } },
         { name: 'waitForInput', step: { type: 'waitForInput', with: { message: 'input?' } } },
