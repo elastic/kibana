@@ -197,20 +197,29 @@ describe('executionControlRoutes', () => {
       });
     });
 
-    it('rejects unknown task types with a 400', async () => {
+    it('accepts unknown task types (does not validate), so a stranded paused type can be cleared', async () => {
       const { router, service } = setup();
+      (service.update as jest.Mock).mockResolvedValue({
+        paused: false,
+        paused_task_types: [],
+        updated_at: 'x',
+      });
       const { handler } = getRoute(router, 'post', '/internal/task_manager/execution/_resume');
-      const [ctx, req, res] = mockHandlerArguments({}, { body: { task_types: ['nope'] } }, [
+      const [ctx, req, res] = mockHandlerArguments({}, { body: { task_types: ['gone:type'] } }, [
         'ok',
         'badRequest',
       ]);
 
       await handler(ctx, req, res);
 
-      expect(res.badRequest).toHaveBeenCalledWith({
-        body: 'Unknown task types: nope',
+      expect(res.badRequest).not.toHaveBeenCalled();
+      const mutator = (service.update as jest.Mock).mock.calls[0][0];
+      // Removing an unknown/stranded type leaves other paused types intact.
+      expect(mutator({ paused: false, pausedTaskTypes: ['gone:type', 'keep:type'] })).toEqual({
+        paused: false,
+        pausedTaskTypes: ['keep:type'],
       });
-      expect(service.update).not.toHaveBeenCalled();
+      expect(res.ok).toHaveBeenCalled();
     });
   });
 });

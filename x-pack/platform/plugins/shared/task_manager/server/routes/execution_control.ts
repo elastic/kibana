@@ -164,38 +164,42 @@ export function executionControlRoutes(params: ExecutionControlRouteParams) {
       req: KibanaRequest<unknown, unknown, { task_types?: string[] } | null | undefined>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> => {
+      // Resume only removes entries from the paused set, so — unlike _pause — it
+      // does not validate task types: a persisted paused type can outlive its
+      // definition (plugin disabled, type removed across an upgrade), and the
+      // operator must still be able to clear it.
       const taskTypes = req.body?.task_types;
-      if (taskTypes) {
-        const unknownTypes = validateTaskTypes(taskTypes);
-        if (unknownTypes.length) {
-          return res.badRequest({
-            body: `Unknown task types: ${unknownTypes.join(', ')}`,
-          });
-        }
-      }
-
       const service = await getExecutionControlService();
       const username = await getUsername(req);
+
+      // Track which of the requested types were actually paused, so the log
+      // reflects what changed rather than what was requested.
+      let removedTaskTypes: string[] = [];
       const next = await service.update(
-        (current) =>
-          taskTypes
-            ? {
-                paused: current.paused,
-                pausedTaskTypes: current.pausedTaskTypes.filter(
-                  (type) => !taskTypes.includes(type)
-                ),
-              }
-            : // A full resume clears both the global pause and the paused type list.
-              { paused: false, pausedTaskTypes: [] },
+        (current) => {
+          if (!taskTypes) {
+            // A full resume clears both the global pause and the paused type list.
+            return { paused: false, pausedTaskTypes: [] };
+          }
+          removedTaskTypes = current.pausedTaskTypes.filter((type) => taskTypes.includes(type));
+          return {
+            paused: current.paused,
+            pausedTaskTypes: current.pausedTaskTypes.filter((type) => !taskTypes.includes(type)),
+          };
+        },
         { username }
       );
 
       logger.info(
-        taskTypes
-          ? `Task Manager execution resumed for task types [${taskTypes.join(', ')}] by ${
+        !taskTypes
+          ? `Task Manager execution resumed by ${username ?? 'unknown user'}.`
+          : removedTaskTypes.length
+          ? `Task Manager execution resumed for task types [${removedTaskTypes.join(', ')}] by ${
               username ?? 'unknown user'
             }.`
-          : `Task Manager execution resumed by ${username ?? 'unknown user'}.`
+          : `Task Manager execution resume requested by ${
+              username ?? 'unknown user'
+            }, but none of the requested task types [${taskTypes.join(', ')}] were paused.`
       );
       return res.ok({ body: toResponseBody(next) });
     }

@@ -104,6 +104,9 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body).toMatchObject({
+        message: expect.stringContaining('Unknown task types'),
+      });
     });
 
     apiTest('_pause: returns 403 when called by a viewer', async ({ apiClient, samlAuth }) => {
