@@ -45,6 +45,7 @@ import {
   DeleteRecordInputSchema,
   GetChoicesInputSchema,
   QueryUsersInputSchema,
+  WhoAmIInputSchema,
 } from './types';
 import type {
   SearchInput,
@@ -646,6 +647,32 @@ export const ServicenowSearch: ConnectorSpec = {
         return response.data;
       },
     },
+
+    whoAmI: {
+      isTool: true,
+      description:
+        'Return the identity of the currently authenticated ServiceNow user. ' +
+        'Returns sys_id, user_name, name, email, title, department, and active status. ' +
+        'Use this to verify connector credentials, resolve the caller sys_id for incident creation, ' +
+        'or confirm which account is performing write operations.',
+      input: WhoAmIInputSchema,
+      handler: async (ctx) => {
+        const { instanceUrl } = ctx.config as { instanceUrl: string };
+        const url = `${instanceUrl}/api/now/table/sys_user`;
+
+        const response = await ctx.client.get(url, {
+          params: {
+            sysparm_query: 'user_name=javascript:gs.getUserName()',
+            sysparm_limit: 1,
+            sysparm_fields: 'sys_id,user_name,name,email,title,department,active',
+            sysparm_display_value: 'true',
+          },
+        });
+
+        const results: unknown[] = response.data?.result ?? [];
+        return results[0] ?? response.data;
+      },
+    },
   },
 
   skill: [
@@ -689,6 +716,10 @@ export const ServicenowSearch: ConnectorSpec = {
     '## Resolving names to sys_ids',
     'Use queryUsers to look up sys_ids for caller_id and assigned_to fields.',
     'Use getChoices to look up valid string values for state, category, impact, and urgency fields.',
+    '',
+    '## Current user identity',
+    'Use whoAmI to get the sys_id and details of the authenticated connector user.',
+    'Useful for populating caller_id with the connector account or verifying permissions.',
   ].join('\n'),
 
   test: {
@@ -715,6 +746,5 @@ export const ServicenowSearch: ConnectorSpec = {
       }
       return {};
     },
-    enabled: true,
   },
 };

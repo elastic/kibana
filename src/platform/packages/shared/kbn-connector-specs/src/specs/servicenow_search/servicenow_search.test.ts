@@ -1243,6 +1243,59 @@ describe('ServicenowSearch', () => {
     });
   });
 
+  describe('whoAmI action', () => {
+    it('should return the current authenticated user record', async () => {
+      const mockResponse = {
+        data: {
+          result: [
+            {
+              sys_id: 'user-123',
+              user_name: 'elastic.connector',
+              name: 'Elastic Connector',
+              email: 'connector@example.com',
+              title: 'Service Account',
+              department: 'IT',
+              active: 'true',
+            },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await ServicenowSearch.actions.whoAmI.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/now/table/sys_user',
+        {
+          params: {
+            sysparm_query: 'user_name=javascript:gs.getUserName()',
+            sysparm_limit: 1,
+            sysparm_fields: 'sys_id,user_name,name,email,title,department,active',
+            sysparm_display_value: 'true',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data.result[0]);
+    });
+
+    it('should fall back to response.data when result array is empty', async () => {
+      const mockResponse = { data: { result: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await ServicenowSearch.actions.whoAmI.handler(mockContext, {});
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should propagate API errors', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(
+        ServicenowSearch.actions.whoAmI.handler(mockContext, {})
+      ).rejects.toThrow('Unauthorized');
+    });
+  });
+
   describe('test handler', () => {
     const testSpec = ServicenowSearch.test;
 

@@ -537,3 +537,5 @@ export const QueryUsersInputSchema = lazySchema(() =>
   })
 );
 export type QueryUsersInput = z.infer<typeof QueryUsersInputSchema>;
+
+export const WhoAmIInputSchema = lazySchema(() => z.object({}));
