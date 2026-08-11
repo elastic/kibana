@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/crypto'
   - '@kbn/std'
   - '@kbn/repo-info'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
