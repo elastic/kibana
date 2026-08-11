@@ -7,7 +7,7 @@
 
 import { Agent, ProxyAgent } from 'undici';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { actionsConfigMock } from '../actions_config.mock';
+import { actionsConfigMock } from '../../actions_config.mock';
 import { buildMcpFetchFactory } from './mcp_fetch';
 
 jest.mock('undici', () => {

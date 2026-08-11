@@ -11,8 +11,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { getNodeSSLOptions, type CustomHostSettings, type SSLSettings } from '@kbn/actions-utils';
 import type { FetchLike } from '@kbn/mcp-client';
 import type { McpFetchFactory, McpFetchResource } from '@kbn/connector-specs';
-import type { ActionsConfigurationUtilities } from '../actions_config';
-import { buildUserAgent } from './get_axios_instance';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import { buildUserAgent } from '../get_axios_instance';
 
 function buildTlsConnectOptions(
   logger: Logger,

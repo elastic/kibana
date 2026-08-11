@@ -128,7 +128,7 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
-import { buildMcpFetchFactory } from './lib/mcp_fetch';
+import { buildMcpFetchFactory } from './lib/mcp';
 
 export interface PluginSetupContract {
   registerType<

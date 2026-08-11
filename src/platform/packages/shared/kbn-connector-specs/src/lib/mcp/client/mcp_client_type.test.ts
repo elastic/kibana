@@ -8,7 +8,7 @@
  */
 
 import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
-import type { BuildContext } from '../clients/client_type_spec';
+import type { BuildContext } from '../../clients/client_type_spec';
 import { createMcpClientType } from './mcp_client_type';
 
 jest.mock('@kbn/mcp-client', () => {

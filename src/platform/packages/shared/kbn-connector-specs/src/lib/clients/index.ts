@@ -9,11 +9,7 @@
 
 import type { McpClient } from '@kbn/mcp-client';
 import type { ClientTypeSpec } from './client_type_spec';
-import { createMcpClientType } from '../mcp/mcp_client_type';
-
-export { createMcpClientType } from '../mcp/mcp_client_type';
-export type { McpClientTypeDeps } from '../mcp/mcp_client_type';
-export type { McpFetchFactory, McpFetchOptions, McpFetchResource } from '../mcp/mcp_fetch_types';
+import { createMcpClientType } from '../mcp/client';
 
 export type {
   ClientTypeSpec,
