@@ -156,51 +156,65 @@ export class DiscoverApp {
     // FTR passes the base name and relies on the editor auto-appending `*` as the
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
-    await titleInput.fill(name.endsWith('*') ? name : `${name}*`);
-    // wait for async title validation to settle before continuing.
-    await form.and(this.page.locator('[data-validation-error="0"]')).waitFor({ state: 'visible' });
-
-    // Wait for an actual selection: it can only exist once the options
-    // have loaded, which is the state callers really depend on.
+    const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
-    await expect
-      .poll(
-        async () => {
-          const isLoading = await timestampField.getAttribute('data-is-loading');
-          if (isLoading !== '0') {
-            return false;
-          }
-          return (await timestampCombo.getSelectedOptions()).length > 0;
-        },
-        { timeout: 30_000, intervals: [200] }
-      )
-      .toBe(true);
 
-    const submitBtn = this.page.testSubj.locator(
-      adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
-    );
+    // Retry: title validation can race its debounced index lookup and get stuck
+    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    // Re-submitting also covers serverless, where the form's submission re-validation can
+    // transiently report "no matching indices" even though the matching sources panel already
+    // shows results, leaving the flyout open with its submit buttons disabled.
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
 
-    // On serverless, the form's submission re-validation can transiently report
-    // "no matching indices" (data-validation-error="1") even though the matching
-    // sources panel already shows results. When that happens the flyout stays
-    // open and the submit buttons become disabled. Re-wait for validation to
-    // settle and retry the click until the flyout actually closes.
-    await submitBtn.click();
-    await expect
-      .poll(
-        async () => {
-          if (await flyout.isVisible()) {
-            await form
-              .and(this.page.locator('[data-validation-error="0"]'))
-              .waitFor({ state: 'visible', timeout: 5_000 })
-              .catch(() => {});
-            await submitBtn.click().catch(() => {});
-          }
-          return !(await flyout.isVisible());
-        },
-        { timeout: 30_000, intervals: [3_000] }
-      )
-      .toBe(true);
+      if (attempt > 1) {
+        await titleInput.fill(''); // force a real value change to re-trigger validation
+      }
+      await titleInput.fill(title);
+      // wait for async title validation to settle before continuing.
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+
+      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
+      // field's initial state, so on its own it cannot tell "options loaded" apart from
+      // "loading has not started". Submitting too early still passes validation, but creates
+      // the data view with no time field, so no time filter is applied and hit counts include
+      // documents outside the selected range.
+      await expect
+        .poll(
+          async () => {
+            const isLoading = await timestampField.getAttribute('data-is-loading');
+            if (isLoading !== '0') {
+              return false;
+            }
+            return (await timestampCombo.getSelectedOptions()).length > 0;
+          },
+          { timeout: 30_000, intervals: [200] }
+        )
+        .toBe(true);
+
+      if (adHoc) {
+        await this.page.testSubj.click('exploreIndexPatternButton');
+      } else {
+        await this.page.testSubj.click('saveIndexPatternButton');
+      }
+
+      const flyoutClosed = await flyout
+        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (flyoutClosed) {
+        break;
+      }
+      if (isLastAttempt) {
+        throw new Error(
+          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
+        );
+      }
+    }
 
     await this.waitUntilTabIsLoaded();
   }

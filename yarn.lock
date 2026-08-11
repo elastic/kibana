@@ -6739,6 +6739,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-attack-discovery-agent-builder@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-attack-discovery@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery":
   version "0.0.0"
   uid ""

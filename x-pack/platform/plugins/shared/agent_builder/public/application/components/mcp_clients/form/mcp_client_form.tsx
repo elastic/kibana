@@ -11,9 +11,11 @@ import { css } from '@emotion/react';
 import { DetailsSection } from './sections/details_section';
 import { RedirectUriSection } from './sections/redirect_uri_section';
 import { CredentialsSection } from './sections/credentials_section';
+import { McpClientFormMode } from './types';
 import { labels } from '../../../utils/i18n';
 
 export interface McpClientFormProps {
+  mode: McpClientFormMode;
   onSubmit: () => void;
 }
 
@@ -25,7 +27,7 @@ const formStyles = css`
     max-inline-size: 520px;
   }
 `;
-export const McpClientForm = ({ onSubmit }: McpClientFormProps) => {
+export const McpClientForm = ({ mode, onSubmit }: McpClientFormProps) => {
   return (
     <EuiForm component="form" onSubmit={onSubmit} css={formStyles} fullWidth>
       <EuiSteps
@@ -41,7 +43,7 @@ export const McpClientForm = ({ onSubmit }: McpClientFormProps) => {
           },
         ]}
       />
-      <CredentialsSection />
+      {mode === McpClientFormMode.CREATE && <CredentialsSection />}
     </EuiForm>
   );
 };
