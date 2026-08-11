@@ -118,7 +118,7 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
 
-## Write list assertions for data you didn't create [write-list-assertions-for-data-you-didnt-create]
+## Don't expect a clean cluster [dont-expect-a-clean-cluster]
 
 A Scout run starts from a stack that already has data on it. Other suites run in it before and after yours, earlier runs leave objects behind, and a Cloud project starts out with content a local stack doesn't have: Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors. Any assertion over a list has to tolerate entries your test didn't create.
 
