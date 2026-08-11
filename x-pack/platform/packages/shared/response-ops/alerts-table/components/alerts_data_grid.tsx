@@ -80,6 +80,7 @@ export const AlertsDataGrid = typedMemo(
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
       height,
+      bulkAddToChatConfig,
       maxRowCount,
       ...euiDataGridProps
     } = props;
@@ -333,6 +334,33 @@ export const AlertsDataGrid = typedMemo(
       [colorMode, euiTheme]
     );
 
+    const ExpandedAlertView =
+      // By checking undefined explicitly, we allow falsy values (null) to skip rendering the flyout
+      renderExpandedAlertView !== undefined
+        ? renderExpandedAlertView
+        : // Overriding the simplified type here to avoid cyclic problems with generics
+          (AlertDetailFlyout as NonNullable<typeof renderExpandedAlertView>);
+
+    const selectedAlerts = useMemo(
+      () =>
+        Array.from(bulkActionsState.rowSelection.keys())
+          .map((i) => alerts[i])
+          .filter(Boolean),
+      [alerts, bulkActionsState.rowSelection]
+    );
+
+    const individualTagsFlyout = useTagsAction({
+      onActionSuccess: () => {
+        refresh();
+      },
+      onActionError: () => {
+        refresh();
+      },
+      isDisabled: false,
+    });
+
+    const { selectedAlerts: selectedAlertsFromRowAction } = individualTagsFlyout;
+
     /**
      * Elasticsearch has a hard-limit of 10k results, even with pagination.
      * Therefore, we need to cap the page count to a max of 10k results
@@ -360,39 +388,46 @@ export const AlertsDataGrid = typedMemo(
                 onSaveTags={bulkEditTagsFlyoutState.onSaveTags}
               />
             )}
-          </Suspense>
-          {alertsCount > 0 && (
-            <EuiDataGrid
-              {...euiDataGridProps}
-              // As per EUI docs, it is not recommended to switch between undefined and defined height.
-              // If user changes height, it is better to unmount and mount the component.
-              // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
-              key={height ? 'fixedHeight' : 'autoHeight'}
-              ref={dataGridRef}
-              css={rowStyles}
-              aria-label="Alerts table"
-              data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
-              height={height}
-              columns={columnsWithCellActions}
-              columnVisibility={columnVisibility}
-              trailingControlColumns={trailingControlColumns}
-              leadingControlColumns={leadingControlColumns}
-              rowCount={cappedAlertsCount}
-              renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
-              cellContext={renderContext}
-              // Cast necessary because `cellContext` is untyped in EuiDataGrid
-              renderCellValue={CellValueHost as RenderCellValue}
-              renderCellPopover={CellPopoverHost}
-              gridStyle={actualGridStyle}
-              sorting={sortProps}
-              toolbarVisibility={toolbarVisibility}
-              pagination={dataGridPagination}
-              rowHeightsOptions={rowHeightsOptions}
-              onColumnResize={onColumnResize}
-            />
-          )}
-        </section>
-      </InspectButtonContainer>
+            {individualTagsFlyout.isFlyoutOpen && selectedAlertsFromRowAction?.length > 0 && (
+              <EditTagsFlyout
+                selectedAlerts={selectedAlertsFromRowAction}
+                onClose={individualTagsFlyout.onClose}
+                onSaveTags={individualTagsFlyout.onSaveTags}
+              />
+            )}
+            {alertsCount > 0 && (
+              <EuiDataGrid
+                {...euiDataGridProps}
+                // As per EUI docs, it is not recommended to switch between undefined and defined height.
+                // If user changes height, it is better to unmount and mount the component.
+                // Ref: https://eui.elastic.co/#/tabular-content/data-grid#virtualization
+                key={height ? 'fixedHeight' : 'autoHeight'}
+                ref={dataGridRef}
+                css={rowStyles}
+                aria-label="Alerts table"
+                data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
+                height={height}
+                columns={columnsWithCellActions}
+                columnVisibility={columnVisibility}
+                trailingControlColumns={trailingControlColumns}
+                leadingControlColumns={leadingControlColumns}
+                rowCount={cappedAlertsCount}
+                renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
+                cellContext={renderContext}
+                // Cast necessary because `cellContext` is untyped in EuiDataGrid
+                renderCellValue={CellValueHost as RenderCellValue}
+                renderCellPopover={CellPopoverHost}
+                gridStyle={actualGridStyle}
+                sorting={sortProps}
+                toolbarVisibility={toolbarVisibility}
+                pagination={dataGridPagination}
+                rowHeightsOptions={rowHeightsOptions}
+                onColumnResize={onColumnResize}
+              />
+            )}
+          </section>
+        </InspectButtonContainer>
+      </IndividualTagsActionContextProvider>
     );
   }
 );

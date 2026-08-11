@@ -638,7 +638,8 @@ const AlertsTableContent = typedForwardRef(
         ruleTypeIds,
         alertsQuerySnapshot,
         sort,
-        onSortChange,
+        onSortChange: onDataGridSortChange,
+        showCsvExportButton,
         maxRowCount,
       }),
       [
@@ -661,7 +662,8 @@ const AlertsTableContent = typedForwardRef(
         ruleTypeIds,
         alertsQuerySnapshot,
         sort,
-        onSortChange,
+        onDataGridSortChange,
+        showCsvExportButton,
         maxRowCount,
       ]
     );

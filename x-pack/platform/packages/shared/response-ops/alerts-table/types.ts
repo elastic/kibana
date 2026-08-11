@@ -680,17 +680,20 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   dynamicRowHeight?: boolean;
   sort: AlertsTableSortCombinations[];
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
-  flyoutAlertIndex: number;
-  setFlyoutAlertIndex: Dispatch<SetStateAction<number>>;
-  onPaginateFlyout: (nextPageIndex: number) => void;
-  onChangePageSize: (size: number) => void;
-  onChangePageIndex: (index: number) => void;
+  alertsQuerySnapshot?: EsQuerySnapshot;
 
   /**
    * Limits the number of results to be paginated.
    * @see https://github.com/elastic/kibana/issues/151913
    */
   maxRowCount?: number;
+}
+
+export interface AlertDetailsNavigation {
+  /** The Kibana app ID to navigate to (e.g. 'observability') */
+  appId: string;
+  /** Returns the in-app path for a given alert ID (e.g. `/alerts/${alertId}`) */
+  getPath: (alertId: string) => string;
 }
 
 export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> =
