@@ -14,7 +14,7 @@ import type { AgentDefinitionWithPermissions } from '../../../../common/http_api
 import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { useCanUpdateAgent } from '../../hooks/agents/use_can_update_agent';
 import { useAgentAiIndices } from '../../hooks/ai_indices/use_agent_ai_indices';
-import { useBaseAiIndices } from '../../hooks/ai_indices/use_base_ai_indices';
+import { useInheritedAiIndices } from '../../hooks/ai_indices/use_inherited_ai_indices';
 import { useListAiIndices } from '../../hooks/ai_indices/use_list_ai_indices';
 import { getContextStatus } from '../../hooks/ai_indices/context_status';
 import { labels } from '../../utils/i18n';
@@ -24,16 +24,16 @@ import { ContextStatusBadge } from './context_status_badge';
 interface RetrievesFromCellProps {
   agent: AgentDefinitionWithPermissions;
   aiIndices: AiIndexHttpItem[];
-  ownIds: string[];
-  baseIds: string[];
+  assignedIds: string[];
+  inheritedIds: string[];
   onChange: (agent: AgentDefinitionWithPermissions, selectedIds: string[]) => void;
 }
 
 const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({
   agent,
   aiIndices,
-  ownIds,
-  baseIds,
+  assignedIds,
+  inheritedIds,
   onChange,
 }) => {
   const canEditAgent = useCanUpdateAgent({ agent });
@@ -43,9 +43,9 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({
     [agent, onChange]
   );
 
-  // An agent with neither its own AI indices nor any from its type never reaches the Context
+  // An agent with neither assigned nor inherited AI indices never reaches the Context
   // Engine, so there is nothing to select for it.
-  if (getContextStatus({ own: ownIds, base: baseIds }) === 'off') {
+  if (getContextStatus({ assigned: assignedIds, inherited: inheritedIds }) === 'off') {
     return (
       <EuiText size="s" color="subdued" data-test-subj="agentBuilderContextOffMessage">
         {labels.context.contextOffMessage}
@@ -57,8 +57,8 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({
     <AiIndexSelector
       agentName={agent.name}
       aiIndices={aiIndices}
-      selectedIds={ownIds}
-      defaultIds={baseIds}
+      assignedIds={assignedIds}
+      inheritedIds={inheritedIds}
       isDisabled={!canEditAgent}
       onChange={handleChange}
     />
@@ -68,12 +68,13 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({
 export const ContextTable: React.FC = () => {
   const { agents, isLoading: isLoadingAgents } = useAgentBuilderAgents();
   const { aiIndices, isLoading: isLoadingAiIndices, error: aiIndicesError } = useListAiIndices();
-  const { baseAiIndicesByAgentId, isLoading: isLoadingBaseAiIndices } = useBaseAiIndices();
+  const { inheritedAiIndicesByAgentId, isLoading: isLoadingInheritedAiIndices } =
+    useInheritedAiIndices();
   const { setAiIndices } = useAgentAiIndices();
 
-  // Until the base configuration lands every agent looks like it has no AI indices at all, which
+  // Until inherited indices land every agent looks like it has no AI indices at all, which
   // would render a column of "off" pills. Hold the rows back rather than show a wrong state.
-  const isLoading = isLoadingAgents || isLoadingAiIndices || isLoadingBaseAiIndices;
+  const isLoading = isLoadingAgents || isLoadingAiIndices || isLoadingInheritedAiIndices;
 
   const handleChange = useCallback(
     (agent: AgentDefinitionWithPermissions, selectedIds: string[]) => {
@@ -106,8 +107,8 @@ export const ContextTable: React.FC = () => {
         render: (agent: AgentDefinitionWithPermissions) => (
           <ContextStatusBadge
             status={getContextStatus({
-              own: agent.configuration.ai_indices ?? [],
-              base: baseAiIndicesByAgentId[agent.id] ?? [],
+              assigned: agent.configuration.ai_indices ?? [],
+              inherited: inheritedAiIndicesByAgentId[agent.id] ?? [],
             })}
           />
         ),
@@ -118,14 +119,14 @@ export const ContextTable: React.FC = () => {
           <RetrievesFromCell
             agent={agent}
             aiIndices={aiIndices}
-            ownIds={agent.configuration.ai_indices ?? []}
-            baseIds={baseAiIndicesByAgentId[agent.id] ?? []}
+            assignedIds={agent.configuration.ai_indices ?? []}
+            inheritedIds={inheritedAiIndicesByAgentId[agent.id] ?? []}
             onChange={handleChange}
           />
         ),
       },
     ],
-    [aiIndices, baseAiIndicesByAgentId, handleChange]
+    [aiIndices, inheritedAiIndicesByAgentId, handleChange]
   );
 
   return (

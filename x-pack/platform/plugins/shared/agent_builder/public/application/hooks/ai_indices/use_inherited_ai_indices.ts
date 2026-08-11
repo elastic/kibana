@@ -11,9 +11,9 @@ import type { AgentBaseConfigurationItem } from '../../../../common/http_api/age
 import { queryKeys } from '../../query_keys';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 
-interface UseBaseAiIndicesResult {
-  /** AI indices contributed by each agent's type, keyed by agent id. */
-  baseAiIndicesByAgentId: Record<string, string[]>;
+interface UseInheritedAiIndicesResult {
+  /** AI indices each agent inherits from its type, keyed by agent id. */
+  inheritedAiIndicesByAgentId: Record<string, string[]>;
   isLoading: boolean;
   error: Error | undefined;
 }
@@ -21,10 +21,13 @@ interface UseBaseAiIndicesResult {
 /**
  * Loads the AI indices each agent inherits from its type.
  *
- * Callers must not treat a missing entry as "the type contributes nothing" while `isLoading` is
- * true — every agent would look like it has no context at all until this resolves.
+ * "Inherited" is this UI's name for what the server calls an agent type's *base configuration*,
+ * which is why the request goes to `_base_configuration`.
+ *
+ * Callers must not treat a missing entry as "inherits nothing" while `isLoading` is true — every
+ * agent would look like it has no context at all until this resolves.
  */
-export const useBaseAiIndices = (): UseBaseAiIndicesResult => {
+export const useInheritedAiIndices = (): UseInheritedAiIndicesResult => {
   const { agentService } = useAgentBuilderServices();
 
   const { data, isLoading, error } = useQuery<AgentBaseConfigurationItem[], Error>({
@@ -32,7 +35,7 @@ export const useBaseAiIndices = (): UseBaseAiIndicesResult => {
     queryFn: () => agentService.listBaseConfigurations(),
   });
 
-  const baseAiIndicesByAgentId = useMemo(
+  const inheritedAiIndicesByAgentId = useMemo(
     () =>
       Object.fromEntries(
         (data ?? []).map(({ agent_id: agentId, configuration }) => [
@@ -43,5 +46,5 @@ export const useBaseAiIndices = (): UseBaseAiIndicesResult => {
     [data]
   );
 
-  return { baseAiIndicesByAgentId, isLoading, error: error ?? undefined };
+  return { inheritedAiIndicesByAgentId, isLoading, error: error ?? undefined };
 };

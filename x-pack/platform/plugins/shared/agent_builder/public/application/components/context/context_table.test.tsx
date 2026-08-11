@@ -19,7 +19,7 @@ const mockNavigateToContextEngine = jest.fn();
 
 jest.mock('../../hooks/agents/use_agents');
 jest.mock('../../hooks/ai_indices/use_list_ai_indices');
-jest.mock('../../hooks/ai_indices/use_base_ai_indices');
+jest.mock('../../hooks/ai_indices/use_inherited_ai_indices');
 jest.mock('../../hooks/ai_indices/use_agent_ai_indices');
 jest.mock('../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine: mockNavigateToContextEngine }),
@@ -27,28 +27,30 @@ jest.mock('../../hooks/use_navigation', () => ({
 
 const { useAgentBuilderAgents } = jest.requireMock('../../hooks/agents/use_agents');
 const { useListAiIndices } = jest.requireMock('../../hooks/ai_indices/use_list_ai_indices');
-const { useBaseAiIndices } = jest.requireMock('../../hooks/ai_indices/use_base_ai_indices');
+const { useInheritedAiIndices } = jest.requireMock(
+  '../../hooks/ai_indices/use_inherited_ai_indices'
+);
 const { useAgentAiIndices } = jest.requireMock('../../hooks/ai_indices/use_agent_ai_indices');
 
-const agent = (id: string, ownAiIndices: string[] = [], canUpdate = true) =>
+const agent = (id: string, assignedAiIndices: string[] = [], canUpdate = true) =>
   ({
     id,
     name: `Agent ${id}`,
     type: 'chat',
-    configuration: { tools: [], ai_indices: ownAiIndices },
+    configuration: { tools: [], ai_indices: assignedAiIndices },
     permissions: { update_agent: canUpdate },
   } as unknown as AgentDefinitionWithPermissions);
 
-/** `own` comes from the agent list; `base` from the internal base-configuration route. */
+/** Assigned indices come from the agent list; inherited ones from the base-configuration route. */
 const show = (
   agents: AgentDefinitionWithPermissions[],
-  baseAiIndicesByAgentId: Record<string, string[]> = {},
-  { isLoadingBase = false }: { isLoadingBase?: boolean } = {}
+  inheritedAiIndicesByAgentId: Record<string, string[]> = {},
+  { isLoadingInherited = false }: { isLoadingInherited?: boolean } = {}
 ) => {
   useAgentBuilderAgents.mockReturnValue({ agents, isLoading: false });
-  useBaseAiIndices.mockReturnValue({
-    baseAiIndicesByAgentId,
-    isLoading: isLoadingBase,
+  useInheritedAiIndices.mockReturnValue({
+    inheritedAiIndicesByAgentId,
+    isLoading: isLoadingInherited,
     error: undefined,
   });
 };
@@ -92,7 +94,7 @@ describe('ContextTable', () => {
   });
 
   describe('status badge', () => {
-    it('shows On when the agent has AI indices of its own', () => {
+    it('shows On when the agent has AI indices assigned', () => {
       show([agent('a', ['sales'])], { a: ['elastic'] });
 
       renderTable();
@@ -120,7 +122,7 @@ describe('ContextTable', () => {
     });
 
     // A code-registered type such as the sig-events ones contributes AI indices, so its agents
-    // must not read as Off just because they store none of their own.
+    // must not read as Off just because none are assigned to them directly.
     it('shows Auto for a type whose contributed index is not registered in the Context Engine', () => {
       show([agent('a')], { a: ['another-one'] });
 
@@ -189,7 +191,7 @@ describe('ContextTable', () => {
       });
     });
 
-    // The trap that made `base − own` wrong: an id in both layers is still type-contributed, so
+    // The trap that made `inherited − assigned` wrong: an id in both is still inherited, so
     // it must stay disabled rather than becoming editable.
     it('stay disabled when the agent also stores the same id', async () => {
       show([agent('a', ['elastic'])], { a: ['elastic'] });
@@ -238,10 +240,10 @@ describe('ContextTable', () => {
     });
   });
 
-  // Base config arrives on its own request. Rendering rows before it lands would show every agent
+  // Inherited indices arrive on a separate request. Rendering rows first would show every agent
   // as Off, since `base` would be empty for all of them.
-  it('renders no rows while the base configuration is still loading', () => {
-    show([agent('a')], {}, { isLoadingBase: true });
+  it('renders no rows while inherited indices are still loading', () => {
+    show([agent('a')], {}, { isLoadingInherited: true });
 
     renderTable();
 

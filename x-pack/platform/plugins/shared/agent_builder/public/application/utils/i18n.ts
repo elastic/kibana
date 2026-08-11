@@ -2928,7 +2928,7 @@ export const labels = {
     selectorPlaceholder: i18n.translate('xpack.agentBuilder.context.selectorPlaceholder', {
       defaultMessage: 'Select AI indexes',
     }),
-    defaultAiIndexBadge: i18n.translate('xpack.agentBuilder.context.defaultAiIndexBadge', {
+    inheritedAiIndexBadge: i18n.translate('xpack.agentBuilder.context.inheritedAiIndexBadge', {
       defaultMessage: 'Always included',
     }),
     unregisteredAiIndexBadge: i18n.translate(

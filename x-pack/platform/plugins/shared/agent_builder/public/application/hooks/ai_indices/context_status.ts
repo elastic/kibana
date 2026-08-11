@@ -8,25 +8,28 @@
 export type ContextStatus = 'on' | 'auto' | 'off';
 
 interface ContextStatusArgs {
-  /** AI indices stored on the agent itself (`configuration.ai_indices`). */
-  own: string[];
-  /** AI indices contributed by the agent's type, which always apply. */
-  base: string[];
+  /** AI indices assigned to the agent itself. Editable: they can be added and removed here. */
+  assigned: string[];
+  /**
+   * AI indices inherited from the agent's type, which always apply on top of the assigned ones.
+   * Fixed: they cannot be removed from the agent, which is why they render disabled.
+   */
+  inherited: string[];
 }
 
 /**
  * Derives how an agent uses the Context Engine.
  *
- * - `on`   — the agent has AI indices of its own.
- * - `auto` — none of its own, but its type contributes some, so it still retrieves.
+ * - `on`   — the agent has AI indices assigned to it.
+ * - `auto` — none assigned, but it inherits some from its type, so it still retrieves.
  * - `off`  — neither, so the agent does not use the Context Engine at all.
  *
- * `base` comes from the internal base-configuration route: type base configurations are resolved
- * per request on the server and are not part of the public agent response.
+ * Inherited indices come from the internal base-configuration route: an agent type's base
+ * configuration is resolved per request on the server and is not part of the public agent response.
  */
-export const getContextStatus = ({ own, base }: ContextStatusArgs): ContextStatus => {
-  if (own.length > 0) {
+export const getContextStatus = ({ assigned, inherited }: ContextStatusArgs): ContextStatus => {
+  if (assigned.length > 0) {
     return 'on';
   }
-  return base.length > 0 ? 'auto' : 'off';
+  return inherited.length > 0 ? 'auto' : 'off';
 };

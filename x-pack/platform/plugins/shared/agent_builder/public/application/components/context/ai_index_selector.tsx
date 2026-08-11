@@ -27,80 +27,82 @@ import { labels } from '../../utils/i18n';
 interface AiIndexSelectorProps {
   agentName: string;
   aiIndices: AiIndexHttpItem[];
-  selectedIds: string[];
+  /** AI indices assigned to the agent: editable, and the only ones a change writes back. */
+  assignedIds: string[];
   /**
-   * AI indices contributed by the agent's type. They always apply and cannot be removed here, so
+   * AI indices inherited from the agent's type. They always apply and cannot be removed here, so
    * they render ticked and disabled, and are never sent back on save.
    */
-  defaultIds: string[];
+  inheritedIds: string[];
   isDisabled: boolean;
-  onChange: (selectedIds: string[]) => void;
+  /** Receives the new assigned list; inherited ids are never included. */
+  onChange: (assignedIds: string[]) => void;
 }
 
 export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
   agentName,
   aiIndices,
-  selectedIds,
-  defaultIds,
+  assignedIds,
+  inheritedIds,
   isDisabled,
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { navigateToContextEngine } = useNavigation();
 
-  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-  // Every type-contributed id is disabled, including one the agent also stores: it applies
-  // regardless, so unticking it would drop it from the agent and change nothing on screen.
-  const defaultIdSet = useMemo(() => new Set(defaultIds), [defaultIds]);
+  const assignedIdSet = useMemo(() => new Set(assignedIds), [assignedIds]);
+  // Every inherited id is disabled, including one the agent is also assigned: it applies
+  // regardless, so unticking it would drop the assignment and change nothing on screen.
+  const inheritedIdSet = useMemo(() => new Set(inheritedIds), [inheritedIds]);
 
   const options = useMemo<EuiSelectableOption[]>(() => {
     const registeredIds = new Set(aiIndices.map((aiIndex) => aiIndex.id));
 
-    // Type-contributed and stored ids are listed even when the Context Engine does not know them:
+    // Inherited and assigned ids are listed even when the Context Engine does not know them:
     // a type may point at an unregistered index, and an agent may reference one that was deleted.
-    // Omitting a stored id would also drop it on the next save, since only checked options are sent.
+    // Omitting an assigned id would also drop it on the next save, since only checked options are sent.
     const orderedIds = [
-      ...defaultIds,
-      ...aiIndices.map((aiIndex) => aiIndex.id).filter((id) => !defaultIdSet.has(id)),
-      ...selectedIds.filter((id) => !defaultIdSet.has(id) && !registeredIds.has(id)),
+      ...inheritedIds,
+      ...aiIndices.map((aiIndex) => aiIndex.id).filter((id) => !inheritedIdSet.has(id)),
+      ...assignedIds.filter((id) => !inheritedIdSet.has(id) && !registeredIds.has(id)),
     ];
 
     return orderedIds.map((id) => {
-      const isDefault = defaultIdSet.has(id);
+      const isInherited = inheritedIdSet.has(id);
       const isUnregistered = !registeredIds.has(id);
 
       return {
         key: id,
         label: id,
-        checked: isDefault || selectedIdSet.has(id) ? 'on' : undefined,
-        disabled: isDefault,
-        append: isDefault ? (
-          <EuiBadge color="hollow">{labels.context.defaultAiIndexBadge}</EuiBadge>
+        checked: isInherited || assignedIdSet.has(id) ? 'on' : undefined,
+        disabled: isInherited,
+        append: isInherited ? (
+          <EuiBadge color="hollow">{labels.context.inheritedAiIndexBadge}</EuiBadge>
         ) : isUnregistered ? (
           <EuiBadge color="warning">{labels.context.unregisteredAiIndexBadge}</EuiBadge>
         ) : undefined,
       };
     });
-  }, [aiIndices, defaultIds, defaultIdSet, selectedIds, selectedIdSet]);
+  }, [aiIndices, inheritedIds, inheritedIdSet, assignedIds, assignedIdSet]);
 
-  // Type-contributed ids belong to the type, so they are stripped before saving even when the
-  // agent already stored one — persisting them would be redundant and imply they are editable.
+  // Inherited ids belong to the type, so they are stripped before saving even when the agent is
+  // also assigned one — persisting them would be redundant and imply they are editable.
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       onChange(
         newOptions
           .filter((option) => option.checked === 'on')
           .map((option) => option.key as string)
-          .filter((id) => !defaultIdSet.has(id))
+          .filter((id) => !inheritedIdSet.has(id))
       );
     },
-    [onChange, defaultIdSet]
+    [onChange, inheritedIdSet]
   );
 
-  // Counts everything the agent retrieves from. An id in both lists is counted once.
+  // Everything the agent retrieves from. An id in both lists is counted once.
   const effectiveIds = useMemo(
-    () => [...defaultIds, ...selectedIds.filter((id) => !defaultIdSet.has(id))],
-    [defaultIds, defaultIdSet, selectedIds]
+    () => [...inheritedIds, ...assignedIds.filter((id) => !inheritedIdSet.has(id))],
+    [inheritedIds, inheritedIdSet, assignedIds]
   );
 
   const buttonLabel = useMemo(() => {
