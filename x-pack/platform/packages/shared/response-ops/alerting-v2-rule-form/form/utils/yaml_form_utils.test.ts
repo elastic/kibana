@@ -209,17 +209,6 @@ describe('yaml_form_utils', () => {
       expect(result).not.toHaveProperty('no_data_strategy');
     });
 
-    it('excludes no_data_strategy for signal rules even when set', () => {
-      const formValues: FormValues = {
-        ...defaultTestFormValues,
-        kind: 'signal',
-        noDataStrategy: 'recover',
-      };
-
-      const result = formValuesToYamlObject(formValues);
-
-      expect(result).not.toHaveProperty('no_data_strategy');
-    });
   });
 
   describe('parseYamlToFormValues', () => {

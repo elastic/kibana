@@ -40,6 +40,7 @@ import {
   isNonRepresentableRule,
   isNonRepresentableFormState,
 } from '../../form/utils/is_non_representable';
+import { DEFAULT_NO_DATA_STRATEGY } from '../../form/fields/no_data_strategy_select';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -76,7 +77,6 @@ import {
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
-import { resolveNoDataStrategyForQuery } from './resolve_no_data_strategy';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 const LazyYamlRuleForm = React.lazy(() =>
@@ -240,7 +240,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   query: { format: 'composed', base: '', breach: { segment: '' } },
   recoveryStrategy: 'no_breach',
   grouping: undefined,
-  noDataStrategy: 'last_known_status',
+  noDataStrategy: DEFAULT_NO_DATA_STRATEGY,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -632,11 +632,7 @@ export function ComposeDiscoverFlyout({
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        const currentNoData = methods.getValues('noDataStrategy');
-        const resolvedNoData = resolveNoDataStrategyForQuery(currentNoData);
-        if (resolvedNoData !== currentNoData) {
-          methods.setValue('noDataStrategy', resolvedNoData, { shouldDirty: true });
-        }
+        methods.setValue('noDataStrategy', DEFAULT_NO_DATA_STRATEGY, { shouldDirty: true });
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
@@ -647,10 +643,7 @@ export function ComposeDiscoverFlyout({
         };
         setSandboxQuery(standalone);
         methods.setValue('query', standalone, { shouldDirty: true });
-        /*
-         * Keep noDataStrategy in form state so alert↔signal round-trips preserve a
-         * still-valid choice; request mappers omit it for signal rules.
-         */
+        methods.setValue('noDataStrategy', undefined, { shouldDirty: true });
         methods.setValue('recoveryStrategy', undefined, { shouldDirty: true });
       }
       methods.setValue('kind', kind, { shouldDirty: true });
