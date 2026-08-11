@@ -32,62 +32,93 @@ export const journey = new Journey({
   })
 
   /**
-   * Test performance of the editor when suggesting/validating large number of fields in functions, commands and options.
-   * Test is split for typing in two different speeds.
+   * Type query pipe by pipe at 50ms/char, waiting for validation to complete
+   * between each pipe. This produces one validation data point per pipe addition,
+   * covering a range of query lengths.
    */
-  .step('Type a new query', async ({ page }) => {
+  .step('Type a new query (fast, pipe by pipe)', async ({ page }) => {
     await setMonacoEditorValue('', page);
 
-    await typeESQLEditorQuery(
-      `FROM indices-stats* METADATA _id, _index, _score
-  | WHERE _all.primaries.bulk.avg_time != ""
-  | EVAL col0 = TRIM(_all.primaries.bulk.total_time)
-  | INLINE STATS col1 = AVG(_all.primaries.docs.count) BY _all.primaries.bulk.avg_time
-  | SORT col0 DESC
-  | DROP _all.primaries.bulk.total_time
-  | RENAME _all.primaries.bulk.avg_size_in_bytes as col3
-  | DISSECT _all.primaries.bulk.avg_time.keyword  "%{b} %{c}" APPEND_SEPARATOR = ";"
-  | GROK _all.primaries.completion.size "%{IP:b} %{NUMBER:c}"`,
-      page,
-      50
-    );
+    const pipes = [
+      `FROM indices-stats* METADATA _id, _index, _score`,
+      `\n  | WHERE _all.primaries.bulk.avg_time != ""`,
+      `\n  | EVAL col0 = TRIM(_all.primaries.bulk.total_time)`,
+      `\n  | INLINE STATS col1 = AVG(_all.primaries.docs.count) BY _all.primaries.bulk.avg_time`,
+      `\n  | SORT col0 DESC`,
+      `\n  | DROP _all.primaries.bulk.total_time`,
+      `\n  | RENAME _all.primaries.bulk.avg_size_in_bytes as col3`,
+      `\n  | DISSECT _all.primaries.bulk.avg_time.keyword  "%{b} %{c}" APPEND_SEPARATOR = ";"`,
+      `\n  | GROK _all.primaries.completion.size "%{IP:b} %{NUMBER:c}"`,
+    ];
 
-    await typeESQLEditorQuery(
-      `
-  | ENRICH policy | CHANGE_POINT _all.primaries.bulk.avg_time_in_millis
-  | LOOKUP JOIN lookup_index ON col0
-  | COMPLETION "query" WITH { "inference_id": "endpoint" }
-  | FORK (KEEP _all.primaries.bulk.avg_time_in_millis) (STATS ABS(_all.primaries.bulk.avg_time_in_millis) BY col0)
-  | FUSE linear
-  | RERANK "Your search query"
-  | SAMPLE .001
-  | KEEP col0`,
-      page,
-      100
-    );
+    for (let i = 0; i < pipes.length; i++) {
+      await typeESQLEditorQuery(pipes[i], page, 50);
+    }
   })
 
   /**
-   * Test performance of the editor after a long query. To stress columns collection routines.
+   * Continue the query at 100ms/char, still pipe by pipe.
+   * Tests additional command types at a different typing cadence.
    */
-  .step('Paste a large query and edit it ', async ({ page }) => {
+  .step('Type additional commands (slower, pipe by pipe)', async ({ page }) => {
+    const pipes = [
+      `\n  | ENRICH policy | CHANGE_POINT _all.primaries.bulk.avg_time_in_millis`,
+      `\n  | LOOKUP JOIN lookup_index ON col0`,
+      `\n  | COMPLETION "query" WITH { "inference_id": "endpoint" }`,
+      `\n  | FORK (KEEP _all.primaries.bulk.avg_time_in_millis) (STATS ABS(_all.primaries.bulk.avg_time_in_millis) BY col0)`,
+      `\n  | FUSE linear`,
+      `\n  | RERANK "Your search query"`,
+      `\n  | SAMPLE .001`,
+      `\n  | KEEP col0`,
+    ];
+
+    for (let i = 0; i < pipes.length; i++) {
+      await typeESQLEditorQuery(pipes[i], page, 100);
+    }
+  })
+
+  /**
+   * Paste incrementally larger queries (10, 25, 50, 75, 100 EVAL lines) to
+   * stress the column-resolution pipeline at different query sizes, then type
+   * a final edit on top of the largest query.
+   */
+  .step('Paste incrementally larger queries and edit', async ({ page }) => {
     await setMonacoEditorValue('', page);
 
-    const largeQuery = buildLargeQuery(100);
+    for (const evalCount of [10, 25, 50, 75, 100]) {
+      await setMonacoEditorValue(buildLargeQuery(evalCount), page);
+    }
 
-    await setMonacoEditorValue(largeQuery, page);
-    await typeESQLEditorQuery(`| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 200);
+    await typeESQLEditorQuery(`\n| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 100);
+    await typeESQLEditorQuery(`\n| EVAL col90 = renamed_field`, page, 100);
   });
 
 // === UTILS ===========================================================================
 
-/**
- * Types the given string letter by letter.
- */
+const countValidationMarks = (page: Page) =>
+  page.evaluate(() => performance.getEntriesByName('esql-validation-complete', 'mark').length);
+
+const waitForValidation = async (page: Page, baseline?: number) => {
+  const marksBefore = baseline ?? (await countValidationMarks(page));
+
+  await page
+    .waitForFunction(
+      ({ name, count }) => performance.getEntriesByName(name, 'mark').length > count,
+      { name: 'esql-validation-complete', count: marksBefore },
+      { timeout: 15000 }
+    )
+    .catch(() => {
+      // eslint-disable-next-line no-console
+      console.log(`Waited for too long for the validation to finish, continuing with the test...`);
+    });
+};
+
 const typeESQLEditorQuery = async (value: string, page: Page, typingDelay: number) => {
   const editor = await getEditor(page);
+  const marksBefore = await countValidationMarks(page);
   await moveCursorToEnd(page, editor);
   await editor.pressSequentially(value, { delay: typingDelay, timeout: 0 });
+  await waitForValidation(page, marksBefore);
 };
 
 /**
@@ -125,6 +156,8 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
     return Boolean(monacoEditor?.getModels && monacoEditor.getModels().length);
   });
 
+  const marksBefore = await countValidationMarks(page);
+
   // Set the value directly via Monaco's API
   await page.evaluate(
     ({ codeEditorValue }) => {
@@ -144,6 +177,7 @@ const setMonacoEditorValue = async (value: string, page: Page) => {
     },
     { expected: value }
   );
+  await waitForValidation(page, marksBefore);
 };
 
 /**

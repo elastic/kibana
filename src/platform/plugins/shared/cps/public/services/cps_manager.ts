@@ -10,7 +10,7 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import {
   type CPSAppAccessResolver,
   type ICPSManager,
@@ -69,7 +69,6 @@ export class CPSManager implements ICPSManager {
           return this.resolveAccess(this.currentAppId, this.currentLocation);
         })
       )
-      .pipe(distinctUntilChanged())
       .subscribe((access) => {
         this.applyAccess(access);
       });
@@ -140,6 +139,15 @@ export class CPSManager implements ICPSManager {
   }
 
   /**
+   * Whether the origin project has any linked projects, i.e. cross-project search is
+   * actually possible. Reflects data fetched during `whenReady()`, so it returns
+   * `false` until that resolves.
+   */
+  public hasLinkedProjects(): boolean {
+    return (this.allProjects?.linkedProjects.length ?? 0) > 0;
+  }
+
+  /**
    * Get the current project routing as an observable
    */
   public getProjectRouting$() {
@@ -192,12 +200,16 @@ export class CPSManager implements ICPSManager {
    * Get the current project routing value
    */
   public getProjectRouting(overrideValue?: ProjectRouting) {
+    if (overrideValue !== undefined) {
+      return overrideValue;
+    }
+
     if (this.projectPickerAccess$.value === ProjectRoutingAccess.DISABLED) {
       return undefined;
     } else if (this.projectPickerAccess$.value === ProjectRoutingAccess.READONLY) {
       return this.defaultProjectRouting;
     }
-    return overrideValue ?? this.projectRouting$.value;
+    return this.projectRouting$.value;
   }
 
   /**

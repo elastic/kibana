@@ -9,13 +9,13 @@
 
 import stylelint from 'stylelint';
 import path from 'path';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import fs from 'fs';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 // load the include globs from .stylelintrc and convert them to regular expressions for filtering files
 const stylelintPath = path.resolve(__dirname, '..', '..', '..', '.stylelintrc');
-const styleLintConfig = load(fs.readFileSync(stylelintPath));
+const styleLintConfig = parse(fs.readFileSync(stylelintPath, 'utf8'));
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log

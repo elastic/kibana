@@ -8,25 +8,79 @@
  */
 
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
-import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
+import { CONTENT_LIST_ACTIONS } from './types';
 import type { ContentListClientState, ContentListAction } from './types';
 
 describe('state_reducer', () => {
   /**
    * Creates initial client state for testing.
    *
-   * Note: The reducer only manages client-controlled state (search, filters, sort, pagination, selection).
+   * Note: The reducer only manages client-controlled state (queryText, sort, pagination, selection).
    * Query data (items, isLoading, error) is managed by React Query directly.
    */
   const createInitialState = (
     overrides?: Partial<ContentListClientState>
   ): ContentListClientState => ({
-    search: { queryText: '' },
-    filters: DEFAULT_FILTERS,
+    queryText: '',
     sort: { field: 'updatedAt', direction: 'desc' },
     page: { index: 0, size: 20 },
     selection: { ...DEFAULT_SELECTION },
     ...overrides,
+  });
+
+  describe('SET_QUERY', () => {
+    it('sets the query text', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'dashboard' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.queryText).toBe('dashboard');
+    });
+
+    it('resets page index to 0 when query changes', () => {
+      const initialState = createInitialState({ page: { index: 5, size: 20 } });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'dashboard' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.page.size).toBe(20);
+    });
+
+    it('preserves sort when setting query', () => {
+      const initialState = createInitialState({
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'test' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when query changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'dashboard' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
   });
 
   describe('SET_SORT', () => {
@@ -56,10 +110,8 @@ describe('state_reducer', () => {
       expect(newState.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    it('preserves filters when setting sort', () => {
-      const initialState = createInitialState({
-        filters: { search: 'test query' },
-      });
+    it('preserves queryText when setting sort', () => {
+      const initialState = createInitialState({ queryText: 'my query' });
       const action: ContentListAction = {
         type: CONTENT_LIST_ACTIONS.SET_SORT,
         payload: { field: 'title', direction: 'asc' },
@@ -67,7 +119,7 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.queryText).toBe('my query');
     });
 
     it('clears selection when sort changes', () => {
@@ -110,9 +162,9 @@ describe('state_reducer', () => {
       expect(newState.page.size).toBe(50);
     });
 
-    it('preserves sort and filters when changing page index', () => {
+    it('preserves sort and queryText when changing page index', () => {
       const initialState = createInitialState({
-        filters: { search: 'test query' },
+        queryText: 'test query',
         sort: { field: 'title', direction: 'asc' },
       });
       const action: ContentListAction = {
@@ -122,7 +174,7 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.queryText).toBe('test query');
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
     });
 
@@ -168,9 +220,9 @@ describe('state_reducer', () => {
       expect(newState.selection.selectedIds).toEqual(['3']);
     });
 
-    it('preserves sort and filters when setting selection', () => {
+    it('preserves sort and queryText when setting selection', () => {
       const initialState = createInitialState({
-        filters: { search: 'test query' },
+        queryText: 'test query',
         sort: { field: 'title', direction: 'asc' },
       });
       const action: ContentListAction = {
@@ -180,7 +232,7 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.queryText).toBe('test query');
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
     });
   });
@@ -199,9 +251,9 @@ describe('state_reducer', () => {
       expect(newState.selection.selectedIds).toEqual([]);
     });
 
-    it('preserves sort and filters when clearing selection', () => {
+    it('preserves sort and queryText when clearing selection', () => {
       const initialState = createInitialState({
-        filters: { search: 'test query' },
+        queryText: 'test query',
         sort: { field: 'title', direction: 'asc' },
         selection: { selectedIds: ['1'] },
       });
@@ -211,131 +263,35 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.queryText).toBe('test query');
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
     });
   });
 
-  describe('SET_SEARCH', () => {
-    it('sets search query text and filters atomically', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.search.queryText).toBe('dashboard');
-      expect(newState.filters).toEqual({ search: 'dashboard' });
-    });
-
-    it('resets page index to 0 when search changes', () => {
-      const initialState = createInitialState({ page: { index: 5, size: 20 } });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.page.index).toBe(0);
-      expect(newState.page.size).toBe(20);
-    });
-
-    it('preserves sort when setting search', () => {
+  describe('RESET_QUERY', () => {
+    it('hard-resets queryText to empty string (including free-text)', () => {
       const initialState = createInitialState({
-        sort: { field: 'title', direction: 'asc' },
+        queryText: 'tag:production my search',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'test query', filters: { search: 'test query' } },
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
 
-      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
-    });
-
-    it('allows filters to differ from query text (e.g. tag syntax)', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'tag:prod my search', filters: { search: 'my search' } },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.search.queryText).toBe('tag:prod my search');
-      expect(newState.filters).toEqual({ search: 'my search' });
-    });
-
-    it('clears filters when search text is empty', () => {
-      const initialState = createInitialState({
-        search: { queryText: 'existing' },
-        filters: { search: 'existing' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: '', filters: { search: undefined } },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.search.queryText).toBe('');
-      expect(newState.filters).toEqual({ search: undefined });
-    });
-
-    it('clears selection when search changes', () => {
-      const initialState = createInitialState({
-        selection: { selectedIds: ['1', '2'] },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'dashboard', filters: { search: 'dashboard' } },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.selection.selectedIds).toEqual([]);
-    });
-  });
-
-  describe('CLEAR_FILTERS', () => {
-    it('resets filters to defaults', () => {
-      const initialState = createInitialState({
-        filters: { search: 'something' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.filters).toEqual(DEFAULT_FILTERS);
-    });
-
-    it('resets search query text to empty string', () => {
-      const initialState = createInitialState({
-        search: { queryText: 'tag:prod my search' },
-      });
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.search.queryText).toBe('');
+      // `RESET_QUERY` is a hard reset that wipes everything. The
+      // `useContentListFilters().clearFilters` hook preserves free-text
+      // by dispatching `SET_QUERY` with only the search portion instead.
+      expect(newState.queryText).toBe('');
     });
 
     it('preserves sort when clearing filters', () => {
       const initialState = createInitialState({
         sort: { field: 'title', direction: 'asc' },
-        filters: { search: 'test' },
-        search: { queryText: 'test' },
+        queryText: 'test',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -345,12 +301,11 @@ describe('state_reducer', () => {
 
     it('resets page index to 0 when filters are cleared', () => {
       const initialState = createInitialState({
-        filters: { search: 'test' },
-        search: { queryText: 'test' },
+        queryText: 'test',
         page: { index: 3, size: 20 },
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -361,12 +316,11 @@ describe('state_reducer', () => {
 
     it('clears selection when filters are cleared', () => {
       const initialState = createInitialState({
-        filters: { search: 'test' },
-        search: { queryText: 'test' },
+        queryText: 'test',
         selection: { selectedIds: ['1', '2'] },
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);
@@ -400,9 +354,9 @@ describe('state_reducer', () => {
       expect(newState.page).toEqual({ index: 0, size: 100 });
     });
 
-    it('preserves sort and filters when changing page size', () => {
+    it('preserves sort and queryText when changing page size', () => {
       const initialState = createInitialState({
-        filters: { search: 'test query' },
+        queryText: 'test query',
         sort: { field: 'title', direction: 'asc' },
       });
       const action: ContentListAction = {
@@ -412,7 +366,7 @@ describe('state_reducer', () => {
 
       const newState = reducer(initialState, action);
 
-      expect(newState.filters).toEqual({ search: 'test query' });
+      expect(newState.queryText).toBe('test query');
       expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
     });
 
@@ -473,7 +427,7 @@ describe('state_reducer', () => {
     it('does not mutate the original state', () => {
       const initialState = createInitialState();
       const originalSort = initialState.sort;
-      const originalFilters = initialState.filters;
+      const originalQueryText = initialState.queryText;
       const originalSelection = initialState.selection;
 
       reducer(initialState, {
@@ -482,7 +436,7 @@ describe('state_reducer', () => {
       });
 
       expect(initialState.sort).toBe(originalSort);
-      expect(initialState.filters).toBe(originalFilters);
+      expect(initialState.queryText).toBe(originalQueryText);
       expect(initialState.selection).toBe(originalSelection);
     });
 
@@ -511,11 +465,11 @@ describe('state_reducer', () => {
       expect(newState).not.toBe(initialState);
     });
 
-    it('returns a new state object for SET_SEARCH', () => {
+    it('returns a new state object for SET_QUERY', () => {
       const initialState = createInitialState();
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'test', filters: { search: 'test' } },
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'test' },
       };
 
       const newState = reducer(initialState, action);
@@ -523,27 +477,24 @@ describe('state_reducer', () => {
       expect(newState).not.toBe(initialState);
     });
 
-    it('does not mutate the original search or filters on SET_SEARCH', () => {
+    it('does not mutate the original queryText on SET_QUERY', () => {
       const initialState = createInitialState();
-      const originalSearch = initialState.search;
-      const originalFilters = initialState.filters;
+      const originalQueryText = initialState.queryText;
 
       reducer(initialState, {
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'test', filters: { search: 'test' } },
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: { queryText: 'test' },
       });
 
-      expect(initialState.search).toBe(originalSearch);
-      expect(initialState.filters).toBe(originalFilters);
+      expect(initialState.queryText).toBe(originalQueryText);
     });
 
-    it('returns a new state object for CLEAR_FILTERS', () => {
+    it('returns a new state object for RESET_QUERY', () => {
       const initialState = createInitialState({
-        filters: { search: 'test' },
-        search: { queryText: 'test' },
+        queryText: 'test',
       });
       const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+        type: CONTENT_LIST_ACTIONS.RESET_QUERY,
       };
 
       const newState = reducer(initialState, action);

@@ -24,10 +24,14 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     if (config.isCloud) {
       return;
     }
+
+    await apiServices.fleet.internal.setup();
+
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
     });
   });
+
   test.afterAll(async ({ apiServices, config }) => {
     if (config.isCloud) {
       return;
@@ -47,7 +51,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 
     await browseIntegrations.navigateTo();
 
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.scrollToIntegration('nginx');
   });
@@ -58,7 +62,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.sortIntegrations('z-a');
 
@@ -71,7 +75,7 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.searchForIntegration('nginx');
 

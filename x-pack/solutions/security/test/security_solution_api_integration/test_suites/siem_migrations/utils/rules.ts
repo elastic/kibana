@@ -27,10 +27,14 @@ import {
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_STATS_PATH,
   SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH,
   SIEM_RULE_MIGRATION_QRADAR_RULES_PATH,
+  SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH,
+  SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type {
   CreateQRadarRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
   RuleMigrationEnhanceRuleResponse,
+  UpdateRuleMigrationIndexPatternResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import {
   type CreateRuleMigrationRequestBody,
@@ -87,6 +91,12 @@ export interface CreateRuleMigrationQradarRulesParams extends RequestParams {
   payload: CreateQRadarRuleMigrationRulesRequestBody;
 }
 
+export interface CreateRuleMigrationSentinelRulesParams extends RequestParams {
+  /* The id is necessary only for batching the migration creation in multiple requests */
+  migrationId: string;
+  payload: CreateSentinelRuleMigrationRulesRequestBody;
+}
+
 export interface UpdateRulesParams extends MigrationRequestParams {
   /** Optional payload to send */
   payload?: any;
@@ -103,6 +113,10 @@ export type StartMigrationRuleParams = MigrationRequestParams & {
 
 export interface EnhanceRulesParams extends MigrationRequestParams {
   payload: RuleMigrationEnhanceRuleRequestBodyInput;
+}
+
+export interface UpdateIndexPatternParams extends MigrationRequestParams {
+  payload: { index_pattern: string; ids?: string[] };
 }
 
 export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => {
@@ -215,6 +229,26 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       expectStatusCode = 200,
     }: CreateRuleMigrationQradarRulesParams): Promise<{ body: null }> => {
       const route = replaceParams(SIEM_RULE_MIGRATION_QRADAR_RULES_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    addSentinelRulesToMigration: async ({
+      migrationId,
+      payload,
+      expectStatusCode = 200,
+    }: CreateRuleMigrationSentinelRulesParams): Promise<{ body: null }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_SENTINEL_RULES_PATH, {
         migration_id: migrationId,
       });
       const response = await supertest
@@ -412,6 +446,26 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       expectStatusCode = 200,
     }: EnhanceRulesParams): Promise<{ body: RuleMigrationEnhanceRuleResponse }> => {
       const route = replaceParams(SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(route)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(payload);
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+
+    updateIndexPattern: async ({
+      migrationId,
+      payload,
+      expectStatusCode = 200,
+    }: UpdateIndexPatternParams): Promise<{ body: UpdateRuleMigrationIndexPatternResponse }> => {
+      const route = replaceParams(SIEM_RULE_MIGRATION_UPDATE_INDEX_PATTERN_PATH, {
         migration_id: migrationId,
       });
       const response = await supertest

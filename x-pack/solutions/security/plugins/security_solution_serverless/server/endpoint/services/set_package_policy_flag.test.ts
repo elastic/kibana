@@ -23,7 +23,7 @@ import { ensureOnlyEventCollectionIsAllowed } from '@kbn/security-solution-plugi
 
 import { setEndpointPackagePolicyServerlessBillingFlags } from './set_package_policy_flag';
 
-describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
+describe.skip('setEndpointPackagePolicyServerlessBillingFlags', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;

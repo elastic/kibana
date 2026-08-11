@@ -15,7 +15,7 @@ export const AgentBuilderConversationsPage: React.FC = () => {
   useBreadcrumb([
     {
       text: labels.conversations.title,
-      path: appPaths.chat.new,
+      path: appPaths.root,
     },
   ]);
   return <AgentBuilderConversationsView />;

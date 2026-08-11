@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { DissectProcessor } from '../../../../types/processors';
 import { parseMultiDissectPatterns } from '../../../../types/utils/dissect_patterns';
 import { conditionToESQLAst } from '../condition_to_esql';

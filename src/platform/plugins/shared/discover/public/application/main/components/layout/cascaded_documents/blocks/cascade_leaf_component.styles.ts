@@ -15,6 +15,7 @@ export const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme'])
     overflow: 'hidden',
     position: 'relative',
     height: '100%',
+    contain: 'content',
     '& .euiDataGridHeader': {
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },

@@ -34,6 +34,7 @@ export {
   type HasTimeRange,
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
+  type SearchEmbeddablePanelApiState,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
 

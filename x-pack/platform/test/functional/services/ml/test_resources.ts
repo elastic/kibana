@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ProvidedType } from '@kbn/test';
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
@@ -242,7 +242,7 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async createSavedSearchFarequoteFilterIfNeeded(dataViewTitle: string = 'ft_farequote') {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
+      return await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
     },
 
     async createMLTestDashboardIfNeeded(): Promise<string> {

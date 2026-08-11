@@ -6,19 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
+import {
+  unifiedSearchBarPlaceholder,
+  getSearchBarBoolFilter,
+} from '../../../../common/dependencies';
 import { page } from './page_template';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { offsetSchema } from '../../../../common/comparison_rt';
 import { DependencyDetailOperations } from '../../app/dependency_detail_operations';
 import { DependencyDetailOverview } from '../../app/dependency_detail_overview';
 import { DependencyDetailView } from '../../app/dependency_detail_view';
-import { DependenciesInventory } from '../../app/dependencies_inventory';
+import { DependenciesInventoryTable } from '../../app/dependencies_inventory/dependencies_inventory_table';
 import { DependencyOperationDetailView } from '../../app/dependency_operation_detail_view';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
@@ -26,6 +31,21 @@ export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',
   { defaultMessage: 'Dependencies' }
 );
+
+function DependenciesInventorySearchBar() {
+  const {
+    query: { environment },
+  } = useApmParams('/dependencies/inventory');
+  const searchBarBoolFilter = getSearchBarBoolFilter({ environment });
+  return (
+    <SearchBar
+      showTimeComparison
+      showEnvironmentFilter
+      searchBarPlaceholder={unifiedSearchBarPlaceholder}
+      searchBarBoolFilter={searchBarBoolFilter}
+    />
+  );
+}
 
 function RedirectDependenciesToDependenciesOverview() {
   const { query } = useApmParams('/dependencies');
@@ -37,14 +57,15 @@ export const dependencies = {
   ...page({
     path: '/dependencies/inventory',
     title: DependenciesInventoryTitle,
-    element: <DependenciesInventory />,
-    params: t.partial({
-      query: t.intersection([
-        t.type({
-          comparisonEnabled: toBooleanRt,
-        }),
-        offsetRt,
-      ]),
+    element: <DependenciesInventoryTable />,
+    searchBar: <DependenciesInventorySearchBar />,
+    params: z.object({
+      query: z
+        .object({
+          comparisonEnabled: toBooleanFromString,
+        })
+        .merge(offsetSchema)
+        .optional(),
     }),
   }),
   '/dependencies': {
@@ -53,14 +74,14 @@ export const dependencies = {
         <Outlet />
       </DependencyDetailView>
     ),
-    params: t.partial({
-      query: t.intersection([
-        t.type({
-          comparisonEnabled: toBooleanRt,
-          dependencyName: t.string,
-        }),
-        offsetRt,
-      ]),
+    params: z.object({
+      query: z
+        .object({
+          comparisonEnabled: toBooleanFromString,
+          dependencyName: z.string(),
+        })
+        .merge(offsetSchema)
+        .optional(),
     }),
     children: {
       '/dependencies': {
@@ -70,25 +91,27 @@ export const dependencies = {
         element: <DependencyDetailOperations />,
       },
       '/dependencies/operation': {
-        params: t.type({
-          query: t.intersection([
-            t.type({
-              spanName: t.string,
-              detailTab: t.union([
-                t.literal(TransactionTab.timeline),
-                t.literal(TransactionTab.metadata),
-                t.literal(TransactionTab.logs),
+        params: z.object({
+          query: z
+            .object({
+              spanName: z.string(),
+              detailTab: z.union([
+                z.literal(TransactionTab.timeline),
+                z.literal(TransactionTab.metadata),
+                z.literal(TransactionTab.logs),
+                z.literal(TransactionTab.genAi),
               ]),
-              showCriticalPath: toBooleanRt,
-            }),
-            t.partial({
-              spanId: t.string,
-              sampleRangeFrom: toNumberRt,
-              sampleRangeTo: toNumberRt,
-              waterfallItemId: t.string,
-              flyoutDetailTab: t.string,
-            }),
-          ]),
+              showCriticalPath: toBooleanFromString,
+            })
+            .merge(
+              z.object({
+                spanId: z.string().optional(),
+                sampleRangeFrom: z.coerce.number().optional(),
+                sampleRangeTo: z.coerce.number().optional(),
+                waterfallItemId: z.string().optional(),
+                flyoutDetailTab: z.string().optional(),
+              })
+            ),
         }),
         defaults: {
           query: {

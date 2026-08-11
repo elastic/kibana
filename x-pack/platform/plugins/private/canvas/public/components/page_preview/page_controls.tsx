@@ -7,7 +7,6 @@
 
 import type { FC, ReactEventHandler } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -74,10 +73,4 @@ export const PageControls: FC<Props> = ({ pageId, onRemove, onDuplicate }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-PageControls.propTypes = {
-  pageId: PropTypes.string.isRequired,
-  onRemove: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
 };

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/270224
+issues:
+- https://github.com/elastic/search-team/issues/14488
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Fix OAuth "Cancel authorization" to delete pending server-side state
+description: Fixes a bug where cancelling an in-progress OAuth connector authorization flow left the pending server-side state intact, allowing the authorization to complete silently if the provider tab remained open.

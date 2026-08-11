@@ -8,16 +8,22 @@
 import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPopover,
-  useEuiPaddingSize,
   EuiContextMenuItem,
   useGeneratedHtmlId,
   EuiContextMenuPanel,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 
 interface CreateRuleContextMenuProps {
   loading: boolean;
@@ -28,14 +34,30 @@ interface CreateRuleContextMenuProps {
  * Alternative implementation using SecuritySolutionLinkButton components
  * for better integration with existing routing
  */
+const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
+
+You can review and edit everything before enabling the rule. 
+Desired behavior or activity to detect:
+
+==== YOUR DESCRIPTION HERE====
+`;
+
+const RULE_CREATION_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.ariaLabel',
+  {
+    defaultMessage:
+      'Create a rule either using the agent or manually using the rule creation form ',
+  }
+);
+
 export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, isDisabled }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'createRuleContextMenuLinks',
   });
+  const { services } = useKibana();
+  const { agentBuilder, telemetry, aiRuleCreation } = services;
 
-  const m = useEuiPaddingSize('m');
-  const xl = useEuiPaddingSize('xl');
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -44,9 +66,38 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     setIsPopoverOpen(false);
   }, []);
 
+  const handleAiRuleCreation = useCallback(() => {
+    closePopover();
+
+    const session = aiRuleCreation.startSession();
+    telemetry.reportEvent(RuleCreationEventTypes.CreationInitialized, {
+      creationSource: 'ai',
+      sessionId: session.sessionId,
+    });
+
+    const emptyRuleAttachment: AttachmentInput = {
+      id: SECURITY_RULE_ATTACHMENT_ID,
+      type: SecurityAgentBuilderAttachments.rule,
+      data: {
+        text: JSON.stringify({}),
+        attachmentLabel: 'New Rule',
+      },
+    };
+
+    if (agentBuilder?.openChat) {
+      agentBuilder.openChat({
+        newConversation: true,
+        initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
+        autoSendInitialMessage: false,
+        sessionTag: 'security',
+        attachments: [emptyRuleAttachment],
+      });
+    }
+  }, [closePopover, agentBuilder, aiRuleCreation, telemetry]);
+
   const createRuleButton = (
     <EuiButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       fill
@@ -62,40 +113,43 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   );
 
   return (
-    <EuiPopover
-      id={contextMenuPopoverId}
-      button={createRuleButton}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      data-test-subj={'create-rule-context-menu-popover'}
-    >
-      <EuiContextMenuPanel>
-        <EuiContextMenuItem key="ai-rule-creation" style={{ padding: `${m} ${xl}` }}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.aiRuleCreation}
+    <>
+      <EuiPopover
+        id={contextMenuPopoverId}
+        aria-label={RULE_CREATION_POPOVER_ARIA_LABEL}
+        button={createRuleButton}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        data-test-subj={'create-rule-context-menu-popover'}
+      >
+        <EuiContextMenuPanel>
+          <EuiContextMenuItem
+            key="ai-rule-creation"
+            onClick={handleAiRuleCreation}
             data-test-subj="ai-rule-creation"
+            icon="productAgent"
           >
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation"
               defaultMessage="AI rule creation"
             />
-          </SecuritySolutionLinkAnchor>
-        </EuiContextMenuItem>
-        <EuiHorizontalRule key="separator" margin="none" />
-        <EuiContextMenuItem key="manual-rule-creation" style={{ padding: `${m} ${xl}` }}>
-          <SecuritySolutionLinkAnchor
-            deepLinkId={SecurityPageName.rulesCreate}
-            data-test-subj="manual-rule-creation"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.contextMenu.manual"
-              defaultMessage="Manual rule creation"
-            />
-          </SecuritySolutionLinkAnchor>
-        </EuiContextMenuItem>
-      </EuiContextMenuPanel>
-    </EuiPopover>
+          </EuiContextMenuItem>
+          <EuiContextMenuItem key="manual-rule-creation">
+            <SecuritySolutionLinkAnchor
+              deepLinkId={SecurityPageName.rulesCreate}
+              data-test-subj="manual-rule-creation"
+              color="text"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.detectionEngine.createRule.contextMenu.manual"
+                defaultMessage="Manual rule creation"
+              />
+            </SecuritySolutionLinkAnchor>
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      </EuiPopover>
+    </>
   );
 };

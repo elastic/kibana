@@ -6,8 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useRef } from 'react';
-import PropTypes from 'prop-types';
+import React, { useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiPanel,
   EuiButton,
@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiLink,
   EuiPortal,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
@@ -100,7 +101,17 @@ export const Expression: FC<Props> = ({
   isCompact,
   toggleCompactView,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const refExpressionInput: ExpressionInputEditorRef = useRef(null);
+
+  const settingsStyles = useMemo(
+    () =>
+      css({
+        borderTop: euiTheme.border.thin,
+        backgroundColor: euiTheme.colors.emptyShade,
+      }),
+    [euiTheme]
+  );
 
   const handleRun = () => {
     setExpression(formState.expression);
@@ -151,7 +162,7 @@ export const Expression: FC<Props> = ({
         onEditorDidMount={onEditorDidMount}
         editorRef={refExpressionInput}
       />
-      <div className="canvasExpression__settings">
+      <div className="canvasExpression__settings" css={settingsStyles}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
@@ -208,18 +219,4 @@ export const Expression: FC<Props> = ({
     // Portal is required to show above the navigation
     return <EuiPortal>{expressionPanel}</EuiPortal>;
   }
-};
-
-Expression.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  functionDefinitions: PropTypes.array,
-  // @ts-expect-error upgrade typescript v5.9.3
-  formState: PropTypes.object,
-  // @ts-expect-error upgrade typescript v5.9.3
-  updateValue: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
-  setExpression: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
-  done: PropTypes.func,
-  error: PropTypes.string,
 };

@@ -47,7 +47,7 @@ export async function getDegradedFieldValues({
 function extractAndDeduplicateValues(searchHits: SearchHit[], key: string): string[] {
   const values: string[] = [];
 
-  searchHits.forEach((hit: any) => {
+  searchHits.forEach((hit: SearchHit) => {
     const fieldValue = hit.ignored_field_values?.[key];
     if (fieldValue) {
       if (Array.isArray(fieldValue)) {

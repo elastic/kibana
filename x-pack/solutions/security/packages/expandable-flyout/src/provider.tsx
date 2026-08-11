@@ -8,7 +8,7 @@
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
 import { ExpandableFlyoutContextProvider, useExpandableFlyoutContext } from './context';
 import type { FlyoutPanels } from './store/state';
@@ -53,10 +53,17 @@ export const UrlSynchronizer = () => {
           id: urlKey,
         })
       );
+    } else {
+      dispatch(urlChangedAction({ id: urlKey }));
     }
 
     const subscription = urlStorage.change$<FlyoutPanels>(urlKey).subscribe((value) => {
-      dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
+      if (value) {
+        dispatch(urlChangedAction({ ...value, preview: value?.preview?.at(-1), id: urlKey }));
+      } else {
+        // No URL state: dispatching with only the id clears left/right/preview in the reducer.
+        dispatch(urlChangedAction({ id: urlKey }));
+      }
     });
 
     return () => subscription.unsubscribe();

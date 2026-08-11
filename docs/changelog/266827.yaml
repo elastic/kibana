@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/266827
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Alerting and reporting
+title: Fix phrase search in All Cases view

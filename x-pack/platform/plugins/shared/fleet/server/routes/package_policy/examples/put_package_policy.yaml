@@ -1,0 +1,61 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putPackagePolicyRequestExample:
+          description: 'Update a package policy'
+          value:
+            name: 'nginx-1-updated'
+            namespace: 'default'
+            enabled: true
+            policy_ids:
+              - 'agent-policy-id-1'
+            package:
+              name: 'nginx'
+              version: '1.20.0'
+            inputs: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putPackagePolicyExample:
+            description: 'The updated package policy'
+            value:
+              item:
+                id: 'package-policy-id-1'
+                name: 'nginx-1-updated'
+                namespace: 'default'
+                enabled: true
+                policy_ids:
+                  - 'agent-policy-id-1'
+                package:
+                  name: 'nginx'
+                  title: 'Nginx'
+                  version: '1.20.0'
+                inputs: []
+                created_at: '2024-01-15T10:00:00.000Z'
+                updated_at: '2024-01-15T11:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  403:
+    description: 'Forbidden'
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            description: 'The update is not authorized for this package'
+            value:
+              statusCode: 403
+              error: 'Forbidden'
+              message: 'An error message describing what went wrong'

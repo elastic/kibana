@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -31,7 +32,6 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'transactions'
     | 'dependencies'
     | 'errors-and-crashes'
-    | 'service-map'
     | 'logs'
     | 'alerts'
     | 'dashboards';
@@ -43,6 +43,9 @@ interface Props {
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
 
 export function MobileServiceTemplate(props: Props) {
@@ -55,7 +58,15 @@ export function MobileServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions }: Props) {
+function TemplateWithContext({
+  title,
+  children,
+  selectedTabKey,
+  searchBarOptions,
+  customSearchBar,
+  bottomHeaderContent: BottomHeaderContent,
+  contentWrapper: ContentWrapper = React.Fragment,
+}: Props) {
   const {
     path: { serviceName },
     query,
@@ -63,6 +74,8 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
   } = useApmParams('/mobile-services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
   const router = useApmRouter();
 
@@ -83,12 +96,9 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
       },
       ...(selectedTab
         ? [
+            // No href on the current entity — Chrome Next Back would self-link.
             {
               title: serviceName,
-              href: router.link('/mobile-services/{serviceName}', {
-                path: { serviceName },
-                query,
-              }),
             },
             {
               title: selectedTab.label,
@@ -97,46 +107,61 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
           ]
         : []),
     ],
-    [query, router, selectedTab, serviceName, servicesLink],
+    [selectedTab, serviceName, servicesLink],
     {
       omitRootOnServerless: true,
     }
   );
 
   return (
-    <ApmMainTemplate
-      pageHeader={{
-        tabs,
-        pageTitle: (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIcons
-                    serviceName={serviceName}
-                    environment={environment}
-                    start={start}
-                    end={end}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+    <ContentWrapper>
+      <ApmMainTemplate
+        searchBar={
+          <>
+            {BottomHeaderContent && <BottomHeaderContent />}
+            {customSearchBar ?? (
+              <MobileSearchBar
+                {...searchBarOptions}
+                showEnvironmentFilter
+                showAnomalyThresholdSelector={shouldShowAnomalyUi}
+              />
+            )}
+          </>
+        }
+        pageHeader={{
+          tabs,
+          pageTitle: (
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ServiceIcons
+                      serviceName={serviceName}
+                      environment={environment}
+                      start={start}
+                      end={end}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <AnalyzeDataButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      }}
-    >
-      <MobileSearchBar {...searchBarOptions} />
-      <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
-    </ApmMainTemplate>
+              <EuiFlexItem grow={false}>
+                <AnalyzeDataButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }}
+      >
+        <ServiceAnomalyTimeseriesContextProvider>
+          {children}
+        </ServiceAnomalyTimeseriesContextProvider>
+      </ApmMainTemplate>
+    </ContentWrapper>
   );
 }
 
@@ -196,16 +221,6 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       }),
     },
     {
-      key: 'service-map',
-      href: router.link('/mobile-services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
-        defaultMessage: 'Service map',
-      }),
-    },
-    {
       key: 'logs',
       href: router.link('/mobile-services/{serviceName}/logs', {
         path: { serviceName },
@@ -214,7 +229,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
     {
       key: 'alerts',
@@ -233,7 +248,7 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),

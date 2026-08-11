@@ -11,7 +11,7 @@ import { TRACE_ID } from '@kbn/apm-types';
 import { timeRangeFilter, termFilter } from '../../utils/dsl_filters';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
-import { DEFAULT_TRACE_FIELDS } from './constants';
+import { DEFAULT_MAX_OUTPUT_CHARS, DEFAULT_TRACE_FIELDS } from './constants';
 
 export interface ServiceAggregate {
   serviceName: string;
@@ -27,13 +27,109 @@ interface ServicesAgg {
   }[];
 }
 
+function getSerializedLength(value: unknown): number {
+  return JSON.stringify(value).length;
+}
+
+function truncateTraceDocuments({
+  traceId,
+  items,
+  totalHits,
+  maxDocsPerTrace,
+  maxOutputChars,
+}: {
+  traceId: string;
+  items: Record<string, unknown>[];
+  totalHits: number;
+  maxDocsPerTrace: number;
+  maxOutputChars: number;
+}) {
+  const exceededMaxDocsPerTrace = totalHits > maxDocsPerTrace;
+
+  if (maxOutputChars <= 0) {
+    return {
+      items: [],
+      isTruncated: true,
+      remainingOutputChars: 0,
+      message: `Truncated (budget), ${totalHits} items were reduced to 0 items.`,
+    };
+  }
+
+  const remainingBudgetChars = maxOutputChars;
+
+  const returnedItems: Record<string, unknown>[] = [];
+  let usedBudgetChars = 0;
+
+  for (const item of items) {
+    const itemSizeChars = getSerializedLength(item);
+    const nextUsedChars = usedBudgetChars + itemSizeChars;
+
+    if (nextUsedChars > remainingBudgetChars) {
+      break;
+    }
+
+    returnedItems.push(item);
+    usedBudgetChars = nextUsedChars;
+  }
+
+  const truncatedByBudget = returnedItems.length < items.length;
+  const isTruncated = exceededMaxDocsPerTrace || truncatedByBudget;
+
+  const remainingOutputChars = Math.max(0, maxOutputChars - usedBudgetChars);
+
+  return {
+    items: returnedItems,
+    isTruncated,
+    message: isTruncated
+      ? `Truncated (${
+          truncatedByBudget ? 'budget' : 'maxDocsPerTrace'
+        }), ${totalHits} items were reduced to ${returnedItems.length} items.`
+      : undefined,
+    remainingOutputChars,
+  };
+}
+
+function truncateTraces(
+  rawTraces: Array<{
+    traceId: string;
+    items: Record<string, unknown>[];
+    services: ServiceAggregate[];
+    totalHits: number;
+    error?: string;
+  }>,
+  maxDocsPerTrace: number,
+  maxOutputChars: number
+) {
+  let remainingChars = maxOutputChars;
+  return rawTraces.map((trace) => {
+    if (trace.error) {
+      return {
+        traceId: trace.traceId,
+        items: [],
+        error: trace.error,
+        services: [],
+        isTruncated: false,
+      };
+    }
+    const { items, isTruncated, message, remainingOutputChars } = truncateTraceDocuments({
+      traceId: trace.traceId,
+      items: trace.items,
+      totalHits: trace.totalHits,
+      maxDocsPerTrace,
+      maxOutputChars: remainingChars,
+    });
+    remainingChars = remainingOutputChars;
+    return { traceId: trace.traceId, items, services: trace.services, isTruncated, message };
+  });
+}
+
 export async function getTraceDocuments({
   esClient,
   traceIds,
   index,
   startTime,
   endTime,
-  size,
+  maxDocsPerTrace,
   fields = DEFAULT_TRACE_FIELDS,
 }: {
   esClient: IScopedClusterClient;
@@ -41,21 +137,24 @@ export async function getTraceDocuments({
   index: string[];
   startTime: number;
   endTime: number;
-  size: number;
+  maxDocsPerTrace: number;
   fields?: string[];
 }): Promise<
   {
+    traceId: string;
     items: Record<string, unknown>[];
     services: ServiceAggregate[];
     error?: string;
     isTruncated: boolean;
+    isOutputTruncated?: boolean;
+    message?: string;
   }[]
 > {
   const searches: MsearchRequestItem[] = traceIds.flatMap((traceId) => [
     { index },
     {
-      track_total_hits: size + 1, // +1 to determine if results are truncated
-      size,
+      track_total_hits: maxDocsPerTrace + 1, // +1 to determine if results are truncated
+      size: maxDocsPerTrace,
       sort: [{ '@timestamp': { order: 'asc' } }],
       _source: false,
       fields,
@@ -85,14 +184,15 @@ export async function getTraceDocuments({
   const msearchResponse = await esClient.asCurrentUser.msearch({
     searches,
   });
-  return msearchResponse.responses.map((response, responseIndex) => {
+  const rawTraces = msearchResponse.responses.map((response, responseIndex) => {
     const traceId = traceIds[responseIndex];
     if ('error' in response) {
       return {
+        traceId,
         items: [],
         error: `Failed to fetch trace documents for trace.id ${traceId}: ${response.error.type}: ${response.error.reason}`,
         services: [],
-        isTruncated: false,
+        totalHits: 0,
       };
     }
     const serviceAggs = (response.aggregations?.services as ServicesAgg)?.buckets ?? [];
@@ -104,9 +204,12 @@ export async function getTraceDocuments({
       }))
       .sort((a, b) => b.count - a.count);
     return {
+      traceId,
       items: response.hits.hits.map((hit) => unwrapEsFields(hit.fields)),
       services,
-      isTruncated: getTotalHits(response) > size,
+      totalHits: getTotalHits(response),
     };
   });
+
+  return truncateTraces(rawTraces, maxDocsPerTrace, DEFAULT_MAX_OUTPUT_CHARS);
 }

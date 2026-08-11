@@ -9,8 +9,11 @@ import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { RunscriptConfig } from './runscript_config';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
+import { KillDescendantsField } from './kill_descendants_field';
 
 interface AdditionalConfigFieldProps {
   basePath: string;
@@ -18,36 +21,54 @@ interface AdditionalConfigFieldProps {
   readDefaultValueOnForm: boolean;
 }
 
-export const ConfigFieldsComponent = ({
-  basePath,
-  disabled,
-  readDefaultValueOnForm,
-}: AdditionalConfigFieldProps) => {
+export const ConfigFieldsComponent = (props: AdditionalConfigFieldProps) => {
+  const { basePath, disabled, readDefaultValueOnForm } = props;
   const commandPath = `${basePath}.command`;
   const overWritePath = `${basePath}.config.overwrite`;
   const [data] = useFormData({ watch: [commandPath, overWritePath] });
   const currentCommand = get(data, commandPath);
   const currentOverwrite = get(data, overWritePath);
+  const isAutomatedRunScriptEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointAutomatedRunScript'
+  );
+  const isKillProcessDescendantsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsEndpointKillProcessDescendants'
+  );
 
   if (currentCommand === 'kill-process' || currentCommand === 'suspend-process') {
     return (
       <>
         <EuiSpacer />
         <OverwriteField
-          path={`${basePath}.config.overwrite`}
+          path={overWritePath}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
         />
         <EuiSpacer />
         <FieldNameField
+          basePath={basePath}
           path={`${basePath}.config.field`}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}
           isRequired={!currentOverwrite}
         />
+        {currentCommand === 'kill-process' && isKillProcessDescendantsEnabled && (
+          <>
+            <EuiSpacer />
+            <KillDescendantsField
+              path={`${basePath}.config.kill_descendants`}
+              disabled={disabled}
+              readDefaultValueOnForm={readDefaultValueOnForm}
+            />
+          </>
+        )}
         <EuiSpacer />
       </>
     );
+  }
+
+  if (currentCommand === 'runscript' && isAutomatedRunScriptEnabled) {
+    return <RunscriptConfig {...props} />;
   }
 
   return null;

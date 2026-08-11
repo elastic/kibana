@@ -134,6 +134,13 @@ export const GAP_STATUS_UNFILLED = i18n.translate(
   }
 );
 
+export const GAP_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.ruleGapSummary.error',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
 // Table column headers
 export const TABLE_COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.table.status',
@@ -175,5 +182,19 @@ export const ERROR_RULE_GAP_SUMMARY = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.error.ruleGapSummary',
   {
     defaultMessage: 'Failed to load gap summary. Please try again later.',
+  }
+);
+
+export const LAST_RESPONSE_SUMMARY_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.lastResponseSummaryTableCaption',
+  {
+    defaultMessage: 'Last response summary',
+  }
+);
+
+export const RULE_GAP_SUMMARY_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.ruleGapSummaryTableCaption',
+  {
+    defaultMessage: 'Rule gap summary',
   }
 );

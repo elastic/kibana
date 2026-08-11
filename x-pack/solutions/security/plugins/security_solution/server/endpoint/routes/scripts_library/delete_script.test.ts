@@ -82,9 +82,11 @@ describe('Delete Script API route', () => {
         .getRegisteredVersionedRoute('delete', SCRIPTS_LIBRARY_ROUTE_ITEM, '2023-10-31')
         .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
 
+      const rulesClient = await (await httpHandlerContextMock.alerting).getRulesClient();
+
       expect(
         apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient
-      ).toHaveBeenCalledWith('space_a', 'unknown');
+      ).toHaveBeenCalledWith('space_a', 'unknown', rulesClient);
 
       expect(
         apiTestSetup.endpointAppContextMock.service.getScriptsLibraryClient('', '').delete

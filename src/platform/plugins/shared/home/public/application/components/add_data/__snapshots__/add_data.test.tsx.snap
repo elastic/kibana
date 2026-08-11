@@ -43,7 +43,7 @@ exports[`AddData render 1`] = `
             fill={false}
             fullWidth={true}
             href="/app/integrations/browse"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={[Function]}
           >
             <MemoizedFormattedMessage
@@ -72,7 +72,7 @@ exports[`AddData render 1`] = `
           <EuiButtonEmpty
             data-test-subj="uploadFile"
             href="#/tutorial_directory/fileDataViz"
-            iconType="importAction"
+            iconType="download"
           >
             <MemoizedFormattedMessage
               defaultMessage="Upload a file"

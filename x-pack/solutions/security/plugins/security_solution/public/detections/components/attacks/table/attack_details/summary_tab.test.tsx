@@ -15,8 +15,6 @@ import {
   DETAILS_CONTENT_TEST_ID,
   ATTACK_CHAIN_TITLE_TEST_ID,
   INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
-  TIMELINE_ICON_TEST_ID,
-  INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID,
 } from './summary_tab';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
@@ -25,10 +23,17 @@ import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discover
 import { AttackChain } from '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain';
 import { InvestigateInTimelineButton } from '../../../../../common/components/event_details/investigate_in_timeline_button';
 import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
+import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
 jest.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => ({
-  InvestigateInTimelineButton: jest.fn(({ children }) => (
-    <div data-test-subj="mock-investigate-in-timeline-button">{children}</div>
+  InvestigateInTimelineButton: jest.fn(({ children, 'data-test-subj': dataTestSubj }) => (
+    <div data-test-subj={dataTestSubj}>{children}</div>
+  )),
+}));
+
+jest.mock('./attack_ai_assistant_button', () => ({
+  AttackAiAssistantButton: jest.fn(() => (
+    <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
   )),
 }));
 
@@ -37,6 +42,7 @@ jest.mock('../../../alerts_table/actions', () => ({
 }));
 
 jest.mock('../../../../../attack_discovery/helpers', () => ({
+  ...jest.requireActual('../../../../../attack_discovery/helpers'),
   getTacticMetadata: jest.fn(() => []),
 }));
 
@@ -50,8 +56,10 @@ jest.mock(
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
     )),
   })
 );
@@ -167,12 +175,44 @@ describe('SummaryTab', () => {
         asEmptyButton: true,
         dataProviders: null,
         filters: { query: 'mock-query' },
+        flush: 'both',
+        iconType: 'timeline',
+        size: 'm',
       }),
       {}
     );
 
     expect(screen.getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(TIMELINE_ICON_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)).toHaveTextContent(
+      'Investigate in Timeline'
+    );
+  });
+
+  it('renders AttackAiAssistantButton with correct props', () => {
+    renderSummaryTab();
+
+    expect(screen.getByTestId('mock-attack-ai-assistant-button')).toBeInTheDocument();
+    expect(AttackAiAssistantButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attack: mockAttack,
+        pathway: 'attacks_page_group_summary',
+      }),
+      {}
+    );
+  });
+
+  it('passes originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
+    mockAttack.alertIds = ['alert-1', 'alert-2'];
+    mockAttack.replacements = { 'alert-1': 'original-1' };
+    renderSummaryTab();
+
+    const formatters = screen.getAllByTestId('mock-markdown-formatter');
+    expect(formatters.length).toBeGreaterThan(0);
+    formatters.forEach((formatter) => {
+      expect(formatter).toHaveAttribute(
+        'data-alert-ids',
+        JSON.stringify(['original-1', 'alert-2'])
+      );
+    });
   });
 });

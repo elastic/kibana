@@ -10,24 +10,26 @@
 import type { MigrationSnapshot } from '../../types';
 
 /**
- * Detects for new removed types by comparing two snapshots and identifying
- * types that exist in 'from' but not in 'to' and not already in removed_types.json
+ * Detects new removed types by comparing two snapshots and identifying
+ * types that exist in 'from' but not in 'to', and are neither already in
+ * removed_types.json nor part of the WIP types allowlist.
+ *
+ * WIP types are excluded because a type that is converted into a WIP type
+ * disappears from the current ('to') snapshot. Without this guard, such a
+ * type would be wrongly classified as removed and added to removed_types.json,
+ * which would then permanently prevent it from being registered again.
  */
 export function detectNewRemovedTypes(
   from: MigrationSnapshot,
   to: MigrationSnapshot,
-  currentRemovedTypes: string[]
+  currentRemovedTypes: string[],
+  wipTypes: string[] = []
 ): string[] {
   const fromTypes = Object.keys(from.typeDefinitions);
-  const toTypes = Object.keys(to.typeDefinitions);
+  const toTypes = new Set(Object.keys(to.typeDefinitions));
+  const ignoredTypes = new Set([...currentRemovedTypes, ...wipTypes]);
 
-  const removedTypes: string[] = [];
-
-  for (const type of fromTypes) {
-    if (!toTypes.includes(type) && !currentRemovedTypes.includes(type)) {
-      removedTypes.push(type);
-    }
-  }
+  const removedTypes = fromTypes.filter((type) => !toTypes.has(type) && !ignoredTypes.has(type));
 
   return removedTypes.sort();
 }

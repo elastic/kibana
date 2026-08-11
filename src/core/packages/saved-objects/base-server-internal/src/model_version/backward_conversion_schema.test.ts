@@ -125,7 +125,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const converted = convertModelVersionBackwardConversionSchema(conversionSchema);
 
       expect(() => converted(doc)).toThrowErrorMatchingInlineSnapshot(
-        `"[hello]: definition for this key is missing"`
+        `"[hello]: Additional properties are not allowed ('hello' was unexpected)"`
       );
     });
 

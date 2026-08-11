@@ -24,3 +24,7 @@ export { type ParsedPart, type ParsedChild, type ParsedItem } from './src/parsin
 
 // Helper types for defining declarative components.
 export type { DeclarativeComponent, DeclarativeReturn } from './src/types';
+
+// Skeleton shape descriptors (used by `createPreset({ skeleton })` and renderers).
+export { isCustomSkeletonNode } from './src/skeleton';
+export type { SkeletonDescriptor, SkeletonOutput, SkeletonTextLines } from './src/skeleton';

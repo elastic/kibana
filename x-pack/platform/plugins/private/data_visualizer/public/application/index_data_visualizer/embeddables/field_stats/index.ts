@@ -9,7 +9,7 @@ import type { DataVisualizerCoreSetup } from '../../../../plugin';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
 export const registerEmbeddables = (embeddable: EmbeddableSetup, core: DataVisualizerCoreSetup) => {
-  embeddable.registerReactEmbeddableFactory(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
+  embeddable.registerEmbeddablePublicDefinition(FIELD_STATS_EMBEDDABLE_TYPE, async () => {
     const { getFieldStatsChartEmbeddableFactory } = await import('./field_stats_factory');
     return getFieldStatsChartEmbeddableFactory(core.getStartServices);
   });

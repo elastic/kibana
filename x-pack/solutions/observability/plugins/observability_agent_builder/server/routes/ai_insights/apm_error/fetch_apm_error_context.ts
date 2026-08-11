@@ -108,7 +108,7 @@ export async function fetchApmErrorContext({
         index: [apmIndices.transaction, apmIndices.span, apmIndices.error].flatMap((pattern) =>
           pattern.split(',')
         ),
-        size: 100,
+        maxDocsPerTrace: 100,
         startTime: parsedStart,
         endTime: parsedEnd,
       });

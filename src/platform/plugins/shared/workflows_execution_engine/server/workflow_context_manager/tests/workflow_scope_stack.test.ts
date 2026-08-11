@@ -425,14 +425,14 @@ describe('WorkflowScopeStack', () => {
   });
 
   describe('getCurrentScope', () => {
-    it('should return null for empty stack', () => {
+    it('should throw an error for empty stack', () => {
       const stack = new WorkflowScopeStack();
-      expect(stack.getCurrentScope()).toBeNull();
+      expect(() => stack.getCurrentScope()).toThrow('ScopeStack is empty');
     });
 
-    it('should return null for stack created from empty frames', () => {
+    it('should throw an error for stack created from empty frames', () => {
       const stack = WorkflowScopeStack.fromStackFrames([]);
-      expect(stack.getCurrentScope()).toBeNull();
+      expect(() => stack.getCurrentScope()).toThrow('ScopeStack is empty');
     });
 
     it('should return current scope data for single frame with single scope', () => {
@@ -507,9 +507,6 @@ describe('WorkflowScopeStack', () => {
     it('should track current scope correctly during enter/exit operations', () => {
       let stack = new WorkflowScopeStack();
 
-      // Initially empty
-      expect(stack.getCurrentScope()).toBeNull();
-
       // Enter first scope
       const enterData1 = createMockEnterScopeData('node1', 'step1', 'atomic', 'scope1');
       stack = stack.enterScope(enterData1);
@@ -558,9 +555,9 @@ describe('WorkflowScopeStack', () => {
         stepId: 'step1',
       });
 
-      // Exit final scope - should become null
+      // Exit final scope - should throw an error
       stack = stack.exitScope();
-      expect(stack.getCurrentScope()).toBeNull();
+      expect(() => stack.getCurrentScope()).toThrow('ScopeStack is empty');
     });
 
     it('should handle different node types correctly', () => {

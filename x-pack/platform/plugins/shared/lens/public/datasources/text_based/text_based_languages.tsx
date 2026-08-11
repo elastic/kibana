@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import {
+  LENS_DATASOURCE_ID,
+  LENS_METRIC_GROUP_ID,
+  appendTimeBucketToEsqlQuery,
+  buildTrendlineBucketExpression,
+  buildTrendlineQueryWithMetricFieldMap,
+} from '@kbn/lens-common';
+
 import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
@@ -37,6 +45,7 @@ import type {
 } from '@kbn/lens-common';
 import { TextBasedDimensionEditor } from './components/dimension_editor';
 import { TextBasedDimensionTrigger } from './components/dimension_trigger';
+import { LayerSettingsPanel } from './layer_settings';
 import { toExpression } from './to_expression';
 import { generateId } from '../../id_generator';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
@@ -305,7 +314,7 @@ export function getTextBasedDatasource({
     return [];
   };
   const TextBasedDatasource: Datasource<TextBasedPrivateState, TextBasedPersistedState> = {
-    id: 'textBased',
+    id: LENS_DATASOURCE_ID.TEXT_BASED,
 
     checkIntegrity: () => {
       return [];
@@ -346,17 +355,142 @@ export function getTextBasedDatasource({
         };
       });
 
-      const initState = state || { layers: {} };
+      const initState = state ?? { layers: {} };
+      const hydratedLayers: typeof initState.layers = {};
+
+      // Validate the layers without a timeField configured at runtime.
+      // The ad-hoc DataView specs are regenerated at initialization (with time field
+      // detection via HTTP), but the persisted layer state may not have a timeField (if comes from the API)
+      // This ensures each layer picks up the correct timeFieldName so that
+      // time-based filtering works correctly for ES|QL visualizations.
+      for (const [layerId, layer] of Object.entries(initState.layers)) {
+        if (layer.timeField || !indexPatterns) {
+          hydratedLayers[layerId] = layer;
+          continue;
+        }
+
+        const matchedIndexPattern = layer.index ? indexPatterns[layer.index] : undefined;
+        hydratedLayers[layerId] = matchedIndexPattern?.timeFieldName
+          ? { ...layer, timeField: matchedIndexPattern.timeFieldName }
+          : layer;
+      }
+
       return {
         ...initState,
+        layers: hydratedLayers,
         indexPatternRefs: refs,
         initialContext: context,
       };
     },
 
-    syncColumns({ state }) {
-      // TODO implement this for real
-      return state;
+    // Synchronizes columns between linked layers. When a visualization declares
+    // dimension links (e.g. a metric chart linking its primary metric column to
+    // the trendline layer), this method copies the source column definition into
+    // the target layer so that the trendline layer has the same field/meta info
+    // without the user manually configuring it.
+    syncColumns({ state, links }) {
+      if (!links?.length) return state;
+
+      let newState = state;
+      for (const link of links) {
+        const fromLayer = newState.layers[link.from.layerId];
+        const toLayer = newState.layers[link.to.layerId];
+        if (!fromLayer || !toLayer) continue;
+
+        const sourceCol = fromLayer.columns.find((c) => c.columnId === link.from.columnId);
+        if (!sourceCol) continue;
+
+        const trendlineLayerLinks = links.filter((l) => l.to.layerId === link.to.layerId);
+
+        // Collect metric field names from all links targeting the same
+        // trendline layer so the auto-generated STATS uses AVG(<field>)
+        // instead of COUNT(*) when the source query has no STATS.
+        const metricGroupIds: string[] = [
+          LENS_METRIC_GROUP_ID.METRIC,
+          LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+        ];
+        const metricFields = trendlineLayerLinks
+          .filter((l) => metricGroupIds.includes(l.from.groupId))
+          .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
+          .filter((c): c is TextBasedLayerColumn => Boolean(c))
+          .map((c) => c.fieldName);
+
+        const groupByColumns = trendlineLayerLinks
+          .filter((l) => l.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY)
+          .map((l) => fromLayer.columns.find((c) => c.columnId === l.from.columnId))
+          .filter((c): c is TextBasedLayerColumn => Boolean(c))
+          .filter((c) => c.fieldName !== toLayer.timeField);
+        const groupByFields = groupByColumns.map((c) => c.fieldName);
+
+        // Sync the trendline layer's query from the source layer.
+        // The trendline query is derived from the main query with an appended
+        // BUCKET() clause. When the main query changes we must regenerate it.
+        let updatedQuery = toLayer.query;
+        let metricFieldMap = new Map<string, string>();
+        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
+          try {
+            const trendlineQueryResult = buildTrendlineQueryWithMetricFieldMap(
+              fromLayer.query.esql,
+              toLayer.timeField,
+              metricFields,
+              groupByFields
+            );
+            metricFieldMap = trendlineQueryResult.metricFieldMap;
+            if (
+              !updatedQuery ||
+              !isOfAggregateQueryType(updatedQuery) ||
+              updatedQuery.esql !== trendlineQueryResult.query
+            ) {
+              updatedQuery = { esql: trendlineQueryResult.query };
+            }
+          } catch {
+            // If the query can't be parsed, keep the existing query unchanged
+          }
+        }
+
+        const shouldSkipColumn =
+          link.from.groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY &&
+          !groupByColumns.some((c) => c.columnId === link.from.columnId);
+        const newCol: TextBasedLayerColumn = {
+          ...sourceCol,
+          columnId: link.to.columnId,
+          // When the source has no STATS, the shared trendline query helper wraps
+          // raw metric fields in AVG(); use its map so the column fieldName matches.
+          ...(metricFieldMap.has(sourceCol.fieldName) && {
+            fieldName: metricFieldMap.get(sourceCol.fieldName),
+          }),
+        };
+
+        const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
+
+        // Update columns: add if missing, update if field changed
+        let updatedColumns = toLayer.columns;
+        if (shouldSkipColumn) {
+          updatedColumns = toLayer.columns.filter((c) => c.columnId !== link.to.columnId);
+        } else if (!existingCol) {
+          updatedColumns = [...toLayer.columns, newCol];
+        } else if (existingCol.fieldName !== newCol.fieldName) {
+          updatedColumns = toLayer.columns.map((c) =>
+            c.columnId === link.to.columnId ? newCol : c
+          );
+        }
+
+        // Skip if nothing changed
+        if (updatedColumns === toLayer.columns && updatedQuery === toLayer.query) continue;
+
+        newState = {
+          ...newState,
+          layers: {
+            ...newState.layers,
+            [link.to.layerId]: {
+              ...toLayer,
+              columns: updatedColumns,
+              query: updatedQuery,
+            },
+          },
+        };
+      }
+      return newState;
     },
 
     onRefreshIndexPattern() {},
@@ -387,13 +521,58 @@ export function getTextBasedDatasource({
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
           state.indexPatternRefs[0].id);
+      // Resolve timeField from the source layer, or fall back to the index pattern ref
+      const timeField =
+        layer?.timeField ??
+        state.indexPatternRefs?.find((ref) => ref.id === (layer?.index ?? index))?.timeField;
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(index, query),
+          [newLayerId]: { ...blankLayer(index, query), timeField },
         },
       };
+    },
+    // Called by the visualization to pre-populate a dimension when a new layer is
+    // created. For metric trendline layers, this auto-initializes the time field
+    // column and appends a BUCKET() time-bucketing clause to the ES|QL query so
+    // the trendline has time-series data without manual user configuration.
+    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
+      const layer = state.layers[layerId];
+      if (!layer) return state;
+      if (autoTimeField && layer.timeField) {
+        const tf = layer.timeField;
+        // The fieldName must match the ES|QL result column name, which is the
+        // full BUCKET expression, not the raw field name.
+        const timeColumn: TextBasedLayerColumn = {
+          columnId,
+          fieldName: buildTrendlineBucketExpression(tf),
+          meta: { type: 'date' },
+        };
+
+        // Auto-modify query to add time bucketing for trendline
+        let trendlineQuery = layer.query;
+        if (trendlineQuery && 'esql' in trendlineQuery) {
+          try {
+            trendlineQuery = { esql: appendTimeBucketToEsqlQuery(trendlineQuery.esql, tf) };
+          } catch {
+            // If the query can't be parsed, keep the existing query unchanged
+          }
+        }
+
+        return {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: {
+              ...layer,
+              query: trendlineQuery,
+              columns: [...layer.columns, timeColumn],
+            },
+          },
+        };
+      }
+      return state;
     },
     createEmptyLayer() {
       return {
@@ -409,13 +588,8 @@ export function getTextBasedDatasource({
     },
 
     removeLayer(state: TextBasedPrivateState, layerId: string) {
-      const newLayers = {
-        ...state.layers,
-        [layerId]: {
-          ...state.layers[layerId],
-          columns: [],
-        },
-      };
+      const newLayers = { ...state.layers };
+      delete newLayers[layerId];
 
       return {
         removedLayerIds: [layerId],
@@ -442,15 +616,10 @@ export function getTextBasedDatasource({
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
     },
-    isTimeBased: (state, indexPatterns) => {
+    isTimeBased: (state) => {
       if (!state) return false;
       const { layers } = state;
-      return (
-        Boolean(layers) &&
-        Object.values(layers).some((layer) => {
-          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
-        })
-      );
+      return Boolean(layers) && Object.values(layers).some((layer) => Boolean(layer.timeField));
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
       if (!layerId || !state.layers[layerId].index) {
@@ -504,6 +673,8 @@ export function getTextBasedDatasource({
       return null;
     },
 
+    LayerSettingsComponent: LayerSettingsPanel,
+
     uniqueLabels(state: TextBasedPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -514,7 +685,9 @@ export function getTextBasedDatasource({
           return;
         }
         Object.values(layer.columns).forEach((column) => {
-          columnLabelMap[column.columnId] = uniqueLabelGenerator(column.label ?? column.fieldName);
+          columnLabelMap[column.columnId] = uniqueLabelGenerator(
+            column.customLabel ? column.label ?? column.fieldName : column.fieldName
+          );
         });
       });
 
@@ -524,7 +697,7 @@ export function getTextBasedDatasource({
     onDrop,
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<TextBasedPrivateState>) {
       return {
-        datasourceId: 'textBased',
+        datasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
 
         getTableSpec: () => {
           const layerColumns = state.layers[layerId]?.columns ?? [];
@@ -587,7 +760,7 @@ export function getTextBasedDatasource({
             },
           };
         },
-        hasDefaultTimeField: () => false,
+        hasDefaultTimeField: () => Boolean(state.layers[layerId]?.timeField),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

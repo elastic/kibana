@@ -8,4 +8,4 @@
  */
 
 export { getTransformOut } from '../../common/embeddable/transforms/get_transform_out';
-export { getVisualizeEmbeddableFactory } from './visualize_embeddable';
+export { visualizeEmbeddableFactory } from './visualize_embeddable';

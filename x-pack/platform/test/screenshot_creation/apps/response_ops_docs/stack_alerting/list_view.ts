@@ -16,13 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('list view', function () {
     it('rules list screenshot', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot('rules-ui', screenshotDirectories, 1400, 1024);
     });
 
     it('rule status screenshot', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       const actionsDropdown = await testSubjects.find('statusDropdown');
       await actionsDropdown.click();
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('rule snooze screenshot', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       const snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
       await snoozeBadge.click();
@@ -44,11 +44,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('rule detail screenshots', async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('ruleSearchField', indexThresholdRuleName);
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${indexThresholdRuleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${indexThresholdRuleName}"]`
+      );
       await alertRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(

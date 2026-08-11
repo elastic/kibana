@@ -49,7 +49,6 @@ describe('getTransformIn', () => {
         transformIn({
           drilldowns: [drilldown],
           savedObjectId: '1234',
-          timeRange: { from: '15-now', to: 'now' },
           title: 'custom title',
           uiState: 'someUiState',
         })
@@ -76,10 +75,6 @@ describe('getTransformIn', () => {
                 "type": "dashboard_drilldown",
               },
             ],
-            "timeRange": Object {
-              "from": "15-now",
-              "to": "now",
-            },
             "title": "custom title",
             "uiState": "someUiState",
           },
@@ -100,7 +95,6 @@ describe('getTransformIn', () => {
               },
             },
           } as SerializedVis,
-          timeRange: { from: '15-now', to: 'now' },
           title: 'custom title',
           uiState: 'someUiState',
         })
@@ -134,10 +128,6 @@ describe('getTransformIn', () => {
                   "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.index",
                 },
               },
-            },
-            "timeRange": Object {
-              "from": "15-now",
-              "to": "now",
             },
             "title": "custom title",
             "uiState": "someUiState",

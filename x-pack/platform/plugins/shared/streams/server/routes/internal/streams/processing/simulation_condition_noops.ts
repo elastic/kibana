@@ -7,15 +7,16 @@
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { conditionToPainless, isConditionBlock, transpileIngestPipeline } from '@kbn/streamlang';
+import {
+  combineConditionsAsAnd,
+  combineConditionsForElseBranch,
+  conditionToPainless,
+  isConditionBlock,
+  transpileIngestPipeline,
+} from '@kbn/streamlang';
+import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];
-
-function combineConditionsAsAnd(condA?: Condition, condB?: Condition): Condition | undefined {
-  if (!condA) return condB;
-  if (!condB) return condA;
-  return { and: [condA, condB] };
-}
 
 function createConditionNoopProcessor({
   conditionId,
@@ -62,19 +63,21 @@ function createConditionNoopProcessor({
   ];
 }
 
-function buildSimulationProcessorsFromSteps({
+async function buildSimulationProcessorsFromSteps({
   steps,
   parentCondition,
+  resolverOptions,
 }: {
   steps: StreamlangStep[];
   parentCondition?: Condition;
-}): NonNullable<IngestProcessorContainer>[] {
+  resolverOptions?: StreamlangResolverOptions;
+}): Promise<NonNullable<IngestProcessorContainer>[]> {
   const processors: NonNullable<IngestProcessorContainer>[] = [];
 
   for (const step of steps) {
     if (isConditionBlock(step)) {
       const conditionId = step.customIdentifier;
-      const { steps: nestedSteps, ...restCondition } = step.condition;
+      const { steps: nestedSteps, else: elseSteps, ...restCondition } = step.condition;
       const combinedCondition = combineConditionsAsAnd(parentCondition, restCondition);
 
       // Only emit no-op processors for identified condition blocks
@@ -86,12 +89,37 @@ function buildSimulationProcessorsFromSteps({
         );
       }
 
+      // Process if-branch steps
       processors.push(
-        ...buildSimulationProcessorsFromSteps({
+        ...(await buildSimulationProcessorsFromSteps({
           steps: nestedSteps,
           parentCondition: combinedCondition,
-        })
+          resolverOptions,
+        }))
       );
+
+      // Process else-branch steps with negated condition
+      if (elseSteps && elseSteps.length > 0) {
+        const negatedCondition = combineConditionsForElseBranch(parentCondition, restCondition);
+
+        // Emit noop for else-branch condition tracking
+        if (conditionId && negatedCondition) {
+          processors.push(
+            ...createConditionNoopProcessor({
+              conditionId: `${conditionId}:else`,
+              condition: negatedCondition,
+            })
+          );
+        }
+
+        processors.push(
+          ...(await buildSimulationProcessorsFromSteps({
+            steps: elseSteps,
+            parentCondition: negatedCondition,
+            resolverOptions,
+          }))
+        );
+      }
 
       continue;
     }
@@ -110,9 +138,15 @@ function buildSimulationProcessorsFromSteps({
           } as StreamlangProcessorDefinition)
         : processorStep;
 
-    const transpiled = transpileIngestPipeline(
-      { steps: [stepWithCombinedWhere] } as StreamlangDSL,
-      { ignoreMalformed: true, traceCustomIdentifiers: true }
+    const transpiled = (
+      await transpileIngestPipeline(
+        { steps: [stepWithCombinedWhere] } as StreamlangDSL,
+        {
+          ignoreMalformed: true,
+          traceCustomIdentifiers: true,
+        },
+        resolverOptions
+      )
     ).processors as NonNullable<IngestProcessorContainer>[];
 
     processors.push(...transpiled);
@@ -134,8 +168,12 @@ function buildSimulationProcessorsFromSteps({
  *
  * These processors are never exposed as steps in the UI; they exist only in the ES `_simulate` request.
  */
-export function buildSimulationProcessorsWithConditionNoops(
-  processing: StreamlangDSL
-): NonNullable<IngestProcessorContainer>[] {
-  return buildSimulationProcessorsFromSteps({ steps: processing.steps });
+export async function buildSimulationProcessorsWithConditionNoops(
+  processing: StreamlangDSL,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<NonNullable<IngestProcessorContainer>[]> {
+  return await buildSimulationProcessorsFromSteps({
+    steps: processing.steps,
+    resolverOptions,
+  });
 }

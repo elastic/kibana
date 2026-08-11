@@ -36,16 +36,15 @@ describe('timelineRequestBasicOptionsSchema', () => {
     }).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"received\\": \\"notAValidEntityType\\",
-          \\"code\\": \\"invalid_enum_value\\",
-          \\"options\\": [
+          \\"code\\": \\"invalid_value\\",
+          \\"values\\": [
             \\"events\\",
             \\"sessions\\"
           ],
           \\"path\\": [
             \\"entityType\\"
           ],
-          \\"message\\": \\"Invalid enum value. Expected 'events' | 'sessions', received 'notAValidEntityType'\\"
+          \\"message\\": \\"Invalid option: expected one of \\\\\\"events\\\\\\"|\\\\\\"sessions\\\\\\"\\"
         }
       ]"
     `);

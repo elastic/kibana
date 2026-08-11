@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import {
-  buildLogsExtractionEsqlQuery,
-  buildCcsLogsExtractionEsqlQuery,
-  buildRemainingLogsCountQuery,
-} from './logs_extraction_query_builder';
+import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { validateQuery } from '@kbn/esql-language';
 
 describe('buildLogsExtractionEsqlQuery', () => {
-  Object.values(EntityType.Values).forEach((type) => {
-    it(`generates the expected query for ${type} entity description`, () => {
+  Object.values(EntityType.enum).forEach((type) => {
+    it(`generates the expected query for ${type} entity description`, async () => {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
         latestIndex: 'latest-index',
@@ -25,10 +22,11 @@ describe('buildLogsExtractionEsqlQuery', () => {
         toDateISO: '2022-01-01T23:59:59.999Z',
       });
       expect(query).toMatchSnapshot();
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });
 
-  it(`generates the expected query for host with pagination`, () => {
+  it(`generates the expected query for host with pagination`, async () => {
     const query = buildLogsExtractionEsqlQuery({
       indexPatterns: ['test-index-*'],
       latestIndex: 'latest-index',
@@ -42,9 +40,10 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  it(`generates the expected query for host with recoveryId`, () => {
+  it(`generates the expected query for host with recoveryId`, async () => {
     const query = buildLogsExtractionEsqlQuery({
       indexPatterns: ['test-index-*'],
       latestIndex: 'latest-index',
@@ -59,60 +58,71 @@ describe('buildLogsExtractionEsqlQuery', () => {
       },
     });
     expect(query).toMatchSnapshot();
-  });
-});
-
-describe('buildCcsLogsExtractionEsqlQuery', () => {
-  it('generates query without LOOKUP JOIN', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote_cluster:logs-*'],
-      entityDefinition: getEntityDefinition('host', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 10000,
-    });
-    expect(query).not.toContain('LOOKUP JOIN');
-    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  it('generates expected query for host entity type', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote:metrics-*'],
-      entityDefinition: getEntityDefinition('host', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 5000,
-    });
-    expect(query).toMatchSnapshot();
-  });
-
-  it('generates expected query with pagination', () => {
-    const query = buildCcsLogsExtractionEsqlQuery({
-      indexPatterns: ['remote:logs-*'],
-      entityDefinition: getEntityDefinition('user', 'default'),
-      fromDateISO: '2022-01-01T00:00:00.000Z',
-      toDateISO: '2022-01-01T23:59:59.999Z',
-      docsLimit: 10000,
-      pagination: {
-        timestampCursor: '2022-01-01T12:00:00.000Z',
-        idCursor: 'cursor-id',
+  it('excludes managed fields from STATS, merge EVAL, and produces a valid query', async () => {
+    const base = getEntityDefinition('host', 'default');
+    // Inject a managed field alongside a normal log-derived field to verify orthogonality.
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        fields: [
+          ...base.fields,
+          {
+            source: 'test.api_only_field',
+            destination: 'test.api_only_field',
+            mapping: { type: 'keyword' },
+            retention: { operation: 'managed' },
+            allowAPIUpdate: true,
+          },
+          {
+            source: 'test.log_field',
+            destination: 'test.log_field',
+            mapping: { type: 'keyword' },
+            retention: { operation: 'prefer_newest_value' },
+          },
+        ],
       },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
     });
-    expect(query).toContain('FirstSeenLogInPage > TO_DATETIME("2022-01-01T12:00:00.000Z")');
-    expect(query).toMatchSnapshot();
+    // managed field must not appear in STATS or the merge EVAL
+    expect(query).not.toContain('test.api_only_field');
+    // log-derived field must be present
+    expect(query).toContain('test.log_field');
+    // Query must remain syntactically valid (no dangling recent.* references)
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
-});
 
-describe('buildRemainingLogsCountQuery', () => {
-  Object.values(EntityType.Values).forEach((type) => {
-    it(`generates the expected query for ${type} entity type`, () => {
-      const query = buildRemainingLogsCountQuery({
-        indexPatterns: ['test-index-*'],
-        type,
-        fromDateISO: '2022-01-01T00:00:00.000Z',
-        toDateISO: '2022-01-01T23:59:59.999Z',
-      });
-      expect(query).toMatchSnapshot();
+  it('inserts whenConditionTrueSetFieldsAfterStats EVAL after LOOKUP and before merge EVAL', () => {
+    const base = getEntityDefinition('host', 'default');
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: {
+        ...base,
+        whenConditionTrueSetFieldsAfterStats: [
+          {
+            condition: { field: 'host.name', eq: 'server1' },
+            fields: { 'host.name': { source: 'host.id' } },
+          },
+        ],
+      },
+      docsLimit: 100,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
     });
+    const statsIdx = query.indexOf('| STATS');
+    const lookupIdx = query.indexOf('LOOKUP JOIN');
+    const afterStatsEvalIdx = query.indexOf('recent.host.name = CASE(');
+    const mergeCoalesceIdx = query.indexOf('entity.name = COALESCE(');
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(lookupIdx).toBeGreaterThan(statsIdx);
+    expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
+    expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
   });
 });

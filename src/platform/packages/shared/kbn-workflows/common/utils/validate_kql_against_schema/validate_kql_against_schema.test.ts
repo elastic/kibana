@@ -110,6 +110,44 @@ describe('validateKqlAgainstSchema', () => {
     });
   });
 
+  describe('array of objects in schema', () => {
+    const casesLikeSchema = z.object({
+      cases: z.array(
+        z.object({
+          id: z.string(),
+          title: z.string().optional(),
+        })
+      ),
+      spaceId: z.string(),
+    });
+
+    it('allows KQL fields under array-of-object using dot paths (e.g. event.cases.id)', () => {
+      expect(
+        validateKqlAgainstSchema('event.cases.id: "1"', casesLikeSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
+      ).toEqual({ valid: true });
+
+      expect(
+        validateKqlAgainstSchema(
+          'event.spaceId: "default" and event.cases.title: *',
+          casesLikeSchema,
+          {
+            fieldPrefix: EVENT_FIELD_PREFIX,
+          }
+        )
+      ).toEqual({ valid: true });
+    });
+
+    it('rejects fields that are not on the array element object', () => {
+      const result = validateKqlAgainstSchema('event.cases.unknown: "x"', casesLikeSchema, {
+        fieldPrefix: EVENT_FIELD_PREFIX,
+      });
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.error).toContain('event.cases.unknown');
+    });
+  });
+
   describe('nested schema', () => {
     const nestedSchema = z.object({
       user: z.object({

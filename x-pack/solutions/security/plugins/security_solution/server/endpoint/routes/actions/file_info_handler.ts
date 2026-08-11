@@ -84,7 +84,6 @@ export const registerActionFileInfoRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

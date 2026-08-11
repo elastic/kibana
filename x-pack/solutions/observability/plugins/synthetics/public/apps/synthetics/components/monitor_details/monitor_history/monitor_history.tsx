@@ -24,12 +24,16 @@ import { DurationSparklines } from '../monitor_summary/duration_sparklines';
 import { MonitorCompleteSparklines } from '../monitor_summary/monitor_complete_sparklines';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { MonitorPendingWrapper } from '../monitor_pending_wrapper';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 const STATS_WIDTH_SINGLE_COLUMN_THRESHOLD = 360; // ✨ determined by trial and error
 
 export const MonitorHistory = () => {
   const [, updateUrlParams] = useUrlParams();
   const { from, to } = useRefreshedRangeFromUrl();
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   const { elementRef: statsRef, width: statsWidth } = useDimensions<HTMLDivElement>();
   const statsColumns = statsWidth && statsWidth < STATS_WIDTH_SINGLE_COLUMN_THRESHOLD ? 1 : 2;
@@ -63,20 +67,20 @@ export const MonitorHistory = () => {
                 <EuiFlexGrid columns={statsColumns} gutterSize="s" responsive={false}>
                   <EuiFlexItem>
                     <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
                         <MonitorCompleteCount from={from} to={to} />
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={true}>
                         <MonitorCompleteSparklines from={from} to={to} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
                         <AvailabilityPanel from={from} to={to} id="availabilityPercentageHistory" />
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={true}>
                         <AvailabilitySparklines
                           from={from}
                           to={to}
@@ -87,10 +91,10 @@ export const MonitorHistory = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
                         <MonitorErrorsCount from={from} to={to} id="monitorErrorsCountHistory" />
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={true}>
                         <MonitorErrorSparklines
                           from={from}
                           to={to}
@@ -101,15 +105,15 @@ export const MonitorHistory = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
                         <DurationPanel from={from} to={to} id="durationAvgValueHistory" />
                       </EuiFlexItem>
-                      <EuiFlexItem>
+                      <EuiFlexItem grow={true}>
                         <DurationSparklines from={from} to={to} id="durationAvgSparklineHistory" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem css={{ minWidth: 210 }}>
                     <MonitorTotalRunsCount from={from} to={to} />
                   </EuiFlexItem>
                 </EuiFlexGrid>

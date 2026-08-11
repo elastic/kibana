@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { AppDeepLinkId } from './project_navigation';
 
 /** @public */
@@ -20,9 +20,16 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
   deepLinkId?: AppDeepLinkId;
 }
 
-/** @public */
+/**
+ * @deprecated Use the typed `favorite`, `badges`, or `metadata` props on `AppHeader` from
+ * `@kbn/app-header`.
+ * @public
+ */
 export interface ChromeBreadcrumbsAppendExtension {
-  content: MountPoint<HTMLDivElement>;
+  /**
+   * The extension content as a React node.
+   */
+  content?: ReactNode;
   /** The order in which the extension should be appended to the breadcrumbs. Default is 50 */
   order?: number;
 }
@@ -32,6 +39,10 @@ export interface ChromeSetBreadcrumbsParams {
   /**
    * Declare the breadcrumbs for the project/solution type navigation in stateful.
    * Those breadcrumbs correspond to the serverless breadcrumbs declaration.
+   *
+   * @deprecated Project breadcrumb overrides are not rendered in Chrome Next and remain only for
+   * compatibility fallback back navigation. Declare hierarchy in the project navigation tree and
+   * pass explicit `back` configuration to `AppHeader`.
    */
   project?: {
     /**

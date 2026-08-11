@@ -15,6 +15,7 @@ import type {
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const singleMetricDatatableAttributes: LensAttributes = {
   visualizationType: 'lnsDatatable',
@@ -70,7 +71,7 @@ export const singleMetricDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -196,7 +197,7 @@ export const singleMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -386,7 +387,7 @@ export const multiMetricRowSplitDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -698,7 +699,7 @@ export const fullConfigDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -855,7 +856,7 @@ export const sortedByTransposedMetricColumnDatatableAttributes: LensAttributes =
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -1012,7 +1013,7 @@ export const sortedByRowDatatableAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -1103,7 +1104,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsDatatable',
   references: [
     {
@@ -1200,7 +1201,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsDatatable',
   references: [
     {

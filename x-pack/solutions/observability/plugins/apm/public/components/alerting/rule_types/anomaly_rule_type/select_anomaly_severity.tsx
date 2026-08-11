@@ -30,7 +30,6 @@ interface Props {
 export function SelectAnomalySeverity({ onChange, value }: Props) {
   return (
     <EuiSuperSelect
-      hasDividers
       style={{ width: 200 }}
       aria-label={i18n.translate('xpack.apm.alerts.anomalySeverity.selectAriaLabel', {
         defaultMessage: 'Anomaly severity',

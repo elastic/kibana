@@ -33,16 +33,19 @@ interface InterceptProgressEvent {
   runId: Intercept['runId'];
   stepId: string;
   stepResponse: unknown;
+  interceptId: string;
 }
 
 interface InterceptCompletionEvent {
   runId: Intercept['runId'];
   response: Record<string, unknown>;
+  interceptId: string;
 }
 
 interface InterceptDismissalEvent {
   runId: Intercept['runId'];
   stepId: string;
+  interceptId: string;
 }
 
 /**

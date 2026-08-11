@@ -16,7 +16,7 @@
  * - Support for localization and safe search
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -31,7 +31,8 @@ export const BraveSearchConnector: ConnectorSpec = {
       defaultMessage: 'Search the web using Brave Search API for privacy-focused results',
     }),
     minimumLicense: 'enterprise',
-    supportedFeatureIds: ['workflows'],
+    isTechnicalPreview: true,
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
@@ -41,29 +42,35 @@ export const BraveSearchConnector: ConnectorSpec = {
   actions: {
     webSearch: {
       isTool: true,
-      input: z.object({
-        q: z.string().describe('Search query'),
-        count: z
-          .number()
-          .int()
-          .min(1)
-          .max(20)
-          .optional()
-          .default(DEFAULT_COUNT)
-          .describe('Number of results to return (max 20)'),
-        offset: z
-          .number()
-          .int()
-          .min(0)
-          .optional()
-          .default(DEFAULT_OFFSET)
-          .describe('Result offset for pagination'),
-      }),
-      output: z.object({
-        query: z.any().describe('Original query information'),
-        results: z.array(z.any()).describe('Array of search results'),
-        type: z.string().describe('Search type'),
-      }),
+      description:
+        'Search the web using Brave Search. Returns a list of results with titles, URLs, and descriptions for a given query. Supports pagination via count and offset parameters.',
+      input: lazySchema(() =>
+        z.object({
+          q: z.string().describe('Search query'),
+          count: z
+            .number()
+            .int()
+            .min(1)
+            .max(20)
+            .optional()
+            .default(DEFAULT_COUNT)
+            .describe('Number of results to return (max 20)'),
+          offset: z
+            .number()
+            .int()
+            .min(0)
+            .optional()
+            .default(DEFAULT_OFFSET)
+            .describe('Result offset for pagination'),
+        })
+      ),
+      output: lazySchema(() =>
+        z.object({
+          query: z.any().describe('Original query information'),
+          results: z.array(z.any()).describe('Array of search results'),
+          type: z.string().describe('Search type'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           q: string;
@@ -96,32 +103,21 @@ export const BraveSearchConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        // Perform a simple test search
-        await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
-          params: {
-            q: 'test',
-            count: 1,
-          },
-          headers: {
-            Accept: 'application/json',
-            'Accept-Encoding': 'gzip',
-          },
-        });
-        return {
-          ok: true,
-          message: 'Successfully connected to Brave Search API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to Brave Search API: ${errorMessage}`,
-        };
-      }
+      await ctx.client.get('https://api.search.brave.com/res/v1/web/search', {
+        params: {
+          q: 'test',
+          count: 1,
+        },
+        headers: {
+          Accept: 'application/json',
+          'Accept-Encoding': 'gzip',
+        },
+      });
+      return {};
     },
     description: i18n.translate('connectorSpecs.braveSearch.test.description', {
       defaultMessage: 'Verifies Brave Search API key and connection',
     }),
+    enabled: true,
   },
 };

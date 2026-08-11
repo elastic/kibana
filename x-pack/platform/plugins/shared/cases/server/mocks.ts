@@ -37,7 +37,6 @@ const lensPersistableState = {
     title: '',
     description: '',
     visualizationType: 'lnsXY',
-    type: 'lens',
     references: [
       {
         type: 'index-pattern',
@@ -579,6 +578,7 @@ export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttr
     attributes: {
       type: 'comment',
       data: { content: 'test' },
+      owner: 'securitySolution',
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',
@@ -778,6 +778,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   getUnifiedAttachmentTypeRegistry: jest.fn(),
   config: {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     stack: {
       enabled: true,
     },
@@ -791,6 +792,13 @@ export const mockCasesContract = (): CasesServerStart => ({
         enabled: true,
       },
     },
+    analyticsV2: {
+      enabled: false,
+      reconciliationIntervalMinutes: 30,
+      enableAdminRoutes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
+    },
     incrementalId: {
       enabled: true,
       taskIntervalMinutes: 10,
@@ -798,6 +806,14 @@ export const mockCasesContract = (): CasesServerStart => ({
     },
     templates: {
       enabled: true,
+    },
+    chat: {
+      enabled: true,
+    },
+    casesRedesign: {
+      list: false,
+      details: false,
+      settings: false,
     },
     attachments: {
       enabled: true,

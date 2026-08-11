@@ -35,6 +35,7 @@ describe('getGeneration', () => {
     authentication_type: 'type',
     elastic_cloud_user: false,
     enabled: true,
+    http_authentication_scheme: null,
   } as AuthenticatedUser;
 
   const mockGeneration: AttackDiscoveryGeneration = {
@@ -89,9 +90,20 @@ describe('getGeneration', () => {
         authenticatedUser: mockAuthenticatedUser,
         eventLogIndex: '.kibana-event-log-8.19.0-000001',
         executionUuid: 'test-execution-uuid',
+        ignoreDismissed: true,
         logger: mockLogger,
         spaceId: 'default',
       });
+    });
+
+    it('requests the underlying status (ignoreDismissed: true) so a dismissed generation shows its actual outcome', async () => {
+      mockDataClient.getAttackDiscoveryGenerationById.mockResolvedValueOnce(mockGeneration);
+
+      await getGeneration(baseParams);
+
+      expect(mockDataClient.getAttackDiscoveryGenerationById).toHaveBeenCalledWith(
+        expect.objectContaining({ ignoreDismissed: true })
+      );
     });
   });
 

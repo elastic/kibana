@@ -17,4 +17,6 @@ export enum COMPARATORS {
   LESS_THAN = '<',
   LESS_THAN_OR_EQUALS = '<=',
   NOT_BETWEEN = 'notBetween',
+  BETWEEN_INCLUSIVE = 'betweenInclusive',
+  NOT_BETWEEN_INCLUSIVE = 'notBetweenInclusive',
 }

@@ -1,0 +1,14 @@
+# TODO: No shared dev account yet
+enabled: false
+spec_id: .zendesk
+name: "Zendesk (testing)"
+auth_type: basic
+config:
+  subdomain: ""
+secrets:
+  username:
+    vault: TODO
+    field: TODO
+  password:
+    vault: TODO
+    field: TODO

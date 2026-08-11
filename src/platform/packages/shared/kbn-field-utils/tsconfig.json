@@ -6,6 +6,7 @@
   "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/data-views-plugin",
     "@kbn/react-field",
     "@kbn/field-types",

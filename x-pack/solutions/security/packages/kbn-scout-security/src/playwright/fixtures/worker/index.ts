@@ -13,10 +13,14 @@ export {
   getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
+  getTimelineApiService,
+  getAttackDiscoveryApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
   DetectionAlertsApiService,
   EntityAnalyticsApiService,
   CloudConnectorApiService,
+  TimelineApiService,
+  AttackDiscoveryApiService,
 } from './apis';

@@ -718,7 +718,7 @@ describe(
         author: ['Test'],
         false_positives: ['false-positive-1', 'false-positive-2'],
         references: ['http://reference-1', 'http://reference-2'],
-        max_signals: 50,
+        max_signals: 100,
         threat: [
           {
             framework: 'MITRE ATT&CK',
@@ -1443,7 +1443,7 @@ const MACHINE_LEARNING_PREBUILT_RULE_ASSET = omit(
     ...commonProperties,
     type: 'machine_learning',
     anomaly_threshold: 65,
-    machine_learning_job_id: ['auth_high_count_logon_events', 'auth_high_count_logon_fails'],
+    machine_learning_job_id: ['auth_high_count_logon_events_ea', 'auth_high_count_logon_fails_ea'],
     alert_suppression: {
       group_by: ['host.name'],
       duration: { unit: 'm', value: 5 },

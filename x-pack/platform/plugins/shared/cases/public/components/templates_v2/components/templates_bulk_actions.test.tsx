@@ -18,9 +18,7 @@ jest.mock('../api/api');
 const apiMock = api as jest.Mocked<typeof api>;
 
 describe('TemplatesBulkActions', () => {
-  // EUI components use CSS animations that set pointer-events: none during transitions
-  // Using pointerEventsCheck: 0 skips this check which is standard for testing EUI components
-  const user = userEvent.setup({ pointerEventsCheck: 0 });
+  let user: ReturnType<typeof userEvent.setup>;
 
   const mockTemplates: Template[] = [
     {
@@ -55,7 +53,16 @@ describe('TemplatesBulkActions', () => {
     },
   ];
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
     jest.clearAllMocks();
     apiMock.bulkDeleteTemplates.mockResolvedValue({
       success: true,
@@ -145,7 +152,9 @@ describe('TemplatesBulkActions', () => {
 
     expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
     expect(
-      screen.getByText('This action will permanently delete these 2 templates.')
+      screen.getByText(
+        'These 2 templates will no longer apply to new cases. Cases already using them keep their values. Export first if you want to keep a copy.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -157,7 +166,9 @@ describe('TemplatesBulkActions', () => {
 
     expect(await screen.findByText('Delete 1 template?')).toBeInTheDocument();
     expect(
-      screen.getByText('This action will permanently delete this template.')
+      screen.getByText(
+        'This template will no longer apply to new cases. Cases already using it keep their values. Export first if you want to keep a copy.'
+      )
     ).toBeInTheDocument();
   });
 

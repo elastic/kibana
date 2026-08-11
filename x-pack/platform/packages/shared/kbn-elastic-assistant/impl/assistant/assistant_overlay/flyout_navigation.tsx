@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -57,33 +58,31 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
       [isExpanded, setIsExpanded]
     );
 
-    const toggleButton = useMemo(
-      () => (
-        <EuiButtonIcon
-          disabled={isLoading || !isAssistantEnabled}
-          onClick={onToggle}
-          iconType={isExpanded ? 'arrowEnd' : 'arrowStart'}
-          size="xs"
-          data-test-subj="aiAssistantFlyoutNavigationToggle"
-          aria-label={
-            isExpanded
-              ? i18n.translate(
-                  'xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel',
-                  {
-                    defaultMessage: 'Hide chats',
-                  }
-                )
-              : i18n.translate(
-                  'xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel',
-                  {
-                    defaultMessage: 'Show chats',
-                  }
-                )
-          }
-        />
-      ),
-      [isAssistantEnabled, isExpanded, isLoading, onToggle]
-    );
+    const toggleButton = useMemo(() => {
+      const toggleLabel = isExpanded
+        ? i18n.translate(
+            'xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel',
+            {
+              defaultMessage: 'Hide chats',
+            }
+          )
+        : i18n.translate('xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel', {
+            defaultMessage: 'Show chats',
+          });
+
+      return (
+        <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            disabled={isLoading || !isAssistantEnabled}
+            onClick={onToggle}
+            iconType={isExpanded ? 'chevronLimitRight' : 'chevronLimitLeft'}
+            size="xs"
+            data-test-subj="aiAssistantFlyoutNavigationToggle"
+            aria-label={toggleLabel}
+          />
+        </EuiToolTip>
+      );
+    }, [isAssistantEnabled, isExpanded, isLoading, onToggle]);
 
     return (
       <EuiPanel
@@ -113,7 +112,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
                     <EuiButtonEmpty
                       size="xs"
                       color="primary"
-                      iconType="newChat"
+                      iconType="plusCircle"
                       data-test-subj="newChatFromOverlay"
                       onClick={onConversationCreate}
                       disabled={isLoading || !isAssistantEnabled}

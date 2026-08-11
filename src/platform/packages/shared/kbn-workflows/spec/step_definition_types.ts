@@ -8,12 +8,17 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from './deprecated_step_metadata';
+import type { StabilityLevel } from '../types/v1';
 
 export enum StepCategory {
   Elasticsearch = 'elasticsearch',
   External = 'external',
   Ai = 'ai',
   Kibana = 'kibana',
+  KibanaCases = 'kibana.cases',
+  KibanaEntityStore = 'kibana.entityStore',
+  KibanaSecurity = 'kibana.security',
   Data = 'data',
   FlowControl = 'flowControl',
 }
@@ -105,4 +110,18 @@ export interface BaseStepDefinition<
    * Documentation for the step, including details and examples.
    */
   documentation?: StepDocumentation;
+
+  /**
+   * API stability level for this step (e.g. 'tech_preview', 'beta', 'stable').
+   * Built-in steps: omit means stable (no badge). Extension-registered steps: omit
+   * defaults to tech_preview in the UI; set 'stable' explicitly to graduate.
+   */
+  stability?: StabilityLevel;
+
+  /**
+   * Deprecation metadata for this step type.
+   * Deprecated steps remain valid for existing workflows, but should not be
+   * suggested for new workflows.
+   */
+  deprecation?: StepDeprecationInfo;
 }

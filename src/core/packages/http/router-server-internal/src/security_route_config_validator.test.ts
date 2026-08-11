@@ -8,7 +8,8 @@
  */
 
 import { validRouteSecurity } from './security_route_config_validator';
-import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { ReservedPrivilegesSet, type RouteSecurity } from '@kbn/core-http-server';
+import type { DeepPartial } from '@kbn/utility-types';
 
 describe('RouteSecurity validation', () => {
   it('should pass validation for valid route security with authz enabled and valid required privileges', () => {
@@ -19,6 +20,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'some reason',
         },
       })
     ).not.toThrow();
@@ -161,6 +163,40 @@ describe('RouteSecurity validation', () => {
     );
   });
 
+  it('should fail validation when authc is minimal but reason is missing', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: ['read'],
+      },
+      authc: {
+        enabled: 'minimal',
+      },
+    };
+
+    expect(() =>
+      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authc.reason]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
+  it('should fail validation when authc is optional but reason is missing', () => {
+    const routeSecurity = {
+      authz: {
+        requiredPrivileges: ['read'],
+      },
+      authc: {
+        enabled: 'optional',
+      },
+    };
+
+    expect(() =>
+      validRouteSecurity(routeSecurity as DeepPartial<RouteSecurity>)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authc.reason]: expected value of type [string] but got [undefined]"`
+    );
+  });
+
   it('should fail validation when authc is disabled but reason is missing', () => {
     const routeSecurity = {
       authz: {
@@ -176,21 +212,18 @@ describe('RouteSecurity validation', () => {
     );
   });
 
-  it('should fail validation when authc is provided in multiple configs', () => {
-    const routeSecurity = {
-      authz: {
-        requiredPrivileges: ['read'],
-      },
-      authc: {
-        enabled: false,
-      },
-    };
-
+  it('should pass validation when authc is minimal', () => {
     expect(() =>
-      validRouteSecurity(routeSecurity, { authRequired: false })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify both security.authc and options.authRequired"`
-    );
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+        },
+        authc: {
+          enabled: 'minimal',
+          reason: 'some reason',
+        },
+      })
+    ).not.toThrow();
   });
 
   it('should pass validation when authc is optional', () => {
@@ -201,6 +234,7 @@ describe('RouteSecurity validation', () => {
         },
         authc: {
           enabled: 'optional',
+          reason: 'some reason',
         },
       })
     ).not.toThrow();
@@ -467,6 +501,135 @@ describe('RouteSecurity validation', () => {
 
     expect(() => validRouteSecurity(invalidRouteSecurity)).toThrowErrorMatchingInlineSnapshot(
       `"[authz.requiredPrivileges]: anyRequired privileges must contain unique values"`
+    );
+  });
+
+  it('should pass validation with valid extendedPrivileges', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: ['readExecution', 'readManaged'],
+        },
+      })
+    ).not.toThrow();
+  });
+
+  it('should fail validation when extendedPrivileges is empty', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: [],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: array size is [0], but cannot be smaller than [1]"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges contains a privilege set', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: [{ anyRequired: ['readExecution', 'readManaged'] } as any],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: extendedPrivileges must be a flat list of privilege name strings; privilege sets (anyRequired/allRequired) are not supported"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges contains duplicates', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: ['readExecution', 'readExecution'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: extendedPrivileges must contain unique values"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges contains superuser', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: [ReservedPrivilegesSet.superuser],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: Using superuser privileges in extendedPrivileges is not allowed"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges contains operator', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: [ReservedPrivilegesSet.operator],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: Using operator privileges in extendedPrivileges is not allowed"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges overlaps with requiredPrivileges', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read'],
+          extendedPrivileges: ['read'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]"`
+    );
+  });
+
+  it('should fail validation listing all overlapping extendedPrivileges', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: ['read', 'write'],
+          extendedPrivileges: ['read', 'readExecution', 'write'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read, write]"`
+    );
+  });
+
+  it('should fail validation when extendedPrivileges overlaps with nested requiredPrivileges', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          requiredPrivileges: [{ anyRequired: ['read', 'write'] }],
+          extendedPrivileges: ['read'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz]: extendedPrivileges cannot overlap with requiredPrivileges: [read]"`
+    );
+  });
+
+  it('should fail validation when authz is disabled but extendedPrivileges is present', () => {
+    expect(() =>
+      validRouteSecurity({
+        authz: {
+          enabled: false,
+          reason: 'Authorization is disabled',
+          extendedPrivileges: ['readExecution'],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[authz.extendedPrivileges]: a value wasn't expected to be present"`
     );
   });
 });

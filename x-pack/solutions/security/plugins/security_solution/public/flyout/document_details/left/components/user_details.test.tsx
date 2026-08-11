@@ -14,7 +14,7 @@ import { DocumentDetailsContext } from '../../shared/context';
 import { UserDetails } from './user_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useObservedUser } from '../../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useUserRelatedHosts } from '../../../../common/containers/related_entities/related_hosts';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
@@ -27,15 +27,15 @@ import {
   USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
   USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/user_entity_overview';
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -50,8 +50,8 @@ jest.mock('react-router-dom', () => {
 });
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
@@ -77,12 +77,6 @@ jest.mock('uuid', () => ({
 jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
-}));
-
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
   AnomalyTableProvider: ({
     children,
@@ -97,8 +91,8 @@ jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () 
 
 jest.mock('../../../../helper_hooks', () => ({ useHasSecurityCapability: () => true }));
 
-jest.mock('../../../../explore/users/containers/users/observed_details');
-const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
+jest.mock('../../../../flyout_v2/entity/user/main/hooks/use_observed_user');
+const mockUseObservedUser = useObservedUser as jest.Mock;
 
 jest.mock('../../../../common/containers/related_entities/related_hosts');
 const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
@@ -127,14 +121,16 @@ const defaultProps = {
   scopeId: 'scopeId',
 };
 
-const mockUserDetailsResponse = [
-  false,
-  {
-    inspect: jest.fn(),
-    refetch: jest.fn(),
-    userDetails: { user: { name: ['test user'] } },
-  },
-];
+const mockObservedUserResult = {
+  details: { user: { name: ['test user'] } },
+  isLoading: false,
+  firstSeen: { date: null, isLoading: false },
+  lastSeen: { date: null, isLoading: false },
+  entityRecord: null,
+  refetchEntityStore: undefined,
+  observedDetailsInspect: undefined,
+  refetchObservedDetails: jest.fn(),
+};
 
 const mockRiskScoreResponse = {
   data: [
@@ -169,7 +165,7 @@ describe('<UserDetails />', () => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
-    mockUseObservedUserDetails.mockReturnValue(mockUserDetailsResponse);
+    mockUseObservedUser.mockReturnValue(mockObservedUserResult);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
@@ -194,6 +190,7 @@ describe('<UserDetails />', () => {
       id: UserPreviewPanelKey,
       params: {
         userName: defaultProps.userName,
+        entityId: undefined,
         scopeId: defaultProps.scopeId,
         banner: USER_PREVIEW_BANNER,
       },
@@ -203,14 +200,11 @@ describe('<UserDetails />', () => {
   describe('Host overview', () => {
     it('should render the HostOverview with correct dates and indices', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
-      expect(mockUseObservedUserDetails).toBeCalledWith({
-        id: 'entities-users-details-uuid',
-        startDate: from,
-        endDate: to,
-        userName: 'test user',
-        indexNames: ['index'],
-        skip: false,
-      });
+      expect(mockUseObservedUser).toHaveBeenCalledWith(
+        'test user',
+        'scopeId',
+        expect.objectContaining({ entityRecord: null })
+      );
       expect(getByTestId(USER_DETAILS_INFO_TEST_ID)).toBeInTheDocument();
     });
 
@@ -231,12 +225,21 @@ describe('<UserDetails />', () => {
   });
 
   describe('Related hosts', () => {
+    it('renders related hosts table when attack cell actions are used without DocumentDetailsContext', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <UserDetails {...defaultProps} isAttackDetails={true} />
+        </TestProviders>
+      );
+      expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID)).toBeInTheDocument();
+    });
+
     it('should render the related host table with correct dates and indices', () => {
       const { getByTestId } = renderUserDetails(mockContextValue);
       expect(mockUseUsersRelatedHosts).toBeCalledWith({
         from: timestamp,
-        userName: 'test user',
-        indexNames: ['index'],
+        userName: defaultProps.userName,
         skip: false,
       });
       expect(getByTestId(USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID)).toBeInTheDocument();
@@ -248,16 +251,16 @@ describe('<UserDetails />', () => {
         isPlatinumOrTrialLicense: true,
         capabilities: {},
       });
-      const { queryAllByRole } = renderUserDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(3);
-      expect(queryAllByRole('row')[1].textContent).toContain('test host');
-      expect(queryAllByRole('row')[1].textContent).toContain('100.XXX.XXX');
-      expect(queryAllByRole('row')[1].textContent).toContain('Low');
+      const { container, queryAllByTestId } = renderUserDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(3);
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('test host');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('100.XXX.XXX');
+      expect(container.querySelectorAll('.euiTableRow')[0].textContent).toContain('Low');
     });
 
     it('should not render host risk score column when license is not valid', () => {
-      const { queryAllByRole } = renderUserDetails(mockContextValue);
-      expect(queryAllByRole('columnheader').length).toBe(2);
+      const { queryAllByTestId } = renderUserDetails(mockContextValue);
+      expect(queryAllByTestId(/tableHeaderCell_/).length).toBe(2);
     });
 
     it('should render empty table if no related host is returned', () => {
@@ -281,14 +284,16 @@ describe('<UserDetails />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: HostPreviewPanelKey,
         params: {
+          contextID: defaultProps.scopeId,
           hostName: 'test host',
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
+          entityId: undefined,
         },
       });
 
       getAllByTestId(USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID)[0].click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenNthCalledWith(2, {
         id: NetworkPreviewPanelKey,
         params: {
           ip: '100.XXX.XXX',

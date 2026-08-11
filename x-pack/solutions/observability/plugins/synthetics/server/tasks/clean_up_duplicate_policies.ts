@@ -52,15 +52,13 @@ export async function cleanUpDuplicatedPackagePolicies(
     for await (const result of finder.find()) {
       result.saved_objects.forEach((monitor) => {
         monitor.attributes.locations?.forEach((location) => {
-          const spaceId = monitor.namespaces?.[0];
-          if (!location.isServiceManaged && spaceId) {
+          if (!location.isServiceManaged) {
             const policyId = privateLocationAPI.getPolicyId(
               {
                 origin: monitor.attributes.origin,
                 id: monitor.attributes.id,
               },
-              location.id,
-              spaceId
+              location.id
             );
             expectedPackagePolicies.add(policyId);
           }
@@ -93,9 +91,15 @@ export async function cleanUpDuplicatedPackagePolicies(
     performCleanupSync = packagePoliciesToDelete.length > 0 || expectedPackagePolicies.size > 0;
 
     debugLog(`Found ${packagePoliciesToDelete.length} duplicate package policies to delete.`);
+    if (packagePoliciesToDelete.length > 0) {
+      debugLog(`Policies to delete: [${packagePoliciesToDelete.join(', ')}]`);
+    }
     debugLog(
       `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
     );
+    if (expectedPackagePolicies.size > 0) {
+      debugLog(`Missing expected policies: [${[...expectedPackagePolicies].join(', ')}]`);
+    }
 
     if (packagePoliciesToDelete.length > 0) {
       await deleteDuplicatePackagePolicies(
@@ -150,6 +154,7 @@ export async function deleteDuplicatePackagePolicies(
     await fleet.packagePolicyService.delete(soClient, esClient, batch, {
       force: true,
       spaceIds: ['*'],
+      ignoreMissing: true,
     });
   }
 }

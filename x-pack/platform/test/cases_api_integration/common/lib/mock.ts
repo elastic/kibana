@@ -14,6 +14,7 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   PersistableStateAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
   Attachment,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
@@ -26,7 +27,10 @@ import type {
   CasePostRequest,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
@@ -96,6 +100,16 @@ export const postCommentAlertMultipleIdsReq: AlertAttachmentPayload = {
   owner: 'securitySolutionFixture',
 };
 
+export const postCommentEntityReq: UnifiedReferenceAttachmentPayload = {
+  type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+  owner: 'securitySolutionFixture',
+  attachmentId: 'entity-1',
+  metadata: {
+    entityName: 'alice',
+    entityType: 'user',
+  },
+};
+
 export const postCommentActionsReq: ActionsAttachmentPayload = {
   comment: 'comment text',
   actions: {
@@ -160,7 +174,7 @@ export const getFilesAttachmentReq = (
       type: ExternalReferenceStorageType.savedObject,
       soType: FILE_SO_TYPE,
     },
-    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
     ...req,
   };
@@ -170,31 +184,41 @@ export const persistableStateAttachment: PersistableStateAttachmentPayload = {
   type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
+  persistableStateAttachmentState: { foo: 'foo' },
 };
 
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
-): Partial<Case> => ({
-  ...req,
-  ...(id != null ? { id } : {}),
-  comments: [],
-  duration: null,
-  severity: req.severity ?? CaseSeverity.LOW,
-  totalAlerts: 0,
-  totalEvents: 0,
-  totalComment: 0,
-  closed_by: null,
-  created_by: defaultUser,
-  external_service: null,
-  status: CaseStatuses.open,
-  updated_by: null,
-  category: null,
-  customFields: [],
-  observables: [],
-  total_observables: 0,
-});
+): Partial<Case> => {
+  // `template` is an optional field on the case response and is only present when the case was
+  // created from a template. transformNewCase deliberately keeps an absent template absent (rather
+  // than writing `template: null`), and CaseRt models it as an optional key — so a case created
+  // without a template has no `template` key at all. None of these mocks supply one, so it is
+  // destructured out of the spread here (rather than left as `template: null`) to match the decoded
+  // response: absent, not null. Destructuring also drops the request-shape `version?: number`,
+  // which is incompatible with the response's pinned `version: number`.
+  const { template, ...reqWithoutTemplate } = req;
+  return {
+    ...reqWithoutTemplate,
+    ...(id != null ? { id } : {}),
+    comments: [],
+    duration: null,
+    severity: req.severity ?? CaseSeverity.LOW,
+    totalAlerts: 0,
+    totalEvents: 0,
+    totalComment: 0,
+    closed_by: null,
+    created_by: defaultUser,
+    external_service: null,
+    status: CaseStatuses.open,
+    updated_by: null,
+    category: null,
+    customFields: [],
+    observables: [],
+    total_observables: 0,
+  };
+};
 
 export const getCaseWithoutCommentsResp = (
   id?: string | null,

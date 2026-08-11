@@ -15,7 +15,7 @@ export const GetMetadataListRequestSchema = {
     {
       page: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE, min: 0 }),
       pageSize: schema.number({ defaultValue: ENDPOINT_DEFAULT_PAGE_SIZE, min: 1, max: 10000 }),
-      kuery: schema.maybe(schema.string()),
+      kuery: schema.maybe(schema.string({ maxLength: 30000 })),
       sortField: schema.maybe(
         schema.oneOf([
           schema.literal(EndpointSortableField.ENROLLED_AT.toString()),
@@ -38,7 +38,8 @@ export const GetMetadataListRequestSchema = {
             schema.literal(HostStatus.UPDATING.toString()),
             schema.literal(HostStatus.UNHEALTHY.toString()),
             schema.literal(HostStatus.INACTIVE.toString()),
-          ])
+          ]),
+          { maxSize: 20 }
         )
       ),
     },

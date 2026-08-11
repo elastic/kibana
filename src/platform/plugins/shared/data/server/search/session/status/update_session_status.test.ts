@@ -33,6 +33,10 @@ const getDeps = () => {
   return {
     esClient: elasticsearchServiceMock.createElasticsearchClient(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    searchSessionEBTManager: {
+      trackBgsCompleted: jest.fn(),
+      trackBgsError: jest.fn(),
+    },
   };
 };
 
@@ -56,6 +60,8 @@ describe('getSessionStatus', () => {
         status: SearchSessionStatus.COMPLETE,
       });
       expect(deps.savedObjectsClient.update).not.toHaveBeenCalled();
+      expect(deps.searchSessionEBTManager.trackBgsCompleted).not.toHaveBeenCalled();
+      expect(deps.searchSessionEBTManager.trackBgsError).not.toHaveBeenCalled();
     });
   });
 
@@ -84,6 +90,13 @@ describe('getSessionStatus', () => {
           status: SearchSessionStatus.COMPLETE,
         })
       );
+      expect(deps.searchSessionEBTManager.trackBgsCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          session,
+          searchStatuses: [],
+        })
+      );
+      expect(deps.searchSessionEBTManager.trackBgsError).not.toHaveBeenCalled();
     });
   });
 
@@ -124,6 +137,8 @@ describe('getSessionStatus', () => {
           },
         })
       );
+      expect(deps.searchSessionEBTManager.trackBgsCompleted).not.toHaveBeenCalled();
+      expect(deps.searchSessionEBTManager.trackBgsError).not.toHaveBeenCalled();
     });
   });
 
@@ -164,6 +179,75 @@ describe('getSessionStatus', () => {
           },
         })
       );
+      expect(deps.searchSessionEBTManager.trackBgsCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          session,
+          searchStatuses: [
+            { id: 'search-1', status: SearchStatus.COMPLETE, strategy: 'esql_async' },
+          ],
+        })
+      );
+      expect(deps.searchSessionEBTManager.trackBgsError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when status changes to error', () => {
+    it('should report a bg_search_error event', async () => {
+      // Given
+      const deps = getDeps();
+      const session = getSavedObjectMock({
+        status: SearchSessionStatus.IN_PROGRESS,
+      });
+      getSessionStatusMock.mockResolvedValue({
+        status: SearchSessionStatus.ERROR,
+        searchStatuses: [
+          {
+            id: 'search-1',
+            strategy: 'esql_async',
+            status: SearchStatus.ERROR,
+            error: {
+              code: 408,
+              message: 'request timeout',
+            },
+          },
+        ],
+      });
+
+      // When
+      const res = await updateSessionStatus(deps, session);
+
+      // Then
+      expect(res).toEqual({
+        status: SearchSessionStatus.ERROR,
+        searchStatuses: [
+          {
+            id: 'search-1',
+            strategy: 'esql_async',
+            status: SearchStatus.ERROR,
+            error: {
+              code: 408,
+              message: 'request timeout',
+            },
+          },
+        ],
+      });
+      expect(deps.searchSessionEBTManager.trackBgsError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          session,
+          searchStatuses: [
+            {
+              id: 'search-1',
+              strategy: 'esql_async',
+              status: SearchStatus.ERROR,
+              error: {
+                code: 408,
+                message: 'request timeout',
+              },
+            },
+          ],
+        })
+      );
+      expect(deps.searchSessionEBTManager.trackBgsCompleted).not.toHaveBeenCalled();
     });
   });
 });

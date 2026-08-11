@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiMarkdownEditorProps, EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
@@ -31,10 +31,12 @@ const markdownRendererStyles = {
 
 export const MarkdownRenderer = ({
   content,
+  parsingPluginList,
   processingPluginList,
   title,
 }: {
   content: string;
+  parsingPluginList?: EuiMarkdownEditorProps['parsingPluginList'];
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   title?: string;
 }) => {
@@ -44,6 +46,7 @@ export const MarkdownRenderer = ({
     <EuiMarkdownFormat
       className="eui-yScroll"
       data-test-subj="markdownRenderer"
+      parsingPluginList={parsingPluginList}
       processingPluginList={processingPluginList}
       css={[styles.container, title?.length && styles.reducedTopPadding]}
     >

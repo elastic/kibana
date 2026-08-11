@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 
 /**
@@ -185,7 +186,8 @@ export function extractWorkflowMetadata(
   const hasAlertTriggers = triggers.some((trigger) => trigger?.type === 'alert');
 
   // Count inputs
-  const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
+  const inputs = getInputsFromDefinition(workflow);
+  const inputCount = !inputs ? 0 : Object.keys(inputs.properties ?? {}).length;
 
   // Extract settings
   const enabled = Boolean(workflow.enabled);

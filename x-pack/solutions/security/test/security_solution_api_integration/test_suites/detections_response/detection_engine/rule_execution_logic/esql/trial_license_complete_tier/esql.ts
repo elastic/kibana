@@ -21,7 +21,10 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import {
+  getMaxSignalsWarning as getMaxAlertsWarning,
+  getMissingIdFieldWarning,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
@@ -47,6 +50,7 @@ import {
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -54,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
@@ -258,6 +263,73 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('non-aggregating query rules', () => {
+      describe('auto-inject metadata _id', () => {
+        it('should deduplicate alerts when query omits METADATA clause (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+
+        it('should deduplicate alerts when KEEP without _id is used (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | keep agent.name`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+      });
       it('should add source document to alert', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
@@ -352,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
-          )} | where agent.name=="test-1" | keep agent.name | rename agent.name as custom_named_agent`,
+          )} | where agent.name=="test-1" | stats count() by agent.name | rename agent.name as custom_named_agent`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -1791,13 +1863,134 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('missing _id warning', () => {
+      it('generates warning when non-aggregating query does not return _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1" | DROP _id`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning when non-aggregating query returns _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning for aggregating queries without _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | stats counted=count(agent.name)`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('generates warning when auto-injected _id is dropped by DROP command', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1" | DROP _id`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+    });
+
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: {
+                id: 'host:host-0',
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -1831,15 +2024,19 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: { id: 'host:host-0', type: 'host' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -2202,7 +2399,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -2380,7 +2577,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveProperty('0.description', 'ES|QL request to find all matches');
         expect(requests).toHaveProperty('0.duration', expect.any(Number));
         expect(requests![0].request).toContain(
-          `"query": "from ecs_compliant metadata _id | where id==\\\"${id}\\\" | where agent.name==\\\"test-1\\\" | limit 101",`
+          `"query": "FROM ecs_compliant METADATA _id | WHERE id == \\\"${id}\\\" | WHERE agent.name == \\\"test-1\\\" | limit 101",`
         );
 
         expect(requests).toHaveProperty(

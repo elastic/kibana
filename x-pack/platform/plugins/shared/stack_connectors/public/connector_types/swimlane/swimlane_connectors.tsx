@@ -121,7 +121,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
               isLoading={isLoadingApplication}
               onClick={onNextStep}
               data-test-subj="swimlaneConfigureMapping"
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               iconSide="right"
             >
               {i18n.SW_NEXT}
@@ -130,7 +130,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         </div>
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
           <SwimlaneFields fields={fields} readOnly={readOnly} />
-          <EuiButton onClick={resetConnection} iconType="arrowLeft">
+          <EuiButton onClick={resetConnection} iconType="chevronSingleLeft">
             {i18n.SW_BACK}
           </EuiButton>
         </div>

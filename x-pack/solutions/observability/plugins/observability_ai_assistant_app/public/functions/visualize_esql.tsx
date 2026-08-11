@@ -259,7 +259,7 @@ export function VisualizeESQL({
                   <EuiDescriptionListDescription key={index}>
                     <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="error" color="danger" size="s" />
+                        <EuiIcon type="error" color="danger" size="s" aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>{error}</EuiFlexItem>
                     </EuiFlexGroup>
@@ -290,7 +290,7 @@ export function VisualizeESQL({
                   >
                     <EuiButtonIcon
                       size="xs"
-                      iconType={isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'}
+                      iconType={isTableVisible ? 'chartBarVerticalStack' : 'tableDensityLow'}
                       onClick={() => setIsTableVisible(!isTableVisible)}
                       data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
                       aria-label={

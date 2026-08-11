@@ -14,6 +14,7 @@ exports[`OverviewPageFooter render 1`] = `
       <div>
         <EuiButtonEmpty
           className="kbnOverviewPageFooter__button"
+          data-test-subj="kbnOverviewPageFooterButton"
           flush="both"
           iconType="home"
           onClick={[Function]}

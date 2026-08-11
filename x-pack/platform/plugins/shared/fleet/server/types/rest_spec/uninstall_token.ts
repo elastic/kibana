@@ -16,7 +16,12 @@ export const GetUninstallTokensMetadataRequestSchema = {
         meta: { description: 'Partial match filtering for policy IDs' },
       })
     ),
-    search: schema.maybe(schema.string({ maxLength: 50 })),
+    search: schema.maybe(
+      schema.string({
+        maxLength: 50,
+        meta: { description: 'Partial match filtering for uninstall token values' },
+      })
+    ),
     perPage: schema.maybe(
       schema.number({
         defaultValue: 20,
@@ -24,7 +29,9 @@ export const GetUninstallTokensMetadataRequestSchema = {
         meta: { description: 'The number of items to return' },
       })
     ),
-    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
+    page: schema.maybe(
+      schema.number({ defaultValue: 1, min: 1, meta: { description: 'Page number' } })
+    ),
   }),
 };
 
@@ -42,7 +49,7 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
-    uninstallTokenId: schema.string(),
+    uninstallTokenId: schema.string({ meta: { description: 'The ID of the uninstall token' } }),
   }),
 };
 
@@ -50,4 +57,17 @@ export const GetUninstallTokenResponseSchema = schema.object({
   item: UninstallTokenMetadataSchema.extends({
     token: schema.string(),
   }),
+});
+
+export const RotateUninstallTokenRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
+    }),
+  }),
+};
+
+export const RotateUninstallTokenResponseSchema = schema.object({
+  message: schema.string(),
 });

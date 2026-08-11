@@ -60,7 +60,7 @@ export const UserProcess = React.memo<{
               eventId={eventId}
               field={PROCESS_NAME_FIELD_NAME}
               value={process}
-              iconType="console"
+              iconType="commandLine"
               isAggregatable={true}
               fieldType="keyword"
             />

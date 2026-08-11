@@ -8,15 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import {
-  getLookupIndexCreateSuggestion,
-  handleFragment,
-} from '../../definitions/utils/autocomplete/helpers';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand } from '../../../types';
+import { getLookupIndexCreateSuggestion } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext, Location } from '../types';
-import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
+import { newLineAndPipeCompleteItems, commaCompleteItem } from '../complete_items';
 import {
   createEnrichedContext,
   createEnrichedGetByType,
@@ -27,6 +24,9 @@ import {
 import { specialIndicesToSuggestions } from '../../definitions/utils/sources';
 import { esqlCommandRegistry } from '..';
 import { suggestForExpression } from '../../definitions/utils';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../../definitions/constants';
+
+const COORDINATOR_LOOKUP_JOIN_QUALIFIER = `${COORDINATOR_LOOKUP_JOIN_PREFIX}:`;
 
 export async function autocomplete(
   query: string,
@@ -68,44 +68,42 @@ export async function autocomplete(
           asSnippet: true,
           detail: description,
           kind: 'Keyword',
-          sortText: `${i}-MNEMONIC`,
         })
       );
     }
 
     case 'after_mnemonic':
     case 'index': {
-      const indexNameInput = commandText.split(' ').pop() ?? '';
+      const words = commandText.split(' ');
+      const indexNameInput = words[words.length - 1] ?? '';
       const joinSources = context?.joinSources;
       const suggestions: ISuggestionItem[] = [];
+      // _coordinator: is a lookup target qualifier, not part of the index name to create.
+      const lookupIndexName = indexNameInput.startsWith(COORDINATOR_LOOKUP_JOIN_QUALIFIER)
+        ? indexNameInput.slice(COORDINATOR_LOOKUP_JOIN_QUALIFIER.length)
+        : indexNameInput;
 
-      const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+      const canCreate = (await callbacks?.canCreateLookupIndex?.(lookupIndexName)) ?? false;
 
       const indexAlreadyExists = joinSources?.some(
-        (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
+        (source) => source.name === lookupIndexName || source.aliases.includes(lookupIndexName)
       );
       if (canCreate && !indexAlreadyExists) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(
-          innerText,
-          indexNameInput
-        );
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(lookupIndexName);
         suggestions.push(createIndexCommandSuggestion);
       }
 
       if (joinSources?.length) {
         const joinIndexesSuggestions = specialIndicesToSuggestions(joinSources);
-        suggestions.push(
-          ...(await handleFragment(
-            innerText,
-            (fragment) =>
-              specialIndicesToSuggestions(joinSources).some(
-                ({ label }) => label.toLocaleLowerCase() === fragment.toLocaleLowerCase()
-              ),
-            (_fragment, rangeToReplace?: { start: number; end: number }) =>
-              joinIndexesSuggestions.map((suggestion) => ({ ...suggestion, rangeToReplace })),
-            () => []
-          ))
-        );
+        const isCompleteLookupIndex =
+          indexNameInput &&
+          joinIndexesSuggestions.some(
+            ({ label }) => label.toLocaleLowerCase() === indexNameInput.toLocaleLowerCase()
+          );
+
+        if (!isCompleteLookupIndex) {
+          suggestions.push(...joinIndexesSuggestions);
+        }
       }
 
       return suggestions;
@@ -119,7 +117,6 @@ export async function autocomplete(
           defaultMessage: 'Specify JOIN field conditions',
         }),
         kind: 'Keyword',
-        sortText: '0-ON',
       });
 
       return [suggestion];
@@ -178,7 +175,7 @@ export async function autocomplete(
 
         if (isBooleanComplete || (!isBooleanComplete && fieldIsCommon)) {
           filteredSuggestions.push(withAutoSuggest({ ...commaCompleteItem, text: ', ' }));
-          filteredSuggestions.push(pipeCompleteItem);
+          filteredSuggestions.push(...newLineAndPipeCompleteItems);
         }
       }
 

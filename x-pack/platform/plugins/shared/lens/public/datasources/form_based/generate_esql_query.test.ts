@@ -54,15 +54,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should return failure with include_empty_rows_not_supported reason if missing row option is set', () => {
@@ -100,6 +97,44 @@ describe('generateEsqlQuery', () => {
     expect(result).toEqual({
       success: false,
       reason: 'include_empty_rows_not_supported',
+    });
+  });
+
+  it('should return failure with drop_partials_not_supported reason if drop partial intervals is set', () => {
+    const result = generateEsqlQuery(
+      [
+        [
+          '1',
+          {
+            operationType: 'date_histogram',
+            sourceField: 'order_date',
+            label: 'Date histogram',
+            dataType: 'date',
+            isBucketed: true,
+            params: { interval: 'auto', dropPartials: true },
+          } as DateHistogramIndexPatternColumn,
+        ],
+        [
+          '2',
+          {
+            operationType: 'count',
+            sourceField: 'records',
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        ],
+      ],
+      mockLayer,
+      mockIndexPattern,
+      uiSettings,
+      mockDateRange,
+      new Date()
+    );
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'drop_partials_not_supported',
     });
   });
 
@@ -162,15 +197,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should not add a where condition to esql if timeField is not set', () => {
@@ -205,14 +237,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | STATS bucket_0_0 = COUNT(*)
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        'FROM myIndexPattern | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 
   it('should preserve user-configured format (e.g., currency) in esAggsIdMap', () => {
@@ -262,10 +292,9 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
-      expect(metricKey).toBeDefined();
-      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      const metricKey = 'SUM(price)';
+      expect(result.esAggsIdMap).toHaveProperty(metricKey);
+      const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
         id: 'currency',
         params: {
@@ -322,10 +351,9 @@ describe('generateEsqlQuery', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      // Find the metric column in esAggsIdMap
-      const metricKey = Object.keys(result.esAggsIdMap).find((key) => key.startsWith('bucket_'));
-      expect(metricKey).toBeDefined();
-      const metricColumn = result.esAggsIdMap[metricKey!][0];
+      const metricKey = 'AVG(bytes)';
+      expect(result.esAggsIdMap).toHaveProperty(metricKey);
+      const metricColumn = result.esAggsIdMap[metricKey][0];
       expect(metricColumn.format).toEqual({
         id: 'bytes',
         params: {
@@ -371,14 +399,12 @@ describe('generateEsqlQuery', () => {
       new Date()
     );
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        success: true,
-        esql: `FROM myIndexPattern
-  | WHERE order_date >= ?_tstart AND order_date <= ?_tend
-  | STATS bucket_0_0 = COUNT(*) WHERE KQL("geo.src:\\"US\\"")
-        BY order_date = BUCKET(order_date, 30 minutes)`,
-      })
-    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.esql).toBe(
+        // eslint-disable-next-line prettier/prettier
+          'FROM myIndexPattern | WHERE order_date >= ?_tstart AND order_date <= ?_tend | STATS COUNT(*) WHERE KQL(\"geo.src:\\\"US\\\"\") BY BUCKET(order_date, 75, ?_tstart, ?_tend)'
+      );
+    }
   });
 });

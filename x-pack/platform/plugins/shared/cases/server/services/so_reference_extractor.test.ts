@@ -345,6 +345,24 @@ describe('SOReferenceExtractor', () => {
         },
       });
     });
+
+    it('does NOT overwrite an existing attribute value when no matching reference is present', () => {
+      const migrator = new SOReferenceExtractor([{ path: 'hello', type: 'type', name: 'name' }]);
+
+      expect(
+        migrator.populateFieldsFromReferences(
+          asSavedObject({
+            data: { hello: 'pre-existing-id' },
+            references: [],
+          })
+        )
+      ).toEqual({
+        attributes: {
+          hello: 'pre-existing-id',
+        },
+        references: [],
+      });
+    });
   });
 });
 

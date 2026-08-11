@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 
 export const useESQLVariables = ({
   parentApi,
@@ -50,7 +51,7 @@ export const useESQLVariables = ({
       // add a new control
       await parentApi.addNewPanel(
         {
-          panelType: 'esqlControl',
+          panelType: ESQL_CONTROL,
           serializedState: {
             ...controlState,
           },

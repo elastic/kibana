@@ -8,6 +8,7 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
+
 import type { DashboardState } from '../../types';
 
 const savedObjectToAPIOptionsKeys = {
@@ -24,9 +25,9 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting?: boolean
-): Required<DashboardState>['options'] {
+): Partial<DashboardState['options']> {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
-  const apiOptions: Writable<Required<DashboardState>['options']> = {};
+  const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
     const savedObjectKey = key as keyof ParsedSavedObjectOptions;
     const apiKey = savedObjectToAPIOptionsKeys[savedObjectKey];

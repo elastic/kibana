@@ -24,7 +24,6 @@ export default defineCypressConfig({
   },
   execTimeout: 150000,
   pageLoadTimeout: 150000,
-  numTestsKeptInMemory: 0,
   retries: {
     runMode: 1,
   },
@@ -41,23 +40,11 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
-      on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.name === 'chrome' && browser.isHeadless) {
-          launchOptions.args.push('--window-size=1920,1200');
-          return launchOptions;
-        }
-        if (browser.family === 'chromium') {
-          launchOptions.args.push(
-            '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
-          );
-        }
-        return launchOptions;
-      });
       samlAuthentication(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       esClient(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
+      require('@cypress/grep/plugin').plugin(config);
       return config;
     },
   },

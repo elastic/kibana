@@ -32,7 +32,7 @@ export const GridLayoutOptions = ({
     <EuiPopover
       button={
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsSettingsPopoverOpen(!isSettingsPopoverOpen)}
         >
@@ -43,6 +43,9 @@ export const GridLayoutOptions = ({
       }
       isOpen={isSettingsPopoverOpen}
       closePopover={() => setIsSettingsPopoverOpen(false)}
+      aria-label={i18n.translate('examples.gridExample.settingsPopover.ariaLabel', {
+        defaultMessage: 'Layout settings',
+      })}
     >
       <>
         <EuiFormRow

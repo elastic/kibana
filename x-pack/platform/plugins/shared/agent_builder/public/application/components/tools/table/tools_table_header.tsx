@@ -15,6 +15,8 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useCallback } from 'react';
 import { useToolsActions } from '../../../context/tools_provider';
 import { labels } from '../../../utils/i18n';
@@ -97,6 +99,11 @@ export const ToolsTableHeader = ({
                   size="xs"
                   color="danger"
                   onClick={deleteSelection}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_DELETE,
+                    detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                  })}
                 >
                   <EuiText
                     size="xs"
@@ -115,6 +122,11 @@ export const ToolsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={selectAll}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.SELECT_ALL,
+                  detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                })}
               >
                 <EuiText
                   size="xs"
@@ -132,6 +144,11 @@ export const ToolsTableHeader = ({
                 iconSize="m"
                 size="xs"
                 onClick={clearSelection}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.CLEAR_SELECTION,
+                  detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                })}
               >
                 <EuiText
                   size="xs"

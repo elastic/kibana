@@ -29,7 +29,6 @@ const newDataViews = [
 
 const rootProfileState = {
   rootProfileLoading: false as const,
-  AppWrapper: () => null,
   getDefaultAdHocDataViews: () =>
     newDataViews.map((dv) => {
       const { id, ...restSpec } = dv.toSpec();

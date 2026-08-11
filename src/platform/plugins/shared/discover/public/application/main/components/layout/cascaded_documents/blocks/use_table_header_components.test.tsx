@@ -9,10 +9,14 @@
 
 import React from 'react';
 import { renderHook, render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useGetGroupBySelectorRenderer } from './use_table_header_components';
+import {
+  useGetGroupBySelectorRenderer,
+  useEsqlDataCascadeHeaderComponent,
+} from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
   const mockCascadeGroupingChangeHandler = jest.fn();
@@ -41,9 +45,11 @@ describe('useTableHeaderComponents', () => {
       result.current(props.availableGroups, props.selectedGroups);
 
     render(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     expect(await screen.findByTestId('discoverEnableCascadeLayoutSwitch')).toBeInTheDocument();
@@ -64,9 +70,11 @@ describe('useTableHeaderComponents', () => {
       result.current(props.availableGroups, props.selectedGroups);
 
     const { rerender } = render(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     const groupSelectionButton = await screen.findByTestId('discoverEnableCascadeLayoutSwitch');
@@ -77,9 +85,11 @@ describe('useTableHeaderComponents', () => {
 
     // we rerender so the state updates and the popover can be seen
     rerender(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     await waitForEuiPopoverOpen();
@@ -90,5 +100,91 @@ describe('useTableHeaderComponents', () => {
     await user.click(screen.getByText('group2'));
 
     await waitFor(() => expect(mockCascadeGroupingChangeHandler).toHaveBeenCalledWith(['group2']));
+  });
+
+  it('displays a technical preview tooltip on hover', async () => {
+    const user = userEvent.setup();
+    const availableGroups = ['group1', 'group2'];
+    const selectedGroups = ['group1'];
+
+    const { result } = renderHook(() =>
+      useGetGroupBySelectorRenderer({
+        cascadeGroupingChangeHandler: mockCascadeGroupingChangeHandler,
+      })
+    );
+
+    const GroupBySelector = (props: { availableGroups: string[]; selectedGroups: string[] }) =>
+      result.current(props.availableGroups, props.selectedGroups);
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+
+    const groupSelectionButton = await screen.findByTestId('discoverEnableCascadeLayoutSwitch');
+
+    await user.hover(groupSelectionButton);
+
+    expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
+    expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
+  });
+});
+
+describe('useEsqlDataCascadeHeaderComponent', () => {
+  const mockCascadeGroupingChangeHandler = jest.fn();
+
+  // Renders the hit-counter-label props it receives so the test can assert on them,
+  // in place of the real hit-count toggle (which independently owns the total-hits number).
+  const ToggleProbe = ({
+    hitCounterLabel,
+    hitCounterPluralLabel,
+  }: {
+    hitCounterLabel?: string;
+    hitCounterPluralLabel?: string;
+  }) => (
+    <div data-test-subj="toggle-probe">
+      {hitCounterLabel}/{hitCounterPluralLabel}
+    </div>
+  );
+
+  const renderCustomHeader = (viewModeToggle: React.ReactElement | undefined) => {
+    const { result } = renderHook(() =>
+      useEsqlDataCascadeHeaderComponent({
+        viewModeToggle,
+        cascadeGroupingChangeHandler: mockCascadeGroupingChangeHandler,
+      })
+    );
+
+    const CustomHeader = () =>
+      result.current({
+        currentSelectedColumns: ['category'],
+        availableColumns: ['category'],
+        onGroupSelection: jest.fn(),
+        selectedRows: [],
+      });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <CustomHeader />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+  };
+
+  it('clones the view mode toggle with "group"/"groups" hit counter labels, instead of the generic hit labels', () => {
+    renderCustomHeader(<ToggleProbe />);
+
+    expect(screen.getByTestId('toggle-probe')).toHaveTextContent('group/groups');
+  });
+
+  it('still renders the group-by selector when no view mode toggle is provided', () => {
+    renderCustomHeader(undefined);
+
+    expect(screen.queryByTestId('toggle-probe')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverEnableCascadeLayoutSwitch')).toBeInTheDocument();
   });
 });

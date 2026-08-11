@@ -11,7 +11,7 @@ import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 
-import type { AttachmentUI, UserActionUI } from '../../containers/types';
+import type { AttachmentUIV2, UserActionUI } from '../../containers/types';
 import type { UserActionTreeProps } from './types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
@@ -64,20 +64,14 @@ const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
 
 export type UserActionListProps = Omit<
   UserActionTreeProps,
-  | 'userActivityQueryParams'
-  | 'userActionsStats'
-  | 'useFetchAlertData'
-  | 'onUpdateField'
-  | 'statusActionButton'
+  'userActivityQueryParams' | 'userActionsStats' | 'onUpdateField' | 'statusActionButton'
 > & {
   commentRefs: React.MutableRefObject<
     Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
   >;
   handleManageQuote: (quote: string) => void;
   caseUserActions: UserActionUI[];
-  attachments: AttachmentUI[];
-  loadingAlertData: boolean;
-  manualAlertsData: Record<string, unknown>;
+  attachments: AttachmentUIV2[];
   bottomActions?: EuiCommentProps[];
   isExpandable?: boolean;
 };
@@ -91,19 +85,16 @@ export const UserActionsList = React.memo(
     currentUserProfile,
     data: caseData,
     casesConfiguration,
-    getRuleDetailsHref,
-    actionsNavigation,
-    onRuleDetailsClick,
-    onShowAlertDetails,
-    loadingAlertData,
-    manualAlertsData,
     commentRefs,
     handleManageQuote,
     bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+    } = useCasesContext();
     const { owner } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
@@ -142,6 +133,7 @@ export const UserActionsList = React.memo(
           caseConnectors,
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
           userAction,
           userProfiles,
           currentUserProfile,
@@ -150,15 +142,9 @@ export const UserActionsList = React.memo(
           manageMarkdownEditIds,
           selectedOutlineCommentId,
           loadingCommentIds,
-          loadingAlertData,
-          alertData: manualAlertsData,
           euiTheme,
           handleOutlineComment,
           handleDeleteComment,
-          onShowAlertDetails,
-          actionsNavigation,
-          getRuleDetailsHref,
-          onRuleDetailsClick,
         });
         return [...userActions, ...userActionBuilder.build()];
       }, []);
@@ -170,21 +156,16 @@ export const UserActionsList = React.memo(
       caseConnectors,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       userProfiles,
       currentUserProfile,
       attachments,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,
-      loadingAlertData,
-      manualAlertsData,
       euiTheme,
       handleOutlineComment,
       handleDeleteComment,
-      onShowAlertDetails,
-      actionsNavigation,
-      getRuleDetailsHref,
-      onRuleDetailsClick,
     ]);
 
     const comments = bottomActions?.length

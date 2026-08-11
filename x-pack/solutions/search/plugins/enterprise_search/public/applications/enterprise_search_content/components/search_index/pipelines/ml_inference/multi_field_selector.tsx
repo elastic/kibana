@@ -170,7 +170,7 @@ export const MultiFieldMapping: React.FC = () => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ paddingTop: '32px' }}>
-          <EuiIcon type="sortRight" />
+          <EuiIcon type="sortRight" aria-hidden />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
           <EuiFormRow
@@ -199,7 +199,7 @@ export const MultiFieldMapping: React.FC = () => {
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureFields-addSelectedFieldsToMapping`}
             disabled={selectedFields.length === 0}
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onAddSelectedFields}
             style={{ width: '60px' }}
           >
@@ -240,7 +240,7 @@ export const SelectedFieldMappings: React.FC<SelectedFieldMappingsProps> = ({ is
     {
       align: 'left',
       name: '',
-      render: () => <EuiIcon type="sortRight" />,
+      render: () => <EuiIcon type="sortRight" aria-hidden />,
       width: '60px',
     },
     {

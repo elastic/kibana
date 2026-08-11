@@ -137,4 +137,52 @@ describe('DeleteDataViewFlyout', () => {
     expect(mockDataViews.delete).toHaveBeenCalledWith('1');
     expect(defaultProps.onDelete).toHaveBeenCalled();
   });
+
+  it('disables Delete button when all data views are managed', () => {
+    const props = {
+      ...defaultProps,
+      dataViewArray: [
+        {
+          id: '1',
+          title: 'Managed Data View',
+          getName: () => 'Managed Data View',
+          managed: true,
+        },
+      ] as RemoveDataViewProps[],
+    };
+    render(<DeleteDataViewFlyout {...props} />);
+    expect(screen.getByText('Delete').closest('button')).toBeDisabled();
+  });
+
+  it('does not call dataViews.delete for managed data views', async () => {
+    const props = {
+      ...defaultProps,
+      dataViewArray: [
+        {
+          id: '1',
+          title: 'Normal Data View',
+          getName: () => 'Normal Data View',
+          managed: false,
+        },
+        {
+          id: '2',
+          title: 'Managed Data View',
+          getName: () => 'Managed Data View',
+          managed: true,
+        },
+      ] as RemoveDataViewProps[],
+      selectedRelationships: {
+        '1': [],
+        '2': [],
+      } as unknown as Record<string, SavedObjectRelation[]>,
+    };
+    render(<DeleteDataViewFlyout {...props} />);
+    const deleteButton = screen.getByText('Delete');
+    expect(deleteButton).not.toBeDisabled();
+    await act(async () => {
+      fireEvent.click(deleteButton);
+    });
+    expect(mockDataViews.delete).toHaveBeenCalledWith('1');
+    expect(mockDataViews.delete).not.toHaveBeenCalledWith('2');
+  });
 });

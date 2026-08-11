@@ -28,6 +28,7 @@ import type {
   ListToolHealthResponse,
   ListMcpToolsHealthResponse,
   BulkCreateMcpToolsResponse,
+  BulkDeleteConnectorsResponse,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
@@ -122,6 +123,13 @@ export class ToolsService {
   async getConnector({ connectorId }: { connectorId: string }) {
     return await this.http.get<GetConnectorResponse>(
       `${internalApiPath}/tools/_get_connector/${connectorId}`
+    );
+  }
+
+  async bulkDeleteConnectors(connectorIds: string[]) {
+    return await this.http.post<BulkDeleteConnectorsResponse>(
+      `${internalApiPath}/connectors/_bulk_delete`,
+      { body: JSON.stringify({ ids: connectorIds }) }
     );
   }
 

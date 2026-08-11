@@ -67,9 +67,10 @@ describe('buildApiMap', () => {
       pluginFilter: ['test-plugin'],
     };
 
-    buildApiMap(project, plugins, log, transaction, options);
+    const allPlugins = [...plugins, { id: 'other-plugin' }];
+    buildApiMap(project, plugins, allPlugins, log, transaction, options);
 
-    expect(getPluginApiMap).toHaveBeenCalledWith(project, plugins, log, {
+    expect(getPluginApiMap).toHaveBeenCalledWith(project, plugins, allPlugins, log, {
       collectReferences: true,
       pluginFilter: ['test-plugin'],
     });
@@ -80,7 +81,7 @@ describe('buildApiMap', () => {
       collectReferences: false,
     };
 
-    const result = buildApiMap(project, plugins, log, transaction, options);
+    const result = buildApiMap(project, plugins, plugins, log, transaction, options);
 
     expect(result).toBeDefined();
     expect(result.pluginApiMap).toBeDefined();
@@ -95,7 +96,7 @@ describe('buildApiMap', () => {
       collectReferences: false,
     };
 
-    buildApiMap(project, plugins, log, transaction, options);
+    buildApiMap(project, plugins, plugins, log, transaction, options);
 
     expect(transaction.startSpan).toHaveBeenCalledWith('build_api_docs.getPluginApiMap', 'setup');
   });

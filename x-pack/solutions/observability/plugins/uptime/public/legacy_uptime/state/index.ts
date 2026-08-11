@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createStore, applyMiddleware } from 'redux';
-import type { Store } from 'redux';
+import { createStore, applyMiddleware } from 'redux-v4';
+import type { Store } from 'redux-v4';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -18,7 +18,9 @@ export type AppState = RootState;
 
 const sagaMW = createSagaMiddleware();
 
-export const store: Store = createStore(rootReducer, composeWithDevTools(applyMiddleware(sagaMW)));
+const composeEnhancers = composeWithDevTools({ name: 'Uptime' });
+
+export const store: Store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
 
 sagaMW.run(rootEffect);
 

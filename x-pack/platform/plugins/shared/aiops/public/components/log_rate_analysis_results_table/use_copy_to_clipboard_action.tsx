@@ -48,7 +48,7 @@ export const useCopyToClipboardAction = (): TableItemAction => ({
           {(copy) => (
             <TableActionButton
               dataTestSubjPostfix="CopyToClipboard"
-              iconType="copyClipboard"
+              iconType="copy"
               isDisabled={false}
               label={copyToClipboardButtonLabel}
               onClick={copy}

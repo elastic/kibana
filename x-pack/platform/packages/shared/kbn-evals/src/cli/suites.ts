@@ -9,7 +9,7 @@ import Fs from 'fs';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 
-const METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+const METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 const SKIP_DIRS = new Set([
   '.git',
@@ -27,6 +27,18 @@ const SKIP_DIRS = new Set([
   'data',
 ]);
 
+/**
+ * Splits a suite across several CI steps so a long suite fits inside the Buildkite step timeout.
+ * Each shard becomes its own step (per connector) with its own Scout stack, running only the spec
+ * files it lists. Paths are relative to the suite root (the directory holding `configPath`) and
+ * must partition the suite: CI fails the fanout if one is missing, and the suite's own coverage
+ * test fails if a spec is listed twice or not at all.
+ */
+export interface EvalSuiteShard {
+  id: string;
+  specFiles: string[];
+}
+
 export interface EvalSuiteMetadata {
   id: string;
   name?: string;
@@ -34,6 +46,9 @@ export interface EvalSuiteMetadata {
   configPath: string;
   tags?: string[];
   ciLabels?: string[];
+  serverConfigSet?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 export interface EvalSuiteDefinition {
@@ -47,6 +62,9 @@ export interface EvalSuiteDefinition {
   ciLabels: string[];
   description?: string;
   source: 'metadata' | 'discovery';
+  serverConfigSet?: string;
+  shards?: EvalSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 interface MetadataFile {
@@ -151,6 +169,9 @@ const normalizeSuite = (
     ciLabels,
     description: metadata?.description,
     source: metadata ? 'metadata' : 'discovery',
+    serverConfigSet: metadata?.serverConfigSet,
+    shards: metadata?.shards,
+    stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };
 };
 

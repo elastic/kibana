@@ -12,23 +12,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
-import {
-  buildGenericEntityFlyoutPreviewQuery,
-  getAbbreviatedNumber,
-} from '@kbn/cloud-security-posture-common';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../utils/build_euid_csp_preview_options';
+import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../entity_insight';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -64,26 +67,32 @@ const VulnerabilitiesCount = ({
 };
 
 export const VulnerabilitiesPreview = ({
-  value,
-  field,
+  identityFields,
+  entityRecord,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcons,
 }: {
-  value: string;
-  field: CloudPostureEntityIdentifier;
+  identityFields: IdentityFields;
+  entityRecord?: EntityStoreRecord | null;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
   }, []);
 
-  const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery(field, value),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
+  const euidApi = useEntityStoreEuidApi();
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () =>
+      buildEuidCspPreviewOptions(entityType, entityRecord, euidApi, {
+        legacyIdentityFields: identityFields,
+      }),
+    [entityType, entityRecord, euidApi, identityFields]
+  );
+  const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
 
@@ -136,7 +145,10 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
+        iconType:
+          !isPreviewMode && !hideHeaderIcons && hasVulnerabilitiesFindings
+            ? 'chevronLimitLeft'
+            : '',
         title: (
           <EuiTitle
             css={css`
@@ -149,7 +161,7 @@ export const VulnerabilitiesPreview = ({
             />
           </EuiTitle>
         ),
-        link,
+        link: hasVulnerabilitiesFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >

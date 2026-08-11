@@ -11,17 +11,17 @@ import type { ApmFields, ApmOtelFields } from '@kbn/synthtrace-client';
 import { Transform } from 'stream';
 
 function moveAttributes(
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   origin: string,
   destination: string,
   ignoreList: Array<keyof ApmFields> = []
-) {
+): Record<string, unknown> {
   return Object.entries(obj)
     .filter(([key]) => key.startsWith(origin) && !ignoreList.some((item) => key.startsWith(item)))
-    .reduce((acc, [key, value]) => {
+    .reduce<Record<string, unknown>>((acc, [key, value]) => {
       acc[`${destination}.${key}`] = value;
       return acc;
-    }, {} as Record<string, any>);
+    }, {});
 }
 
 export function getOtelToApmSpanTransform() {

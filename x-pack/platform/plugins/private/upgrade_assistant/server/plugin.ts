@@ -58,6 +58,7 @@ export class UpgradeAssistantServerPlugin
   private readonly kibanaVersion: string;
   private readonly initialFeatureSet: FeatureSet;
   private readonly initialDataSourceExclusions: DataSourceExclusions;
+  private readonly cloudStackVersionsApiBaseUrl: string;
 
   // Properties set at start
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
@@ -67,9 +68,10 @@ export class UpgradeAssistantServerPlugin
     this.logger = logger.get();
     this.kibanaVersion = env.packageInfo.version;
 
-    const { featureSet, dataSourceExclusions } = config.get();
+    const { featureSet, dataSourceExclusions, cloudStackVersionsApiBaseUrl } = config.get();
     this.initialFeatureSet = featureSet;
     this.initialDataSourceExclusions = Object.assign({}, defaultExclusions, dataSourceExclusions);
+    this.cloudStackVersionsApiBaseUrl = cloudStackVersionsApiBaseUrl;
   }
 
   setup(
@@ -130,6 +132,7 @@ export class UpgradeAssistantServerPlugin
       config: {
         featureSet: this.initialFeatureSet,
         dataSourceExclusions: this.initialDataSourceExclusions,
+        cloudStackVersionsApiBaseUrl: this.cloudStackVersionsApiBaseUrl,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
       current: versionService.getCurrentVersion(),

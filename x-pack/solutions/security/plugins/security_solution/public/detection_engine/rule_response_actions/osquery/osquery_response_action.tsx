@@ -34,6 +34,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
 
   if (osquery) {
     const { disabled, permissionDenied } = osquery.fetchInstallationStatus();
+    const { OsqueryIcon } = osquery;
     const disabledOsqueryPermission = !(
       application?.capabilities?.osquery?.writeLiveQueries ||
       (application?.capabilities?.osquery?.runSavedQueries &&
@@ -52,7 +53,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
           <EuiEmptyPrompt
             title={<h2>{PERMISSION_DENIED}</h2>}
             titleSize="xs"
-            iconType="logoOsquery"
+            iconType={OsqueryIcon}
             body={
               <p>
                 <FormattedMessage
@@ -74,7 +75,7 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
         <>
           <UseField path={`${props.item.path}.params`} component={GhostFormField} />
           <EuiEmptyPrompt
-            iconType="logoOsquery"
+            iconType={OsqueryIcon}
             title={<h2>{SHORT_EMPTY_TITLE}</h2>}
             titleSize="xs"
             body={<p>{NOT_AVAILABLE}</p>}

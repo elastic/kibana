@@ -5,5 +5,9 @@
  * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.
  */
 
-exports.set = exports.assoc = exports.assocPath = require('./set');
+const set = require('./set');
+
+exports.set = set;
+exports.assoc = set;
+exports.assocPath = set;
 exports.setWith = require('./setWith');

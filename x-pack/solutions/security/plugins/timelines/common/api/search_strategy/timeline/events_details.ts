@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { requestPaginated } from './request_paginated';
@@ -16,6 +16,11 @@ export const timelineEventsDetailsSchema = requestPaginated.partial().extend({
   authFilter: z.object({}).optional(),
   runtimeMappings,
   factoryQueryType: z.literal(TimelineEventsQueries.details),
+  /**
+   * When `true`, hidden indices are included in wildcard expansion for the lookup.
+   * Left unset by default. Used for example for the  fallback retry.
+   */
+  includeHiddenIndices: z.boolean().optional(),
 });
 
 export type TimelineEventsDetailsRequestOptionsInput = z.input<typeof timelineEventsDetailsSchema>;

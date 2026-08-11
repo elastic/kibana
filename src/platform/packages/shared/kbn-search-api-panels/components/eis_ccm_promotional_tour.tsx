@@ -125,7 +125,7 @@ export const EisCloudConnectPromoTour = ({
           data-test-subj="eisCloudConnectPromoTourCtaBtn"
           data-telemetry-id={`${dataId}-connectYourCluster-btn`}
           iconSide="right"
-          iconType="popout"
+          iconType="external"
         >
           {EIS_CLOUD_CONNECT_PROMO_TOUR_CTA}
         </EuiButton>,

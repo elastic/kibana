@@ -23,6 +23,10 @@ export interface EcsRiskScore {
     name: string;
     risk: Omit<EntityRiskScoreRecord, '@timestamp'>;
   };
+  service?: {
+    name: string;
+    risk: Omit<EntityRiskScoreRecord, '@timestamp'>;
+  };
 }
 
 export type RiskInputs = RiskScoreInput[];

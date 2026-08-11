@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-components'
+  title: '@kbn/aiops-components'
   description: Moon project for @kbn/aiops-components
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/private/ml/aiops_components
+  sourceRoot: x-pack/platform/packages/private/ml/aiops_components
 dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/i18n'
@@ -27,6 +26,15 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/ml-agg-utils'
+  - '@kbn/content-management-plugin'
+  - '@kbn/data-views-plugin'
+  - '@kbn/data-view-editor-plugin'
+  - '@kbn/data-view-field-editor-plugin'
+  - '@kbn/saved-objects-finder-plugin'
+  - '@kbn/saved-search-plugin'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/discover-utils'
 tags:
   - shared-common
   - package
@@ -39,16 +47,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

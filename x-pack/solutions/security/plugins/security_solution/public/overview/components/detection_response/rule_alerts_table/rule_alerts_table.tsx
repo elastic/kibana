@@ -40,6 +40,7 @@ import { FormattedCount } from '../../../../common/components/formatted_number';
 import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -59,6 +60,7 @@ export const useGetTableColumns: GetTableColumns = ({
   navigateTo,
   openRuleInAlertsPage,
 }) => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const severityColors = useRiskSeverityColors();
   return useMemo(
     () => [
@@ -74,10 +76,9 @@ export const useGetTableColumns: GetTableColumns = ({
               content={name}
               anchorClassName="eui-textTruncate"
             >
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
+                disabled={!canReadRules}
                 data-test-subj="severityRuleAlertsTable-name"
-                href={url}
                 onClick={(ev?: React.MouseEvent) => {
                   if (ev) {
                     ev.preventDefault();
@@ -133,7 +134,7 @@ export const useGetTableColumns: GetTableColumns = ({
         ),
       },
     ],
-    [getAppUrl, navigateTo, openRuleInAlertsPage, severityColors]
+    [canReadRules, getAppUrl, navigateTo, openRuleInAlertsPage, severityColors]
   );
 };
 

@@ -15,13 +15,14 @@ describe('utils', () => {
       // @ts-expect-error: extra attributes are not needed
       expect(getLensCaseAttachment(embeddable)).toMatchInlineSnapshot(`
         Object {
-          "persistableStateAttachmentState": Object {
-            "attributes": Object {},
-            "metadata": undefined,
-            "timeRange": Object {},
+          "data": Object {
+            "state": Object {
+              "attributes": Object {},
+              "metadata": undefined,
+              "timeRange": Object {},
+            },
           },
-          "persistableStateAttachmentTypeId": ".lens",
-          "type": "persistableState",
+          "type": "lens",
         }
       `);
     });

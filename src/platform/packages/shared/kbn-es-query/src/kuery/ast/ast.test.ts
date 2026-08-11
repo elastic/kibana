@@ -17,7 +17,6 @@ import { nodeTypes } from '../node_types';
 import type { DataViewBase } from '../../..';
 import type { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
-import { performance } from 'perf_hooks';
 
 describe('kuery AST API', () => {
   let indexPattern: DataViewBase;
@@ -61,6 +60,50 @@ describe('kuery AST API', () => {
       ]);
       const actual = fromKueryExpression('foo and bar');
       expect(actual).toEqual(expected);
+    });
+
+    test('should support spaces before & after "and"', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = fromKueryExpression('foo    and    bar');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should support spaces before & after "or"', () => {
+      const withSingleSpaces = fromKueryExpression('foo or bar');
+      expect(fromKueryExpression('foo      or      bar')).toEqual(withSingleSpaces);
+    });
+
+    test('should support spaces after "not"', () => {
+      const withSingleSpaces = fromKueryExpression('not foo');
+      expect(fromKueryExpression('not      foo')).toEqual(withSingleSpaces);
+    });
+
+    test('should normalize extra spaces around "and" for field:value followed by another clause', () => {
+      const withSingleSpaces = fromKueryExpression('host:foo and bar');
+      expect(fromKueryExpression('host:foo    and    bar')).toEqual(withSingleSpaces);
+    });
+
+    test('should normalize extra spaces around "or" inside field:(...) value lists', () => {
+      const withSingleSpaces = fromKueryExpression('host:(bar or baz)');
+      expect(fromKueryExpression('host:(bar      or      baz)')).toEqual(withSingleSpaces);
+    });
+
+    test('should normalize extra spaces around "and" between range comparisons', () => {
+      const withSingleSpaces = fromKueryExpression('bytes > 1000 and bytes < 8000');
+      expect(fromKueryExpression('bytes > 1000    and    bytes < 8000')).toEqual(withSingleSpaces);
+    });
+
+    test('should normalize extra spaces around "and" when left operand is parenthesized', () => {
+      const withSingleSpaces = fromKueryExpression('(foo) and bar');
+      expect(fromKueryExpression('(foo)    and    bar')).toEqual(withSingleSpaces);
+    });
+
+    test('should normalize extra spaces around "and" when left operand is quoted', () => {
+      const withSingleSpaces = fromKueryExpression('"foo" and bar');
+      expect(fromKueryExpression('"foo"    and    bar')).toEqual(withSingleSpaces);
     });
 
     test('nbsp should be recognised as whitespace', () => {
@@ -277,41 +320,23 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/217598
-    describe.skip('performance', () => {
-      const NUM_RUNS = 100;
-      it('with simple expression', () => {
-        const start = performance.now();
-        for (let i = 0; i < NUM_RUNS; i++) {
-          fromKueryExpression(
-            'not fleet-agent-actions.attributes.sent_at: * and fleet-agent-actions.attributes.agent_id:1234567'
-          );
-        }
-        const elapsed = performance.now() - start;
-        const opsPerSec = NUM_RUNS / (elapsed / 1000);
-        expect(opsPerSec).toBeGreaterThan(1000);
-      });
-
-      it('with complex expression', () => {
-        const start = performance.now();
-        for (let i = 0; i < NUM_RUNS; i++) {
-          fromKueryExpression(
-            `((alert.attributes.alertTypeId:.index-threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.signals and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.notifications and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.inventory.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:logs.alert.document.count and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cluster_health and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_license_expiration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cpu_usage and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_nodes_changed and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_logstash_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_kibana_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_elasticsearch_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration_anomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.error_rate and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.monitorStatus and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.tls and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.durationAnomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)))`
-          );
-        }
-        const elapsed = performance.now() - start;
-        const opsPerSec = NUM_RUNS / (elapsed / 1000);
-        expect(opsPerSec).toBeGreaterThan(100);
+    describe('complex queries', () => {
+      it('with many expressions', () => {
+        const expression = `((alert.attributes.alertTypeId:.index-threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.signals and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:siem.notifications and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:metrics.alert.inventory.threshold and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:logs.alert.document.count and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cluster_health and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_license_expiration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_cpu_usage and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_nodes_changed and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_logstash_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_kibana_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:monitoring_alert_elasticsearch_version_mismatch and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.transaction_duration_anomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:apm.error_rate and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.monitorStatus and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.tls and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)) or (alert.attributes.alertTypeId:xpack.uptime.alerts.durationAnomaly and alert.attributes.consumer:(alerts or builtInAlerts or siem or infrastructure or logs or monitoring or apm or uptime)))`;
+        const result = fromKueryExpression(Array(100).fill(expression).join(' and '));
+        expect(result.arguments.length).toBe(100);
       });
 
       it('with many subqueries', () => {
-        const start = performance.now();
-        for (let i = 0; i < NUM_RUNS; i++) {
-          fromKueryExpression(`((((((((((foo))))))))))`);
-        }
-        const elapsed = performance.now() - start;
-        const opsPerSec = NUM_RUNS / (elapsed / 1000);
-        expect(opsPerSec).toBeGreaterThan(1000);
+        const expression = '('.repeat(1000) + 'foo' + ')'.repeat(1000);
+        const result = fromKueryExpression(expression);
+        expect(result.arguments.length).toBe(2);
+      });
+
+      it('with many spaces', () => {
+        const expression = `foo${' '.repeat(10000)}bar`;
+        const result = fromKueryExpression(expression);
+        expect(result.arguments.length).toBe(2);
       });
     });
   });

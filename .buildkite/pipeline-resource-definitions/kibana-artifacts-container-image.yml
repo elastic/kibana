@@ -19,11 +19,16 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts_container_image.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/artifacts_container_image.yml
+            cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:
         build_branches: false

@@ -2,7 +2,8 @@
   "type": "doc",
   "value": {
     "id": "_aZE5nwBOpWiDwiSth_F",
-    "index": "endpoint.alerts-cypress",
+    "data_stream": "logs-endpoint.alerts-default",
+    "index": ".ds-logs-endpoint.alerts-default-2023.02.15-000001",
     "source": {
       "@timestamp": "2023-02-15T16:37:12.225Z",
       "file": {
@@ -69,8 +70,12 @@
         "module": "endpoint",
         "dataset": "process",
         "kind": "alert",
-        "category": ["process"],
-        "type": ["start"],
+        "category": [
+          "process"
+        ],
+        "type": [
+          "start"
+        ],
         "action": "process_started",
         "code": "test"
       },
@@ -89,7 +94,9 @@
         },
         "executable": "/bin/zsh",
         "name": "zsh",
-        "args": ["-zsh"],
+        "args": [
+          "-zsh"
+        ],
         "entity_id": "q6pltOhTWlQx3BCD",
         "entry_leader": {
           "entity_id": "q6pltOhTWlQx3BCD",

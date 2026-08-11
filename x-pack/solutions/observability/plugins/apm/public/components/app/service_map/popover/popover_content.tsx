@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../../common/environment_rt';
 import {
-  isServiceNodeData,
   isGroupedNodeData,
   type ServiceMapNode,
   type ServiceMapEdge,
@@ -23,8 +22,6 @@ import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
-import { ServiceContents } from './service_contents';
-import { withDiagnoseButton } from './with_diagnose_button';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export type { ServiceMapSelection } from './utils';
@@ -43,9 +40,12 @@ export interface ContentsProps {
   onFocusClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
+  isEmbedded?: boolean;
+  /** Override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** Strip `kuery` from popover-built URLs (env still flows through). */
+  clearKueryOnNavigation?: boolean;
 }
-
-export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
 
 /**
  * Returns the content component for the given selection (node or edge).
@@ -60,9 +60,6 @@ export function getContentsComponent(
   const data = selection.data;
   if (isGroupedNodeData(data)) {
     return ExternalsListContents;
-  }
-  if (isServiceNodeData(data)) {
-    return isDiagnosticModeEnabled ? ServiceContentsWithDiagnose : ServiceContents;
   }
   if (data.spanType === 'resource') {
     return ResourceContents;
@@ -89,6 +86,12 @@ interface PopoverContentProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
   onOpenDiagnostic?: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
+  /** When true, popover-built URLs (Service Details / Focus map) drop `kuery`. See `ContentsProps`. */
+  clearKueryOnNavigation?: boolean;
 }
 
 /**
@@ -103,6 +106,9 @@ export function PopoverContent({
   end,
   onFocusClick,
   onOpenDiagnostic,
+  isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -125,20 +131,24 @@ export function PopoverContent({
       data-test-subj="serviceMapPopoverContent"
     >
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-            {getPopoverTitle(selection)}
-            {kuery && (
-              <EuiIconTip
-                position="bottom"
-                content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                  defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                })}
-                type="info"
-              />
-            )}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+                {getPopoverTitle(selection)}
+                {kuery && (
+                  <EuiIconTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                    type="info"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
       <ContentsComponent
@@ -150,6 +160,9 @@ export function PopoverContent({
         end={end}
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
+        isEmbedded={isEmbedded}
+        showFocusMap={showFocusMap}
+        clearKueryOnNavigation={clearKueryOnNavigation}
       />
     </EuiFlexGroup>
   );

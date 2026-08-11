@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component, Suspense } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,19 +66,6 @@ interface InspectorPanelState {
 export class InspectorPanel extends Component<InspectorPanelProps, InspectorPanelState> {
   static defaultProps = {
     title: inspectorTitle,
-  };
-
-  static propTypes = {
-    adapters: PropTypes.object.isRequired,
-    views: (props: InspectorPanelProps, propName: string, componentName: string) => {
-      if (!Array.isArray(props.views) || props.views.length < 1) {
-        throw new Error(
-          `${propName} prop must be an array of at least one element in ${componentName}.`
-        );
-      }
-    },
-    title: PropTypes.string,
-    options: PropTypes.object,
   };
 
   state: InspectorPanelState = {

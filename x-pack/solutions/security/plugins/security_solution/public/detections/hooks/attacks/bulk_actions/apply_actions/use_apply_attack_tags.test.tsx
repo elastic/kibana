@@ -9,16 +9,18 @@ import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useApplyAttackTags } from './use_apply_attack_tags';
-import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
+import { useSetAttacksTags } from '../../../../../common/containers/attacks/hooks/use_set_attacks_tags';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
-jest.mock('../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags');
+jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_tags');
 jest.mock('../confirmation_modal/use_update_attacks_modal');
 
-const mockUseSetUnifiedAlertsTags = useSetUnifiedAlertsTags as jest.MockedFunction<
-  typeof useSetUnifiedAlertsTags
->;
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseSetAttacksTags = useSetAttacksTags as jest.MockedFunction<typeof useSetAttacksTags>;
 const mockUseUpdateAttacksModal = useUpdateAttacksModal as jest.MockedFunction<
   typeof useUpdateAttacksModal
 >;
@@ -30,23 +32,74 @@ function wrapper(props: { children: React.ReactNode }) {
 }
 
 describe('useApplyAttackTags', () => {
-  const mockMutateAsync = jest.fn();
+  const mockAttacksMutateAsync = jest.fn();
   const mockShowModal = jest.fn();
+  const mockReportEvent = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
 
-    mockUseSetUnifiedAlertsTags.mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    } as unknown as ReturnType<typeof useSetUnifiedAlertsTags>);
+    mockUseKibana.mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: mockReportEvent,
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    mockUseSetAttacksTags.mockReturnValue({
+      mutateAsync: mockAttacksMutateAsync,
+    } as unknown as ReturnType<typeof useSetAttacksTags>);
 
     mockUseUpdateAttacksModal.mockReturnValue(mockShowModal);
   });
 
+  it('should report telemetry with attack_only scope when user chooses attacks only', async () => {
+    mockShowModal.mockResolvedValue({ updateAlerts: false });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
+
+    const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
+
+    await act(async () => {
+      await result.current.applyTags({
+        tags: { tags_to_add: ['tag1'], tags_to_remove: [] },
+        attackIds: ['attack-1', 'attack-2'],
+        relatedAlertIds: ['alert-1', 'alert-2'],
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionTagsUpdated, {
+      source: 'attacks_page_group_take_action',
+      scope: 'attack_only',
+    });
+  });
+
+  it('should report telemetry with attack_and_related_alerts scope when user chooses both', async () => {
+    mockShowModal.mockResolvedValue({ updateAlerts: true });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
+
+    const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
+
+    await act(async () => {
+      await result.current.applyTags({
+        tags: { tags_to_add: ['tag1'], tags_to_remove: ['tag2'] },
+        attackIds: ['attack-1'],
+        relatedAlertIds: ['alert-1', 'alert-2', 'alert-3'],
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionTagsUpdated, {
+      source: 'attacks_page_group_take_action',
+      scope: 'attack_and_related_alerts',
+    });
+  });
+
   it('should show modal and update only attacks when user chooses attacks only', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 2 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 2 });
 
     const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
     const setIsLoading = jest.fn();
@@ -66,9 +119,10 @@ describe('useApplyAttackTags', () => {
       alertsCount: 2,
       attackDiscoveriesCount: 2,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
       ids: ['attack-1', 'attack-2'],
       tags: { tags_to_add: ['tag1'], tags_to_remove: [] },
+      update_related_alerts: false,
     });
     expect(setIsLoading).toHaveBeenCalledWith(true);
     expect(setIsLoading).toHaveBeenCalledWith(false);
@@ -77,7 +131,7 @@ describe('useApplyAttackTags', () => {
 
   it('should show modal and update both when user chooses attacks and alerts', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: true });
-    mockMutateAsync.mockResolvedValue({ updated: 4 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 4 });
 
     const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
     const setIsLoading = jest.fn();
@@ -97,9 +151,10 @@ describe('useApplyAttackTags', () => {
       alertsCount: 3,
       attackDiscoveriesCount: 1,
     });
-    expect(mockMutateAsync).toHaveBeenCalledWith({
-      ids: ['attack-1', 'alert-1', 'alert-2', 'alert-3'],
+    expect(mockAttacksMutateAsync).toHaveBeenCalledWith({
+      ids: ['attack-1'],
       tags: { tags_to_add: ['tag1'], tags_to_remove: ['tag2'] },
+      update_related_alerts: true,
     });
     expect(onSuccess).toHaveBeenCalled();
   });
@@ -122,14 +177,14 @@ describe('useApplyAttackTags', () => {
     });
 
     expect(mockShowModal).toHaveBeenCalled();
-    expect(mockMutateAsync).not.toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).not.toHaveBeenCalled();
     expect(setIsLoading).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
   it('should handle missing optional callbacks', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockResolvedValue({ updated: 1 });
+    mockAttacksMutateAsync.mockResolvedValue({ updated: 1 });
 
     const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
 
@@ -141,12 +196,12 @@ describe('useApplyAttackTags', () => {
       });
     });
 
-    expect(mockMutateAsync).toHaveBeenCalled();
+    expect(mockAttacksMutateAsync).toHaveBeenCalled();
   });
 
   it('should set loading to false even if mutation fails', async () => {
     mockShowModal.mockResolvedValue({ updateAlerts: false });
-    mockMutateAsync.mockRejectedValue(new Error('Mutation failed'));
+    mockAttacksMutateAsync.mockRejectedValue(new Error('Mutation failed'));
 
     const { result } = renderHook(() => useApplyAttackTags(), { wrapper });
     const setIsLoading = jest.fn();

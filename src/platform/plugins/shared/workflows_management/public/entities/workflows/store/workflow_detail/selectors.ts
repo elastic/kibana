@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createSelector } from '@reduxjs/toolkit';
+import { createSelector } from 'redux-toolkit-v1';
 import type { RootState } from '../types';
 
 // Selectors
@@ -51,6 +51,11 @@ export const selectWorkflowDefinition = createSelector(
   (computed) => computed?.workflowDefinition
 );
 
+export const selectGraphBuildError = createSelector(
+  selectYamlComputed,
+  (computed) => computed?.graphBuildError
+);
+
 // Only checks if the current workflow yaml can be parsed, does not check the schema, only the yaml syntax
 export const selectIsYamlSyntaxValid = createSelector(selectYamlDocument, (yamlDoc): boolean =>
   Boolean(yamlDoc && yamlDoc.errors.length === 0)
@@ -62,7 +67,17 @@ export const selectHasYamlSchemaValidationErrors = createSelector(
   (detail): boolean => detail.hasYamlSchemaValidationErrors
 );
 
+export const selectAiAssisted = createSelector(
+  selectDetail,
+  (detail): boolean => detail.aiAssisted
+);
+
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
+
+export const selectFocusedTriggerId = createSelector(
+  selectDetail,
+  (detail) => detail.focusedTriggerId
+);
 
 export const selectHighlightedStepId = createSelector(
   selectDetail,
@@ -76,7 +91,17 @@ export const selectIsTestModalOpen = createSelector(
 
 export const selectReplayExecutionId = createSelector(
   selectDetail,
-  (detail) => detail.replayExecutionId
+  (detail) => detail.replay?.executionId ?? null
+);
+
+export const selectReplayStepExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.stepExecutionId ?? null
+);
+
+export const selectTestStepModalOpenStepId = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalOpenStepId ?? undefined
 );
 
 export const selectIsSavingYaml = createSelector(
@@ -109,7 +134,7 @@ export const selectIsWorkflowTab = createSelector(
  * These selectors are used to get the correct data for the editor based on the active tab (current workflow or previous execution).
  */
 
-const selectIsEditorExecutionYaml = createSelector(
+export const selectIsEditorExecutionYaml = createSelector(
   selectIsExecutionsTab,
   selectExecution,
   (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)
@@ -152,6 +177,17 @@ export const selectEditorFocusedStepInfo = createSelector(
   selectEditorWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectEditorFocusedTriggerInfo = createSelector(
+  selectFocusedTriggerId,
+  selectEditorWorkflowLookup,
+  (focusedTriggerId, workflowLookup) => {
+    if (!focusedTriggerId || !workflowLookup) return undefined;
+    const { triggersLineStart, triggersLineEnd } = workflowLookup;
+    if (triggersLineStart == null || triggersLineEnd == null) return undefined;
+    return { lineStart: triggersLineStart, lineEnd: triggersLineEnd };
+  }
 );
 
 export const selectEditorWorkflowGraph = createSelector(

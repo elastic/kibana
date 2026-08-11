@@ -48,7 +48,7 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central',
+          locations: [{ id: 'us_central' }],
         } as OverviewStatusMetaData),
       { wrapper: WrapperWithState }
     );
@@ -88,7 +88,7 @@ describe('useLocationName', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central_qa',
+          locations: [{ id: 'us_central_qa' }],
         } as OverviewStatusMetaData),
       { wrapper: WrapperWithState }
     );

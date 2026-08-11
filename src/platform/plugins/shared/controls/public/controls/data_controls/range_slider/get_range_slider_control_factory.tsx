@@ -11,15 +11,17 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
-  apiCanPinPanels,
+  apiHasPinnedPanels,
   apiHasSections,
+  panelIsRelatedByGlobalFilters,
   apiPublishesViewMode,
   fetch$,
-  initializeUnsavedChanges,
+  initializeRelatedPanels,
+  initializeStateApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
@@ -35,13 +37,16 @@ import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-export const getRangesliderControlFactory = (): EmbeddableFactory<
+export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
@@ -68,23 +73,22 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<RangeSliderControlState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...dataControlManager.getLatestState(),
           ...editorStateManager.getLatestState(),
           value: selections.value$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
-          selections.value$,
+          selections.value$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           editorStateManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => {
           return {
             ...editorComparators,
@@ -92,22 +96,58 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
             value: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
-          selections.setValue(lastSaved?.value);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
+          selections.setValue(nextState.value);
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
+      });
+
+      const controlFetch$ = fetch$({ uuid, parentApi });
+      const { minMax$: minMaxObservable$, cancelRequests: cancelMinMaxRequests } = minMax$({
+        controlFetch$,
+        dataViews$: dataControlManager.api.dataViews$,
+        fieldName$: dataControlManager.api.fieldName$,
+        esqlQuery$: dataControlManager.api.esqlQuery$,
+        valuesSource$: dataControlManager.api.valuesSource$,
+        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
+        setIsLoading: (isLoading: boolean) => {
+          // clear previous loading error on next loading start
+          if (isLoading && dataControlManager.api.blockingError$.value) {
+            dataControlManager.api.setBlockingError(undefined);
+          }
+          loadingMinMax$.next(isLoading);
+        },
+      });
+      const { hasNoResults$: hasNoResultsObservable$, cancelRequests: cancelHasNoResultsRequests } =
+        hasNoResults$({
+          api: dataControlManager.api,
+          controlFetch$,
+          setIsLoading: (isLoading: boolean) => {
+            loadingHasNoResults$.next(isLoading);
+          },
+        });
+
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         dataLoading$,
-        serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
         },
         hasSelections$: selections.hasRangeSelection$,
+        supportsJsonExport: true,
+        cancelRequests: () => {
+          cancelMinMaxRequests();
+          cancelHasNoResultsRequests();
+        },
       });
 
       const dataLoadingSubscription = combineLatest([
@@ -130,26 +170,13 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
       ])
         .pipe(skip(1))
         .subscribe(() => {
-          editorStateManager.api.setStep(1);
+          editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);
           selections.setValue(undefined);
         });
 
-      const controlFetch$ = fetch$({ uuid, parentApi });
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
-      const minMaxSubscription = minMax$({
-        controlFetch$,
-        dataViews$: dataControlManager.api.dataViews$,
-        fieldName$: dataControlManager.api.fieldName$,
-        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
-        setIsLoading: (isLoading: boolean) => {
-          // clear previous loading error on next loading start
-          if (isLoading && dataControlManager.api.blockingError$.value) {
-            dataControlManager.api.setBlockingError(undefined);
-          }
-          loadingMinMax$.next(isLoading);
-        },
-      }).subscribe(
+      const minMaxSubscription = minMaxObservable$.subscribe(
         ({
           error,
           min,
@@ -196,13 +223,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         });
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
-      const hasNotResultsSubscription = hasNoResults$({
-        api: dataControlManager.api,
-        controlFetch$,
-        setIsLoading: (isLoading: boolean) => {
-          loadingHasNoResults$.next(isLoading);
-        },
-      }).subscribe((hasNoResults) => {
+      const hasNotResultsSubscription = hasNoResultsObservable$.subscribe((hasNoResults) => {
         selectionHasNoResults$.next(hasNoResults);
       });
 
@@ -210,7 +231,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
-      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
@@ -253,7 +274,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
           return (
             <RangeSliderControl
-              fieldName={fieldName}
+              fieldName={fieldName ?? ''}
               fieldFormatter={fieldFormatter}
               isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
@@ -261,7 +282,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
               max={max}
               min={min}
               onChange={selections.setValue}
-              step={step ?? 1}
+              step={step}
               value={value}
               uuid={uuid}
               compressed={isCompressed(api)}

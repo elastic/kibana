@@ -103,7 +103,7 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
                   inProgress={isBulkActionInProgress}
                   dataTestSubj="bulkActions"
                   iconSide="right"
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   popoverPanelPaddingSize="none"
                   popoverContent={handleGetBulkItemsPopoverContent}
                 >

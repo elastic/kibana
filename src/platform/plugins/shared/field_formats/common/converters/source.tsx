@@ -18,5 +18,9 @@ export class SourceFormat extends FieldFormat {
   static title = '_source';
   static fieldType = KBN_FIELD_TYPES._SOURCE;
 
-  textConvert: TextContextTypeConvert = (value: string) => JSON.stringify(value);
+  textConvert: TextContextTypeConvert = (value: string) => {
+    const missing = this.checkForMissingValueText(value);
+    if (missing) return missing;
+    return JSON.stringify(value);
+  };
 }

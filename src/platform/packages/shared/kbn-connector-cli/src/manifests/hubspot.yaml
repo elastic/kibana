@@ -1,0 +1,10 @@
+spec_id: .hubspot
+name: "HubSpot (testing)"
+auth_type: oauth_authorization_code
+secrets:
+  clientId:
+    vault: secret/ent-search-team/hubspot
+    field: oauth-app-client-id
+  clientSecret:
+    vault: secret/ent-search-team/hubspot
+    field: oauth-app-client-secret

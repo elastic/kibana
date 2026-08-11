@@ -33,9 +33,11 @@ export const useAttackTagsContextMenuItems = ({
   setIsLoading,
   onSuccess,
   refresh,
+  telemetrySource,
 }: UseAttackTagsContextMenuItemsProps): BulkAttackContextMenuItems => {
   const bulkActionItems = useBulkAttackTagsItems({
     onTagsUpdate: onSuccess,
+    telemetrySource,
   });
 
   const alertItems = useMemo(() => {

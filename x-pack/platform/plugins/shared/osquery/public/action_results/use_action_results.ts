@@ -18,6 +18,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -38,9 +39,20 @@ export interface UseActionResults {
   sortField: string;
   kuery?: string;
   isLive?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 interface ActionResultsResponse {
+  metadata?: {
+    scheduleId: string;
+    executionCount: number;
+    packId: string;
+    packName: string;
+    queryName: string;
+    queryText: string;
+    timestamp: string;
+  };
   edges: ResultEdges;
   total: number;
   currentPage: number;
@@ -66,21 +78,45 @@ export const useActionResults = ({
   kuery,
   startDate,
   isLive = false,
+  scheduleId,
+  executionCount,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const isScheduled = !!scheduleId && executionCount != null;
+
   const currentPageAgentIds = useMemo(() => {
+    if (isScheduled) return [];
     const startIndex = activePage * limit;
     const endIndex = startIndex + limit;
 
     return agentIds?.slice(startIndex, endIndex) || [];
-  }, [agentIds, activePage, limit]);
+  }, [agentIds, activePage, limit, isScheduled]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField }],
-    () =>
-      http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
+    [
+      'actionResults',
+      { actionId, activePage, limit, direction, sortField, scheduleId, executionCount },
+    ],
+    () => {
+      if (isScheduled) {
+        return http.get<ActionResultsResponse>(
+          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page: activePage,
+              pageSize: limit,
+              sort: sortField,
+              sortOrder: direction,
+              ...(kuery && { kuery }),
+            },
+          }
+        );
+      }
+
+      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
         query: {
           page: activePage,
@@ -94,10 +130,19 @@ export const useActionResults = ({
           }),
           totalAgents: agentIds?.length ?? 0,
         },
-      }),
+      });
+    },
     {
       select: (response) => {
-        // Server already filtered by agentIds - build set of responded agents
+        if (isScheduled) {
+          return {
+            edges: response.edges as ResultEdges,
+            total: response.total ?? response.edges.length,
+            aggregations: response.aggregations,
+            inspect: response.inspect || { dsl: [], response: [] },
+          };
+        }
+
         const respondedAgentIds = new Set(
           response.edges
             .map((edge) => getAgentIdFromFields(edge.fields))
@@ -117,13 +162,14 @@ export const useActionResults = ({
 
         return {
           edges: mergedEdges,
+          total: agentIds?.length ?? 0,
           aggregations: response.aggregations,
           inspect: response.inspect || { dsl: [], response: [] },
         };
       },
       initialData: {
         edges: [],
-        total: 0,
+        total: isScheduled ? 0 : agentIds?.length ?? 0,
         currentPage: 0,
         pageSize: limit,
         totalPages: 0,
@@ -131,14 +177,14 @@ export const useActionResults = ({
           totalRowCount: 0,
           totalResponded: 0,
           successful: 0,
-          pending: agentIds?.length ?? 0,
+          pending: isScheduled ? 0 : agentIds?.length ?? 0,
           failed: 0,
         },
         inspect: { dsl: [], response: [] },
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!actionId && !!agentIds?.length,
+      enabled: isScheduled ? !!scheduleId : !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

@@ -9,7 +9,9 @@ import React from 'react';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
+  ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
@@ -17,6 +19,44 @@ import {
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
+import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
+
+interface ResolveAttachmentVersionParams {
+  explicitVersion: string | number | undefined;
+  attachmentId: string;
+  attachmentRefs: AttachmentVersionRef[] | undefined;
+  attachment: VersionedAttachment;
+}
+
+/**
+ * Resolves the version to use for an attachment.
+ * Priority:
+ * 1. Explicit version from tag attributes
+ * 2. Version from cumulative attachment refs (highest version seen up to this round)
+ * 3. Latest available version as fallback
+ */
+export const resolveAttachmentVersion = ({
+  explicitVersion,
+  attachmentId,
+  attachmentRefs,
+  attachment,
+}: ResolveAttachmentVersionParams): number | undefined => {
+  if (explicitVersion !== undefined) {
+    const parsed =
+      typeof explicitVersion === 'string' ? Number.parseInt(explicitVersion, 10) : explicitVersion;
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  const ref = attachmentRefs?.find((r) => r.attachment_id === attachmentId);
+  if (ref) {
+    return ref.version;
+  }
+
+  // Final fallback: use the latest version
+  return attachment.versions.at(-1)?.version;
+};
 
 /**
  * Parser for <render_attachment> tags in markdown.
@@ -28,12 +68,6 @@ export const renderAttachmentTagParser = createTagParser({
     attachmentId: extractAttr(value, renderAttachmentElement.attributes.attachmentId),
     version: extractAttr(value, renderAttachmentElement.attributes.version),
   }),
-  assignAttributes: (node, attributes) => {
-    node.type = renderAttachmentElement.tagName;
-    node.attachmentId = attributes.attachmentId;
-    node.attachmentVersion = attributes.version;
-    delete node.value;
-  },
   createNode: (attributes, position) => ({
     type: renderAttachmentElement.tagName,
     attachmentId: attributes.attachmentId,
@@ -42,12 +76,26 @@ export const renderAttachmentTagParser = createTagParser({
   }),
 });
 
+const getScreenContext = (
+  conversationAttachments?: VersionedAttachment[]
+): ScreenContextAttachmentData | undefined => {
+  const screenContextAttachment = conversationAttachments?.find(
+    (att) => att.type === AttachmentType.screenContext
+  );
+  if (!screenContextAttachment) {
+    return undefined;
+  }
+  const latest = getLatestVersion(screenContextAttachment);
+  return latest?.data as ScreenContextAttachmentData | undefined;
+};
+
 interface RenderAttachmentRendererProps {
   attachmentsService: AttachmentsService;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
+  isStreaming: boolean;
 }
 /**
  * Creates a renderer for <render_attachment> tags.
@@ -58,7 +106,10 @@ export const createRenderAttachmentRenderer = ({
   attachmentRefs,
   conversationId,
   isSidebar,
+  isStreaming,
 }: RenderAttachmentRendererProps) => {
+  const screenContext = getScreenContext(conversationAttachments);
+
   return (props: RenderAttachmentElementAttributes) => {
     const { attachmentId, version: explicitVersion } = props;
 
@@ -68,18 +119,19 @@ export const createRenderAttachmentRenderer = ({
 
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
-    if (!attachment) {
-      return null;
+    if (isStreaming || !attachment) {
+      return <AttachmentLoadingSkeleton />;
     }
 
-    // Resolve version: explicit > from refs > current_version
-    let versionToUse: number;
-    if (explicitVersion !== undefined) {
-      versionToUse =
-        typeof explicitVersion === 'string' ? parseInt(explicitVersion, 10) : explicitVersion;
-    } else {
-      const refVersion = attachmentRefs?.find((r) => r.attachment_id === attachmentId)?.version;
-      versionToUse = refVersion ?? attachment.current_version;
+    const versionToUse = resolveAttachmentVersion({
+      explicitVersion,
+      attachmentId,
+      attachmentRefs,
+      attachment,
+    });
+
+    if (versionToUse === undefined) {
+      return null;
     }
 
     const versionData = attachment.versions.find((v) => v.version === versionToUse);
@@ -88,6 +140,8 @@ export const createRenderAttachmentRenderer = ({
       return null;
     }
 
+    const previousVersionData = attachment.versions.find((v) => v.version === versionToUse - 1);
+
     return (
       <InlineAttachmentWithActions
         attachment={{
@@ -95,10 +149,19 @@ export const createRenderAttachmentRenderer = ({
           type: attachment.type,
           data: versionData.data,
           hidden: attachment.hidden,
+          origin: attachment.origin,
+          versionData: {
+            version: versionToUse,
+            versionCount: attachment.versions.length,
+            createdAt: versionData.created_at,
+            originSyncedAt: attachment.origin_snapshot_at,
+            previousVersionData: previousVersionData?.data,
+          },
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}
         isSidebar={isSidebar}
+        screenContext={screenContext}
       />
     );
   };

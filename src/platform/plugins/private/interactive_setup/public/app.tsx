@@ -76,7 +76,7 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
             ${euiShadowM};
           `}
         >
-          <EuiIcon type="logoElastic" size="xxl" />
+          <EuiIcon type="logoElastic" size="xxl" aria-hidden={true} />
         </span>
         <EuiTitle size="m">
           <h1>

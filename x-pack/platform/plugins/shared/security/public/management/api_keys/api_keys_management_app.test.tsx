@@ -15,6 +15,8 @@ import { apiKeysManagementApp } from './api_keys_management_app';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 
+jest.mock('./api_keys_grid/api_keys_grid_page', () => ({ APIKeysGridPage: () => 'API Keys Page' }));
+
 const element = document.body.appendChild(document.createElement('div'));
 
 describe('apiKeysManagementApp', () => {

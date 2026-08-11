@@ -1,0 +1,32 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getStatsResponseExample:
+            description: 'Example response with workflow counts and 30-day execution history'
+            value:
+              workflows:
+                enabled: 12
+                disabled: 3
+              executions:
+                - date: '2025-11-20'
+                  timestamp: '2025-11-20T00:00:00.000Z'
+                  completed: 45
+                  failed: 2
+                  cancelled: 1
+                - date: '2025-11-21'
+                  timestamp: '2025-11-21T00:00:00.000Z'
+                  completed: 50
+                  failed: 0
+                  cancelled: 0
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/stats" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/stats

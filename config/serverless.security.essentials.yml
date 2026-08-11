@@ -3,9 +3,12 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: essentials
 
-### Workflows plugins should not be enabled in this tier
-workflowsManagement.enabled: false
-workflowsExecutionEngine.enabled: false
-
 ### Agent Builder should not be enabled in this tier
 xpack.agentBuilder.enabled: false
+
+### Workflows Management plugin is not available in this tier
+workflowsManagement.available: false
+
+xpack.features.overrides:
+  ### The following features are Security features hidden in Role management UI for this specific tier.
+  workflowsManagement.hidden: true

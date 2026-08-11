@@ -9,7 +9,7 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
-  EuiAvatar,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -24,6 +24,8 @@ import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
@@ -45,7 +47,8 @@ interface WorkflowExecutionListItemProps {
   isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
-  executedBy?: string;
+  executedByProfile?: UserProfileWithAvatar;
+  executedByLabel?: string;
   triggeredBy?: string;
   showExecutor?: boolean;
   selected?: boolean;
@@ -57,7 +60,8 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     isTestRun,
     startedAt,
     duration,
-    executedBy,
+    executedByProfile,
+    executedByLabel,
     triggeredBy,
     showExecutor = false,
     selected,
@@ -67,6 +71,9 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
+    const executedByDisplayName = executedByProfile?.user
+      ? getUserDisplayName(executedByProfile.user)
+      : executedByLabel;
     const formattedDuration = useMemo(() => {
       if (duration) {
         return formatDuration(duration);
@@ -112,7 +119,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               <EuiFlexItem>
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
-                    <EuiText size="xs" tabIndex={0} color="subdued">
+                    <EuiText size="xs" tabIndex={0} color="subdued" css={{ whiteSpace: 'nowrap' }}>
                       <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
@@ -129,6 +136,15 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.metadataContainer}>
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {status === ExecutionStatus.WAITING_FOR_INPUT && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                      defaultMessage: 'Action is required',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {isTestRun && (
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
@@ -140,28 +156,30 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   />
                 </EuiFlexItem>
               )}
-              {showExecutor && (
+              {showExecutor && executedByDisplayName && (
                 <EuiFlexItem grow={false} css={styles.executedByContainer}>
-                  {executedBy && (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      justifyContent="flexEnd"
-                      gutterSize="xs"
-                      wrap={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiAvatar name={executedBy} size="s" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued">
-                          {executedBy}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <UserAvatar
+                        user={executedByProfile?.user ?? { username: executedByDisplayName }}
+                        avatar={executedByProfile?.data?.avatar}
+                        size="s"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {executedByDisplayName}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} css={styles.durationContainer} justifyContent="flexEnd">
+              <EuiFlexItem grow={false} css={styles.durationContainer}>
                 {formattedDuration && (
                   <EuiFlexGroup
                     alignItems="center"
@@ -211,7 +229,8 @@ const componentStyles = {
     justifyContent: 'flex-end',
   }),
   durationContainer: css({
-    minWidth: '70px',
+    minWidth: '112px',
+    width: '112px',
     justifyContent: 'flex-end',
   }),
 };

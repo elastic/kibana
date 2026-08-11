@@ -8,19 +8,17 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../types';
-import { EsqlQuery } from '../../composer';
+} from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../ast';
-import { parse } from '../../parser';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
-import { SuggestionOrderingEngine } from './utils';
+import { SuggestionOrderingEngine, SuggestionCategory } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -29,15 +27,16 @@ import type {
   ISuggestionItem,
 } from '../../commands/registry/types';
 import { getControlSuggestionIfSupported } from '../../commands/definitions/utils';
-import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
-import { getCursorContext } from '../shared/get_cursor_context';
+import { getAutocompleteCursorContext } from '../shared/parse_for_autocomplete_query';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
-import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
+import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
+import { attachReplacementRanges, ReplacementRangeStrategyKind } from './utils/prefix_range';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -57,11 +56,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const innerText = fullText.substring(0, offset);
-  const correctedQuery = correctQuerySyntax(innerText);
-  const { root } = parse(correctedQuery, { withFormatting: true });
-
-  const astContext = getCursorContext(innerText, root, offset);
+  const { innerText, root, astContext, tokens } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -72,7 +67,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, astForFields),
+    getQueryForFields(innerText, astForFields),
     innerText,
     resourceRetriever
   );
@@ -82,7 +77,9 @@ export async function suggest(
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
-  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
+  const hasMinimumLicenseRequired = licenseInstance
+    ? (license: LicenseType) => licenseInstance.hasAtLeast(license)
+    : undefined;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -94,7 +91,6 @@ export async function suggest(
 
     const commands = esqlCommandRegistry
       .getAllCommands({
-        isCursorInSubquery: astContext.isCursorInSubquery,
         isStartingSubquery,
         queryContainsSubqueries: astContext.queryContainsSubqueries,
       })
@@ -115,6 +111,32 @@ export async function suggest(
 
         return hasLicenseAccess && hasObservabilityAccess;
       })
+      .filter((command) => {
+        // Commands that require a TS source are only suggested when the source command is TS
+        if (command.metadata?.requiresTimeseriesSource) {
+          return (
+            astContext.astForContext.commands.length > 0 &&
+            isTimeseriesSourceCommand(astContext.astForContext.commands)
+          );
+        }
+        return true;
+      })
+      .filter((command) => {
+        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        const hiddenAfter = command.metadata?.hiddenAfterCommands;
+        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
+          const commandNamesInPipeline = new Set(
+            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
+          );
+          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
+            commandNamesInPipeline.has(name)
+          );
+          if (hasHiddenCommandInPipeline) {
+            return false;
+          }
+        }
+        return true;
+      })
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
@@ -133,7 +155,9 @@ export async function suggest(
         innerText,
         resourceRetriever
       );
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(
+        fromCommand + ' '
+      )) ?? {
         recommendedQueries: [],
       };
       const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
@@ -150,13 +174,24 @@ export async function suggest(
         ...recommendedQueriesSuggestionsFromStaticTemplates
       );
 
-      const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
-      return [
-        ...headerCommandsSuggestions,
-        ...sourceCommandsSuggestions,
+      const rootLevelSuggestions: ISuggestionItem[] = [
+        ...suggestions.filter(isSourceCommandSuggestion),
         ...recommendedQueriesSuggestions,
-      ];
+      ].map((suggestion) => ({
+        ...suggestion,
+        replacementRangeStrategy: { kind: ReplacementRangeStrategyKind.ROOT_QUERY },
+      }));
+
+      const rootLevelQuerySuggestions = attachReplacementRanges(innerText, rootLevelSuggestions, {
+        fullText,
+        offset,
+        tokens,
+      });
+
+      return orderingEngine.sort([...headerCommandsSuggestions, ...rootLevelQuerySuggestions], {
+        command: '',
+      });
     }
 
     return suggestions.filter(
@@ -185,18 +220,37 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
+    let columnMapPromise: Promise<ColumnsMap> | undefined;
+    const getColumnMapOnce = () => {
+      if (!columnMapPromise) {
+        columnMapPromise = getColumnMap();
+      }
+
+      return columnMapPromise;
+    };
+
     const commands = [...(root.header ?? []), ...root.commands];
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       fullText,
       commands,
       astContext,
       getColumnsByType,
-      getColumnMap,
+      getColumnMapOnce,
       resourceRetriever,
       offset,
       hasMinimumLicenseRequired
     );
-    return commandsSpecificSuggestions;
+
+    const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
+    const isAtStartOfLine = fullText.slice(lineStart, offset).trim() === '';
+    const visibleSuggestions = isAtStartOfLine
+      ? commandsSpecificSuggestions.filter((s) => s.category !== SuggestionCategory.NEW_LINE)
+      : commandsSpecificSuggestions;
+
+    return attachReplacementRanges(innerText, visibleSuggestions, {
+      commandContext: { columns: await getColumnMapOnce() },
+      tokens,
+    });
   }
   return [];
 }
@@ -266,6 +320,7 @@ async function getSuggestionsWithinCommandExpression(
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;

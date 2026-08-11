@@ -25,7 +25,16 @@ import {
 } from '../navigation';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
-  ({ detailName, filterQuery, indexNames, hostDetailsPagePath, hostDetailsFilter }) => {
+  ({
+    detailName,
+    filterQuery,
+    indexNames,
+    hostDetailsPagePath,
+    hostDetailsFilter,
+    identityFields,
+    entityId,
+    entityRecord,
+  }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
     const tabProps = {
@@ -37,36 +46,42 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       startDate: from,
       type: HostsType.details,
       indexNames,
+      identityFields,
+      entityId,
+      entityRecord,
       hostName: detailName,
     };
 
+    const tabPath = (tab: HostsTableType) => `${hostDetailsPagePath}/:tabName(${tab})`;
+
     return (
       <Routes>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
+        <Route path={tabPath(HostsTableType.authentications)}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+        <Route path={tabPath(HostsTableType.uncommonProcesses)}>
           <UncommonProcessQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+        <Route path={tabPath(HostsTableType.anomalies)}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
         </Route>
 
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
+        <Route path={tabPath(HostsTableType.events)}>
           <EventsQueryTabBody
             additionalFilters={hostDetailsFilter}
             tableId={TableId.hostsPageEvents}
             {...tabProps}
           />
         </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
+        <Route path={tabPath(HostsTableType.risk)}>
           <RiskDetailsTabBody
             {...tabProps}
             riskEntity={EntityType.host}
-            entityName={tabProps.hostName}
+            entityName={detailName}
+            entityId={entityId}
           />
         </Route>
-        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
+        <Route path={tabPath(HostsTableType.sessions)}>
           <SessionsTabBody {...tabProps} />
         </Route>
       </Routes>

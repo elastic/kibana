@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse, BasicPrettyPrinter } from '@kbn/esql-language';
+import { parse, BasicPrettyPrinter } from '@elastic/esql';
 import { correctTimespanLiterals } from './timespan_literals';
 
 describe('correctTimespanLiterals', () => {

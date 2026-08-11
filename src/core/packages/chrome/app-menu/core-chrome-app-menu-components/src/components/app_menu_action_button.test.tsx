@@ -26,7 +26,6 @@ describe('AppMenuActionButton', () => {
   const splitButtonProps = {
     run: jest.fn(),
     secondaryButtonAriaLabel: 'More options',
-    secondaryButtonIcon: 'arrowDown',
   };
 
   beforeEach(() => {
@@ -108,28 +107,6 @@ describe('AppMenuActionButton', () => {
     await user.click(screen.getByTestId('test-action-button'));
 
     expect(defaultProps.run).not.toHaveBeenCalled();
-  });
-
-  it('should toggle popover when button with items is clicked', async () => {
-    const user = userEvent.setup();
-    const secondaryActionProps = {
-      label: 'options',
-      id: 'optionsButton',
-      iconType: 'gear',
-      isPopoverOpen: false,
-      onPopoverToggle: jest.fn(),
-      onPopoverClose: jest.fn(),
-      items: [
-        { id: 'item1', label: 'Item 1', run: jest.fn(), order: 1 },
-        { id: 'item2', label: 'Item 2', run: jest.fn(), order: 2 },
-      ],
-    };
-
-    render(<AppMenuActionButton {...secondaryActionProps} testId="test-action-button" />);
-
-    await user.click(screen.getByTestId('test-action-button'));
-
-    expect(secondaryActionProps.onPopoverToggle).toHaveBeenCalledTimes(1);
   });
 
   it('should toggle popover when split button with items is clicked', async () => {

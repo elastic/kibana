@@ -9,18 +9,23 @@
 
 import { type Type, schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+} from '@kbn/core-saved-objects-server';
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
+import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
 
 export const registerFindRoute = (
   router: IRouter,
   managementServicePromise: Promise<ISavedObjectsManagement>
 ) => {
   const referenceSchema = schema.object({
-    type: schema.string(),
-    id: schema.string(),
+    type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+    id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
   });
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
@@ -44,13 +49,21 @@ export const registerFindRoute = (
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-          search: schema.maybe(schema.string()),
+          type: schema.oneOf([
+            schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+            schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
+              maxSize: SAVED_OBJECT_TYPES_MAX_SIZE,
+            }),
+          ]),
+          search: schema.maybe(schema.string({ maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH })),
           defaultSearchOperator: searchOperatorSchema,
           sortField: schema.maybe(sortFieldSchema),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           hasReference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
+            schema.oneOf([
+              referenceSchema,
+              schema.arrayOf(referenceSchema, { maxSize: SAVED_OBJECT_TYPES_MAX_SIZE }),
+            ])
           ),
           hasReferenceOperator: searchOperatorSchema,
         }),

@@ -11,7 +11,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
 import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 export interface StepListTreeItem {
   stepId: string;
@@ -24,6 +25,13 @@ export interface StepExecutionTreeItem extends StepListTreeItem {
   status: ExecutionStatus | null;
   stepExecutionId: string | null;
   isTriggerPseudoStep?: boolean;
+  isChildWorkflowStep?: boolean;
+  /**
+   * Human-readable label to render instead of `stepId`. Used to show static
+   * parallel branch names (e.g. "virustotal") instead of the raw scope index
+   * ("0", "1", ...) the engine uses internally.
+   */
+  displayLabel?: string;
   children: StepExecutionTreeItem[];
 }
 
@@ -40,12 +48,69 @@ function getStepTreeType(
       return 'foreach-iteration';
     }
 
+    if (previousStepExecution.stepType === 'while') {
+      return 'while-iteration';
+    }
+
     if (previousStepExecution.stepType === 'if') {
       return 'if-branch';
+    }
+
+    if (previousStepExecution.stepType === 'parallel') {
+      return 'parallel-branch';
     }
   }
 
   return 'unknown';
+}
+
+/**
+ * Resolves the human-readable name of a parallel branch from the parent parallel
+ * step execution. The engine identifies branches by their scope index ("0", "1",
+ * ...); for static `branches` mode each branch has a name which is snapshotted as
+ * the branch `key` in the parallel step's runtime state (index-aligned). We use
+ * that to display the name instead of the bare index.
+ *
+ * Returns `undefined` when the parent is not a parallel step, the scope segment is
+ * not a numeric index, or no matching branch name is found (e.g. dynamic foreach
+ * fan-out, where the index is the meaningful label).
+ */
+function resolveParallelBranchName(
+  parentStepExecution: WorkflowStepExecutionDto | undefined,
+  scopeSegment: string
+): string | undefined {
+  if (parentStepExecution?.stepType !== 'parallel') {
+    return undefined;
+  }
+
+  const index = Number(scopeSegment);
+  if (!Number.isInteger(index) || index < 0) {
+    return undefined;
+  }
+
+  const parallelState = parentStepExecution.state as
+    | { branches?: unknown; static?: unknown }
+    | undefined;
+
+  // Only static `branches` mode has meaningful author-chosen names as the branch
+  // `key`. In dynamic `foreach` fan-out the `key` is the snapshotted item (which
+  // may be arbitrary/long data, e.g. an agent prompt), so the fan-out index is
+  // the correct label — fall back to it by returning undefined here.
+  if (parallelState?.static !== true) {
+    return undefined;
+  }
+
+  const branches = parallelState.branches;
+  if (!Array.isArray(branches)) {
+    return undefined;
+  }
+
+  const branch = branches[index] as { key?: unknown } | undefined;
+  if (branch && typeof branch.key === 'string' && branch.key.length > 0) {
+    return branch.key;
+  }
+
+  return undefined;
 }
 
 function isVisibleStepType(stepType: string): boolean {
@@ -83,10 +148,46 @@ export function flattenStackFrames(stackFrames: StackFrame[]): string[] {
   });
 }
 
+/**
+ * A parallel branch is a *scope* that can hold multiple steps, so it is rendered
+ * as an expandable grouping node (e.g. "virustotal" → scan_hash, console). When a
+ * branch contains exactly one step, that extra level is pure noise, so we collapse
+ * the branch node into its single child and surface the branch name on the step's
+ * own row. Branches with 2+ steps keep the grouping node so the per-branch timing
+ * and status stay visible.
+ */
+function collapseSingleStepParallelBranches(
+  items: StepExecutionTreeItem[]
+): StepExecutionTreeItem[] {
+  return items.map((item) => {
+    const children = collapseSingleStepParallelBranches(item.children);
+
+    // Only collapse *named* branches (static `branches` mode). Dynamic foreach
+    // fan-out branches have no name and the index is their meaningful identity, so
+    // they stay grouped under the index node.
+    const isCollapsibleBranch =
+      item.stepType === 'parallel-branch' &&
+      item.displayLabel !== undefined &&
+      children.length === 1;
+    if (isCollapsibleBranch) {
+      const [onlyChild] = children;
+      return {
+        ...onlyChild,
+        // Keep the branch name as the visible label; the row otherwise *is* the
+        // underlying step (its execution id, status, type, input/output).
+        displayLabel: item.displayLabel,
+      };
+    }
+
+    return { ...item, children };
+  });
+}
+
 export function buildStepExecutionsTree(
   stepExecutions: WorkflowStepExecutionDto[],
   executionContext?: Record<string, any>,
-  executionStatus?: ExecutionStatus
+  executionStatus?: ExecutionStatus,
+  triggeredBy?: string
 ): StepExecutionTreeItem[] {
   const root = {};
   const stepExecutionsMap: Map<string, WorkflowStepExecutionDto> = new Map();
@@ -117,6 +218,10 @@ export function buildStepExecutionsTree(
 
       if (!current[currentPart as keyof typeof current]) {
         const currentFullKey = fullPath.join('>');
+        const parentStepExecution = stepExecutionsMap.get(
+          fullPath.slice(0, fullPath.length - 1).join('>')
+        );
+        const branchName = resolveParallelBranchName(parentStepExecution, currentPart);
         let result: StepExecutionTreeItem;
         if (stepExecutionsMap.has(currentFullKey)) {
           const stepExecution = stepExecutionsMap.get(currentFullKey)!;
@@ -127,18 +232,20 @@ export function buildStepExecutionsTree(
             stepExecutionId: stepExecution.id!,
             status: stepExecution.status!,
             children: [],
+            ...(branchName ? { displayLabel: branchName } : {}),
           };
         } else {
           result = {
             stepId: currentPart,
             stepType: getStepTreeType(
               stepExecutionsMap.get(currentFullKey),
-              stepExecutionsMap.get(fullPath.slice(0, fullPath.length - 1).join('>'))
+              parentStepExecution
             ) as any,
             executionIndex: 0,
             stepExecutionId: undefined as any,
             status: ExecutionStatus.SKIPPED,
             children: [],
+            ...(branchName ? { displayLabel: branchName } : {}),
           };
         }
 
@@ -155,7 +262,7 @@ export function buildStepExecutionsTree(
     }));
   }
 
-  const regularSteps = toArray(root);
+  const regularSteps = collapseSingleStepParallelBranches(toArray(root));
   // Pseudo-steps are not real steps, an example is the trigger pseudo-step that is used to display the trigger context
   const pseudoSteps: StepExecutionTreeItem[] = [];
 
@@ -202,5 +309,93 @@ export function buildStepExecutionsTree(
     }
   }
 
+  // When execution failed/skipped before any steps ran and no trigger pseudo-step
+  // was created from context, create one from triggeredBy so the invocation type is visible
+  const hasTriggerPseudo = pseudoSteps.some(
+    (s) => s.stepType === '__trigger' || s.stepType === '__inputs'
+  );
+  if (!hasTriggerPseudo && triggeredBy) {
+    pseudoSteps.push({
+      stepId: triggeredBy === 'manual' ? 'Inputs' : 'Event',
+      stepType: triggeredBy === 'manual' ? '__inputs' : '__trigger',
+      executionIndex: 0,
+      stepExecutionId: triggeredBy === 'manual' ? '__pseudo_inputs__' : '__pseudo_trigger__',
+      status: executionStatus ?? ExecutionStatus.COMPLETED,
+      isTriggerPseudoStep: true,
+      children: [],
+    });
+  }
+
   return [...pseudoSteps, ...regularSteps];
+}
+
+/**
+ * Injects child workflow execution steps into the tree as children of `workflow.execute` nodes.
+ * For steps where child data is still loading, adds a loading placeholder to show the expand arrow.
+ */
+export function injectChildWorkflowSteps(
+  tree: StepExecutionTreeItem[],
+  childExecutionsMap: ChildWorkflowExecutionsMap,
+  isLoadingChildData: boolean
+): { tree: StepExecutionTreeItem[]; childStepExecutions: WorkflowStepExecutionDto[] } {
+  const childStepExecutions: WorkflowStepExecutionDto[] = [];
+
+  function processNode(node: StepExecutionTreeItem): StepExecutionTreeItem {
+    const isWorkflowExecuteStep = isExecuteSyncStepType(node.stepType) && node.stepExecutionId;
+
+    if (!isWorkflowExecuteStep) {
+      return {
+        ...node,
+        children: node.children.map(processNode),
+      };
+    }
+
+    if (childExecutionsMap.has(node.stepExecutionId!)) {
+      const childExecution = childExecutionsMap.get(node.stepExecutionId!)!;
+      const visibleSteps = childExecution.stepExecutions.filter((step) =>
+        isVisibleStepType(step.stepType ?? '')
+      );
+      childStepExecutions.push(...visibleSteps);
+      const childItems: StepExecutionTreeItem[] = visibleSteps.map((step) => ({
+        stepId: step.stepId,
+        stepType: step.stepType ?? 'unknown',
+        executionIndex: step.stepExecutionIndex,
+        stepExecutionId: step.id,
+        status: step.status,
+        isChildWorkflowStep: true,
+        children: [],
+      }));
+
+      return {
+        ...node,
+        children: [...childItems, ...node.children.map(processNode)],
+      };
+    }
+
+    if (isLoadingChildData && node.status && isTerminalStatus(node.status)) {
+      return {
+        ...node,
+        children: [
+          {
+            stepId: 'Loading...',
+            stepType: '__loading',
+            executionIndex: 0,
+            stepExecutionId: `__loading_${node.stepExecutionId}`,
+            status: ExecutionStatus.RUNNING,
+            isChildWorkflowStep: true,
+            children: [],
+          },
+          ...node.children.map(processNode),
+        ],
+      };
+    }
+
+    return {
+      ...node,
+      children: node.children.map(processNode),
+    };
+  }
+
+  const processedTree = tree.map(processNode);
+  return { tree: processedTree, childStepExecutions };
 }

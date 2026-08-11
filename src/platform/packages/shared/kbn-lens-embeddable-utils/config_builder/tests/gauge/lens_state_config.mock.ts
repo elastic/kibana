@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  *  Gauge generated from kibana
@@ -204,7 +205,7 @@ export const gaugeAttributes: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -302,7 +303,7 @@ export const gaugeAttributesWithPercentageColorMode: LensAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -454,7 +455,7 @@ export const gaugeESQLAttributes: LensAttributes = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 };
 
@@ -543,7 +544,7 @@ export const defaultColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'default color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsGauge',
   references: [
     {
@@ -638,7 +639,7 @@ export const selectorColorByValueAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'testing color by value palette',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsGauge',
   references: [
     {

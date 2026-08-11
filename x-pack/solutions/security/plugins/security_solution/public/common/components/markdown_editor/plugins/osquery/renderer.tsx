@@ -18,9 +18,15 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
-import { AlertDataContext } from '../../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
-import OsqueryLogo from './osquery_icon/osquery.svg';
+import { AlertDataContext } from '../../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
+import { useKibana } from '../../../../lib/kibana';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+
+const OsqueryButtonIcon: React.FC = () => {
+  const { osquery } = useKibana().services;
+  const Icon = osquery?.OsqueryIcon;
+  return Icon ? <Icon size="m" /> : null;
+};
 
 export const OsqueryRenderer = ({
   configuration,
@@ -64,7 +70,7 @@ export const OsqueryRenderer = ({
     <>
       <EuiToolTip content={interactionsUpsellingMessage}>
         <EuiButton
-          iconType={OsqueryLogo}
+          iconType={OsqueryButtonIcon}
           onClick={handleOpen}
           disabled={!!interactionsUpsellingMessage}
           css={css`

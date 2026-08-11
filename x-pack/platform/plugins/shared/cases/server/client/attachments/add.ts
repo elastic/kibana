@@ -18,8 +18,8 @@ import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
 import { validateRegisteredAttachments } from './validators';
 import { validateMaxUserActions } from '../../common/validators';
-import { getCaseOwner } from './utils';
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
+import { extractAndAddObservables } from './extract_observables';
+import { emitAttachmentsAddedEvent } from './trigger_utils';
 
 /**
  * Create an attachment to a case.
@@ -27,7 +27,7 @@ import { isLegacyAttachmentRequest } from '../../../common/utils/attachments';
  * @ignore
  */
 export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs): Promise<Case> => {
-  const { comment, caseId } = addArgs;
+  const { comment, caseId, mode = 'legacy' } = addArgs;
 
   const {
     logger,
@@ -49,14 +49,12 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     );
 
     const savedObjectID = SavedObjectsUtils.generateId();
-    const owner = await getCaseOwner(caseId, clientArgs);
-
     await authorization.ensureAuthorized({
       operation: Operations.createComment,
       entities: [
         {
           id: savedObjectID,
-          owner: isLegacyAttachmentRequest(comment) ? comment.owner : owner,
+          owner: comment.owner,
         },
       ],
     });
@@ -71,15 +69,20 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
     const createdDate = new Date().toISOString();
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-
     const updatedModel = await model.createComment({
       createdDate,
       commentReq: query,
       id: savedObjectID,
-      owner,
     });
 
-    return await updatedModel.encodeWithComments();
+    const updatedCase = await updatedModel.encodeWithComments({ mode });
+
+    emitAttachmentsAddedEvent(clientArgs, updatedCase, [savedObjectID], query.type);
+
+    // This call never throws — failures are logged and do not abort the attachment creation.
+    await extractAndAddObservables(caseId, [comment], updatedCase, clientArgs);
+
+    return updatedCase;
   } catch (error) {
     throw createCaseError({
       message: `Failed while adding a comment to case id: ${caseId} error: ${error}`,

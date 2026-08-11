@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -15,6 +16,7 @@ import type { IDetectionRulesClient } from '../../../rule_management/logic/detec
 export const createPrebuiltRules = (
   detectionRulesClient: IDetectionRulesClient,
   rules: PrebuiltRuleAsset[],
+  changeTracking?: SecurityRuleChangeTracking<never>,
   logger?: Logger
 ) => {
   return withSecuritySpan('createPrebuiltRules', async () => {
@@ -27,11 +29,30 @@ export const createPrebuiltRules = (
       executor: async (rule) => {
         return detectionRulesClient.createPrebuiltRule({
           params: rule,
+          changeTracking: {
+            ...changeTracking,
+            metadata: {
+              bulkCount: rules.length,
+              ...changeTracking?.metadata,
+            },
+          },
         });
       },
     });
+
     logger?.debug(
-      `createPrebuiltRules: Creating prebuilt rules - done. Rules created: ${result.results}. Rules failed to create: ${result.errors.length}.`
+      `createPrebuiltRules: Creating prebuilt rules - done. Rules created: ${
+        result.results.length
+      }. Rules failed to create: ${result.errors.length}. Errors: ${JSON.stringify(
+        result.errors.map((e) => ({
+          rule_id: e.item.rule_id,
+          ruleName: e.item.name,
+          error:
+            typeof e.error === 'object' && e.error !== null && 'message' in e.error
+              ? e.error.message
+              : e.error,
+        }))
+      )}`
     );
 
     return result;

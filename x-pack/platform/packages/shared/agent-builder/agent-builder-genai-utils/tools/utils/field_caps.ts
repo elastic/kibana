@@ -75,7 +75,13 @@ export const processFieldCapsResponsePerIndex = (
       }
 
       const meta = extractMeta(capability);
-      const field: MappingField = { path, type: capability.type, meta };
+      const field: MappingField = {
+        path,
+        type: capability.type,
+        meta,
+        searchable: capability.searchable,
+      };
+      applyTsdbMarkers(field, capability);
 
       const targetIndices =
         capability.indices == null
@@ -114,9 +120,24 @@ const processField = (
   const fieldCaps = Object.values(entry)[0];
   const meta = extractMeta(fieldCaps);
 
-  return {
+  const field: MappingField = {
     path,
     type: fieldCaps.type,
     meta,
+    searchable: fieldCaps.searchable,
   };
+  applyTsdbMarkers(field, fieldCaps);
+  return field;
+};
+
+/**
+ * Copies TSDB markers from a field_caps capability onto a MappingField.
+ */
+const applyTsdbMarkers = (field: MappingField, fieldCaps: FieldCapsFieldCapability): void => {
+  if (fieldCaps.time_series_dimension === true) {
+    field.tsDimension = true;
+  }
+  if (typeof fieldCaps.time_series_metric === 'string') {
+    field.tsMetric = fieldCaps.time_series_metric;
+  }
 };

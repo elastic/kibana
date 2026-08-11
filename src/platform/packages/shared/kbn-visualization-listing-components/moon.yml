@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/visualization-listing-components'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/visualization-listing-components'
+  title: '@kbn/visualization-listing-components'
   description: Moon project for @kbn/visualization-listing-components
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/packages/shared/kbn-visualization-listing-components
+  sourceRoot: src/platform/packages/shared/kbn-visualization-listing-components
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'

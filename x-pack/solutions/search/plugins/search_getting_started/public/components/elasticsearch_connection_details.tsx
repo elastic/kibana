@@ -22,10 +22,10 @@ export const ElasticsearchConnectionDetails = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
+            <EuiTitle size="xxxs">
               <h3>
                 {i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.endpointLabel',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.endpointLabel',
                   {
                     defaultMessage: 'Elasticsearch endpoint:',
                   }
@@ -36,7 +36,7 @@ export const ElasticsearchConnectionDetails = () => {
           <EuiFlexItem grow={false}>
             <EuiIconTip
               content={i18n.translate(
-                'xpack.search.gettingStarted.elasticsearchConnectionDetails.endpointTooltip',
+                'xpack.searchGettingStarted.elasticsearchConnectionDetails.endpointTooltip',
                 {
                   defaultMessage:
                     'The Elasticsearch endpoint is the URL for your Elasticsearch cluster.',
@@ -48,7 +48,7 @@ export const ElasticsearchConnectionDetails = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
             <FormInfoField
               value={elasticsearchUrl}
@@ -64,20 +64,21 @@ export const ElasticsearchConnectionDetails = () => {
             <div>
               <EuiButtonEmpty
                 data-test-subj="viewConnectionDetailsLink"
+                size="s"
                 iconType="plugs"
                 iconSide="left"
                 target="_blank"
                 onClick={() => openWiredConnectionDetails()}
                 color="text"
                 aria-label={i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.viewDetails',
                   {
                     defaultMessage: 'View connection details',
                   }
                 )}
               >
                 {i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.viewDetails',
                   {
                     defaultMessage: 'View connection details',
                   }

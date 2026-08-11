@@ -5,10 +5,27 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
+export type GetConversationResponse = ConversationWithPermissions;
+
+export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
-  results: ConversationWithoutRounds[];
+  results: ListConversationsResponseItem[];
 }
 
 export interface DeleteConversationResponse {
@@ -18,4 +35,14 @@ export interface DeleteConversationResponse {
 export interface RenameConversationResponse {
   id: string;
   title: string;
+}
+
+export interface MarkReadConversationResponse {
+  id: string;
+  read: boolean;
+}
+
+export interface MarkPinnedConversationResponse {
+  id: string;
+  pinned: boolean;
 }

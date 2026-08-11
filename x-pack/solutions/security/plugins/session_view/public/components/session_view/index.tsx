@@ -263,9 +263,9 @@ export const SessionView = ({
   }, [openDetails, selectedProcess]);
 
   const onShowAlertDetails = useCallback(
-    (alertUuid: string) => {
+    (alertId: string, alertIndex: string) => {
       if (loadAlertDetails) {
-        loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+        loadAlertDetails(alertId, alertIndex, () => handleOnAlertDetailsClosed(alertId));
         trackEvent('alert_details_loaded');
       }
     },
@@ -440,7 +440,7 @@ export const SessionView = ({
               <EuiButtonIcon
                 isSelected={showTTY}
                 display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
+                iconType="chartWaterfall"
                 onClick={onToggleTTY}
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
@@ -451,15 +451,17 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="refresh"
-              display="empty"
-              onClick={handleRefresh}
-              size="m"
-              aria-label={REFRESH_SESSION}
-              data-test-subj="sessionView:sessionViewRefreshButton"
-              isLoading={isFetching}
-            />
+            <EuiToolTip content={REFRESH_SESSION} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="refresh"
+                display="empty"
+                onClick={handleRefresh}
+                size="m"
+                aria-label={REFRESH_SESSION}
+                data-test-subj="sessionView:sessionViewRefreshButton"
+                isLoading={isFetching}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -471,13 +473,20 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              onClick={toggleDetailPanel}
-              iconType="list"
-              aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
                 defaultMessage: 'Open details panel',
               })}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={toggleDetailPanel}
+                iconType="listBullet"
+                aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
+                  defaultMessage: 'Open details panel',
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

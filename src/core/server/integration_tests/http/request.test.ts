@@ -58,7 +58,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -75,9 +74,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -94,9 +103,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -113,9 +132,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -134,7 +163,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -156,9 +184,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: false },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
@@ -175,9 +213,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
@@ -196,7 +244,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );

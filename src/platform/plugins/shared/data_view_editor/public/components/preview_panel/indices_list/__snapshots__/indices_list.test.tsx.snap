@@ -2,72 +2,76 @@
 
 exports[`IndicesList should render normally 1`] = `
 <div>
-  <table
-    class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
-    id="generated-id_indices-list-table"
-    tabindex="-1"
+  <div
+    class="emotion-euiContainerCSS"
   >
-    <tbody>
-      <tr
-        class="euiTableRow emotion-euiTableRow-desktop"
-        data-test-subj="indicesListTableRow"
-      >
-        <td
-          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+    <table
+      class="euiTable emotion-euiTable-auto-uncompressed-hasBackground-desktop"
+      id="generated-id_indices-list-table"
+      tabindex="-1"
+    >
+      <tbody>
+        <tr
+          class="euiTableRow emotion-euiTableRow-desktop"
+          data-test-subj="indicesListTableRow"
         >
-          <div
-            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
           >
-            <span
-              class="euiTableCellContent__text"
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
             >
-              kibana
-            </span>
-          </div>
-        </td>
-        <td
-          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-        >
-          <div
-            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              <span
+                class="euiTableCellContent__text"
+              >
+                kibana
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
           >
-            <span
-              class="euiTableCellContent__text"
-            />
-          </div>
-        </td>
-      </tr>
-      <tr
-        class="euiTableRow emotion-euiTableRow-desktop"
-        data-test-subj="indicesListTableRow"
-      >
-        <td
-          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-        >
-          <div
-            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-          >
-            <span
-              class="euiTableCellContent__text"
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
             >
-              es
-            </span>
-          </div>
-        </td>
-        <td
-          class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <span
+                class="euiTableCellContent__text"
+              />
+            </div>
+          </td>
+        </tr>
+        <tr
+          class="euiTableRow emotion-euiTableRow-desktop"
+          data-test-subj="indicesListTableRow"
         >
-          <div
-            class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
           >
-            <span
-              class="euiTableCellContent__text"
-            />
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              >
+                es
+              </span>
+            </div>
+          </td>
+          <td
+            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          >
+            <div
+              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            >
+              <span
+                class="euiTableCellContent__text"
+              />
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
@@ -97,7 +101,7 @@ exports[`IndicesList should render normally 1`] = `
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
@@ -129,7 +133,7 @@ exports[`IndicesList should render normally 1`] = `
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowLeft"
+            data-euiicon-type="chevronSingleLeft"
           />
         </button>
         <ul
@@ -170,7 +174,7 @@ exports[`IndicesList should render normally 1`] = `
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
           />
         </button>
       </nav>

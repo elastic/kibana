@@ -10,11 +10,10 @@
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
-  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +28,6 @@ import { getColumns } from './get_columns';
 import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 export const Flyout = ({
-  flyoutId,
   api,
   coreStart,
   usageCollector,
@@ -42,7 +40,6 @@ export const Flyout = ({
   onBackgroundSearchOpened,
   onClose,
 }: {
-  flyoutId: string;
   api: SearchSessionsMgmtAPI;
   coreStart: CoreStart;
   usageCollector: SearchUsageCollector;
@@ -61,20 +58,11 @@ export const Flyout = ({
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center">
-          <EuiTitle id={flyoutId} size="m">
-            <h1>
-              <FormattedMessage
-                id="data.session_mgmt.flyout_title"
-                defaultMessage="Background searches"
-              />
-            </h1>
-          </EuiTitle>
-          <EuiBetaBadge label={technicalPreviewLabel}>{technicalPreviewLabel}</EuiBetaBadge>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label={technicalPreviewLabel}>{technicalPreviewLabel}</EuiBetaBadge>
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
         <SearchSessionsMgmtTable
           core={coreStart}
           api={api}

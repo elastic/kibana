@@ -5,18 +5,30 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACE_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetTraceRoute } from './get_trace';
 
 describe('GET /internal/evals/traces/{traceId}', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetTraceRoute({ router, logger });
+    registerGetTraceRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      evaluatorRegistry: { list: () => [], get: () => undefined },
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACE_URL).versions[
@@ -195,5 +207,24 @@ describe('GET /internal/evals/traces/{traceId}', () => {
 
     expect(response.status).toBe(500);
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('returns an actionable 400 and logs at warn when the ES response is too large', async () => {
+    const { handler, context, esClient, logger } = setup();
+    esClient.search.mockRejectedValueOnce(
+      new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      )
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message:
+        'The response is too large to process. error: The content length (9000) is bigger than the maximum allowed buffer (42)',
+    });
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });

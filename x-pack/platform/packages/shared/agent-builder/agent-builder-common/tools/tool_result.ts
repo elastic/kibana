@@ -6,6 +6,7 @@
  */
 
 import type { EsqlEsqlColumnInfo, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { TimeRange } from '../attachments/attachment_types';
 
 export enum ToolResultType {
   resource = 'resource',
@@ -83,6 +84,8 @@ export interface EsqlResultsData {
   query: string;
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
+  /** Optional time range used for named parameters ?_tstart and ?_tend */
+  time_range?: TimeRange;
 }
 
 export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;
@@ -110,16 +113,33 @@ export type QueryResult = ToolResultMixin<ToolResultType.query>;
 export enum SupportedChartType {
   Metric = 'metric',
   Gauge = 'gauge',
-  Tagcloud = 'tagcloud',
+  Tagcloud = 'tag_cloud',
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
+  Datatable = 'data_table',
+  Pie = 'pie',
+  Treemap = 'treemap',
+  Waffle = 'waffle',
+  Mosaic = 'mosaic',
 }
 
 export interface VisualizationResultData {
-  visualization: Record<string, unknown>;
-  chart_type: SupportedChartType;
   esql: string;
+  time_range?: TimeRange;
+  renderer?: 'lens' | 'vega';
+  /** Shared visualization payload. Vega stores spec at visualization.spec. */
+  visualization: Record<string, unknown> & { spec?: string };
+  /** Optional chart type identifier (primarily Lens). */
+  chart_type?: SupportedChartType;
+  /**
+   * ID of the persisted visualization attachment. Present when persistence
+   * succeeded; the agent renders the visualization inline via
+   * `<render_attachment id version>` and reuses it for follow-up updates.
+   */
+  attachment_id?: string;
+  /** Version of the persisted attachment backing this result. */
+  version?: number;
 }
 
 export type VisualizationResult = ToolResultMixin<ToolResultType.visualization>;

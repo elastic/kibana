@@ -19,7 +19,6 @@ const mockSearch = jest.fn();
 
 const defaultProps = {
   userName: 'user1',
-  indexNames: ['index-*'],
   from: '2020-07-07T08:20:18.966Z',
   skip: false,
 };

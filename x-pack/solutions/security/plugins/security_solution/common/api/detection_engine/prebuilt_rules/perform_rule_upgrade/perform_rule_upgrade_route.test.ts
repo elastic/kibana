@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   RuleUpgradeSpecifier,
   UpgradeSpecificRulesRequest,
@@ -33,7 +33,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = PickVersionValues.safeParse(value);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Invalid enum value. Expected 'BASE' | 'CURRENT' | 'TARGET' | 'MERGED', received '${value}'"`
+          `"Invalid option: expected one of \\"BASE\\"|\\"CURRENT\\"|\\"TARGET\\"|\\"MERGED\\""`
         );
       });
     });
@@ -94,7 +94,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"references: Unrecognized key(s) in object: 'resolved_value'"`
+          `"references: Unrecognized key: \\"resolved_value\\""`
         );
       });
 
@@ -112,7 +112,58 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"tags.resolved_value: Expected array, received number, references.resolved_value: Expected array, received string"`
+          `"tags.resolved_value: Invalid input: expected array, received number, references.resolved_value: Invalid input: expected array, received string"`
+        );
+      });
+
+      // Regression test for https://github.com/elastic/kibana/issues/232614:
+      // resolving a `required_fields` conflict must not require the computed
+      // `ecs` property on input (it is derived on the server).
+      it('accepts a resolved required_fields value without the computed `ecs` property', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [
+              { name: '@timestamp', type: 'date' },
+              { name: 'user.name', type: 'keyword' },
+            ],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(input);
+      });
+
+      // The pre-fix workaround sent `ecs` hardcoded; that must keep working.
+      // `ecs` is not part of the input schema, so it is stripped on parse.
+      it('strips a provided `ecs` property from a resolved required_fields value', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp', type: 'date', ecs: false }],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseSuccess(result);
+        expect(result.data).toEqual({
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp', type: 'date' }],
+          },
+        });
+      });
+
+      it('invalidates a resolved required_fields value missing required properties', () => {
+        const input = {
+          required_fields: {
+            pick_version: 'RESOLVED',
+            resolved_value: [{ name: '@timestamp' }],
+          },
+        };
+        const result = RuleFieldsToUpgrade.safeParse(input);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"required_fields.resolved_value.0.type: Invalid input: expected string, received undefined"`
         );
       });
 
@@ -125,7 +176,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Unrecognized key(s) in object: 'unknown_field'"`
+          `"Unrecognized key: \\"unknown_field\\""`
         );
       });
 
@@ -157,7 +208,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
         const result = RuleFieldsToUpgrade.safeParse(input);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"Unrecognized key(s) in object: 'type', 'rule_id', 'version', 'author', 'license', 'concurrent_searches', 'items_per_search'"`
+          `"Unrecognized keys: \\"type\\", \\"rule_id\\", \\"version\\", \\"author\\", \\"license\\", \\"concurrent_searches\\", \\"items_per_search\\""`
         );
       });
     });
@@ -203,7 +254,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"fields: Unrecognized key(s) in object: 'unknown_field'"`
+        `"fields: Unrecognized key: \\"unknown_field\\""`
       );
     });
 
@@ -220,7 +271,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(specifierWithFields);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"fields.name: Unrecognized key(s) in object: 'resolved_value'"`
+        `"fields.name: Unrecognized key: \\"resolved_value\\""`
       );
     });
 
@@ -229,7 +280,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = RuleUpgradeSpecifier.safeParse(invalid);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"rule_id: Expected string, received number"`
+        `"rule_id: Invalid input: expected string, received number"`
       );
     });
   });
@@ -257,7 +308,7 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const result = UpgradeSpecificRulesRequest.safeParse(invalid);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"mode: Invalid literal value, expected \\"SPECIFIC_RULES\\""`
+        `"mode: Invalid input: expected \\"SPECIFIC_RULES\\""`
       );
     });
 
@@ -265,7 +316,9 @@ describe('Perform Rule Upgrade Route Schemas', () => {
       const invalid = { ...validRequest, rules: undefined };
       const result = UpgradeSpecificRulesRequest.safeParse(invalid);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"rules: Required"`);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"rules: Invalid input: expected array, received undefined"`
+      );
     });
   });
 
@@ -349,13 +402,17 @@ describe('Perform Rule Upgrade Route Schemas', () => {
 
     test('rejects missing required fields', () => {
       const propsToDelete = Object.keys(validResponse);
+      const expectedType = { summary: 'object', results: 'object', errors: 'array' } as const;
       propsToDelete.forEach((deletedProp) => {
         const invalidResponse = Object.fromEntries(
           Object.entries(validResponse).filter(([key]) => key !== deletedProp)
         );
         const result = PerformRuleUpgradeResponseBody.safeParse(invalidResponse);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${deletedProp}: Required"`);
+        const expected = `${deletedProp}: Invalid input: expected ${
+          expectedType[deletedProp as keyof typeof expectedType]
+        }, received undefined`;
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"${expected}"`);
       });
     });
   });

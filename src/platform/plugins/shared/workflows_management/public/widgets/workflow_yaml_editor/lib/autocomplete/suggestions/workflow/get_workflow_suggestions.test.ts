@@ -10,6 +10,7 @@
 import type { monaco } from '@kbn/monaco';
 import { getWorkflowSuggestions } from './get_workflow_suggestions';
 import type { WorkflowsResponse } from '../../../../../../entities/workflows/model/types';
+import { createStepInfo } from '../../../../../../shared/test_utils';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 type WorkflowSuggestionsContext = ExtendedAutocompleteContext & {
@@ -53,14 +54,12 @@ function makeContext(
     },
     range,
     workflows,
-    focusedStepInfo: {
+    isCurrentWorkflowManaged: false,
+    focusedStepInfo: createStepInfo({
       stepId: 'step1',
       stepType: 'workflow.execute',
-      stepYamlNode: {} as any,
-      lineStart: 1,
       lineEnd: 5,
-      propInfos: {},
-    },
+    }),
     model: {
       getLineContent: () => '  workflow-id: ',
     } as unknown as monaco.editor.ITextModel,
@@ -81,14 +80,7 @@ describe('getWorkflowSuggestions', () => {
   it('returns empty array when step type is not workflow.execute or workflow.executeAsync', async () => {
     const result = await getWorkflowSuggestions(
       makeContext({
-        focusedStepInfo: {
-          stepId: 's',
-          stepType: 'slack',
-          stepYamlNode: {} as any,
-          lineStart: 1,
-          lineEnd: 1,
-          propInfos: {},
-        },
+        focusedStepInfo: createStepInfo({ stepId: 's', stepType: 'slack', lineEnd: 1 }),
       })
     );
     expect(result).toEqual([]);
@@ -106,14 +98,11 @@ describe('getWorkflowSuggestions', () => {
   it('returns suggestions for workflow.executeAsync step type', async () => {
     const result = await getWorkflowSuggestions(
       makeContext({
-        focusedStepInfo: {
+        focusedStepInfo: createStepInfo({
           stepId: 's',
           stepType: 'workflow.executeAsync',
-          stepYamlNode: {} as any,
-          lineStart: 1,
           lineEnd: 1,
-          propInfos: {},
-        },
+        }),
       })
     );
     expect(result).toHaveLength(2);
@@ -169,5 +158,36 @@ describe('getWorkflowSuggestions', () => {
   it('returns all workflows when currentWorkflowId is null', async () => {
     const result = await getWorkflowSuggestions(makeContext({ currentWorkflowId: null }));
     expect(result).toHaveLength(2);
+  });
+
+  it('excludes managed workflows unless the current workflow is managed', async () => {
+    const managedWorkflows: WorkflowsResponse = {
+      workflows: {
+        'wf-user': {
+          id: 'wf-user',
+          name: 'User Workflow',
+        },
+        'wf-managed': {
+          id: 'wf-managed',
+          name: 'Managed Workflow',
+          managed: true,
+        },
+      },
+      totalWorkflows: 2,
+    };
+
+    const userWorkflowResult = await getWorkflowSuggestions(
+      makeContext({ workflows: managedWorkflows })
+    );
+    expect(userWorkflowResult).toHaveLength(1);
+    expect(userWorkflowResult[0].label).toBe('User Workflow (id: wf-user)');
+
+    const managedWorkflowResult = await getWorkflowSuggestions(
+      makeContext({
+        workflows: managedWorkflows,
+        isCurrentWorkflowManaged: true,
+      })
+    );
+    expect(managedWorkflowResult).toHaveLength(2);
   });
 });

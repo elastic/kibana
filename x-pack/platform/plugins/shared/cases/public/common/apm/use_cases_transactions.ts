@@ -90,7 +90,7 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
 
 const getAlertCount = (attachments: CaseAttachmentsWithoutOwner) => {
   return attachments.reduce((total, attachment) => {
-    if (attachment.type !== AttachmentType.alert) {
+    if (attachment.type !== AttachmentType.alert || !(`alertId` in attachment)) {
       return total;
     }
     if (!Array.isArray(attachment.alertId)) {

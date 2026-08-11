@@ -29,7 +29,7 @@ function validateUrl(configuredUrl: string) {
   }
 }
 
-function ensureUriAllowed(
+export function ensureUriAllowed(
   configuredUrl: string,
   configurationUtilities: ActionsConfigurationUtilities
 ) {
@@ -114,6 +114,15 @@ function validateOAuth2(configObject: ConnectorTypeConfigType) {
         values: {
           missingItems: missingFields.join(', '),
         },
+      })
+    );
+  }
+
+  if (configObject.authType === AuthType.OAuth2Password && !configObject.accessTokenUrl) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.http.oauth2PasswordConfigurationError', {
+        defaultMessage:
+          'error validation http action config: missing Access Token URL (accessTokenUrl) field',
       })
     );
   }

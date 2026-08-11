@@ -11,8 +11,32 @@ import type {
   ColumnState,
   GenericIndexPatternColumn,
   TextBasedLayerColumn,
+  DataType,
 } from '@kbn/lens-common';
+
 import { ACCESSOR } from './constants';
+import type { AutoColorType, ColorByValueType, ColorMappingType } from '../../../schema/color';
+import { isColorByValueColor, isColorMappingColor } from '../../coloring';
+import { getReversibleMappings } from '../utils';
+
+const colorModeCompat = getReversibleMappings([
+  ['value', 'text'],
+  ['badge', 'badge'],
+  ['background', 'cell'],
+]);
+
+type ApiColorTarget = 'value' | 'badge' | 'background';
+
+// 'progress' is a numeric-only cell decoration and is rejected at the as-code export boundary
+// until the datatable API grows an explicit representation for it.
+type ApiColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'none' | 'progress'>;
+
+export const colorModeToApplyColorTo = (mode: ApiColorMode): ApiColorTarget =>
+  colorModeCompat.toAPI(mode);
+
+export const applyColorToToColorMode = (
+  target: ApiColorTarget
+): NonNullable<ColumnState['colorMode']> => colorModeCompat.toState(target);
 
 /**
  * Checks if the column is a metric column in a formBased layer
@@ -53,4 +77,23 @@ export function getAccessorName(
     return `${ACCESSOR}_${type}`;
   }
   return `${ACCESSOR}_${type}_${index}`;
+}
+
+/**
+ * Infers the datatype from the color configuration.
+ * - colorMapping → 'string'
+ * - colorByValue → 'number'
+ * - No color → uses the provided default
+ */
+export function inferDatatypeFromColor(
+  color: ColorByValueType | ColorMappingType | AutoColorType | undefined,
+  defaultType: Extract<DataType, 'number' | 'string'>
+): Extract<DataType, 'number' | 'string'> {
+  if (isColorByValueColor(color)) {
+    return 'number';
+  }
+  if (isColorMappingColor(color)) {
+    return 'string';
+  }
+  return defaultType;
 }

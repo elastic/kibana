@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, type ReactElement, useCallback } from 'react';
+import React, { memo, type ReactElement, type ReactNode, useCallback } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useAccordionState } from '../hooks/use_accordion_state';
 
 export const HEADER_TEST_ID = 'Header';
 export const CONTENT_TEST_ID = 'Content';
+
+/**
+ * Chrome can fail to repaint content inside EuiAccordion's overflow:hidden childWrapper
+ * after it transitions open (especially inside flyouts).
+ */
+const accordionCss = css`
+  .euiAccordion__childWrapper {
+    overflow: visible;
+  }
+`;
 
 export interface ExpandableSectionProps {
   /**
@@ -42,6 +53,10 @@ export interface ExpandableSectionProps {
    * Title value to render in the header of the accordion
    */
   title: ReactElement | string;
+  /**
+   * Optional content rendered in the accordion header row
+   */
+  extraAction?: ReactNode;
 }
 
 /**
@@ -58,6 +73,7 @@ export const ExpandableSection = memo(
     localStorageKey,
     sectionId,
     title,
+    extraAction,
   }: ExpandableSectionProps) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
     const { renderContent, state, toggle } = useAccordionState(expanded);
@@ -76,7 +92,14 @@ export const ExpandableSection = memo(
     }, [toggle, localStorageKey, sectionId]);
 
     return (
-      <EuiAccordion forceState={state} onToggle={onToggle} id={accordionId} buttonContent={header}>
+      <EuiAccordion
+        forceState={state}
+        onToggle={onToggle}
+        id={accordionId}
+        buttonContent={header}
+        css={accordionCss}
+        extraAction={extraAction}
+      >
         <EuiSpacer size="m" />
         <EuiFlexGroup
           gutterSize={gutterSize}

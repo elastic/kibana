@@ -21,6 +21,7 @@ import { renderActionParameterTemplates } from './plugin';
 import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
+import { actionsConfigMock } from './actions_config.mock';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
@@ -33,6 +34,8 @@ const createSetupMock = () => {
     registerType: jest.fn(),
     registerSubActionConnectorType: jest.fn(),
     getAxiosInstanceWithAuth: jest.fn(),
+    getCredential: jest.fn(),
+    getClientLeasePool: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
@@ -40,9 +43,13 @@ const createSetupMock = () => {
     getActionsConfigurationUtilities: jest.fn().mockReturnValue({
       getAwsSesConfig: jest.fn(),
       getWebhookSettings: jest.fn(),
+      getEarsUrl: jest.fn(),
+      getRelaySSLSettings: jest.fn(),
     }),
+    getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
+    registerConnectorLifecycleListener: jest.fn(),
   });
   return mock;
 };
@@ -62,6 +69,9 @@ const createStartMock = () => {
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),
+    registerDynamicConnector: jest.fn(),
+    unregisterDynamicConnector: jest.fn(),
+    getRelayClient: jest.fn(),
   });
 
   return mock;
@@ -96,6 +106,7 @@ const createServicesMock = () => {
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
+      configurationUtilities: actionsConfigMock.create(),
     }),
   });
   return mock;
@@ -113,6 +124,7 @@ const createUnsecuredServicesMock = () => {
       unsecuredSavedObjectsClient: savedObjectsRepositoryMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
+      configurationUtilities: actionsConfigMock.create(),
     }),
   });
   return mock;

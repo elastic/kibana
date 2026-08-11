@@ -93,6 +93,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -231,7 +232,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { status, message } = resp.body;
           expect(status).to.eql('error');
-          expect(message).to.eql('HTML email can only be sent via notifications');
+          expect(message).to.eql(
+            'HTML email can only be sent when the connector is configured to allow HTML'
+          );
         });
     });
 
@@ -276,7 +279,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type config: Field \"from\": Required`,
+            message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at from`,
           });
         });
     });
@@ -480,6 +483,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -550,6 +554,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -629,6 +634,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           clientId: '12345',
           tenantId: '1234567',
         },
+        auth_mode: 'shared',
       });
     });
 

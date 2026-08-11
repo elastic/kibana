@@ -6,23 +6,12 @@
  */
 
 import type { StoryObj } from '@storybook/react';
-import type { ComponentType } from 'react';
 import React from 'react';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 
 export default {
   title: 'app/settings/Schema',
   component: ConfirmSwitchModal,
-  decorators: [
-    (StoryComponent: ComponentType) => {
-      return (
-        <MockApmPluginStorybook>
-          <StoryComponent />
-        </MockApmPluginStorybook>
-      );
-    },
-  ],
 };
 
 interface ModalArgs {

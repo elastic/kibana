@@ -11,24 +11,22 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InferenceClient } from '@kbn/inference-common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
-import type { QueryClient } from '../lib/streams/assets/query/query_client';
 import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
-import type { FeatureClient } from '../lib/streams/feature/feature_client';
 import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipelines/processor_suggestions_service';
-import type { TaskClient } from '../lib/tasks/task_client';
-import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { SystemClient } from '../lib/streams/system/system_client';
+import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
+import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 
-export type GetScopedClients = ({
-  request,
-}: {
+export type GetScopedClients = (params: {
   request: KibanaRequest;
+  rulesClientOptions?: RulesClientCreateOptions;
 }) => Promise<RouteHandlerScopedClients>;
 
 export interface RouteHandlerScopedClients {
@@ -36,15 +34,15 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  featureClient: FeatureClient;
-  systemClient: SystemClient;
+  getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
-  queryClient: QueryClient;
   licensing: LicensingPluginStart;
   uiSettingsClient: IUiSettingsClient;
+  globalUiSettingsClient: IUiSettingsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
-  taskClient: TaskClient<StreamsTaskType>;
+  streamsSettingsStorageClient: StreamsSettingsStorageClient;
+  isSecurityEnabled: boolean;
 }
 
 export interface RouteDependencies {
@@ -52,6 +50,8 @@ export interface RouteDependencies {
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
+  patternExtractionService: IPatternExtractionService;
+  getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

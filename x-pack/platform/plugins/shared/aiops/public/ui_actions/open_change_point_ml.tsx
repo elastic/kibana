@@ -8,11 +8,11 @@
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
-import type { AiopsPluginStartDeps } from '../types';
 import type { ChangePointChartActionContext } from './change_point_action_context';
+import type { AiopsCoreSetup } from '../types';
+import { canUseAiops } from '../capabilities';
 
 export const OPEN_CHANGE_POINT_IN_ML_APP_ACTION = 'openChangePointInMlAppAction';
 
@@ -31,8 +31,7 @@ const getEmbeddableTimeRange = async (
 };
 
 export function createOpenChangePointInMlAppAction(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ): UiActionsActionDefinition<ChangePointChartActionContext> {
   return {
     id: 'open-change-point-in-ml-app',
@@ -50,6 +49,7 @@ export function createOpenChangePointInMlAppAction(
         throw new IncompatibleActionError();
       }
 
+      const [, pluginStart] = await getStartServices();
       const locator = pluginStart.share.url.locators.get('ML_APP_LOCATOR')!;
 
       const { metricField, fn, splitField, dataViewId } = context.embeddable;
@@ -70,7 +70,11 @@ export function createOpenChangePointInMlAppAction(
       });
     },
     async execute(context) {
-      const { isChangePointChartEmbeddableContext } = await import('./change_point_action_context');
+      const [{ isChangePointChartEmbeddableContext }, [coreStart]] = await Promise.all([
+        import('./change_point_action_context'),
+        getStartServices(),
+      ]);
+
       if (!isChangePointChartEmbeddableContext(context)) {
         throw new IncompatibleActionError();
       }
@@ -81,7 +85,8 @@ export function createOpenChangePointInMlAppAction(
     },
     async isCompatible(context) {
       const { isChangePointChartEmbeddableContext } = await import('./change_point_action_context');
-      return isChangePointChartEmbeddableContext(context);
+      const [coreStart] = await getStartServices();
+      return isChangePointChartEmbeddableContext(context) && canUseAiops(coreStart);
     },
   };
 }

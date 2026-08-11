@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -13,14 +13,20 @@ import type { Logger } from '@kbn/core/server';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { timeRangeSchemaRequired, indexDescription } from '../../utils/tool_schemas';
+import {
+  MAX_INDEX_PATTERN_LENGTH,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+} from '../../utils/schema_limits';
 import { getToolHandler } from './handler';
 
 export const OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID = 'observability.run_log_rate_analysis';
 
 const logRateAnalysisSchema = z.object({
-  index: z.string().describe(indexDescription),
+  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription),
   timeFieldName: z
     .string()
+    .max(MAX_SHORT_STRING_LENGTH)
     .default('@timestamp')
     .describe('Timestamp field used to build the baseline/deviation windows.'),
   baseline: z
@@ -31,12 +37,13 @@ const logRateAnalysisSchema = z.object({
   deviation: z
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
-  searchQuery: z
-    .record(z.any())
+  kqlFilter: z
+    .string()
+    .max(MAX_KQL_FILTER_LENGTH)
+    .optional()
     .describe(
-      'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
-    )
-    .optional(),
+      'Optional KQL filter to narrow which documents are analyzed. Examples: "service.name: checkout", "log.level: error".'
+    ),
 });
 
 export function createRunLogRateAnalysisTool({
@@ -73,7 +80,7 @@ Do NOT use for:
       },
     },
     handler: async (toolParams, context) => {
-      const { index, timeFieldName, baseline, deviation, searchQuery } = toolParams;
+      const { index, timeFieldName, baseline, deviation, kqlFilter } = toolParams;
 
       try {
         const esClient = context.esClient.asCurrentUser;
@@ -85,7 +92,7 @@ Do NOT use for:
           timeFieldName,
           baseline,
           deviation,
-          searchQuery,
+          kqlFilter,
         });
 
         return {

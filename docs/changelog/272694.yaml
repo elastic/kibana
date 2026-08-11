@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/272694
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+areas:
+- Dashboards and visualizations
+title: Fix dashboard API returning 400 status for server-side transform errors

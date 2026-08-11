@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode } from '../../../ast/is';
+import { isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLAstMmrCommand,
   ESQLCommand,
-  ESQLMessage,
-} from '../../../types';
+} from '@elastic/esql/types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateMap } from '../../definitions/utils/validation/map';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandCallbacks, ICommandContext } from '../types';
 import { getItemLocation } from './utils';
+import type { ESQLMessage } from '../../definitions/types';
 
 const MMR_WITH_MAP_DEFINITION =
   "{name='lambda', description='The relevance/diversity balancing factor', type=[double]}";

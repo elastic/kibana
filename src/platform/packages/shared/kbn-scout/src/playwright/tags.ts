@@ -32,15 +32,17 @@ export const getPlaywrightTagsFor = (
 export const tags = {
   stateful: {
     classic: getPlaywrightTagsFor('stateful', 'classic'),
-    search: getPlaywrightTagsFor('stateful', 'search'),
-    observability: getPlaywrightTagsFor('stateful', 'observability_complete'),
-    security: getPlaywrightTagsFor('stateful', 'security_complete'),
+
+    // `search` / `observability` / `security` are intentionally not exposed for `stateful`:
+    // CI only schedules stateful runs tagged `classic` (see `getServerRunFlagsFromTags` in
+    // `../tests_discovery/tag_utils.ts`), so other domains would be discovered but never run.
+    // Use `tags.stateful.classic` instead.
 
     /**
-     * Tags to target all stateful deployment types
+     * Tags to target all supported stateful deployment types
      */
     get all(): string[] {
-      return [...this.classic, ...this.search, ...this.observability, ...this.security];
+      return [...this.classic];
     },
   },
   serverless: {
@@ -69,12 +71,19 @@ export const tags = {
       },
     },
     workplaceai: getPlaywrightTagsFor('serverless', 'workplaceai'),
+    vectordb: getPlaywrightTagsFor('serverless', 'vectordb'),
 
     /**
      * All serverless project types
      */
     get all(): string[] {
-      return [...this.search, ...this.observability.all, ...this.security.all, ...this.workplaceai];
+      return [
+        ...this.search,
+        ...this.observability.all,
+        ...this.security.all,
+        ...this.workplaceai,
+        ...this.vectordb,
+      ];
     },
   },
 

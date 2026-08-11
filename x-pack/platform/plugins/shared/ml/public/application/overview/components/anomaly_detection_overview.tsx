@@ -10,19 +10,17 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../locator';
-import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.png';
+import type { MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { useOverviewPageCustomCss } from '../overview_ml_page';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
-  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
-  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
+  const canGetJobs = usePermissionCheck('canGetJobs');
   const [isLoading, setIsLoading] = useState(false);
   const [hasADJobs, setHasADJobs] = useState(false);
 
@@ -72,7 +70,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
 
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];
-    if (hasADJobs) {
+    if (hasADJobs && canGetJobs) {
       actions.push(
         <EuiButton
           color="text"
@@ -87,12 +85,11 @@ export const AnomalyDetectionOverviewCard: FC = () => {
         </EuiButton>
       );
     }
-    if (canGetJobs && canCreateJob) {
+    if (canGetJobs) {
       actions.push(
         <EuiButtonEmpty
           color="text"
           onClick={redirectToManageJobs}
-          isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="manageJobsButton"
         >
           <FormattedMessage
@@ -103,17 +100,10 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       );
     }
     return actions;
-  }, [
-    disableCreateAnomalyDetectionJob,
-    hasADJobs,
-    canCreateJob,
-    canGetJobs,
-    redirectToMultiMetricExplorer,
-    redirectToManageJobs,
-  ]);
+  }, [hasADJobs, canGetJobs, redirectToMultiMetricExplorer, redirectToManageJobs]);
 
   return showEmptyState ? (
-    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} />
+    <AnomalyDetectionEmptyState customCss={overviewPageCardCustomCss} iconSize="m" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
@@ -121,6 +111,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       hasBorder={true}
       hasShadow={false}
       iconSrc={adImage}
+      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}

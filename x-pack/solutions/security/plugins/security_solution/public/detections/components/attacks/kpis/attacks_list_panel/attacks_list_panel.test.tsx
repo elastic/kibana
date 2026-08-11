@@ -12,11 +12,27 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { AttacksListPanel } from './attacks_list_panel';
 import { useAttacksListData } from './use_attacks_list_data';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 
+jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
+jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('./use_attacks_list_data');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
   SeverityBar: () => <div data-test-subj="severity-bar" />,
+}));
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
+  useStore: () => ({ getState: jest.fn(), dispatch: jest.fn(), subscribe: jest.fn() }),
+}));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useHistory: () => ({ push: jest.fn() }),
 }));
 
 describe('AttacksListPanel', () => {
@@ -26,15 +42,25 @@ describe('AttacksListPanel', () => {
   } as unknown as DataView;
 
   const mockOpenFlyout = jest.fn();
+  const reportEvent = jest.fn();
+
+  let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    flyoutApi = createFlyoutApiMock();
+    jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: mockOpenFlyout,
     });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
   });
 
   it('renders loading state correctly', () => {
@@ -46,6 +72,7 @@ describe('AttacksListPanel', () => {
       total: 0,
       setPageIndex: jest.fn(),
       setPageSize: jest.fn(),
+      refetch: jest.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -76,6 +103,7 @@ describe('AttacksListPanel', () => {
       total: 2,
       setPageIndex: jest.fn(),
       setPageSize: jest.fn(),
+      refetch: jest.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -88,7 +116,7 @@ describe('AttacksListPanel', () => {
     expect(screen.getAllByTestId('severity-bar')).toHaveLength(2);
   });
 
-  it('calls openFlyout when clicking on an attack name', () => {
+  it('calls openFlyout (legacy) when clicking on an attack name with flag off', () => {
     const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
@@ -99,6 +127,7 @@ describe('AttacksListPanel', () => {
       total: 1,
       setPageIndex: jest.fn(),
       setPageSize: jest.fn(),
+      refetch: jest.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);
@@ -115,6 +144,45 @@ describe('AttacksListPanel', () => {
         },
       },
     });
+    expect(flyoutApi.openAttackFlyout).not.toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_summary_kpi',
+    });
+  });
+
+  it('calls openAttackFlyout when enableNewFlyout setting is on', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+    const mockRefetch = jest.fn();
+    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
+
+    (useAttacksListData as jest.Mock).mockReturnValue({
+      items: mockItems,
+      isLoading: false,
+      pageIndex: 0,
+      pageSize: 10,
+      total: 1,
+      setPageIndex: jest.fn(),
+      setPageSize: jest.fn(),
+      refetch: mockRefetch,
+    });
+
+    render(<AttacksListPanel dataView={mockDataView} />);
+
+    const link = screen.getByText('Attack 1');
+    link.click();
+
+    expect(flyoutApi.openAttackFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attackId: 'attack-1',
+        indexName: 'test-index-pattern',
+      })
+    );
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_summary_kpi',
+    });
   });
 
   it('handles pagination changes', () => {
@@ -129,6 +197,7 @@ describe('AttacksListPanel', () => {
       total: 20,
       setPageIndex,
       setPageSize,
+      refetch: jest.fn(),
     });
 
     render(<AttacksListPanel dataView={mockDataView} />);

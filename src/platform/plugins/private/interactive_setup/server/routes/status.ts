@@ -16,6 +16,11 @@ export function defineStatusRoute({ router, elasticsearch, preboot }: RouteDefin
     {
       path: '/internal/interactive_setup/status',
       security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route is used during initial Kibana setup before authentication is configured.',
+        },
         authz: {
           enabled: false,
           reason:
@@ -23,7 +28,6 @@ export function defineStatusRoute({ router, elasticsearch, preboot }: RouteDefin
         },
       },
       validate: false,
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       // `connectionStatus$` is a `ReplaySubject` with a buffer size of 1 so `first()` operator will

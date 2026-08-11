@@ -10,37 +10,24 @@
 import { createStartServicesMock } from '../../../../mocks';
 import type { WorkflowsServices } from '../../../../types';
 import { createWorkflowsStore } from '../store';
-import type { RootState } from '../types';
+
+export type MockServices = ReturnType<typeof createStartServicesMock>;
+
+const storeToServices = new WeakMap<ReturnType<typeof createWorkflowsStore>, MockServices>();
 
 export const createMockStore = (services?: WorkflowsServices) => {
-  const mockServices = services || createStartServicesMock();
+  const mockServices = (services as MockServices | undefined) ?? createStartServicesMock();
   const store = createWorkflowsStore(mockServices);
-
-  // Attach services to the store for easy access in tests
-  (store as any).mockServices = mockServices;
-
+  storeToServices.set(store, mockServices);
   return store;
 };
 
 export type MockStore = ReturnType<typeof createMockStore>;
-export type MockServices = ReturnType<typeof createStartServicesMock>;
 
-// Helper function to get mock services from a store
 export const getMockServices = (store: MockStore): MockServices => {
-  return (store as any).mockServices;
-};
-
-// Helper function to create a store with initial state
-export const createMockStoreWithState = (
-  initialState: Partial<RootState>,
-  services?: WorkflowsServices
-) => {
-  const store = createMockStore(services);
-
-  // Pre-populate the store with initial state
-  if (initialState.detail) {
-    Object.assign(store.getState().detail, initialState.detail);
+  const services = storeToServices.get(store);
+  if (!services) {
+    throw new Error('No mock services found for store — was it created with createMockStore?');
   }
-
-  return store;
+  return services;
 };

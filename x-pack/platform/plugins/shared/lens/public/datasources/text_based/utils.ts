@@ -129,7 +129,7 @@ export function updateColumnLabel({
       {
         ...currentColumn,
         label: value,
-        customLabel: !!value,
+        customLabel: Boolean(value) && value !== currentColumn.fieldName,
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],
@@ -153,7 +153,31 @@ export function updateColumnFormat({
       ...layer.columns.slice(0, currentColumnIndex),
       {
         ...currentColumn,
-        params: { format: value },
+        params: { ...currentColumn.params, format: value },
+      },
+      ...layer.columns.slice(currentColumnIndex + 1),
+    ],
+  };
+}
+
+export function updateColumnDropPartials({
+  layer,
+  columnId,
+  value,
+}: {
+  layer: TextBasedLayer;
+  columnId: string;
+  value: boolean;
+}): TextBasedLayer {
+  const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
+  const currentColumn = layer.columns[currentColumnIndex];
+  return {
+    ...layer,
+    columns: [
+      ...layer.columns.slice(0, currentColumnIndex),
+      {
+        ...currentColumn,
+        params: { ...currentColumn.params, dropPartials: value },
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

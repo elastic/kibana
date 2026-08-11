@@ -22,18 +22,22 @@ import React, { useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 import { MetricFlyoutBody } from './metrics_flyout_body';
 import { useFlyoutA11y } from './hooks/use_flyout_a11y';
 import { useFieldsMetadataContext } from '../../context/fields_metadata';
 
 interface MetricInsightsFlyoutProps {
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   esqlQuery?: string;
   onClose: () => void;
 }
 
-export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsightsFlyoutProps) => {
+export const MetricInsightsFlyout = ({
+  metricItem,
+  esqlQuery,
+  onClose,
+}: MetricInsightsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const defaultWidth = euiTheme.base * 34;
   const isXlScreen = useIsWithinMinBreakpoint('xl');
@@ -47,6 +51,20 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  }, []);
+
+  // TODO: Remove once EUI ships the push-flyout padding fix (https://github.com/elastic/kibana/issues/276159).
+  // When this push flyout mounts while another push flyout (e.g. the Inspector) is still
+  // cleaning up, EUI captures and later restores a stale push offset onto Kibana's app scroll
+  // container on unmount, which shrinks the layout permanently. Clearing that inline padding
+  // when this flyout unmounts neutralizes the stale value.
+  useEffect(() => {
+    return () => {
+      // Hardcoded to avoid a package dependency; mirrors APP_MAIN_SCROLL_CONTAINER_ID from
+      // `@kbn/ui-chrome-layout-constants` and the default EuiFlyout container configured in
+      // the Kibana EUI provider.
+      document.getElementById('app-main-scroll')?.style.removeProperty('padding-inline-end');
+    };
   }, []);
 
   const metricFlyoutTitleId = useGeneratedHtmlId({
@@ -109,9 +127,9 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <MetricFlyoutBody
-          metric={metric}
+          metricItem={metricItem}
           esqlQuery={esqlQuery}
-          description={fieldsMetadata[metric.name]?.description}
+          description={fieldsMetadata[metricItem.metricName]?.description}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

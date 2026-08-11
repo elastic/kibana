@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,8 +28,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest('ingest-set-value', docs, processors);
@@ -37,7 +38,7 @@ apiTest.describe(
       await testBed.ingest('esql-set-value', docs);
       const esqlResult = await esql.queryOnIndex('esql-set-value', query);
 
-      expect(ingestResult[0]?.attributes?.status).toBe('active');
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.status).toBe('active');
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({ 'attributes.status': 'active' })
       );
@@ -54,8 +55,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ message: 'should-be-copied' }];
       await testBed.ingest('ingest-set-copy', docs, processors);
@@ -64,7 +65,7 @@ apiTest.describe(
       await testBed.ingest('esql-set-copy', docs);
       const esqlResult = await esql.queryOnIndex('esql-set-copy', query);
 
-      expect(ingestResult[0]?.attributes?.status).toBe('should-be-copied');
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.status).toBe('should-be-copied');
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({ 'attributes.status': 'should-be-copied' })
       );
@@ -84,8 +85,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { status: 'active' } }];
         await testBed.ingest('ingest-set-override', docs, processors);
@@ -94,7 +95,7 @@ apiTest.describe(
         await testBed.ingest('esql-set-override', docs);
         const esqlResult = await esql.queryOnIndex('esql-set-override', query);
 
-        expect(ingestResult[0]?.attributes?.status).toBe('inactive');
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.status).toBe('inactive');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.status': 'inactive' })
         );
@@ -115,8 +116,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { status: 'active' } }];
         await testBed.ingest('ingest-set-no-override', docs, processors);
@@ -125,7 +126,7 @@ apiTest.describe(
         await testBed.ingest('esql-set-no-override', docs);
         const esqlResult = await esql.queryOnIndex('esql-set-no-override', query);
 
-        expect(ingestResult[0]?.attributes?.status).toBe('active');
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.status).toBe('active');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.status': 'active' })
         );
@@ -159,10 +160,10 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }

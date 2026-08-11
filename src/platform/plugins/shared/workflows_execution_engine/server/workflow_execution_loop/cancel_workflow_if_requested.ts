@@ -11,6 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionCursorApi } from '../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -29,6 +30,7 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState: WorkflowExecutionState,
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger,
+  workflowExecutionCursor: WorkflowExecutionCursorApi,
   monitorAbortController?: AbortController
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
@@ -60,8 +62,7 @@ export async function cancelWorkflowIfRequested(
 
   // mark current step scopes as cancelled
   while (!nodeStack.isEmpty()) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const scopeData = nodeStack.getCurrentScope()!;
+    const scopeData = nodeStack.getCurrentScope();
     nodeStack = nodeStack.exitScope();
     const stepExecutionId = buildStepExecutionId(
       workflowExecutionState.getWorkflowExecution().id,
@@ -87,4 +88,5 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.CANCELLED,
   });
+  workflowExecutionCursor.stop();
 }

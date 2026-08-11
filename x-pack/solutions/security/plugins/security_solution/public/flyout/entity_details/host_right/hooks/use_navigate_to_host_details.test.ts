@@ -15,6 +15,8 @@ import {
 import { HostDetailsPanelKey } from '../../host_details_left';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { HostPanelKey } from '../../shared/constants';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
+import { EntityType } from '../../../../../common/search_strategy';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -33,8 +35,12 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+const documentEntityIdentifiers = { 'host.name': 'testHost' };
+
 const mockProps = {
+  documentEntityIdentifiers,
   hostName: 'testHost',
+  entityId: 'resolved-host-entity-id',
   scopeId: 'testScopeId',
   isRiskScoreExist: false,
   hasMisconfigurationFindings: false,
@@ -62,12 +68,19 @@ describe('useNavigateToHostDetails', () => {
   it('returns callback that opens details panel when not in preview mode', () => {
     const { result } = renderHook(() => useNavigateToHostDetails(mockProps));
 
+    expect(mockedTelemetry.reportEvent).not.toHaveBeenCalled();
+
     result.current({ tab, subTab });
 
+    expect(mockedTelemetry.reportEvent).toHaveBeenCalledWith(
+      EntityEventTypes.RiskInputsExpandedFlyoutOpened,
+      { entity: EntityType.host }
+    );
     expect(mockOpenLeftPanel).toHaveBeenCalledWith({
       id: HostDetailsPanelKey,
       params: {
-        name: mockProps.hostName,
+        hostName: mockProps.hostName,
+        entityId: mockProps.entityId,
         scopeId: mockProps.scopeId,
         isRiskScoreExist: mockProps.isRiskScoreExist,
         path: { tab, subTab },
@@ -93,12 +106,14 @@ describe('useNavigateToHostDetails', () => {
           contextID: mockProps.contextID,
           scopeId: mockProps.scopeId,
           hostName: mockProps.hostName,
+          entityId: mockProps.entityId,
         },
       },
       left: {
         id: HostDetailsPanelKey,
         params: {
-          name: mockProps.hostName,
+          hostName: mockProps.hostName,
+          entityId: mockProps.entityId,
           scopeId: mockProps.scopeId,
           isRiskScoreExist: mockProps.isRiskScoreExist,
           path: { tab, subTab },

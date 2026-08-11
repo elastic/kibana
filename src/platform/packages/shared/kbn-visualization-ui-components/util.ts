@@ -10,8 +10,9 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { isNestedField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { IconCircle, IconTriangle } from '@kbn/chart-icons';
 import type { IconSet } from './components';
-import type { SharedSetOfIcons } from './types';
+import type { AnnotationReferenceLineIcons, SharedSetOfIcons } from './types';
 
 export const isFieldLensCompatible = (field: DataViewField) =>
   !isNestedField(field) && (!!field.aggregatable || !!field.scripted);
@@ -36,23 +37,28 @@ export function iconSortCriteria<T extends string>(a: IconSet<T>[number], b: Ico
   return a.value.localeCompare(b.value);
 }
 
-/**
- * This is the minimal icons set.
- * So far it is computed from Reference line and Metric chart icons.
- * Needs to consider annotation icons set too in the future.
- */
+export const emptyIconEntry: IconSet<'empty'>[number] = {
+  value: 'empty',
+  label: i18n.translate('visualizationUiComponents.iconSelect.noIconLabel', {
+    defaultMessage: 'None',
+  }),
+};
 
+/**
+ * Intersection of icons shared across Reference Lines, Annotations, and Metric charts.
+ * Each consumer extends this base with its own additional icons.
+ */
 export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
-  {
-    value: 'empty',
-    label: i18n.translate('visualizationUiComponents.iconSelect.noIconLabel', {
-      defaultMessage: 'None',
-    }),
-  },
   {
     value: 'asterisk',
     label: i18n.translate('visualizationUiComponents.iconSelect.asteriskIconLabel', {
       defaultMessage: 'Asterisk',
+    }),
+  },
+  {
+    value: 'alert',
+    label: i18n.translate('visualizationUiComponents.iconSelect.alertIconLabel', {
+      defaultMessage: 'Alert',
     }),
   },
   {
@@ -80,15 +86,27 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     }),
   },
   {
-    value: 'alert',
-    label: i18n.translate('visualizationUiComponents.iconSelect.alertIconLabel', {
-      defaultMessage: 'Alert',
-    }),
-  },
-  {
     value: 'flag',
     label: i18n.translate('visualizationUiComponents.iconSelect.flagIconLabel', {
       defaultMessage: 'Flag',
+    }),
+  },
+  {
+    value: 'heart',
+    label: i18n.translate('visualizationUiComponents.iconSelect.heartIconLabel', {
+      defaultMessage: 'Heart',
+    }),
+  },
+  {
+    value: 'mapMarker',
+    label: i18n.translate('visualizationUiComponents.iconSelect.mapMarkerIconLabel', {
+      defaultMessage: 'Map Marker',
+    }),
+  },
+  {
+    value: 'starEmpty',
+    label: i18n.translate('visualizationUiComponents.iconSelect.starIconLabel', {
+      defaultMessage: 'Star',
     }),
   },
   {
@@ -96,5 +114,48 @@ export const sharedSetOfIcons: IconSet<SharedSetOfIcons> = [
     label: i18n.translate('visualizationUiComponents.iconSelect.tagIconLabel', {
       defaultMessage: 'Tag',
     }),
+  },
+];
+
+export const annotationReferenceLineSharedSetOfIcons: IconSet<AnnotationReferenceLineIcons> = [
+  ...sharedSetOfIcons,
+  {
+    value: 'circle',
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.circleIconLabel',
+      {
+        defaultMessage: 'Circle',
+      }
+    ),
+    icon: IconCircle,
+  },
+  {
+    value: 'pinFilled',
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.mapPinLabel',
+      {
+        defaultMessage: 'Map Pin',
+      }
+    ),
+  },
+  {
+    value: 'starFilled',
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.starFilledLabel',
+      {
+        defaultMessage: 'Star filled',
+      }
+    ),
+  },
+  {
+    value: 'triangle',
+    label: i18n.translate(
+      'visualizationUiComponents.annotationReferenceLine.iconSelect.triangleIconLabel',
+      {
+        defaultMessage: 'Triangle',
+      }
+    ),
+    icon: IconTriangle,
+    shouldRotate: true,
   },
 ];

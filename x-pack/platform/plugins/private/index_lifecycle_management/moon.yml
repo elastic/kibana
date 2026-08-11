@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/index-lifecycle-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-lifecycle-management-plugin'
+  title: '@kbn/index-lifecycle-management-plugin'
   description: Moon project for @kbn/index-lifecycle-management-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/private/index_lifecycle_management
+  sourceRoot: x-pack/platform/plugins/private/index_lifecycle_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/licensing-plugin'
@@ -42,6 +41,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/shared-ux-table-persist'
+  - '@kbn/data-lifecycle-phases'
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/licensing-types'
   - '@kbn/test-eui-helpers'
@@ -59,16 +59,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

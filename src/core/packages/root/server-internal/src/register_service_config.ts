@@ -40,6 +40,7 @@ import { config as dataStreamsConfig } from '@kbn/core-data-streams-server-inter
 import { elasticApmConfig } from './root/elastic_config';
 import { serverlessConfig } from './root/serverless_config';
 import { airgappedConfig } from './root/airgapped_config';
+import { isCoreRenderingInReactConcurrentModeConfig } from './root/is_core_rendering_in_react_concurrent_mode_config';
 import { coreConfig } from './core_config';
 
 const rootConfigPath = '';
@@ -47,6 +48,7 @@ const rootConfigPath = '';
 export function registerServiceConfig(configService: ConfigService) {
   const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
     airgappedConfig,
+    isCoreRenderingInReactConcurrentModeConfig,
     coreConfig,
     cspConfig,
     deprecationConfig,

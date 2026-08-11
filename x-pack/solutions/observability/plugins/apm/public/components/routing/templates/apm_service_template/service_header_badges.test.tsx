@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHeaderBadges } from './service_header_badges';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/telemetry_client_mock';
@@ -20,6 +21,47 @@ jest.mock('../../../../context/service_slo/use_service_slo_context', () => ({
 const mockUseApmPluginContext = jest.fn();
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => mockUseApmPluginContext(),
+}));
+
+const mockShare = {
+  url: {
+    locators: {
+      get: jest.fn().mockReturnValue({
+        getRedirectUrl: jest
+          .fn()
+          .mockImplementation(
+            ({ serviceName, query }: any) =>
+              `/services/${serviceName}/overview?comparisonEnabled=${
+                query?.comparisonEnabled ?? true
+              }`
+          ),
+      }),
+    },
+  },
+};
+
+jest.mock('../../../../hooks/use_apm_router', () => ({
+  useApmRouter: () => ({
+    link: (path: string, { path: pathParams, query }: any) =>
+      `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+        query
+      ).toString()}`,
+  }),
+}));
+
+const mockUseApmParams = jest.fn();
+jest.mock('../../../../hooks/use_apm_params', () => ({
+  useApmParams: () => mockUseApmParams(),
+}));
+
+const mockUseApmServiceContext = jest.fn();
+jest.mock('../../../../context/apm_service/use_apm_service_context', () => ({
+  useApmServiceContext: () => mockUseApmServiceContext(),
+}));
+
+const mockUseApmRoutePath = jest.fn();
+jest.mock('../../../../hooks/use_apm_route_path', () => ({
+  useApmRoutePath: () => mockUseApmRoutePath(),
 }));
 
 const mockUseFetcher = jest.fn();
@@ -42,9 +84,16 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
+const baseQuery = {
+  environment: 'ENVIRONMENT_ALL',
+  kuery: '',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  serviceGroup: '',
+  comparisonEnabled: false,
+};
+
 const defaultProps = {
-  serviceName: 'test-service',
-  environment: 'production',
   start: '2026-01-01T00:00:00.000Z',
   end: '2026-01-02T00:00:00.000Z',
   onSloClick: jest.fn(),
@@ -63,22 +112,44 @@ function setupMocks({
   isAlertingAvailable = true,
   canReadAlerts = true,
   canReadSlos = true,
+  canReadMlJobs = false,
   alertsCount = 0,
+  anomalyScore,
   sloFetchStatus = FETCH_STATUS.SUCCESS as string,
   mostCriticalSloStatus = { status: 'healthy' as const, count: 0 },
+  serviceName = 'test-service',
+  // `null` (rather than `undefined`) signals "no agent resolved yet" — using
+  // `undefined` here would trigger this destructuring default even when the
+  // caller explicitly passes `agentName: undefined`.
+  agentName = 'nodejs' as AgentName | null,
+  anomalyEnvironment = 'production',
+  routePath = '/services/{serviceName}/transactions',
+  comparisonEnabled: queryComparisonEnabled,
+  offset: queryOffset,
 }: {
   isAlertingAvailable?: boolean;
   canReadAlerts?: boolean;
   canReadSlos?: boolean;
+  canReadMlJobs?: boolean;
   alertsCount?: number;
+  anomalyScore?: number;
   sloFetchStatus?: string;
   mostCriticalSloStatus?: { status: string; count: number };
+  serviceName?: string;
+  agentName?: AgentName | null;
+  anomalyEnvironment?: string;
+  routePath?: string;
+  comparisonEnabled?: boolean;
+  offset?: string;
 } = {}) {
+  mockUseApmRoutePath.mockReturnValue(routePath);
+
   mockUseApmPluginContext.mockReturnValue({
     core: {
       application: {
         capabilities: {
           slo: { read: canReadSlos },
+          ml: { canGetJobs: canReadMlJobs },
           apm: {
             'alerting:show': canReadAlerts,
             'alerting:save': canReadAlerts,
@@ -89,17 +160,36 @@ function setupMocks({
     plugins: {
       alerting: isAlertingAvailable ? {} : undefined,
     },
+    share: mockShare,
   });
+
+  mockUseApmParams.mockReturnValue({
+    path: { serviceName },
+    query: {
+      ...baseQuery,
+      ...(queryComparisonEnabled !== undefined && { comparisonEnabled: queryComparisonEnabled }),
+      ...(queryOffset !== undefined && { offset: queryOffset }),
+    },
+  });
+
+  mockUseApmServiceContext.mockReturnValue({ agentName: agentName ?? undefined });
 
   mockUseServiceSloContext.mockReturnValue({
     mostCriticalSloStatus,
     sloFetchStatus,
   });
 
-  mockUseFetcher.mockReturnValue({
-    data: { alertsCount },
-    status: FETCH_STATUS.SUCCESS,
-  });
+  // `ServiceHeaderBadges` calls `useFetcher` twice: alerts count, then anomaly score.
+  mockUseFetcher.mockReset();
+  mockUseFetcher
+    .mockReturnValueOnce({
+      data: { alertsCount },
+      status: FETCH_STATUS.SUCCESS,
+    })
+    .mockReturnValueOnce({
+      data: { anomalyScore, anomalyEnvironment },
+      status: FETCH_STATUS.SUCCESS,
+    });
 
   mockKibanaServices.mockReturnValue({
     services: {
@@ -122,12 +212,12 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveTextContent('5');
   });
 
-  it('shows alerts badge with correct href', () => {
+  it('renders the alerts badge as a link to the alerts tab', () => {
     setupMocks({ alertsCount: 3 });
     renderBadges();
 
-    const badge = screen.getByTestId('serviceHeaderAlertsBadge');
-    expect(badge).toHaveAttribute('href', '/services/test-service/alerts');
+    const href = screen.getByTestId('serviceHeaderAlertsBadge').closest('a')?.getAttribute('href');
+    expect(href).toBe(defaultProps.alertsTabHref);
   });
 
   it('hides alerts badge when alertsCount is 0', () => {
@@ -212,5 +302,126 @@ describe('ServiceHeaderBadges', () => {
     const badge = screen.getByTestId('apmSloBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
+  });
+
+  it('shows anomalies badge when ML jobs can be read and a score is returned', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    renderBadges();
+
+    expect(screen.getByTestId('serviceHeaderAnomaliesBadge')).toBeInTheDocument();
+    expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
+  });
+
+  it('links the anomalies badge to the service overview tab', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    renderBadges();
+
+    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    expect(href).toContain('/services/test-service/overview');
+  });
+
+  it('renders the anomalies badge as non-interactive when the agent name is not yet resolved', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+      agentName: null,
+    });
+    renderBadges();
+
+    expect(screen.getByTestId('apmAnomaliesBadge').closest('a')).toBeNull();
+  });
+
+  it('hides anomalies badge when ML jobs cannot be read even if anomaly score data is present', () => {
+    setupMocks({
+      canReadMlJobs: false,
+      alertsCount: 0,
+      anomalyScore: 80,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    const { container } = renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('hides anomalies badge when ML can be read but no anomaly score is available', () => {
+    setupMocks({
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: undefined,
+      mostCriticalSloStatus: { status: 'noSLOs', count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    });
+    const { container } = renderBadges();
+
+    expect(screen.queryByTestId('serviceHeaderAnomaliesBadge')).not.toBeInTheDocument();
+    expect(container.firstChild).toBeNull();
+  });
+
+  describe('anomaly badge toggle behavior', () => {
+    const anomalySetup = {
+      canReadMlJobs: true,
+      alertsCount: 0,
+      anomalyScore: 82,
+      mostCriticalSloStatus: { status: 'noSLOs' as const, count: 0 },
+      sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
+    };
+
+    function getAnomalyBadgeSearchParams(): Record<string, string> {
+      const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+      return Object.fromEntries(new URLSearchParams(href!.split('?')[1]));
+    }
+
+    it('always targets expected bounds ON when not on the overview tab', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/transactions',
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+    });
+
+    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/overview',
+        comparisonEnabled: true,
+        offset: 'expected_bounds',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'false' });
+    });
+
+    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', () => {
+      setupMocks({
+        ...anomalySetup,
+        routePath: '/services/{serviceName}/overview',
+        comparisonEnabled: true,
+        offset: '1d',
+      });
+      renderBadges();
+
+      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+    });
   });
 });

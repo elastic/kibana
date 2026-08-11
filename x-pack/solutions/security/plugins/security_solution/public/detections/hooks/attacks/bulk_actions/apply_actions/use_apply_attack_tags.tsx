@@ -7,7 +7,9 @@
 
 import { useCallback } from 'react';
 
-import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { useSetAttacksTags } from '../../../../../common/containers/attacks/hooks/use_set_attacks_tags';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 import type { BaseApplyAttackProps } from '../types';
@@ -26,11 +28,21 @@ interface ApplyAttackTagsReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
-  const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
+  const { mutateAsync: setAttacksTags } = useSetAttacksTags();
   const showModalIfNeeded = useUpdateAttacksModal();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const applyTags = useCallback(
-    async ({ tags, attackIds, relatedAlertIds, setIsLoading, onSuccess }: ApplyAttackTagsProps) => {
+    async ({
+      tags,
+      attackIds,
+      relatedAlertIds,
+      setIsLoading,
+      onSuccess,
+      telemetrySource,
+    }: ApplyAttackTagsProps) => {
       // Show modal (if needed) and wait for user decision
       const result = await showModalIfNeeded({
         alertsCount: relatedAlertIds.length,
@@ -40,21 +52,27 @@ export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
         // User cancelled, don't proceed with update
         return;
       }
+
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionTagsUpdated, {
+          source: telemetrySource,
+          scope: result.updateAlerts ? 'attack_and_related_alerts' : 'attack_only',
+        });
+      }
+
       setIsLoading?.(true);
       try {
-        // Combine IDs based on user choice
-        const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-        await setUnifiedAlertsTags({
+        await setAttacksTags({
+          ids: attackIds,
           tags,
-          ids: allIds,
+          update_related_alerts: result.updateAlerts,
         });
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [setUnifiedAlertsTags, showModalIfNeeded]
+    [setAttacksTags, showModalIfNeeded, telemetry]
   );
 
   return { applyTags };

@@ -6,7 +6,8 @@
  */
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { ExecutionStatus } from '../types';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from '../persistence';
 import { AbortMonitor } from './abort_monitor';
 
@@ -54,6 +55,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.aborted,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,
@@ -84,6 +86,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.running,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,
@@ -111,6 +114,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.running,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,
@@ -147,6 +151,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.completed,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,
@@ -181,6 +186,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.failed,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,
@@ -215,6 +221,7 @@ describe('AbortMonitor', () => {
       '@timestamp': new Date().toISOString(),
       status: ExecutionStatus.aborted,
       agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
       eventCount: 0,

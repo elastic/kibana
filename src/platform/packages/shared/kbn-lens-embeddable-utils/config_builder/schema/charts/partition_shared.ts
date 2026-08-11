@@ -7,47 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import type { ColorMappingType, StaticColorType } from '../color';
+import { z } from '@kbn/zod';
+import { isEqual } from 'lodash';
+import type { AutoColorType, ColorMappingType, StaticColorType } from '../color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../color';
 import { groupIsNotCollapsed } from '../../utils';
 
-export const legendVisibleSchema = schema.maybe(
-  schema.oneOf([schema.literal('auto'), schema.literal('show'), schema.literal('hide')], {
-    meta: { description: 'Legend visibility: auto, show, or hide' },
-  })
-);
+/**
+ * A grouping dimension is only considered to have an explicit coloring assignment when its color
+ * differs from the default categorical mapping that the schema applies to every breakdown dimension.
+ * Without this check, the auto-applied default would make every dimension look "colored" and the
+ * single-dimension coloring rules below could never be satisfied for multi-breakdown charts.
+ */
+function hasAssignedColoring(color?: ColorMappingType): boolean {
+  return color != null && !isEqual(color, DEFAULT_CATEGORICAL_COLOR_MAPPING);
+}
 
-export const valueDisplaySchema = schema.maybe(
-  schema.object(
-    {
-      mode: schema.oneOf(
-        [schema.literal('hidden'), schema.literal('absolute'), schema.literal('percentage')],
-        { meta: { description: 'Value display mode: hidden, absolute, or percentage' } }
-      ),
-      percent_decimals: schema.maybe(
-        schema.number({
-          defaultValue: 2,
-          min: 0,
-          max: 10,
-          meta: { description: 'Decimal places for percentage display (0-10)' },
-        })
-      ),
-    },
-    { meta: { description: 'Configuration for displaying values in chart cells' } }
-  )
-);
-
-export const legendNestedSchema = schema.maybe(
-  schema.boolean({
-    defaultValue: false,
-    meta: { description: 'Show nested legend with hierarchical breakdown levels' },
+export const valueDisplaySchema = z
+  .object({
+    visible: z.boolean().optional().meta({ description: 'Show metric values on the chart' }),
+    mode: z
+      .union([z.literal('absolute'), z.literal('percentage')])
+      .optional()
+      .meta({
+        description: 'How to format values when visible.',
+      }),
+    percent_decimals: z
+      .number()
+      .min(0)
+      .max(10)
+      .default(2)
+      .optional()
+      .meta({ description: 'Decimal places for percentage display (0-10)' }),
   })
-);
+  .strict()
+  .optional()
+  .meta({
+    id: 'valueDisplay',
+    description:
+      'Configure the visibility and the format of the values rendered on each chart partition section',
+  });
+
+export const legendNestedSchema = z
+  .boolean()
+  .default(false)
+  .optional()
+  .meta({ description: 'Show nested legend with hierarchical breakdown levels' });
 
 export type PartitionMetric =
   | {}
   | {
-      color?: StaticColorType;
+      color?: StaticColorType | AutoColorType;
     };
 export interface PartitionGroupBy {
   collapse_by?: string;
@@ -69,7 +79,7 @@ export function validateColoringAssignments({
     // if (group_by.length && hasStaticColoring) {
     //   return 'Coloring cannot be assigned to metric dimensions when grouping dimensions are defined.';
     // }
-    const breakdownsWithColoring = group_by.filter((def) => def.color != null);
+    const breakdownsWithColoring = group_by.filter((def) => hasAssignedColoring(def.color));
     if (breakdownsWithColoring.length > 1) {
       return 'Coloring can only be assigned to a single grouping dimension.';
     }

@@ -30,6 +30,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
+      summary: 'Reset all preconfigured agent policies',
+      description:
+        'Reset all preconfigured agent policies to their original preconfigured state, removing any user modifications.',
     })
     .addVersion(
       {
@@ -53,6 +56,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
+      summary: 'Reset one preconfigured agent policy',
+      description:
+        'Reset a single preconfigured agent policy to its original preconfigured state by ID, removing any user modifications.',
     })
     .addVersion(
       {

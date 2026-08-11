@@ -15,17 +15,26 @@ import type {
   ActionResultsRequestOptions,
 } from './actions';
 import type { ResultsStrategyResponse, ResultsRequestOptions } from './results';
+import type {
+  ScheduledActionResultsStrategyResponse,
+  ScheduledActionResultsRequestOptions,
+} from './scheduled_action_results';
+import type { ExportResultsStrategyResponse, ExportResultsRequestOptions } from './export_results';
 
 import type { SortField, PaginationInputPaginated } from '../common';
 
 export type * from './actions';
 export type * from './results';
+export type * from './scheduled_action_results';
+export type * from './export_results';
 
 export enum OsqueryQueries {
   actions = 'actions',
   actionDetails = 'actionDetails',
   actionResults = 'actionResults',
   results = 'results',
+  scheduledActionResults = 'scheduledActionResults',
+  exportResults = 'osquery.exportResults',
 }
 
 export type FactoryQueryTypes = OsqueryQueries;
@@ -34,6 +43,13 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   kuery?: string;
   factoryQueryType?: FactoryQueryTypes;
   componentTemplateExists?: boolean;
+  ccsEnabled?: boolean;
+  /**
+   * When false, default-space reads match only documents with an explicit
+   * `space_id: default` stamp. Used for URL-supplied agent-index reads under CPS
+   * that lack a Kibana-metadata gate.
+   */
+  matchMissingSpaceId?: boolean;
 }
 
 /** A mapping of semantic fields to their document counterparts */
@@ -53,6 +69,10 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends Osquer
   ? ActionResultsStrategyResponse
   : T extends OsqueryQueries.results
   ? ResultsStrategyResponse
+  : T extends OsqueryQueries.scheduledActionResults
+  ? ScheduledActionResultsStrategyResponse
+  : T extends OsqueryQueries.exportResults
+  ? ExportResultsStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends OsqueryQueries.actions
@@ -63,4 +83,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends Osquery
   ? ActionResultsRequestOptions
   : T extends OsqueryQueries.results
   ? ResultsRequestOptions
+  : T extends OsqueryQueries.scheduledActionResults
+  ? ScheduledActionResultsRequestOptions
+  : T extends OsqueryQueries.exportResults
+  ? ExportResultsRequestOptions
   : never;

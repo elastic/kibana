@@ -10,9 +10,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
+import { assertDiscoverHasData } from '../lib/validation_helpers';
 
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page, onboardingHomePage }) => {
   await page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding`);
+  await onboardingHomePage.maybeClickIntroducingAIAgentModalContinueBtn();
 });
 
 test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOverviewPage }) => {
@@ -45,12 +47,23 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
   fs.writeFileSync(outputPath, codeSnippet);
 
   /**
-   * There is no explicit data ingest indication
-   * in the flow, so we need to rely on a timeout.
-   * 3 minutes should be enough for the collector
-   * to initialize and start ingesting data.
+   * The page waits for the browser window to lose
+   * focus as a signal to start checking for incoming data
    */
-  await page.waitForTimeout(3 * 60000);
+  await page.evaluate('window.dispatchEvent(new Event("blur"))');
+
+  /**
+   * Wait for the data received indicator to appear.
+   * The flow polls for data after the blur event and
+   * shows "We are monitoring your host" once data arrives.
+   */
+  await otelHostFlowPage.assertDataReceivedIndicator();
+
+  /**
+   * Additional buffer to ensure data has propagated
+   * to dashboards and Discover before navigating.
+   */
+  await page.waitForTimeout(2 * 60000);
 
   if (!isLogsEssentialsMode) {
     await otelHostFlowPage.clickHostsOverviewCTA();
@@ -58,10 +71,6 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
     await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
   } else {
     await otelHostFlowPage.clickLogsExplorationCTA();
-
-    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
-    const discoverValidation = new DiscoverValidationPage(page);
-    await discoverValidation.waitForDiscoverToLoad();
-    await discoverValidation.assertHasAnyLogData();
+    await assertDiscoverHasData(page);
   }
 });

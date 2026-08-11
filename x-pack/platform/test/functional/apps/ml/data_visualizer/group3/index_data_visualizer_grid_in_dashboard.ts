@@ -11,7 +11,6 @@ import { farequoteLuceneFiltersSearchTestData } from '../index_test_data';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -24,7 +23,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const filterBar = getService('filterBar');
 
+  const PINNED_FILTER = {
+    key: 'type.keyword',
+    value: 'farequote',
+  };
   function runTests(testData: TestData) {
     const savedSearchTitle = `Field stats for ${testData.suiteTitle} ${Date.now()}`;
     const dashboardTitle = `Dashboard for ${testData.suiteTitle} ${Date.now()}`;
@@ -88,6 +92,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             fieldRow.exampleContent
           );
         }
+        await filterBar.addFilter({
+          field: PINNED_FILTER.key,
+          operation: 'is not',
+          value: PINNED_FILTER.value,
+        });
+        await ml.dataVisualizerTable.assertNonMetricFieldContents(
+          'text',
+          '@version',
+          '0 (0%)',
+          0,
+          false
+        );
+        await filterBar.removeFilter(PINNED_FILTER.key);
 
         await PageObjects.dashboard.saveDashboard(dashboardTitle);
       });
@@ -112,7 +129,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('field statistics in Dashboard', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.securityUI.loginAsMlPowerUser();

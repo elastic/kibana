@@ -1,0 +1,27 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getAgentUploadsExample:
+            description: 'List of files uploaded by the agent'
+            value:
+              items:
+                - id: 'file-id-1'
+                  name: 'diagnostics-2024-01-01.zip'
+                  filePath: '/tmp/diagnostics-2024-01-01.zip'
+                  createTime: '2024-01-01T00:00:00.000Z'
+                  status: 'READY'
+                  actionId: 'action-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -11,6 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
@@ -47,7 +48,13 @@ jest.mock('../../../../../hooks', () => ({
   useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
 }));
 
+import { useGetPackageInstallStatus } from '../../../../../hooks';
+
 import { AlertingPage } from './alerting_page';
+
+const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.MockedFunction<
+  typeof useGetPackageInstallStatus
+>;
 
 describe('AlertingPage', () => {
   const basePackageInfo = {
@@ -88,6 +95,11 @@ describe('AlertingPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+      status: InstallStatus.installed,
+      version: '1.0.0',
+    }));
 
     mockUseAlertingAssets.mockReturnValue({
       alertingAssets: [
@@ -309,7 +321,7 @@ describe('AlertingPage', () => {
       expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
     });
 
-    it('should not show callout when inactivity template exists', async () => {
+    it('should not show callout when inactivity template exists in default space', async () => {
       mockExperimentalFeaturesGet.mockReturnValue({
         enableIntegrationInactivityAlerting: true,
       });
@@ -335,6 +347,58 @@ describe('AlertingPage', () => {
             },
             'fleet-system-inactivity-monitoring': {
               id: 'fleet-system-inactivity-monitoring',
+              type: 'alerting_rule_template',
+              attributes: { title: '[System] Idle data streams' },
+            },
+          },
+        },
+        userCreatedRules: [],
+        isLoading: false,
+        fetchError: undefined,
+        refetch: jest.fn(),
+      });
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText('[System] Template')).toBeInTheDocument();
+      });
+
+      expect(screen.queryByText('Idle data streams alerting available')).not.toBeInTheDocument();
+    });
+
+    it('should not show callout when space-specific inactivity template exists', async () => {
+      mockExperimentalFeaturesGet.mockReturnValue({
+        enableIntegrationInactivityAlerting: true,
+      });
+
+      mockUseAlertingAssets.mockReturnValue({
+        alertingAssets: [
+          { id: 'template-1', type: 'alerting_rule_template' },
+          {
+            id: 'fleet-system-inactivity-monitoring-my-space',
+            type: 'alerting_rule_template',
+          },
+        ],
+        alertingAssetsByType: {
+          alerting_rule_template: [
+            { id: 'template-1', type: 'alerting_rule_template' },
+            {
+              id: 'fleet-system-inactivity-monitoring-my-space',
+              type: 'alerting_rule_template',
+            },
+          ],
+        },
+        deferredAlerts: [],
+        assetSavedObjectsByType: {
+          alerting_rule_template: {
+            'template-1': {
+              id: 'template-1',
+              type: 'alerting_rule_template',
+              attributes: { title: '[System] Template' },
+            },
+            'fleet-system-inactivity-monitoring-my-space': {
+              id: 'fleet-system-inactivity-monitoring-my-space',
               type: 'alerting_rule_template',
               attributes: { title: '[System] Idle data streams' },
             },
@@ -404,5 +468,16 @@ describe('AlertingPage', () => {
 
     const fleetRuleElements = screen.getAllByText('[System] Fleet rule');
     expect(fleetRuleElements).toHaveLength(1);
+  });
+
+  it('should not redirect to overview when package type is input', async () => {
+    const inputPackageInfo = { ...basePackageInfo, type: 'input' as const };
+    renderComponent(inputPackageInfo);
+
+    await waitFor(() => {
+      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('fleetAlertingReinstallButton')).toBeInTheDocument();
   });
 });

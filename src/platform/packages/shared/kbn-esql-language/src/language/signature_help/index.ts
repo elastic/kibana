@@ -8,9 +8,9 @@
  */
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { Parser } from '../../parser';
-import { within, Walker } from '../../ast';
-import type { ESQLFunction } from '../../types';
+import { Parser } from '@elastic/esql';
+import { within, Walker } from '@elastic/esql';
+import type { ESQLFunction } from '@elastic/esql/types';
 import {
   getFormattedFunctionSignature,
   getFunctionDefinition,

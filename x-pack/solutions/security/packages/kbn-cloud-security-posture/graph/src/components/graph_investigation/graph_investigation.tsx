@@ -12,19 +12,14 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
-import { Callout } from '../callout/callout';
+import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
-import { useGraphCallout } from '../../hooks/use_graph_callout';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
 import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
@@ -34,33 +29,22 @@ import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import {
-  CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
-  addFilter,
-  getFilterValues,
-} from './search_filters';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
+import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  dataViewId,
-  searchFilters,
-  setSearchFilters,
-  nodeDetailsClickHandler,
+  scopeId,
+  onOpenEventPreview,
   onOpenNetworkPreview,
-  expandedEntityIds,
-  onToggleEntityRelationships,
 }: {
-  dataViewId: string;
-  searchFilters: Filter[];
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  nodeDetailsClickHandler?: (node: NodeProps) => void;
+  scopeId: string;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
-  expandedEntityIds: Set<string>;
-  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -68,20 +52,8 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler,
-    expandedEntityIds,
-    onToggleEntityRelationships
-  );
-  const labelExpandPopover = useLabelNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
@@ -162,6 +134,12 @@ const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
 
 export interface GraphInvestigationProps {
   /**
+   * Unique identifier for this graph instance, used to scope filter state.
+   * When multiple graphs are open simultaneously, each should have a distinct scopeId.
+   */
+  scopeId: string;
+
+  /**
    * The initial state to use for the graph investigation view.
    */
   initialState: {
@@ -211,6 +189,13 @@ export interface GraphInvestigationProps {
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
+
+    /**
+     * CPS project routing for the logs/events query. Forwarded as-is to the Graph API.
+     * Alerts and entity-store enrichment are always fetched from the origin project,
+     * regardless of this value. Leave undefined for non-CPS environments.
+     */
+    projectRouting?: ProjectRouting;
   };
 
   /**
@@ -252,12 +237,14 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
+    scopeId,
     initialState: {
       indexPatterns,
       dataView,
       originEventIds,
       entityIds,
       timeRange: initialTimeRange,
+      projectRouting,
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
@@ -265,7 +252,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const emptyEntityIds = useMemo(() => [], []);
+
+    const { searchFilters, setSearchFilters, entityIdsForApi, pinnedEuids } = useGraphFilters(
+      scopeId,
+      entityIds ?? emptyEntityIds,
+      dataView?.id ?? ''
+    );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -273,32 +266,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
-
-    // Track which entities have their relationships expanded
-    const [expandedEntityIds, setExpandedEntityIds] = useState<Set<string>>(() => new Set());
-
-    // Convert expandedEntityIds Set to API format
-    const entityIdsForApi = useMemo(() => {
-      if (expandedEntityIds.size === 0) return undefined;
-
-      return Array.from(expandedEntityIds).map((id) => ({
-        id,
-        isOrigin: false, // User-expanded entities are not the graph origin
-      }));
-    }, [expandedEntityIds]);
-
-    // Toggle handler for entity relationships
-    const onToggleEntityRelationships = useCallback((node: NodeProps, action: 'show' | 'hide') => {
-      setExpandedEntityIds((prev) => {
-        const next = new Set(prev);
-        if (action === 'show') {
-          next.add(node.id);
-        } else {
-          next.delete(node.id);
-        }
-        return next;
-      });
-    }, []);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -347,13 +314,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return lastValidEsQuery.current;
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
-    const pinnedIds = useMemo(() => {
-      return getFilterValues(searchFilters, [
-        ...GRAPH_ACTOR_ENTITY_FIELDS,
-        ...GRAPH_TARGET_ENTITY_FIELDS,
-      ]).map(String);
-    }, [searchFilters]);
-
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
       req: {
         query: {
@@ -363,7 +323,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           start: timeRange.from,
           end: timeRange.to,
           entityIds: entityIdsForApi,
-          pinnedIds,
+          pinnedIds: pinnedEuids,
+          projectRouting,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -380,13 +341,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    const nodeDetailsClickHandler = useCallback(
-      (node: NodeProps) => {
-        onOpenEventPreview?.(node.data);
-      },
-      [onOpenEventPreview]
-    );
-
     const {
       nodeExpandPopover,
       labelExpandPopover,
@@ -398,13 +352,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createCountryClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
-      dataViewId: dataView?.id ?? '',
-      searchFilters,
-      setSearchFilters,
-      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      scopeId,
+      onOpenEventPreview,
       onOpenNetworkPreview,
-      expandedEntityIds,
-      onToggleEntityRelationships,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
@@ -418,6 +368,51 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       countryFlagsPopover,
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
+
+    // d3-zoom suppresses native `mousedown`/`mouseup` on the ReactFlow pane,
+    // so `react-focus-on` (EuiPopover) and `EuiOutsideClickDetector` (KQL
+    // autocomplete) never see the click. Synthesize both events on the
+    // graph container in capture phase (before d3-zoom) so they reach those
+    // detectors but stay "inside" the parent EuiFlyout. Graph-internal
+    // popovers own their own dismissal and are mutually exclusive with
+    // external ones — when any is open, every `.euiPopover__panel` is ours.
+    const isExternalOverlayOpen = useCallback(
+      () =>
+        (!isPopoverOpen && document.querySelector('.euiPopover__panel') !== null) ||
+        document.querySelector('#kbnTypeahead__items') !== null,
+      [isPopoverOpen]
+    );
+
+    const handlePointerDownCapture = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        const eventTarget = event.target as HTMLElement | null;
+        if (!eventTarget?.closest?.('.react-flow__pane')) return;
+
+        // The KQL search input grows to fit a long query while it is focused.
+        // d3-zoom calls `preventDefault()` on the pane's pointer events, which
+        // suppresses the browser's native focus change — so clicking the graph
+        // would otherwise leave the input focused and expanded. Blur it
+        // explicitly so it collapses back to a single line, matching what
+        // happens when clicking any other DOM node outside the input.
+        const activeElement = document.activeElement as HTMLElement | null;
+        const isSearchInputFocused = Boolean(activeElement?.closest?.('.kbnQueryBar__wrap'));
+        if (isSearchInputFocused) {
+          activeElement?.blur();
+        }
+
+        // Synthesize the suppressed `mousedown`/`mouseup` on the graph container
+        // in capture phase (before d3-zoom) so `EuiOutsideClickDetector` (which
+        // collapses the search input and closes KQL autocomplete) and
+        // `react-focus-on` (EuiPopover) react to the click while it stays
+        // "inside" the parent EuiFlyout.
+        if (!isSearchInputFocused && !isExternalOverlayOpen()) return;
+
+        const opts = { bubbles: true, cancelable: true, view: window, button: 0 };
+        event.currentTarget.dispatchEvent(new MouseEvent('mousedown', opts));
+        event.currentTarget.dispatchEvent(new MouseEvent('mouseup', opts));
+      },
+      [isExternalOverlayOpen]
+    );
 
     const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
@@ -468,8 +463,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const isOrigin = originEntityIdsSet.has(node.id);
             return {
               ...node,
+              ...(isOrigin && { isOrigin }),
               expandButtonClick: nodeExpandButtonClickHandler,
               ipClickHandler: createIpClickHandler(nodeIps),
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
@@ -519,12 +516,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       relationshipNodeSources,
     ]);
 
-    // Get callout state based on current graph state
-    const calloutState = useGraphCallout(nodes);
-
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
-        .filter((filter) => !filter.meta.disabled)
+        .filter((filter) => filter.meta && !filter.meta.disabled)
         .reduce((sum, filter) => {
           if (isCombinedFilter(filter)) {
             return sum + filter.meta.params.length;
@@ -540,6 +534,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
+          filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
           filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
@@ -553,6 +548,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
+          onPointerDownCapture={handlePointerDownCapture}
           css={css`
             height: 100%;
 
@@ -613,18 +609,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
-              interactiveBottomRightContent={
-                calloutState.shouldShowCallout ? (
-                  <EuiFlexItem grow={false}>
-                    <Callout
-                      title={calloutState.config.title}
-                      message={calloutState.config.message}
-                      links={calloutState.config.links}
-                      onDismiss={calloutState.onDismiss}
-                    />
-                  </EuiFlexItem>
-                ) : null
-              }
             >
               <Panel position="top-right">
                 <Actions

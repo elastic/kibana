@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { snakeCase } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
@@ -21,7 +21,8 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getBooleanParam,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -125,11 +126,9 @@ export const cardinalityOperation: OperationDefinition<
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
         ...getFormatFromPreviousColumn(previousColumn),
-        emptyAsNull:
-          previousColumn &&
-          isColumnOfType<CardinalityIndexPatternColumn>('unique_count', previousColumn)
-            ? previousColumn.params?.emptyAsNull
-            : !columnParams?.usedInMath,
+        emptyAsNull: hasOperationType(previousColumn, 'unique_count')
+          ? getBooleanParam(previousColumn, 'emptyAsNull')
+          : !columnParams?.usedInMath,
       },
     };
   },
@@ -174,13 +173,10 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
-    // Use columnId to make param name unique
-    const paramKey = `field_${snakeCase(columnId)}`;
     return {
-      template: `COUNT_DISTINCT(??${paramKey})`,
-      params: { [paramKey]: column.sourceField },
+      template: `COUNT_DISTINCT(${esql.col(column.sourceField)})`,
     };
   },
   toEsAggsFn: (column, columnId) => {

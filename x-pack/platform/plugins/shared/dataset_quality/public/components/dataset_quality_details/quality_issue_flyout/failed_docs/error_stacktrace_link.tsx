@@ -40,7 +40,7 @@ export const ErrorStacktraceLink = ({ errorType }: { errorType: string }) => {
   return (
     <EuiButton
       color="text"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       target="_blank"
       size="s"

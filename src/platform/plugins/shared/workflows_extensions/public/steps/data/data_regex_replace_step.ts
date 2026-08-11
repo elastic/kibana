@@ -14,7 +14,7 @@ import { createPublicStepDefinition } from '../../step_registry/types';
 export const dataRegexReplaceStepDefinition = createPublicStepDefinition({
   ...dataRegexReplaceStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/asterisk').then(({ icon }) => ({
       default: icon,
     }))
   ),

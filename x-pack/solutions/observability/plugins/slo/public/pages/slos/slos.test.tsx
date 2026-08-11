@@ -26,12 +26,17 @@ import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
+import { useFetchActiveAlerts } from '../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../hooks/use_fetch_rules_for_slo';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
+import { useHasSlos } from '../../hooks/use_has_slos';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
+import { useSpace } from '../../hooks/use_space';
 import { render } from '../../utils/test_helper';
 import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_clone_state';
 import { useGetSettings } from '../slo_settings/hooks/use_get_settings';
@@ -49,17 +54,28 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
+jest.mock('../../hooks/use_composite_slo_enabled', () => ({
+  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
+}));
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_fetch_slo_definitions');
+jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_create_slo');
 jest.mock('../slo_settings/hooks/use_get_settings');
 jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
+jest.mock('../../hooks/use_fetch_active_alerts');
 jest.mock('../../hooks/use_fetch_historical_summary');
+jest.mock('../../hooks/use_fetch_rules_for_slo');
+jest.mock('../../hooks/use_get_filtered_rule_types');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('../../hooks/use_space');
 jest.mock('./components/slo_list_search_bar');
+jest.mock('./components/slo_sparkline', () => ({
+  SloSparkline: () => <div data-test-subj="mockedSparkline" />,
+}));
 jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
@@ -67,11 +83,16 @@ const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useFetchSloListMock = useFetchSloList as jest.Mock;
 const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
+const useHasSlosMock = useHasSlos as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useDeleteSloInstanceMock = useDeleteSloInstance as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
+const useFetchRulesForSloMock = useFetchRulesForSlo as jest.Mock;
+const useGetFilteredRuleTypesMock = useGetFilteredRuleTypes as jest.Mock;
+const useSpaceMock = useSpace as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
@@ -89,6 +110,10 @@ useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
 useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
 useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
 useCreateDataViewMock.mockReturnValue({});
+useFetchActiveAlertsMock.mockReturnValue({ data: new Map() });
+useFetchRulesForSloMock.mockReturnValue({ data: {} });
+useGetFilteredRuleTypesMock.mockReturnValue([]);
+useSpaceMock.mockReturnValue('default');
 
 const mockNavigate = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -211,7 +236,7 @@ describe('SLOs Page', () => {
         isLoading: false,
         data: emptySloDefinitionList,
       });
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
@@ -233,9 +258,11 @@ describe('SLOs Page', () => {
   describe('when the correct license is found', () => {
     beforeEach(() => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      useHasSlosMock.mockReturnValue({ hasSlos: true, isLoading: false, isError: false });
     });
 
     it('redirects to the SLOs Welcome Page when the API has finished loading and there are no results', async () => {
+      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       useFetchSloDefinitionsMock.mockReturnValue({
         isLoading: false,
         data: emptySloDefinitionList,
@@ -291,10 +318,7 @@ describe('SLOs Page', () => {
       expect(screen.getByText('Create SLO')).toBeTruthy();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/239819
-    // FLAKY: https://github.com/elastic/kibana/issues/253564
-    // FLAKY: https://github.com/elastic/kibana/issues/254484
-    describe.skip('when API has returned results', () => {
+    describe('when API has returned results', () => {
       const setupSloListView = async () => {
         useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
         useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });

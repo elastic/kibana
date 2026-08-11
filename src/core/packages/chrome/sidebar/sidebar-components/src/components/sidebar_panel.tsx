@@ -12,7 +12,7 @@ import React, { useCallback, useId, useLayoutEffect, useMemo, useRef } from 'rea
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiShadow } from '@elastic/eui';
 import { getHighContrastBorder } from '@kbn/core-chrome-layout-utils';
-import { useLayoutConfig } from '@kbn/core-chrome-layout-components';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -87,7 +87,7 @@ const useFocusRescue = () => {
  * the panel's heading ID for aria-labelledby via {@link useSidebarPanel}.
  */
 export const SidebarPanel: FC<SidebarPanelProps> = ({ children }) => {
-  const { chromeStyle } = useLayoutConfig();
+  const chromeStyle = useChromeStyle();
   const headingId = useId();
   const { asideRef, setOnFocusRescue } = useFocusRescue();
   const contextValue = useMemo<SidebarPanelContextValue>(

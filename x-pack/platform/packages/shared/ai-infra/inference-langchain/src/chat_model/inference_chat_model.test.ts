@@ -6,7 +6,7 @@
  */
 
 import { of, Observable } from 'rxjs';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import {
   AIMessage,
@@ -39,6 +39,8 @@ const createConnector = (parts: Partial<InferenceConnector> = {}): InferenceConn
     name: 'My connector',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };
@@ -689,7 +691,9 @@ describe('InferenceChatModel', () => {
       });
 
       expect(concatChunk.usage_metadata).toEqual({
+        input_token_details: {},
         input_tokens: 5,
+        output_token_details: {},
         output_tokens: 20,
         total_tokens: 25,
       });

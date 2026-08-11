@@ -5,39 +5,27 @@
  * 2.0.
  */
 
-import { significantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/significant_item_groups';
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
-import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
 import { groupDuplicates } from './fetch_frequent_item_sets';
-import { getFieldValuePairCounts } from './get_field_value_pair_counts';
-import { getMarkedDuplicates } from './get_marked_duplicates';
-import { getMissingSignificantItems } from './get_missing_significant_items';
 import { transformSignificantItemToGroup } from './transform_significant_item_to_group';
 
-describe('getMissingSignificantItems', () => {
-  it('get missing significant items', () => {
+describe('transformSignificantItemToGroup', () => {
+  it('transforms a significant item into a standalone group', () => {
     const groupedSignificantItems = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(significantItemGroups);
-    const markedDuplicates = getMarkedDuplicates(significantItemGroups, fieldValuePairCounts);
-    const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
-      markedDuplicates,
-      groupedSignificantItems
+    const significantItem = significantTerms.find(
+      ({ fieldName, fieldValue }) => fieldName === 'user' && fieldValue === 'Peter'
     );
+    expect(significantItem).toBeDefined();
+    if (!significantItem) {
+      throw new Error('Expected user:Peter significant item to exist');
+    }
 
-    const missingSignificantItems = getMissingSignificantItems(
-      significantTerms,
-      groupsWithReaddedDuplicates
-    );
-
-    const transformed = transformSignificantItemToGroup(
-      missingSignificantItems[0],
-      groupedSignificantItems
-    );
+    const transformed = transformSignificantItemToGroup(significantItem, groupedSignificantItems);
 
     expect(transformed).toEqual({
       docCount: 1981,

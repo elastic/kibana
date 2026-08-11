@@ -17,9 +17,10 @@ import { useCascadeTable, useAdaptedTableRows, type TableProps } from '.';
 describe('table', () => {
   const createHookWrapper = ({
     children,
+    data = [],
     helper: Helper = React.Fragment,
-  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren> }>) => (
-    <DataCascadeProvider cascadeGroups={[]}>
+  }: PropsWithChildren<{ helper?: React.FC<PropsWithChildren>; data?: GroupNode[] }>) => (
+    <DataCascadeProvider data={data} cascadeGroups={[]}>
       <Helper>{children}</Helper>
     </DataCascadeProvider>
   );
@@ -38,19 +39,18 @@ describe('table', () => {
       const { result } = renderHook(useCascadeTable, {
         wrapper: createHookWrapper,
         initialProps: {
-          initialData: [],
           allowMultipleRowToggle: false,
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current).toHaveProperty('headerColumns');
       expect(result.current).toHaveProperty('rows');
     });
 
-    it('table rows value and length is derived from the `initialData` prop', () => {
+    it('table rows value and length is derived from the provider data', () => {
       const data = Array.from(new Array(10)).map((_, index) => ({
         id: String(index),
         name: `Item ${index}`,
@@ -60,15 +60,15 @@ describe('table', () => {
         wrapper: ({ children }) =>
           createHookWrapper({
             children,
+            data,
             helper: TestHelper,
           }),
         initialProps: {
-          initialData: data,
           allowMultipleRowToggle: false,
           enableRowSelection: false,
           header: jest.fn(),
           rowCell: jest.fn(),
-        } as TableProps<GroupNode, unknown>,
+        } satisfies TableProps<GroupNode, unknown>,
       });
 
       expect(result.current.rows.length).toBe(data.length);
@@ -85,15 +85,15 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: true,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         expect(Object.keys(cascadeState.table.expanded ?? {})).toHaveLength(0);
@@ -116,15 +116,15 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded
@@ -153,15 +153,15 @@ describe('table', () => {
           wrapper: ({ children }) =>
             createHookWrapper({
               children,
+              data,
               helper: TestHelper,
             }),
           initialProps: {
-            initialData: data,
             allowMultipleRowToggle: false,
             enableRowSelection: false,
             header: jest.fn(),
             rowCell: jest.fn(),
-          } as TableProps<GroupNode, unknown>,
+          } satisfies TableProps<GroupNode, unknown>,
         });
 
         // Initially no rows should be expanded

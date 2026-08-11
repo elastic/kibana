@@ -30,7 +30,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -42,7 +42,6 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
-  OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT,
 } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
@@ -68,7 +67,7 @@ export interface ObservabilityOnboardingPluginStartDeps {
   fleet: FleetStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  streams?: StreamsPluginStart;
+  ingestHub?: IngestHubStart;
 }
 
 export type ObservabilityOnboardingContextValue = CoreStart &
@@ -121,7 +120,7 @@ export class ObservabilityOnboardingPlugin
           },
         });
       },
-      visibleIn: ['globalSearch'],
+      visibleIn: ['globalSearch', 'projectSideNav'],
     });
 
     this.locators = {
@@ -135,14 +134,27 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
     );
-    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT);
 
     return {
       locators: this.locators,
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public start(_core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
+  public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+    if (plugins.ingestHub) {
+      const { registerIngestFlows } = await import('./ingest_hub/register_ingest_flows');
+      registerIngestFlows(core, plugins);
+    }
+
+    const { getLazyElbLogsCloudForwarderExtension } = await import(
+      './fleet_extensions/elb_logs_cloud_forwarder'
+    );
+    plugins.fleet.registerExtension({
+      package: 'aws_cloudwatch_input_otel',
+      view: 'package-policy-create-bottom',
+      Component: getLazyElbLogsCloudForwarderExtension(core),
+    });
+
     return {
       locators: this.locators,
     };

@@ -19,9 +19,12 @@ export interface ClientSearchRequest<SearchRuntimeMappings extends BaseSearchRun
   track_total_hits?: boolean | number;
   size?: number;
   /**
-   * Optional space identifier. When provided, results are filtered to only include
-   * documents belonging to this space. When undefined, only space-agnostic documents
-   * are returned.
+   * Optional space identifier. Controls which documents are included in the search:
+   * - When undefined: only space-agnostic documents (no `kibana.space_ids` field) are returned.
+   * -  `default` space **is distinct** from space-agnostic (`undefined`). It should be used to fulfil the same role as `default` space saved objects. Please note: no space authorization checks are performed in this client.
+   * - When any other space: only documents belonging to that space are returned.
+   *
+   * The `kibana.space_ids` field is a system-managed property and is stripped from `_source` in all responses.
    */
   space?: string;
 }
@@ -41,8 +44,9 @@ export type ClientCreateRequest<TDocument> = Omit<
    */
   documents: Array<{ _id?: string } & TDocument>;
   /**
-   * Optional space identifier. When provided, prefixes document IDs and decorates
-   * documents with kibana.space_ids. When undefined, rejects space-prefixed IDs.
+   * Optional space identifier. When provided (including `'default'`), document IDs are
+   * prefixed as `{space}::{id}` and documents are decorated with `kibana.space_ids: [space]`.
+   * When undefined, no ID prefixing or decoration is applied.
    */
   space?: string;
 };

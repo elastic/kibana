@@ -15,7 +15,7 @@ import { RuleGapSummaryChart } from './rule_gap_summary_chart';
 import { SECTION_MIN_WIDTH } from './constants';
 
 export const RulesWithGapsOverviewPanel = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const handleToggleExpand = useCallback(() => {
     setIsExpanded((prev) => !prev);
@@ -26,7 +26,7 @@ export const RulesWithGapsOverviewPanel = () => {
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={handleToggleExpand}
             aria-expanded={isExpanded}
             flush="left"

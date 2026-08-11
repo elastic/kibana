@@ -185,10 +185,10 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
           "invalid params: [
             {
               \\"code\\": \\"custom\\",
-              \\"message\\": \\"Invalid timezone\\",
               \\"path\\": [
                 \\"browserTimezone\\"
-              ]
+              ],
+              \\"message\\": \\"Invalid timezone\\"
             }
           ]"
         `)
@@ -239,7 +239,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },
@@ -280,7 +280,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },

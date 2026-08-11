@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
@@ -15,6 +16,7 @@ describe('StepExecutionRepository', () => {
     index: jest.Mock;
     update: jest.Mock;
     bulk: jest.Mock;
+    mget: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock };
   };
 
@@ -23,12 +25,13 @@ describe('StepExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       bulk: jest.fn(),
+      mget: jest.fn(),
       indices: {
         exists: jest.fn().mockResolvedValue(false),
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    underTest = new StepExecutionRepository(esClient as any);
+    underTest = new StepExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('bulkUpsert', () => {
@@ -54,11 +57,11 @@ describe('StepExecutionRepository', () => {
         refresh: false,
         index: expect.any(String),
         body: [
-          { update: { _id: 'step-1' } },
+          { update: { _id: 'step-1', retry_on_conflict: 3 } },
           { doc: stepExecutions[0], doc_as_upsert: true },
-          { update: { _id: 'step-2' } },
+          { update: { _id: 'step-2', retry_on_conflict: 3 } },
           { doc: stepExecutions[1], doc_as_upsert: true },
-          { update: { _id: 'step-3' } },
+          { update: { _id: 'step-3', retry_on_conflict: 3 } },
           { doc: stepExecutions[2], doc_as_upsert: true },
         ],
       });
@@ -218,7 +221,10 @@ describe('StepExecutionRepository', () => {
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
         index: expect.any(String),
-        body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
+        body: [
+          { update: { _id: 'step-1', retry_on_conflict: 3 } },
+          { doc: stepExecutions[0], doc_as_upsert: true },
+        ],
       });
     });
 
@@ -271,6 +277,171 @@ describe('StepExecutionRepository', () => {
           refresh: false,
         })
       );
+    });
+  });
+
+  describe('getStepExecutionsByIds', () => {
+    it('should retrieve step executions by their IDs', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+          },
+          {
+            _id: 'step-2',
+            found: true,
+            _source: { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1', 'step-2'],
+      });
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+      ]);
+    });
+
+    it('should skip documents that were not found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 'test-step-1' } },
+          { _id: 'step-2', found: false },
+          { _id: 'step-3', found: true, _source: { id: 'step-3', stepId: 'test-step-3' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2', 'step-3']);
+
+      expect(result).toEqual([
+        { id: 'step-1', stepId: 'test-step-1' },
+        { id: 'step-3', stepId: 'test-step-3' },
+      ]);
+    });
+
+    it('should return empty array when no documents are found', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: false },
+          { _id: 'step-2', found: false },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should handle a single ID', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 'test-step-1', status: 'pending' },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1']);
+
+      expect(result).toEqual([{ id: 'step-1', stepId: 'test-step-1', status: 'pending' }]);
+    });
+
+    it('should skip documents where _source is missing', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: null },
+          { _id: 'step-2', found: true, _source: { id: 'step-2', stepId: 'test-step-2' } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1', 'step-2']);
+
+      expect(result).toEqual([{ id: 'step-2', stepId: 'test-step-2' }]);
+    });
+
+    it('should pass sourceIncludes as _source_includes to mget', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', output: { data: 'value' } } },
+        ],
+      });
+
+      await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+        _source_includes: ['id', 'output'],
+      });
+    });
+
+    it('should not include _source_includes when sourceIncludes is undefined', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1']);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+      });
+    });
+
+    it('should not include _source_includes when sourceIncludes is empty', async () => {
+      esClient.mget.mockResolvedValue({ docs: [] });
+
+      await underTest.getStepExecutionsByIds(['step-1'], []);
+
+      expect(esClient.mget).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ids: ['step-1'],
+      });
+    });
+
+    it('normalises missing output to null when output is in the projection', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' /* no output */ } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(result[0].output).toBeNull();
+    });
+
+    it('does not invent an output field when output is not in the projection', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [{ _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' } }],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'stepId']);
+
+      expect('output' in result[0]).toBe(false);
+    });
+
+    it('preserves a legitimate null output (FAILED step)', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 't', output: null },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(result[0].output).toBeNull();
     });
   });
 });

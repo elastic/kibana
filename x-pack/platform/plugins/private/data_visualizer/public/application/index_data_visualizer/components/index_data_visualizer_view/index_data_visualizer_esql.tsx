@@ -11,7 +11,11 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
-import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
+import {
+  FullTimeRangeSelector,
+  DatePickerWrapper,
+  mlTimefilterRefresh$,
+} from '@kbn/ml-date-picker';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
@@ -221,6 +225,13 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     },
     [resetData]
   );
+
+  useEffect(() => {
+    const subscription = services.cps?.cpsManager?.getProjectRouting$()?.subscribe(() => {
+      mlTimefilterRefresh$.next({ lastRefresh: Date.now() });
+    });
+    return () => subscription?.unsubscribe();
+  }, [services.cps?.cpsManager]);
 
   return (
     <EuiPageTemplate

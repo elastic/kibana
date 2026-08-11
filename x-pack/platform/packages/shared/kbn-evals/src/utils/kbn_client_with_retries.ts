@@ -6,8 +6,8 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
-import { withRetry } from './retry_utils';
+import type { KbnClient } from '@kbn/kbn-client';
+import { getStatusCode, withRetry } from './retry_utils';
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -67,8 +67,10 @@ export function wrapKbnClientWithRetries({
   const maxDelayMs = Number(process.env.KBN_EVALS_KBNCLIENT_MAX_DELAY_MS ?? '60000') || 60000;
 
   const wrappedRequest: KbnClient['request'] = async (params: any) => {
-    return withRetry(
-      async () => {
+    const label = `kbnClient.request ${params?.method ?? 'GET'} ${params?.path ?? ''}`.trim();
+
+    const doRequest = async () => {
+      try {
         const response = await (kbnClient.request as any)(params);
 
         // Some endpoints return SSE text with an embedded error instead of a non-2xx status.
@@ -80,28 +82,41 @@ export function wrapKbnClientWithRetries({
         }
 
         return response;
-      },
-      {
-        label: `kbnClient.request ${params?.method ?? 'GET'} ${params?.path ?? ''}`.trim(),
-        maxAttempts,
-        minDelayMs,
-        maxDelayMs,
-        onRetry: ({ attempt, maxAttempts: total, delayMs, error, label }) => {
-          const message = toErrorMessage(error);
-          const headers = (error as any)?.response?.headers ?? (error as any)?.headers;
-          const retryAfterMs =
-            getRetryAfterMsFromHeaders(headers) ??
-            parseRetryAfterMsFromMessage(message) ??
-            undefined;
-
-          log.warning(
-            `${label} failed (attempt ${attempt}/${total}); retrying in ${delayMs}ms${
-              retryAfterMs ? ` (retry-after=${retryAfterMs}ms)` : ''
-            }. Error: ${message}`
+      } catch (error) {
+        // 413 is terminal — surface it loudly so cluster regressions don't get
+        // buried in a generic retry warning. Re-throw so withRetry sees it.
+        if (getStatusCode(error) === 413) {
+          log.error(
+            `${label} failed with HTTP 413 Payload Too Large — request body exceeds the cluster limit. ` +
+              `This is treated as terminal (no retry). Error: ${toErrorMessage(error)}`
           );
-        },
+        }
+        throw error;
       }
-    );
+    };
+
+    if (params?.retries === 0) {
+      return doRequest();
+    }
+
+    return withRetry(doRequest, {
+      label,
+      maxAttempts,
+      minDelayMs,
+      maxDelayMs,
+      onRetry: ({ attempt, maxAttempts: total, delayMs, error }) => {
+        const message = toErrorMessage(error);
+        const headers = (error as any)?.response?.headers ?? (error as any)?.headers;
+        const retryAfterMs =
+          getRetryAfterMsFromHeaders(headers) ?? parseRetryAfterMsFromMessage(message) ?? undefined;
+
+        log.warning(
+          `${label} failed (attempt ${attempt}/${total}); retrying in ${delayMs}ms${
+            retryAfterMs ? ` (retry-after=${retryAfterMs}ms)` : ''
+          }. Error: ${message}`
+        );
+      },
+    });
   };
 
   // Proxy all properties, override only request()

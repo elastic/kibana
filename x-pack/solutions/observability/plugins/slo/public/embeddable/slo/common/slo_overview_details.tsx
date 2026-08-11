@@ -24,10 +24,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { OVERVIEW_TAB_ID } from '@kbn/deeplinks-observability';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
 import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
@@ -47,6 +44,10 @@ export function SloOverviewDetailsContent({
   const { agentBuilder } = useKibana().services;
   const { telemetry } = usePluginContext();
   const [selectedTabId, setSelectedTabId] = useState<SloTabId>(initialTabId);
+
+  useEffect(() => {
+    setSelectedTabId(initialTabId);
+  }, [initialTabId, slo.id, slo.instanceId]);
 
   const handleTabChange = useCallback(
     (tabId: SloTabId) => {
@@ -71,8 +72,7 @@ export function SloOverviewDetailsContent({
       return;
     }
 
-    agentBuilder.setConversationFlyoutActiveConfig({
-      agentId: OBSERVABILITY_AGENT_ID,
+    agentBuilder.setChatConfig({
       attachments: [
         {
           type: OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
@@ -90,7 +90,7 @@ export function SloOverviewDetailsContent({
     });
 
     return () => {
-      agentBuilder.clearConversationFlyoutActiveConfig();
+      agentBuilder.clearChatConfig();
     };
   }, [agentBuilder, slo]);
 

@@ -13,9 +13,7 @@ import { CommentActions } from '.';
 import { updateAndAssociateNode } from '../../timelines/components/notes/helpers';
 import { useKibana } from '../../common/lib/kibana';
 import { useAssistantAvailability } from '../use_assistant_availability';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
-jest.mock('../../common/hooks/use_experimental_features');
 jest.mock('../use_assistant_availability');
 jest.mock('../../timelines/components/notes/helpers', () => ({
   ...jest.requireActual('../../timelines/components/notes/helpers'),
@@ -49,7 +47,6 @@ describe('CommentActions', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasSearchAILakeConfigurations: false,
     });
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
   it('content added to timeline is correct', () => {
     const message: ClientMessage = {
@@ -60,7 +57,7 @@ describe('CommentActions', () => {
     const { container } = render(<CommentActions message={message} />, { wrapper: Wrapper });
 
     fireEvent.click(
-      container.querySelector('[aria-label="Add message content as a timeline note"]')!
+      container.querySelector('[aria-label="Add message content as a Timeline note"]')!
     );
 
     expect(updateAndAssociateNode).toHaveBeenCalledWith(
@@ -99,34 +96,20 @@ describe('CommentActions', () => {
     expect(attachments).toHaveLength(1);
     expect(attachments[0].comment).toBe('Only this should be copied!');
   });
-  it('renders all actions when traceData and not EASE', () => {
-    const message: ClientMessage = {
-      content: `Only this should be copied! {reference(exampleReferenceId)}`,
-      role: 'assistant',
-      timestamp: '2025-01-08T10:47:34.578Z',
-      traceData: { traceId: '123' },
-    };
-    const { getByTestId } = render(<CommentActions message={message} />, { wrapper: Wrapper });
-
-    expect(getByTestId('apmTraceButton')).toBeInTheDocument();
-    expect(getByTestId('addMessageContentAsTimelineNote')).toBeInTheDocument();
-    expect(getByTestId('addToExistingCaseButton')).toBeInTheDocument();
-  });
-  it('renders only case and timeline actions when no traceData and not EASE', () => {
+  it('renders timeline and case actions when not EASE', () => {
     const message: ClientMessage = {
       content: `Only this should be copied! {reference(exampleReferenceId)}`,
       role: 'assistant',
       timestamp: '2025-01-08T10:47:34.578Z',
     };
-    const { getByTestId, queryByTestId } = render(<CommentActions message={message} />, {
+    const { getByTestId } = render(<CommentActions message={message} />, {
       wrapper: Wrapper,
     });
 
-    expect(queryByTestId('apmTraceButton')).not.toBeInTheDocument();
     expect(getByTestId('addMessageContentAsTimelineNote')).toBeInTheDocument();
     expect(getByTestId('addToExistingCaseButton')).toBeInTheDocument();
   });
-  it('renders only case action when traceData and EASE', () => {
+  it('renders only case action when EASE', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasSearchAILakeConfigurations: true,
     });
@@ -134,6 +117,19 @@ describe('CommentActions', () => {
       content: `Only this should be copied! {reference(exampleReferenceId)}`,
       role: 'assistant',
       timestamp: '2025-01-08T10:47:34.578Z',
+    };
+    const { getByTestId, queryByTestId } = render(<CommentActions message={message} />, {
+      wrapper: Wrapper,
+    });
+
+    expect(queryByTestId('addMessageContentAsTimelineNote')).not.toBeInTheDocument();
+    expect(getByTestId('addToExistingCaseButton')).toBeInTheDocument();
+  });
+  it('does not render APM trace button even when traceData is present', () => {
+    const message: ClientMessage = {
+      content: `Only this should be copied! {reference(exampleReferenceId)}`,
+      role: 'assistant',
+      timestamp: '2025-01-08T10:47:34.578Z',
       traceData: { traceId: '123' },
     };
     const { getByTestId, queryByTestId } = render(<CommentActions message={message} />, {
@@ -141,7 +137,7 @@ describe('CommentActions', () => {
     });
 
     expect(queryByTestId('apmTraceButton')).not.toBeInTheDocument();
-    expect(queryByTestId('addMessageContentAsTimelineNote')).not.toBeInTheDocument();
+    expect(getByTestId('addMessageContentAsTimelineNote')).toBeInTheDocument();
     expect(getByTestId('addToExistingCaseButton')).toBeInTheDocument();
   });
 });

@@ -9,20 +9,22 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from './use_workflows';
+import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
 
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('../api/use_workflows_api', () => ({
+  useWorkflowsApi: () => mockWorkflowApi,
+}));
+
 const queryClient = new QueryClient(testQueryClientConfig);
-const mockCore = coreMock.createStart();
-const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -31,11 +33,6 @@ describe('useWorkflows', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: mockCore.http,
-      },
-    } as any);
   });
 
   it('calls the API with correct params', async () => {
@@ -52,30 +49,13 @@ describe('useWorkflows', () => {
       query: 'test',
     };
 
-    mockCore.http.post.mockResolvedValue(mockData);
+    mockWorkflowApi.getWorkflows.mockResolvedValue(mockData);
 
     const { result } = renderHook(() => useWorkflows(params), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(mockCore.http.post).toHaveBeenCalledWith('/api/workflows/search', {
-      body: JSON.stringify(params),
-    });
+    expect(mockWorkflowApi.getWorkflows).toHaveBeenCalledWith(params);
     expect(result.current.data).toEqual(mockData);
-  });
-
-  it('handles http service unavailable', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    mockUseKibana.mockReturnValue({
-      services: {
-        http: null,
-      },
-    } as any);
-
-    const params: WorkflowsSearchParams = { page: 1, size: 10 };
-    const { result } = renderHook(() => useWorkflows(params), { wrapper });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    expect((result.current.error as Error)?.message).toBe('Http service is not available');
   });
 });

@@ -291,15 +291,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await action.click();
 
-        const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
-        const firstDashboardButton = await dashboardButtons[0];
+        const firstDashboardButton = await retry.try(async () => {
+          const dashboardButtons =
+            await PageObjects.datasetQuality.getIntegrationDashboardButtons();
+          if (!dashboardButtons || dashboardButtons.length === 0) {
+            throw new Error('Dashboard buttons not yet rendered');
+          }
+          return dashboardButtons[0];
+        });
         const dashboardText = await firstDashboardButton.getVisibleText();
 
         await firstDashboardButton.click();
 
-        const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+        await retry.tryForTime(30 * 1000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const breadcrumbText = await retry.try(async () => {
+            const titleSubj = (await testSubjects.exists('breadcrumb last', { timeout: 1000 }))
+              ? 'breadcrumb last'
+              : 'appHeaderTitle';
+            return testSubjects.getVisibleText(titleSubj);
+          });
 
-        expect(breadcrumbText).to.eql(dashboardText);
+          expect(parsedUrl.pathname).to.contain('/app/dashboards');
+          expect(breadcrumbText).to.eql(dashboardText);
+        });
       });
     });
 

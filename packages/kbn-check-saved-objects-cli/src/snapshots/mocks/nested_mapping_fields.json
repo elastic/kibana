@@ -28,7 +28,9 @@
       "mappings": {
         "dynamic": false,
         "properties.topLevel.type": "keyword",
-        "properties.parent.properties.child.type": "keyword"
+        "properties.topLevel.ignore_above": 1024,
+        "properties.parent.properties.child.type": "keyword",
+        "properties.parent.properties.child.ignore_above": 1024
       }
     }
   }

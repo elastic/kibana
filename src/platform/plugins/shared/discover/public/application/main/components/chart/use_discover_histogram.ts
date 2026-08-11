@@ -32,7 +32,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   type DiscoverAppState,
   selectTabCombinedFilters,
@@ -49,6 +48,7 @@ import {
   useCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
@@ -66,15 +66,15 @@ export interface UseUnifiedHistogramOptions {
 }
 
 export const useDiscoverHistogram = (
-  stateContainer: DiscoverStateContainer,
   options?: UseUnifiedHistogramOptions
 ): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
+  const dataStateContainer = useCurrentTabDataStateContainer();
   const {
     data$: { main$, documents$, totalHits$ },
     inspectorAdapters,
     getAbortController,
-  } = stateContainer.dataState;
+  } = dataStateContainer;
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -207,6 +207,7 @@ export const useDiscoverHistogram = (
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const isApproximate = useAppStateSelector((state) => state.isApproximate);
   const visContext = useCurrentTabSelector((tab) => tab.attributes.visContext);
 
   const getModifiedVisAttributesAccessor = useProfileAccessor('getModifiedVisAttributes');
@@ -229,6 +230,7 @@ export const useDiscoverHistogram = (
       breakdownField,
       timeInterval,
       esqlVariables,
+      isApproximate,
       controlsState: getDefinedControlGroupState(currentTabControlState),
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
@@ -240,6 +242,7 @@ export const useDiscoverHistogram = (
     currentTabControlState,
     dataView,
     esqlVariables,
+    isApproximate,
     filters,
     inspectorAdapters.requests,
     isEsqlMode,
@@ -279,7 +282,7 @@ export const useDiscoverHistogram = (
       return;
     }
 
-    const subscription = stateContainer.dataState.fetchChart$.subscribe((latestFetchDetails) => {
+    const subscription = dataStateContainer.fetchChart$.subscribe((latestFetchDetails) => {
       if (latestFetchDetails) {
         triggerUnifiedHistogramFetch.current(latestFetchDetails);
       }
@@ -288,7 +291,7 @@ export const useDiscoverHistogram = (
     return () => {
       subscription.unsubscribe();
     };
-  }, [stateContainer.dataState.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
+  }, [dataStateContainer.fetchChart$, triggerUnifiedHistogramFetch, unifiedHistogramApi]);
 
   useEffect(() => {
     const previousFetchParams = previousFetchParamsRef.current;
@@ -445,11 +448,11 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
         return changes;
       }
 
-      if (prev?.lensRequestAdapter !== curr.lensRequestAdapter) {
+      if (!prev || prev.lensRequestAdapter !== curr.lensRequestAdapter) {
         changes.lensRequestAdapter = curr.lensRequestAdapter;
       }
 
-      if (prev?.chartHidden !== curr.chartHidden) {
+      if (!prev || prev.chartHidden !== curr.chartHidden) {
         changes.hideChart = curr.chartHidden;
       }
 

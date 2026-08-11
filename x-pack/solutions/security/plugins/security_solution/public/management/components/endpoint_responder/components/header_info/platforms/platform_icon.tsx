@@ -34,6 +34,8 @@ export interface PlatformIconProps {
   'data-test-subj'?: string;
 }
 
+// FIXME:PT move this component to `public/common/components/endpoint`
+
 export const PlatformIcon = memo<PlatformIconProps>(
   ({ platform, size = 'xl', 'data-test-subj': dataTestSubj }) => {
     const platformIcon = useMemo(() => getPlatformIcon(platform), [platform]);
@@ -47,7 +49,7 @@ export const PlatformIcon = memo<PlatformIconProps>(
 
     return (
       <EuiIcon
-        type={!platformIcon ? 'desktop' : platformIcon}
+        type={!platformIcon ? 'display' : platformIcon}
         title={iconTitle}
         size={size}
         data-test-subj={dataTestSubj}

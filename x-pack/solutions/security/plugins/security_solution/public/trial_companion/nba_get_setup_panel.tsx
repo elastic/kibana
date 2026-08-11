@@ -84,6 +84,7 @@ function itemButtonContent(iconType: string, color: string, title: string, miles
           size="m"
           color={color}
           data-test-subj={`${TEST_SUBJ_PREFIX}-item-icon-${milestoneId}`}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -109,9 +110,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
 }) => {
   const { analytics, application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const iconType = completed.includes(item.milestoneId)
-    ? 'checkInCircleFilled'
-    : RadioCircleIconSVG;
+  const iconType = completed.includes(item.milestoneId) ? 'checkCircleFill' : RadioCircleIconSVG;
   const color = completed.includes(item.milestoneId) ? 'success' : 'default';
   const accordionId = useGeneratedHtmlId({
     prefix: 'yourTrialCompanionAccordionTODOItem',
@@ -163,7 +162,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
           gutterSize="m"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="m" />
+            <EuiIcon type="empty" size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
@@ -195,7 +194,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="m" />
+            <EuiIcon type="empty" size="m" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>
@@ -238,6 +237,10 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
     },
     paddingTop: euiTheme.size.base,
     paddingBottom: euiTheme.size.l,
+    '.euiAccordion__optionalAction': {
+      alignSelf: 'flex-start',
+      marginTop: '0rem',
+    },
   });
   const firstLineSelected = expandedItemId === todoItems[0].milestoneId;
   const lastLineSelected = expandedItemId === todoItems[todoItems.length - 1].milestoneId;
@@ -249,6 +252,10 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
     postNBADismiss();
   };
 
+  const onClose = () => {
+    setIsVisible(false);
+  };
+
   return (
     isVisible && (
       <EuiPanel css={styles}>
@@ -256,12 +263,16 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
           id={accordionId}
           buttonContent={buttonContent(completed.length, todoItems.length, euiTheme)}
           buttonProps={{ css: css({ '&:hover': { textDecoration: 'none' } }) }}
-          arrowProps={{ css: css({ alignSelf: 'flex-start', marginTop: '0rem' }) }}
-          arrowDisplay="right"
+          arrowDisplay="left"
           paddingSize="none"
           css={{
             gap: euiTheme.size.m,
           }}
+          extraAction={
+            <EuiPanel onClick={onClose} hasBorder={false} hasShadow={false} paddingSize="none">
+              <EuiIcon type="cross" size="m" aria-hidden={true} />
+            </EuiPanel>
+          }
           data-test-subj={GET_SET_UP_ACCORDION_TEST_ID}
           element="fieldset"
         >

@@ -20,10 +20,6 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <span
     tabIndex={0}
@@ -53,10 +49,6 @@ exports[`text_field_value TextFieldValue should render long text correctly, when
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <span
     tabIndex={0}
@@ -86,10 +78,6 @@ exports[`text_field_value TextFieldValue should render small text correctly, whe
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <span
     tabIndex={0}
@@ -119,10 +107,6 @@ exports[`text_field_value TextFieldValue should render small text correctly, whe
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  delay="regular"
-  disableScreenReaderOutput={false}
-  display="inlineBlock"
-  position="top"
 >
   <span
     tabIndex={0}

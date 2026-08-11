@@ -19,7 +19,6 @@
       "licensing",
       "uiActions",
       "embeddable",
-      "presentationUtil",
       "dashboard",
       "fieldFormats",
       "unifiedSearch",
@@ -28,13 +27,20 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "cps",
+      "dataViewEditor",
+      "dataViewFieldEditor",
+      "contentManagement"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
-      "cases"
+      "cases",
+      "savedSearch",
+      "savedObjectsFinder",
+      "presentationUtil"
     ]
   }
 }

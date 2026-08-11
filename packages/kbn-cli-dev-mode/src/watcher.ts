@@ -26,8 +26,8 @@ const packageMatcher = makeMatcher([
 /**
  * Any code that is outside of a package must match this in order to trigger a restart
  */
-const nonPackageMatcher = makeMatcher(['config/**/*.yml', 'plugins/**/server/**/*']);
-const staticFileMatcher = makeMatcher(['plugins/**/kibana.json']);
+const nonPackageMatcher = makeMatcher(['plugins/**/server/**/*']);
+const staticFileMatcher = makeMatcher(['plugins/**/kibana.json', 'config/**/*.yml']);
 const OPTIMIZER_RESTART_DEBOUNCE_MS = 1000;
 
 export interface Options {
@@ -118,7 +118,7 @@ export class Watcher {
 
           // ignore changes in any devOnly package, these can't power the server so we can ignore them
           if (pkg?.devOnly) {
-            return pkg.id === '@kbn/babel-register';
+            return pkg.id === '@kbn/swc-register';
           }
 
           const result = this.classifier.classify(event.path);
@@ -144,6 +144,7 @@ export class Watcher {
           '**/{.cache,.temp,.tmp,temp,tmp}/**',
           '**/*.{test,spec,story,stories}.*',
           '**/*.{http,md,sh,txt,log,pid,swp,swo}',
+          '**/tsconfig*.type_check.json',
           '**/*~',
           '**/.DS_Store',
           '/data/**',

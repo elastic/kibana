@@ -35,6 +35,22 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { user: { info: { name: 'Jane Doe' } } })).toBe(false);
     });
 
+    it('should correctly evaluate a quoted value with dots in nested field path', () => {
+      const kql = 'data.host.name: "admin-console.prod.001"';
+      expect(
+        evaluateKql(kql, {
+          episode_status: 'recovering',
+          data: { count: 2, host: { name: 'admin-console.prod.001' } },
+        })
+      ).toBe(true);
+      expect(
+        evaluateKql(kql, {
+          episode_status: 'recovering',
+          data: { count: 2, host: { name: 'other-host' } },
+        })
+      ).toBe(false);
+    });
+
     it('should correctly evaluate a simple "is" KQL expression with boolean', () => {
       const kql = 'isActive: true';
       expect(evaluateKql(kql, { isActive: true })).toBe(true);
@@ -47,6 +63,27 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { matchesCount: 0 })).toBe(false);
     });
 
+    it('should treat array fields as multi-valued: term matches if any element matches', () => {
+      const kql = 'tags: "prod"';
+      expect(evaluateKql(kql, { tags: ['dev', 'prod'] })).toBe(true);
+      expect(evaluateKql(kql, { tags: ['dev', 'staging'] })).toBe(false);
+      expect(evaluateKql(kql, { tags: 'prod' })).toBe(true);
+    });
+
+    it('should match nested fields when value is an array', () => {
+      const kql = 'event.category: "alerts" and event.labels: "demo"';
+      expect(
+        evaluateKql(kql, {
+          event: { category: 'alerts', labels: ['example', 'demo'] },
+        })
+      ).toBe(true);
+      expect(
+        evaluateKql(kql, {
+          event: { category: 'alerts', labels: ['example'] },
+        })
+      ).toBe(false);
+    });
+
     it('should support array index access in property path', () => {
       const kql = 'users[0].name: "Alice"';
       expect(evaluateKql(kql, { users: [{ name: 'Alice' }, { name: 'Bob' }] })).toBe(true);
@@ -57,6 +94,45 @@ describe('evaluateKql', () => {
       const kql = 'users.0.name: "Alice"';
       expect(evaluateKql(kql, { users: [{ name: 'Alice' }, { name: 'Bob' }] })).toBe(true);
       expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
+    });
+
+    // A field path whose intermediate segment resolves to a non-object (scalar,
+    // null, or undefined) must evaluate to false, NOT throw. Traversing further
+    // into such a value previously hit `'segment' in <non-object>`, which throws
+    // `TypeError: Cannot use 'in' operator ...` and crashed the whole caller
+    // (e.g. a workflow execution or an alerting matcher).
+    describe('traversing through a non-object intermediate value', () => {
+      it('should return false (not throw) when traversing into a string', () => {
+        const kql = 'output.value: true';
+        expect(() => evaluateKql(kql, { output: 'hello' })).not.toThrow();
+        expect(evaluateKql(kql, { output: 'hello' })).toBe(false);
+      });
+
+      it('should return false (not throw) when traversing into a number', () => {
+        const kql = 'output.value: true';
+        expect(evaluateKql(kql, { output: 42 })).toBe(false);
+      });
+
+      it('should return false (not throw) when traversing into a boolean', () => {
+        const kql = 'output.value: true';
+        expect(evaluateKql(kql, { output: true })).toBe(false);
+      });
+
+      it('should return false (not throw) when an intermediate segment is undefined', () => {
+        const kql = 'steps.x.output.field: "y"';
+        expect(evaluateKql(kql, { steps: { x: {} } })).toBe(false);
+      });
+
+      it('should return false (not throw) when an intermediate segment is null', () => {
+        const kql = 'steps.x.output.field: "y"';
+        expect(evaluateKql(kql, { steps: { x: { output: null } } })).toBe(false);
+      });
+
+      it('should return false (not throw) for a deep path through a scalar in a range expression', () => {
+        const kql = 'output.value.deeper > 5';
+        expect(() => evaluateKql(kql, { output: 'hello' })).not.toThrow();
+        expect(evaluateKql(kql, { output: 'hello' })).toBe(false);
+      });
     });
 
     describe('range expressions', () => {
@@ -88,6 +164,13 @@ describe('evaluateKql', () => {
         expect(evaluateKql(kql, { matchesCount: 1001 })).toBe(false);
       });
 
+      it('should match range if any array element satisfies the range', () => {
+        const kql = 'scores >= 10';
+        expect(evaluateKql(kql, { scores: [1, 5, 12] })).toBe(true);
+        expect(evaluateKql(kql, { scores: [1, 5, 7] })).toBe(false);
+        expect(evaluateKql(kql, { scores: [] })).toBe(false);
+      });
+
       it('should return false when field refers to object in property', () => {
         const kql = 'user < 90';
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
@@ -107,6 +190,12 @@ describe('evaluateKql', () => {
         const kql = 'user.name: John*';
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+      });
+
+      it('should evaluate wildcards against any string element in an array field', () => {
+        const kql = 'tags: demo*';
+        expect(evaluateKql(kql, { tags: ['x', 'demo-1'] })).toBe(true);
+        expect(evaluateKql(kql, { tags: ['x', 'prod'] })).toBe(false);
       });
 
       it('should do anything', () => {
@@ -156,6 +245,40 @@ describe('evaluateKql', () => {
         expect(evaluateKql(kql, { user: { name: 'John Doe' } })).toBe(true);
         expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
+
+      it('should run wildcard patterns against stringified numeric and boolean scalars', () => {
+        expect(evaluateKql('n: foo*', { n: 5 })).toBe(false);
+        expect(evaluateKql('n: foo*', { n: true })).toBe(false);
+        expect(evaluateKql('n: 23*', { n: 2339 })).toBe(true);
+        expect(evaluateKql('n: tr*', { n: true })).toBe(true);
+      });
+    });
+
+    describe('array membership', () => {
+      it('should match when array contains the value', () => {
+        const kql = 'tags: "production"';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should not match when array does not contain the value', () => {
+        const kql = 'tags: "staging"';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(false);
+      });
+
+      it('should match wildcard against array elements', () => {
+        const kql = 'tags: prod*';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should match existence wildcard against array', () => {
+        const kql = 'tags: *';
+        expect(evaluateKql(kql, { tags: ['production', 'critical'] })).toBe(true);
+      });
+
+      it('should not match when array is empty', () => {
+        const kql = 'tags: "production"';
+        expect(evaluateKql(kql, { tags: [] })).toBe(false);
+      });
     });
   });
 
@@ -188,6 +311,29 @@ describe('evaluateKql', () => {
         const resolved = dateMath.parse('2025-01-01T00:00:00.000Z||+1d')!.toISOString();
         expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
         expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match "now+1h" against the resolved date', () => {
+        const kql = 'timestamp: now+1h';
+        const resolved = dateMath.parse('now+1h')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2020-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match "now/d" with rounding', () => {
+        const kql = 'timestamp: now/d';
+        const resolved = dateMath.parse('now/d')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2020-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match datemath against any element in an array field', () => {
+        const kql = 'timestamps: now-1d';
+        const resolved = dateMath.parse('now-1d')!.toISOString();
+        expect(evaluateKql(kql, { timestamps: ['2020-01-01T00:00:00.000Z', resolved] })).toBe(true);
+        expect(
+          evaluateKql(kql, { timestamps: ['2020-01-01T00:00:00.000Z', '2021-06-01T00:00:00.000Z'] })
+        ).toBe(false);
       });
     });
 
@@ -224,6 +370,34 @@ describe('evaluateKql', () => {
         expect(evaluateKql(`${baseKql}-7d/d`, { timestamp: '2025-01-10T00:00:00.000Z' })).toBe(
           true
         );
+      });
+
+      it('should evaluate > with datemath on the right side', () => {
+        const kql = 'timestamp > now-7d';
+        // now-7d is 2025-01-08T12:00:00Z
+        expect(evaluateKql(kql, { timestamp: '2025-01-09T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: dateMath.parse('now-7d')!.toISOString() })).toBe(
+          false
+        );
+      });
+
+      it('should evaluate <= with datemath on the right side', () => {
+        const kql = 'timestamp <= now';
+        const nowIso = dateMath.parse('now')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: nowIso })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-14T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-16T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match range with datemath against any element in an array field', () => {
+        const kql = 'timestamps >= now-7d';
+        // now-7d is 2025-01-08T12:00:00Z
+        expect(
+          evaluateKql(kql, { timestamps: ['2025-01-01T00:00:00.000Z', '2025-01-10T00:00:00.000Z'] })
+        ).toBe(true);
+        expect(
+          evaluateKql(kql, { timestamps: ['2025-01-01T00:00:00.000Z', '2025-01-02T00:00:00.000Z'] })
+        ).toBe(false);
       });
     });
 

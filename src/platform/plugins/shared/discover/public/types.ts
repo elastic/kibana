@@ -47,6 +47,8 @@ import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -148,7 +150,9 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
+  alertingVTwo?: AlertingV2PublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;

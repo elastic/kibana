@@ -29,7 +29,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ temp_field: 'to-be-kept', message: 'keep-this' }];
         await testBed.ingest(indexName, docs);
@@ -56,7 +56,7 @@ apiTest.describe(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -101,7 +101,7 @@ apiTest.describe(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -134,7 +134,7 @@ apiTest.describe(
           } as RemoveByPrefixProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

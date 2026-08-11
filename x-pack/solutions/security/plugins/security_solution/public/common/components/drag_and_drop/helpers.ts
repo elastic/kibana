@@ -6,7 +6,7 @@
  */
 import { keyBy } from 'lodash/fp';
 import type { DropResult } from '@hello-pangea/dnd';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import type { ActionCreator } from 'typescript-fsa';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
@@ -55,7 +55,6 @@ export {
   userIsReArrangingProviders,
   fieldWasDroppedOnTimelineColumns,
   DRAG_TYPE_FIELD,
-  IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
 interface AddProviderToTimelineParams {
   activeTimelineDataProviders: DataProvider[];

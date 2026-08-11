@@ -23,7 +23,7 @@ export const DataStreamActionsMenu = ({ dataStreamActions, selectedDataStreamsCo
     <EuiButton
       data-test-subj="dataStreamActionsPopoverButton"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       fill={true}
     >
@@ -38,6 +38,10 @@ export const DataStreamActionsMenu = ({ dataStreamActions, selectedDataStreamsCo
   return (
     <EuiPopover
       id="dataStreamActionsPopover"
+      aria-label={i18n.translate(
+        'xpack.idxMgmt.dataStreamList.table.dataStreamActionsPopoverAriaLabel',
+        { defaultMessage: 'Data stream actions' }
+      )}
       button={popoverButton}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

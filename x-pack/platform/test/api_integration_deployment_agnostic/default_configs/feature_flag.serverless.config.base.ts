@@ -31,6 +31,7 @@ const esServerArgsFromController = {
   oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
   workplaceai: [],
+  vectordb: [],
 };
 
 // include settings from kibana controller
@@ -51,6 +52,7 @@ const kbnServerArgsFromController = {
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
   workplaceai: [],
+  vectordb: [],
 };
 
 export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnosticCommonServices>(

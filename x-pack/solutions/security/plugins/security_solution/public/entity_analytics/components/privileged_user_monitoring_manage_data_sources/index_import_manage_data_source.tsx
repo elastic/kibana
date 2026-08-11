@@ -36,7 +36,7 @@ export const IndexImportManageDataSource = ({
     <>
       <EuiFlexGroup alignItems="flexStart" direction="column">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon size="l" type="indexOpen" />
+          <EuiIcon size="l" type="indexOpen" aria-hidden={true} />
           <EuiText>
             <h1>
               <FormattedMessage
@@ -74,7 +74,7 @@ export const IndexImportManageDataSource = ({
             )}
           </h4>
         </EuiText>
-        <EuiButton fullWidth={false} iconType="plusInCircle" onClick={showIndexModal}>
+        <EuiButton fullWidth={false} iconType="plusCircle" onClick={showIndexModal}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.indices.btnText"
             defaultMessage="Select index"

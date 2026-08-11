@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
@@ -57,6 +57,12 @@ export interface ExecutableTool<
    * to replace large tool results with compact summaries.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
 }
 
 export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {

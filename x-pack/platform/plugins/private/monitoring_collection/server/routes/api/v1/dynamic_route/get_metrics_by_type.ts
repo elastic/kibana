@@ -45,7 +45,6 @@ export function registerDynamicRoute({
       },
       options: {
         access: 'public',
-        authRequired: true,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
       },
       validate: {

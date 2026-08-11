@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
 import { deleteTemplates } from '../services/api';
-import { notificationService } from '../services/notification';
+import { useServices } from '../app_context';
 
 export const TemplateDeleteModal = ({
   templatesToDelete,
@@ -28,6 +28,7 @@ export const TemplateDeleteModal = ({
   templatesToDelete: Array<{ name: string; isLegacy?: boolean; type?: string }>;
   callback: (data?: { hasDeletedTemplates: boolean }) => void;
 }) => {
+  const { notificationService } = useServices();
   const [isDeleteConfirmed, setIsDeleteConfirmed] = useState<boolean>(false);
 
   const modalTitleId = useGeneratedHtmlId();

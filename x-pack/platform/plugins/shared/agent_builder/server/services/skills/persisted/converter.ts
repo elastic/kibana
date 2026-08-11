@@ -6,6 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { MOUNT_POINTS } from '../../execution/filesystem/mount_points';
 import type { SkillPersistedDefinition } from './client';
 
 export const convertPersistedSkill = (
@@ -13,15 +14,17 @@ export const convertPersistedSkill = (
 ): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
-  basePath: '/skills', // user-skills have no configurable basePath atm
+  basePath: skill.base_path ?? MOUNT_POINTS.skills,
   description: skill.description,
   content: skill.content,
-  readonly: false,
+  readonly: !!skill.plugin_id,
+  experimental: false,
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,
     content: rc.content,
   })),
   getRegistryTools: () => skill.tool_ids ?? [],
-  // Persisted skills have no inline tools or basePath
+  plugin_id: skill.plugin_id,
+  referencedContentCount: skill.referenced_content_count,
 });

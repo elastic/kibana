@@ -82,7 +82,7 @@ const NoEnrollmentKeysCallout: React.FunctionComponent<{
       </div>
       <EuiSpacer size="m" />
       <EuiButton
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isLoading={isLoadingEnrollmentKey}
         fill
         onClick={onCreateEnrollmentTokenClick}
@@ -192,7 +192,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
     <>
       <EuiButtonEmpty
         iconSide="left"
-        iconType={isAuthenticationSettingsOpen ? 'arrowDown' : 'arrowRight'}
+        iconType={isAuthenticationSettingsOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
         onClick={() => setIsAuthenticationSettingsOpen(!isAuthenticationSettingsOpen)}
       >
         <FormattedMessage

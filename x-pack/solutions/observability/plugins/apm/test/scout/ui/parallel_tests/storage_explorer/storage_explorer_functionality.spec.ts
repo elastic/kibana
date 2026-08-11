@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 const timeRange = {
@@ -56,10 +56,11 @@ test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, (
         .getByTestId('tableHeaderSortButton')
         .click();
 
-      // Verify the service icon links are present
-      await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
-      await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_go')).toHaveCount(2);
+      // Verify the service icon links are present (counts may vary as more test data is added)
+      const nodejsCount = await page.getByTestId('serviceLink_nodejs').count();
+      expect(nodejsCount).toBeGreaterThanOrEqual(1);
+      const goCount = await page.getByTestId('serviceLink_go').count();
+      expect(goCount).toBeGreaterThanOrEqual(2);
 
       // Verify the synthetic services with actual data are present
       await expect(page.getByLabel(testData.SERVICE_SYNTH_NODE_1)).toBeVisible();
@@ -94,7 +95,7 @@ test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, (
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
-      await waitForApmSettingsHeaderLink(page);
+      await waitForApmAppMenuReady(page);
 
       await expect(page).toHaveURL(new RegExp(`.*environment=${PRODUCTION_ENVIRONMENT}.*`));
       await expect(storageExplorerPage.pageTitle).toBeVisible();

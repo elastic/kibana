@@ -7,32 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
-
-export const createRequestParamsSchema = schema.maybe(
-  schema.object(
-    {
-      id: schema.maybe(
-        schema.string({
-          meta: { description: 'A unique identifier for the dashboard.' },
-        })
-      ),
-    },
-    { unknowns: 'forbid' }
-  )
-);
-
-export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
-  return getDashboardStateSchema(isDashboardAppRequest);
-}
 
 export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
-  return schema.object({
-    id: schema.string(),
-    data: getDashboardStateSchema(isDashboardAppRequest),
-    meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-  });
+  return z
+    .object({
+      id: z.string().meta({
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      }),
+      data: getDashboardStateSchema(isDashboardAppRequest),
+      meta: asCodeMetaSchema,
+    })
+    .strict();
 }

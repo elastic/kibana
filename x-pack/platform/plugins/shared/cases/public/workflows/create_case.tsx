@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { createCaseStepCommonDefinition } from '../../common/workflows/steps/create_case';
 import { connectorTypesOptions } from './case_enum_options';
+import { createPublicCaseStepDefinition } from './shared';
 
-export const createCreateCaseStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...createCaseStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    editorHandlers: {
-      config: {
-        'connector-id': {
-          connectorIdSelection: {
-            connectorTypes: connectorTypesOptions,
-            enableCreation: false,
-          },
+export const createCaseStepDefinition = createPublicCaseStepDefinition({
+  ...createCaseStepCommonDefinition,
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: connectorTypesOptions,
+          enableCreation: false,
         },
       },
     },
-  });
-};
+  },
+});

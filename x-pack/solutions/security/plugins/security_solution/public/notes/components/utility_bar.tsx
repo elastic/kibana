@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -141,7 +141,7 @@ export const NotesUtilityBar = React.memo(() => {
           <UtilityBarAction
             dataTestSubj="notes-management-utility-bar-actions"
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             popoverContent={BulkActionPopoverContent}
           >
             <span data-test-subj="notes-management-utility-bar-action-button">{BATCH_ACTIONS}</span>

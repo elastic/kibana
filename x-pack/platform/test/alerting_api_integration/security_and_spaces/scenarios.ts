@@ -219,6 +219,37 @@ export const StackAlertsOnly: User = {
   },
 };
 
+/**
+ * Alerts-only user: the `stackAlertsOnly` feature grants alert read/write but
+ * no rule read/create. Used to verify that alert views still receive a rule type
+ * list (via the alert authorization entity), unlike `StackAlertsOnly` above which
+ * uses the `stackAlerts` (rule management) feature.
+ */
+export const StackAlertsOnlyFeatureReadUser: User = {
+  username: 'stack_alerts_only_feature_read',
+  fullName: 'stack_alerts_only_feature_read',
+  password: 'stack_alerts_only_feature_read-password',
+  role: {
+    name: 'stack_alerts_only_feature_read_role',
+    kibana: [
+      {
+        feature: {
+          stackAlertsOnly: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const ManualRunOnlyUser: User = {
   username: 'manual_run_only',
   fullName: 'manual_run_only',
@@ -271,6 +302,84 @@ export const EnableDisableOnlyUser: User = {
   },
 };
 
+export const ManageRuleSettingsOnlyUser: User = {
+  username: 'manage_rule_settings_only',
+  fullName: 'manage_rule_settings_only',
+  password: 'manage_rule_settings_only-password',
+  role: {
+    name: 'manage_rule_settings_only_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['read', 'manage_rule_settings'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
+export const AllWithoutBackfillPrivilegesUser: User = {
+  username: 'all_without_backfill_privileges',
+  fullName: 'all_without_backfill_privileges',
+  password: 'all_without_backfill_privileges-password',
+  role: {
+    name: 'all_without_backfill_privileges_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['minimal_all', 'enable_disable'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
+export const AllWithoutManageRuleSettingsUser: User = {
+  username: 'all_without_manage_rule_settings',
+  fullName: 'all_without_manage_rule_settings',
+  password: 'all_without_manage_rule_settings-password',
+  role: {
+    name: 'all_without_manage_rule_settings_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['minimal_all', 'enable_disable', 'manual_run'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -280,8 +389,12 @@ export const Users: User[] = [
   Space1AllAlertingNoneActions,
   CasesAll,
   StackAlertsOnly,
+  StackAlertsOnlyFeatureReadUser,
   ManualRunOnlyUser,
   EnableDisableOnlyUser,
+  ManageRuleSettingsOnlyUser,
+  AllWithoutBackfillPrivilegesUser,
+  AllWithoutManageRuleSettingsUser,
 ];
 
 export const Space1: Space = {
@@ -363,7 +476,7 @@ const Space1AllWithRestrictedFixtureAtSpace1: Space1AllWithRestrictedFixtureAtSp
 interface Space1AllAlertingNoneActionsAtSpace1 extends Scenario {
   id: 'space_1_all_alerts_none_actions at space1';
 }
-const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
+export const Space1AllAlertingNoneActionsAtSpace1: Space1AllAlertingNoneActionsAtSpace1 = {
   id: 'space_1_all_alerts_none_actions at space1',
   user: Space1AllAlertingNoneActions,
   space: Space1,
@@ -415,6 +528,36 @@ interface ManualRunOnlyUserAtSpace1 extends Scenario {
 export const ManualRunOnlyUserAtSpace1: ManualRunOnlyUserAtSpace1 = {
   id: 'manual_run_only at space1',
   user: ManualRunOnlyUser,
+  space: Space1,
+};
+
+interface ManageRuleSettingsOnlyUserAtSpace1 extends Scenario {
+  id: 'manage_rule_settings_only at space1';
+}
+
+export const ManageRuleSettingsOnlyUserAtSpace1: ManageRuleSettingsOnlyUserAtSpace1 = {
+  id: 'manage_rule_settings_only at space1',
+  user: ManageRuleSettingsOnlyUser,
+  space: Space1,
+};
+
+interface AllWithoutBackfillPrivilegesUserAtSpace1 extends Scenario {
+  id: 'all_without_backfill_privileges at space1';
+}
+
+export const AllWithoutBackfillPrivilegesUserAtSpace1: AllWithoutBackfillPrivilegesUserAtSpace1 = {
+  id: 'all_without_backfill_privileges at space1',
+  user: AllWithoutBackfillPrivilegesUser,
+  space: Space1,
+};
+
+interface AllWithoutManageRuleSettingsUserAtSpace1 extends Scenario {
+  id: 'all_without_manage_rule_settings at space1';
+}
+
+export const AllWithoutManageRuleSettingsUserAtSpace1: AllWithoutManageRuleSettingsUserAtSpace1 = {
+  id: 'all_without_manage_rule_settings at space1',
+  user: AllWithoutManageRuleSettingsUser,
   space: Space1,
 };
 
