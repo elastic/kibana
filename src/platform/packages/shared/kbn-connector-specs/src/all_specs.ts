@@ -74,3 +74,4 @@ export * from './specs/opensearch_aws_opensearch_service/opensearch_aws_opensear
 export * from './specs/zabbix/zabbix';
 export * from './specs/okta/okta';
 export * from './specs/gcp_iam/gcp_iam';
+export * from './specs/gcp_secret_manager/gcp_secret_manager';
