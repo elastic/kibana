@@ -257,7 +257,7 @@ describe('unified data table', () => {
       });
 
       await waitFor(() => {
-        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'expand');
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'maximize');
         expect(expandButtons[1].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
       });
     },
