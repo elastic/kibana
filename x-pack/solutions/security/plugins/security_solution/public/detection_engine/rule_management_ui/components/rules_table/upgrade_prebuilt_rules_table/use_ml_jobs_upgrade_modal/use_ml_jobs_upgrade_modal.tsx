@@ -6,41 +6,69 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useBoolean } from '@kbn/react-hooks';
-import { useInstalledSecurityJobs } from '../../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { affectedJobIds } from '../../../../../../../common/machine_learning/affected_job_ids';
+import type { RuleUpgradeState } from '../../../../../rule_management/model/prebuilt_rule_upgrade';
 import { useAsyncConfirmation } from '../../rules_table/use_async_confirmation';
-import { OutdatedMlJobsUpgradeModal } from './ml_jobs_upgrade_modal';
+import {
+  buildMlLinkedJobUpgradeItems,
+  type MlLinkedJobUpgradeItem,
+} from './job_upgrade_items';
+import {
+  MlRuleJobUpgradeModal,
+  type MlRuleJobUpgradeConfirmResult,
+} from './ml_jobs_upgrade_modal';
 
-interface UseOutdatedMlJobsUpgradeModalResult {
+export type { MlRuleJobUpgradeConfirmResult } from './ml_jobs_upgrade_modal';
+
+interface UseMlRuleJobUpgradeModalResult {
   modal: ReactNode;
-  isLoading: boolean;
-  confirmLegacyMLJobs: () => Promise<boolean>;
+  /**
+   * Opens the ML rule↔job upgrade consent modal when the selected rules
+   * change linked ML jobs. Resolves `false` on cancel.
+   */
+  confirmMlRuleJobUpgrade: (
+    rules: Array<Pick<RuleUpgradeState, 'rule_id' | 'current_rule' | 'target_rule'>>
+  ) => Promise<false | MlRuleJobUpgradeConfirmResult>;
 }
 
-export function useOutdatedMlJobsUpgradeModal(): UseOutdatedMlJobsUpgradeModalResult {
+/**
+ * Consent flow for tying ML job updates to detection rule upgrades.
+ * Replaces the legacy V1/V2 → V3 warning-only modal for this prototype path.
+ */
+export function useOutdatedMlJobsUpgradeModal(): UseMlRuleJobUpgradeModalResult {
   const [isVisible, { on: showModal, off: hideModal }] = useBoolean(false);
-  const { loading, jobs } = useInstalledSecurityJobs();
-  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
-  const [confirmLegacyMLJobs, confirm, cancel] = useAsyncConfirmation({
+  const [items, setItems] = useState<MlLinkedJobUpgradeItem[]>([]);
+
+  const [initConfirmation, confirm, cancel] = useAsyncConfirmation<MlRuleJobUpgradeConfirmResult>({
     onInit: showModal,
     onFinish: hideModal,
   });
 
-  const handleLegacyMLJobsConfirm = useCallback(async () => {
-    if (legacyJobsInstalled.length > 0) {
-      return confirmLegacyMLJobs();
-    }
+  const confirmMlRuleJobUpgrade = useCallback(
+    async (
+      rules: Array<Pick<RuleUpgradeState, 'rule_id' | 'current_rule' | 'target_rule'>>
+    ): Promise<false | MlRuleJobUpgradeConfirmResult> => {
+      const nextItems = buildMlLinkedJobUpgradeItems(rules);
+      if (nextItems.length === 0) {
+        // No linked job changes — proceed without blocking the user.
+        return { updateJobs: false, duplicateOldJobs: false };
+      }
 
-    return true;
-  }, [confirmLegacyMLJobs, legacyJobsInstalled]);
+      setItems(nextItems);
+      const result = await initConfirmation();
+      if (result === false) {
+        return false;
+      }
+      return result as MlRuleJobUpgradeConfirmResult;
+    },
+    [initConfirmation]
+  );
 
   return {
     modal: isVisible && (
-      <OutdatedMlJobsUpgradeModal jobs={jobs} onConfirm={confirm} onCancel={cancel} />
+      <MlRuleJobUpgradeModal items={items} onConfirm={confirm} onCancel={cancel} />
     ),
-    confirmLegacyMLJobs: handleLegacyMLJobsConfirm,
-    isLoading: loading,
+    confirmMlRuleJobUpgrade,
   };
 }

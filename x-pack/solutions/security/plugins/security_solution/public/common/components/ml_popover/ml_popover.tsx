@@ -117,7 +117,12 @@ export const MlPopover = React.memo(() => {
           {i18n.ML_JOB_SETTINGS}
         </EuiHeaderSectionItemButton>
         {isFlyoutOpen && (
-          <EuiFlyout size="s" onClose={closeFlyout} aria-labelledby={mlFlyoutTitleId} ownFocus>
+          <EuiFlyout
+            size="s"
+            onClose={closeFlyout}
+            aria-labelledby={mlFlyoutTitleId}
+            ownFocus={false}
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="s">
                 <h2 id={mlFlyoutTitleId}>{i18n.UPGRADE_TITLE}</h2>
@@ -153,7 +158,7 @@ export const MlPopover = React.memo(() => {
             size="m"
             onClose={closeFlyout}
             aria-labelledby={mlFlyoutTitleId}
-            ownFocus
+            ownFocus={false}
             data-test-subj="ml-job-settings-flyout"
           >
             <EuiFlyoutHeader hasBorder>
