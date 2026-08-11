@@ -398,7 +398,17 @@ export class DataGrid {
   }
 
   async openGridDisplaySettings() {
-    await this.page.testSubj.click('dataGridDisplaySelectorButton');
+    // `dataGridDisplaySelectorPopover` is the popover's always-present outer wrapper, not
+    // its content, so it can't confirm the popover actually opened. `.euiDataGrid__displayPopoverPanel`
+    // is only mounted while the panel is open/closing, so wait on that instead, retrying the
+    // click if the panel doesn't appear (e.g. the click raced a re-render of the popover content).
+    await expect(async () => {
+      await this.page.testSubj.click('dataGridDisplaySelectorButton');
+      await this.page.locator('.euiDataGrid__displayPopoverPanel').waitFor({
+        state: 'visible',
+        timeout: 2_000,
+      });
+    }).toPass();
   }
 
   async openInTableSearch() {
