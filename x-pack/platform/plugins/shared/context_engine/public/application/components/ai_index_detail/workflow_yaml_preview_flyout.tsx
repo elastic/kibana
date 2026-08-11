@@ -12,11 +12,19 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { useWorkflow } from '../../hooks/use_workflow';
+
+const workflowYamlPreviewFlyoutBodyCss = css`
+  .euiFlyoutBody__overflow,
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
+  }
+`;
 
 const READ_ONLY_OPTIONS = {
   readOnly: true,
@@ -59,7 +67,7 @@ export const WorkflowYamlPreviewFlyout = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody css={workflowYamlPreviewFlyoutBodyCss}>
         {isLoading ? (
           <EuiLoadingSpinner size="m" data-test-subj="contextWorkflowYamlPreviewLoading" />
         ) : null}
@@ -94,17 +102,14 @@ export const WorkflowYamlPreviewFlyout = ({
           </KbnWarningCallout>
         ) : null}
         {workflowYaml ? (
-          <div css={{ height: '60vh' }}>
-            <CodeEditor
-              languageId="yaml"
-              value={workflowYaml}
-              height="100%"
-              options={READ_ONLY_OPTIONS}
-              isCopyable
-              allowFullScreen
-              data-test-subj="contextWorkflowYamlPreview"
-            />
-          </div>
+          <CodeEditor
+            languageId="yaml"
+            value={workflowYaml}
+            options={READ_ONLY_OPTIONS}
+            isCopyable
+            allowFullScreen
+            data-test-subj="contextWorkflowYamlPreview"
+          />
         ) : null}
       </EuiFlyoutBody>
     </EuiFlyout>
