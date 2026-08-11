@@ -13,7 +13,7 @@ export type { RandomSamplerOption };
 
 export class IndexDataVisualizer {
   readonly randomSamplerOptionsButton: Locator;
-  readonly randomSamplerPopover: Locator;
+  readonly randomSamplerOptionsSelect: Locator;
   private readonly timeRangeSelectorSection: Locator;
   private readonly useFullDataButton: Locator;
   private readonly applyTimeButton: Locator;
@@ -21,7 +21,9 @@ export class IndexDataVisualizer {
 
   constructor(private readonly page: ScoutPage) {
     this.randomSamplerOptionsButton = this.page.testSubj.locator('dvRandomSamplerOptionsButton');
-    this.randomSamplerPopover = this.page.testSubj.locator('dvRandomSamplerOptionsPopover');
+    // Select is only mounted while the panel is open. The popover wrapper's
+    // data-test-subj stays in the DOM even when closed, so it is not a ready signal.
+    this.randomSamplerOptionsSelect = this.page.testSubj.locator('dvRandomSamplerOptionsSelect');
     this.timeRangeSelectorSection = this.page.testSubj.locator(
       'dataVisualizerTimeRangeSelectorSection'
     );
@@ -30,19 +32,28 @@ export class IndexDataVisualizer {
     this.totalDocCount = this.page.testSubj.locator('dataVisualizerTotalDocCount');
   }
 
-  async openRandomSamplerPopover() {
+  private async openRandomSamplerPopoverOnce() {
+    // Escape can race with the toggle click (closes instead of opens). Callers retry.
     await this.page.keyboard.press('Escape');
-    await expect(this.randomSamplerOptionsButton).toBeEnabled({ timeout: 20_000 });
+    await this.randomSamplerOptionsSelect.waitFor({ state: 'hidden', timeout: 2_000 });
+    await expect(this.randomSamplerOptionsButton).toBeEnabled({ timeout: 10_000 });
     await this.randomSamplerOptionsButton.click();
-    await this.randomSamplerPopover.waitFor({ state: 'visible', timeout: 10_000 });
+    await this.randomSamplerOptionsSelect.waitFor({ state: 'visible', timeout: 5_000 });
+  }
+
+  async openRandomSamplerPopover() {
+    await expect(async () => {
+      await this.openRandomSamplerPopoverOnce();
+    }).toPass({ timeout: 20_000 });
   }
 
   async setRandomSamplingOption(option: RandomSamplerOption) {
-    await this.openRandomSamplerPopover();
-    await this.page.testSubj
-      .locator('dvRandomSamplerOptionsSelect')
-      .selectOption(RANDOM_SAMPLER_OPTION_VALUES[option]);
-    await this.page.keyboard.press('Escape');
+    await expect(async () => {
+      await this.openRandomSamplerPopoverOnce();
+      await this.randomSamplerOptionsSelect.selectOption(RANDOM_SAMPLER_OPTION_VALUES[option]);
+      await this.page.keyboard.press('Escape');
+      await this.randomSamplerOptionsSelect.waitFor({ state: 'hidden', timeout: 5_000 });
+    }).toPass({ timeout: 20_000 });
   }
 
   async waitForTimeRangeSelectorSection() {
