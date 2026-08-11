@@ -48,10 +48,7 @@ const toReindexResult = (response: ReindexResponse): ReindexResult => ({
  * destinations) on retry into a partial destination — those are accounted for,
  * not treated as data loss.
  */
-export const assertReindexSucceeded = (
-  result: ReindexResult,
-  context: string
-): void => {
+export const assertReindexSucceeded = (result: ReindexResult, context: string): void => {
   if (result.failures.length > 0) {
     throw new Error(
       `${context}: reindex completed with ${result.failures.length} document failure(s); refusing to delete source`
