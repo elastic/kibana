@@ -35,7 +35,14 @@ export async function getESQLTimeField({
   query: string;
   http?: HttpStart;
 }): Promise<string | undefined> {
-  const cached = timeFieldCache.get(query);
+  // The Monaco ESQL editor stores queries with non-breaking spaces (\u00a0) instead
+  // of regular spaces. The ESQL parser does not treat \u00a0 as whitespace, so queries
+  // with non-breaking spaces are silently unparseable, causing the timefield route to
+  // return undefined and leaving the ad-hoc data view without a timeFieldName.
+  // Normalize before caching and sending so callers using Monaco output behave
+  // identically to callers that have already normalized the query.
+  const normalizedQuery = query.replace(/\u00a0/g, ' ');
+  const cached = timeFieldCache.get(normalizedQuery);
   if (cached !== undefined) {
     return cached;
   }
@@ -43,14 +50,14 @@ export async function getESQLTimeField({
     return undefined;
   }
   const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
+    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: normalizedQuery }) })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch the timefield', error);
-      timeFieldCache.delete(query);
+      timeFieldCache.delete(normalizedQuery);
       return undefined;
     });
-  timeFieldCache.set(query, pendingRequest);
+  timeFieldCache.set(normalizedQuery, pendingRequest);
   return pendingRequest;
 }
