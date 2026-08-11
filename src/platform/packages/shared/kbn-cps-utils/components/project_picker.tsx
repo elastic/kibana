@@ -43,6 +43,7 @@ export interface ProjectPickerProps
   isReadonly?: boolean;
   isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
+  totalProjectCount: number;
 }
 
 export const ProjectPicker = ({
@@ -52,6 +53,7 @@ export const ProjectPicker = ({
   getActiveRouteProjects$,
   defaultProjectRoutingGetter,
   currentProjectRoutingGetter,
+  totalProjectCount,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -89,15 +91,15 @@ export const ProjectPicker = ({
   });
 
   const availableProjects = useMemo((): CPSProject[] | undefined => {
-    if (!projects?.origin || projects.linkedProjects.length === 0) {
+    if (totalProjectCount <= 1 || !projects?.origin) {
       return undefined;
     }
 
     return [
-      projects.origin,
+      projects?.origin,
       ...projects.linkedProjects.slice(0).sort((a, b) => a._alias.localeCompare(b._alias)),
     ];
-  }, [projects?.origin, projects?.linkedProjects]);
+  }, [projects?.origin, projects?.linkedProjects, totalProjectCount]);
 
   if (isDisabled) {
     return (

@@ -6,12 +6,12 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
+import { BehaviorSubject, from, switchMap } from 'rxjs';
 import { useMlKibana } from '../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../job_creator_context';
 import type {
@@ -35,16 +35,23 @@ export const ProjectRoutingSelect: FC = () => {
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState(jobCreator.projectRouting);
+  const projectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
-    [cpsManager]
-  );
+  useEffect(() => {
+    projectRouting$.current.next(projectRouting || undefined);
+  }, [projectRouting]);
 
-  const projectsResult = useFetchProjects(fetchProjects, jobCreator.projectRouting ?? undefined);
-  const projects = projectsResult.isLoading ? undefined : projectsResult;
+  const getProjects$ = useCallback(() => {
+    return projectRouting$.current.pipe(
+      switchMap((routing) => {
+        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
+      })
+    );
+  }, [cpsManager]);
+
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   useEffect(() => {
     setProjectRouting(jobCreator.projectRouting ?? null);
@@ -63,12 +70,13 @@ export const ProjectRoutingSelect: FC = () => {
   return (
     <Description titleId={titleId}>
       <MlProjectPickerPanel
-        projectRouting={projectRouting ?? undefined}
+        projectRouting$={projectRouting$.current}
         onProjectRoutingChange={onProjectRoutingChange}
-        projects={projects}
+        getActiveRouteProjects$={getProjects$}
+        defaultProjectRoutingGetter={defaultProjectRoutingGetter}
         totalProjectCount={totalProjectCount}
         isReadonly={false}
-        disabled={projects === undefined}
+        disabled={projectRouting$?.current.value === undefined}
       />
     </Description>
   );

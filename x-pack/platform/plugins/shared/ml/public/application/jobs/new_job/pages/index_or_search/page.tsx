@@ -6,16 +6,16 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
+import { BehaviorSubject, from, switchMap } from 'rxjs';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
@@ -58,7 +58,12 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState<string | undefined>(undefined);
+  const projectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
+
+  useEffect(() => {
+    projectRouting$.current.next(projectRouting);
+  }, [projectRouting]);
 
   useEffect(() => {
     if (cpsManager) {
@@ -68,14 +73,17 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
     }
   }, [cpsManager]);
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
-    [cpsManager]
-  );
+  const getProjects$ = useCallback(() => {
+    return projectRouting$.current.pipe(
+      switchMap((routing) => {
+        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
+      })
+    );
+  }, [cpsManager]);
 
-  const projects = useFetchProjects(fetchProjects, projectRouting);
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   const onProjectRoutingChange = useCallback((newProjectRouting: ProjectRouting) => {
     setProjectRouting(newProjectRouting as string);
@@ -111,7 +119,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
           back={anomalyDetectionJobsBack}
         />
         <EuiPanel hasShadow={false} hasBorder>
-          {totalProjectCount > 1 && projects ? (
+          {totalProjectCount > 1 ? (
             <>
               <EuiFormRow
                 fullWidth
@@ -123,9 +131,10 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                 }
               >
                 <MlProjectPickerPanel
-                  projectRouting={projectRouting}
                   onProjectRoutingChange={onProjectRoutingChange}
-                  projects={projects}
+                  getActiveRouteProjects$={getProjects$}
+                  projectRouting$={projectRouting$.current}
+                  defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                   totalProjectCount={totalProjectCount}
                   projectRoutingValueTestSubj="mlIndexOrSearchProjectRoutingValue"
                 />

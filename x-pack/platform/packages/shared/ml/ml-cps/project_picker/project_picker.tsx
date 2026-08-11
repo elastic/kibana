@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
+import React, { type ComponentProps, useCallback, type FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
-import { ProjectPicker, DisabledProjectPicker, type UseFetchProjectsResult } from '@kbn/cps-utils';
+import { ProjectPicker, DisabledProjectPicker } from '@kbn/cps-utils';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EMPTY, type BehaviorSubject } from 'rxjs';
+import { useObservable } from '@kbn/use-observable';
 
-export interface MlProjectPickerPanelProps {
-  projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  projects?: UseFetchProjectsResult;
+export interface MlProjectPickerPanelProps
+  extends Pick<
+    ComponentProps<typeof ProjectPicker>,
+    'onProjectRoutingChange' | 'getActiveRouteProjects$' | 'defaultProjectRoutingGetter'
+  > {
+  projectRouting$?: BehaviorSubject<ProjectRouting>;
   totalProjectCount: number;
   isReadonly?: boolean;
   disabled?: boolean;
@@ -25,16 +28,26 @@ export interface MlProjectPickerPanelProps {
 }
 
 export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
-  projectRouting,
+  projectRouting$,
   onProjectRoutingChange,
-  projects,
   totalProjectCount,
   isReadonly = false,
   disabled = false,
   displayDisabledTooltip = true,
   projectRoutingValueTestSubj,
+  getActiveRouteProjects$,
+  defaultProjectRoutingGetter,
 }) => {
-  const isDisabled = disabled || projects === undefined;
+  const isDisabled = disabled || projectRouting$ === undefined;
+
+  const currentProjectRoutingGetter = useCallback(() => {
+    return projectRouting$?.value;
+  }, [projectRouting$]);
+
+  const projectRouting = useObservable(
+    projectRouting$?.asObservable() ?? EMPTY,
+    defaultProjectRoutingGetter()
+  );
 
   return (
     <EuiPanel
@@ -59,11 +72,13 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
             />
           ) : (
             <ProjectPicker
-              projectRouting={projectRouting}
-              onProjectRoutingChange={onProjectRoutingChange}
-              projects={projects}
+              getActiveRouteProjects$={getActiveRouteProjects$}
               totalProjectCount={totalProjectCount}
+              currentProjectRoutingGetter={currentProjectRoutingGetter}
+              defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+              onProjectRoutingChange={onProjectRoutingChange}
               isReadonly={isReadonly}
+              isDisabled={disabled}
             />
           )}
         </EuiFlexItem>

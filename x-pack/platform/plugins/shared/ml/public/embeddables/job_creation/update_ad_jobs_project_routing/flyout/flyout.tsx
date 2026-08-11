@@ -6,12 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,9 +29,10 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { useFetchProjects } from '@kbn/cps-utils';
 import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
+import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
 import { useMlKibana, useNotifications } from '../../../../application/contexts/kibana';
@@ -92,15 +92,24 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const [selectedProjectRouting, setSelectedProjectRouting] = useState<string>(
     DEFAULT_ML_PROJECT_ROUTING
   );
+  const selectedProjectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
   const [hasInitializedProjectRouting, setHasInitializedProjectRouting] = useState(false);
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
-    [cpsManager]
-  );
-  const projects = useFetchProjects(fetchProjects, selectedProjectRouting);
+  useEffect(() => {
+    selectedProjectRouting$.current.next(selectedProjectRouting);
+  }, [selectedProjectRouting]);
+
+  const getProjects$ = useCallback(() => {
+    return selectedProjectRouting$.current.pipe(
+      switchMap((routing) => {
+        return from(cpsManager?.fetchProjects(routing) ?? Promise.resolve(null));
+      })
+    );
+  }, [cpsManager]);
+
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   const onProjectRoutingChange = useCallback((projectRouting: ProjectRouting) => {
     setSelectedProjectRouting(projectRouting as string);
@@ -277,7 +286,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {allowScopeSelection && totalProjectCount > 1 && projects ? (
+        {allowScopeSelection && totalProjectCount > 1 ? (
           <>
             <EuiFormRow
               label={
@@ -288,9 +297,10 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
               }
             >
               <MlProjectPickerPanel
-                projectRouting={selectedProjectRouting}
+                projectRouting$={selectedProjectRouting$.current}
                 onProjectRoutingChange={onProjectRoutingChange}
-                projects={projects}
+                getActiveRouteProjects$={getProjects$}
+                defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                 totalProjectCount={totalProjectCount}
                 projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
                 disabled={hasInitializedProjectRouting === false}
@@ -299,23 +309,23 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
             {selectedProjectRouting !== DEFAULT_ML_PROJECT_ROUTING ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut
+                <KbnWarningCallout
                   announceOnMount
-                  color="warning"
                   title={i18n.translate(
                     'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarningTitle',
                     {
                       defaultMessage: 'Non-default project scope selected',
                     }
                   )}
+                  text={
+                    <FormattedMessage
+                      id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarning"
+                      defaultMessage="Using a project routing scope other than {defaultScope} may negatively affect the job's anomaly detection results."
+                      values={{ defaultScope: DEFAULT_ML_PROJECT_ROUTING }}
+                    />
+                  }
                   data-test-subj="mlUpdateAdJobsProjectRoutingScopeWarning"
-                >
-                  <FormattedMessage
-                    id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarning"
-                    defaultMessage="Using a project routing scope other than {defaultScope} may negatively affect the job's anomaly detection results."
-                    values={{ defaultScope: DEFAULT_ML_PROJECT_ROUTING }}
-                  />
-                </EuiCallOut>
+                />
               </>
             ) : null}
             <EuiSpacer size="m" />
@@ -326,9 +336,8 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
             <EuiLoadingSpinner size="l" data-test-subj="mlUpdateAdJobsProjectRoutingLoading" />
           </EuiFlexGroup>
         ) : loadError ? (
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color="danger"
             title={i18n.translate(
               'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.loadErrorTitle',
               {
@@ -337,7 +346,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
             )}
           >
             {loadError.message}
-          </EuiCallOut>
+          </KbnDangerCallout>
         ) : jobIds.length === 0 ? (
           <EuiEmptyPrompt
             data-test-subj="mlUpdateAdJobsProjectRoutingNoJobs"

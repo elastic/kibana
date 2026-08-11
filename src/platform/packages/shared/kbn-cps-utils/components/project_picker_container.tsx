@@ -75,6 +75,7 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
 
   return (
     <ProjectPicker
+      totalProjectCount={cpsManager.getTotalProjectCount()}
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       onProjectRoutingChange={updateProjectRouting}
