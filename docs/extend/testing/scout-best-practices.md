@@ -145,6 +145,8 @@ await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1'
 
 :::::
 
+The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites. For per-test data, use `afterEach`/`afterAll`. For suite-wide state (feature flags, global settings, shared archives), use a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
+
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
 
 A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
