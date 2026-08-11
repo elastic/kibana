@@ -574,6 +574,22 @@ async function retrieveAgentPolicyId(soClient: SavedObjectsClientContract, agent
   });
 }
 
+/**
+ * Elasticsearch expires the underlying API key on its own schedule, but nothing writes
+ * `active: false` back to the enrollment key document, so a key that is past its expiration
+ * date is still stored as active. An unparseable date is treated as not expired, so a bad
+ * value never hides a key that still works.
+ */
+function isExpired(expireAt?: string): boolean {
+  if (!expireAt) {
+    return false;
+  }
+
+  const expireAtMs = Date.parse(expireAt);
+
+  return !Number.isNaN(expireAtMs) && expireAtMs <= Date.now();
+}
+
 function esDocToEnrollmentApiKey(doc: {
   _id: string;
   _source: FleetServerEnrollmentAPIKey;
@@ -585,7 +601,7 @@ function esDocToEnrollmentApiKey(doc: {
     name: doc._source.name,
     policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
-    active: doc._source.active || false,
+    active: (doc._source.active || false) && !isExpired(doc._source.expire_at),
     hidden: doc._source.hidden || false,
     ...(doc._source.expire_at ? { expire_at: doc._source.expire_at } : {}),
   };

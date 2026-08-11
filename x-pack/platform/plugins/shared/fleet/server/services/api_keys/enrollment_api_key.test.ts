@@ -21,6 +21,7 @@ import {
   deleteEnrollmentApiKeys,
   generateEnrollmentAPIKey,
   getEnrollmentAPIKey,
+  listEnrollmentApiKeys,
 } from './enrollment_api_key';
 
 jest.mock('../audit_logging');
@@ -395,6 +396,107 @@ describe('enrollment api keys', () => {
       ).rejects.toThrowError(
         'Enrollment api key test-enrollment-api-key-id not found in namespace'
       );
+    });
+  });
+
+  describe('expired enrollment api keys', () => {
+    const HOUR_IN_MS = 60 * 60 * 1000;
+
+    const esDoc = (source: Record<string, unknown>) => ({
+      _id: 'test-id',
+      _index: ENROLLMENT_API_KEYS_INDEX,
+      _source: {
+        active: true,
+        created_at: new Date().toISOString(),
+        api_key_id: 'test-enrollment-api-key-id',
+        ...source,
+      },
+      found: true,
+    });
+
+    it('should report a key past its expiration date as inactive', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue(
+        esDoc({ expire_at: new Date(Date.now() - HOUR_IN_MS).toISOString() }) as any
+      );
+
+      const enrollmentKey = await getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id');
+
+      expect(enrollmentKey.active).toBe(false);
+    });
+
+    it('should report a key that has not reached its expiration date as active', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue(
+        esDoc({ expire_at: new Date(Date.now() + HOUR_IN_MS).toISOString() }) as any
+      );
+
+      const enrollmentKey = await getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id');
+
+      expect(enrollmentKey.active).toBe(true);
+    });
+
+    it('should report a key without an expiration date as active', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue(esDoc({}) as any);
+
+      const enrollmentKey = await getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id');
+
+      expect(enrollmentKey.active).toBe(true);
+    });
+
+    it('should report a key with an unparseable expiration date as active', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue(esDoc({ expire_at: 'not-a-date' }) as any);
+
+      const enrollmentKey = await getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id');
+
+      expect(enrollmentKey.active).toBe(true);
+    });
+
+    it('should keep a revoked key inactive regardless of its expiration date', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.get.mockResolvedValue(
+        esDoc({
+          active: false,
+          expire_at: new Date(Date.now() + HOUR_IN_MS).toISOString(),
+        }) as any
+      );
+
+      const enrollmentKey = await getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id');
+
+      expect(enrollmentKey.active).toBe(false);
+    });
+
+    it('should report expired keys as inactive when listing', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 2,
+          hits: [
+            esDoc({
+              expire_at: new Date(Date.now() - HOUR_IN_MS).toISOString(),
+            }),
+            {
+              ...esDoc({ expire_at: new Date(Date.now() + HOUR_IN_MS).toISOString() }),
+              _id: 'test-id-2',
+            },
+          ],
+        },
+      } as any);
+
+      const { items } = await listEnrollmentApiKeys(esClient, {});
+
+      expect(items.map(({ id, active }) => ({ id, active }))).toEqual([
+        { id: 'test-id', active: false },
+        { id: 'test-id-2', active: true },
+      ]);
     });
   });
 });
