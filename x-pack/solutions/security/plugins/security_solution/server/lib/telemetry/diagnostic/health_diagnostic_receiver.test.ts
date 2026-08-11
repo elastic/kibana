@@ -870,6 +870,8 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       ['value with /', '_transform/{id}/_stats', { id: 'a/b' }],
       ['value with backslash', '_transform/{id}/_stats', { id: 'a\\b' }],
       ['traversal prefix', '_transform/{id}/_stats', { id: '../other' }],
+      ['value with ? (query-string injection)', '_transform/{id}/_stats', { id: 'foo?x=1' }],
+      ['value with # (fragment injection)', '_transform/{id}/_stats', { id: 'foo#bar' }],
     ])('rejects path traversal attempt: %s', (_, template, pathParams) => {
       expect(() => interpolatePath(template, pathParams)).toThrow('Invalid path parameter value');
     });
