@@ -7,9 +7,9 @@
 
 import {
   API_VERSIONS,
-  DeleteEvaluationDatasetExampleRequestParams,
-  EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_RESOLVE_URL,
   INTERNAL_API_ACCESS,
+  ResolveEvaluationDatasetRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -20,31 +20,37 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
-import { ExampleNotFoundError } from '../../storage/example_not_found_error';
+import { redactSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
-export const registerDeleteExampleRoute = ({
+/**
+ * Looks a dataset up by name. Ids are derived from the owning space, so a
+ * client holding only a name can no longer compute one for itself.
+ */
+export const registerResolveDatasetRoute = ({
   router,
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
   getSpaceId,
+  getAccessibleSpaceIds,
 }: RouteDependencies) => {
   router.versioned
-    .delete({
-      path: EVALS_DATASET_EXAMPLE_URL,
+    .get({
+      path: EVALS_DATASET_RESOLVE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
-      summary: 'Delete evaluation dataset example',
+      summary: 'Resolve evaluation dataset by name',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(DeleteEvaluationDatasetExampleRequestParams),
+            query: buildRouteValidationWithZod(ResolveEvaluationDatasetRequestQuery),
           },
         },
       },
@@ -63,7 +69,7 @@ export const registerDeleteExampleRoute = ({
               encryptedSavedObjects,
               remoteId: destination,
               request,
-              method: 'DELETE',
+              method: 'GET',
             });
 
             if (forwarded.statusCode === 200) {
@@ -79,23 +85,32 @@ export const registerDeleteExampleRoute = ({
             });
           }
 
-          const { datasetId, exampleId } = request.params;
+          const { name } = request.query;
           const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+          const dataset = await datasetClient.resolveByName(name);
 
-          const exists = await datasetClient.datasetExists(datasetId);
-          if (!exists) {
+          if (!dataset) {
             return response.notFound({
-              body: { message: `Evaluation dataset not found: ${datasetId}` },
+              body: { message: `Evaluation dataset not found: ${name}` },
             });
           }
 
-          await datasetClient.deleteExample(exampleId, datasetId);
-
           return response.ok({
             body: {
-              success: true,
+              id: dataset.id,
+              name: dataset.name,
+              description: dataset.description,
+              tags: dataset.tags,
+              maturity: dataset.maturity,
+              examples_count: dataset.examples_count,
+              created_at: dataset.created_at,
+              updated_at: dataset.updated_at,
+              space_ids: redactSpaceIds(
+                dataset.space_ids,
+                getAccessibleSpaceIds ? await getAccessibleSpaceIds(request) : undefined
+              ),
             },
           });
         } catch (error) {
@@ -107,17 +122,19 @@ export const registerDeleteExampleRoute = ({
             });
           }
 
-          if (error instanceof ExampleNotFoundError) {
-            return response.notFound({
-              body: { message: error.message },
-            });
-          }
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Resolve evaluation dataset',
+          });
+          if (tooLarge) return tooLarge;
 
           const errorMessage = error instanceof Error ? error.message : String(error);
-          logger.error(`Failed to delete evaluation dataset example: ${errorMessage}`);
+          logger.error(`Failed to resolve evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to delete evaluation dataset example' },
+            body: { message: 'Failed to resolve evaluation dataset' },
           });
         }
       }

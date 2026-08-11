@@ -8,6 +8,7 @@
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   InternalIStorageClient,
   StorageClientBulkOperation,
@@ -26,6 +27,8 @@ import {
   MAX_TAGS_PER_DATASET,
   type DatasetMaturity,
 } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
@@ -59,6 +62,8 @@ export interface CreateDatasetInput {
   tags?: string[];
   maturity?: DatasetMaturity;
   examples?: DatasetExampleInput[];
+  /** Spaces to assign the dataset to. Defaults to the client's own space. */
+  spaceIds?: string[];
 }
 
 export interface UpsertDatasetInput {
@@ -67,6 +72,11 @@ export interface UpsertDatasetInput {
   tags?: string[];
   maturity?: DatasetMaturity;
   examples: DatasetExampleInput[];
+  /**
+   * Spaces to assign on create. An upsert never reassigns an existing dataset,
+   * so a CI run can't move one that other spaces are reading.
+   */
+  spaceIds?: string[];
 }
 
 /**
@@ -77,13 +87,20 @@ export interface UpdateDatasetInput {
   description?: string;
   tags?: string[];
   maturity?: DatasetMaturity | null;
+  /** Reassigns the dataset's spaces. Must be non-empty when provided. */
+  spaceIds?: string[];
 }
+
+/** Whether a delete removed the dataset or only detached it from one space. */
+export type DatasetDeleteResult = 'deleted' | 'unshared' | 'not_found';
 
 export interface DatasetDocument extends DatasetStorageProperties {
   id: string;
   // Normalized on read: legacy documents missing the stored field are
   // backfilled to 0, so callers can always rely on a number here.
   examples_count: number;
+  // Normalized on read: an absent assignment resolves to the default space.
+  space_ids: string[];
 }
 
 export interface DatasetWithExamples extends DatasetDocument {
@@ -157,19 +174,26 @@ export class DatasetClient {
   private readonly examplesStorage: InternalIStorageClient<DatasetExampleStorageDocument>;
   private readonly datasetWriter: OccWriter<DatasetStorageProperties>;
   private readonly logger?: Logger;
+  /** The space reads are narrowed to and writes are stamped with. */
+  private readonly spaceId: string;
+  private readonly spaceFilter: QueryDslQueryContainer;
 
   constructor({
     datasetsStorageAdapter,
     examplesStorageAdapter,
     logger,
+    spaceId,
   }: {
     datasetsStorageAdapter: DatasetsStorageAdapter;
     examplesStorageAdapter: DatasetExamplesStorageAdapter;
     logger?: Logger;
+    spaceId: string;
   }) {
     this.datasetsStorage = datasetsStorageAdapter.getClient();
     this.examplesStorage = examplesStorageAdapter.getClient();
     this.logger = logger;
+    this.spaceId = spaceId;
+    this.spaceFilter = buildDatasetSpaceFilter(spaceId);
 
     // Every dataset write is a read-modify-write of the whole document, because the
     // storage adapter can only replace documents outright. Without a conditional write
@@ -205,8 +229,15 @@ export class DatasetClient {
     });
   }
 
-  static getDatasetId(name: string): string {
-    return uuidv5(name, DATASET_UUID_NAMESPACE);
+  /**
+   * Names are unique per space, so the id has to include the owning space. The
+   * default space keeps the original `uuidv5(name)` derivation, so existing
+   * documents and older SDKs still resolve to the same dataset.
+   */
+  static getDatasetId(spaceId: string, name: string): string {
+    return spaceId === DEFAULT_SPACE_ID
+      ? uuidv5(name, DATASET_UUID_NAMESPACE)
+      : uuidv5(JSON.stringify([spaceId, name]), DATASET_UUID_NAMESPACE);
   }
 
   static getExampleId({
@@ -222,14 +253,21 @@ export class DatasetClient {
     });
   }
 
+  /** Narrows a query to the client's space. Every read goes through this. */
+  private scoped(query: QueryDslQueryContainer): QueryDslQueryContainer {
+    return { bool: { must: [query], filter: [this.spaceFilter] } };
+  }
+
   async create({
     name,
     description,
     tags,
     maturity,
     examples = [],
+    spaceIds,
   }: CreateDatasetInput): Promise<DatasetWithExamples> {
-    const datasetId = DatasetClient.getDatasetId(name);
+    const activeSpaceId = this.spaceId;
+    const datasetId = DatasetClient.getDatasetId(activeSpaceId, name);
     const now = new Date().toISOString();
 
     try {
@@ -242,6 +280,7 @@ export class DatasetClient {
             description,
             created_at: now,
             updated_at: now,
+            space_ids: normalizeSpaceIds(spaceIds, activeSpaceId),
           },
           { tags, maturity, examples_count: 0 }
         ),
@@ -286,11 +325,11 @@ export class DatasetClient {
       track_total_hits: false,
       size: 1,
       _source: ['name'],
-      query: {
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     return response.hits.hits.length > 0;
@@ -300,11 +339,11 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
-      query: {
+      query: this.scoped({
         term: {
           name,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -313,6 +352,31 @@ export class DatasetClient {
     }
 
     return this.get(hit._id);
+  }
+
+  /** Resolves a name to a dataset without loading its examples. */
+  async resolveByName(name: string): Promise<DatasetDocument | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      query: this.scoped({
+        term: {
+          name,
+        },
+      }),
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || !hit._id) {
+      return undefined;
+    }
+
+    return {
+      id: hit._id,
+      ...hit._source,
+      examples_count: hit._source.examples_count ?? 0,
+      space_ids: normalizeSpaceIds(hit._source.space_ids),
+    };
   }
 
   async list(options: DatasetListOptions = {}): Promise<DatasetListResult> {
@@ -370,16 +434,19 @@ export class DatasetClient {
       from,
       size: perPage,
       sort: [{ [sortField]: { order: sortOrder } }],
-      query: filters.length > 0 ? { bool: { must: [searchQuery], filter: filters } } : searchQuery,
+      query: this.scoped(
+        filters.length > 0 ? { bool: { must: [searchQuery], filter: filters } } : searchQuery
+      ),
       // `global` escapes the request query so the facet counts aren't narrowed by
       // the tag/maturity filters, then `scoped` re-applies just the search term.
       // Otherwise selecting a tag would hide every tag it doesn't co-occur with.
+      // The space filter is escaped too, so `scoped` puts that back as well.
       aggs: {
         facets: {
           global: {},
           aggs: {
             scoped: {
-              filter: searchQuery,
+              filter: this.scoped(searchQuery),
               aggs: {
                 tags: { terms: { field: 'tags', size: MAX_DATASET_TAG_FACETS } },
                 maturity: { terms: { field: 'maturity', size: MATURITY_FACET_SIZE } },
@@ -399,6 +466,7 @@ export class DatasetClient {
         id: hit._id,
         ...hit._source,
         examples_count: hit._source.examples_count ?? 0,
+        space_ids: normalizeSpaceIds(hit._source.space_ids),
       }));
 
     return {
@@ -413,11 +481,16 @@ export class DatasetClient {
 
   async update(
     datasetId: string,
-    updates: UpdateDatasetInput
+    { spaceIds, ...updates }: UpdateDatasetInput
   ): Promise<DatasetWithExamples | undefined> {
     const updatedAt = new Date().toISOString();
+    const activeSpaceId = this.spaceId;
     const written = await this.writeDatasetIfPresent(datasetId, (current) =>
-      buildDatasetDocument(current, { ...updates, updated_at: updatedAt })
+      buildDatasetDocument(current, {
+        ...updates,
+        ...(spaceIds ? { space_ids: normalizeSpaceIds(spaceIds, activeSpaceId) } : {}),
+        updated_at: updatedAt,
+      })
     );
 
     if (!written) {
@@ -427,16 +500,36 @@ export class DatasetClient {
     return this.get(datasetId);
   }
 
-  async delete(datasetId: string): Promise<boolean> {
-    const exists = await this.datasetExists(datasetId);
-    if (!exists) {
-      return false;
+  /**
+   * Removes the dataset from the caller's space, detaching it while other
+   * spaces still share it and deleting it when the last one lets go. `*` can't
+   * be narrowed by subtraction, so deleting it is always a real delete.
+   */
+  async delete(datasetId: string): Promise<DatasetDeleteResult> {
+    const activeSpaceId = this.spaceId;
+    const current = await this.getDatasetForWrite(datasetId);
+    if (!current) {
+      return 'not_found';
+    }
+
+    const spaceIds = normalizeSpaceIds(current.source.space_ids);
+    const remaining = spaceIds.filter((spaceId) => spaceId !== activeSpaceId);
+
+    if (!spaceIds.includes(ALL_SPACES_ID) && remaining.length > 0) {
+      const written = await this.writeDatasetIfPresent(datasetId, (dataset) =>
+        buildDatasetDocument(dataset, {
+          space_ids: remaining,
+          updated_at: new Date().toISOString(),
+        })
+      );
+
+      return written ? 'unshared' : 'not_found';
     }
 
     await this.deleteExamplesByDatasetId(datasetId);
 
     const deleteDatasetResponse = await this.datasetsStorage.delete({ id: datasetId });
-    return deleteDatasetResponse.result === 'deleted';
+    return deleteDatasetResponse.result === 'deleted' ? 'deleted' : 'not_found';
   }
 
   async addExamples(
@@ -497,6 +590,12 @@ export class DatasetClient {
     updates: Partial<Pick<DatasetExampleStorageProperties, 'input' | 'output' | 'metadata'>>,
     expectedDatasetId: string
   ): Promise<ExampleDocument> {
+    // Examples carry no space of their own, so an example is only reachable
+    // through a dataset this space can see.
+    if (!(await this.datasetExists(expectedDatasetId))) {
+      throw new ExampleNotFoundError(exampleId);
+    }
+
     const ownerDatasetId = await this.getExampleDatasetId(exampleId);
     if (!ownerDatasetId || ownerDatasetId !== expectedDatasetId) {
       throw new ExampleNotFoundError(exampleId);
@@ -549,6 +648,10 @@ export class DatasetClient {
   }
 
   async deleteExample(exampleId: string, expectedDatasetId: string): Promise<void> {
+    if (!(await this.datasetExists(expectedDatasetId))) {
+      throw new ExampleNotFoundError(exampleId);
+    }
+
     const datasetId = await this.getExampleDatasetId(exampleId);
     if (!datasetId || datasetId !== expectedDatasetId) {
       throw new ExampleNotFoundError(exampleId);
@@ -616,11 +719,12 @@ export class DatasetClient {
     tags,
     maturity,
     examples,
+    spaceIds,
   }: UpsertDatasetInput): Promise<UpsertDatasetResult> {
     const existing = await this.getByName(name);
 
     if (!existing) {
-      const created = await this.create({ name, description, tags, maturity, examples });
+      const created = await this.create({ name, description, tags, maturity, examples, spaceIds });
       return {
         dataset_id: created.id,
         added: created.examples.length,
@@ -715,11 +819,11 @@ export class DatasetClient {
       track_total_hits: false,
       size: 1,
       seq_no_primary_term: true,
-      query: {
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -738,11 +842,11 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
-      query: {
+      query: this.scoped({
         term: {
           _id: datasetId,
         },
-      },
+      }),
     });
 
     const hit = response.hits.hits[0];
@@ -754,6 +858,7 @@ export class DatasetClient {
       id: hit._id,
       ...hit._source,
       examples_count: hit._source.examples_count ?? 0,
+      space_ids: normalizeSpaceIds(hit._source.space_ids),
     };
   }
 
@@ -850,48 +955,6 @@ export class DatasetClient {
   }
 
   /**
-   * Counts examples for many datasets in a single request via a `terms`
-   * aggregation. Used by the backfill to avoid one count search per dataset.
-   * Datasets with no examples are absent from the result (callers default to 0).
-   */
-  private async countExamplesByDatasetIds(datasetIds: string[]): Promise<Map<string, number>> {
-    if (datasetIds.length === 0) {
-      return new Map();
-    }
-
-    const response = await this.examplesStorage.search({
-      track_total_hits: false,
-      size: 0,
-      query: {
-        terms: {
-          dataset_id: datasetIds,
-        },
-      },
-      aggs: {
-        by_dataset_id: {
-          terms: {
-            field: 'dataset_id',
-            size: datasetIds.length,
-          },
-        },
-      },
-    });
-
-    const buckets =
-      (
-        response.aggregations?.by_dataset_id as
-          | { buckets?: Array<{ key: string; doc_count: number }> }
-          | undefined
-      )?.buckets ?? [];
-
-    const counts = new Map<string, number>();
-    for (const bucket of buckets) {
-      counts.set(bucket.key, bucket.doc_count);
-    }
-    return counts;
-  }
-
-  /**
    * Recomputes the denormalized `examples_count` for a dataset and writes it
    * back, optionally applying a metadata patch in the same write. By default
    * this also advances `updated_at` (a "touch"); pass `bumpUpdatedAt: false` to
@@ -959,63 +1022,6 @@ export class DatasetClient {
       throw error;
     }
   }
-
-  /**
-   * Backfills the denormalized `examples_count` on datasets that predate the
-   * field. Idempotent: only datasets missing the field are processed, so reruns
-   * (and fresh/empty deployments) are no-ops. Intended to run once on plugin
-   * start.
-   *
-   * Unlike the other write paths this one isn't version-checked, since bulk needs
-   * per-item conflict handling. The exposure is a single start-up pass over
-   * documents old enough to be missing the field, so an edit would have to land in
-   * that window to be lost.
-   */
-  async backfillDatasetCounts(): Promise<{ updated: number }> {
-    const batchSize = 100;
-    let updated = 0;
-
-    for (;;) {
-      // Reads the whole document rather than a field projection: the rewrite
-      // below replaces the document, so anything left out would be dropped.
-      const response = await this.datasetsStorage.search({
-        track_total_hits: false,
-        size: batchSize,
-        query: {
-          bool: {
-            must_not: [{ exists: { field: 'examples_count' } }],
-          },
-        },
-      });
-
-      const hits = response.hits.hits.filter(
-        (hit): hit is typeof hit & { _source: DatasetStorageDocument; _id: string } =>
-          Boolean(hit._source) && typeof hit._id === 'string'
-      );
-
-      if (hits.length === 0) {
-        break;
-      }
-
-      const counts = await this.countExamplesByDatasetIds(hits.map((hit) => hit._id));
-
-      const operations: Array<StorageClientBulkOperation<DatasetStorageDocument>> = hits.map(
-        (hit) => ({
-          index: {
-            _id: hit._id,
-            document: buildDatasetDocument(hit._source, {
-              examples_count: counts.get(hit._id) ?? 0,
-            }),
-          },
-        })
-      );
-
-      await this.datasetsStorage.bulk({ operations, refresh: 'wait_for', throwOnFail: true });
-      updated += operations.length;
-    }
-
-    return { updated };
-  }
 }
 
 /**
@@ -1032,7 +1038,43 @@ interface DatasetPatch {
   maturity?: DatasetMaturity | null;
   examples_count?: number;
   updated_at?: string;
+  space_ids?: string[];
 }
+
+/**
+ * Resolves the spaces a dataset belongs to. An absent assignment means the
+ * default space, as it does for scores. An empty one would hide the dataset
+ * everywhere, so it falls back rather than being stored.
+ */
+const normalizeSpaceIds = (
+  spaceIds: string[] | undefined,
+  fallback: string = DEFAULT_SPACE_ID
+): string[] => {
+  const normalized = dedupe((spaceIds ?? []).filter((spaceId) => spaceId.length > 0));
+
+  if (normalized.length === 0) {
+    return [fallback];
+  }
+
+  return normalized.includes(ALL_SPACES_ID) ? [ALL_SPACES_ID] : normalized;
+};
+
+/**
+ * Matches datasets visible in a space: those assigned to it, those assigned to
+ * all spaces, and — in the default space only — those predating the field.
+ *
+ * Restates `buildSpaceFilter` from `@kbn/evals-common`, which does the same for
+ * scores untyped; `dataset_client.test.ts` asserts the two agree.
+ */
+const buildDatasetSpaceFilter = (spaceId: string): QueryDslQueryContainer => {
+  const should: QueryDslQueryContainer[] = [{ terms: { space_ids: [spaceId, ALL_SPACES_ID] } }];
+
+  if (spaceId === DEFAULT_SPACE_ID) {
+    should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
+  }
+
+  return { bool: { should, minimum_should_match: 1 } };
+};
 
 /**
  * Rebases a patch onto the current document, since the storage adapter can only
@@ -1046,6 +1088,9 @@ const buildDatasetDocument = (
 ): DatasetStorageProperties => {
   const tags = patch.tags === undefined ? existing.tags : normalizeTags(patch.tags);
   const maturity = patch.maturity === undefined ? existing.maturity : patch.maturity;
+  // Writes replace the whole document, so dropping this would reset the dataset
+  // to the default space on the next example insert.
+  const spaceIds = patch.space_ids === undefined ? existing.space_ids : patch.space_ids;
 
   return {
     name: existing.name,
@@ -1055,6 +1100,7 @@ const buildDatasetDocument = (
     updated_at: patch.updated_at ?? existing.updated_at,
     ...(tags && tags.length > 0 ? { tags } : {}),
     ...(maturity ? { maturity } : {}),
+    ...(spaceIds && spaceIds.length > 0 ? { space_ids: spaceIds } : {}),
   };
 };
 

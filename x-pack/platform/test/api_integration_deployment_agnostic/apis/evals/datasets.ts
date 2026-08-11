@@ -11,6 +11,7 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   type AddEvaluationDatasetExamplesResponse,
   type CreateEvaluationDatasetResponse,
@@ -18,6 +19,7 @@ import {
   type DeleteEvaluationDatasetResponse,
   type GetEvaluationDatasetResponse,
   type GetEvaluationDatasetsResponse,
+  type ResolveEvaluationDatasetResponse,
   type UpdateEvaluationDatasetExampleResponse,
   type UpdateEvaluationDatasetResponse,
   type UpsertEvaluationDatasetResponse,
@@ -29,6 +31,7 @@ import { uniqueSuffix } from './helpers/fixtures';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const spaces = getService('spaces');
 
   let adminClient: SupertestWithRoleScopeType;
   let viewerClient: SupertestWithRoleScopeType;
@@ -292,6 +295,139 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             examples: [],
           })
           .expect(403);
+      });
+    });
+
+    describe('spaces', () => {
+      const spaceId = `evals-space-${suffix}`;
+      const inSpace = (path: string) => `/s/${spaceId}${path}`;
+      const sharedName = `FTR Shared Dataset ${suffix}`;
+      const createdDatasetIds: Array<{ id: string; path: (id: string) => string }> = [];
+
+      before(async () => {
+        await spaces.create({ id: spaceId, name: 'Evals Space', disabledFeatures: [] });
+      });
+
+      after(async () => {
+        for (const { id, path } of createdDatasetIds) {
+          await adminClient.delete(path(id)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+        await spaces.delete(spaceId);
+      });
+
+      it('keeps a dataset created in one space out of another', async () => {
+        const name = `FTR Space Scoped ${suffix}`;
+        const { body } = await adminClient
+          .post(inSpace(EVALS_DATASETS_URL))
+          .send({ name, description: 'lives in one space' })
+          .expect(200);
+
+        const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+        createdDatasetIds.push({ id: datasetId, path: (id) => inSpace(datasetPath(id)) });
+
+        await adminClient.get(inSpace(datasetPath(datasetId))).expect(200);
+        await adminClient.get(datasetPath(datasetId)).expect(404);
+
+        const { body: defaultListing } = await adminClient
+          .get(EVALS_DATASETS_URL)
+          .query({ search: name })
+          .expect(200);
+        expect((defaultListing as GetEvaluationDatasetsResponse).datasets).to.eql([]);
+      });
+
+      it('allows the same dataset name in two spaces', async () => {
+        const { body: defaultBody } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: sharedName, description: 'default space copy' })
+          .expect(200);
+        const defaultId = (defaultBody as CreateEvaluationDatasetResponse).dataset_id;
+        createdDatasetIds.push({ id: defaultId, path: datasetPath });
+
+        const { body: spaceBody } = await adminClient
+          .post(inSpace(EVALS_DATASETS_URL))
+          .send({ name: sharedName, description: 'other space copy' })
+          .expect(200);
+        const spaceScopedId = (spaceBody as CreateEvaluationDatasetResponse).dataset_id;
+        createdDatasetIds.push({ id: spaceScopedId, path: (id) => inSpace(datasetPath(id)) });
+
+        expect(spaceScopedId).to.not.eql(defaultId);
+      });
+
+      it('resolves a name to the id of the space it is asked from', async () => {
+        const { body: defaultResolved } = await adminClient
+          .get(EVALS_DATASET_RESOLVE_URL)
+          .query({ name: sharedName })
+          .expect(200);
+        const { body: spaceResolved } = await adminClient
+          .get(inSpace(EVALS_DATASET_RESOLVE_URL))
+          .query({ name: sharedName })
+          .expect(200);
+
+        const defaultId = (defaultResolved as ResolveEvaluationDatasetResponse).id;
+        const spaceScopedId = (spaceResolved as ResolveEvaluationDatasetResponse).id;
+        expect(defaultId).to.not.eql(spaceScopedId);
+        expect((defaultResolved as ResolveEvaluationDatasetResponse).description).to.eql(
+          'default space copy'
+        );
+        expect((spaceResolved as ResolveEvaluationDatasetResponse).description).to.eql(
+          'other space copy'
+        );
+      });
+
+      it('shares a dataset across spaces when asked, and reports where it lives', async () => {
+        const name = `FTR Multi Space ${suffix}`;
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'shared', space_ids: ['default', spaceId] })
+          .expect(200);
+
+        const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+        createdDatasetIds.push({ id: datasetId, path: datasetPath });
+
+        const { body: fromDefault } = await adminClient.get(datasetPath(datasetId)).expect(200);
+        const { body: fromSpace } = await adminClient
+          .get(inSpace(datasetPath(datasetId)))
+          .expect(200);
+
+        expect((fromDefault as GetEvaluationDatasetResponse).space_ids?.sort()).to.eql(
+          ['default', spaceId].sort()
+        );
+        expect((fromSpace as GetEvaluationDatasetResponse).id).to.eql(datasetId);
+      });
+
+      it('unshares instead of deleting a dataset another space still uses', async () => {
+        const name = `FTR Unshare ${suffix}`;
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'shared', space_ids: ['default', spaceId] })
+          .expect(200);
+
+        const { dataset_id: datasetId } = body as CreateEvaluationDatasetResponse;
+
+        const { body: deleted } = await adminClient
+          .delete(inSpace(datasetPath(datasetId)))
+          .expect(200);
+        expect((deleted as DeleteEvaluationDatasetResponse).unshared).to.be(true);
+
+        await adminClient.get(inSpace(datasetPath(datasetId))).expect(404);
+        await adminClient.get(datasetPath(datasetId)).expect(200);
+
+        const { body: finalDelete } = await adminClient.delete(datasetPath(datasetId)).expect(200);
+        expect((finalDelete as DeleteEvaluationDatasetResponse).unshared).to.be(false);
+        await adminClient.get(datasetPath(datasetId)).expect(404);
+      });
+
+      it('rejects a space id that does not exist', async () => {
+        await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({
+            name: `FTR Bad Space ${suffix}`,
+            description: 'should be rejected',
+            space_ids: [`missing-space-${suffix}`],
+          })
+          .expect(400);
       });
     });
   });

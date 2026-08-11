@@ -1,53 +1,28 @@
 openapi: 3.0.0
 info:
-  title: Update Evaluation Dataset API endpoint
+  title: Resolve Evaluation Dataset API endpoint
   version: '1'
 paths:
-  /internal/evals/datasets/{datasetId}:
-    put:
+  /internal/evals/datasets/_resolve:
+    get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: UpdateEvaluationDataset
-      description: Update evaluation dataset metadata
-      summary: Update evaluation dataset
+      operationId: ResolveEvaluationDataset
+      description: >-
+        Look up a dataset by name within the current space. Dataset ids are
+        derived from the owning space, so a caller cannot compute one locally
+        without knowing which space the dataset lives in.
+      summary: Resolve evaluation dataset by name
       tags:
         - Evals API
       parameters:
-        - name: datasetId
-          in: path
+        - name: name
+          in: query
           required: true
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: >-
-                Only the supplied fields are changed; omitted fields keep their
-                current value. Send an empty `tags` array or a null `maturity`
-                to clear them.
-              properties:
-                description:
-                  type: string
-                  maxLength: 2048
-                tags:
-                  $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetTags'
-                # Inlined rather than $ref'd to DatasetMaturity because only this
-                # request can clear the field, and a $ref cannot be made nullable.
-                maturity:
-                  type: string
-                  nullable: true
-                  enum:
-                    - raw
-                    - cleaned
-                    - golden
-                # Reassigns the dataset's spaces. The active space cannot be
-                # dropped here: leaving a space is a delete, so that it goes
-                # through the confirmation the destructive path already has.
-                space_ids:
-                  $ref: '../common_attributes.schema.yaml#/components/schemas/SpaceIds'
+            minLength: 1
+            maxLength: 256
       responses:
         '200':
           description: Successful response
@@ -68,6 +43,8 @@ paths:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/DatasetMaturity'
                   space_ids:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/RedactedSpaceIds'
+                  examples_count:
+                    type: integer
                   created_at:
                     type: string
                   updated_at:

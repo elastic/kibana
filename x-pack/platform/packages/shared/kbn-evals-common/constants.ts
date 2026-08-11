@@ -41,6 +41,7 @@ export const EVALS_DATASET_URL = `${EVALS_DATASETS_URL}/{datasetId}` as const;
 export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
+export const EVALS_DATASET_RESOLVE_URL = `${EVALS_DATASETS_URL}/_resolve` as const;
 
 const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 

@@ -11,6 +11,7 @@ import {
   API_VERSIONS,
   DATASET_UUID_NAMESPACE,
   EVALS_DATASETS_URL,
+  EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
@@ -24,6 +25,8 @@ import {
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
+  ResolveEvaluationDatasetResponse,
+  UpsertEvaluationDatasetResponse,
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
@@ -64,6 +67,8 @@ export interface UpsertDatasetInput {
   description: string;
   tags?: string[];
   maturity?: DatasetMaturity;
+  /** Spaces to assign the dataset to. Omitted means the space the request lands in. */
+  spaceIds?: string[];
   examples: Array<{
     input?: Record<string, unknown>;
     output?: Record<string, unknown>;
@@ -251,8 +256,12 @@ export class EvalsClient {
     }
   }
 
-  async upsertDataset(dataset: UpsertDatasetInput): Promise<void> {
-    await this.kbnClient.request({
+  /**
+   * Creates or updates a dataset and returns the id the server assigned it. Ids
+   * derive from the owning space, so the caller can't compute one.
+   */
+  async upsertDataset(dataset: UpsertDatasetInput): Promise<string> {
+    const response = await this.kbnClient.request({
       path: EVALS_DATASET_UPSERT_URL,
       method: 'POST',
       body: {
@@ -262,16 +271,18 @@ export class EvalsClient {
         // declare tags leaves the stored ones alone.
         ...(dataset.tags ? { tags: dataset.tags } : {}),
         ...(dataset.maturity ? { maturity: dataset.maturity } : {}),
+        ...(dataset.spaceIds?.length ? { space_ids: dataset.spaceIds } : {}),
         examples: dataset.examples,
       },
       headers: VERSIONED_HEADERS,
       retries: 0,
     });
+
+    return UpsertEvaluationDatasetResponse.parse(getResponseData(response)).dataset_id;
   }
 
-  async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
+  private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
-      const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
       const response = await this.kbnClient.request({
         path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
         method: 'GET',
@@ -295,6 +306,39 @@ export class EvalsClient {
         })),
       };
     } catch (error: unknown) {
+      if (getStatusCode(error) === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Looks a dataset up by name, guessing the default-space id first — the
+   * common case, and all an older Kibana understands — then asking the server.
+   */
+  async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
+    const defaultSpaceDataset = await this.fetchDatasetById(
+      uuidv5(datasetName, DATASET_UUID_NAMESPACE)
+    );
+    if (defaultSpaceDataset) {
+      return defaultSpaceDataset;
+    }
+
+    try {
+      const response = await this.kbnClient.request({
+        path: EVALS_DATASET_RESOLVE_URL,
+        method: 'GET',
+        query: { name: datasetName },
+        headers: VERSIONED_HEADERS,
+        retries: 0,
+      });
+
+      const { id } = ResolveEvaluationDatasetResponse.parse(getResponseData(response));
+      return await this.fetchDatasetById(id);
+    } catch (error: unknown) {
+      // A Kibana without this route reads `_resolve` as a dataset id and also
+      // answers 404, same as a genuinely unknown name.
       if (getStatusCode(error) === 404) {
         return null;
       }

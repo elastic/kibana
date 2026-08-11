@@ -40,6 +40,18 @@ export type DatasetMaturity = z.infer<typeof DatasetMaturity>;
 export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
 export const DatasetMaturityEnum = DatasetMaturity.enum;
 
+/**
+ * Spaces a dataset is assigned to, or `["*"]` for every space. Each id must name an existing space the caller can manage evaluations in. Omitted on write means the active space; absent on read means the default space.
+ */
+export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
+export type SpaceIds = z.infer<typeof SpaceIds>;
+
+/**
+ * Spaces a dataset is assigned to, with ids the caller cannot access replaced by `?`, so a dataset can show it is shared without naming where.
+ */
+export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
+export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;
+
 export const DatasetFacetBucket = lazySchema(() =>
   z.object({
     value: z.string().max(64),

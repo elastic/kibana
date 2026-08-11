@@ -292,13 +292,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
-      // Optional space assignment for offline runs. Comma-separated so a run can
-      // target several spaces; omitted means the target Kibana's default space.
-      const spaceIds = process.env.EVAL_SPACE_ID
-        ? process.env.EVAL_SPACE_ID.split(',')
-            .map((id) => id.trim())
-            .filter(Boolean)
-        : undefined;
+      // Set by `--space-ids`, comma-separated so a run can target several
+      // spaces. Omitted means the target Kibana's default space.
+      const parsedSpaceIds = (process.env.EVAL_SPACE_IDS ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean);
+      const spaceIds = parsedSpaceIds.length > 0 ? parsedSpaceIds : undefined;
 
       const executionId = buildExecutionId({
         baseExecutionId: process.env.TEST_RUN_ID,
@@ -316,15 +316,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         executionId,
         repetitions,
-        upsertDataset: async (dataset: EvaluationDataset) => {
-          await evalsClient.upsertDataset({
+        upsertDataset: async (dataset: EvaluationDataset) =>
+          evalsClient.upsertDataset({
             name: dataset.name,
             description: dataset.description,
             tags: dataset.tags,
             maturity: dataset.maturity,
+            spaceIds,
             examples: dataset.examples.map(toDatasetRouteExample),
-          });
-        },
+          }),
         getDatasetByName: (datasetName: string) => evalsClient.getDatasetByName(datasetName),
         onExperimentStart: async ({ experimentId }) => {
           workerExperimentId.current = experimentId;

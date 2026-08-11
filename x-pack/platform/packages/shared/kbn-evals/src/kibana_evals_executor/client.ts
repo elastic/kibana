@@ -27,7 +27,11 @@ import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tra
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
-function computeDatasetId(name: string): string {
+/**
+ * The id a dataset gets in the default space. A last resort: ids derive from
+ * the owning space, so a local guess can detach scores from their dataset.
+ */
+function computeDefaultSpaceDatasetId(name: string): string {
   return uuidv5(name, DATASET_UUID_NAMESPACE);
 }
 
@@ -54,7 +58,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       model: Model;
       executionId?: string;
       repetitions?: number;
-      upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
+      /** Persists the dataset and resolves to the id the server assigned it. */
+      upsertDataset?: (dataset: EvaluationDataset) => Promise<string | void>;
       getDatasetByName?: (
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;
@@ -66,9 +71,9 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
   private async resolveDataset(
     dataset: EvaluationDataset,
     trustUpstreamDataset: boolean
-  ): Promise<EvaluationDataset> {
+  ): Promise<{ dataset: EvaluationDataset; upstreamId?: string }> {
     if (!trustUpstreamDataset) {
-      return dataset;
+      return { dataset };
     }
 
     if (!this.options.getDatasetByName) {
@@ -84,13 +89,16 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
     }
 
-    const { name, description, tags, maturity, examples } = upstreamDataset;
+    const { id, name, description, tags, maturity, examples } = upstreamDataset;
     return {
-      name,
-      description,
-      tags,
-      maturity,
-      examples,
+      dataset: {
+        name,
+        description,
+        tags,
+        maturity,
+        examples,
+      },
+      upstreamId: id,
     };
   }
 
@@ -158,10 +166,16 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
   ): Promise<DatasetRunResult> {
     return withInferenceContext(async () => {
-      const resolvedDataset = await this.resolveDataset(dataset, trustUpstreamDataset);
-      await this.options.upsertDataset?.(resolvedDataset);
+      const { dataset: resolvedDataset, upstreamId } = await this.resolveDataset(
+        dataset,
+        trustUpstreamDataset
+      );
+      const upsertedId = await this.options.upsertDataset?.(resolvedDataset);
 
-      const datasetId = computeDatasetId(resolvedDataset.name);
+      // Scores are stamped with this id, so it has to be the one the server
+      // stored the dataset under, not one guessed from the name.
+      const datasetId =
+        upsertedId || upstreamId || computeDefaultSpaceDatasetId(resolvedDataset.name);
       const experimentId = computeExperimentId(
         this.options.executionId,
         experimentName,

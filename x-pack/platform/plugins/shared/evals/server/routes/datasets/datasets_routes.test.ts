@@ -11,6 +11,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 jest.mock('../../remote_kibana/forward_to_remote_kibana', () => {
@@ -31,6 +33,7 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   GetEvaluationDatasetsRequestQuery,
 } from '@kbn/evals-common';
@@ -50,24 +53,40 @@ import { registerAddExamplesRoute } from './add_examples';
 import { registerUpdateExampleRoute } from './update_example';
 import { registerDeleteExampleRoute } from './delete_example';
 import { registerUpsertDatasetRoute } from './upsert_dataset';
+import { registerResolveDatasetRoute } from './resolve_dataset';
 
 const buildRouteSetup = ({
   registerRoute,
   method,
   path,
+  spaceId = DEFAULT_SPACE_ID,
+  accessibleSpaceIds,
+  hasManageEvalsPrivileges = true,
 }: {
   registerRoute: (deps: any) => void;
   method: 'get' | 'post' | 'put' | 'delete';
   path: string;
+  spaceId?: string;
+  accessibleSpaceIds?: string[];
+  hasManageEvalsPrivileges?: boolean;
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
+  const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(hasManageEvalsPrivileges);
+  const checkManageEvalsPrivilegesGlobally = jest.fn().mockResolvedValue(hasManageEvalsPrivileges);
+  const getAccessibleSpaceIds = jest
+    .fn()
+    .mockResolvedValue(accessibleSpaceIds ?? [spaceId, 'marketing', 'sales']);
   registerRoute({
     router,
     logger,
     canEncrypt: true,
     getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
     getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    getSpaceId: async () => spaceId,
+    getAccessibleSpaceIds,
+    checkManageEvalsPrivileges,
+    checkManageEvalsPrivilegesGlobally,
   });
 
   const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -84,6 +103,7 @@ const buildRouteSetup = ({
     updateExample: jest.fn(),
     deleteExample: jest.fn(),
     upsert: jest.fn(),
+    resolveByName: jest.fn(),
   };
 
   const datasetService = {
@@ -97,7 +117,16 @@ const buildRouteSetup = ({
     evals: { datasetService } as any,
   });
 
-  return { handler, context, logger, datasetClient, datasetService };
+  return {
+    handler,
+    context,
+    logger,
+    datasetClient,
+    datasetService,
+    checkManageEvalsPrivileges,
+    checkManageEvalsPrivilegesGlobally,
+    getAccessibleSpaceIds,
+  };
 };
 
 describe('dataset routes', () => {
@@ -144,7 +173,7 @@ describe('dataset routes', () => {
 
       const response = await handler(context as any, request, kibanaResponseFactory);
 
-      expect(datasetService.getClient).toHaveBeenCalledWith();
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: DEFAULT_SPACE_ID });
       expect(datasetClient.list).toHaveBeenCalledWith({
         page: 2,
         perPage: 5,
@@ -320,6 +349,7 @@ describe('dataset routes', () => {
         description: dataset.description,
         tags: undefined,
         maturity: undefined,
+        spaceIds: [DEFAULT_SPACE_ID],
       });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
@@ -519,7 +549,7 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_URL,
       });
-      datasetClient.delete.mockResolvedValueOnce(true);
+      datasetClient.delete.mockResolvedValueOnce('deleted');
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -530,7 +560,29 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
-      expect(response.payload).toEqual({ success: true });
+      expect(response.payload).toEqual({ success: true, unshared: false });
+    });
+
+    it('only unshares a dataset that other spaces still use', async () => {
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
+        registerRoute: registerDeleteDatasetRoute,
+        method: 'delete',
+        path: EVALS_DATASET_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.delete.mockResolvedValueOnce('unshared');
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'delete',
+        path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+      expect(response.status).toBe(200);
+      expect(response.payload).toEqual({ success: true, unshared: true });
     });
 
     it('returns 404 when dataset does not exist', async () => {
@@ -539,7 +591,7 @@ describe('dataset routes', () => {
         method: 'delete',
         path: EVALS_DATASET_URL,
       });
-      datasetClient.delete.mockResolvedValueOnce(false);
+      datasetClient.delete.mockResolvedValueOnce('not_found');
 
       const request = httpServerMock.createKibanaRequest({
         method: 'delete',
@@ -942,6 +994,7 @@ describe('dataset routes', () => {
         description: dataset.description,
         tags: undefined,
         maturity: undefined,
+        spaceIds: [DEFAULT_SPACE_ID],
         examples: [{ input: datasetExample.input, output: datasetExample.output, metadata: {} }],
       });
       expect(response.status).toBe(200);
@@ -986,6 +1039,7 @@ describe('dataset routes', () => {
         description: dataset.description,
         tags: undefined,
         maturity: undefined,
+        spaceIds: [DEFAULT_SPACE_ID],
         examples: [
           { input: { searchTerm: 'query 1' } },
           { input: { searchTerm: 'query 2' }, metadata: { minDocs: 1 } },
@@ -1030,6 +1084,7 @@ describe('dataset routes', () => {
         description: dataset.description,
         tags: undefined,
         maturity: undefined,
+        spaceIds: [DEFAULT_SPACE_ID],
         examples: [{}],
       });
       expect(response.status).toBe(200);
@@ -1170,6 +1225,247 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(404);
       expect(response.payload).toEqual({ message: 'Not found on remote' });
+    });
+  });
+
+  describe('GET /internal/evals/datasets/_resolve', () => {
+    it('resolves a name to the id the active space knows it by', async () => {
+      const { handler, context, datasetClient, datasetService } = buildRouteSetup({
+        registerRoute: registerResolveDatasetRoute,
+        method: 'get',
+        path: EVALS_DATASET_RESOLVE_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.resolveByName.mockResolvedValueOnce({
+        ...dataset,
+        examples_count: 4,
+        space_ids: ['sales', 'finance'],
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASET_RESOLVE_URL,
+        query: { name: dataset.name },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
+      expect(datasetClient.resolveByName).toHaveBeenCalledWith(dataset.name);
+      expect(response.status).toBe(200);
+      expect(response.payload).toMatchObject({
+        id: datasetId,
+        name: dataset.name,
+        examples_count: 4,
+        space_ids: ['sales', UNKNOWN_SPACE],
+      });
+    });
+
+    it('returns 404 for a name the active space cannot see', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerResolveDatasetRoute,
+        method: 'get',
+        path: EVALS_DATASET_RESOLVE_URL,
+        spaceId: 'sales',
+      });
+      datasetClient.resolveByName.mockResolvedValueOnce(undefined);
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASET_RESOLVE_URL,
+        query: { name: 'somewhere-else' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  describe('space assignment', () => {
+    it('assigns a created dataset to the spaces the caller asked for', async () => {
+      const { handler, context, datasetClient, datasetService, checkManageEvalsPrivileges } =
+        buildRouteSetup({
+          registerRoute: registerCreateDatasetRoute,
+          method: 'post',
+          path: EVALS_DATASETS_URL,
+        });
+      datasetClient.create.mockResolvedValueOnce({ ...dataset, examples: [] });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          space_ids: ['marketing', 'sales'],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(checkManageEvalsPrivileges).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.arrayContaining(['marketing', 'sales'])
+      );
+      expect(datasetClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceIds: ['marketing', 'sales'] })
+      );
+      // The id derives from the creating space, so it has to be one that will
+      // see the dataset.
+      expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'marketing' });
+    });
+
+    it('rejects a space the caller cannot see', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCreateDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        accessibleSpaceIds: [DEFAULT_SPACE_ID],
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          space_ids: ['typo-space'],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(400);
+      expect(response.payload.message).toContain('typo-space');
+      expect(datasetClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses to share into a space the caller cannot manage evaluations in', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerCreateDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        hasManageEvalsPrivileges: false,
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          space_ids: ['sales'],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(403);
+      expect(datasetClient.create).not.toHaveBeenCalled();
+    });
+
+    it('requires privileges everywhere before assigning a dataset to all spaces', async () => {
+      const denied = buildRouteSetup({
+        registerRoute: registerCreateDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+        hasManageEvalsPrivileges: false,
+      });
+
+      const body = {
+        name: dataset.name,
+        description: dataset.description,
+        space_ids: [ALL_SPACES_ID],
+      };
+
+      const deniedResponse = await denied.handler(
+        denied.context as any,
+        httpServerMock.createKibanaRequest({ method: 'post', path: EVALS_DATASETS_URL, body }),
+        kibanaResponseFactory
+      );
+
+      expect(deniedResponse.status).toBe(403);
+      expect(denied.checkManageEvalsPrivilegesGlobally).toHaveBeenCalled();
+
+      const allowed = buildRouteSetup({
+        registerRoute: registerCreateDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASETS_URL,
+      });
+      allowed.datasetClient.create.mockResolvedValueOnce({ ...dataset, examples: [] });
+
+      const allowedResponse = await allowed.handler(
+        allowed.context as any,
+        httpServerMock.createKibanaRequest({ method: 'post', path: EVALS_DATASETS_URL, body }),
+        kibanaResponseFactory
+      );
+
+      expect(allowedResponse.status).toBe(200);
+      expect(allowed.datasetClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceIds: [ALL_SPACES_ID] })
+      );
+    });
+
+    it('hides the names of spaces the caller cannot see when reading a dataset', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerGetDatasetRoute,
+        method: 'get',
+        path: EVALS_DATASET_URL,
+        accessibleSpaceIds: [DEFAULT_SPACE_ID, 'sales'],
+      });
+      datasetClient.get.mockResolvedValueOnce({
+        ...dataset,
+        examples: [],
+        space_ids: ['sales', 'finance', 'legal'],
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'get',
+        path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      // Two hidden spaces collapse into one placeholder: shared elsewhere,
+      // without saying where.
+      expect(response.payload.space_ids).toEqual(['sales', UNKNOWN_SPACE]);
+    });
+
+    it('leaves the space assignment alone when an update does not mention it', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerUpdateDatasetRoute,
+        method: 'put',
+        path: EVALS_DATASET_URL,
+      });
+      datasetClient.get.mockResolvedValueOnce({
+        ...dataset,
+        examples: [],
+        space_ids: [DEFAULT_SPACE_ID, 'sales'],
+      });
+      datasetClient.update.mockResolvedValueOnce({
+        ...dataset,
+        description: 'Updated',
+        space_ids: [DEFAULT_SPACE_ID, 'sales'],
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'put',
+        path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+        body: { description: 'Updated' },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      expect(response.status).toBe(200);
+      expect(datasetClient.update).toHaveBeenCalledWith(
+        datasetId,
+        expect.objectContaining({ spaceIds: undefined })
+      );
     });
   });
 });

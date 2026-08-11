@@ -28,6 +28,7 @@ import { registerAddExamplesRoute } from './datasets/add_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
+import { registerResolveDatasetRoute } from './datasets/resolve_dataset';
 import { registerRemoteConfigsRoutes } from './remotes/register_routes';
 import { registerGetTracingProjectsRoute } from './tracing/get_projects';
 import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
@@ -55,6 +56,8 @@ export interface RouteDependencies {
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
   getSpaceId?: (request: KibanaRequest) => Promise<string>;
   checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
+  checkManageEvalsPrivilegesGlobally?: (request: KibanaRequest) => Promise<boolean>;
+  getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
@@ -72,6 +75,9 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerIngestScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
+  // Before the `{datasetId}` route so the literal path reads as the more
+  // specific match; hapi orders literals ahead of parameters either way.
+  registerResolveDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);
   registerUpdateDatasetRoute(dependencies);
   registerDeleteDatasetRoute(dependencies);

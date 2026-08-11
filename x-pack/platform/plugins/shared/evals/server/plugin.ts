@@ -162,6 +162,39 @@ export class EvalsPlugin
       return hasAllRequested;
     };
 
+    /**
+     * `*` covers spaces that don't exist yet, so it can't be checked space by
+     * space; only a global privilege implies them all.
+     */
+    const checkManageEvalsPrivilegesGlobally = async (request: KibanaRequest): Promise<boolean> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const security = pluginsStart.security;
+      if (!security) {
+        return true;
+      }
+      const { hasAllRequested } = await security.authz
+        .checkPrivilegesWithRequest(request)
+        .globally({
+          kibana: [security.authz.actions.api.get(EVALS_API_PRIVILEGES.manage)],
+        });
+      return hasAllRequested;
+    };
+
+    /**
+     * Spaces the caller can see, for rejecting writes that name an unknown one
+     * and redacting the rest out of reads. The spaces client already filters by
+     * authorization.
+     */
+    const getAccessibleSpaceIds = async (request: KibanaRequest): Promise<string[]> => {
+      const [, pluginsStart] = await coreSetup.getStartServices();
+      const spaces = pluginsStart.spaces;
+      if (!spaces) {
+        return [DEFAULT_SPACE_ID];
+      }
+      const allSpaces = await spaces.spacesService.createSpacesClient(request).getAll();
+      return allSpaces.map(({ id }) => id);
+    };
+
     registerRoutes({
       router,
       logger: this.logger,
@@ -173,6 +206,8 @@ export class EvalsPlugin
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
       getSpaceId,
       checkManageEvalsPrivileges,
+      checkManageEvalsPrivilegesGlobally,
+      getAccessibleSpaceIds,
       taskProviderRegistry: this.taskProviderRegistry,
       workflowsManagement,
     });
@@ -207,26 +242,6 @@ export class EvalsPlugin
       this.isServerless
     );
     this.evaluationScoreService = new EvaluationScoreService(this.logger, coreStart.dataStreams);
-
-    // Fire-and-forget backfill of the denormalized `examples_count` for datasets
-    // created before the field existed. Idempotent and a no-op once complete (and
-    // on fresh/empty deployments), so it is safe to run on every start. Only runs
-    // when the plugin is enabled, since we early-return above otherwise.
-    this.datasetService
-      .getClient()
-      .backfillDatasetCounts()
-      .then(({ updated }) => {
-        if (updated > 0) {
-          this.logger.info(`Backfilled examples_count for ${updated} evaluation dataset(s)`);
-        }
-      })
-      .catch((error) => {
-        this.logger.warn(
-          `Failed to backfill evaluation dataset example counts: ${
-            error instanceof Error ? error.message : error
-          }`
-        );
-      });
 
     return {
       datasetService: this.datasetService,

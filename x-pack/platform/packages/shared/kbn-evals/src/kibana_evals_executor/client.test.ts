@@ -431,6 +431,50 @@ describe('KibanaEvalsClient', () => {
     expect(Object.values(result.runs)).toHaveLength(1);
   });
 
+  it('stamps scores with the dataset id the server assigned', async () => {
+    const onEvaluationComplete = jest.fn().mockResolvedValue(undefined);
+    const client = createClient({
+      repetitions: 1,
+      onEvaluationComplete,
+      upsertDataset: jest.fn().mockResolvedValue('server-assigned-id'),
+    });
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [{ name: 'ds', description: 'desc', examples: [{ input: { q: 1 } }] }],
+        task: async () => ({ ok: true }),
+      },
+      [{ name: 'AlwaysOne', kind: 'CODE', evaluate: async () => ({ score: 1 }) }]
+    );
+
+    expect(exp.datasetId).toBe('server-assigned-id');
+    expect(onEvaluationComplete.mock.calls[0][0].datasetId).toBe('server-assigned-id');
+  });
+
+  it('falls back to the upstream dataset id when the upsert reports none', async () => {
+    const client = createClient({
+      repetitions: 1,
+      upsertDataset: jest.fn().mockResolvedValue(undefined),
+      getDatasetByName: jest.fn().mockResolvedValue({
+        id: 'upstream-dataset-id',
+        name: 'ds',
+        description: 'desc',
+        examples: [{ input: { q: 1 } }],
+      }),
+    });
+
+    const [exp] = await client.runExperiment(
+      {
+        datasets: [{ name: 'ds', description: 'placeholder', examples: [] }],
+        task: async () => ({ ok: true }),
+        trustUpstreamDataset: true,
+      },
+      []
+    );
+
+    expect(exp.datasetId).toBe('upstream-dataset-id');
+  });
+
   it('throws when trustUpstreamDataset=true without getDatasetByName', async () => {
     const client = createClient();
 

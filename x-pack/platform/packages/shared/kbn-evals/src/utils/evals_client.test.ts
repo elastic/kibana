@@ -8,6 +8,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
+  EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
   EVALS_EXPERIMENT_SCORES_URL,
@@ -313,7 +314,7 @@ describe('EvalsClient', () => {
       ],
     };
 
-    await expect(client.upsertDataset(dataset)).resolves.toBeUndefined();
+    await expect(client.upsertDataset(dataset)).resolves.toBe('ds-1');
     expect(kbnClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
         path: EVALS_DATASET_UPSERT_URL,
@@ -354,6 +355,37 @@ describe('EvalsClient', () => {
         },
       })
     );
+  });
+
+  it('upsertDataset sends the requested spaces only when a run targets some', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({ dataset_id: 'ds-1', added: 0, removed: 0, unchanged: 0 })
+    );
+    const client = new EvalsClient(kbnClient, createLog());
+
+    await client.upsertDataset({
+      name: 'My Dataset',
+      description: 'Test dataset',
+      spaceIds: ['marketing', 'sales'],
+      examples: [],
+    });
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ space_ids: ['marketing', 'sales'] }),
+      })
+    );
+
+    kbnClient.request.mockClear();
+    await client.upsertDataset({
+      name: 'My Dataset',
+      description: 'Test dataset',
+      spaceIds: [],
+      examples: [],
+    });
+
+    expect(kbnClient.request.mock.calls[0][0].body).not.toHaveProperty('space_ids');
   });
 
   it('upsertDataset propagates errors', async () => {
@@ -417,6 +449,35 @@ describe('EvalsClient', () => {
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.getDatasetByName('Nonexistent')).resolves.toBeNull();
+  });
+
+  it('getDatasetByName asks the server to resolve a name it cannot address directly', async () => {
+    const kbnClient = createMockKbnClient();
+    const dataset = {
+      id: 'space-scoped-id',
+      name: 'My Dataset',
+      description: 'Test dataset',
+      examples: [],
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    };
+    kbnClient.request
+      // The default-space id guess misses, because the dataset lives elsewhere.
+      .mockRejectedValueOnce(Object.assign(new Error('Not Found'), { status: 404 }))
+      .mockResolvedValueOnce(asKbnResponse({ ...dataset, examples_count: 0 }))
+      .mockResolvedValueOnce(asKbnResponse(dataset));
+    const client = new EvalsClient(kbnClient, createLog());
+
+    const result = await client.getDatasetByName('My Dataset');
+
+    expect(kbnClient.request).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        path: EVALS_DATASET_RESOLVE_URL,
+        query: { name: 'My Dataset' },
+      })
+    );
+    expect(result?.id).toBe('space-scoped-id');
   });
 
   it('getDatasetByName propagates non-404 errors', async () => {

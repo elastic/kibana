@@ -39,6 +39,7 @@ import {
 } from '@kbn/evals-common';
 import type { CoreStart } from '@kbn/core/public';
 import type { AddToDatasetFlyoutOpenOptions } from '../../types';
+import { isSharedAssignment } from '../dataset_spaces';
 
 const DEFAULT_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.title', {
   defaultMessage: 'Add to dataset',
@@ -114,6 +115,14 @@ const SUBMIT_BUTTON = i18n.translate('xpack.evals.addToDatasetFlyout.submitButto
 
 const LOAD_DATASETS_ERROR = i18n.translate('xpack.evals.addToDatasetFlyout.loadDatasetsError', {
   defaultMessage: 'Failed to load datasets',
+});
+
+const SHARED_DATASET_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.sharedDatasetTitle', {
+  defaultMessage: 'This dataset is shared',
+});
+
+const SHARED_DATASET_BODY = i18n.translate('xpack.evals.addToDatasetFlyout.sharedDatasetBody', {
+  defaultMessage: 'It belongs to more than one space, so anything you add is visible there too.',
 });
 
 const SUBMIT_ERROR = i18n.translate('xpack.evals.addToDatasetFlyout.submitError', {
@@ -313,6 +322,12 @@ export function AddToDatasetFlyout({
     const match = datasetOptions.find((o) => o.value === selectedDatasetId);
     return match ? [match] : [];
   }, [datasetOptions, selectedDatasetId]);
+
+  // A remote deployment's spaces are its own, so its assignment says nothing
+  // about who here would see the example.
+  const isSelectedDatasetShared =
+    destinationType === 'local' &&
+    isSharedAssignment(datasets.find((d) => d.id === selectedDatasetId)?.space_ids);
 
   const remoteOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return remotes.map((r) => ({
@@ -592,19 +607,37 @@ export function AddToDatasetFlyout({
           </EuiFormRow>
 
           {mode === 'existing' ? (
-            <EuiFormRow label={DATASET_LABEL} fullWidth>
-              <EuiComboBox
-                fullWidth
-                isLoading={isLoadingDatasets}
-                options={datasetOptions}
-                selectedOptions={selectedOptions}
-                onChange={(items) => setSelectedDatasetId(items[0]?.value ?? null)}
-                singleSelection={{ asPlainText: true }}
-                placeholder={i18n.translate('xpack.evals.addToDatasetFlyout.datasetPlaceholder', {
-                  defaultMessage: 'Select a dataset',
-                })}
-              />
-            </EuiFormRow>
+            <>
+              <EuiFormRow label={DATASET_LABEL} fullWidth>
+                <EuiComboBox
+                  fullWidth
+                  isLoading={isLoadingDatasets}
+                  options={datasetOptions}
+                  selectedOptions={selectedOptions}
+                  onChange={(items) => setSelectedDatasetId(items[0]?.value ?? null)}
+                  singleSelection={{ asPlainText: true }}
+                  placeholder={i18n.translate('xpack.evals.addToDatasetFlyout.datasetPlaceholder', {
+                    defaultMessage: 'Select a dataset',
+                  })}
+                />
+              </EuiFormRow>
+              {isSelectedDatasetShared ? (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut
+                    announceOnMount
+                    size="s"
+                    color="warning"
+                    iconType="spaces"
+                    title={SHARED_DATASET_TITLE}
+                    data-test-subj="addToDatasetSharedNotice"
+                  >
+                    <p>{SHARED_DATASET_BODY}</p>
+                  </EuiCallOut>
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
+            </>
           ) : (
             <>
               <EuiFormRow label={NEW_DATASET_NAME_LABEL} fullWidth>

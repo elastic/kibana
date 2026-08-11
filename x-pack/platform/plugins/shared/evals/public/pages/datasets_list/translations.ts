@@ -46,6 +46,20 @@ export const CREATE_DATASET_NAME_REQUIRED_ERROR = i18n.translate(
   }
 );
 
+export const CREATE_DATASET_SPACES_REQUIRED_ERROR = i18n.translate(
+  'xpack.evals.datasetsList.createDatasetFlyout.spacesRequiredError',
+  {
+    defaultMessage: 'Pick at least one space, otherwise nobody can reach this dataset.',
+  }
+);
+
+export const CREATE_DATASET_FAILED_TITLE = i18n.translate(
+  'xpack.evals.datasetsList.createDatasetFlyout.failedTitle',
+  {
+    defaultMessage: 'Could not create dataset',
+  }
+);
+
 export const CREATE_DATASET_CANCEL_BUTTON = i18n.translate(
   'xpack.evals.datasetsList.createDatasetFlyout.cancelButton',
   {
@@ -78,6 +92,10 @@ export const COLUMN_TAGS = i18n.translate('xpack.evals.datasetsList.columns.tags
 
 export const COLUMN_MATURITY = i18n.translate('xpack.evals.datasetsList.columns.maturity', {
   defaultMessage: 'Maturity',
+});
+
+export const COLUMN_SPACES = i18n.translate('xpack.evals.datasetsList.columns.spaces', {
+  defaultMessage: 'Spaces',
 });
 
 export const COLUMN_EXAMPLES = i18n.translate('xpack.evals.datasetsList.columns.examples', {

@@ -12,6 +12,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -20,6 +21,11 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
+import {
+  resolveDatasetHomeSpace,
+  resolveTargetSpaces,
+  withoutSpaceIds,
+} from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerCreateDatasetRoute = ({
@@ -27,6 +33,10 @@ export const registerCreateDatasetRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
+  checkManageEvalsPrivileges,
+  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -62,7 +72,7 @@ export const registerCreateDatasetRoute = ({
               remoteId: destination,
               request,
               method: 'POST',
-              body: request.body,
+              body: withoutSpaceIds(request.body),
             });
 
             if (forwarded.statusCode === 200) {
@@ -78,11 +88,37 @@ export const registerCreateDatasetRoute = ({
             });
           }
 
-          const { name, description, tags, maturity } = request.body;
-          const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const { name, description, tags, maturity, space_ids: requestedSpaceIds } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
-          const dataset = await datasetClient.create({ name, description, tags, maturity });
+          const targetSpaces = await resolveTargetSpaces({
+            request,
+            activeSpaceId,
+            requestedSpaceIds,
+            getAccessibleSpaceIds,
+            checkManageEvalsPrivileges,
+            checkManageEvalsPrivilegesGlobally,
+          });
+
+          if (!targetSpaces.authorized) {
+            return response.customError({
+              statusCode: targetSpaces.statusCode,
+              body: { message: targetSpaces.message },
+            });
+          }
+
+          const evalsContext = await context.evals;
+          const datasetClient = evalsContext.datasetService.getClient({
+            spaceId: resolveDatasetHomeSpace(activeSpaceId, targetSpaces.spaceIds),
+          });
+
+          const dataset = await datasetClient.create({
+            name,
+            description,
+            tags,
+            maturity,
+            spaceIds: targetSpaces.spaceIds,
+          });
 
           return response.ok({
             body: {

@@ -12,6 +12,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -26,6 +27,7 @@ export const registerDeleteDatasetRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .delete({
@@ -77,11 +79,12 @@ export const registerDeleteDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
-          const wasDeleted = await datasetClient.delete(datasetId);
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+          const result = await datasetClient.delete(datasetId);
 
-          if (!wasDeleted) {
+          if (result === 'not_found') {
             return response.notFound({
               body: { message: `Evaluation dataset not found: ${datasetId}` },
             });
@@ -90,6 +93,9 @@ export const registerDeleteDatasetRoute = ({
           return response.ok({
             body: {
               success: true,
+              // Lets the caller say whether the dataset was deleted or only
+              // detached from this space.
+              unshared: result === 'unshared',
             },
           });
         } catch (error) {

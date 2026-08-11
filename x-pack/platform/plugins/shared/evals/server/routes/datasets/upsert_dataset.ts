@@ -12,6 +12,7 @@ import {
   UpsertEvaluationDatasetRequestBody,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -19,6 +20,11 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import {
+  resolveDatasetHomeSpace,
+  resolveTargetSpaces,
+  withoutSpaceIds,
+} from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
@@ -27,6 +33,10 @@ export const registerUpsertDatasetRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
+  checkManageEvalsPrivileges,
+  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -62,7 +72,7 @@ export const registerUpsertDatasetRoute = ({
               remoteId: destination,
               request,
               method: 'POST',
-              body: request.body,
+              body: withoutSpaceIds(request.body),
             });
 
             if (forwarded.statusCode === 200) {
@@ -75,15 +85,46 @@ export const registerUpsertDatasetRoute = ({
             });
           }
 
-          const { name, description, tags, maturity, examples } = request.body;
+          const {
+            name,
+            description,
+            tags,
+            maturity,
+            examples,
+            space_ids: requestedSpaceIds,
+          } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+
+          const targetSpaces = await resolveTargetSpaces({
+            request,
+            activeSpaceId,
+            requestedSpaceIds,
+            getAccessibleSpaceIds,
+            checkManageEvalsPrivileges,
+            checkManageEvalsPrivilegesGlobally,
+          });
+
+          if (!targetSpaces.authorized) {
+            return response.customError({
+              statusCode: targetSpaces.statusCode,
+              body: { message: targetSpaces.message },
+            });
+          }
+
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          // Scoped to where the dataset should live, not where the call came
+          // from, so `--space-ids b` from an unprefixed CLI run finds the
+          // dataset in space B instead of creating a second one in default.
+          const datasetClient = evalsContext.datasetService.getClient({
+            spaceId: resolveDatasetHomeSpace(activeSpaceId, targetSpaces.spaceIds),
+          });
           const upsertResult = await datasetClient.upsert({
             name,
             description,
             tags,
             maturity,
             examples,
+            spaceIds: targetSpaces.spaceIds,
           });
 
           return response.ok({

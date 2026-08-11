@@ -8,6 +8,9 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
+import { v5 as uuidv5 } from 'uuid';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DATASET_UUID_NAMESPACE, buildSpaceFilter } from '@kbn/evals-common';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
 import type {
@@ -77,6 +80,10 @@ const matchesQuery = (row: MockRow, query: MockQuery | undefined): boolean => {
   if (query.terms) {
     const [[field, values]] = Object.entries(query.terms) as Array<[string, string[]]>;
     const actual = (row._source as unknown as Record<string, unknown>)[field];
+    // Keyword fields hold either one value or many; `space_ids` is the latter.
+    if (Array.isArray(actual)) {
+      return actual.some((entry) => typeof entry === 'string' && values.includes(entry));
+    }
     return typeof actual === 'string' && values.includes(actual);
   }
 
@@ -100,11 +107,18 @@ const matchesQuery = (row: MockRow, query: MockQuery | undefined): boolean => {
   }
 
   if (query.bool) {
-    const { must = [], filter = [], should = [], must_not: mustNot = [] } = query.bool;
-    const clauses = [...must, ...filter];
+    // Elasticsearch accepts a single clause where a list is allowed, as the
+    // space filter's `must_not` does.
+    const asClauses = (clauses: MockQuery | MockQuery[] | undefined): MockQuery[] =>
+      clauses === undefined ? [] : Array.isArray(clauses) ? clauses : [clauses];
+
+    const must = asClauses(query.bool.must);
+    const filter = asClauses(query.bool.filter);
+    const should = asClauses(query.bool.should);
+    const mustNot = asClauses(query.bool.must_not);
 
     return (
-      clauses.every((clause: MockQuery) => matchesQuery(row, clause)) &&
+      [...must, ...filter].every((clause: MockQuery) => matchesQuery(row, clause)) &&
       mustNot.every((clause: MockQuery) => !matchesQuery(row, clause)) &&
       (should.length === 0 || should.some((clause: MockQuery) => matchesQuery(row, clause)))
     );
@@ -433,9 +447,21 @@ const createExamplesStorageClient = () => {
   return { docs, client };
 };
 
-const createClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) => {
-  const datasetsStorage = createDatasetStorageClient({ onReadForWrite });
-  const examplesStorage = createExamplesStorageClient();
+const createClient = ({
+  onReadForWrite,
+  spaceId = DEFAULT_SPACE_ID,
+  storage,
+}: {
+  onReadForWrite?: () => void;
+  spaceId?: string;
+  storage?: {
+    datasetsStorage: ReturnType<typeof createDatasetStorageClient>;
+    examplesStorage: ReturnType<typeof createExamplesStorageClient>;
+  };
+} = {}) => {
+  const datasetsStorage =
+    storage?.datasetsStorage ?? createDatasetStorageClient({ onReadForWrite });
+  const examplesStorage = storage?.examplesStorage ?? createExamplesStorageClient();
 
   const datasetsStorageAdapter = {
     getClient: () => datasetsStorage.client,
@@ -450,9 +476,23 @@ const createClient = ({ onReadForWrite }: { onReadForWrite?: () => void } = {}) 
     datasetsStorageAdapter,
     examplesStorageAdapter,
     logger,
+    spaceId,
   });
 
   return { client, datasetsStorage, examplesStorage, logger };
+};
+
+/** Two clients over one index, as two spaces of a deployment see it. */
+const createClientsInSpaces = (spaceIds: [string, string]) => {
+  const storage = {
+    datasetsStorage: createDatasetStorageClient(),
+    examplesStorage: createExamplesStorageClient(),
+  };
+
+  return spaceIds.map((spaceId) => createClient({ spaceId, storage }).client) as [
+    DatasetClient,
+    DatasetClient
+  ];
 };
 
 describe('DatasetClient', () => {
@@ -525,7 +565,7 @@ describe('DatasetClient', () => {
     const deleted = await client.delete(created.id);
     const fetched = await client.get(created.id);
 
-    expect(deleted).toBe(true);
+    expect(deleted).toBe('deleted');
     expect(fetched).toBeUndefined();
   });
 
@@ -716,7 +756,7 @@ describe('DatasetClient', () => {
     const dataset = await client.get(result.dataset_id);
 
     expect(result).toEqual({
-      dataset_id: DatasetClient.getDatasetId('dataset-1'),
+      dataset_id: DatasetClient.getDatasetId(DEFAULT_SPACE_ID, 'dataset-1'),
       added: 1,
       removed: 1,
       unchanged: 1,
@@ -846,29 +886,238 @@ describe('DatasetClient', () => {
     expect((await client.list()).datasets[0].examples_count).toBe(1);
   });
 
-  it('backfills examples_count for datasets missing it and is idempotent', async () => {
+  it('recovers a stale examples_count on the next example change', async () => {
     const { client, datasetsStorage } = createClient();
 
     const created = await client.create({
       name: 'legacy',
       description: 'legacy dataset',
-      examples: [baseExampleA, baseExampleB],
+      examples: [baseExampleA],
     });
 
     // Simulate a dataset written before examples_count existed.
-    const stored = datasetsStorage.docs.get(created.id);
-    expect(stored).toBeDefined();
-    const updatedAtBefore = stored!.updated_at;
-    delete (stored as { examples_count?: number }).examples_count;
+    delete (datasetsStorage.docs.get(created.id) as { examples_count?: number }).examples_count;
+    expect((await client.list()).datasets[0].examples_count).toBe(0);
 
-    const firstRun = await client.backfillDatasetCounts();
-    expect(firstRun.updated).toBe(1);
+    await client.addExamples(created.id, [baseExampleB]);
     expect(datasetsStorage.docs.get(created.id)?.examples_count).toBe(2);
-    // Backfill preserves updated_at (it is not a user-facing modification).
-    expect(datasetsStorage.docs.get(created.id)?.updated_at).toBe(updatedAtBefore);
+  });
 
-    const secondRun = await client.backfillDatasetCounts();
-    expect(secondRun.updated).toBe(0);
+  describe('spaces', () => {
+    it('derives ids per space so the same name can exist in two spaces', () => {
+      expect(DatasetClient.getDatasetId('marketing', 'shared-name')).not.toBe(
+        DatasetClient.getDatasetId('sales', 'shared-name')
+      );
+    });
+
+    it('keeps the pre-space-awareness derivation for the default space', () => {
+      // An older SDK derives ids from the name alone, and example ids from the
+      // dataset id, so changing this points its scores at nothing.
+      expect(DatasetClient.getDatasetId(DEFAULT_SPACE_ID, 'dataset-1')).toBe(
+        uuidv5('dataset-1', DATASET_UUID_NAMESPACE)
+      );
+    });
+
+    it('narrows reads with the same rule that filters scores', async () => {
+      // Two statements of one rule: if they drift, a dataset and its scores
+      // disagree about which space they are visible in.
+      for (const spaceId of [DEFAULT_SPACE_ID, 'marketing']) {
+        const { client, datasetsStorage } = createClient({ spaceId });
+
+        await client.datasetExists('dataset-1');
+
+        expect(datasetsStorage.client.search).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                must: [{ term: { _id: 'dataset-1' } }],
+                filter: [buildSpaceFilter(spaceId)],
+              },
+            },
+          })
+        );
+      }
+    });
+
+    it('hides a dataset created in one space from another', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      });
+
+      await expect(marketing.get(created.id)).resolves.toBeDefined();
+      await expect(sales.get(created.id)).resolves.toBeUndefined();
+      await expect(sales.datasetExists(created.id)).resolves.toBe(false);
+      await expect(sales.getByName('dataset-1')).resolves.toBeUndefined();
+      expect((await sales.list()).total).toBe(0);
+    });
+
+    it('keeps facet counts inside the space', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      await marketing.create({ name: 'dataset-1', description: 'A dataset', tags: ['golden'] });
+      await sales.create({ name: 'dataset-2', description: 'A dataset', tags: ['regression'] });
+
+      // The facet aggregation is `global`, so it escapes the request query and
+      // would count both datasets without the space filter re-applied.
+      const { facets } = await marketing.list();
+      expect(facets.tags).toEqual([{ value: 'golden', count: 1 }]);
+    });
+
+    it('lets the same name be created in two spaces', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const first = await marketing.create({ name: 'shared-name', description: 'Marketing' });
+      const second = await sales.create({ name: 'shared-name', description: 'Sales' });
+
+      expect(first.id).not.toBe(second.id);
+      expect((await marketing.list()).datasets.map(({ description }) => description)).toEqual([
+        'Marketing',
+      ]);
+    });
+
+    it('treats a dataset without a stored assignment as belonging to the default space', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client: defaultClient } = createClient({ spaceId: DEFAULT_SPACE_ID, storage });
+      const { client: otherClient } = createClient({ spaceId: 'marketing', storage });
+
+      const created = await defaultClient.create({ name: 'legacy', description: 'A dataset' });
+      // Simulate a dataset written before space awareness.
+      delete storage.datasetsStorage.docs.get(created.id)!.space_ids;
+
+      const fetched = await defaultClient.get(created.id);
+      expect(fetched?.space_ids).toEqual([DEFAULT_SPACE_ID]);
+      await expect(otherClient.get(created.id)).resolves.toBeUndefined();
+    });
+
+    it('makes a dataset assigned to all spaces visible everywhere', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        spaceIds: ['*'],
+      });
+
+      await expect(sales.get(created.id)).resolves.toBeDefined();
+    });
+
+    it('keeps the assignment when an unrelated field is written', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        spaceIds: ['marketing', 'sales'],
+      });
+
+      // Writes replace the whole document, so an example insert is the likeliest
+      // path to drop a field nobody restated.
+      await client.addExamples(created.id, [baseExampleA]);
+      await client.update(created.id, { description: 'Updated' });
+
+      expect(storage.datasetsStorage.docs.get(created.id)?.space_ids).toEqual([
+        'marketing',
+        'sales',
+      ]);
+    });
+
+    it('detaches a shared dataset from one space instead of deleting it', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+        spaceIds: ['marketing', 'sales'],
+      });
+
+      await expect(marketing.delete(created.id)).resolves.toBe('unshared');
+      await expect(marketing.get(created.id)).resolves.toBeUndefined();
+
+      const remaining = await sales.get(created.id);
+      expect(remaining?.space_ids).toEqual(['sales']);
+      expect(remaining?.examples).toHaveLength(1);
+    });
+
+    it('deletes for real once the last space lets go', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+        spaceIds: ['marketing', 'sales'],
+      });
+
+      await marketing.delete(created.id);
+
+      await expect(sales.delete(created.id)).resolves.toBe('deleted');
+      await expect(sales.get(created.id)).resolves.toBeUndefined();
+    });
+
+    it('deletes a dataset assigned to all spaces outright', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        spaceIds: ['*'],
+      });
+
+      // `*` can't be narrowed by removing one space, so there is nothing to
+      // unshare to.
+      await expect(marketing.delete(created.id)).resolves.toBe('deleted');
+      await expect(sales.get(created.id)).resolves.toBeUndefined();
+    });
+
+    it('refuses to reach an example through a dataset the space cannot see', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      });
+      const [example] = created.examples;
+
+      await expect(sales.deleteExample(example.id, created.id)).rejects.toThrow(
+        ExampleNotFoundError
+      );
+      await expect(
+        sales.updateExample(example.id, { output: { expected: 'changed' } }, created.id)
+      ).rejects.toThrow(ExampleNotFoundError);
+
+      const untouched = await marketing.get(created.id);
+      expect(untouched?.examples).toHaveLength(1);
+      expect(untouched?.examples[0].output).toEqual(baseExampleA.output);
+    });
+
+    it('never stores an empty assignment, which would read as the default space', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      const created = await client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        spaceIds: [],
+      });
+
+      expect(storage.datasetsStorage.docs.get(created.id)?.space_ids).toEqual(['marketing']);
+    });
   });
 
   describe('tags and maturity', () => {
@@ -1071,24 +1320,23 @@ describe('DatasetClient', () => {
       });
     });
 
-    it('preserves tags and maturity when backfilling example counts', async () => {
+    it('preserves tags and maturity when the example count is rewritten', async () => {
       const { client, datasetsStorage } = createClient();
 
       const created = await client.create({
-        name: 'legacy',
-        description: 'legacy dataset',
+        name: 'dataset-1',
+        description: 'A dataset',
         tags: ['golden'],
         maturity: 'golden',
         examples: [baseExampleA],
       });
-      delete (datasetsStorage.docs.get(created.id) as { examples_count?: number }).examples_count;
 
-      await client.backfillDatasetCounts();
+      await client.addExamples(created.id, [baseExampleB]);
 
       expect(datasetsStorage.docs.get(created.id)).toMatchObject({
         tags: ['golden'],
         maturity: 'golden',
-        examples_count: 1,
+        examples_count: 2,
       });
     });
 

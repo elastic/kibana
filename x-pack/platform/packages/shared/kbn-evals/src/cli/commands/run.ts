@@ -37,6 +37,7 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite agent-builder --grep "product documentation"
     node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
+    node scripts/evals run --suite streams --space-ids marketing,sales
   `,
   flags: {
     string: [
@@ -45,6 +46,7 @@ export const runSuiteCmd: Command<void> = {
       'project',
       'evaluation-connector-id',
       'repetitions',
+      'space-ids',
       'grep',
       'grep-invert',
       'profile',
@@ -88,6 +90,11 @@ export const runSuiteCmd: Command<void> = {
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
       envOverrides.EVAL_REPETITIONS = repetitions;
+    }
+
+    const spaceIds = flagsReader.string('space-ids');
+    if (spaceIds) {
+      envOverrides.EVAL_SPACE_IDS = spaceIds;
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');

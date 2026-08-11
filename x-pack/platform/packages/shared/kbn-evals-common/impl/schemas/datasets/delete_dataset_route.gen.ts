@@ -31,6 +31,10 @@ export type DeleteEvaluationDatasetRequestParamsInput = z.input<
 export const DeleteEvaluationDatasetResponse = lazySchema(() =>
   z.object({
     success: z.boolean(),
+    /**
+     * True when the dataset was only removed from the current space because others still share it, false when it was deleted outright.
+     */
+    unshared: z.boolean().optional(),
   })
 );
 export type DeleteEvaluationDatasetResponse = z.infer<typeof DeleteEvaluationDatasetResponse>;

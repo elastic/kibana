@@ -366,6 +366,11 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
+  const spaceIds = flagsReader.string('space-ids');
+  if (spaceIds) {
+    envOverrides.EVAL_SPACE_IDS = spaceIds;
+  }
+
   const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
   if (evaluationsKbnUrl) {
     envOverrides.EVAL_KBN_URL = evaluationsKbnUrl;
@@ -433,6 +438,11 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
+  const spaceIds = flagsReader.string('space-ids');
+  if (spaceIds) {
+    runArgs.push('--space-ids', spaceIds);
+  }
+
   if (skipServer) {
     runArgs.push('--skip-server');
   }
@@ -447,6 +457,7 @@ export const evalRunFlags: FlagOptions = {
     'evaluation-connector-id',
     'project',
     'repetitions',
+    'space-ids',
     'grep',
     'profile',
     'datasets-profile',
