@@ -72,7 +72,7 @@ function getEuiIconType(type) {
     case 'value':
       return 'queryValue';
     case 'recentSearch':
-      return 'search';
+      return 'magnify';
     case 'conjunction':
       return 'querySelector';
     case 'operator':
