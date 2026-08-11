@@ -270,7 +270,7 @@ export const useTransformConfigData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, projectRouting])]);
 
   if (sortingColumns.length > 0) {
     const sortingColumnsWithTypes = sortingColumns.map((c) => {

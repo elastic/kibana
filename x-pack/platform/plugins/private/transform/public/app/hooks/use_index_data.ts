@@ -142,7 +142,7 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify([query, timeRangeMs])]);
+  }, [JSON.stringify([query, projectRouting, timeRangeMs])]);
 
   const sort: EsSorting = sortingColumns.reduce((s, column) => {
     s[column.id] = { order: column.direction };
