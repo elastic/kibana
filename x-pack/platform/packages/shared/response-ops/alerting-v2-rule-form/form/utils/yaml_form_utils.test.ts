@@ -208,7 +208,6 @@ describe('yaml_form_utils', () => {
 
       expect(result).not.toHaveProperty('no_data_strategy');
     });
-
   });
 
   describe('parseYamlToFormValues', () => {
