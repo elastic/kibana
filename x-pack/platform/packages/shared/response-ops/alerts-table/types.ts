@@ -109,11 +109,12 @@ export type SystemCellId = keyof SystemCellComponentMap;
 
 interface CaseInfo {
   id: string;
-  updatedAt?: string | null;
 }
 
 type UseCasesAddToExistingCaseModal = (
-  props?: Record<string, unknown> & { onSuccess: (theCase: CaseInfo) => void }
+  props?: Record<string, unknown> & {
+    onSuccess: (theCase: CaseInfo, isNewCase: boolean) => void;
+  }
 ) => {
   open: ({
     getAttachments,

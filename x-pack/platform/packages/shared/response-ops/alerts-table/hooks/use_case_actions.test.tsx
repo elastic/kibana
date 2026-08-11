@@ -55,10 +55,7 @@ describe('useCaseActions', () => {
     ]);
   });
 
-  it.each([
-    { updatedAt: null, isNewCase: true },
-    { updatedAt: '2026-08-11T00:00:00.000Z', isNewCase: false },
-  ])('reports whether the modal added to a new case: $isNewCase', ({ updatedAt, isNewCase }) => {
+  it.each([true, false])('reports the modal case path: isNewCase=%s', (isNewCase) => {
     const onAddToCase = jest.fn();
 
     renderHook(() =>
@@ -73,7 +70,7 @@ describe('useCaseActions', () => {
       casesServiceMock.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
     expect(onSuccessCallback).toBeDefined();
     act(() => {
-      onSuccessCallback?.({ id: 'case-id', updatedAt });
+      onSuccessCallback?.({ id: 'case-id' }, isNewCase);
     });
 
     expect(onAddToCase).toHaveBeenCalledWith({ isNewCase });

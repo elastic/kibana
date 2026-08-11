@@ -31,7 +31,7 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: CaseUI) => void;
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
 };
 
 export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
@@ -47,7 +47,7 @@ export const useCasesAddToExistingCaseModal = ({
   const handleSuccess = useCallback(
     (theCase?: CaseUI) => {
       if (onSuccess && theCase) {
-        return onSuccess(theCase);
+        return onSuccess(theCase, true);
       }
     },
     [onSuccess]
@@ -120,7 +120,7 @@ export const useCasesAddToExistingCaseModal = ({
 
         trackAttachEvents(window.location.pathname, attachments);
 
-        onSuccess?.(theCase);
+        onSuccess?.(theCase, false);
 
         casesToasts.showSuccessAttach({
           theCase,
