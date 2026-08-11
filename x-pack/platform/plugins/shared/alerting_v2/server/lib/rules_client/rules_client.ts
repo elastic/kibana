@@ -1123,7 +1123,7 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      updatedRules.push({ id: item.id, spaceId });
+      updatedRules.push({ ruleId: item.id, spaceId });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
