@@ -306,11 +306,7 @@ export class MyAppPage {
 
 :::::
 
-If neither covers your component, `page.testSubj` locators are fine. When the component is EUI's, add a wrapper under `kbn-scout`'s `eui_components/` instead of keeping the logic in your page object. That's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
-
-:::::{note}
-If a Component Object lacks what you need, don't subclass it or drive the component yourself, which puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
-:::::
+If neither covers your component, `page.testSubj` locators are fine. When an EUI component has no wrapper, or its helper is missing a method, [add it to the shared helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it. Subclassing a helper or driving the component from your page object puts you back on the selectors these helpers replace.
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
