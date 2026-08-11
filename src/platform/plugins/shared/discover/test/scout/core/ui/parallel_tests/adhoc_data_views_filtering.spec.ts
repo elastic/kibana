@@ -114,7 +114,7 @@ spaceTest.describe(
           }
         );
 
-        await spaceTest.step('adds search to dashboard and navigates to context view', async () => {
+        await spaceTest.step('add search to dashboard and navigates to context view', async () => {
           await dashboard.goto();
           await dashboard.openNewDashboard();
           await dashboard.addSavedSearch('logst-ctx-runtimefield');
@@ -131,7 +131,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step(
-          'loads saved search in Discover and verifies runtime field column is preserved',
+          'load saved search in Discover and verifies runtime field column is preserved',
           async () => {
             await discover.goto({ queryMode: 'classic' });
             await discover.loadSavedSearch('logst-ctx-runtimefield');
