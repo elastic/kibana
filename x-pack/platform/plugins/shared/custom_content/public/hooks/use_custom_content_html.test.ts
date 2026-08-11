@@ -21,7 +21,7 @@ jest.mock('../utils/fill_template');
 import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { CustomContentTokenEvent } from '../../common/types';
-import { getServices } from '../services';
+import { getServices, hasServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
@@ -44,6 +44,7 @@ function makeHttp(events: CustomContentTokenEvent[]) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  (hasServices as jest.Mock).mockReturnValue(true);
   (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: mockSearch });
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });

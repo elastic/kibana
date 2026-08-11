@@ -55,6 +55,7 @@ jest.mock('./components/edit_custom_content_flyout', () => ({
 let mockAgentBuilder: unknown;
 
 jest.mock('./services', () => ({
+  hasServices: () => true,
   getServices: () => ({ agentBuilder: mockAgentBuilder, core: { http: {} }, search: jest.fn() }),
 }));
 

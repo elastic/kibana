@@ -25,6 +25,8 @@ export const setServices = (
   services = { core, search, agentBuilder };
 };
 
+export const hasServices = (): boolean => services != null;
+
 export const getServices = (): Services => {
   if (!services) throw new Error('CustomContent services not initialized');
   return services;

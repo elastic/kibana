@@ -26,7 +26,7 @@ import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
-import { getServices } from './services';
+import { getServices, hasServices } from './services';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
@@ -112,7 +112,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       onEdit: async ({ isNewPanel } = {}) => {
         isFlyoutOpen$.next(true);
       },
-      isEditingEnabled: () => true,
+      isEditingEnabled: () => hasServices(),
     });
 
     return {
@@ -158,6 +158,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         useEffect(() => {
+          if (!hasServices()) return;
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
 
