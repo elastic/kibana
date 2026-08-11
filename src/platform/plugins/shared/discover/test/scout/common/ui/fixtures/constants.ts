@@ -23,6 +23,17 @@ export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
 /**
+ * Loads the `with-timefield` and `without-timefield` data views. The matching ES
+ * data is ingested by the Discover core global setup, so specs only need the
+ * saved objects. Use {@link NO_TIME_FIELD_DATA_VIEW} to select the latter.
+ */
+export const WITHOUT_TIMEFIELD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield';
+
+/** Data view from {@link WITHOUT_TIMEFIELD_KBN_ARCHIVE} that has no time field. */
+export const NO_TIME_FIELD_DATA_VIEW = 'without-timefield';
+
+/**
  * Saved searches exercising ES|QL column rendering (initial/custom columns for
  * transformational and non-transformational commands).
  */

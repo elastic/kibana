@@ -80,7 +80,7 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       await expect(docViewer.getFlyoutNavigation()).toBeVisible();
 
       // Re-sort ascending: pinned doc moves to page 4 (last of 5 results).
-      await dataGrid.sortColumnAsc('@timestamp');
+      await dataGrid.sortColumn('@timestamp', 'Sort Old-New');
       await discover.waitUntilTabIsLoaded();
 
       await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp!);

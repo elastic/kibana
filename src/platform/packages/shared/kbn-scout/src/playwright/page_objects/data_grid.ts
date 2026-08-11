@@ -22,6 +22,18 @@ export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
 export type DataGridPaginationScope = 'discover' | 'docViewer';
 
+interface TimeoutOptions {
+  timeout?: number;
+}
+
+/**
+ * Opening a column's action menu is hover-dependent and can lose the hover to a
+ * re-render, so it is retried. Sorting goes through an extra menu click, which
+ * makes it more sensitive to that churn than the other menu actions — hence the
+ * wider budget.
+ */
+const SORT_COLUMN_MENU_TIMEOUT = 10_000;
+
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
 
@@ -376,14 +388,14 @@ export class DataGrid {
     return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
-  async openColumnMenuByField(field: string) {
+  async openColumnMenuByField(field: string, { timeout }: TimeoutOptions = {}) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
       await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
       await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
         state: 'visible',
       });
-    }).toPass();
+    }).toPass({ timeout });
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
@@ -532,25 +544,14 @@ export class DataGrid {
     });
   }
 
-  async sortColumnAsc(field: string, sortText = 'Sort Old-New') {
-    await expect(async () => {
-      await this.page.testSubj.locator(`dataGridHeaderCell-${field}`).hover();
-      await this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`).click();
-      await this.page.testSubj
-        .locator(`dataGridHeaderCellActionGroup-${field}`)
-        .waitFor({ state: 'visible' });
-    }).toPass({ timeout: 10_000 });
-    await this.page.getByRole('button', { name: sortText }).click();
-  }
-
-  async sortColumnDesc(field: string, sortText = 'Sort New-Old') {
-    await expect(async () => {
-      await this.page.testSubj.locator(`dataGridHeaderCell-${field}`).hover();
-      await this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`).click();
-      await this.page.testSubj
-        .locator(`dataGridHeaderCellActionGroup-${field}`)
-        .waitFor({ state: 'visible' });
-    }).toPass({ timeout: 10_000 });
-    await this.page.getByRole('button', { name: sortText }).click();
+  /**
+   * Sorts a column via its header menu. The direction is carried entirely by
+   * `sortOption`, which is the menu entry's label and varies by field type:
+   * `Sort A-Z` / `Sort Z-A` for strings, `Sort Old-New` / `Sort New-Old` for
+   * dates, `Sort Low-High` / `Sort High-Low` for numbers.
+   */
+  async sortColumn(field: string, sortOption: string) {
+    await this.openColumnMenuByField(field, { timeout: SORT_COLUMN_MENU_TIMEOUT });
+    await this.page.getByRole('button', { name: sortOption }).click();
   }
 }

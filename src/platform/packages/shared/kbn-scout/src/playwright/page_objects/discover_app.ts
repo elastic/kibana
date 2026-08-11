@@ -770,15 +770,6 @@ export class DiscoverApp {
       this.controls.getControlFrame(controlId).getByText(value),
   };
 
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
-  }
-
   getDocHeaderLabels(): Locator {
     return this.page.locator(
       '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
@@ -830,12 +821,40 @@ export class DiscoverApp {
     }, cellSelector);
   }
 
+  async isChartVisible(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('unifiedHistogramChart')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
+  async isTableVisible(): Promise<boolean> {
+    return this.page.testSubj
+      .locator('discoverDocTable')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+  }
+
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async showTable() {
+    await this.page.testSubj.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async hideTable() {
+    await this.page.testSubj.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async expectXYVisChartVisible() {
@@ -1240,8 +1259,31 @@ export class DiscoverApp {
     return this.page.testSubj.locator('data-cascade');
   }
 
+  /**
+   * Trigger for the "Group by" popover in the cascade layout toolbar. Despite
+   * the `...Switch` test subject it is a popover button, not a toggle — use
+   * {@link optOutOfCascadeLayout} to actually leave the cascade layout.
+   */
   getCascadeLayoutSwitch(): Locator {
     return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  /**
+   * Leaves the cascade ("grouped results") layout that Discover switches to for
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. No-op when the
+   * cascade layout is not active, so callers can use it to normalise the layout
+   * regardless of whether the feature flag is on.
+   */
+  async optOutOfCascadeLayout() {
+    if (!(await this.isShowingCascadeLayout())) {
+      return;
+    }
+
+    await this.getCascadeLayoutSwitch().click();
+    await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+    await this.waitUntilTabIsLoaded();
+    await this.getCascadeLayout().waitFor({ state: 'hidden' });
   }
 
   async isShowingCascadeLayout(): Promise<boolean> {
