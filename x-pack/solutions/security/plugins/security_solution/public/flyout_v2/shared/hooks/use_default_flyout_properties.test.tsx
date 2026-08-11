@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { EuiProvider } from '@elastic/eui';
-import { useDefaultDocumentFlyoutProperties } from './use_default_flyout_properties';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import {
+  useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
+} from './use_default_flyout_properties';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiProvider highContrastMode={false}>{children}</EuiProvider>
@@ -45,5 +48,23 @@ describe('useDefaultDocumentFlyoutProperties', () => {
     rerender();
 
     expect(result.current).toBe(initial);
+  });
+});
+
+describe('useDefaultToolsFlyoutProperties', () => {
+  it('sets a theme-aware minimum width', () => {
+    const { result } = renderHook(() => ({
+      properties: useDefaultToolsFlyoutProperties(),
+      theme: useEuiTheme().euiTheme,
+    }));
+
+    expect(result.current.properties).toEqual({
+      flyoutMenuDisplayMode: 'always',
+      minWidth: result.current.theme.base * 24,
+      ownFocus: false,
+      paddingSize: 'm',
+      resizable: true,
+      size: 'm',
+    });
   });
 });
