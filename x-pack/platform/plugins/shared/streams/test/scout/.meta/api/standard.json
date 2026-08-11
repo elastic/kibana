@@ -2,28 +2,14 @@
   "sha1": "882dd321f403b0619488911f9f19b4d029cb5840",
   "tests": [
     {
-<<<<<<< HEAD
-=======
-      "id": "4aaafd2a7000640-70ec3e6d9549722",
-      "title": "Teardown environment for Streams API tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
-    {
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
-        "line": 5,
-        "column": 1
+        "line": 11,
+        "column": 16
       }
     },
     {
@@ -37,99 +23,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 65,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 57,
-        "column": 99
-      }
-    },
-    {
-      "id": "53fcb18bfdd8ffe-613a376a423c275",
-      "title": "Draft stream simulation should simulate grok processing on a draft stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 83,
-        "column": 5
-      }
-    },
-    {
-      "id": "53fcb18bfdd8ffe-13442199fc239a6",
-      "title": "Draft stream simulation should detect mapping errors for draft stream detected_fields",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 118,
-        "column": 17
-      }
-    },
-    {
-      "id": "53fcb18bfdd8ffe-8021a5e1c328229",
-      "title": "Draft stream simulation should report processor failures correctly on a draft stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 153,
-        "column": 26
-      }
-    },
-    {
-      "id": "53fcb18bfdd8ffe-8814c3f8c6c4449",
-      "title": "Draft stream simulation should simulate processing on a nested draft (draft child of draft)",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 183,
-        "column": 25
-      }
-    },
-    {
-      "id": "53fcb18bfdd8ffe-eca05f32c585194",
-      "title": "Draft stream simulation should simulate multiple sequential processors on a draft stream",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/draft_stream_simulate.spec.ts",
-        "line": 217,
-        "column": 14
-      }
-    },
-    {
-      "id": "bf9123d2f461ba3-a9d65106606d0b3",
-      "title": "Stream lifecycle - inherited ILM config API (classic) returns the ILM policy a classic stream would inherit from its index template",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited_ilm.spec.ts",
-        "line": 57,
-        "column": 47
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -143,15 +39,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 90,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 70,
-        "column": 63
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -165,15 +55,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 116,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 99,
-        "column": 9
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -203,15 +87,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 170,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 129,
-        "column": 35
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -225,7 +103,6 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 209,
         "column": 12
@@ -234,30 +111,6 @@
     {
       "id": "26e520f8517a033-29fe613a0f05ad5",
       "title": "Insights CRUD API should delete an insight",
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 173,
-        "column": 76
-      }
-    },
-    {
-      "id": "65f024391566ce3-395f047424e733f",
-      "title": "Stream lifecycle & failure store - inherited config API returns the ILM policy a classic stream would inherit from its index template",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 203,
-        "column": 29
-      }
-    },
-    {
-      "id": "65f024391566ce3-b2a69fbf3f40bbc",
-      "title": "Stream lifecycle & failure store - inherited config API returns the failure store a classic stream would inherit from an exact-pattern index template",
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -266,15 +119,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 245,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 255,
-        "column": 32
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -288,15 +135,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 278,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 297,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -326,15 +167,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/insights_crud.spec.ts",
         "line": 330,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_inherited.spec.ts",
-        "line": 315,
-        "column": 57
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -412,15 +247,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 107,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 96,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -434,15 +263,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 128,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 109,
-        "column": 27
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -456,15 +279,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 149,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 123,
-        "column": 26
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -478,15 +295,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 190,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 157,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -500,15 +311,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 229,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 192,
-        "column": 42
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -522,15 +327,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 264,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 222,
-        "column": 36
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -544,15 +343,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 299,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 250,
-        "column": 22
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -566,15 +359,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 338,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 284,
-        "column": 26
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -588,15 +375,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 398,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 339,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -610,15 +391,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 456,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 390,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -632,15 +407,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 479,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 411,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -654,15 +423,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 523,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 441,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -676,15 +439,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 539,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 456,
-        "column": 95
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -698,15 +455,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 568,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 485,
-        "column": 36
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -720,15 +471,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 598,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 515,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -742,15 +487,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
         "line": 652,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/lifecycle_retention.spec.ts",
-        "line": 556,
-        "column": 44
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -764,15 +503,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 86,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 76,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -786,15 +519,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 133,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 120,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -808,15 +535,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 176,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 156,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -830,15 +551,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 231,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 212,
-        "column": 10
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -852,15 +567,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 303,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 280,
-        "column": 36
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -874,15 +583,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 367,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 344,
-        "column": 23
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -896,15 +599,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 419,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 389,
-        "column": 32
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -918,15 +615,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 486,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 460,
-        "column": 24
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -940,15 +631,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 555,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 533,
-        "column": 17
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -962,15 +647,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 614,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 589,
-        "column": 29
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -984,15 +663,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
         "line": 648,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_persistence.spec.ts",
-        "line": 613,
-        "column": 5
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1006,15 +679,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 21,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 20,
-        "column": 5
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1028,15 +695,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 64,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 59,
-        "column": 22
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1050,15 +711,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 93,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 85,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1072,15 +727,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 132,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 123,
-        "column": 27
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1094,15 +743,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 168,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 157,
-        "column": 14
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1116,15 +759,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 201,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 190,
-        "column": 27
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1138,15 +775,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 229,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 218,
-        "column": 14
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1160,15 +791,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 261,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 241,
-        "column": 19
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1182,15 +807,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 296,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 269,
-        "column": 50
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1204,15 +823,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 323,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 302,
-        "column": 20
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1226,15 +839,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 351,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 326,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1248,15 +855,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 383,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 352,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1270,15 +871,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 418,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 386,
-        "column": 49
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1292,15 +887,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 452,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 421,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1314,15 +903,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 480,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 452,
-        "column": 67
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1336,15 +919,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 506,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 475,
-        "column": 8
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1358,15 +935,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 532,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 497,
-        "column": 88
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1380,15 +951,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 563,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 523,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1402,15 +967,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 590,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 545,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1424,15 +983,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 617,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 573,
-        "column": 17
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1446,15 +999,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 648,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 596,
-        "column": 62
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1468,15 +1015,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 676,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 623,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1490,15 +1031,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 709,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 654,
-        "column": 20
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1512,15 +1047,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 752,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 688,
-        "column": 36
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1534,15 +1063,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 786,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 728,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1556,15 +1079,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 814,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 755,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1578,15 +1095,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 839,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 773,
-        "column": 17
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1600,15 +1111,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 866,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 794,
-        "column": 22
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1622,15 +1127,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
         "line": 888,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/processing_simulate.spec.ts",
-        "line": 817,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1642,15 +1141,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 79,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 71,
-        "column": 37
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1662,15 +1155,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 98,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 82,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1682,15 +1169,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 109,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 83,
-        "column": 60
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1702,15 +1183,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 117,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 90,
-        "column": 26
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1722,15 +1197,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 127,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 99,
-        "column": 34
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1742,15 +1211,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 139,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 105,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1762,15 +1225,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 147,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 112,
-        "column": 34
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1782,15 +1239,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 160,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 118,
-        "column": 36
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1802,15 +1253,9 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/query_stream_isolation.spec.ts",
         "line": 222,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/query_stream_isolation.spec.ts",
-        "line": 168,
-        "column": 29
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1824,15 +1269,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 32,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 27,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1846,15 +1285,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 65,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 48,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1868,15 +1301,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 83,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 66,
-        "column": 47
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1890,15 +1317,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 104,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 80,
-        "column": 19
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1912,15 +1333,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 125,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 93,
-        "column": 38
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1934,15 +1349,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 146,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 111,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1956,15 +1365,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 167,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 128,
-        "column": 17
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -1978,15 +1381,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 189,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 142,
-        "column": 21
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2000,15 +1397,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 218,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 168,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2022,15 +1413,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 251,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 189,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2044,15 +1429,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 300,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 228,
-        "column": 20
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2066,15 +1445,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 339,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 265,
-        "column": 59
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2088,15 +1461,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 372,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 293,
-        "column": 60
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2110,15 +1477,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 395,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 315,
-        "column": 29
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2132,15 +1493,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 418,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 339,
-        "column": 63
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2154,15 +1509,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 438,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 350,
-        "column": 10
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2176,15 +1525,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 466,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 376,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2198,15 +1541,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 484,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 387,
-        "column": 10
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2220,15 +1557,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 513,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 406,
-        "column": 38
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2242,15 +1573,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 535,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 424,
-        "column": 15
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2264,15 +1589,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 551,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 438,
-        "column": 74
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2286,15 +1605,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 581,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 466,
-        "column": 68
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2308,15 +1621,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 601,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 480,
-        "column": 26
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2330,15 +1637,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 617,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 491,
-        "column": 19
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2352,15 +1653,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 634,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 506,
-        "column": 27
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2374,15 +1669,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 702,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 556,
-        "column": 28
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2396,15 +1685,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 767,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 596,
-        "column": 9
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2418,15 +1701,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
         "line": 861,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/routing_fork_stream.spec.ts",
-        "line": 652,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2440,15 +1717,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 86,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 76,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2462,15 +1733,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 129,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 111,
-        "column": 10
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2484,15 +1749,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 168,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 145,
-        "column": 22
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2506,15 +1765,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 207,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 181,
-        "column": 18
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2528,15 +1781,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 246,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 212,
-        "column": 30
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2550,15 +1797,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 285,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 246,
-        "column": 83
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2572,15 +1813,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 324,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 282,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2594,15 +1829,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 370,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 325,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2616,15 +1845,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 442,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 387,
-        "column": 22
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2638,15 +1861,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 508,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 443,
-        "column": 13
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2660,15 +1877,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 574,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 505,
-        "column": 7
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2682,15 +1893,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 616,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 539,
-        "column": 25
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
@@ -2704,15 +1909,9 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-<<<<<<< HEAD
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
         "line": 648,
         "column": 12
-=======
-        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams/schema_persistence.spec.ts",
-        "line": 563,
-        "column": 62
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))
       }
     },
     {
