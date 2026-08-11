@@ -30,15 +30,16 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
       await discoverScoutSpace.savedObjects.load(testData.WITHOUT_TIMEFIELD_KBN_ARCHIVE);
+      // Open Discover on the no-time-field view directly. Switching to it through
+      // the data-view picker in `beforeEach` raced the picker's filtered list
+      // under load, and API setup is cheaper than driving the UI per test.
+      await discoverScoutSpace.uiSettings.setDefaultIndex(testData.NO_TIME_FIELD_DATA_VIEW);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.dataGrid.waitForLoad();
-      await pageObjects.dataGrid.waitForDocTableRendered();
-      await pageObjects.discover.selectDataView(testData.NO_TIME_FIELD_DATA_VIEW);
-      await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.dataGrid.waitForDocTableRendered();
     });
 

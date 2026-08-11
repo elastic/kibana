@@ -10,7 +10,7 @@
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-const expectSidebarState = async (page: ScoutPage, expanded: boolean) => {
+export const expectSidebarState = async (page: ScoutPage, expanded: boolean) => {
   await expect(page.testSubj.locator('fieldList')).toBeVisible({ visible: expanded });
   await expect(page.testSubj.locator('dscHideSidebarButton')).toBeVisible({ visible: expanded });
   await expect(page.testSubj.locator('dscShowSidebarButton')).toBeVisible({ visible: !expanded });

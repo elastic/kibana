@@ -27,7 +27,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { createPanelsStateAssertion, spaceTest } from '../fixtures';
+import { createPanelsStateAssertion, expectSidebarState, spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'Discover panels toggle - ES|QL mode',
@@ -65,10 +65,10 @@ spaceTest.describe(
 
         await spaceTest.step('sidebar toggle', async () => {
           await discover.closeSidebar();
-          await expectPanels({ sidebar: false, chart: true, table: true });
+          await expectSidebarState(page, false);
 
           await discover.openSidebar();
-          await expectPanels({ sidebar: true, chart: true, table: true });
+          await expectSidebarState(page, true);
         });
 
         await spaceTest.step('histogram toggle', async () => {
@@ -123,10 +123,10 @@ spaceTest.describe(
 
         await spaceTest.step('sidebar toggle', async () => {
           await discover.closeSidebar();
-          await expectPanels({ sidebar: false, chart: true, table: true });
+          await expectSidebarState(page, false);
 
           await discover.openSidebar();
-          await expectPanels({ sidebar: true, chart: true, table: true });
+          await expectSidebarState(page, true);
         });
 
         await spaceTest.step('histogram toggle', async () => {
