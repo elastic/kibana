@@ -1254,15 +1254,11 @@ export class DiscoverApp {
 
   /**
    * Leaves the cascade ("grouped results") layout that Discover switches to for
-   * `STATS ... BY` ES|QL queries, restoring the flat doc table. No-op when the
-   * cascade layout is not active, so callers can use it to normalise the layout
-   * regardless of whether the feature flag is on.
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. Expects the
+   * cascade layout to be showing — it fails rather than silently doing nothing
+   * if the layout is absent, so callers notice when the trigger stops applying.
    */
   async optOutOfCascadeLayout() {
-    if (!(await this.isShowingCascadeLayout())) {
-      return;
-    }
-
     await this.getCascadeLayoutSwitch().click();
     await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
     await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');

@@ -22,18 +22,6 @@ export type DataGridRowHeight = 'Auto' | 'Custom';
 export type DataGridComparisonDiffMode = 'Full value' | 'By character' | 'By word' | 'By line';
 export type DataGridPaginationScope = 'discover' | 'docViewer';
 
-interface TimeoutOptions {
-  timeout?: number;
-}
-
-/**
- * Opening a column's action menu is hover-dependent and can lose the hover to a
- * re-render, so it is retried. Sorting goes through an extra menu click, which
- * makes it more sensitive to that churn than the other menu actions — hence the
- * wider budget.
- */
-const SORT_COLUMN_MENU_TIMEOUT = 10_000;
-
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
 
@@ -388,14 +376,14 @@ export class DataGrid {
     return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
-  async openColumnMenuByField(field: string, { timeout }: TimeoutOptions = {}) {
+  async openColumnMenuByField(field: string) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
       await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
       await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
         state: 'visible',
       });
-    }).toPass({ timeout });
+    }).toPass();
   }
 
   async openDocumentDetails({ rowIndex }: { rowIndex: number }) {
@@ -551,7 +539,7 @@ export class DataGrid {
    * dates, `Sort Low-High` / `Sort High-Low` for numbers.
    */
   async sortColumn(field: string, sortOption: string) {
-    await this.openColumnMenuByField(field, { timeout: SORT_COLUMN_MENU_TIMEOUT });
+    await this.openColumnMenuByField(field);
     await this.page.getByRole('button', { name: sortOption }).click();
   }
 }

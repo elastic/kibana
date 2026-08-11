@@ -72,8 +72,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
 
       // Capture the identity of the first result.
-      const timestamp = await docViewer.getFieldValue('@timestamp').textContent();
-      const clientIp = await docViewer.getFieldValue('clientip').textContent();
+      const timestamp = await docViewer.getFieldValue('@timestamp').innerText();
+      const clientIp = await docViewer.getFieldValue('clientip').innerText();
 
       // Starts on page 0 (first matching doc, DESC order).
       await expect(docViewer.getNavigationPage(0)).toBeVisible();
@@ -83,8 +83,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       await dataGrid.sortColumn('@timestamp', 'Sort Old-New');
       await discover.waitUntilTabIsLoaded();
 
-      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp!);
-      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp!);
+      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp);
+      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp);
       await expect(docViewer.getNavigationPage(4)).toBeVisible();
       await expect(docViewer.getFlyoutNavigation()).toBeVisible();
 
@@ -92,8 +92,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       await discover.writeAndSubmitKqlQuery('extension : ("css" or "gif" or "png")');
       await discover.waitUntilTabIsLoaded();
 
-      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp!);
-      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp!);
+      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp);
+      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp);
       await expect(docViewer.getFlyoutNavigation()).toBeHidden();
     }
   );
@@ -115,8 +115,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
 
       await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
 
-      const timestamp = await docViewer.getFieldValue('@timestamp').textContent();
-      const clientIp = await docViewer.getFieldValue('clientip').textContent();
+      const timestamp = await docViewer.getFieldValue('@timestamp').innerText();
+      const clientIp = await docViewer.getFieldValue('clientip').innerText();
 
       await expect(docViewer.getNavigationPage(0)).toBeVisible();
       await expect(docViewer.getFlyoutNavigation()).toBeVisible();
@@ -127,8 +127,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       );
       await discover.waitUntilTabIsLoaded();
 
-      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp!);
-      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp!);
+      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp);
+      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp);
       await expect(docViewer.getNavigationPage(4)).toBeVisible();
       await expect(docViewer.getFlyoutNavigation()).toBeVisible();
 
@@ -141,8 +141,8 @@ spaceTest.describe('Discover doc viewer - pinning', { tag: '@local-stateful-clas
       );
       await discover.waitUntilTabIsLoaded();
 
-      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp!);
-      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp!);
+      await expect(docViewer.getFieldValue('@timestamp')).toHaveText(timestamp);
+      await expect(docViewer.getFieldValue('clientip')).toHaveText(clientIp);
       await expect(docViewer.getFlyoutNavigation()).toBeHidden();
     }
   );

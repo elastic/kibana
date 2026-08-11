@@ -169,5 +169,27 @@ spaceTest.describe(
         await expect(page.locator(`[id="${describedBy}"]`)).toBeAttached();
       });
     });
+
+    spaceTest('has no automated a11y violations', async ({ page, pageObjects }) => {
+      const { docViewer } = pageObjects;
+
+      await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+      await spaceTest.step('push flyout', async () => {
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="docViewerFlyout"]'],
+        });
+        expect(violations).toStrictEqual([]);
+      });
+
+      await spaceTest.step('overlay flyout', async () => {
+        await page.setViewportSize(OVERLAY_VIEWPORT);
+
+        const { violations } = await page.checkA11y({
+          include: ['[data-test-subj="docViewerFlyout"]'],
+        });
+        expect(violations).toStrictEqual([]);
+      });
+    });
   }
 );
