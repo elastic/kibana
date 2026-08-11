@@ -13,6 +13,7 @@ import type {
   Error,
   IWaterfallGetRelatedErrorsHref,
   TraceItem,
+  TraceWaterfallEbt,
   WaterfallGetErrorMarkerHref,
   WaterfallGetServiceBadgeHref,
 } from '@kbn/apm-types';
@@ -70,11 +71,7 @@ interface BaseTraceWaterfallProps {
   maxTraceItems?: number;
   discoverHref?: string;
   // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693
-  ebt?: {
-    row: { element: string };
-    errorBadge: { element: string };
-    serviceBadge: { element: string };
-  };
+  ebt?: TraceWaterfallEbt;
 }
 
 /** Default: 'window' (page scroll). Use 'parent' for flyout. */
@@ -148,6 +145,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
             traceDocsTotal={traceDocsTotal}
             maxTraceItems={maxTraceItems}
             discoverHref={discoverHref}
+            ebtElement={ebt?.sizeWarningDiscoverLink?.element}
           />
           <EuiSpacer size="m" />
         </>
@@ -179,6 +177,7 @@ function TraceWaterfallComponent() {
     showCriticalPathControl,
     contextSpanIds,
     scrollStrategy,
+    ebt,
   } = useTraceWaterfallContext();
 
   const [isContextSpanVisible, setIsContextSpanVisible] = useState(true);
@@ -218,6 +217,7 @@ function TraceWaterfallComponent() {
                 <ScrollToOriginButton
                   isDisabled={isContextSpanVisible}
                   onClick={() => scrollToOriginRef.current()}
+                  ebtElement={ebt?.scrollToOrigin?.element}
                 />
               </EuiFlexItem>
             )}
@@ -272,6 +272,7 @@ function TraceWaterfallComponent() {
                     <WaterfallAccordionButton
                       isOpen={isAccordionOpen}
                       onClick={toggleAllAccordions}
+                      ebtElement={ebt?.foldButton?.element}
                     />
                   </EuiFlexItem>
                 )}

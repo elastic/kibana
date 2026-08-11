@@ -20,7 +20,7 @@ import {
   type ServiceTransactionsLocatorParams,
   type TransactionDetailsByNameParams,
 } from '@kbn/deeplinks-observability';
-import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -39,6 +39,10 @@ const MAX_GROUPS_TOOLTIP = (
           <EuiLink
             href="https://www.elastic.co/guide/en/kibana/current/troubleshooting.html#troubleshooting-too-many-transactions"
             target="_blank"
+            {...getEbtProps({
+              action: EBT_CLICK_ACTIONS.VIEW_DOCS,
+              element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.REMAINING_TOOLTIP_DOCS_LINK,
+            })}
           >
             {i18n.translate('apmUiShared.serviceFlyout.transactions.maxGroupsDocsLink', {
               defaultMessage: 'docs',
@@ -172,6 +176,9 @@ export function ServiceFlyoutTransactionsSection({
       }
       showMaxTransactionGroupsExceededWarning
       remainingTransactionsCellTooltipContent={MAX_GROUPS_TOOLTIP}
+      remainingTransactionsInfoEbtElement={
+        SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_REMAINING_TRANSACTIONS_INFO_BUTTON
+      }
       columnInteractions={{
         name: {
           href: getTransactionDetailHref,

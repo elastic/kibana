@@ -20,4 +20,11 @@ export const GENAI_EBT_CLICK_ACTIONS = {
    * host app is available on every click event via `context.applicationId`.
    */
   VIEW_GENAI: 'viewGenAi',
+  /** User expands/collapses long GenAI message content via the "View more" button. */
+  TOGGLE_VIEW_MORE: 'toggleGenAiViewMore',
+} as const;
+
+export const GENAI_EBT_ELEMENTS = {
+  /** The "View more"/"View less" toggle under truncated GenAI content. */
+  VIEW_MORE: 'genAiViewMore',
 } as const;

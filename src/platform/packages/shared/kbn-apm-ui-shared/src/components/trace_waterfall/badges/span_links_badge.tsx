@@ -7,19 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TRACE_WATERFALL_EBT_CLICK_ACTIONS } from '../ebt_constants';
 
 interface Props {
   incomingCount: number;
   outgoingCount: number;
   id: string;
   onClick?: (flyoutDetailTab: string) => unknown;
+  /** EBT click `element` supplied by the hosting waterfall so badge clicks can be attributed to its surface. */
+  ebtElement?: string;
 }
 
 const SPAN_LINKS_FLYOUT_TAB = 'span_links';
 
-export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Props) {
+export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick, ebtElement }: Props) {
   if (!outgoingCount && !incomingCount) {
     return null;
   }
@@ -50,10 +54,18 @@ export function SpanLinksBadge({ outgoingCount, incomingCount, id, onClick }: Pr
       <EuiBadge
         tabIndex={0}
         data-test-subj={`spanLinksBadge_${id}`}
+        {...(onClick && ebtElement
+          ? getEbtProps({
+              action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.VIEW_SPAN_LINKS,
+              element: ebtElement,
+            })
+          : {})}
         {...(onClick
           ? {
-              onClick: (e: any) => {
-                e.stopPropagation();
+              // `data-prevent-row-click` (checked by the row handlers) instead of
+              // stopPropagation, so the click still bubbles to the EBT tracker on window.
+              'data-prevent-row-click': true,
+              onClick: () => {
                 onClick(SPAN_LINKS_FLYOUT_TAB);
               },
               onClickAriaLabel: i18n.translate('apmUiShared.waterfall.spanLinks.badgeAriaLabel', {

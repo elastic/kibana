@@ -132,7 +132,14 @@ const DEFAULT_REMAINING_TRANSACTIONS_TOOLTIP = (
   </EuiText>
 );
 
-function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNode }) {
+function RemainingTransactionsRow({
+  tooltipContent,
+  ebtElement = TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_REMAINING_TRANSACTIONS_INFO_BUTTON,
+}: {
+  tooltipContent?: ReactNode;
+  /** EBT click `element` supplied by the consumer so info-button clicks can be attributed to its surface. */
+  ebtElement?: string;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const content = tooltipContent ?? DEFAULT_REMAINING_TRANSACTIONS_TOOLTIP;
   return (
@@ -166,6 +173,10 @@ function RemainingTransactionsRow({ tooltipContent }: { tooltipContent?: ReactNo
                   'apmUiShared.transactionsTable.remainingTransactionsAriaLabel',
                   { defaultMessage: 'More information about remaining transactions' }
                 )}
+                {...getEbtProps({
+                  action: EBT_CLICK_ACTIONS.VIEW_MORE_INFO,
+                  element: ebtElement,
+                })}
                 onClick={() => setIsOpen(true)}
               />
             </EuiToolTip>
@@ -188,6 +199,7 @@ export function getBuiltInColumns({
   showSparklines = true,
   isSparklineLoading = false,
   remainingTransactionsCellTooltipContent,
+  remainingTransactionsInfoEbtElement,
 }: {
   latencyAggregationType?: LatencyAggregationType;
   nameInteraction?: TransactionGroupInteraction;
@@ -195,6 +207,7 @@ export function getBuiltInColumns({
   showSparklines?: boolean;
   isSparklineLoading?: boolean;
   remainingTransactionsCellTooltipContent?: ReactNode;
+  remainingTransactionsInfoEbtElement?: string;
 }): Record<ColumnId, EuiBasicTableColumn<TransactionGroup>> {
   return {
     alerts: {
@@ -255,7 +268,10 @@ export function getBuiltInColumns({
       render: (_: unknown, item: TransactionGroup) => {
         if (item.name === '_other') {
           return (
-            <RemainingTransactionsRow tooltipContent={remainingTransactionsCellTooltipContent} />
+            <RemainingTransactionsRow
+              tooltipContent={remainingTransactionsCellTooltipContent}
+              ebtElement={remainingTransactionsInfoEbtElement}
+            />
           );
         }
         const nameHref = nameInteraction?.href?.(item);

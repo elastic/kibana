@@ -73,6 +73,51 @@ for (const [name, tester] of [tsTester, babelTester]) {
           filename: 'foo.tsx',
           code: `<CustomWrapper className="foo" />`,
         },
+        // Conditionally applied getEbtProps — the consumer may not provide an EBT element
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <EuiButton {...(ebt ? getEbtProps({ action: 'a', element: ebt.element }) : {})} />; }`,
+        },
+        // Custom component with onClick + conditional getEbtProps spread — should not be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ mark }) { return <CustomWrapper onClick={fn} {...(mark.ebt?.errorMarker ? getEbtProps({ action: 'a', element: mark.ebt.errorMarker.element }) : {})} />; }`,
+        },
+        // Logical-expression getEbtProps spread — should not be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <EuiButton {...(ebt && getEbtProps({ action: 'a', element: 'e' }))} />; }`,
+        },
+        // Variable holding a getEbtProps() result — should not be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo() { const ebtProps = getEbtProps({ action: 'a', element: 'e' }); return <EuiButton {...ebtProps} />; }`,
+        },
+        // Variable holding a conditionally applied getEbtProps() result — should not be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { const ebtProps = ebt ? getEbtProps({ action: 'a', element: ebt.element }) : {}; return <EuiButton {...ebtProps} />; }`,
+        },
+        // Custom component receiving EBT context via an `ebt` prop — instrumented internally
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <TraceWaterfall onClick={fn} ebt={ebt} />; }`,
+        },
+        // Custom component receiving EBT context via an `ebtElement` prop — instrumented internally
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <SpanLinksBadge onClick={fn} ebtElement={ebt?.spanLinksBadge?.element} />; }`,
+        },
+        // Nested interactive element inside a container with direct EBT attrs — tracked via ancestor
+        {
+          filename: 'foo.tsx',
+          code: `function Foo() { return <div data-ebt-action="a" data-ebt-element="e" onClick={fn}><div onClick={fn}>Inner</div></div>; }`,
+        },
+        // Nested interactive element inside a container with a conditional getEbtProps spread — tracked via ancestor
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <div {...(ebt ? getEbtProps({ action: 'a', element: ebt.element }) : {})} onClick={fn}><div onClick={fn}>Inner</div></div>; }`,
+        },
       ],
 
       invalid: [
@@ -104,6 +149,46 @@ for (const [name, tester] of [tsTester, babelTester]) {
           errors: [
             {
               message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Conditional spread of an unrelated function — should still be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ cond }) { return <EuiButton {...(cond ? someOtherFn() : {})}>Click</EuiButton>; }`,
+          errors: [
+            {
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Variable holding a conditional unrelated-function result — should still be flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ cond }) { const props = cond ? someOtherFn() : {}; return <EuiButton {...props}>Click</EuiButton>; }`,
+          errors: [
+            {
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Known interactive element with only an `ebt` prop — EUI components don't apply it, still flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo({ ebt }) { return <EuiButton ebt={ebt}>Click</EuiButton>; }`,
+          errors: [
+            {
+              message: `<EuiButton> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
+            },
+          ],
+        },
+        // Nested interactive element whose ancestors carry no EBT attrs — still flagged
+        {
+          filename: 'foo.tsx',
+          code: `function Foo() { return <div className="wrapper"><div onClick={fn}>Inner</div></div>; }`,
+          errors: [
+            {
+              message: `<div> is missing EBT tracking attributes. Add \`data-ebt-action\` and \`data-ebt-element\` (use \`getEbtProps()\` from \`@kbn/ebt-click\`).`,
             },
           ],
         },

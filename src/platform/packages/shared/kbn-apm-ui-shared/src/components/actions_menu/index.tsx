@@ -16,6 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { EBT_CLICK_ACTIONS, getEbtProps, type EbtClickAttrsElementOnly } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { ActionGroups } from './types';
 import { buildPanels } from './build_panels';
@@ -26,9 +27,16 @@ interface ActionsMenuProps {
   actions: ActionGroups;
   id?: string;
   dataTestSubjPrefix?: string;
+  /** EBT click `element` identifying where this menu lives; when provided, trigger clicks are tracked as `openActions`. */
+  ebt?: EbtClickAttrsElementOnly;
 }
 
-export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }: ActionsMenuProps) {
+export function ActionsMenu({
+  actions,
+  id,
+  dataTestSubjPrefix = 'actionsMenu',
+  ebt,
+}: ActionsMenuProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const generatedId = useGeneratedHtmlId({ prefix: 'actionsMenu' });
@@ -57,7 +65,14 @@ export function ActionsMenu({ actions, id, dataTestSubjPrefix = 'actionsMenu' }:
       aria-label={ariaLabel}
       button={
         <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
-          <EuiButtonIcon iconType="boxesVertical" aria-label={ariaLabel} onClick={togglePopover} />
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={ariaLabel}
+            onClick={togglePopover}
+            {...(ebt
+              ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_ACTIONS, element: ebt.element })
+              : {})}
+          />
         </EuiToolTip>
       }
       isOpen={isPopoverOpen}

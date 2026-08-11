@@ -72,6 +72,9 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div
         data-test-subj="traceItemRowWrapper"
+        {...(onClick && ebt?.row
+          ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
+          : {})}
         css={css`
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
@@ -117,6 +120,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
                 data-test-subj="traceItemRowToggleAccordionButton"
                 isOpen={state === 'open'}
                 childrenCount={childrenCount}
+                ebtElement={ebt?.rowToggle?.element}
                 onClick={() => onToggle(item.id)}
               />
             </EuiFlexItem>
@@ -124,9 +128,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           <EuiFlexItem>
             <div
               data-test-subj="traceItemRowContent"
-              {...(onClick && ebt?.row
-                ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
-                : {})}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}

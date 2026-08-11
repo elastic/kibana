@@ -8,8 +8,10 @@
  */
 
 import { EuiButtonEmpty, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_EBT_ELEMENTS } from './ebt_constants';
 
 const MAX_HEIGHT = 300;
 
@@ -65,6 +67,11 @@ export function ViewMore({ label, children }: Props) {
         flush="left"
         data-test-subj={testSubj}
         aria-label={ariaLabel}
+        {...getEbtProps({
+          action: GENAI_EBT_CLICK_ACTIONS.TOGGLE_VIEW_MORE,
+          element: GENAI_EBT_ELEMENTS.VIEW_MORE,
+          detail: expanded ? 'collapse' : 'expand',
+        })}
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded

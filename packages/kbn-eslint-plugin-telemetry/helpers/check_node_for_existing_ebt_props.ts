@@ -14,15 +14,28 @@ import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 const EBT_REQUIRED_ATTRS = ['data-ebt-action', 'data-ebt-element'];
 
 /**
- * Returns true if a spread attribute is a call to `getEbtProps(...)`.
+ * Returns true if evaluating the expression can produce the result of a
+ * `getEbtProps(...)` call. Recognizes direct calls as well as conditional
+ * application (`cond ? getEbtProps(...) : {}`, `cond && getEbtProps(...)`),
+ * used when the EBT element is an optional prop the consumer may not provide.
  */
-const isGetEbtPropsCall = (spread: TSESTree.JSXSpreadAttribute): boolean => {
-  const { argument } = spread;
-  if (argument.type !== AST_NODE_TYPES.CallExpression) {
-    return false;
+const expressionContainsGetEbtPropsCall = (expr: TSESTree.Node): boolean => {
+  switch (expr.type) {
+    case AST_NODE_TYPES.CallExpression:
+      return expr.callee.type === AST_NODE_TYPES.Identifier && expr.callee.name === 'getEbtProps';
+    case AST_NODE_TYPES.ConditionalExpression:
+      return (
+        expressionContainsGetEbtPropsCall(expr.consequent) ||
+        expressionContainsGetEbtPropsCall(expr.alternate)
+      );
+    case AST_NODE_TYPES.LogicalExpression:
+      return (
+        expressionContainsGetEbtPropsCall(expr.left) ||
+        expressionContainsGetEbtPropsCall(expr.right)
+      );
+    default:
+      return false;
   }
-  const { callee } = argument;
-  return callee.type === AST_NODE_TYPES.Identifier && callee.name === 'getEbtProps';
 };
 
 /**
@@ -53,7 +66,16 @@ const isVariableWithEbtProps = (
     return false;
   }
 
-  const properties = variable.defs[0].node.init?.properties;
+  const init = variable.defs[0].node.init;
+  if (!init) {
+    return false;
+  }
+
+  if (expressionContainsGetEbtPropsCall(init)) {
+    return true;
+  }
+
+  const { properties } = init;
   if (!properties) {
     return false;
   }
@@ -69,7 +91,9 @@ const isVariableWithEbtProps = (
 /**
  * Returns true if the JSXOpeningElement already has EBT tracking attributes
  * (`data-ebt-action` and `data-ebt-element`), either as direct attributes or
- * via a `{...getEbtProps({...})}` spread.
+ * via a `{...getEbtProps({...})}` spread — including conditional application
+ * (`{...(cond ? getEbtProps({...}) : {})}`) and variables holding either an
+ * object with the EBT keys or the result of a (conditional) `getEbtProps` call.
  */
 export const checkNodeForExistingEbtProps = (
   node: TSESTree.JSXOpeningElement,
@@ -93,6 +117,7 @@ export const checkNodeForExistingEbtProps = (
   );
 
   return spreads.some(
-    (spread) => isGetEbtPropsCall(spread) || isVariableWithEbtProps(spread, getScope)
+    (spread) =>
+      expressionContainsGetEbtPropsCall(spread.argument) || isVariableWithEbtProps(spread, getScope)
   );
 };

@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import React, { useState } from 'react';
-import type { Error } from '@kbn/apm-types';
+import type { Error, TraceWaterfallEbt } from '@kbn/apm-types';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../../utils';
 import { Legend, Shape } from '../legend';
@@ -30,6 +31,8 @@ export interface ErrorMark extends Mark {
   serviceColor: string;
   onClick?: () => void;
   errorMarkerHref?: string;
+  /** EBT click elements supplied by the hosting waterfall so marker clicks can be attributed to its surface. */
+  ebt?: Pick<TraceWaterfallEbt, 'errorMarker' | 'errorMarkerMessage'>;
 }
 
 interface Props {
@@ -75,10 +78,22 @@ export function ErrorMarker({ mark }: Props) {
       color={euiTheme.colors.danger}
       shape={Shape.square}
       onClick={togglePopover}
+      ebt={
+        mark.ebt?.errorMarker
+          ? { action: EBT_CLICK_ACTIONS.VIEW_ERROR, element: mark.ebt.errorMarker.element }
+          : undefined
+      }
     />
   );
 
   const { error } = mark;
+
+  const errorMessageEbtProps = mark.ebt?.errorMarkerMessage
+    ? getEbtProps({
+        action: EBT_CLICK_ACTIONS.VIEW_ERROR,
+        element: mark.ebt.errorMarkerMessage.element,
+      })
+    : {};
 
   const errorMessage = error.error.log?.message || error.error.exception?.message;
   const truncatedErrorMessage = truncateMessage(errorMessage);
@@ -112,12 +127,17 @@ export function ErrorMarker({ mark }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             {mark.errorMarkerHref ? (
-              <ErrorLink href={mark.errorMarkerHref} onClick={togglePopover}>
+              <ErrorLink
+                href={mark.errorMarkerHref}
+                onClick={togglePopover}
+                {...errorMessageEbtProps}
+              >
                 {truncatedErrorMessage}
               </ErrorLink>
             ) : mark.onClick ? (
               <EuiButtonEmpty
                 data-test-subj="apmTimelineErrorMarkerButton"
+                {...errorMessageEbtProps}
                 onClick={() => {
                   togglePopover();
                   mark.onClick?.();

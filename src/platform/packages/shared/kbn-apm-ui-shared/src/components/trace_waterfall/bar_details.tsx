@@ -229,6 +229,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           outgoingCount={item.spanLinksCount.outgoing}
           incomingCount={item.spanLinksCount.incoming}
           id={item.id}
+          ebtElement={ebt?.spanLinksBadge?.element}
           onClick={
             onClick ? (flyoutTab) => onClick(item.id, { flyoutDetailTab: flyoutTab }) : undefined
           }

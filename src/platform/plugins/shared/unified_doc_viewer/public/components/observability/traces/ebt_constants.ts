@@ -32,6 +32,12 @@ export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
   WATERFALL_ROW: 'docViewerWaterfallRow',
   WATERFALL_ERROR_BADGE: 'docViewerWaterfallErrorBadge',
   WATERFALL_SERVICE_BADGE: 'docViewerWaterfallServiceBadge',
+  WATERFALL_ROW_TOGGLE: 'docViewerWaterfallRowToggle',
+  WATERFALL_SPAN_LINKS_BADGE: 'docViewerWaterfallSpanLinksBadge',
+  WATERFALL_ERROR_MARKER: 'docViewerWaterfallErrorMarker',
+  WATERFALL_ERROR_MARKER_MESSAGE: 'docViewerWaterfallErrorMarkerMessage',
+  WATERFALL_FOLD_BUTTON: 'docViewerWaterfallFoldButton',
+  WATERFALL_SCROLL_TO_ORIGIN: 'docViewerWaterfallScrollToOrigin',
 } as const;
 
 export const TRACES_DOC_VIEWER_EBT_DETAILS = {
