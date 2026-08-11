@@ -256,8 +256,7 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(await screen.findByText('Case type')).toBeInTheDocument();
       expect(screen.getByTestId('attach-new-case')).toBeInTheDocument();
       expect(screen.getByTestId('attach-existing-case')).toBeInTheDocument();
-      expect(screen.getByTestId('add-to-case-submit')).toHaveTextContent('Add to case');
-      expect(screen.getByTestId('add-to-case-submit')).toBeDisabled();
+      expect(screen.queryByTestId('add-to-case-submit')).not.toBeInTheDocument();
     });
 
     it('should show only mute/unmute actions when user does not have case write access', async () => {
