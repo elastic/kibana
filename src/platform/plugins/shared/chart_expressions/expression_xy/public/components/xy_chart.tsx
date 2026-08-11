@@ -96,7 +96,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
-  getDecimalsFromFormat,
+  getMaximumFractionDigits,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -386,7 +386,7 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
-  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+  const xTickMfd = getMaximumFractionDigits(xAxisFormatter);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -442,7 +442,6 @@ export function XYChart({
 
   const isHistogramVis = dataLayers.every((l) => l.isHistogram);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
-  const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -511,8 +510,9 @@ export function XYChart({
     const tickVisible = axis.showLabels;
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
 
-    const style = {
+    const style: RecursivePartial<AxisStyle> = {
       tickLabel: {
+        ...(axis.truncate ? { maxLength: axis.truncate, truncate: 'end' } : {}),
         fill: axis.labelColor,
         visible: tickVisible,
         rotation: axis.labelsOrientation,
@@ -726,34 +726,62 @@ export function XYChart({
     strokeWidth: 1,
   };
 
-  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
-    ? {
-        tickLabel: {
-          visible: Boolean(xAxisConfig?.showLabels),
-          fill: xAxisConfig?.labelColor,
-        },
-        tickLine: {
-          visible: Boolean(xAxisConfig?.showLabels),
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-        },
-      }
-    : {
-        tickLabel: {
-          visible: xAxisConfig?.showLabels,
-          rotation: xAxisConfig?.labelsOrientation,
-          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
-          fill: xAxisConfig?.labelColor,
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-          padding:
-            !xAxisConfig?.showLabels && linesPaddings.bottom != null
-              ? { inner: linesPaddings.bottom }
-              : undefined,
-        },
+  const xAxisStyle: RecursivePartial<AxisStyle> = (() => {
+    const style: RecursivePartial<AxisStyle> = {
+      tickLabel: {
+        visible: Boolean(xAxisConfig?.showLabels),
+        fill: xAxisConfig?.labelColor,
+      },
+      axisTitle: {
+        visible: xAxisConfig?.showTitle,
+      },
+    };
+
+    const isCategoricalXAxis = dataLayers.every(
+      ({ xAccessor, xScaleType }) =>
+        !xAccessor || (xScaleType ?? defaultXScaleType) === XScaleTypes.ORDINAL
+    );
+
+    if (isHorizontalTimeAxis) {
+      style.tickLine = {
+        visible: Boolean(xAxisConfig?.showLabels),
       };
+      return style;
+    }
+
+    style.tickLabel = {
+      ...style.tickLabel,
+      truncate: xAxisConfig?.truncate ? 'end' : undefined,
+      ...(xAxisConfig?.truncate ? { maxLength: xAxisConfig.truncate } : {}),
+      rotation: xAxisConfig?.labelsOrientation,
+      padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+    };
+
+    style.axisTitle = {
+      ...style.axisTitle,
+      padding:
+        !xAxisConfig?.showLabels && linesPaddings.bottom != null
+          ? { inner: linesPaddings.bottom }
+          : undefined,
+    };
+
+    if (isCategoricalXAxis) {
+      style.maxExtent = style.maxExtent ?? '50%';
+      style.tickLabel = {
+        ...style.tickLabel,
+        truncate: style.tickLabel.truncate ?? 'middle',
+      };
+
+      if (!isHorizontalChart(dataLayers)) {
+        style.tickLabel = {
+          ...style.tickLabel,
+          minLength: xAxisConfig?.truncate ? Math.min(80, xAxisConfig.truncate) : 80,
+        };
+      }
+    }
+
+    return style;
+  })();
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
@@ -973,17 +1001,10 @@ export function XYChart({
               gridLine={gridLineStyle}
               hide={xAxisConfig?.hide || dataLayers[0]?.simpleView || !dataLayers[0]?.xAccessor}
               tickFormat={(d) => safeXAccessorLabelRenderer(d) || ''}
-              maximumFractionDigits={xTickDecimals}
+              maximumFractionDigits={xTickMfd}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
-              tickLabelMaxLength={
-                xAxisConfig?.truncate ?? (isHorizontalBarChart ? '40%' : undefined)
-              }
-              tickLabelTruncate={
-                // If legacy truncate is set, preserve end truncation behavior.
-                isHorizontalBarChart ? (xAxisConfig?.truncate ? 'end' : 'middle') : undefined
-              }
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
@@ -994,10 +1015,7 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
-              const tickDecimals = axis.formatter
-                ? getDecimalsFromFormat(axis.formatter)
-                : undefined;
-
+              const mfd = axis.formatter ? getMaximumFractionDigits(axis.formatter) : undefined;
               return (
                 <Axis
                   key={axis.groupId}
@@ -1010,12 +1028,11 @@ export function XYChart({
                   }}
                   hide={axis.hide || dataLayers[0]?.simpleView}
                   tickFormat={(d) => axis.formatter?.convertToText(d) || ''}
-                  maximumFractionDigits={tickDecimals}
+                  maximumFractionDigits={mfd}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
                   showDuplicatedTicks={axis.showDuplicates}
-                  tickLabelMaxLength={axis.truncate}
                   {...getOverridesFor(
                     overrides,
                     /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'

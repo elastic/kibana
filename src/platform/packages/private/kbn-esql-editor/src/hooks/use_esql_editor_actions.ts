@@ -15,13 +15,16 @@ import type { EsqlStarredQueriesService } from '../editor_footer/esql_starred_qu
 interface UseEsqlEditorActionsParams {
   code: string;
   isHistoryOpen: boolean;
+  isLanguageComponentOpen: boolean;
   isCurrentQueryStarred: boolean;
+  editorIsInline: boolean;
   onUpdateAndSubmitQuery: (newQuery: string, source: QuerySource) => void;
   onVisorClosed?: () => void;
   starredQueriesService: EsqlStarredQueriesService | null;
   trimmedQuery: string;
   isVisorOpenRef: React.MutableRefObject<boolean>;
   setIsHistoryOpen: (value: boolean) => void;
+  setIsLanguageComponentOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
   setIsVisorOpen: (value: boolean) => void;
   trackQueryHistoryOpened: (isOpen: boolean) => void;
@@ -30,13 +33,16 @@ interface UseEsqlEditorActionsParams {
 export function useEsqlEditorActions({
   code,
   isHistoryOpen,
+  isLanguageComponentOpen,
   isCurrentQueryStarred,
+  editorIsInline,
   onUpdateAndSubmitQuery,
   onVisorClosed,
   starredQueriesService,
   trimmedQuery,
   isVisorOpenRef,
   setIsHistoryOpen,
+  setIsLanguageComponentOpen,
   setIsCurrentQueryStarred,
   setIsVisorOpen,
   trackQueryHistoryOpened,
@@ -68,6 +74,11 @@ export function useEsqlEditorActions({
     onClickQueryHistory(!isHistoryOpen);
   }, [isHistoryOpen, onClickQueryHistory]);
 
+  const onToggleLanguageComponent = useCallback(() => {
+    setIsLanguageComponentOpen(!isLanguageComponentOpen);
+    setIsHistoryOpen(false);
+  }, [isLanguageComponentOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
+
   const onToggleStarredQuery = useCallback(async () => {
     if (!starredQueriesService || !trimmedQuery) {
       return;
@@ -98,18 +109,22 @@ export function useEsqlEditorActions({
       toggleVisor: onToggleVisor,
       toggleHistory: onToggleHistory,
       toggleStarredQuery: onToggleStarredQuery,
+      toggleLanguageComponent: onToggleLanguageComponent,
       submitEsqlQuery: onSubmitEsqlQuery,
       isHistoryOpen,
       isCurrentQueryStarred,
       canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
       currentQuery: code,
+      editorIsInline,
     }),
     [
       code,
+      editorIsInline,
       isCurrentQueryStarred,
       isHistoryOpen,
       onSubmitEsqlQuery,
       onToggleHistory,
+      onToggleLanguageComponent,
       onToggleStarredQuery,
       onToggleVisor,
       starredQueriesService,

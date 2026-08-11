@@ -14,9 +14,9 @@ description: |
   surfaced as workflow output for the report phase to resume.
 enabled: true
 tags:
-  - Attack discovery
-  - Security
-  - AI Agent
+  - attack-discovery
+  - security
+  - ai-agent
   - attackDiscovery:gate
 
 triggers:
@@ -88,6 +88,7 @@ steps:
   - name: gate
     type: ai.agent
     timeout: '10m'
+    max-step-size: '2097152b'
     create-conversation: true
     # Route the skill's model calls through the connector selected for this
     # generation (Constraint A). When the input is empty/omitted, this renders

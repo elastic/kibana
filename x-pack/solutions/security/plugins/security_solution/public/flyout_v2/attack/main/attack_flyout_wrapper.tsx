@@ -10,6 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
+import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
 import { AttackFlyout } from '.';
@@ -34,6 +35,10 @@ export interface AttackFlyoutWrapperProps {
    * having to close and re-open it.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in nested alert flyouts opened from attack tools.
+   */
+  renderCellActions?: CellActionRenderer;
 }
 
 /**
@@ -44,7 +49,7 @@ export interface AttackFlyoutWrapperProps {
  * is reflected without re-opening the flyout.
  */
 export const AttackFlyoutWrapper = memo(
-  ({ attackId, indexName, onAttackUpdated }: AttackFlyoutWrapperProps) => {
+  ({ attackId, indexName, onAttackUpdated, renderCellActions }: AttackFlyoutWrapperProps) => {
     const { loading, searchHit, attack, refetch } = useAttackDetails({ attackId, indexName });
 
     const hit = useMemo(
@@ -77,7 +82,14 @@ export const AttackFlyoutWrapper = memo(
       );
     }
 
-    return <AttackFlyout hit={hit} attack={attack} onAttackUpdated={handleAttackUpdated} />;
+    return (
+      <AttackFlyout
+        hit={hit}
+        attack={attack}
+        onAttackUpdated={handleAttackUpdated}
+        renderCellActions={renderCellActions}
+      />
+    );
   }
 );
 

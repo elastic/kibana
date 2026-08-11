@@ -77,7 +77,7 @@ export interface CasesAttachmentsV2WriterContract {
   bulkUpsertAttachments: (sos: AttachmentSource[]) => void;
   bulkDeleteAttachments: (ids: string[]) => void;
   /**
-   * Cascade-delete every analytics doc whose `cases.id` matches one of
+   * Cascade-delete every analytics doc whose `case.id` matches one of
    * the supplied case ids. Called from `CasesService.deleteCase` /
    * `bulkDeleteCaseEntities` so the analytics mirror tracks the
    * SO-layer cascade — see writer §1.14 in the README.
@@ -146,7 +146,7 @@ export class CasesAttachmentsV2Writer implements CasesAttachmentsV2WriterContrac
   }
 
   /**
-   * Cascade-delete every analytics attachment doc whose `cases.id`
+   * Cascade-delete every analytics attachment doc whose `case.id`
    * matches one of the supplied case ids. Called by
    * `CasesService.deleteCase` / `bulkDeleteCaseEntities` for case-level
    * deletions. Fire-and-forget. Implementation mirrors the activity
@@ -302,7 +302,7 @@ export class CasesAttachmentsV2Writer implements CasesAttachmentsV2WriterContrac
         // re-emit anyway because the source SO is gone.
         conflicts: 'proceed',
         query: {
-          terms: { 'cases.id': caseIds },
+          terms: { 'case.id': caseIds },
         },
       });
     } catch (err) {

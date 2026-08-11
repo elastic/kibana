@@ -34,6 +34,8 @@ const ebtAction = {
     DELETE_CONVERSATION: 'delete_conversation',
     MARK_AS_READ: 'mark_as_read',
     MARK_AS_UNREAD: 'mark_as_unread',
+    PIN_CONVERSATION: 'pin_conversation',
+    UNPIN_CONVERSATION: 'unpin_conversation',
   },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
@@ -74,6 +76,9 @@ const ebtAction = {
     MANAGE_APPLICATION_CONNECTIONS_LINK: 'manage_application_connections_link',
     MCP_DOCS: 'mcp_docs',
     ADD_REFERENCED_FILE: 'add_referenced_file',
+    EDIT_REFERENCED_FILE: 'edit_referenced_file',
+    SAVE_REFERENCED_FILE: 'save_referenced_file',
+    CANCEL_REFERENCED_FILE: 'cancel_referenced_file',
     REMOVE_REFERENCED_FILE: 'remove_referenced_file',
     TOOL_CANCEL: 'tool_cancel',
     TEST_TOOL: 'test_tool',

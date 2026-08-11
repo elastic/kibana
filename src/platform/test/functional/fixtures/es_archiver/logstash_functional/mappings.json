@@ -3,6 +3,14 @@
   "value": {
     "index": "logstash-2015.09.22",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {
@@ -380,6 +388,14 @@
   "value": {
     "index": "logstash-2015.09.20",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {
@@ -757,6 +773,14 @@
   "value": {
     "index": "logstash-2015.09.21",
     "mappings": {
+      "runtime": {
+        "runtime_number": {
+          "type": "long",
+          "script": {
+            "source": "emit(doc['bytes'].value)"
+          }
+        }
+      },
       "dynamic_templates": [
         {
           "string_fields": {

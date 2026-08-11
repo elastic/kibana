@@ -111,11 +111,13 @@ describe('AnomaliesSection', () => {
     expect(props.isPreviewMode).toBeUndefined();
   });
 
-  it('renders nothing when totalAnomaliesCount is 0', () => {
-    const { container } = render(
-      <AnomaliesSection {...defaultProps} data={makeData({ totalAnomaliesCount: 0 })} />,
-      { wrapper: Wrapper }
-    );
-    expect(container.firstChild).toBeNull();
+  it('renders the accordion when totalAnomaliesCount is 0', () => {
+    render(<AnomaliesSection {...defaultProps} data={makeData({ totalAnomaliesCount: 0 })} />, {
+      wrapper: Wrapper,
+    });
+    expect(
+      screen.getByTestId('entity-anomalies-flyout-section-data-test-subj')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('mock-anomalies-overview')).toBeInTheDocument();
   });
 });

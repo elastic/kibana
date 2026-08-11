@@ -6,7 +6,7 @@
  */
 
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
-import type { MemoryService } from '../memory';
+import type { MemoryService } from '../../memory_and_investigation/lib/memory';
 
 /**
  * Memory tool definitions and callbacks for use in discovery flows
@@ -155,12 +155,15 @@ export const createMemoryDiscoveryTools = ({
   };
 
   const promptSnippet = `
-You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, and operational patterns. Pages are organized by categories (like Wikipedia). After analyzing the current data independently, you may use memory tools to enrich your findings with additional context:
+You have access to a knowledge base ("memory") that stores what the system has learned about monitored services, infrastructure, operational patterns, known-benign noise, and prior false positives. Pages are organized by categories (like Wikipedia).
+
+**Required grounding step:** before you finalize your output, you MUST call \`memory_search\` at least once — scoped to the services, symptoms, and patterns you are considering — to ground your work in prior learnings. Treat this as mandatory, never optional: finalizing without first consulting memory is an error. An empty memory result is acceptable and expected; skipping the search is not.
+
 - **memory_search** — Search by keyword to find relevant pages (supports category filter)
 - **memory_read** — Read the full content of a specific page by name or ID
 - **memory_list** — List all pages to discover what knowledge exists
 
-Analyze the data on its own merits first. Use the knowledge base to add context or cross-reference, not as a starting point.`;
+Use memory to avoid regenerating known-bad / demoted patterns and to prefer outputs aligned with durable prior learnings. Still ground everything you propose in the current stream data; memory is prior context, not a substitute for evidence.`;
 
   return { tools, callbacks, promptSnippet };
 };

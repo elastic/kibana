@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/274580
+issues:
+- https://github.com/elastic/kibana/issues/267914
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Support DLM frozen phase in Streams UI
+description: Adds frozen phase support to the Streams data lifecycle page. Streams that use a data stream lifecycle with frozen_after configured now show the frozen phase in the lifecycle timeline and split storage size, document count, and ingestion rate across the hot and frozen tiers.

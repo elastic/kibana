@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 
 export interface LifecycleFlyoutProps
   extends Pick<
@@ -43,6 +44,7 @@ export const LifecycleFlyout = ({
   const headerStyles = css`
     padding: ${headerPadding};
   `;
+  const { focusProps } = usePushFlyoutFocus({ enabled: (flyoutProps.type ?? 'push') === 'push' });
 
   return (
     <EuiFlyout
@@ -52,6 +54,7 @@ export const LifecycleFlyout = ({
       paddingSize={paddingSize}
       aria-labelledby={titleId}
       role="region"
+      {...focusProps}
       {...flyoutProps}
     >
       <EuiFlyoutHeader hasBorder>

@@ -11,7 +11,8 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { esqlAdditionalInstructions } from './esql_instructions';
+import { buildEsqlAdditionalInstructions } from './esql_instructions';
+import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
 export interface GeneratedVisualizationEsql {
@@ -75,6 +76,26 @@ export const buildEsqlEditContext = (
 };
 
 /**
+ * Context given to the default-model fallback run so it does not repeat the
+ * low-effort model's mistake.
+ */
+const buildFallbackContext = (failedQuery: string | undefined, error: string): string =>
+  failedQuery
+    ? `A previous attempt with a smaller model produced this failing query: "${failedQuery}" (error: ${error}). Avoid repeating this mistake.`
+    : `A previous attempt with a smaller model failed to produce a query (error: ${error}).`;
+
+/**
+ * Reject a query that reads from an index other than the one the caller grounded it
+ * against. `generateEsql` reports only syntax and execution problems, and neither catches
+ * a hallucinated wildcard source — it validates and executes cleanly against nothing.
+ *
+ * Only checkable when the caller passed an explicit `index`: an auto-discovered target is
+ * resolved inside `generateEsql` and never surfaces here.
+ */
+const findTargetError = (query: string | undefined, index: string | undefined) =>
+  query && index ? validateQueryTarget({ query, target: index }) : undefined;
+
+/**
  * Resolve a visualization-ready ES|QL query, shared by the Lens and Vega
  * engines so both generate queries the same way.
  *
@@ -83,6 +104,11 @@ export const buildEsqlEditContext = (
  * failed when none was produced or the loop still reported an execution error,
  * ensuring an unrunnable query never reaches config/spec authoring. On edits,
  * `existingQueries` seed the request so a query-changing edit is not blocked.
+ *
+ * Generation runs on the low-effort model first (two attempts). When it
+ * soft-fails (no usable query), one fallback attempt uses the default model,
+ * seeded with the failing query — three attempts in total. Thrown errors
+ * (infra) never trigger the fallback.
  */
 export const generateVisualizationEsql = async ({
   nlQuery,
@@ -95,23 +121,44 @@ export const generateVisualizationEsql = async ({
   timeRange,
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
-  const model = await modelProvider.getDefaultModel();
-  const response = await generateEsql({
+  const instructions = buildEsqlAdditionalInstructions(index);
+  const requestParams = {
     nlQuery: buildEsqlEditContext(nlQuery, existingQueries),
     index,
-    model,
     events,
     logger,
     esClient: esClient.asCurrentUser,
     additionalInstructions: extraInstructions
-      ? `${esqlAdditionalInstructions}\n${extraInstructions}`
-      : esqlAdditionalInstructions,
+      ? `${instructions}\n${extraInstructions}`
+      : instructions,
     ...(timeRange ? { timeRange } : {}),
-  });
+  };
 
-  if (!response.query || response.error) {
-    return { error: response.error ?? 'No queries generated' };
+  const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
+  const responseError = response.error ?? findTargetError(response.query, index);
+
+  if (response.query && !responseError) {
+    return { query: response.query, columns: response.results?.columns };
   }
 
-  return { query: response.query, columns: response.results?.columns };
+  const error = responseError ?? 'No queries generated';
+
+  logger.warn(
+    `ES|QL generation with the low-effort model failed (${error}), retrying with the default model`
+  );
+
+  const defaultModel = await modelProvider.getDefaultModel();
+  const fallbackResponse = await generateEsql({
+    ...requestParams,
+    model: defaultModel,
+    maxRetries: 1,
+    additionalContext: buildFallbackContext(response.query, error),
+  });
+  const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
+
+  if (!fallbackResponse.query || fallbackError) {
+    return { error: fallbackError ?? 'No queries generated' };
+  }
+
+  return { query: fallbackResponse.query, columns: fallbackResponse.results?.columns };
 };

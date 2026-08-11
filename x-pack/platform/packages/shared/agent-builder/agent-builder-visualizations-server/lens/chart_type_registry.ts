@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
+
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   metricConfigSchemaESQL,
@@ -20,8 +22,8 @@ import {
   mosaicConfigSchemaESQL,
 } from '@kbn/lens-embeddable-utils';
 
-interface ChartTypeRegistryEntry {
-  schema: { validate: (config: unknown) => any; getSchema: () => any };
+interface ChartTypeRegistryEntry<T extends z.ZodType> {
+  schema: T;
   prompt: {
     /**
      * Guidance used when selecting the best chart type for a user request.
@@ -60,6 +62,20 @@ interface ChartTypeRegistryEntry {
   };
 }
 
+export interface ChartTypeRegistry {
+  [SupportedChartType.Metric]: ChartTypeRegistryEntry<typeof metricConfigSchemaESQL>;
+  [SupportedChartType.Gauge]: ChartTypeRegistryEntry<typeof gaugeConfigSchemaESQL>;
+  [SupportedChartType.XY]: ChartTypeRegistryEntry<typeof xyConfigSchemaESQL>;
+  [SupportedChartType.Heatmap]: ChartTypeRegistryEntry<typeof heatmapConfigSchemaESQL>;
+  [SupportedChartType.Tagcloud]: ChartTypeRegistryEntry<typeof tagcloudConfigSchemaESQL>;
+  [SupportedChartType.RegionMap]: ChartTypeRegistryEntry<typeof regionMapConfigSchemaESQL>;
+  [SupportedChartType.Datatable]: ChartTypeRegistryEntry<typeof datatableConfigSchemaESQL>;
+  [SupportedChartType.Pie]: ChartTypeRegistryEntry<typeof pieConfigSchemaESQL>;
+  [SupportedChartType.Treemap]: ChartTypeRegistryEntry<typeof treemapConfigSchemaESQL>;
+  [SupportedChartType.Waffle]: ChartTypeRegistryEntry<typeof waffleConfigSchemaESQL>;
+  [SupportedChartType.Mosaic]: ChartTypeRegistryEntry<typeof mosaicConfigSchemaESQL>;
+}
+
 /**
  * Central registry for all supported chart types.
  *
@@ -71,7 +87,7 @@ interface ChartTypeRegistryEntry {
  * TypeScript enforces exhaustiveness via `satisfies Record<SupportedChartType, ...>` —
  * a missing entry is a compile error.
  */
-export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntry> = {
+export const chartTypeRegistry: ChartTypeRegistry = {
   [SupportedChartType.Metric]: {
     schema: metricConfigSchemaESQL,
     prompt: {
@@ -126,6 +142,9 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         perChartTypeRules: [
           'CRITICAL: For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
+          'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
+          'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
+          'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         ],
       },
     },
@@ -155,7 +174,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         description:
           'For displaying word frequency or categorical data where text size represents value. Best for showing top terms, keywords, categories, or text-based aggregations (e.g., "show top error messages", "display most common tags").',
         guideline:
-          "Choose 'tagcloud' when visualizing text/categorical data where frequency or count determines size",
+          "Choose 'tag_cloud' when visualizing text/categorical data where frequency or count determines size",
       },
     },
   },
@@ -177,7 +196,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
         description:
           'For displaying data in a structured table format with sortable columns. Best for showing detailed records, precise numeric comparisons, or multi-dimensional breakdowns where exact values matter more than visual patterns (e.g., "list top 20 hosts by CPU usage", "show error counts by service and status code").',
         guideline:
-          "Choose 'datatable' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
+          "Choose 'data_table' when the user needs precise values, sortable columns, or a spreadsheet-like view of the data",
       },
       config: {
         options: {
@@ -235,8 +254,4 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
   },
 };
 
-export type ChartTypeRegistry = typeof chartTypeRegistry;
-
-export type VisualizationConfig = ReturnType<
-  ChartTypeRegistry[SupportedChartType]['schema']['validate']
->;
+export type VisualizationConfig = z.output<ChartTypeRegistry[SupportedChartType]['schema']>;

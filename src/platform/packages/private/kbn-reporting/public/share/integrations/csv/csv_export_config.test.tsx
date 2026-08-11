@@ -18,6 +18,7 @@ jest.mock('../../shared/get_search_csv_job_params', () => ({
 
 import { getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
 import { getCsvReportParams, getShareMenuItems } from './csv_export_config';
+import type { ReportingCSVSharingData } from '../../../types';
 
 describe('csv export config', () => {
   describe('getCsvReportParams', () => {
@@ -61,6 +62,38 @@ describe('csv export config', () => {
             }),
           ]),
         })
+      );
+    });
+
+    const makeClassicSharingData = () => {
+      const getSearchSource = jest.fn(
+        (_args: { addGlobalTimeFilter?: boolean; absoluteTime?: boolean }) => ({})
+      ) as jest.MockedFunction<ReportingCSVSharingData['getSearchSource']>;
+      const sharingData: ReportingCSVSharingData = {
+        isTextBased: false,
+        locatorParams: [],
+        getSearchSource,
+        columns: [],
+        title: 'test',
+        absoluteTimeRange: undefined,
+      };
+      return { sharingData, getSearchSource };
+    };
+
+    it('classic path: uses absolute filter when useAbsoluteTime is true (immediate export)', () => {
+      const { sharingData, getSearchSource } = makeClassicSharingData();
+      getCsvReportParams({ sharingData, useAbsoluteTime: true });
+
+      expect(getSearchSource).toHaveBeenCalledWith(expect.objectContaining({ absoluteTime: true }));
+    });
+
+    it('classic path: uses relative filter when useAbsoluteTime is omitted (scheduled export)', () => {
+      const { sharingData, getSearchSource } = makeClassicSharingData();
+      // no useAbsoluteTime — this is how schedule creation calls getCsvReportParams
+      getCsvReportParams({ sharingData });
+
+      expect(getSearchSource).toHaveBeenCalledWith(
+        expect.objectContaining({ absoluteTime: false })
       );
     });
   });

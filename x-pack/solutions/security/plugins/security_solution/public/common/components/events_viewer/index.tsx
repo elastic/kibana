@@ -16,8 +16,8 @@ import {
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch, useSelector } from 'react-redux-v7';
 import { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type {
@@ -140,8 +140,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { uiSettings, data } = useKibana().services;
 
   const { dataView, status } = useDataView(pageScope);
-  const selectedPatterns = useSelectedPatterns(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const browserFields = useBrowserFields(dataView);
   const isLoadingIndexPattern = status !== 'ready';
   const dataViewId = dataView.id ?? null;
   const selectedDataViewId = dataView.id;

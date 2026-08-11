@@ -99,12 +99,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(response.attachments.length).to.be(1);
         expect(response.errors.length).to.be(1);
-        expect(response.errors[0]).to.eql({
-          error: 'Not Found',
-          message: 'Saved object [cases-comments/does-not-exist] not found',
-          status: 404,
-          savedObjectId: 'does-not-exist',
-        });
+        expect(response.errors[0].error).to.eql('Not Found');
+        expect(response.errors[0].status).to.eql(404);
+        expect(response.errors[0].savedObjectId).to.eql('does-not-exist');
+        // The not-found SO type depends on the attachments feature flag (legacy
+        // `cases-comments` when off, unified `cases-attachments` when on).
+        expect(response.errors[0].message).to.match(
+          /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
+        );
       });
     });
 
@@ -380,12 +382,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(attachments.length).to.be(0);
           expect(errors.length).to.be(2);
-          expect(errors[0]).to.eql({
-            error: 'Not Found',
-            message: 'Saved object [cases-comments/does-not-exist] not found',
-            status: 404,
-            savedObjectId: 'does-not-exist',
-          });
+          expect(errors[0].error).to.eql('Not Found');
+          expect(errors[0].status).to.eql(404);
+          expect(errors[0].savedObjectId).to.eql('does-not-exist');
+          // The not-found SO type depends on the attachments feature flag (legacy
+          // `cases-comments` when off, unified `cases-attachments` when on).
+          expect(errors[0].message).to.match(
+            /Saved object \[cases-(comments|attachments)\/does-not-exist\] not found/
+          );
           expect(errors[1]).to.eql({
             savedObjectId: obsSavedObjectId,
             error: 'Bad Request',

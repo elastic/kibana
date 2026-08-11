@@ -13,6 +13,7 @@ import './peggy_setup';
 // Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
+export { extendPlaywrightPage } from './fixtures/scope/test/scout_page/single_thread';
 
 // Matchers
 export { expect } from './matchers/ui';
@@ -27,6 +28,7 @@ export type {
   PageObjects, // can be extended with solution specific Page Objects
 } from './fixtures/scope/test';
 export { browserAuthFixture } from './fixtures/scope/test';
+export { networkFixture } from './fixtures/scope/test';
 
 // Test and worker fixtures (can be extended with solution specific fixtures)
 export type {
@@ -39,6 +41,7 @@ export type {
 // Worker primitives (for optional packages such as @kbn/scout-synthtrace)
 export { coreWorkerFixtures, esArchiverFixture } from './fixtures/scope/worker';
 export type { EsArchiverFixture } from './fixtures/scope/worker';
+export type { NetworkFixture } from './fixtures/scope/test';
 
 // API services (can be extended with solution specific API services)
 export { apiServicesFixture } from './fixtures/scope/worker/apis';

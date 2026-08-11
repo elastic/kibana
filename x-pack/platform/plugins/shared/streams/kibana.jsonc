@@ -24,13 +24,12 @@
       "licensing",
       "ruleRegistry",
       "security",
-      "taskManager",
       "usageCollection",
       "fieldsMetadata"
     ],
     "optionalPlugins": [
       "agentBuilder",
-      "agentContextLayer",
+      "agentBuilderSml",
       "alertingVTwo",
       "cloud",
       "esql",

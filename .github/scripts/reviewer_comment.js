@@ -257,6 +257,7 @@ const dispatchReviewerComment = async ({ github, context, core }) => {
     inputs: {
       pr_number: String(pullNumber),
       comment_id: String(commentId),
+      comment_type: artifact.comment_type,
     },
   });
 

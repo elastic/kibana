@@ -29,7 +29,7 @@ import {
 export async function resumeWorkflow({
   workflowRunId,
   spaceId,
-  taskAbortController,
+  signal,
   dependencies,
   logger,
   config,
@@ -40,7 +40,7 @@ export async function resumeWorkflow({
 }: {
   workflowRunId: string;
   spaceId: string;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
@@ -84,6 +84,7 @@ export async function resumeWorkflow({
     esClient,
     workflowTaskManager,
     workflowExecutionRepository,
+    workflowExecutionCursor,
   } = setupResult;
 
   const loadedExecution = workflowExecutionState.getWorkflowExecution();
@@ -98,6 +99,7 @@ export async function resumeWorkflow({
 
   const workflowExecutionLoopParams = {
     workflowRuntime,
+    workflowExecutionCursor,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
     stepIoService,
@@ -108,7 +110,7 @@ export async function resumeWorkflow({
     esClient,
     fakeRequest,
     coreStart: dependencies.coreStart,
-    taskAbortController,
+    signal,
     workflowTaskManager,
   };
 

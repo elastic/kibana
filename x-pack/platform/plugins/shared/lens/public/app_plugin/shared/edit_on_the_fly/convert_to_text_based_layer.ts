@@ -115,7 +115,8 @@ function buildTextBasedState(
         column.customLabel = true; // set always to true so we can use the default label as a custom label
         if (hasCustomLabel) {
           column.label = sourceColumn.label;
-        } else {
+          // This is a sanity check to satisfy TS for the incoming form based column.
+        } else if ('operationType' in sourceColumn && sourceColumn.operationType) {
           // use the generated default label
           column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
             layer.columns[sourceColumn.id],

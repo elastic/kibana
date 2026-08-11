@@ -11,6 +11,17 @@ import type { Feature } from '../feature';
 import type { QueryWithOccurrences } from '../api/significant_events';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
+export function isExpirable(
+  ki: Feature | QueryLink
+): ki is (Feature | QueryLink) & { expires_at: string } {
+  return !!ki.expires_at;
+}
+
+/** Whether an expiry timestamp has passed. Callers must exclude durable indicators (`isDurable`) first. */
+export function isExpired(expiresAt: string): boolean {
+  return new Date(expiresAt).getTime() <= Date.now();
+}
+
 export interface EsqlQuery {
   query: string;
 }
@@ -37,6 +48,12 @@ export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
  */
 export const HIGH_SEVERITY_THRESHOLD = 60;
 
+/**
+ * Minimum severity score for the Critical band.
+ * Severity bands: Low < 40, Medium [40, 60), High [60, 80), Critical >= 80.
+ */
+export const CRITICAL_SEVERITY_THRESHOLD = 80;
+
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
 export const queryFeatureSchema = z.object({
@@ -55,26 +72,6 @@ export interface StreamQuery extends StreamQueryBase {
   features?: QueryFeature[];
   expires_at?: string;
 }
-
-const streamQueryBaseSchema = z.object({
-  id: NonEmptyString,
-  title: NonEmptyString,
-  description: z.string().max(MAX_TEXT_LENGTH),
-}) satisfies z.Schema<StreamQueryBase>;
-
-/**
- * The `type` default exists for backward compatibility with pre-migration
- * stored documents that lack a type field. For all new writes the type MUST
- * be derived server-side via {@link deriveQueryType} — never trust the default.
- */
-export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
-  type: queryTypeSchema.default(QUERY_TYPE_MATCH),
-  severity_score: z.number().optional(),
-  evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
-  features: z.array(queryFeatureSchema).optional(),
-  esql: esqlQuerySchema,
-  expires_at: z.iso.datetime().optional(),
-});
 
 /**
  * Wire schema for creating/updating a query. The `type` field is intentionally

@@ -36,7 +36,7 @@ export interface RunWorkflowResult {
 export async function runWorkflow({
   workflowRunId,
   spaceId,
-  taskAbortController,
+  signal,
   logger,
   config,
   fakeRequest,
@@ -47,7 +47,7 @@ export async function runWorkflow({
 }: {
   workflowRunId: string;
   spaceId: string;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
@@ -97,6 +97,7 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
     telemetryClient,
+    workflowExecutionCursor,
   } = setupResult;
 
   const execution = workflowExecutionState.getWorkflowExecution();
@@ -181,6 +182,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,
@@ -191,7 +193,7 @@ export async function runWorkflow({
       esClient,
       fakeRequest,
       coreStart: dependencies.coreStart,
-      taskAbortController,
+      signal,
       workflowTaskManager,
     });
     loopSpan?.setOutcome('success');

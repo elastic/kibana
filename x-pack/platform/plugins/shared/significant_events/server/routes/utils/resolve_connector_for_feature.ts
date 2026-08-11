@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID } from '@kbn/significant-events-schema';
 import { StatusError } from '../../lib/errors/status_error';
 
 /**
@@ -46,24 +45,4 @@ export async function resolveConnectorForFeature({
   }
 
   return endpoints[0].connectorId;
-}
-
-/**
- * Resolves the connector for Streams Significant Events **Discovery** — same inference feature
- * id, Model Settings mapping, and recommended-endpoint fallback chain as insights discovery.
- * Memory-related tasks use this so they share the Discovery model configuration.
- */
-export async function resolveConnectorForSignificantEventsDiscovery({
-  searchInferenceEndpoints,
-  request,
-}: {
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
-  request: KibanaRequest;
-}): Promise<string> {
-  return resolveConnectorForFeature({
-    searchInferenceEndpoints,
-    featureId: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-    featureName: 'discovery',
-    request,
-  });
 }

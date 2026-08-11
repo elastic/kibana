@@ -1027,6 +1027,78 @@ export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   },
 };
 
+export type AttacksApiCallOperation = 'search' | 'tags' | 'assignees' | 'status';
+
+export const ATTACKS_API_CALL_EVENT: EventTypeOpts<{
+  endpoint: string;
+  operation: AttacksApiCallOperation;
+  ids_count?: number;
+  update_related_alerts?: boolean;
+  tags_to_add_count?: number;
+  tags_to_remove_count?: number;
+  assignees_to_add_count?: number;
+  assignees_to_remove_count?: number;
+  status?: string;
+  has_aggregations?: boolean;
+  has_ids_filter?: boolean;
+  error?: string;
+}> = {
+  eventType: 'attacks_api_call',
+  schema: {
+    endpoint: {
+      type: 'keyword',
+      _meta: { description: 'The attacks API route path that was called' },
+    },
+    operation: {
+      type: 'keyword',
+      _meta: { description: 'The attacks API operation: search, tags, assignees, or status' },
+    },
+    ids_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of attack IDs in the request' },
+    },
+    update_related_alerts: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Whether related detection alerts were also updated',
+      },
+    },
+    tags_to_add_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of tags to add' },
+    },
+    tags_to_remove_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of tags to remove' },
+    },
+    assignees_to_add_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of assignees to add' },
+    },
+    assignees_to_remove_count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of assignees to remove' },
+    },
+    status: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Workflow status value being set' },
+    },
+    has_aggregations: {
+      type: 'boolean',
+      _meta: { optional: true, description: 'Whether the search request included aggregations' },
+    },
+    has_ids_filter: {
+      type: 'boolean',
+      _meta: { optional: true, description: 'Whether the search request filtered by IDs' },
+    },
+    error: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Error message if the call failed' },
+    },
+  },
+};
+
 export const WATCHLIST_API_CALL_EVENT: EventTypeOpts<{
   endpoint: string;
   watchlist_id?: string;
@@ -2400,6 +2472,7 @@ export const events = [
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   WATCHLIST_API_CALL_EVENT,
+  ATTACKS_API_CALL_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,

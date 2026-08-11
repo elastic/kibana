@@ -7,6 +7,7 @@
   "include": [
     "server/**/*",
     "public/**/*",
+    "test/scout/**/*",
     "*.ts",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/test_utils/vega_map_test.json",
@@ -48,6 +49,7 @@
     "@kbn/visualizations-common",
     "@kbn/es-types",
     "@kbn/esql-utils",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

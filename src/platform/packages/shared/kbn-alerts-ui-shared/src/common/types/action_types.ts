@@ -164,6 +164,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;
+  isTestable?: boolean;
   /**
    * Connector form config
    */

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
+import { ECH_AGENTLESS_OUTPUT_ID } from '@kbn/fleet-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -37,6 +38,36 @@ export default function (providerContext: FtrProviderContext) {
     const apiClient = new SpaceTestApiClient(supertest);
 
     let mockApiServer: http.Server;
+    describe('Managed integrations route path', () => {
+      // The deprecated agentless_policies public paths are aliased to the same handlers as
+      // managed_integrations, so an empty body fails validation with 400 — proving the path
+      // still resolves (a 404 would mean the alias is gone).
+      it('still serves the deprecated agentless_policies public path as an alias', async () => {
+        await supertest
+          .post('/api/fleet/agentless_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('serves the new managed_integrations public path', async () => {
+        await supertest
+          .post('/api/fleet/managed_integrations')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(400);
+      });
+
+      it('does not alias the internal sync path under agentless_policies', async () => {
+        await supertest
+          .post('/internal/fleet/agentless_policies/_sync')
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .send({})
+          .expect(404);
+      });
+    });
+
     describe('Create Agentless Policy', () => {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
@@ -101,6 +132,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const agentPolicy = await apiClient.getAgentPolicy(policy.item.id);
         expect(agentPolicy.item.supports_agentless).to.be(true);
+        // Managed bulk is disabled in this suite's config (config.agentless.ts): agentless
+        // policies must keep using the direct-ES output.
+        expect(agentPolicy.item.data_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
+        expect(agentPolicy.item.monitoring_output_id).to.be(ECH_AGENTLESS_OUTPUT_ID);
 
         expect(apiCalls.length).to.be(1);
         expect(apiCalls[0].url).to.be('/agentless-api/api/v1/ess/deployments');
@@ -1423,7 +1458,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
               description: 'tata',
             }),
-          /400 "Bad Request" To update agentless agent policies, use the agentless policies API./
+          /400 "Bad Request" To update managed integrations, use the managed integrations API./
         );
       });
     });

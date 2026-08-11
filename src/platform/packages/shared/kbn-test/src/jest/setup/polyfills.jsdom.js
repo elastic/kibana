@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const MutationObserver = require('mutation-observer');
-Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
-
 // Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
 require('whatwg-fetch');
 
@@ -19,9 +16,14 @@ if (!Object.hasOwn(global.URL, 'createObjectURL')) {
 
 // https://github.com/jsdom/jsdom/issues/2524
 if (!Object.hasOwn(global, 'TextEncoder')) {
-  const customTextEncoding = require('@kayahr/text-encoding');
-  global.TextEncoder = customTextEncoding.TextEncoder;
-  global.TextDecoder = customTextEncoding.TextDecoder;
+  const { TextEncoder: NodeTextEncoder, TextDecoder } = require('node:util');
+
+  global.TextEncoder = class TextEncoder extends NodeTextEncoder {
+    encode(input = '') {
+      return global.Uint8Array.from(super.encode(input));
+    }
+  };
+  global.TextDecoder = TextDecoder;
 }
 
 // JSDOM 20's Blob lacks .arrayBuffer() and .text() (jsdom#2555).

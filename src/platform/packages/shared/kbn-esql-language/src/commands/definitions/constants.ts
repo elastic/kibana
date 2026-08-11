@@ -12,6 +12,8 @@ import type { Literals } from './types';
 
 export const EDITOR_MARKER = 'marker_esql_editor';
 
+export const COORDINATOR_LOOKUP_JOIN_PREFIX = '_coordinator';
+
 // List for suggestions (human-friendly)
 export const timeUnitsToSuggest: Literals[] = [
   {
@@ -89,3 +91,7 @@ export const FULL_TEXT_SEARCH_FUNCTIONS = [
   'qstr',
   'kql',
 ];
+
+export const FULL_TEXT_SEARCH_DEFINITIONS = FULL_TEXT_SEARCH_FUNCTIONS.map((name) =>
+  name === 'match_operator' ? ':' : name
+);

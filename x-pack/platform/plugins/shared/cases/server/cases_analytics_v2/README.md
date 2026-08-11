@@ -165,7 +165,7 @@ A future Kibana-side provider (built on the `ImplicitPrivilegesProvider` SPI
 tracked in [elastic/elasticsearch#147176](https://github.com/elastic/elasticsearch/pull/147176))
 will scope which case documents a user can read inside `.cases` via DLS on
 the top-level `space_id` + `owner` fields. These are deliberately placed at
-the document root (not under `cases.*`) to match the implicit-privileges DLS
+the document root (not under `case.*`) to match the implicit-privileges DLS
 convention — `space_id` is singular because cases are space-isolated. Until
 that provider lands, role-granted access to `.cases` is unrestricted across
 cases — apply with care.
@@ -212,16 +212,16 @@ DLS convention. Until that lands, role-granted access is unrestricted (see
 "Authorization" above). The per-space data view
 is orthogonal — it scopes the _runtime field set_, not the document set. The
 two compose cleanly: a user in space A sees only space-A runtime fields
-**and** (once DLS is enforced) only space-A cases.
+**and** (once DLS is enforced) only space-A case.
 
 ## Runtime field lift
 
 Each template-declared extended field is stored at
-`cases.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
-a typed runtime field published at `cases.<name>_as_<type>` — Lens and
+`case.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
+a typed runtime field published at `case.<name>_as_<type>` — Lens and
 Discover get numeric / date / boolean filter operators instead of
 string-contains. The runtime field reads the value via
-`doc['cases.extended_fields.<name>_as_<type>']` at query time (flattened
+`doc['case.extended_fields.<name>_as_<type>']` at query time (flattened
 sub-keys are doc-values-backed under the parent's value stream).
 
 `flattened` is used (not `dynamic_template`-per-key) so the index mapping
@@ -242,11 +242,11 @@ The `.cases` index mapping mirrors the cases SO mapping at
   strings (`"low"`, `"open"`, etc.) in the doc-builder so Lens shows readable
   labels.
 - **`observables`**: SO stores nested `[{ typeKey, value, description }]`; v2
-  denormalizes to per-type keyword arrays — `cases.observables.url: ["..."]`,
-  `cases.observables.ipv4: [...]`. Type↔value relationship preserved via the
+  denormalizes to per-type keyword arrays — `case.observables.url: ["..."]`,
+  `case.observables.ipv4: [...]`. Type↔value relationship preserved via the
   field path; `description` dropped (free text, not an analytics dimension).
 - **`extended_fields`**: SO uses `flattened`; v2 matches. Runtime fields
-  at `cases.<snake>` parse the raw string from `_source` at query time
+  at `case.<snake>` parse the raw string from `_source` at query time
   (see "Runtime field lift" above for the field-limit rationale).
 - **`time_to_acknowledge` / `time_to_investigate` / `time_to_resolve` /
   `in_progress_at`**: present in the SO's persisted attributes but not the SO
@@ -530,6 +530,69 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
+| `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
+
+### Templates migration coupling
+
+The cases templates v2 migration (`server/tasks/templates_migration`)
+backfills `extended_fields` onto existing cases. That backfill writes
+through a raw saved-objects `bulkUpdate`, which stamps the
+**SO-framework** top-level `updated_at` but **not** the **case-domain**
+`attributes.updated_at`. Incremental reconciliation filters on
+`attributes.updated_at` (see `reconciliation/runner.ts`), so it would
+**never** re-emit backfilled cases on its own — the miss would be
+permanent, not a transient window, until the case's next real edit.
+
+To close this, the migration fires a one-shot hook when its case
+backfill reaches a terminal state (fully complete **or** gives up after
+the failure cap). The hook calls
+`CasesAnalyticsV2Service.triggerBackfillReconciliation()`, which
+**schedules the dedicated full-reset task** — the same
+`cases.analyticsV2.fullReset` task that `POST /reset` uses (see "Reset
+the index"). That task re-walks every case with `lastRunAt: undefined`,
+mirroring the freshly backfilled `extended_fields` into `.cases`, and
+seeds the periodic cursors on completion so reconciliation returns to
+incremental mode.
+
+We deliberately route through the reset task rather than clearing the
+periodic reconciliation cursor. The periodic task is tuned for
+`O(delta)` ticks — no inter-page throttle, Task Manager's default
+timeout — so forcing a full walk through it would run unthrottled and,
+on a tenant large enough to exceed that timeout, would re-walk from
+scratch every tick and never settle back into incremental mode (the
+periodic cursor only advances on a full successful drain). The reset
+task is purpose-built for full walks: it throttles inter-page writes
+(`resetPageDelayMs`), runs under a larger configurable timeout
+(`resetTaskTimeoutMinutes`), reports live progress under
+`/state.active_reset`, and seeds the post-walk cursors itself.
+
+Note the give-up case: the nudge still fires, and the reset walk
+faithfully mirrors whatever is currently in the SOs — that re-indexes
+the cases that _were_ backfilled but does **not** mean the backfill
+succeeded for every case. Cases that never backfilled stay without
+`extended_fields` until a later Kibana restart re-runs the migration to
+completion (which fires the nudge again).
+
+Safety properties (all covered by tests):
+
+- **Restart-safe / no re-index storms.** The hook is gated on
+  `hasPendingCaseBackfill(configures)`, derived from the restart-durable
+  `legacyCasesMigrated` per-space flags — **not** a per-run write count.
+  A no-op restart of an already-migrated cluster sees no pending work
+  and triggers **no** reset. This also closes the boundary case where
+  the migration's final run writes zero cases (e.g. a restart wiped the
+  in-progress cursor and the last run only re-scans already-written
+  cases) yet still needs to nudge analytics.
+- **No feedback loop.** The reset walk reads case SOs and writes only to
+  `.cases`; it never writes case SOs, so it cannot re-trigger the
+  migration task.
+- **No concurrent walks.** `scheduleResetTask` removes any in-flight
+  reset first (singleton task id), so a nudge landing while an admin
+  `/reset` is running replaces it rather than racing a second walk.
+- **Decoupled + non-fatal.** The callback is dependency-injected from
+  `plugin.ts`; it no-ops when analytics v2 is disabled and swallows its
+  own errors (scheduling failures are logged, never propagated), so it
+  can never fail or retry the migration task.
 
 ## Activity surface
 
@@ -548,7 +611,7 @@ deliberate differences driven by the user-action shape:
   cascades to its user-action SOs. Reconciliation walks forward in
   time and never sees the gap, so the activity writer exposes a
   `bulkDeleteActionsByCaseIds` path that runs a `delete_by_query` on
-  `cases.id`. `CasesService.deleteCase` and `bulkDeleteCaseEntities`
+  `case.id`. `CasesService.deleteCase` and `bulkDeleteCaseEntities`
   dispatch this immediately after the SO delete succeeds.
 - **Polymorphic payload + curated extracts.** The user-action
   `attributes.payload` shape is union-typed by `attributes.type`. The
@@ -565,7 +628,7 @@ deliberate differences driven by the user-action shape:
   large, opaque strings queried with grep-style predicates.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
-  JOIN .cases ON cases.id`; the lookup-mode index is on the cases side.
+  JOIN .cases ON case.id`; the lookup-mode index is on the cases side.
 - **Same reconciliation page size as cases (100).** User-action docs are
   smaller than case docs, but the per-page sync CPU is dominated by the
   `JSON.stringify(payload)` for the polymorphic payload field (which can
@@ -577,7 +640,7 @@ The same managed `Case Analytics` data view spans every surface — its
 title is `.cases,.cases-activity,.cases-attachments`, so a single
 Discover / Lens selection covers all three. A `LOOKUP JOIN` from the
 activity or attachments surface to the cases surface is just
-`LOOKUP JOIN .cases ON cases.id` against the joined view.
+`LOOKUP JOIN .cases ON case.id` against the joined view.
 
 The reconciliation task runs all three surfaces sequentially per tick,
 with **independent cursors** (`cases_last_run_at`,
@@ -608,7 +671,7 @@ cases surface, with the following deliberate differences:
   `legacy:<space>` / `unified:<space>`.
 - **Cascade on case delete.** Same shape as the activity cascade —
   `bulkDeleteAttachmentsByCaseIds` runs a `delete_by_query` on
-  `cases.id` from `CasesService.deleteCase` and
+  `case.id` from `CasesService.deleteCase` and
   `bulkDeleteCaseEntities`. Covers both source SO types in one
   query because the analytics index is the unified normalization
   point.
@@ -631,7 +694,7 @@ cases surface, with the following deliberate differences:
   oversized values from the index).
 - **No `index.mode: lookup`.** `.cases-attachments` is the **fact**
   table in the analytics model, joined to `.cases` via ES|QL `LOOKUP
-  JOIN .cases ON cases.id`.
+  JOIN .cases ON case.id`.
 - **`attachment_id` normalized to `string[]`.** Reference subtypes
   carry the referenced entity ids as `string | string[]` on the SO
   shape (single-id alert vs bulk multi-id alert). The doc-builder
@@ -688,7 +751,7 @@ cases_analytics_v2/
 │   │                        scopes to `default`.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
-│   ├── attachments_runner.ts   walks cases-comments + (when xpack.cases.attachments.enabled) cases-attachments
+│   ├── attachments_runner.ts   walks cases-comments + cases-attachments (both unconditionally)
 │   │                           SOs into the unified analytics index. Same
 │   │                           filter shape as the cases runner (mutable SOs).
 │   ├── reset_runner.ts         shared "walk every surface + seed cursors"

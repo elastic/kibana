@@ -11,14 +11,14 @@ import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { truncate, unit } from '@kbn/apm-common';
+import { TruncateWithTooltip } from '@kbn/apm-ui-shared';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import type { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
-import { truncate, unit } from '../../../../../utils/style';
 import type { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
-import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { MaxGroupsMessage, OTHER_SERVICE_NAME } from '../max_groups_message';
 
 const StyledLink = styled(EuiLink)`

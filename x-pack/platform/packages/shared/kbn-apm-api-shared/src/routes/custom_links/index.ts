@@ -21,4 +21,4 @@ export const customLinksRouteDefinitions = {
 export type { CustomLinkTransactionResponse } from './custom_link_transaction';
 export type { ListCustomLinksResponse } from './list_custom_links';
 export type { DeleteCustomLinkResponse } from './delete_custom_link';
-export { filterOptionsRt, payloadRt } from './custom_link_types';
+export { filterOptionsSchema, payloadSchema } from './custom_link_types';

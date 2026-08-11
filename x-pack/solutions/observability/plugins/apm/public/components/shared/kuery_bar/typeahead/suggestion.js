@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { EuiIcon, useEuiFontSize } from '@elastic/eui';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 import { tint } from 'polished';
 
 function getIconColor(type, theme) {
@@ -83,7 +83,7 @@ function getEuiIconType(type) {
     case 'value':
       return 'queryValue';
     case 'recentSearch':
-      return 'search';
+      return 'magnify';
     case 'conjunction':
       return 'querySelector';
     case 'operator':

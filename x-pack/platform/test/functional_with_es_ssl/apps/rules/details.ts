@@ -176,7 +176,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(ruleType).to.be(`Always Firing`);
 
         const owner = await pageObjects.ruleDetailsUI.getAPIKeyOwner();
-        expect(owner).to.be('elastic');
+        expect(owner).to.be('API key owner elastic');
       });
 
       it('renders toast when schedule is less than configured minimum', async () => {
@@ -189,28 +189,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Enabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(1)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await testSubjects.click('confirmModalConfirmButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+          expect(await statusBadge.getVisibleText()).to.eql('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -231,18 +227,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        const statusBadge = await testSubjects.find('ruleEnabledBadge');
 
-        expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
+        expect(await statusBadge.getVisibleText()).to.eql('Disabled');
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(0)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).to.eql('Enabled');
+          expect(await statusBadge.getVisibleText()).to.eql('Enabled');
         });
       });
 
@@ -371,7 +363,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -408,7 +400,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -423,7 +415,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
         await actionsButton.click();
-        await editButton.click();
+        await testSubjects.click('openEditRuleFlyoutButton');
 
         const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
@@ -489,7 +481,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -556,7 +548,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -937,9 +929,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
-        await actionsButton.click();
+        await testSubjects.existOrFail('ruleEnabledBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
       });
 
@@ -964,9 +954,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Verify we're on the rule details page by checking for rule-specific elements
-        await testSubjects.existOrFail('statusDropdown');
-        const actionsButton = await testSubjects.find('ruleActionsButton');
-        await actionsButton.click();
+        await testSubjects.existOrFail('ruleEnabledBadge');
         await testSubjects.existOrFail('openEditRuleFlyoutButton');
 
         // Assert that we're still within the correct space by checking the URL

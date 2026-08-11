@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { RawSettingDefinition } from './types';
-import { loggingLevelRt } from '../runtime_types/logging_level_rt';
+import { loggingLevelSchema } from '../runtime_types/logging_level_rt';
 
 export const edotSDKSettings: RawSettingDefinition[] = [
   {
@@ -32,6 +32,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
       'opentelemetry/python/elastic',
@@ -53,6 +54,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -73,12 +75,13 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/php/elastic',
     ],
   },
   {
     key: 'logging_level',
-    validation: loggingLevelRt,
+    validation: loggingLevelSchema,
     type: 'select',
     defaultValue: 'info',
     label: i18n.translate('apmCommon.agentConfig.loggingLevel.label', {
@@ -99,6 +102,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/python/elastic',
       'opentelemetry/php/elastic',
@@ -121,6 +125,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -141,6 +146,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
       'opentelemetry/python/elastic',
@@ -161,6 +167,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -180,6 +187,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -199,6 +207,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/java/opentelemetry-javaagent',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
