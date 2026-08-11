@@ -90,16 +90,16 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body).toStrictEqual({
         ...enabled,
         enabled: false,
-        updatedAt: response.body.updatedAt,
-        updatedBy: response.body.updatedBy,
+        updated_at: response.body.updated_at,
+        updated_by: response.body.updated_by,
         version: response.body.version,
         metadata: {
           ...enabled.metadata,
           version: response.body.metadata.version,
         },
       });
-      expect(Date.parse(response.body.updatedAt)).toBeGreaterThanOrEqual(
-        Date.parse(enabled.updatedAt)
+      expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
+        Date.parse(enabled.updated_at)
       );
       expect(response.body.version).not.toBe(enabled.version);
       expect(response.body.metadata.version).toBe(enabled.metadata.version + 1);

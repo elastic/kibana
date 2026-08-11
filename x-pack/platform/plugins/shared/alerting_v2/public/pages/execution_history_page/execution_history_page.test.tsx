@@ -179,14 +179,14 @@ const mockRulesFetchResult = (
       items: { id: string; metadata: { name: string } }[];
       total: number;
       page: number;
-      perPage: number;
+      per_page: number;
     };
     isFetching: boolean;
     isError: boolean;
   }> = {}
 ) => {
   mockUseFetchRules.mockReturnValue({
-    data: { items: [], total: 0, page: 1, perPage: 10 },
+    data: { items: [], total: 0, page: 1, per_page: 10 },
     isFetching: false,
     isError: false,
     ...overrides,

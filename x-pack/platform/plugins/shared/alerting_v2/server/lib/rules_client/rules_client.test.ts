@@ -160,10 +160,10 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic_profile_uid',
-          updatedBy: 'elastic_profile_uid',
-          createdAt: '2025-01-01T00:00:00.000Z',
-          updatedAt: '2025-01-01T00:00:00.000Z',
+          created_by: 'elastic_profile_uid',
+          updated_by: 'elastic_profile_uid',
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
     });
@@ -1333,7 +1333,7 @@ describe('RulesClient', () => {
       );
       expect(res.total).toBe(2);
       expect(res.page).toBe(2);
-      expect(res.perPage).toBe(50);
+      expect(res.per_page).toBe(50);
     });
 
     it('uses default pagination when no page params are provided', async () => {
@@ -1358,7 +1358,7 @@ describe('RulesClient', () => {
 
       expect(res.total).toBe(100);
       expect(res.page).toBe(1);
-      expect(res.perPage).toBe(20);
+      expect(res.per_page).toBe(20);
     });
 
     it('translates clean API filter to SO filter before passing to saved objects client', async () => {

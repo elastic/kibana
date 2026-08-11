@@ -56,10 +56,10 @@ export const RULE_RESPONSE: RuleResponse = {
     ...SAMPLE_RULE_DATA.metadata,
     version: 1,
   },
-  createdBy: 'elastic',
-  createdAt: '2026-01-15T12:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-01-15T12:00:00.000Z',
+  created_by: 'elastic',
+  created_at: '2026-01-15T12:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-01-15T12:00:00.000Z',
 };
 
 export const BULK_OPERATION_REQUEST: BulkByIdsParams = {

@@ -351,9 +351,9 @@ export function transformRuleSoAttributesToRuleApiResponse(
     grouping: attrs.grouping,
     artifacts: attrs.artifacts,
     enabled: attrs.enabled,
-    createdBy: attrs.createdBy,
-    createdAt: attrs.createdAt,
-    updatedBy: attrs.updatedBy,
-    updatedAt: attrs.updatedAt,
+    created_by: attrs.createdBy,
+    created_at: attrs.createdAt,
+    updated_by: attrs.updatedBy,
+    updated_at: attrs.updatedAt,
   };
 }
