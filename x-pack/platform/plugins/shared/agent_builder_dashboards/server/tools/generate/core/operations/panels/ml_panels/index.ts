@@ -126,7 +126,7 @@ export const singleMetricViewerConfigSchema = z.object({
     .optional()
     .describe('Zero-based detector index within the job. Defaults to 0.'),
   selected_entities: z
-    .record(z.string(), z.string())
+    .record(z.string(), z.union([z.string(), z.number()]))
     .optional()
     .describe(
       'Partition / by / over field values that identify the series to display, e.g. { "host.name": "web-01" }.'
