@@ -50,7 +50,7 @@ describe('getTripleQuoteContext', () => {
   it('SHOULD prefer the enclosing request over a parser-recovered request inside a script string', () => {
     const lines = ['POST _search', '{ "script": """', 'GET /not-a-request'];
     const model = createModel(lines);
-    const parsedRequests = createParser()(lines.join('\n'))?.requests ?? [];
+    const parsedRequests = createParser()(lines.join('\n'), undefined)?.requests ?? [];
     const recoveredRequest = parsedRequests.at(-1);
     if (!recoveredRequest) {
       throw new Error('expected a recovered request');
@@ -67,7 +67,7 @@ describe('getTripleQuoteContext', () => {
   it('SHOULD retain ES|QL context for a parser-recovered request inside a query string', () => {
     const lines = ['POST _query', '{ "query": """', 'GET /part-of-query'];
     const model = createModel(lines);
-    const parsedRequests = createParser()(lines.join('\n'))?.requests ?? [];
+    const parsedRequests = createParser()(lines.join('\n'), undefined)?.requests ?? [];
     const recoveredRequest = parsedRequests.at(-1);
     if (!recoveredRequest) {
       throw new Error('expected a recovered request');
