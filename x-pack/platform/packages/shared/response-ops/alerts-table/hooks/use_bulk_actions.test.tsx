@@ -101,7 +101,7 @@ describe('bulk action hooks', () => {
         }
       );
 
-      mockAddExistingCase.mock.calls[0][0]!.onSuccess({ id: caseId });
+      mockAddExistingCase.mock.calls[0][0]!.onSuccess({ id: caseId }, false);
       expect(refresh).toHaveBeenCalled();
     });
 
