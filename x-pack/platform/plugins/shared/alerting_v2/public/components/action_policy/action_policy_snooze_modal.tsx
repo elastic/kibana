@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -23,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   PANEL_TITLE,
-  QUICK_SNOOZE_POPOVER_APPLY,
   QuickSnoozePanel,
   type QuickSnoozePanelMessages,
 } from '@kbn/response-ops-alert-snooze';
@@ -41,11 +39,16 @@ const SNOOZE_PANEL_MESSAGES = {
     }),
 } satisfies Partial<QuickSnoozePanelMessages>;
 
-// The shared subtitle advertises conditions and indefinite snoozing, neither of
-// which this modal offers.
 const SUBTITLE = i18n.translate('xpack.alertingV2.actionPolicy.snoozeModal.subtitle', {
   defaultMessage: 'Silence notifications until the chosen time.',
 });
+
+const SNOOZE_NOTIFICATIONS_BUTTON_TEXT = i18n.translate(
+  'xpack.alertingV2.actionPolicy.snoozeModal.applyButtonText',
+  {
+    defaultMessage: 'Snooze notifications',
+  }
+);
 
 interface ActionPolicySnoozeModalProps {
   title?: string;
@@ -92,20 +95,17 @@ export const ActionPolicySnoozeModal = ({
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="actionPolicySnoozeModalCancel" onClick={onCancel}>
-          {i18n.translate('xpack.alertingV2.actionPolicy.snoozeModal.cancel', {
-            defaultMessage: 'Cancel',
-          })}
-        </EuiButtonEmpty>
         <EuiButton
           fill
+          fullWidth
+          iconType="bellSlash"
           data-test-subj="actionPolicySnoozeModalApply"
           isDisabled={!snoozedUntil}
           onClick={() => {
             if (snoozedUntil) onApplySnooze(snoozedUntil);
           }}
         >
-          {QUICK_SNOOZE_POPOVER_APPLY}
+          {SNOOZE_NOTIFICATIONS_BUTTON_TEXT}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

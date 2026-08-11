@@ -68,13 +68,4 @@ describe('ActionPolicySnoozeModal', () => {
 
     expect(screen.getByTestId('actionPolicySnoozeModalApply')).toBeDisabled();
   });
-
-  it('calls onCancel when the cancel button is clicked', async () => {
-    renderModal();
-
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeModalCancel'));
-
-    expect(onCancel).toHaveBeenCalled();
-    expect(onApplySnooze).not.toHaveBeenCalled();
-  });
 });
