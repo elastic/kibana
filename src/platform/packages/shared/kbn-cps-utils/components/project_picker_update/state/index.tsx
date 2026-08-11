@@ -32,9 +32,9 @@ interface ProjectPickerContext {
   actions: Omit<ActionsFromReducers<ReturnType<typeof createStoreReducers>>, '_setStoreState'>;
 }
 
-export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
+export interface ProjectPickerStateProviderProps
+  extends Pick<ProjectPickerState, 'isReadOnly' | 'originProjectId'> {
   children: React.ReactNode;
-  originProjectId: string;
   availableProjects: CPSProject[];
   currentProjectRoutingGetter: () => ProjectRouting | undefined;
   defaultProjectRoutingGetter: () => ProjectRouting;
@@ -84,14 +84,14 @@ const createInitialPickerState = ({
   isReadOnly,
   originProjectId,
   projectRoutingStrategy,
-}: {
-  availableProjects: CPSProject[];
-  currentProjectRouting: ProjectRouting;
-  defaultProjectRouting: ProjectRouting;
-  isReadOnly?: boolean;
-  originProjectId: string;
-  projectRoutingStrategy: NonNullable<ProjectPickerStateProviderProps['projectRoutingStrategy']>;
-}): ProjectPickerState => {
+}: Pick<
+  ProjectPickerState,
+  | 'currentProjectRouting'
+  | 'defaultProjectRouting'
+  | 'isReadOnly'
+  | 'originProjectId'
+  | 'projectRoutingStrategy'
+> & { availableProjects: CPSProject[] }): ProjectPickerState => {
   const availableProjectIds = availableProjects.map((project) => project._id);
   const parsed = parseDefaultProjectRouting(currentProjectRouting, availableProjectIds);
 

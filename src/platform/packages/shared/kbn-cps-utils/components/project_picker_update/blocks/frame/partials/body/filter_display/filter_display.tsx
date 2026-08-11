@@ -71,6 +71,7 @@ const getFilterBadgeContextMenuItems = ({
       onClick(this: FilterBadgeClickActionContext, e) {
         e.preventDefault();
         onEditFilter({ id: this.id, expression: this.expression });
+        closePopover();
       },
     },
     {

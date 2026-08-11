@@ -31,7 +31,7 @@ export interface FilterEntry {
 
 export interface ProjectPickerStoredState {
   isReadOnly?: boolean;
-  originProjectId: string;
+  originProjectId?: string;
   defaultProjectRouting: ProjectRouting;
   projectRoutingStrategy: ProjectRoutingStrategy;
   filteringDimensions: string[];

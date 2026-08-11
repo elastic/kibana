@@ -22,7 +22,6 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         top: 0,
         zIndex: euiTheme.levels.header,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        backgroundColor: euiTheme.components.headerBackground,
         padding: euiTheme.size.base,
       },
     ]);

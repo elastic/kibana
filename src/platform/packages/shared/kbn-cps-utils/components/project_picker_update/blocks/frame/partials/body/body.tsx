@@ -76,14 +76,15 @@ export function ProjectPickerFrameBodyHeader() {
               defaultMessage: 'No projects are currently being searched',
             })}
             data-test-subj="projectPickerFilterDisplayNoMatchCallout"
-          >
-            <p>
-              {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
-                defaultMessage:
-                  'Adjust your project filters and toggles to ensure at least one project is included in your search.',
-              })}
-            </p>
-          </KbnWarningCallout>
+            text={
+              <p>
+                {i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutDescription', {
+                  defaultMessage:
+                    'Adjust your project filters and toggles to ensure at least one project is included in your search.',
+                })}
+              </p>
+            }
+          />
         </EuiFlexItem>
       )}
       {Boolean(state.filterExpressions.size) ? (
