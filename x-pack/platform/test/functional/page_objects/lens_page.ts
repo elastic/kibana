@@ -246,14 +246,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        if (opts.isPreviousIncompatible) {
-          // Incomplete → field must commit before close, or close discards the transition.
-          await retry.waitFor('incompatible field transition to complete', async () => {
-            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-            return await comboBox.isOptionSelected(fieldCombo, opts.field!);
-          });
-        }
+        const { field } = opts;
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+        // Switching operation re-renders the field list and can drop the click, so re-select until the field commits.
+        await retry.waitFor(`field "${field}" to be selected`, async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          if (await comboBox.isOptionSelected(fieldCombo, field)) {
+            return true;
+          }
+          await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+          return false;
+        });
       }
 
       if (opts.formula) {
