@@ -232,7 +232,6 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
-    comment?: string;
     dataCascade?: DataCascadeRestorableState;
     cascadedDocumentsDataGridMap?: CascadedDocumentsDataGridUiStateMap;
   };

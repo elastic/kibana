@@ -29,7 +29,11 @@ import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import moment from 'moment';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
-import { getColumnsWithHighlights } from '@kbn/esql-utils';
+import {
+  getColumnsWithHighlights,
+  getMultiplierFromESQLQuery,
+  MAX_MULTIPLIED_ROWS,
+} from '@kbn/esql-utils';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -59,17 +63,6 @@ export interface FetchEsqlParams {
     title: string;
     description: string;
   };
-}
-
-const MAX_MULTIPLIED_ROWS = 1_000_000;
-
-function getMultiplierFromESQLQuery(esql: string): number {
-  if (!esql) return 1;
-  const match = esql.match(/(?:\/\/|\/\*)\s*(\d+)\s*x\b/i);
-  if (!match) return 1;
-  const value = parseInt(match[1], 10);
-  if (!Number.isFinite(value) || value <= 0) return 1;
-  return value;
 }
 
 export function fetchEsql({

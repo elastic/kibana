@@ -39,7 +39,6 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   attributes: TabState['attributes'] | undefined;
   appState: DiscoverAppState | undefined;
   globalState: TabState['globalState'] | undefined;
-  comment?: string;
   profileState: TabState['profileState'] | undefined;
 };
 
@@ -83,7 +82,7 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<
       TabStateInLocalStorage,
-      'internalState' | 'attributes' | 'appState' | 'globalState' | 'comment' | 'profileState'
+      'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState'
     >
   ) => void;
   loadLocally: (props: {
@@ -197,7 +196,6 @@ export const createTabsStorageManager = ({
       attributes: tabState.attributes,
       appState: tabState.appState,
       globalState: tabState.globalState,
-      comment: tabState.uiState.comment,
       profileState: getLocallyPersistedProfileState(tabState.profileState),
     };
   };
@@ -277,10 +275,6 @@ export const createTabsStorageManager = ({
       globalState: globalState || {},
       profileState: profileState || defaultTabState.profileState,
       esqlVariables,
-      uiState: {
-        ...defaultTabState.uiState,
-        comment: tabStateInStorage.comment,
-      },
     };
 
     // migration from the older format where visContext was stored in internalState
@@ -404,7 +398,6 @@ export const createTabsStorageManager = ({
             attributes: tabStatePartial.attributes,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
-            comment: tabStatePartial.comment,
             profileState: getLocallyPersistedProfileState(tabStatePartial.profileState),
           };
         }

@@ -27,7 +27,6 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCheckbox,
-  EuiContextMenu,
   EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldSearch,
@@ -53,6 +52,7 @@ import {
   DataLoadingState,
   type UnifiedDataTableProps,
   type SortOrder,
+  type DataGridDensity,
 } from '@kbn/unified-data-table';
 import type { AggregateQuery } from '@kbn/es-query';
 import {
@@ -65,7 +65,6 @@ import {
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 declare module '@tanstack/react-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     isControl?: boolean;
     isSelect?: boolean;
@@ -159,9 +158,6 @@ const DENSITY_BUTTONS = [
   { id: 'expanded' as GridDensity, label: 'Expanded', iconType: 'menuRight' },
 ];
 
-const GROUP_SUB_ROW_HEIGHT = 28;
-const GROUP_SUB_PANEL_HEADER = 30;
-const MAX_GROUP_SUB_ROWS = 5;
 const OVERSCAN = 20;
 const MAX_SUMMARY_FIELDS = 80;
 
@@ -215,7 +211,11 @@ function scanMatches(
     const flat = rows[ri].flattened;
     if (isSummaryMode) {
       for (const [key, val] of Object.entries(flat)) {
-        if (val !== null && val !== undefined && formatCellValue(val).toLowerCase().includes(lower)) {
+        if (
+          val !== null &&
+          val !== undefined &&
+          formatCellValue(val).toLowerCase().includes(lower)
+        ) {
           matches.push({ rowIndex: ri, fieldName: key });
         }
       }
@@ -312,9 +312,7 @@ const FindInTableBar = React.memo(
     );
 
     const hasResults = matchesCount > 0;
-    const counter = inputValue
-      ? `${hasResults ? activeIndex + 1 : 0}/${matchesCount}`
-      : '';
+    const counter = inputValue ? `${hasResults ? activeIndex + 1 : 0}/${matchesCount}` : '';
 
     return (
       <div css={styles.findBar} data-test-subj="findInTableBar">
@@ -335,32 +333,38 @@ const FindInTableBar = React.memo(
         <EuiText size="xs" css={styles.findCounter} data-test-subj="findInTableCounter">
           {counter}
         </EuiText>
-        <EuiButtonIcon
-          iconType="arrowUp"
-          size="xs"
-          color="text"
-          disabled={!hasResults}
-          aria-label="Previous match"
-          onClick={onPrev}
-          data-test-subj="findInTablePrev"
-        />
-        <EuiButtonIcon
-          iconType="arrowDown"
-          size="xs"
-          color="text"
-          disabled={!hasResults}
-          aria-label="Next match"
-          onClick={onNext}
-          data-test-subj="findInTableNext"
-        />
-        <EuiButtonIcon
-          iconType="cross"
-          size="xs"
-          color="text"
-          aria-label="Close find bar"
-          onClick={onClose}
-          data-test-subj="findInTableClose"
-        />
+        <EuiToolTip content="Previous match" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="arrowUp"
+            size="xs"
+            color="text"
+            disabled={!hasResults}
+            aria-label="Previous match"
+            onClick={onPrev}
+            data-test-subj="findInTablePrev"
+          />
+        </EuiToolTip>
+        <EuiToolTip content="Next match" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="arrowDown"
+            size="xs"
+            color="text"
+            disabled={!hasResults}
+            aria-label="Next match"
+            onClick={onNext}
+            data-test-subj="findInTableNext"
+          />
+        </EuiToolTip>
+        <EuiToolTip content="Close find bar" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            size="xs"
+            color="text"
+            aria-label="Close find bar"
+            onClick={onClose}
+            data-test-subj="findInTableClose"
+          />
+        </EuiToolTip>
       </div>
     );
   }
@@ -411,50 +415,6 @@ const parseStatsByColumns = (
   return { byFields, orderedColumns };
 };
 
-// ── Marvel placeholder data for grouped mode sub-rows ──
-interface MarvelCharacter {
-  name: string;
-  realName: string;
-  team: string;
-  power: number;
-  firstAppearance: number;
-}
-
-const MARVEL_CHARACTERS: MarvelCharacter[] = [
-  { name: 'Spider-Man', realName: 'Peter Parker', team: 'Avengers', power: 87, firstAppearance: 1962 },
-  { name: 'Iron Man', realName: 'Tony Stark', team: 'Avengers', power: 95, firstAppearance: 1963 },
-  { name: 'Wolverine', realName: 'Logan', team: 'X-Men', power: 88, firstAppearance: 1974 },
-  { name: 'Storm', realName: 'Ororo Munroe', team: 'X-Men', power: 90, firstAppearance: 1975 },
-  { name: 'Captain America', realName: 'Steve Rogers', team: 'Avengers', power: 82, firstAppearance: 1941 },
-  { name: 'Black Widow', realName: 'Natasha Romanoff', team: 'Avengers', power: 75, firstAppearance: 1964 },
-  { name: 'Thor', realName: 'Thor Odinson', team: 'Asgardians', power: 99, firstAppearance: 1962 },
-  { name: 'Hulk', realName: 'Bruce Banner', team: 'Avengers', power: 98, firstAppearance: 1962 },
-  { name: 'Cyclops', realName: 'Scott Summers', team: 'X-Men', power: 78, firstAppearance: 1963 },
-  { name: 'Jean Grey', realName: 'Jean Grey', team: 'X-Men', power: 96, firstAppearance: 1963 },
-  { name: 'Deadpool', realName: 'Wade Wilson', team: 'X-Force', power: 85, firstAppearance: 1991 },
-  { name: 'Black Panther', realName: "T'Challa", team: 'Avengers', power: 88, firstAppearance: 1966 },
-  { name: 'Doctor Strange', realName: 'Stephen Strange', team: 'Avengers', power: 97, firstAppearance: 1963 },
-  { name: 'Scarlet Witch', realName: 'Wanda Maximoff', team: 'Avengers', power: 99, firstAppearance: 1964 },
-  { name: 'Gambit', realName: 'Remy LeBeau', team: 'X-Men', power: 80, firstAppearance: 1990 },
-  { name: 'Rogue', realName: 'Anna Marie', team: 'X-Men', power: 92, firstAppearance: 1981 },
-  { name: 'Vision', realName: 'Vision', team: 'Avengers', power: 91, firstAppearance: 1968 },
-  { name: 'Hawkeye', realName: 'Clint Barton', team: 'Avengers', power: 70, firstAppearance: 1964 },
-  { name: 'Ant-Man', realName: 'Scott Lang', team: 'Avengers', power: 72, firstAppearance: 1979 },
-  { name: 'Wasp', realName: 'Janet Van Dyne', team: 'Avengers', power: 74, firstAppearance: 1963 },
-];
-
-const MARVEL_FIELDS: (keyof MarvelCharacter)[] = ['name', 'realName', 'team', 'power', 'firstAppearance'];
-
-const getMarvelSubRows = (rowIndex: number): MarvelCharacter[] => {
-  const count = 2 + (rowIndex % (MAX_GROUP_SUB_ROWS - 1));
-  const start = (rowIndex * 7) % MARVEL_CHARACTERS.length;
-  const result: MarvelCharacter[] = [];
-  for (let i = 0; i < count; i++) {
-    result.push(MARVEL_CHARACTERS[(start + i) % MARVEL_CHARACTERS.length]);
-  }
-  return result;
-};
-
 // ── Cell Actions: filter in/out, copy, expand ──
 const CellActions = React.memo(
   ({
@@ -503,7 +463,7 @@ const CellActions = React.memo(
       <div className="tsg-cellActions" css={styles.cellActions}>
         {onFilter && (
           <>
-            <EuiToolTip content="Filter for value">
+            <EuiToolTip content="Filter for value" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 aria-label="Filter for value"
@@ -514,7 +474,7 @@ const CellActions = React.memo(
                 data-test-subj="filterForValue"
               />
             </EuiToolTip>
-            <EuiToolTip content="Filter out value">
+            <EuiToolTip content="Filter out value" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="minusInCircle"
                 aria-label="Filter out value"
@@ -527,7 +487,7 @@ const CellActions = React.memo(
             </EuiToolTip>
           </>
         )}
-        <EuiToolTip content="Copy value">
+        <EuiToolTip content="Copy value" disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="copyClipboard"
             aria-label="Copy value"
@@ -538,7 +498,7 @@ const CellActions = React.memo(
             data-test-subj="copyCellValue"
           />
         </EuiToolTip>
-        <EuiToolTip content="Expand cell">
+        <EuiToolTip content="Expand cell" disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="expand"
             aria-label="Expand cell"
@@ -589,7 +549,19 @@ const CellPopover = React.memo(
 
     return (
       <>
-        <div css={styles.cellPopoverBackdrop} onClick={onClose} />
+        <div
+          css={styles.cellPopoverBackdrop}
+          onClick={onClose}
+          onKeyDown={(e) => {
+            if (e.key === keys.ENTER || e.key === keys.SPACE || e.key === keys.ESCAPE) {
+              e.preventDefault();
+              onClose();
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Close"
+        />
         <div
           css={styles.cellPopover}
           style={{ top, left }}
@@ -602,25 +574,31 @@ const CellPopover = React.memo(
             <div css={{ display: 'flex', gap: 2 }}>
               {onFilter && (
                 <>
-                  <EuiToolTip content="Filter for value">
+                  <EuiToolTip content="Filter for value" disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="plusInCircle"
                       aria-label="Filter for value"
                       size="xs"
-                      onClick={() => { onFilter(fieldName, value, '+'); onClose(); }}
+                      onClick={() => {
+                        onFilter(fieldName, value, '+');
+                        onClose();
+                      }}
                     />
                   </EuiToolTip>
-                  <EuiToolTip content="Filter out value">
+                  <EuiToolTip content="Filter out value" disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="minusInCircle"
                       aria-label="Filter out value"
                       size="xs"
-                      onClick={() => { onFilter(fieldName, value, '-'); onClose(); }}
+                      onClick={() => {
+                        onFilter(fieldName, value, '-');
+                        onClose();
+                      }}
                     />
                   </EuiToolTip>
                 </>
               )}
-              <EuiToolTip content="Copy value">
+              <EuiToolTip content="Copy value" disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="copyClipboard"
                   aria-label="Copy value"
@@ -628,62 +606,14 @@ const CellPopover = React.memo(
                   onClick={handleCopy}
                 />
               </EuiToolTip>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label="Close"
-                size="xs"
-                onClick={onClose}
-              />
+              <EuiToolTip content="Close" disableScreenReaderOutput>
+                <EuiButtonIcon iconType="cross" aria-label="Close" size="xs" onClick={onClose} />
+              </EuiToolTip>
             </div>
           </div>
           <div css={styles.cellPopoverBody}>{formatted}</div>
         </div>
       </>
-    );
-  }
-);
-
-// ── Grouped sub-panel ──
-const GroupSubPanel = React.memo(
-  ({
-    rowIndex,
-    styles,
-    width,
-  }: {
-    rowIndex: number;
-    styles: ReturnType<typeof getTanStackDataGridStyles>;
-    width: number;
-  }) => {
-    const characters = useMemo(() => getMarvelSubRows(rowIndex), [rowIndex]);
-    return (
-      <div css={styles.groupSubPanel} style={{ width }} data-test-subj="groupSubPanel">
-        <table css={styles.subTable}>
-          <thead css={styles.subTableHeader}>
-            <tr>
-              {MARVEL_FIELDS.map((field) => (
-                <th key={field}>{field}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {characters.map((char, i) => (
-              <tr key={`${char.name}-${i}`} css={styles.subTableRow}>
-                <td>
-                  <strong>{char.name}</strong>
-                </td>
-                <td>{char.realName}</td>
-                <td>
-                  <EuiBadge color="hollow" css={styles.subTableBadge}>
-                    {char.team}
-                  </EuiBadge>
-                </td>
-                <td>{char.power}</td>
-                <td>{char.firstAppearance}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     );
   }
 );
@@ -754,89 +684,6 @@ const VirtualRow = React.memo(
   }
 );
 
-// ── Grouped virtual row ──
-const GroupedVirtualRow = React.memo(
-  ({
-    row,
-    virtualRow,
-    isGroupExpanded,
-    onToggleGroup,
-    byFields,
-    aggregateColumns,
-    styles,
-    totalWidth,
-    groupRowHeight,
-  }: {
-    row: Row<DataTableRecord>;
-    virtualRow: VirtualItem;
-    isGroupExpanded: boolean;
-    onToggleGroup: (rowId: string) => void;
-    byFields: string[];
-    aggregateColumns: string[];
-    styles: ReturnType<typeof getTanStackDataGridStyles>;
-    totalWidth: number;
-    groupRowHeight: number;
-  }) => {
-    const record = row.original;
-    const handleClick = useCallback(() => onToggleGroup(row.id), [onToggleGroup, row.id]);
-    const handleKeyDown = useCallback(
-      (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onToggleGroup(row.id);
-        }
-      },
-      [onToggleGroup, row.id]
-    );
-
-    const subRowCount = 2 + (virtualRow.index % (MAX_GROUP_SUB_ROWS - 1));
-
-    return (
-      <div
-        data-index={virtualRow.index}
-        role="row"
-        tabIndex={0}
-        data-test-subj="groupRow"
-      >
-        <div
-          css={[styles.groupRow, isGroupExpanded && styles.groupRowExpanded]}
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          style={{ width: totalWidth, height: groupRowHeight }}
-          data-test-subj="groupRowHeader"
-        >
-          <div
-            css={[styles.groupChevronCell, isGroupExpanded && styles.groupChevronRotated]}
-          >
-            <EuiIcon type="arrowRight" size="s" />
-          </div>
-          <div css={styles.groupLabel}>
-            {byFields.map((field) => (
-              <span key={field}>
-                <span css={styles.groupLabelField}>{field}:</span>{' '}
-                <strong>{formatCellValue(record.flattened[field])}</strong>
-              </span>
-            ))}
-            {aggregateColumns.map((col) => (
-              <EuiBadge key={col} color="hollow">
-                {col}: {formatCellValue(record.flattened[col])}
-              </EuiBadge>
-            ))}
-          </div>
-          <div css={styles.groupCount}>{subRowCount} documents</div>
-        </div>
-        {isGroupExpanded && (
-          <GroupSubPanel
-            rowIndex={virtualRow.index}
-            styles={styles}
-            width={totalWidth}
-          />
-        )}
-      </div>
-    );
-  }
-);
-
 // ── Virtual cell with cell actions, popover, and focus support ──
 const VirtualCell = React.memo(
   ({
@@ -875,21 +722,29 @@ const VirtualCell = React.memo(
     }
 
     if (isSummary) {
+      const openSummaryPopover = (el: HTMLElement) => {
+        if (setPopoverState) {
+          setPopoverState({
+            fieldName: '_source',
+            value: Object.entries(cell.row.original.flattened)
+              .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
+              .join('\n'),
+            rect: el.getBoundingClientRect(),
+          });
+        }
+      };
+
       return (
         <div
           css={[styles.summaryCell, styles.expandableCell, isFocused && styles.focusedCell]}
           role="gridcell"
           style={{ flex: '1 1 0' }}
-          onClick={(e) => {
-            if (setPopoverState) {
-              const el = e.currentTarget;
-              setPopoverState({
-                fieldName: '_source',
-                value: Object.entries(cell.row.original.flattened)
-                  .map(([k, v]) => `${k}: ${formatCellValue(v)}`)
-                  .join('\n'),
-                rect: el.getBoundingClientRect(),
-              });
+          tabIndex={0}
+          onClick={(e) => openSummaryPopover(e.currentTarget)}
+          onKeyDown={(e) => {
+            if (e.key === keys.ENTER || e.key === keys.SPACE) {
+              e.preventDefault();
+              openSummaryPopover(e.currentTarget);
             }
           }}
         >
@@ -904,7 +759,10 @@ const VirtualCell = React.memo(
     const rowId = cell.row.original.id;
     const formatted = formatCellValue(value);
     const isActiveHighlight =
-      findTerm && findActiveMatch && findActiveMatch.rowIndex === rowIndex && findActiveMatch.fieldName === colId;
+      findTerm &&
+      findActiveMatch &&
+      findActiveMatch.rowIndex === rowIndex &&
+      findActiveMatch.fieldName === colId;
 
     const openCellPopover = (el: HTMLElement) => {
       if (fieldName && setPopoverState) {
@@ -918,12 +776,24 @@ const VirtualCell = React.memo(
 
     return (
       <div
-        css={[styles.cell, styles.cellWithActions, styles.expandableCell, isFocused && styles.focusedCell]}
+        css={[
+          styles.cell,
+          styles.cellWithActions,
+          styles.expandableCell,
+          isFocused && styles.focusedCell,
+        ]}
         style={{ width: cell.column.getSize() }}
         role="gridcell"
         data-row-id={rowId}
         data-col-id={colId}
+        tabIndex={0}
         onClick={(e) => openCellPopover(e.currentTarget)}
+        onKeyDown={(e) => {
+          if (e.key === keys.ENTER || e.key === keys.SPACE) {
+            e.preventDefault();
+            openCellPopover(e.currentTarget);
+          }
+        }}
       >
         <div css={styles.cellContent}>
           {findTerm ? (
@@ -943,9 +813,7 @@ const VirtualCell = React.memo(
             value={value}
             onFilter={onFilter}
             onExpand={() => {
-              const el = document.querySelector(
-                `[data-row-id="${rowId}"][data-col-id="${colId}"]`
-              );
+              const el = document.querySelector(`[data-row-id="${rowId}"][data-col-id="${colId}"]`);
               if (el) openCellPopover(el as HTMLElement);
             }}
             styles={styles}
@@ -1055,7 +923,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       setFindActiveIndex(0);
     }, []);
     const handleFindNext = useCallback(() => {
-      setFindActiveIndex((prev) => (findMatches.length === 0 ? 0 : (prev + 1) % findMatches.length));
+      setFindActiveIndex((prev) =>
+        findMatches.length === 0 ? 0 : (prev + 1) % findMatches.length
+      );
     }, [findMatches.length]);
     const handleFindPrev = useCallback(() => {
       setFindActiveIndex((prev) =>
@@ -1066,27 +936,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       setIsFindOpen(false);
       setFindTerm('');
       setFindActiveIndex(0);
-    }, []);
-
-    // Grouped mode
-    const isGroupedMode = Boolean(statsByInfo);
-    const aggregateColumns = useMemo(() => {
-      if (!statsByInfo) return [];
-      const bySet = new Set(statsByInfo.byFields);
-      return effectiveColumns.filter((c) => !bySet.has(c));
-    }, [statsByInfo, effectiveColumns]);
-
-    const [groupExpandedSet, setGroupExpandedSet] = useState<Set<string>>(new Set());
-    const toggleGroupExpand = useCallback((rowId: string) => {
-      setGroupExpandedSet((prev) => {
-        const next = new Set(prev);
-        if (next.has(rowId)) {
-          next.delete(rowId);
-        } else {
-          next.add(rowId);
-        }
-        return next;
-      });
     }, []);
 
     const shouldShowFieldHandler = useMemo(() => {
@@ -1138,7 +987,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const setDensity = useCallback(
       (d: GridDensity) => {
         setLocalDensity(d);
-        onUpdateDataGridDensity?.(d as any);
+        onUpdateDataGridDensity?.(d as DataGridDensity);
       },
       [onUpdateDataGridDensity]
     );
@@ -1227,8 +1076,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const handleSortingChange = useCallback(
       (updater: SortingState | ((prev: SortingState) => SortingState)) => {
         if (!onSortRef.current) return;
-        const next =
-          typeof updater === 'function' ? updater(sortingStateRef.current) : updater;
+        const next = typeof updater === 'function' ? updater(sortingStateRef.current) : updater;
         onSortRef.current(next.map(({ id, desc }) => [id, desc ? 'desc' : 'asc']));
       },
       []
@@ -1289,7 +1137,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const onFilterRef = useRef(onFilter);
     onFilterRef.current = onFilter;
 
-    const stopPropagation = useCallback((e: React.MouseEvent) => e.stopPropagation(), []);
+    const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), []);
 
     // ── Column header context menu ──
     const [headerMenuState, setHeaderMenuState] = useState<{
@@ -1297,13 +1145,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       anchorPosition: { top: number; left: number };
     } | null>(null);
 
-    const handleHeaderContextMenu = useCallback(
-      (e: React.MouseEvent, colId: string) => {
-        e.preventDefault();
-        setHeaderMenuState({ colId, anchorPosition: { top: e.clientY, left: e.clientX } });
-      },
-      []
-    );
+    const handleHeaderContextMenu = useCallback((e: React.MouseEvent, colId: string) => {
+      e.preventDefault();
+      setHeaderMenuState({ colId, anchorPosition: { top: e.clientY, left: e.clientX } });
+    }, []);
 
     const closeHeaderMenu = useCallback(() => setHeaderMenuState(null), []);
 
@@ -1384,51 +1229,59 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       }
 
       return items;
-    }, [headerMenuState, effectiveColumns, onSetColumns, onResize, rows, dataView.timeFieldName, closeHeaderMenu]);
+    }, [
+      headerMenuState,
+      effectiveColumns,
+      onSetColumns,
+      onResize,
+      rows,
+      dataView.timeFieldName,
+      closeHeaderMenu,
+    ]);
 
     // ── Build TanStack column defs ──
     const tanstackColumns: ColumnDef<DataTableRecord>[] = useMemo(() => {
       const defs: ColumnDef<DataTableRecord>[] = [];
 
-      if (!isGroupedMode) {
-        // Select column
-        defs.push({
-          id: SELECT_COLUMN_ID,
-          header: '',
-          size: SELECT_COL_WIDTH,
-          minSize: SELECT_COL_WIDTH,
-          maxSize: SELECT_COL_WIDTH,
-          enableResizing: false,
-          enableSorting: false,
-          meta: { isSelect: true },
-          cell: function SelectCell({ row }) {
-            const record = row.original;
-            return (
-              <EuiCheckbox
-                id={`select-${record.id}`}
-                checked={selectedRowsRef.current.has(record.id)}
-                onChange={() => toggleSelectRowRef.current(record.id)}
-                aria-label={`Select row ${row.index + 1}`}
-                compressed
-              />
-            );
-          },
-        });
+      // Select column
+      defs.push({
+        id: SELECT_COLUMN_ID,
+        header: '',
+        size: SELECT_COL_WIDTH,
+        minSize: SELECT_COL_WIDTH,
+        maxSize: SELECT_COL_WIDTH,
+        enableResizing: false,
+        enableSorting: false,
+        meta: { isSelect: true },
+        cell: function SelectCell({ row }) {
+          const record = row.original;
+          return (
+            <EuiCheckbox
+              id={`select-${record.id}`}
+              checked={selectedRowsRef.current.has(record.id)}
+              onChange={() => toggleSelectRowRef.current(record.id)}
+              aria-label={`Select row ${row.index + 1}`}
+              compressed
+            />
+          );
+        },
+      });
 
-        // Expand column
-        defs.push({
-          id: EXPAND_COLUMN_ID,
-          header: '',
-          size: CONTROL_COL_WIDTH,
-          minSize: CONTROL_COL_WIDTH,
-          maxSize: CONTROL_COL_WIDTH,
-          enableResizing: false,
-          enableSorting: false,
-          meta: { isControl: true },
-          cell: function ExpandCell({ row }) {
-            const record = row.original;
-            const isExp = expandedDocRef.current?.id === record.id;
-            return (
+      // Expand column
+      defs.push({
+        id: EXPAND_COLUMN_ID,
+        header: '',
+        size: CONTROL_COL_WIDTH,
+        minSize: CONTROL_COL_WIDTH,
+        maxSize: CONTROL_COL_WIDTH,
+        enableResizing: false,
+        enableSorting: false,
+        meta: { isControl: true },
+        cell: function ExpandCell({ row }) {
+          const record = row.original;
+          const isExp = expandedDocRef.current?.id === record.id;
+          return (
+            <EuiToolTip content="Toggle document details" disableScreenReaderOutput>
               <EuiButtonIcon
                 size="xs"
                 iconSize="s"
@@ -1436,7 +1289,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 data-test-subj="docTableExpandToggleColumn"
                 onClick={() => toggleExpandDocRef.current(record)}
                 onKeyDown={(e: React.KeyboardEvent) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === keys.ENTER || e.key === keys.SPACE) {
                     e.preventDefault();
                     toggleExpandDocRef.current(record);
                   }
@@ -1445,10 +1298,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 iconType={isExp ? 'minimize' : 'expand'}
                 isSelected={isExp}
               />
-            );
-          },
-        });
-      }
+            </EuiToolTip>
+          );
+        },
+      });
 
       if (isSummaryMode) {
         if (showTimeCol && timeFieldName) {
@@ -1504,7 +1357,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               } else {
                 const dvField = dataView.getFieldByName(colId);
                 if (dvField && fieldFormats) {
-                  formatted = formatFieldValue(val, row.original.raw, fieldFormats, dataView, dvField, 'text');
+                  formatted = formatFieldValue(
+                    val,
+                    row.original.raw,
+                    fieldFormats,
+                    dataView,
+                    dvField,
+                    'text'
+                  );
                 } else {
                   formatted = formatCellValue(val);
                 }
@@ -1525,7 +1385,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       dataView,
       effectiveColumns,
       fieldFormats,
-      isGroupedMode,
       isSortEnabled,
       isSummaryMode,
       settings,
@@ -1540,14 +1399,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       data: rows,
       columns: tanstackColumns,
       getCoreRowModel: getCoreRowModel(),
-      getSortedRowModel:
-        isSortEnabled && !isSummaryMode && !isGroupedMode ? getSortedRowModel() : undefined,
+      getSortedRowModel: isSortEnabled && !isSummaryMode ? getSortedRowModel() : undefined,
       state: { sorting: sortingState, columnSizing },
       onSortingChange: handleSortingChange,
       onColumnSizingChange: handleColumnSizingChange,
       columnResizeMode: 'onChange',
-      enableColumnResizing: !isGroupedMode,
-      enableSorting: isSortEnabled && !isSummaryMode && !isGroupedMode,
+      enableColumnResizing: true,
+      enableSorting: isSortEnabled && !isSummaryMode,
       enableMultiSort: true,
       manualSorting: false,
     });
@@ -1580,19 +1438,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const baseRowHeight = isSummaryMode ? densityCfg.summaryRowHeight : bodyRowHeight;
     const totalColCount = table.getVisibleLeafColumns().length;
 
-    const getRowHeight = useCallback(
-      (index: number): number => {
-        if (!isGroupedMode) return baseRowHeight;
-        const row = tableRows[index];
-        if (!row) return baseRowHeight;
-        if (groupExpandedSet.has(row.id)) {
-          const subRowCount = 2 + (index % (MAX_GROUP_SUB_ROWS - 1));
-          return densityCfg.rowHeight + GROUP_SUB_PANEL_HEADER + subRowCount * GROUP_SUB_ROW_HEIGHT + 2;
-        }
-        return densityCfg.rowHeight;
-      },
-      [isGroupedMode, baseRowHeight, densityCfg.rowHeight, tableRows, groupExpandedSet]
-    );
+    const getRowHeight = useCallback((): number => {
+      return baseRowHeight;
+    }, [baseRowHeight]);
 
     // ── Virtualizer ──
     const rowVirtualizer = useVirtualizer({
@@ -1605,7 +1453,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     useEffect(() => {
       rowVirtualizer.measure();
-    }, [groupExpandedSet, density, bodyMaxLines, rowVirtualizer]);
+    }, [density, bodyMaxLines, rowVirtualizer]);
 
     useEffect(() => {
       const scrollEl = parentRef.current;
@@ -1741,7 +1589,11 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const copySelectedAsJson = useCallback(() => {
       const selectedRecords = rows.filter((r) => selectedRows.has(r.id));
-      const json = JSON.stringify(selectedRecords.map((r) => r.flattened), null, 2);
+      const json = JSON.stringify(
+        selectedRecords.map((r) => r.flattened),
+        null,
+        2
+      );
       navigator.clipboard.writeText(json);
     }, [rows, selectedRows]);
 
@@ -1759,7 +1611,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const isLoadingMore = loadingState === DataLoadingState.loadingMore;
 
     return (
-      <div ref={wrapperRef} css={[styles.wrapper, isFullScreen && styles.fullScreen]} style={densityVars} data-test-subj="tanstackGridWrapper">
+      <div
+        ref={wrapperRef}
+        css={[styles.wrapper, isFullScreen && styles.fullScreen]}
+        style={densityVars}
+        data-test-subj="tanstackGridWrapper"
+      >
         {/* Find in table bar */}
         {isFindOpen && (
           <FindInTableBar
@@ -1782,16 +1639,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               <EuiText size="xs">
                 {rows.length.toLocaleString()} rows
                 {isSummaryMode ? ' · Summary' : ` · ${effectiveColumns.length} columns`}
-                {isGroupedMode ? ' · Grouped' : ''}
               </EuiText>
             </EuiFlexItem>
-            {isGroupedMode && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="primary">
-                  Grouped by: {statsByInfo!.byFields.join(', ')}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
             {externalAdditionalControls && (
               <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
             )}
@@ -1802,7 +1651,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 R{focusedCell.row + 1}:C{focusedCell.col + 1}
               </EuiBadge>
             )}
-            <EuiToolTip content="Find in table">
+            <EuiToolTip content="Find in table" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="search"
                 aria-label="Find in table"
@@ -1812,8 +1661,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               />
             </EuiToolTip>
             <EuiPopover
+              aria-label="Grid density"
               button={
-                <EuiToolTip content="Grid density">
+                <EuiToolTip content="Grid density" disableScreenReaderOutput>
                   <EuiButtonIcon
                     iconType={densityCfg.icon}
                     aria-label="Grid density"
@@ -1843,11 +1693,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 data-test-subj="dataGridDensityButtonGroup"
               />
               <EuiSpacer size="s" />
-              <EuiFormRow
-                label="Max header cell lines"
-                display="columnCompressed"
-                fullWidth
-              >
+              <EuiFormRow label="Max header cell lines" display="columnCompressed" fullWidth>
                 <EuiFieldNumber
                   compressed
                   min={1}
@@ -1861,11 +1707,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   data-test-subj="headerMaxLinesInput"
                 />
               </EuiFormRow>
-              <EuiFormRow
-                label="Body cell lines"
-                display="columnCompressed"
-                fullWidth
-              >
+              <EuiFormRow label="Body cell lines" display="columnCompressed" fullWidth>
                 <EuiFieldNumber
                   compressed
                   min={1}
@@ -1880,7 +1722,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 />
               </EuiFormRow>
             </EuiPopover>
-            <EuiToolTip content={isFullScreen ? 'Exit full screen' : 'Full screen'}>
+            <EuiToolTip
+              content={isFullScreen ? 'Exit full screen' : 'Full screen'}
+              disableScreenReaderOutput
+            >
               <EuiButtonIcon
                 iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
                 aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
@@ -1930,160 +1775,164 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               aria-rowcount={tableRows.length + 1}
               aria-colcount={totalColCount}
               tabIndex={0}
-              onKeyDown={!isGroupedMode ? handleGridKeyDown : undefined}
+              onKeyDown={handleGridKeyDown}
             >
               {/* Header */}
-              {!isGroupedMode &&
-                headerGroupsRaw.map((headerGroup) => (
-                  <div
-                    key={headerGroup.id}
-                    css={styles.headerRow}
-                    role="row"
-                    aria-rowindex={1}
-                    style={{ width: totalWidth }}
-                  >
-                    {headerGroup.headers.map((header) => {
-                      const isControl = header.column.columnDef.meta?.isControl;
-                      const isSelect = header.column.columnDef.meta?.isSelect;
-                      const isSummary = header.column.columnDef.meta?.isSummary;
-                      const canSort = header.column.getCanSort();
-                      const sortDir = header.column.getIsSorted();
-                      const colId = header.column.id;
-                      const isDraggable =
-                        !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
-                      const isDragging = dragState.dragging === colId;
-                      const isDragOver = dragState.over === colId && dragState.dragging !== colId;
+              {headerGroupsRaw.map((headerGroup) => (
+                <div
+                  key={headerGroup.id}
+                  css={styles.headerRow}
+                  role="row"
+                  aria-rowindex={1}
+                  style={{ width: totalWidth }}
+                >
+                  {headerGroup.headers.map((header) => {
+                    const isControl = header.column.columnDef.meta?.isControl;
+                    const isSelect = header.column.columnDef.meta?.isSelect;
+                    const isSummary = header.column.columnDef.meta?.isSummary;
+                    const canSort = header.column.getCanSort();
+                    const sortDir = header.column.getIsSorted();
+                    const colId = header.column.id;
+                    const isDraggable =
+                      !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
+                    const isDragging = dragState.dragging === colId;
+                    const isDragOver = dragState.over === colId && dragState.dragging !== colId;
 
-                      if (isSelect) {
-                        return (
-                          <div
-                            key={header.id}
-                            css={styles.selectHeaderCell}
-                            style={{ width: header.getSize() }}
-                            role="columnheader"
-                          >
-                            <EuiCheckbox
-                              id="select-all"
-                              checked={allSelected}
-                              indeterminate={someSelected}
-                              onChange={toggleSelectAll}
-                              aria-label="Select all rows"
-                              compressed
-                            />
-                          </div>
-                        );
-                      }
-
+                    if (isSelect) {
                       return (
                         <div
                           key={header.id}
-                          css={[
-                            isControl ? styles.controlHeaderCell : styles.headerCell,
-                            canSort && styles.headerCellSortable,
-                            isDraggable && styles.headerCellDraggable,
-                            isDragging && styles.headerCellDragging,
-                            isDragOver && styles.headerCellDragOver,
-                          ]}
-                          style={{
-                            width: isSummary ? undefined : header.getSize(),
-                            flex: isSummary ? '1 1 0' : undefined,
-                          }}
+                          css={styles.selectHeaderCell}
+                          style={{ width: header.getSize() }}
                           role="columnheader"
-                          onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                          draggable={isDraggable}
-                          onDragStart={
-                            isDraggable
-                              ? () => handleDragStart(colId)
-                              : undefined
-                          }
-                          onDragOver={
-                            isDraggable
-                              ? (e) => {
-                                  e.preventDefault();
-                                  handleDragOver(colId);
-                                }
-                              : undefined
-                          }
-                          onDrop={isDraggable ? handleDragEnd : undefined}
-                          onDragEnd={handleDragEnd}
-                          onContextMenu={
-                            !isControl && !isSelect && !isSummary
-                              ? (e: React.MouseEvent) => handleHeaderContextMenu(e, colId)
-                              : undefined
-                          }
                         >
-                          {!isControl && (
-                            <>
-                              {showColumnTokens && !isSummary && (() => {
+                          <EuiCheckbox
+                            id="select-all"
+                            checked={allSelected}
+                            indeterminate={someSelected}
+                            onChange={toggleSelectAll}
+                            aria-label="Select all rows"
+                            compressed
+                          />
+                        </div>
+                      );
+                    }
+
+                    const sortHandler = canSort
+                      ? header.column.getToggleSortingHandler()
+                      : undefined;
+
+                    return (
+                      <div
+                        key={header.id}
+                        css={[
+                          isControl ? styles.controlHeaderCell : styles.headerCell,
+                          canSort && styles.headerCellSortable,
+                          isDraggable && styles.headerCellDraggable,
+                          isDragging && styles.headerCellDragging,
+                          isDragOver && styles.headerCellDragOver,
+                        ]}
+                        style={{
+                          width: isSummary ? undefined : header.getSize(),
+                          flex: isSummary ? '1 1 0' : undefined,
+                        }}
+                        role="columnheader"
+                        tabIndex={canSort ? 0 : undefined}
+                        onClick={sortHandler}
+                        onKeyDown={
+                          sortHandler
+                            ? (e) => {
+                                if (e.key === keys.ENTER || e.key === keys.SPACE) {
+                                  e.preventDefault();
+                                  sortHandler(e);
+                                }
+                              }
+                            : undefined
+                        }
+                        draggable={isDraggable}
+                        onDragStart={isDraggable ? () => handleDragStart(colId) : undefined}
+                        onDragOver={
+                          isDraggable
+                            ? (e) => {
+                                e.preventDefault();
+                                handleDragOver(colId);
+                              }
+                            : undefined
+                        }
+                        onDrop={isDraggable ? handleDragEnd : undefined}
+                        onDragEnd={handleDragEnd}
+                        onContextMenu={
+                          !isControl && !isSelect && !isSummary
+                            ? (e: React.MouseEvent) => handleHeaderContextMenu(e, colId)
+                            : undefined
+                        }
+                      >
+                        {!isControl && (
+                          <>
+                            {showColumnTokens &&
+                              !isSummary &&
+                              (() => {
                                 const fieldName = header.column.columnDef.meta?.fieldName;
                                 if (!fieldName) return null;
                                 if (columnsMeta) {
-                                  const iconType = getTextBasedColumnIconType(columnsMeta[fieldName]);
+                                  const iconType = getTextBasedColumnIconType(
+                                    columnsMeta[fieldName]
+                                  );
                                   if (iconType && iconType !== 'unknown') {
-                                    return <FieldIcon type={iconType} css={{ marginRight: 4, flexShrink: 0 }} />;
+                                    return (
+                                      <FieldIcon
+                                        type={iconType}
+                                        css={{ marginRight: 4, flexShrink: 0 }}
+                                      />
+                                    );
                                   }
                                 } else {
                                   const dvField = dataView.getFieldByName(fieldName);
                                   if (dvField) {
-                                    return <FieldIcon {...getFieldIconProps(dvField)} css={{ marginRight: 4, flexShrink: 0 }} />;
+                                    return (
+                                      <FieldIcon
+                                        {...getFieldIconProps(dvField)}
+                                        css={{ marginRight: 4, flexShrink: 0 }}
+                                      />
+                                    );
                                   }
                                 }
                                 return null;
                               })()}
-                              <span css={styles.headerCellText}>
-                                {flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
+                            <span css={styles.headerCellText}>
+                              {flexRender(header.column.columnDef.header, header.getContext())}
+                            </span>
+                            {sortDir && (
+                              <span css={styles.sortIndicator}>
+                                <EuiIcon
+                                  type={sortDir === 'asc' ? 'sortUp' : 'sortDown'}
+                                  size="s"
+                                  aria-hidden={true}
+                                />
                               </span>
-                              {sortDir && (
-                                <span css={styles.sortIndicator}>
-                                  <EuiIcon
-                                    type={sortDir === 'asc' ? 'sortUp' : 'sortDown'}
-                                    size="s"
-                                  />
-                                </span>
-                              )}
-                            </>
-                          )}
-                          {header.column.getCanResize() && !isControl && !isSummary && (
-                            <div
-                              css={[
-                                styles.resizeHandle,
-                                header.column.getIsResizing() && styles.resizeHandleActive,
-                              ]}
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
-                              onClick={stopPropagation}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-
-              {/* Grouped mode header */}
-              {isGroupedMode && (
-                <div css={styles.headerRow} role="row" style={{ width: totalWidth }}>
-                  <div
-                    css={styles.controlHeaderCell}
-                    style={{ width: CONTROL_COL_WIDTH }}
-                    role="columnheader"
-                  />
-                  <div css={styles.headerCell} style={{ flex: '1 1 0' }} role="columnheader">
-                    <span css={styles.headerCellText}>
-                      Groups ({statsByInfo!.byFields.join(', ')})
-                    </span>
-                  </div>
+                            )}
+                          </>
+                        )}
+                        {header.column.getCanResize() && !isControl && !isSummary && (
+                          <div
+                            css={[
+                              styles.resizeHandle,
+                              header.column.getIsResizing() && styles.resizeHandleActive,
+                            ]}
+                            onMouseDown={header.getResizeHandler()}
+                            onTouchStart={header.getResizeHandler()}
+                            onClick={stopPropagation}
+                            onKeyDown={stopPropagation}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              ))}
 
               {/* Virtual body */}
-              <div
-                css={styles.virtualOuter}
-                style={{ height: rowVirtualizer.getTotalSize() }}
-              >
+              <div css={styles.virtualOuter} style={{ height: rowVirtualizer.getTotalSize() }}>
                 <div
                   css={styles.virtualInner}
                   style={{
@@ -2094,23 +1943,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   {virtualItems.map((virtualRow) => {
                     const row = tableRows[virtualRow.index];
                     const record = row.original;
-
-                    if (isGroupedMode) {
-                      return (
-                      <GroupedVirtualRow
-                        key={row.id}
-                        row={row}
-                        virtualRow={virtualRow}
-                        isGroupExpanded={groupExpandedSet.has(row.id)}
-                        onToggleGroup={toggleGroupExpand}
-                        byFields={statsByInfo!.byFields}
-                        aggregateColumns={aggregateColumns}
-                        styles={styles}
-                        totalWidth={totalWidth}
-                        groupRowHeight={densityCfg.rowHeight}
-                      />
-                      );
-                    }
 
                     const isExpanded = currentExpandedDoc?.id === record.id;
                     const isSelected = selectedRows.has(record.id);
@@ -2146,20 +1978,19 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 </div>
               )}
               {isLoadingMore && (
-                <EuiProgress size="xs" color="accent" position="absolute" css={{ bottom: 0, left: 0, right: 0, top: 'auto' }} />
+                <EuiProgress
+                  size="xs"
+                  color="accent"
+                  position="absolute"
+                  css={{ bottom: 0, left: 0, right: 0, top: 'auto' }}
+                />
               )}
             </div>
           )}
 
-          {!isGroupedMode && canRenderDocumentView && currentExpandedDoc && (
+          {canRenderDocumentView && currentExpandedDoc && (
             <span className="dscTable__flyout">
-              {renderDocumentView!(
-                currentExpandedDoc,
-                rows,
-                columns,
-                setExpandedDoc!,
-                columnsMeta
-              )}
+              {renderDocumentView!(currentExpandedDoc, rows, columns, setExpandedDoc!, columnsMeta)}
             </span>
           )}
         </div>
@@ -2182,6 +2013,15 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             <div
               css={{ position: 'fixed', inset: 0, zIndex: 9998 }}
               onClick={closeHeaderMenu}
+              onKeyDown={(e) => {
+                if (e.key === keys.ENTER || e.key === keys.SPACE || e.key === keys.ESCAPE) {
+                  e.preventDefault();
+                  closeHeaderMenu();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="Close menu"
             />
             <div
               css={{
@@ -2191,7 +2031,10 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                 zIndex: 9999,
                 backgroundColor: euiTheme.colors.backgroundBasePlain,
                 borderRadius: euiTheme.border.radius.medium,
-                boxShadow: euiTheme.levels.menu === 1000 ? '0 1px 5px rgba(0,0,0,.1), 0 3px 15px rgba(0,0,0,.1)' : undefined,
+                boxShadow:
+                  euiTheme.levels.menu === 1000
+                    ? '0 1px 5px rgba(0,0,0,.1), 0 3px 15px rgba(0,0,0,.1)'
+                    : undefined,
                 border: euiTheme.border.thin,
                 padding: `${euiTheme.size.xs} 0`,
                 minWidth: 200,
@@ -2218,7 +2061,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                   }}
                   onClick={item.onClick}
                 >
-                  <EuiIcon type={item.icon} size="s" />
+                  <EuiIcon type={item.icon} size="s" aria-hidden={true} />
                   {item.name}
                 </button>
               ))}

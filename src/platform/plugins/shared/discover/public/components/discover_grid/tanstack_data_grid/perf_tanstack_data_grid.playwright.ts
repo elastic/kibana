@@ -29,10 +29,8 @@ const KIBANA_PASS = process.env.KIBANA_PASS ?? 'changeme';
 
 // ES|QL queries that activate the TanStackGrid variant
 // ROW-based queries are time-independent and always produce results
-const ESQL_QUERY =
-  'ROW a=1,b="hello",c=3.14 | EVAL d=a+1 // TanStackGrid';
-const ESQL_MULTI_ROW_QUERY =
-  'FROM kibana_sample_data_logs | LIMIT 500 // TanStackGrid';
+const ESQL_QUERY = 'ROW a=1,b="hello",c=3.14 | EVAL d=a+1 // TanStackGrid';
+const ESQL_MULTI_ROW_QUERY = 'FROM kibana_sample_data_logs | LIMIT 500 // TanStackGrid';
 const ESQL_STATS_QUERY =
   'FROM kibana_sample_data_logs | STATS count=COUNT(*) BY geo.dest | LIMIT 50 // TanStackGrid';
 
@@ -97,7 +95,10 @@ const login = async (page: Page) => {
 
 const navigateToDiscover = async (page: Page) => {
   if (!page.url().includes('/app/discover')) {
-    await page.goto(`${KIBANA_URL}/app/discover`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    await page.goto(`${KIBANA_URL}/app/discover`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60_000,
+    });
   }
 
   // Wait for the Discover heading to appear (robust across versions)
@@ -124,7 +125,12 @@ const switchToEsqlMode = async (page: Page) => {
   const langToggle = page
     .locator('[data-test-subj="discover-dataView-switch-link"]')
     .or(page.getByText('Try ES|QL'));
-  if (await langToggle.first().isVisible({ timeout: 5_000 }).catch(() => false)) {
+  if (
+    await langToggle
+      .first()
+      .isVisible({ timeout: 5_000 })
+      .catch(() => false)
+  ) {
     await langToggle.first().click();
     await page.waitForTimeout(2000);
   }
@@ -132,7 +138,10 @@ const switchToEsqlMode = async (page: Page) => {
 
 const setWideTimeRange = async (page: Page) => {
   // Click the date picker button to open the popover
-  const dateBtn = page.locator('button').filter({ hasText: /Last \d+/ }).first();
+  const dateBtn = page
+    .locator('button')
+    .filter({ hasText: /Last \d+/ })
+    .first();
   if (await dateBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await dateBtn.click();
     await page.waitForTimeout(500);
@@ -395,91 +404,6 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     expect(await rows.count()).toBeGreaterThanOrEqual(2); // header + at least 1 data row
   });
 
-  test('STATS/BY activates grouped mode', async ({ page }) => {
-    test.setTimeout(120_000);
-
-    await setupDiscover(page);
-
-    const statsQuery =
-      'ROW dest="US",val=10 | STATS count=COUNT(*) BY dest // TanStackGrid';
-    await submitEsqlQuery(page, statsQuery);
-
-    const tanstackBadge = page.getByText('TanStack Grid');
-    await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
-
-    // Verify "Grouped by" badge shows BY field
-    const groupedByBadge = page.getByText('Grouped by: dest');
-    await expect(groupedByBadge).toBeVisible({ timeout: 10_000 });
-
-    // Verify toolbar shows "Grouped" in the status text
-    const toolbarText = page.locator('text=/Grouped/');
-    await expect(toolbarText.first()).toBeVisible({ timeout: 5_000 });
-
-    // Verify grouped header shows "Groups (dest)"
-    const groupHeader = page.locator('[role="columnheader"]', { hasText: 'Groups (dest)' });
-    await expect(groupHeader).toBeVisible({ timeout: 5_000 });
-  });
-
-  test('grouped mode: expand/collapse inline sub-panel with Marvel characters', async ({ page }) => {
-    test.setTimeout(120_000);
-
-    await setupDiscover(page);
-
-    const statsQuery =
-      'ROW dest="US",val=10 | STATS count=COUNT(*) BY dest // TanStackGrid';
-    await submitEsqlQuery(page, statsQuery);
-
-    const tanstackBadge = page.getByText('TanStack Grid');
-    await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
-
-    // Verify grouped mode is active via badge
-    await expect(page.getByText('Grouped by: dest')).toBeVisible({ timeout: 10_000 });
-
-    // Click on the first group row header to expand
-    const groupRowHeader = page.locator('[data-test-subj="groupRowHeader"]').first();
-    await expect(groupRowHeader).toBeVisible({ timeout: 10_000 });
-    await groupRowHeader.click();
-    await page.waitForTimeout(500);
-
-    // Verify the sub-panel appears with Marvel character data
-    const subPanel = page.locator('[data-test-subj="groupSubPanel"]').first();
-    await expect(subPanel).toBeVisible({ timeout: 5_000 });
-
-    // Verify sub-panel contains a table with Marvel character fields
-    const subTableHeaders = subPanel.locator('th');
-    const headerTexts: string[] = [];
-    for (let i = 0; i < (await subTableHeaders.count()); i++) {
-      const text = await subTableHeaders.nth(i).textContent();
-      if (text?.trim()) headerTexts.push(text.trim());
-    }
-    console.log('Sub-panel headers:', headerTexts);
-    expect(headerTexts).toContain('name');
-    expect(headerTexts).toContain('team');
-    expect(headerTexts).toContain('power');
-
-    // Verify at least one Marvel character name is visible
-    const marvelNames = ['Spider-Man', 'Iron Man', 'Wolverine', 'Storm', 'Captain America',
-      'Black Widow', 'Thor', 'Hulk', 'Cyclops', 'Jean Grey', 'Deadpool',
-      'Black Panther', 'Doctor Strange', 'Scarlet Witch', 'Gambit', 'Rogue',
-      'Vision', 'Hawkeye', 'Ant-Man', 'Wasp'];
-    let foundMarvelChar = false;
-    for (const charName of marvelNames) {
-      if (await subPanel.getByText(charName).isVisible().catch(() => false)) {
-        foundMarvelChar = true;
-        console.log(`Found Marvel character: ${charName}`);
-        break;
-      }
-    }
-    expect(foundMarvelChar).toBe(true);
-
-    // Click the group row header again to collapse
-    await groupRowHeader.click();
-    await page.waitForTimeout(500);
-
-    // Verify sub-panel is no longer visible
-    await expect(subPanel).not.toBeVisible({ timeout: 5_000 });
-  });
-
   test('large dataset: multiplied rows perf', async ({ page }) => {
     test.setTimeout(180_000);
 
@@ -489,8 +413,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await cdp.send('Performance.enable');
 
     // ROW with 100x multiplier + TanStackGrid trigger
-    const bigQuery =
-      'ROW a=1,b="test",c=42 // 100x // TanStackGrid';
+    const bigQuery = 'ROW a=1,b="test",c=42 // 100x // TanStackGrid';
     await submitEsqlQuery(page, bigQuery);
 
     const tanstackBadge = page.getByText('TanStack Grid');
@@ -606,10 +529,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
 
     // Submit query that produces individual columns
-    await submitEsqlQuery(
-      page,
-      'ROW a=1,b="test",c=42,d="val",e="extra" // 10x // TanStackGrid'
-    );
+    await submitEsqlQuery(page, 'ROW a=1,b="test",c=42,d="val",e="extra" // 10x // TanStackGrid');
 
     const tanstackBadge = page.getByText('TanStack Grid');
     await expect(tanstackBadge).toBeVisible({ timeout: 60_000 });
@@ -858,7 +778,9 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     expect(afterHighlights).toBe(0);
   });
 
-  test('cell content expansion: click to open popover, close with X or Escape', async ({ page }) => {
+  test('cell content expansion: click to open popover, close with X or Escape', async ({
+    page,
+  }) => {
     test.setTimeout(90_000);
     await setupDiscover(page);
 
@@ -927,8 +849,7 @@ test.describe('TanStack Data Grid – performance & functional', () => {
     await setupDiscover(page);
 
     // Submit a query that produces no results
-    const noResultsQuery =
-      'FROM nonexistent_index_xyz_12345 | LIMIT 1 // TanStackGrid';
+    const noResultsQuery = 'FROM nonexistent_index_xyz_12345 | LIMIT 1 // TanStackGrid';
     await submitEsqlQuery(page, noResultsQuery);
 
     // Wait for query to complete

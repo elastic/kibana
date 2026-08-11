@@ -15,7 +15,7 @@ import { isEqualState } from './state_comparators';
 export type TabPersistableState = Pick<
   TabState,
   'appState' | 'globalState' | 'attributes' | 'profileState'
-> & { comment?: string };
+>;
 
 export const createTabPersistableStateObservable = ({
   tabId,
@@ -33,7 +33,6 @@ export const createTabPersistableStateObservable = ({
       appState: tabState.appState,
       globalState: tabState.globalState,
       attributes: tabState.attributes,
-      comment: tabState.uiState.comment,
       profileState: tabState.profileState,
     };
   };
@@ -45,7 +44,6 @@ export const createTabPersistableStateObservable = ({
         isEqualState(a.appState, b.appState) &&
         isEqualState(a.globalState, b.globalState) &&
         isEqual(a.attributes, b.attributes) &&
-        a.comment === b.comment &&
         isEqual(a.profileState, b.profileState)
     ),
     skip(1)

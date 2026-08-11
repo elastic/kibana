@@ -226,109 +226,6 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     zIndex: 3,
   }),
 
-  // -- Grouped mode --
-  groupRow: css({
-    display: 'flex',
-    borderBottom: euiTheme.border.thin,
-    boxSizing: 'border-box',
-    cursor: 'pointer',
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    '&:hover': {
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-    },
-  }),
-
-  groupRowExpanded: css({
-    backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
-    borderBottom: 'none',
-    '&:hover': {
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
-    },
-  }),
-
-  groupChevronCell: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: CONTROL_COL_WIDTH,
-    flexShrink: 0,
-    borderRight: euiTheme.border.thin,
-    transition: 'transform 150ms ease',
-  }),
-
-  groupChevronRotated: css({
-    '& svg': {
-      transform: 'rotate(90deg)',
-    },
-  }),
-
-  groupLabel: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: euiTheme.size.s,
-    padding: '0 var(--tsg-cell-padding-h, 8px)',
-    fontWeight: euiTheme.font.weight.semiBold,
-    fontSize: 'var(--tsg-font-size, 14px)',
-    flex: 1,
-    overflow: 'hidden',
-  }),
-
-  groupLabelField: css({
-    color: euiTheme.colors.textSubdued,
-    fontWeight: euiTheme.font.weight.regular,
-  }),
-
-  groupCount: css({
-    marginLeft: 'auto',
-    paddingRight: euiTheme.size.s,
-    color: euiTheme.colors.textSubdued,
-    fontSize: euiTheme.size.m,
-    flexShrink: 0,
-  }),
-
-  groupSubPanel: css({
-    borderBottom: `2px solid ${euiTheme.colors.borderBaseFormsControl}`,
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
-    overflow: 'hidden',
-  }),
-
-  subTable: css({
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: euiTheme.size.m,
-  }),
-
-  subTableHeader: css({
-    position: 'sticky',
-    top: 0,
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    '& th': {
-      padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-      fontWeight: euiTheme.font.weight.semiBold,
-      textAlign: 'left',
-      borderBottom: euiTheme.border.thin,
-      whiteSpace: 'nowrap',
-    },
-  }),
-
-  subTableRow: css({
-    '&:hover': {
-      backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-    },
-    '& td': {
-      padding: `${euiTheme.size.xs} ${euiTheme.size.s}`,
-      borderBottom: euiTheme.border.thin,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: 250,
-    },
-  }),
-
-  subTableBadge: css({
-    marginLeft: euiTheme.size.xs,
-  }),
-
   // -- Expandable cell (click to expand) --
   expandableCell: css({
     cursor: 'pointer',
@@ -355,9 +252,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     transition: 'opacity 100ms ease',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     borderRadius: euiTheme.border.radius.small,
-    boxShadow: euiTheme.levels.menu !== undefined
-      ? `0 1px 4px ${euiTheme.colors.shadow}`
-      : `0 1px 3px rgba(0,0,0,.15)`,
+    boxShadow:
+      euiTheme.levels.menu !== undefined
+        ? `0 1px 4px ${euiTheme.colors.shadow}`
+        : `0 1px 3px rgba(0,0,0,.15)`,
     padding: '1px 2px',
     zIndex: 1,
   }),

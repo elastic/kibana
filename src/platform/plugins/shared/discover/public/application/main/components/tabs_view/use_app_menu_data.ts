@@ -12,13 +12,7 @@ import type { UnifiedTabsProps } from '@kbn/unified-tabs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  internalStateActions,
-  useInternalStateDispatch,
-  useInternalStateSelector,
-  useCurrentTabAction,
-  selectAllTabs,
-} from '../../state_management/redux';
+import { useInternalStateSelector, selectAllTabs } from '../../state_management/redux';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
@@ -33,12 +27,10 @@ interface UseAppMenuDataResult {
 }
 
 export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAppMenuDataResult => {
-  const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
     useCurrentTabMenuActions({ currentDataView });
-  const setCommentUiState = useCurrentTabAction(internalStateActions.setCommentUiState);
 
   const getTopTabMenuItems = useCallback<NonNullable<UnifiedTabsProps['getTopTabMenuItems']>>(
     (item) => {
@@ -70,66 +62,36 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     (item) => {
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
-      const items: Array<{
-        'data-test-subj': string;
-        name: string;
-        label: string;
-        onClick: () => void;
-      }> = [];
 
-      if (isCurrentTab && canSwitchLanguageMode) {
-        if (isDataViewMode) {
-          items.push({
+      if (!isCurrentTab || !canSwitchLanguageMode) {
+        return [];
+      }
+
+      if (isDataViewMode) {
+        return [
+          {
             'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
             name: 'switchToESQL',
             label: i18n.translate('discover.tabsView.tabMenu.switchToESQLTitle', {
               defaultMessage: 'Switch to ES|QL',
             }),
             onClick: switchLanguageMode,
-          });
-        } else {
-          items.push({
-            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
-            name: 'switchToClassic',
-            label: i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
-              defaultMessage: 'Switch to classic',
-            }),
-            onClick: switchLanguageMode,
-          });
-        }
-      }
-
-      if (isCurrentTab && tab) {
-        const hasComment = typeof tab.uiState.comment === 'string';
-        items.push({
-          'data-test-subj': hasComment
-            ? 'unifiedTabs_tabMenuItem_removeComment'
-            : 'unifiedTabs_tabMenuItem_addComment',
-          name: hasComment ? 'removeComment' : 'addComment',
-          label: hasComment
-            ? i18n.translate('discover.tabs.removeCommentMenuItem', {
-                defaultMessage: 'Remove comment',
-              })
-            : i18n.translate('discover.tabs.addCommentMenuItem', {
-                defaultMessage: 'Add comment',
-              }),
-          onClick: () => {
-            dispatch(setCommentUiState({ comment: hasComment ? undefined : '' }));
           },
-        });
+        ];
       }
 
-      return items;
+      return [
+        {
+          'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+          name: 'switchToClassic',
+          label: i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
+            defaultMessage: 'Switch to classic',
+          }),
+          onClick: switchLanguageMode,
+        },
+      ];
     },
-    [
-      allTabs,
-      canSwitchLanguageMode,
-      currentTabId,
-      dispatch,
-      isDataViewMode,
-      setCommentUiState,
-      switchLanguageMode,
-    ]
+    [allTabs, canSwitchLanguageMode, currentTabId, isDataViewMode, switchLanguageMode]
   );
 
   const topNavMenuItems = useTopNavMenuItems();

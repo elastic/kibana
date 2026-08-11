@@ -49,7 +49,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import useLatest from 'react-use/lib/useLatest';
-import { isOfAggregateQueryType, type AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
@@ -547,13 +547,6 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
-  const handleOpenInNewTab = useCallback(
-    (params: { appState?: { query?: AggregateQuery } }) => {
-      dispatch(internalStateActions.openInNewTab({ appState: params.appState }));
-    },
-    [dispatch]
-  );
-
   const flyoutColumnsMeta = useMemo(() => {
     if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
       return columnsMeta;
@@ -638,8 +631,6 @@ function DiscoverDocumentsComponent({
             externalCustomRenderers={cellRenderers}
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
-            onUpdateESQLQuery={onUpdateESQLQuery}
-            onOpenInNewTab={handleOpenInNewTab}
             query={query}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
