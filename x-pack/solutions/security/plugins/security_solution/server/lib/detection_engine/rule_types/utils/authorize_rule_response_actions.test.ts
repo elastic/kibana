@@ -280,6 +280,37 @@ describe('createSecurityRuleParamsAuthorizer', () => {
       expect(error.message).toContain('exceptions_list');
     });
 
+    it('throws a 403 Boom error when the note is unset and the user lacks investigation-guide-edit', async () => {
+      // Unsetting (omitting `note` on a PUT so it becomes undefined) is a privileged
+      // edit too, not just setting or replacing it.
+      getRulesAuthz.mockResolvedValue({
+        ...allowAllRulesAuthz,
+        canEditInvestigationGuides: false,
+      });
+
+      const error = await buildAuthorizer()
+        .authorize(paramsWith({ note: undefined } as Partial<RuleParams>), {
+          request,
+          previousParams: paramsWith({ note: 'investigate me' } as Partial<RuleParams>),
+        })
+        .catch((e) => e);
+
+      expect(Boom.isBoom(error)).toBe(true);
+      expect(error.output.statusCode).toBe(403);
+      expect(error.message).toContain('note');
+    });
+
+    it('resolves when the note is unset and the user has investigation-guide-edit', async () => {
+      getRulesAuthz.mockResolvedValue(allowAllRulesAuthz);
+
+      await expect(
+        buildAuthorizer().authorize(paramsWith({ note: undefined } as Partial<RuleParams>), {
+          request,
+          previousParams: paramsWith({ note: 'investigate me' } as Partial<RuleParams>),
+        })
+      ).resolves.toBeUndefined();
+    });
+
     it('does not require exceptions-edit when the exception lists are unchanged', async () => {
       getRulesAuthz.mockResolvedValue({
         ...allowAllRulesAuthz,

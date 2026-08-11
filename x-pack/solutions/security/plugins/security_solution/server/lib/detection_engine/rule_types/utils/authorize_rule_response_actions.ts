@@ -9,9 +9,11 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RuleTypeParamsAuthorizer } from '@kbn/alerting-plugin/server';
-import { validFields } from '@kbn/alerting-plugin/common/constants';
 import { transformAlertToRuleResponseAction } from '../../../../../common/detection_engine/transform_actions';
-import type { DetectionRulesAuthz } from '../../../../../common/detection_engine/rule_management/authz';
+import {
+  READ_AUTH_PARAM_FIELDS,
+  type DetectionRulesAuthz,
+} from '../../../../../common/detection_engine/rule_management/authz';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { CheckOsqueryResponseActionAuthz } from '../../../../endpoint/services/actions/utils/rule_response_actions_validators';
 import { validateRuleResponseActions } from '../../../../endpoint/services';
@@ -33,26 +35,6 @@ interface CreateSecurityRuleParamsAuthorizerDeps {
     request: KibanaRequest
   ) => CheckOsqueryResponseActionAuthz;
 }
-
-/**
- * Read-auth-editable params gated behind a sub-feature privilege, each mapped to
- * the capability that authorizes it and the field name used in the error message.
- * `responseActions` is not included here; it is authorized separately by
- * {@link authorizeResponseActions}.
- */
-const READ_AUTH_PARAM_FIELDS = [
-  {
-    param: validFields.EXCEPTIONS_LIST,
-    capability: 'canEditExceptions',
-    field: 'exceptions_list',
-  },
-  {
-    param: validFields.INVESTIGATION_FIELDS,
-    capability: 'canEditCustomHighlightedFields',
-    field: 'investigation_fields',
-  },
-  { param: validFields.NOTE, capability: 'canEditInvestigationGuides', field: 'note' },
-] as const;
 
 /**
  * Builds the alerting params authorizer for security rule types. Authorizes
@@ -149,9 +131,10 @@ const authorizeReadAuthParamFields = async <TParams extends RuleParams>({
   const changedFields = READ_AUTH_PARAM_FIELDS.filter(({ param }) => {
     const nextValue = params[param];
     const previousValue = previousParams[param];
-    // A change to a provided (non-null) value is privileged, whether adding,
-    // replacing, or clearing to `[]`. Unchanged or absent values are not.
-    return nextValue != null && !isEqual(nextValue, previousValue);
+    // Any change to the field's value is privileged: adding, replacing, and
+    // removing (unsetting, e.g. clearing an exception list or omitting a note on a
+    // PUT) all require the privilege. Only genuinely unchanged fields are skipped.
+    return !isEqual(nextValue, previousValue);
   });
 
   // Nothing privileged changed, so skip resolving capabilities entirely.
