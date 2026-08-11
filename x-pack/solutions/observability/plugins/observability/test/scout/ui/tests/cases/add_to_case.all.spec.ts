@@ -35,6 +35,7 @@ test.describe(
       const { alertsTablePage } = pageObjects;
       await alertsTablePage.waitForTableToLoad();
       await alertsTablePage.openActionsMenuForRow(0);
+      await alertsTablePage.openAddToCasePanel();
       await expect(alertsTablePage.addToExistingCaseAction).toBeVisible();
       await expect(alertsTablePage.addToNewCaseAction).toBeVisible();
     });
