@@ -118,6 +118,30 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
     }
   );
 
+  apiTest(
+    'search: should escape Elasticsearch-only regexp operators in the prefix',
+    async ({ apiClient, apiServices }) => {
+      // `<` opens an interval and `"` a quoted literal in the Lucene regexp the
+      // terms aggregation `include` uses. Unescaped, either one makes the pattern
+      // unparsable and the aggregation fails.
+      await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'policy-operators', tags: ['<lt-real', '"quote-real'] })
+      );
+
+      for (const [search, expectedTag] of [
+        ['<', '<lt-real'],
+        ['"', '"quote-real'],
+      ]) {
+        const response = await apiClient.get(tagsUrl({ search }), {
+          headers: readerHeaders,
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.tags).toContain(expectedTag);
+      }
+    }
+  );
+
   apiTest('cap: should return at most 20 tags', async ({ apiClient, apiServices }) => {
     // Each action policy may have at most 20 tags, so create 21 policies each with a distinct tag
     // to produce 21 unique tags in total — enough to exercise the aggregation cap.
