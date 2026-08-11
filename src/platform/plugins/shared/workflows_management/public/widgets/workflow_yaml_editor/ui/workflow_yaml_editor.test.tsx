@@ -27,7 +27,6 @@ import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail
 import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils/mock_workflow_factories';
-import type { YamlEditorProps } from '../../../shared/ui';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests.

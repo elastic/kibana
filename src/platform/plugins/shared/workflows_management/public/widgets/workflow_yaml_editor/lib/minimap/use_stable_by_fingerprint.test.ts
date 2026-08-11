@@ -13,8 +13,7 @@ import { useStableByFingerprint } from './use_stable_by_fingerprint';
 describe('useStableByFingerprint', () => {
   it('returns the same reference across renders when the fingerprint is unchanged', () => {
     const { result, rerender } = renderHook(
-      ({ value, fp }: { value: { id: string }; fp: string }) =>
-        useStableByFingerprint(value, fp),
+      ({ value, fp }: { value: { id: string }; fp: string }) => useStableByFingerprint(value, fp),
       { initialProps: { value: { id: 'a' }, fp: 'a' } }
     );
 
@@ -25,8 +24,7 @@ describe('useStableByFingerprint', () => {
 
   it('returns the new reference once the fingerprint changes', () => {
     const { result, rerender } = renderHook(
-      ({ value, fp }: { value: { id: string }; fp: string }) =>
-        useStableByFingerprint(value, fp),
+      ({ value, fp }: { value: { id: string }; fp: string }) => useStableByFingerprint(value, fp),
       { initialProps: { value: { id: 'a' }, fp: 'a' } }
     );
 
@@ -45,8 +43,7 @@ describe('useStableByFingerprint', () => {
     const valueA = { id: 'a' };
 
     const { rerender } = renderHook(
-      ({ value, fp }: { value: { id: string }; fp: string }) =>
-        useStableByFingerprint(value, fp),
+      ({ value, fp }: { value: { id: string }; fp: string }) => useStableByFingerprint(value, fp),
       { initialProps: { value: valueA, fp: computeFingerprint(valueA) } }
     );
 

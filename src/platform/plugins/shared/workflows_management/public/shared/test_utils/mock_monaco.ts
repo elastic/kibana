@@ -80,9 +80,7 @@ export const createMockMonacoEditor = (
     onDidScrollChange: jest.fn(() => ({ dispose: jest.fn() })),
     onDidLayoutChange: jest.fn(() => ({ dispose: jest.fn() })),
     getPosition: jest.fn(() => ({ lineNumber: 1, column: 1 })),
-    getVisibleRanges: jest.fn(() => [
-      { startLineNumber: 1, endLineNumber: lineCount },
-    ]),
+    getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: lineCount }]),
     revealLineInCenter: jest.fn(),
     setPosition: jest.fn(),
     focus: jest.fn(),

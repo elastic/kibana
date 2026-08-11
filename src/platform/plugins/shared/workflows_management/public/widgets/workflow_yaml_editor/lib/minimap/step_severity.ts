@@ -90,7 +90,8 @@ export const buildStepSeverityMap = (
       if (line <= ownEnd) {
         if (!ownWorst || (sev === 'error' && ownWorst === 'warning')) ownWorst = sev;
       } else {
-        if (!inheritedWorst || (sev === 'error' && inheritedWorst === 'warning')) inheritedWorst = sev;
+        if (!inheritedWorst || (sev === 'error' && inheritedWorst === 'warning'))
+          inheritedWorst = sev;
       }
     }
 

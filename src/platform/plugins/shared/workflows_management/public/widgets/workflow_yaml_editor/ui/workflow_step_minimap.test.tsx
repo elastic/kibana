@@ -9,11 +9,11 @@
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { createRef } from 'react';
+import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockMonacoEditor } from '../../../shared/test_utils/mock_monaco';
-import { WorkflowStepMinimap } from './workflow_step_minimap';
 
 // ── YAML fixtures ─────────────────────────────────────────────────────────────
 // Two separate steps so there is always a visible range to show/hide the indicator.

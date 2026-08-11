@@ -11,10 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  EDITOR_SCROLLBAR_WIDTH_PX,
-  FOCUSED_STEP_DECORATION_INSET_PX,
-} from './constants';
+import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
