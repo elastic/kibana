@@ -133,8 +133,8 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                 </EuiFlexGroup>
 
                 {/* Properties return with `raw` memory dump */}
-                {(agentActionResult?.content.total_memory_size ||
-                  agentActionResult?.content.total_bytes_captured) && (
+                {('total_memory_size' in agentActionResult?.content ||
+                  'total_bytes_captured' in agentActionResult?.content) && (
                   <EuiFlexGroup gutterSize="m" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <KeyValueDisplay
