@@ -33,7 +33,7 @@ import { getBaseConnectorType } from '@kbn/workflows-ui';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
-import { flattenOptions, getActionOptions, usesInverseIconColor } from '../lib/get_action_options';
+import { flattenOptions, getActionOptions, getIconGlyphColor } from '../lib/get_action_options';
 import { STEPS_PREFIX, useDisplayOptions } from '../lib/use_display_options';
 import {
   type ActionOptionData,
@@ -618,11 +618,9 @@ export function ActionsMenu({
     const action =
       itemData?.kind === 'action' ? itemData.action : (rawOption as unknown as ActionOptionData);
     const shouldUseGroupStyle = isActionGroup(action) || isActionConnectorGroup(action);
-    const glyphColor = usesInverseIconColor(action.iconVariant)
-      ? euiTheme.colors.textInverse
-      : 'iconColor' in action
-      ? action.iconColor
-      : undefined;
+    const glyphColor =
+      getIconGlyphColor(action.iconVariant, euiTheme) ??
+      ('iconColor' in action ? action.iconColor : undefined);
 
     return (
       <div
@@ -1414,41 +1412,42 @@ const componentStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  // Platform (AI, Data transformation, Cases) — Vis2 fill, no border
+  // AI — Backgrounds/Base/Primary + Borders/Base/Primary (Text/Primary on glyph)
   iconOuterPlatform: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis2,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBasePrimary,
+      border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
     }),
-  // Triggers — Vis4 fill, no border
+  // Triggers — Backgrounds/Base/Accent + Borders/Base/Accent (Text/Accent on glyph)
   iconOuterTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis4,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseAccent,
+      border: `1px solid ${euiTheme.colors.borderBaseAccent}`,
     }),
-  // App logos (ES, Kibana) + External — plain white + prominent border
+  // ES / Kibana / External — match External systems & apps
+  // Backgrounds/Base/Subdued + Borders/Base/Plain (Text/Paragraph on glyph)
   iconOuterAppLogo: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  // Commands — subdued background + prominent border
+  // Commands — same as External systems & apps
   iconOuterCommand: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
-  // Data transformation — Vis8 fill, no border
+  // Data transformation — Backgrounds/Base/Warning + Borders/Base/Warning
   iconOuterDataTransformation: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis8,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      border: `1px solid ${euiTheme.colors.borderBaseWarning}`,
     }),
-  // Flow control — Vis0 fill, no border
+  // Flow control — Backgrounds/Base/Accent secondary + Borders/Base/Accent secondary
   iconOuterFlowControl: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis0,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
+      border: `1px solid ${euiTheme.colors.borderBaseAccentSecondary}`,
     }),
   groupIconInner: css({
     display: 'flex',

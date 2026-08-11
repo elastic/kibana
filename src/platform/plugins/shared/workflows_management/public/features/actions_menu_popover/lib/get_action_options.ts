@@ -79,7 +79,7 @@ function getBuiltInNestedFlowControlStepOptions(
       label: def.label,
       description: def.description,
       iconType: 'nested' as const,
-      iconColor: euiTheme.colors.vis.euiColorVis0,
+      iconColor: euiTheme.colors.textAccentSecondary,
       stability: def.stability,
     }));
 }
@@ -108,7 +108,7 @@ export function getActionOptions(
   );
   const triggersGroup: ActionOptionData = {
     iconType: 'bolt',
-    iconColor: euiTheme.colors.textInverse,
+    iconColor: euiTheme.colors.textAccent,
     id: 'triggers',
     label: i18n.translate('workflows.actionsMenu.triggers', {
       defaultMessage: 'Triggers',
@@ -182,7 +182,7 @@ export function getActionOptions(
   };
   const aiGroup: ActionOptionData = {
     iconType: 'sparkles',
-    iconColor: euiTheme.colors.textInverse,
+    iconColor: euiTheme.colors.textPrimary,
     id: 'ai',
     label: i18n.translate('workflows.actionsMenu.ai', {
       defaultMessage: 'AI',
@@ -194,7 +194,7 @@ export function getActionOptions(
   };
   const dataTransformationGroup: ActionOptionData = {
     iconType: 'database',
-    iconColor: euiTheme.colors.textInverse,
+    iconColor: euiTheme.colors.textWarning,
     id: 'data',
     label: i18n.translate('workflows.actionsMenu.dataTransformation', {
       defaultMessage: 'Data transformation',
@@ -212,13 +212,13 @@ export function getActionOptions(
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
         iconType: 'database',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textWarning,
       },
     ],
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
-    iconColor: euiTheme.colors.textInverse,
+    iconColor: euiTheme.colors.textAccentSecondary,
     id: 'flowControl',
     label: i18n.translate('workflows.actionsMenu.aggregations', {
       defaultMessage: 'Flow control',
@@ -236,7 +236,7 @@ export function getActionOptions(
           defaultMessage: 'Define condition with KQL to execute the action',
         }),
         iconType: 'branch',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'switch',
@@ -247,7 +247,7 @@ export function getActionOptions(
           defaultMessage: 'Multi-way branching based on expression value matching',
         }),
         iconType: 'productStreamsWired',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'foreach',
@@ -258,7 +258,7 @@ export function getActionOptions(
           defaultMessage: 'Iterate the action over a specified list',
         }),
         iconType: 'refresh',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'while',
@@ -269,7 +269,7 @@ export function getActionOptions(
           defaultMessage: 'Repeat steps while a condition is true',
         }),
         iconType: 'refresh',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'parallel',
@@ -280,7 +280,7 @@ export function getActionOptions(
           defaultMessage: 'Run branches concurrently and collect their results',
         }),
         iconType: ParallelIcon,
-        iconColor: euiTheme.colors.vis.euiColorVis0,
+        iconColor: euiTheme.colors.textAccentSecondary,
         stability: getBuiltInStepDefinition('parallel')?.stability,
       },
       {
@@ -292,7 +292,7 @@ export function getActionOptions(
           defaultMessage: 'Pause for a specified amount of time before continuing',
         }),
         iconType: 'clock',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
       },
       {
         id: 'waitForInput',
@@ -303,7 +303,7 @@ export function getActionOptions(
           defaultMessage: 'Pause execution until external input is provided (human-in-the-loop)',
         }),
         iconType: 'user',
-        iconColor: euiTheme.colors.textInverse,
+        iconColor: euiTheme.colors.textAccentSecondary,
         stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
       ...getBuiltInNestedFlowControlStepOptions(euiTheme),
@@ -412,10 +412,9 @@ export function getActionOptions(
   mergeNestedStepGroups(stepGroups);
 
   triggersGroup.iconVariant = 'trigger';
-  // App logos use neutral containers so brand colors stay readable
+  // ES / Kibana / Cases share External systems & apps tile colors (subdued + plain)
   elasticSearchGroup.iconVariant = 'neutral';
   kibanaGroup.iconVariant = 'neutral';
-  // Cases uses a briefcase glyph — same neutral tile as Kibana / ES / External
   kibanaCasesGroup.iconVariant = 'neutral';
   aiGroup.iconVariant = 'platform';
   dataTransformationGroup.iconVariant = 'dataTransformation';
@@ -470,14 +469,34 @@ function sortOptionsByLabel(options: ActionOptionData[]): void {
   }
 }
 
-/** Filled tile variants (pink / blue / teal / warning) always use inverse glyphs for contrast. */
-export function usesInverseIconColor(variant: IconVariant | undefined): boolean {
-  return (
-    variant === 'platform' ||
-    variant === 'trigger' ||
-    variant === 'flowControl' ||
-    variant === 'dataTransformation'
-  );
+/**
+ * Glyph color for menu icon tiles (Figma semantic text tokens).
+ * Soft pastel tile fills pair with matching Text/* colors — not inverse/white.
+ */
+export function getIconGlyphColor(
+  variant: IconVariant | undefined,
+  euiTheme: UseEuiTheme['euiTheme']
+): string | undefined {
+  switch (variant) {
+    case 'trigger':
+      return euiTheme.colors.textAccent;
+    case 'platform':
+      return euiTheme.colors.textPrimary;
+    case 'dataTransformation':
+      return euiTheme.colors.textWarning;
+    case 'flowControl':
+      return euiTheme.colors.textAccentSecondary;
+    case 'external':
+    case 'neutral':
+      return euiTheme.colors.textParagraph;
+    default:
+      return undefined;
+  }
+}
+
+/** @deprecated Use {@link getIconGlyphColor}; filled tiles no longer use inverse glyphs. */
+export function usesInverseIconColor(_variant: IconVariant | undefined): boolean {
+  return false;
 }
 
 function assignIconVariants(
@@ -490,8 +509,9 @@ function assignIconVariants(
       opt.iconVariant = parentVariant;
     }
     const childVariant = opt.iconVariant ?? parentVariant;
-    if (usesInverseIconColor(childVariant)) {
-      opt.iconColor = euiTheme.colors.textInverse;
+    const glyphColor = getIconGlyphColor(childVariant, euiTheme);
+    if (glyphColor) {
+      opt.iconColor = glyphColor;
     }
     if ('options' in opt && childVariant) {
       assignIconVariants(

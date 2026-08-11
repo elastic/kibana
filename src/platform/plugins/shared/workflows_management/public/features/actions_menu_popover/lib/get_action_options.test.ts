@@ -46,6 +46,10 @@ describe('getActionOptions', () => {
       },
       textParagraph: '#textColor',
       textInverse: '#inverse',
+      textAccent: '#accent',
+      textPrimary: '#primary',
+      textWarning: '#warning',
+      textAccentSecondary: '#accentSecondary',
     },
   } as unknown as EuiThemeComputed<{}>;
 
@@ -287,7 +291,7 @@ describe('getActionOptions', () => {
         expect(casesNested.options).toHaveLength(1);
         expect(casesNested.options[0].id).toBe('cases.createCase');
         expect(casesNested.options[0].iconVariant).toBe('neutral');
-        expect(casesNested.options[0].iconColor).toBeUndefined();
+        expect(casesNested.options[0].iconColor).toBe(mockEuiTheme.colors.textParagraph);
       }
     }
   });

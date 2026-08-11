@@ -57,6 +57,7 @@ const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn(() => mockOptions),
   usesInverseIconColor: jest.fn(() => false),
+  getIconGlyphColor: jest.fn(() => undefined),
   flattenOptions: jest.fn((options: ActionOptionData[]) => {
     const flat: ActionOptionData[] = [];
     const flatten = (items: ActionOptionData[]) => {

@@ -32,7 +32,7 @@ import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_workflow_json_schema';
-import { usesInverseIconColor } from '../lib/get_action_options';
+import { getIconGlyphColor } from '../lib/get_action_options';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
 import type { ActionOptionData, JumpToStepEntry } from '../types';
 import {
@@ -548,11 +548,9 @@ function PreviewStepRow({
   const { euiTheme } = useEuiTheme();
   const isGroup = isActionGroup(step) || isActionConnectorGroup(step);
   const iconType = 'iconType' in step ? step.iconType : undefined;
-  const glyphColor = usesInverseIconColor(step.iconVariant)
-    ? euiTheme.colors.textInverse
-    : 'iconColor' in step
-    ? step.iconColor
-    : undefined;
+  const glyphColor =
+    getIconGlyphColor(step.iconVariant, euiTheme) ??
+    ('iconColor' in step ? step.iconColor : undefined);
   // Menu may override connector glyphs (e.g. AI → sparkles)
   const preferMenuIcon =
     iconType === 'sparkles' || iconType === 'database' || iconType === 'branch';
@@ -935,28 +933,28 @@ const previewStepRowStyles = {
   }),
   iconContainerPlatform: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis2,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBasePrimary,
+      border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
     }),
   iconContainerTrigger: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis4,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseAccent,
+      border: `1px solid ${euiTheme.colors.borderBaseAccent}`,
     }),
   iconContainerAppLogo: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   iconContainerFlowControl: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis0,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
+      border: `1px solid ${euiTheme.colors.borderBaseAccentSecondary}`,
     }),
   iconContainerDataTransformation: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis8,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      border: `1px solid ${euiTheme.colors.borderBaseWarning}`,
     }),
   info: css({
     display: 'flex',
