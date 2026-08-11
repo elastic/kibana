@@ -47,6 +47,7 @@ export {
   deleteDataStreamIfExists,
   deleteIndexTemplateIfExists,
   deletePipelineIfExists,
+  disableFailureStoreIfExists,
   getBackingIndexNames,
   getDataStreamSettingsOfEarliestIndex,
   getWriteBackingIndexName,
