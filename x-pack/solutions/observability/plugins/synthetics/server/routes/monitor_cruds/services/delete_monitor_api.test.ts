@@ -73,7 +73,7 @@ describe('DeleteMonitorAPI', () => {
   });
 
   describe('per-space authorization', () => {
-    it('asserts update privileges in all monitor spaces before deleting', async () => {
+    it('asserts delete privileges in all monitor spaces before deleting', async () => {
       const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue({
@@ -86,7 +86,8 @@ describe('DeleteMonitorAPI', () => {
       expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
         routeContext,
         ['default', 'other-space'],
-        'synthetics-monitor'
+        'synthetics-monitor',
+        'bulk_delete'
       );
       expect(mocks.deleteMonitors).toHaveBeenCalledTimes(1);
     });
@@ -105,7 +106,8 @@ describe('DeleteMonitorAPI', () => {
       expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
         routeContext,
         ['default', 'shared-via-so-api'],
-        'synthetics-monitor'
+        'synthetics-monitor',
+        'bulk_delete'
       );
     });
 
@@ -120,7 +122,8 @@ describe('DeleteMonitorAPI', () => {
       expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
         routeContext,
         ['*'],
-        'synthetics-monitor'
+        'synthetics-monitor',
+        'bulk_delete'
       );
       expect(mocks.deleteMonitors).toHaveBeenCalledTimes(1);
     });
@@ -163,7 +166,7 @@ describe('DeleteMonitorAPI', () => {
       expect(mocks.bulkDelete).not.toHaveBeenCalled();
     });
 
-    it('skips the space check for monitors without shared spaces', async () => {
+    it('delegates the empty-space early return to the authorization helper', async () => {
       const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue({ normalizedMonitor: mockMonitor('mon-1') });
@@ -171,7 +174,12 @@ describe('DeleteMonitorAPI', () => {
       const api = new DeleteMonitorAPI(routeContext);
       await api.execute({ monitorIds: ['mon-1'] });
 
-      expect(assertCanUpdateMonitorInAllSpaces).not.toHaveBeenCalled();
+      expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledWith(
+        routeContext,
+        [],
+        'synthetics-monitor',
+        'bulk_delete'
+      );
       expect(mocks.deleteMonitors).toHaveBeenCalledTimes(1);
     });
 

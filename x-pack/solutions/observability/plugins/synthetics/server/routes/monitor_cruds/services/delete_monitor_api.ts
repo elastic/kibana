@@ -106,18 +106,17 @@ export class DeleteMonitorAPI {
       // denormalized `spaces` attribute, which can drift (e.g. when a monitor
       // is shared via the generic saved-objects share API).
       const monitorSpaces = monitor.namespaces ?? [];
-      if (monitorSpaces.length > 0) {
-        const spaceKey = `${monitor.type}::${[...new Set(monitorSpaces)].sort().join(',')}`;
-        if (!checkedSpaceKeys.has(spaceKey)) {
-          checkedSpaceKeys.add(spaceKey);
-          const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
-            this.routeContext,
-            monitorSpaces,
-            monitor.type
-          );
-          if (spaceAuthError) {
-            return { res: spaceAuthError };
-          }
+      const spaceKey = `${monitor.type}::${[...new Set(monitorSpaces)].sort().join(',')}`;
+      if (!checkedSpaceKeys.has(spaceKey)) {
+        checkedSpaceKeys.add(spaceKey);
+        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+          this.routeContext,
+          monitorSpaces,
+          monitor.type,
+          'bulk_delete'
+        );
+        if (spaceAuthError) {
+          return { res: spaceAuthError };
         }
       }
     }
