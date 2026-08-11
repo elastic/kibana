@@ -89,6 +89,9 @@ describe(
       // The datepicker is only active when a query exists.
       addDiscoverEsqlQuery(esqlQuery);
 
+      setStartDate('now-15m', DISCOVER_CONTAINER);
+      updateDates(DISCOVER_CONTAINER);
+
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
       updateDates(DISCOVER_CONTAINER);
 
