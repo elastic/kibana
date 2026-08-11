@@ -27,11 +27,16 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
 } from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
-import * as connectorsModule from './connectors';
-import * as workflowsModule from './workflows';
-import * as agentBuilderModule from './agent_builder';
 import { CasesClientFactory } from './client/factory';
 import { createCasesClientMock } from './client/mocks';
+
+jest.mock('./connectors', () => ({ registerConnectorTypes: jest.fn() }));
+jest.mock('./workflows', () => ({ registerCaseWorkflowSteps: jest.fn() }));
+jest.mock('./agent_builder', () => ({ registerCasesAgentBuilderTools: jest.fn() }));
+
+const { registerConnectorTypes } = jest.requireMock('./connectors');
+const { registerCaseWorkflowSteps } = jest.requireMock('./workflows');
+const { registerCasesAgentBuilderTools } = jest.requireMock('./agent_builder');
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
@@ -322,25 +327,13 @@ describe('Cases Plugin', () => {
   });
 
   describe('client source propagation', () => {
-    afterEach(() => {
-      jest.restoreAllMocks();
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
     const request = httpServerMock.createKibanaRequest();
 
     it('passes the correct source for each client path', async () => {
-      const connectorRegistration = jest
-        .spyOn(connectorsModule, 'registerConnectorTypes')
-        .mockImplementation(() => {});
-
-      const workflowRegistration = jest
-        .spyOn(workflowsModule, 'registerCaseWorkflowSteps')
-        .mockImplementation(() => {});
-
-      const agentBuilderRegistration = jest
-        .spyOn(agentBuilderModule, 'registerCasesAgentBuilderTools')
-        .mockImplementation(() => {});
-
       const createClient = jest
         .spyOn(CasesClientFactory.prototype, 'create')
         .mockResolvedValue(createCasesClientMock());
@@ -353,9 +346,9 @@ describe('Cases Plugin', () => {
       const startContract = plugin.start(coreStart, pluginsStart);
 
       const clients = [
-        ['connector', connectorRegistration.mock.calls[0][0].getCasesClient],
-        ['workflow', workflowRegistration.mock.calls[0][1]],
-        ['agent_builder', agentBuilderRegistration.mock.calls[0][1]],
+        ['connector', registerConnectorTypes.mock.calls[0][0].getCasesClient],
+        ['workflow', registerCaseWorkflowSteps.mock.calls[0][1]],
+        ['agent_builder', registerCasesAgentBuilderTools.mock.calls[0][1]],
         ['plugin_contract', startContract.getCasesClientWithRequest],
       ] as const;
 
