@@ -73,6 +73,19 @@ describe('useCustomContentHtml', () => {
     });
   });
 
+  describe('services unavailable (flag off)', () => {
+    it('clears isLoading when services are not initialized and no stored template', async () => {
+      (hasServices as jest.Mock).mockReturnValue(false);
+
+      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(streamGenerate).not.toHaveBeenCalled();
+      expect(result.current.html).toBe('');
+      expect(result.current.error).toBeUndefined();
+    });
+  });
+
   describe('fast path — static panel with stored template', () => {
     it('renders the stored HTML immediately with no fetch calls', async () => {
       const { result } = renderHook(() =>

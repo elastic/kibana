@@ -111,7 +111,10 @@ export function useCustomContentHtml({
       return;
     }
 
-    if (!hasServices()) return;
+    if (!hasServices()) {
+      setIsLoading(false);
+      return;
+    }
 
     const controller = new AbortController();
     let acc = '';
