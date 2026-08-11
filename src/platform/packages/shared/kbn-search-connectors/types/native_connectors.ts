@@ -1825,12 +1825,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: BASIC_AUTH,
           },
           {
-            label: translate(
-              'searchConnectors.nativeConnectors.jira.options.personalAccessToken',
-              {
-                defaultMessage: 'Personal access token',
-              }
-            ),
+            label: translate('searchConnectors.nativeConnectors.jira.options.personalAccessToken', {
+              defaultMessage: 'Personal access token',
+            }),
             value: PERSONAL_ACCESS_TOKEN,
           },
         ],
