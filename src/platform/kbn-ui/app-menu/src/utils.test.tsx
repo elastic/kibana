@@ -456,9 +456,11 @@ describe('utils', () => {
       };
       const result = mapAppMenuItemToPanelItem(item);
 
-      expect(result['data-ebt-action']).toBe('viewSettings');
-      expect(result['data-ebt-element']).toBe('appMenu');
-      expect(result['data-ebt-detail']).toBe('settings');
+      expect(result).toMatchObject({
+        'data-ebt-action': 'viewSettings',
+        'data-ebt-element': 'appMenu',
+        'data-ebt-detail': 'settings',
+      });
     });
 
     it('should always set data-ebt-element to appMenu and omit detail when absent', () => {
@@ -468,17 +470,19 @@ describe('utils', () => {
       };
       const result = mapAppMenuItemToPanelItem(item);
 
-      expect(result['data-ebt-action']).toBe('viewSettings');
-      expect(result['data-ebt-element']).toBe('appMenu');
-      expect(result['data-ebt-detail']).toBeUndefined();
+      expect(result).toMatchObject({
+        'data-ebt-action': 'viewSettings',
+        'data-ebt-element': 'appMenu',
+      });
+      expect(result).not.toHaveProperty('data-ebt-detail');
     });
 
     it('should omit data-ebt attributes when ebt is not provided', () => {
       const result = mapAppMenuItemToPanelItem(baseItem);
 
-      expect(result['data-ebt-action']).toBeUndefined();
-      expect(result['data-ebt-element']).toBeUndefined();
-      expect(result['data-ebt-detail']).toBeUndefined();
+      expect(result).not.toHaveProperty('data-ebt-action');
+      expect(result).not.toHaveProperty('data-ebt-element');
+      expect(result).not.toHaveProperty('data-ebt-detail');
     });
 
     it('should include tooltip content and title', () => {
