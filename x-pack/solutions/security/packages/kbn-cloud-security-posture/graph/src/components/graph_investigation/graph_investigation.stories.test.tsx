@@ -95,6 +95,9 @@ jest.mock('../constants', () => ({
 // By default we toggle the search bar visibility
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn().mockReturnValue([true, jest.fn()]));
 
+// Costly full-component renders; headroom for Jest's 5s default under CI CPU contention.
+jest.setTimeout(15_000);
+
 const QUERY_PARAM_IDX = 0;
 const FILTERS_PARAM_IDX = 1;
 
