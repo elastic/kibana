@@ -255,7 +255,15 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async createRuntimeField(fieldName: string, script: string) {
+  async createRuntimeField({
+    fieldName,
+    script,
+    popularity,
+  }: {
+    fieldName: string;
+    script: string;
+    popularity?: number;
+  }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
     const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
@@ -267,6 +275,11 @@ export class DiscoverApp {
       .getByRole('textbox', { name: /Editor content/ })
       .waitFor({ state: 'visible' });
     await this.codeEditor.setCodeEditorValue(script);
+
+    if (typeof popularity === 'number') {
+      await this.setPopularity(popularity);
+    }
+
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
@@ -282,6 +295,13 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
+  }
+
+  async setPopularity(popularity: number) {
+    await this.page.testSubj.click('toggleAdvancedSetting');
+    const row = this.page.testSubj.locator('popularityRow');
+    await row.locator('[data-test-subj="toggle"]').click();
+    await this.page.testSubj.locator('editorFieldCount').fill(String(popularity));
   }
 
   async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {

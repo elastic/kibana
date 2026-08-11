@@ -53,8 +53,9 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
 
   spaceTest(
     'tracks selected and popular fields across refresh',
-    async ({ browserAuth, page, pageObjects }) => {
+    async ({ apiServices, browserAuth, discoverScoutSpace, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
+      const runtimeFieldName = '_popularity_runtimefield';
 
       // Selecting columns calls popularizeField, which requires indexPatterns.save and
       // persists counts on the data view. Security editor lacks that capability.
@@ -62,6 +63,8 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await discover.goto({ queryMode: 'classic' });
       await discover.waitUntilTabIsLoaded();
 
+      // Each column toggle popularizes the field (indexPatterns.save) and retriggers
+      // search. Wait between toggles so saves don't 409 and column state can't race.
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('@message');
@@ -109,8 +112,13 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemRemove('extension');
       await discover.waitUntilSearchingHasFinished();
+      // FTR set popularity: 30 so the new runtime field ranks above selected fields.
       // createRuntimeField already waits for the tab/search to settle.
-      await discover.createRuntimeField('test', `emit('test')`);
+      await discover.createRuntimeField({
+        fieldName: runtimeFieldName,
+        script: `emit('test')`,
+        popularity: 30,
+      });
 
       try {
         expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).toStrictEqual([
@@ -120,7 +128,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         const popularAfterRuntimeField = await unifiedFieldList.getSidebarSectionFieldNames(
           'popular'
         );
-        expect(popularAfterRuntimeField[0]).toBe('test');
+        expect(popularAfterRuntimeField[0]).toBe(runtimeFieldName);
         expect(popularAfterRuntimeField).toContain('@message');
         expect(popularAfterRuntimeField).toContain('extension');
         expect(popularAfterRuntimeField).toContain('bytes');
@@ -133,12 +141,23 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         await discover.waitUntilSearchingHasFinished();
 
         const popularAfterClientip = await unifiedFieldList.getSidebarSectionFieldNames('popular');
-        expect(popularAfterClientip[0]).toBe('test');
+        expect(popularAfterClientip[0]).toBe(runtimeFieldName);
         expect(popularAfterClientip).toContain('clientip');
         await unifiedFieldList.expectSidebarSectionFieldCount('popular', 5);
       } finally {
-        await discover.deleteRuntimeField('test');
-        await unifiedFieldList.clearFieldSearch();
+        // UI delete is flaky here: the field sits in Popular and the delete control is
+        // often intercepted by the data grid. Clear it via the data views API instead.
+        const dataViewId = discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW);
+        const { data: dataView } = await apiServices.dataViews.get(
+          dataViewId,
+          discoverScoutSpace.id
+        );
+        const runtimeFieldMap = { ...(dataView.runtimeFieldMap ?? {}) };
+        delete runtimeFieldMap[runtimeFieldName];
+        await apiServices.dataViews.update(dataViewId, {
+          runtimeFieldMap,
+          spaceId: discoverScoutSpace.id,
+        });
       }
     }
   );
