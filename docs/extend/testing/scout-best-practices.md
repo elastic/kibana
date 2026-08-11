@@ -146,7 +146,11 @@ await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1'
 :::::
 
 :::::{tip}
-The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites. For per-test data, use `afterEach`/`afterAll`. For suite-wide state (feature flags, global settings, shared archives), use a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
+The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites.
+
+- **Per-test data**: clean up in `afterEach`/`afterAll`.
+- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
+
 :::::
 
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
