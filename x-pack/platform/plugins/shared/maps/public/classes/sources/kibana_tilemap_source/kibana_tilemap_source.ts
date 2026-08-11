@@ -12,6 +12,7 @@ import { AbstractSource } from '../source';
 import { getKibanaTileMap } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
+import { createKibanaTilemapSourceDescriptor } from '../../../../common/descriptor_factories';
 import { extractAttributions } from './extract_attributions';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 
@@ -23,9 +24,7 @@ export class KibanaTilemapSource extends AbstractSource implements IRasterSource
   static type = SOURCE_TYPES.KIBANA_TILEMAP;
 
   static createDescriptor() {
-    return {
-      type: KibanaTilemapSource.type,
-    };
+    return createKibanaTilemapSourceDescriptor();
   }
 
   async getImmutableProperties() {

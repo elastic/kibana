@@ -15,6 +15,7 @@ import type {
   DataRequestMeta,
   Timeslice,
 } from '../../../../common/descriptor_types';
+import { createXyzTmsSourceDescriptor } from '../../../../common/descriptor_factories';
 import type { ImmutableSourceProperty } from '../source';
 import { AbstractSource } from '../source';
 import type { XYZTMSSourceConfig } from './xyz_tms_editor';
@@ -32,10 +33,7 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
   readonly _descriptor: XYZTMSSourceDescriptor;
 
   static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
-    return {
-      type: SOURCE_TYPES.EMS_XYZ,
-      urlTemplate,
-    };
+    return createXyzTmsSourceDescriptor(urlTemplate);
   }
 
   constructor(sourceDescriptor: XYZTMSSourceDescriptor) {

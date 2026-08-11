@@ -8,14 +8,13 @@
 import type { IStyle } from '../style';
 import type { StyleDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { createTileStyleDescriptor } from '../../../../common/descriptor_factories';
 
 export class TileStyle implements IStyle {
   readonly _descriptor: StyleDescriptor;
 
   constructor() {
-    this._descriptor = {
-      type: LAYER_STYLE_TYPE.TILE,
-    };
+    this._descriptor = createTileStyleDescriptor();
   }
 
   getType() {

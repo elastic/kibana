@@ -11,7 +11,12 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
 import type { EMSVectorTileLayerDescriptor, RasterLayerDescriptor } from '../descriptor_types';
-import { AUTOSELECT_EMS_LOCALE, LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../constants';
+import {
+  createEmsTmsSourceDescriptor,
+  createEmsVectorTileLayerDescriptor,
+  createRasterTileLayerDescriptor,
+  createWmsSourceDescriptor,
+} from '../descriptor_factories';
 
 export function createEmsVectorTileBasemapLayerDescriptor({
   id,
@@ -24,23 +29,13 @@ export function createEmsVectorTileBasemapLayerDescriptor({
   lightModeDefault?: string;
   isAutoSelect?: boolean;
 }): EMSVectorTileLayerDescriptor {
-  return {
+  return createEmsVectorTileLayerDescriptor({
     id,
-    type: LAYER_TYPE.EMS_VECTOR_TILE,
-    alpha: 1,
-    visible: true,
-    minZoom: 0,
-    maxZoom: 24,
-    includeInFitToBounds: true,
-    __dataRequests: [],
-    locale: AUTOSELECT_EMS_LOCALE,
-    sourceDescriptor: {
-      type: SOURCE_TYPES.EMS_TMS,
+    sourceDescriptor: createEmsTmsSourceDescriptor({
       isAutoSelect,
       lightModeDefault,
-    },
-    style: { type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE, color: '' },
-  };
+    }),
+  });
 }
 
 function createWmsOverlayLayerDescriptor({
@@ -54,22 +49,10 @@ function createWmsOverlayLayerDescriptor({
   layers: string;
   styles: string;
 }): RasterLayerDescriptor {
-  return {
+  return createRasterTileLayerDescriptor({
     id,
-    type: LAYER_TYPE.RASTER_TILE,
-    alpha: 1,
-    visible: true,
-    minZoom: 0,
-    maxZoom: 24,
-    includeInFitToBounds: true,
-    __dataRequests: [],
-    sourceDescriptor: {
-      type: SOURCE_TYPES.WMS,
-      serviceUrl,
-      layers,
-      styles,
-    },
-  };
+    sourceDescriptor: createWmsSourceDescriptor({ serviceUrl, layers, styles }),
+  });
 }
 
 export function createLegacyCompatibleBasemapLayersFromLegacyParams(

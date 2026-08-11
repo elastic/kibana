@@ -12,6 +12,7 @@ import type {
   StyleDescriptor,
 } from '../../../../common/descriptor_types';
 import { LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { createEmsVectorTileStyleDescriptor } from '../../../../common/descriptor_factories';
 import { EMSVectorTileStyleEditor } from './components/ems_vector_tile_style_editor';
 
 export class EMSVectorTileStyle implements IStyle {
@@ -22,10 +23,7 @@ export class EMSVectorTileStyle implements IStyle {
   }
 
   static createDescriptor(color?: string): EMSVectorTileStyleDescriptor {
-    return {
-      type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE,
-      color: color ?? '',
-    };
+    return createEmsVectorTileStyleDescriptor(color ?? '');
   }
 
   getType() {

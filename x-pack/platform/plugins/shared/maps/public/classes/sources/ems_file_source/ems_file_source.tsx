@@ -13,13 +13,14 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import type { GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import { AbstractVectorSource } from '../vector_source';
-import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
 import type { IField } from '../../fields/field';
 import type { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
+import { createEmsFileSourceDescriptor } from '../../../../common/descriptor_factories';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
@@ -54,11 +55,7 @@ export function getSourceTitle() {
 
 export class EMSFileSource extends AbstractVectorSource implements IEmsFileSource {
   static createDescriptor({ id, tooltipProperties = [] }: Partial<EMSFileSourceDescriptor>) {
-    return {
-      type: SOURCE_TYPES.EMS_FILE,
-      id: id!,
-      tooltipProperties,
-    } as EMSFileSourceDescriptor;
+    return createEmsFileSourceDescriptor({ id: id!, tooltipProperties });
   }
 
   private readonly _tooltipFields: IField[];
