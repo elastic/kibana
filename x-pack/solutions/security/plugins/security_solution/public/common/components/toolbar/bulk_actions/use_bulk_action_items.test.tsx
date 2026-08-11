@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { MouseEvent } from 'react';
 import type { BulkActionsProps } from './use_bulk_action_items';
 import { useBulkActionItems } from './use_bulk_action_items';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -99,16 +100,16 @@ describe('useBulkActionItems', () => {
     const { result } = renderUseBulkActionItems({
       customBulkActions: [
         {
-          key: 'attach-new-case',
-          label: 'Add to new case',
+          key: 'attach-case',
+          label: 'Add to case',
           icon: 'briefcase',
           onClick,
         },
       ],
     });
 
-    const customAction = result.current.items.find(({ key }) => key === 'attach-new-case');
-    customAction?.onActionClick?.();
+    const customAction = result.current.items.find(({ key }) => key === 'attach-case');
+    customAction?.onClick?.({} as MouseEvent<HTMLHRElement>);
 
     expect(onClick).toHaveBeenCalledWith(['mockEventId']);
     expect(customAction?.icon).toBe('briefcase');

@@ -29,9 +29,7 @@ import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_c
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 
-export type BulkActionMenuItem = AlertTableContextMenuItem & {
-  onActionClick?: () => void;
-};
+export type BulkActionMenuItem = AlertTableContextMenuItem;
 
 export const ALERT_STATUS_ACTION_IDS = {
   markAsAcknowledged: 'acknowledge',
@@ -241,7 +239,7 @@ export const useBulkActionItems = ({
     const additionalItems = customBulkActions
       ? customBulkActions.reduce<BulkActionMenuItem[]>((acc, action) => {
           const isDisabled = !!(query && action.disableOnQuery);
-          const onActionClick = () => {
+          const onClick = () => {
             closePopover?.();
             action.onClick(eventIds);
           };
@@ -251,8 +249,7 @@ export const useBulkActionItems = ({
             'data-test-subj': action['data-test-subj'],
             icon: action.icon,
             toolTipContent: isDisabled ? action.disabledLabel : null,
-            onClick: onActionClick,
-            onActionClick,
+            onClick,
             name: action.label,
           });
           return acc;
