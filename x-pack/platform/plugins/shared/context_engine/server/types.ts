@@ -15,7 +15,7 @@ export interface ContextEnginePluginSetup {
 }
 
 export interface ContextEnginePluginStart {
-  /** The global signals store, for the signal-generation task and consumers (#15591+). */
+  /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
 }
 

@@ -5,45 +5,36 @@
  * 2.0.
  */
 
-/**
- * Prefix for the per-space Context Engine signals user indices — one index per
- * Kibana space, mirroring the per-space Agent Builder traces convention
- * (`traces-agent_builder.otel-<space>`). The `kibana_system` reserved-role grant
- * covers `context-engine-signals-*`.
- */
+/** Prefix for the per-space Context Engine signals indices (one index per Kibana space). */
 export const SIGNAL_INDEX_PREFIX = 'context-engine-signals-';
 
-/** The signals user index for a given Kibana space. */
+/** The signals index name for a given Kibana space. */
 export const buildSignalsIndexName = (spaceId: string): string =>
   `${SIGNAL_INDEX_PREFIX}${spaceId}`;
 
-/** The set of signal types grows over time; `tool_call` is the first (Stage 1). */
+/** The set of signal types; `tool_call` is the first. */
 export type SignalType = 'tool_call';
 
-/** A classification label attached by a classifier. Used for grouping, not filtering. */
+/** A classification label attached by a classifier. */
 export interface SignalTag {
   type: string;
   sub_type?: string;
   confidence: number;
 }
 
-/**
- * Fixed common envelope shared by every signal, of every type. Signals are
- * top-level / global — there is no `ai_index_id`. `signal_id` is the ES `_id`,
- * so re-processing a source overwrites rather than duplicates.
- */
+/** Common envelope shared by every signal. `signal_id` is the ES `_id`, so re-processing overwrites rather than duplicates. */
 export interface SignalEnvelope {
   signal_id: string;
   '@timestamp': string;
   trace_ids?: string[];
   signal_type: SignalType;
-  /** Empty for a clean / unremarkable signal. */
+  /** Empty for a clean signal. */
   tags: SignalTag[];
-  /** Per-type observation; opaque at the envelope level (indexed `flattened`). */
+  /** Per-type observation; opaque at the envelope level. */
   data: Record<string, unknown>;
 }
 
-/** First concrete signal type (Stage 1); others follow the same envelope. */
+/** First concrete signal type; others follow the same envelope. */
 export interface ToolCallSignal extends SignalEnvelope {
   signal_type: 'tool_call';
   data: {

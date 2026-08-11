@@ -43,7 +43,6 @@ const makeToolCallSignal = (overrides: Partial<Signal> = {}): Signal => ({
 describe('SignalsService', () => {
   const storageClient = {
     bulk: jest.fn(),
-    search: jest.fn(),
     reconcileMappings: jest.fn(),
   } as unknown as ReturnType<typeof createSignalsStorageClient>;
 
@@ -127,45 +126,6 @@ describe('SignalsService', () => {
     it('rejects when the storage client rejects (so the producer can retry)', async () => {
       (storageClient.bulk as jest.Mock).mockRejectedValue(new Error('bulk failed'));
       await expect(service.write('default', [makeToolCallSignal()])).rejects.toThrow('bulk failed');
-    });
-  });
-
-  describe('list', () => {
-    const searchResponse = (sources: Signal[]) => ({
-      hits: { hits: sources.map((_source) => ({ _source })) },
-    });
-
-    it('searches newest-first with no query when unfiltered', async () => {
-      const signal = makeToolCallSignal();
-      (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([signal]));
-
-      const result = await service.list('default');
-
-      expect(storageClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          size: 1000,
-          track_total_hits: false,
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        })
-      );
-      expect((storageClient.search as jest.Mock).mock.calls[0][0].query).toBeUndefined();
-      expect(result).toEqual([signal]);
-    });
-
-    it('filters by signal_type', async () => {
-      (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([]));
-
-      await service.list('default', { signalType: 'tool_call', size: 50 });
-
-      const request = (storageClient.search as jest.Mock).mock.calls[0][0];
-      expect(request.size).toBe(50);
-      expect(request.query.bool.filter).toEqual([{ term: { signal_type: 'tool_call' } }]);
-    });
-
-    it('clamps size to the max', async () => {
-      (storageClient.search as jest.Mock).mockResolvedValue(searchResponse([]));
-      await service.list('default', { size: 1_000_000 });
-      expect((storageClient.search as jest.Mock).mock.calls[0][0].size).toBe(10_000);
     });
   });
 });

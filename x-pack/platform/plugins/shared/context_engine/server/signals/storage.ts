@@ -11,15 +11,13 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { SignalEnvelope } from '../../common/http_api/signals';
 import { buildSignalsIndexName } from '../../common/http_api/signals';
 
-/** Shared mapping for every per-space signals index. Exported for the mapping test. */
+/** Shared mapping for every per-space signals index. */
 export const signalsSchema = {
   properties: {
     signal_id: types.keyword({}),
     '@timestamp': types.date({}),
     trace_ids: types.keyword({}),
     signal_type: types.keyword({}),
-    // Classification labels. `nested` keeps each label's fields together;
-    // group by tag type with a `nested` terms aggregation.
     tags: types.nested({
       properties: {
         type: types.keyword({}),
@@ -27,12 +25,6 @@ export const signalsSchema = {
         confidence: types.double({}),
       },
     }),
-    // Per-type observation. `flattened` keeps every leaf term-filterable and
-    // terms-aggregatable without mapping growth as signal types are added.
-    // `ignore_above: 1024` skips indexing ANY leaf value longer than 1024 chars
-    // (it still lives in `_source`) — this keeps long free-text like `query` /
-    // `error` out of the index, but note it applies to every `data.*` leaf, so a
-    // guaranteed-filterable long field should be promoted to a typed envelope field.
     data: types.flattened({ ignore_above: 1024 }),
   },
 } satisfies StorageSchema;
