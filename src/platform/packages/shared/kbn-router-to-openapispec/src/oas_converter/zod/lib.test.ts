@@ -112,6 +112,114 @@ describe('zod', () => {
       });
     });
 
+    describe('.nullable()', () => {
+      test('collapses a nullable scalar into nullable: true', () => {
+        const result = convert(
+          z.object({ createdBy: z.string().nullable().describe('Who created it.') }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            createdBy: { type: 'string', nullable: true, description: 'Who created it.' },
+          },
+        });
+        expect(result.schema.properties!.createdBy).not.toHaveProperty('anyOf');
+      });
+
+      test('collapses .nullish() the same way', () => {
+        const result = convert(z.object({ count: z.number().nullish() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { count: { type: 'number', nullable: true } },
+        });
+      });
+
+      test('keeps the combiner and marks it nullable when several branches remain', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number(), z.boolean()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+            },
+          },
+        });
+      });
+
+      test('collapses a nullable enum', () => {
+        const result = convert(
+          z.object({ criticality: z.enum(['low', 'high']).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: { criticality: { type: 'string', enum: ['low', 'high'], nullable: true } },
+        });
+      });
+
+      test('collapses a nullable inside a nullable object', () => {
+        const result = convert(
+          z.object({
+            throttle: z.object({ interval: z.string().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            throttle: {
+              type: 'object',
+              nullable: true,
+              properties: { interval: { type: 'string', nullable: true } },
+            },
+          },
+        });
+      });
+
+      test('boxes a nullable named component in allOf so nullable is not a $ref sibling', () => {
+        const groupingMode = z.enum(['per_episode', 'per_alert']);
+        registerZodV4Component(groupingMode, 'GroupingMode');
+
+        const result = convert(z.object({ groupingMode: groupingMode.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('GroupingMode');
+        expect(result.shared.GroupingMode).not.toHaveProperty('nullable');
+        expect(result.schema.properties!.groupingMode).toEqual({
+          allOf: [{ $ref: '#/components/schemas/GroupingMode' }],
+          nullable: true,
+        });
+      });
+
+      test('boxes a nullable recursive $ref in allOf', () => {
+        const condition: z.ZodType = z.lazy(() =>
+          z.object({ field: z.string(), and: z.array(condition).optional() })
+        );
+        registerZodV4Component(condition, 'Condition');
+
+        const result = convert(z.object({ condition: condition.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('Condition');
+        expect(result.shared.Condition).not.toHaveProperty('nullable');
+        expect(result.schema.properties!.condition).toEqual({
+          allOf: [{ $ref: '#/components/schemas/Condition' }],
+          nullable: true,
+        });
+      });
+
+      test('leaves no half-converted { nullable: true } branch behind', () => {
+        const result = convert(
+          z.object({
+            a: z.string().nullable(),
+            b: z.array(z.string()).nullable(),
+            c: z.object({ d: z.number().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(JSON.stringify(result)).not.toContain('{"nullable":true}');
+      });
+    });
+
     test('convert handles DeepStrict-wrapped body schema', () => {
       const bodySchema = z.object({
         name: z.string(),
