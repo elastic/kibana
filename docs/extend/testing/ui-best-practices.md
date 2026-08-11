@@ -308,6 +308,10 @@ export class MyAppPage {
 
 If neither covers your component, `page.testSubj` locators are fine for simple ones. For a component that's genuinely hard to drive reliably, add a wrapper under `kbn-scout`'s `eui_components/` instead of solving it privately in your page object — that's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
 
+:::::{note}
+If a Component Object lacks what you need, don't subclass it or drive the component yourself — that puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
+:::::
+
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
 
 Scout supports automated accessibility (a11y) scanning via `page.checkA11y`. Add checks at high-value points in your UI tests (landing pages, modals, flyouts, wizard steps) rather than on every interaction.
