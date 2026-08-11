@@ -218,6 +218,8 @@ describe('Editor actions provider', () => {
       },
       getLineCount: () => 1,
       getLineContent: () => 'GET ',
+      getOffsetAt: () => 0,
+      getPositionAt: () => ({ lineNumber: 1, column: 1 }),
       getValueInRange: () => 'GET ',
     } as unknown as jest.Mocked<monaco.editor.ITextModel>;
     const mockPosition = { lineNumber: 1, column: 1 } as jest.Mocked<monaco.Position>;
