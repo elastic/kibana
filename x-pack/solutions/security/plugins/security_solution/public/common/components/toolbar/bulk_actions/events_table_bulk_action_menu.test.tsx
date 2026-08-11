@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EventsTableBulkActionMenu } from './events_table_bulk_action_menu';
 
 describe('EventsTableBulkActionMenu', () => {
-  it('groups new and existing case actions in a case type panel', async () => {
-    const onAddToNewCase = jest.fn();
-    const onAddToExistingCase = jest.fn();
+  it('renders the singular case action with the other bulk actions', async () => {
+    const onAddToCase = jest.fn();
 
     render(
       <EventsTableBulkActionMenu
@@ -31,16 +30,11 @@ describe('EventsTableBulkActionMenu', () => {
             icon: 'workflow',
           },
           {
-            key: 'attach-new-case',
-            name: 'Add to new case',
-            'data-test-subj': 'attach-new-case',
-            onActionClick: onAddToNewCase,
-          },
-          {
-            key: 'attach-existing-case',
-            name: 'Add to existing case',
-            'data-test-subj': 'attach-existing-case',
-            onActionClick: onAddToExistingCase,
+            key: 'attach-case',
+            name: 'Add to case',
+            'data-test-subj': 'attach-case',
+            icon: 'briefcase',
+            onClick: onAddToCase,
           },
         ]}
         panels={[]}
@@ -55,19 +49,13 @@ describe('EventsTableBulkActionMenu', () => {
         .getByTestId('run-document-workflow-action')
         .querySelector('[data-euiicon-type="workflow"]')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('add-to-case')).toBeInTheDocument();
-    expect(screen.queryByTestId('attach-new-case')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('attach-existing-case')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('attach-case').querySelector('[data-euiicon-type="briefcase"]')
+    ).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('add-to-case'));
+    await userEvent.click(screen.getByTestId('attach-case'));
 
-    expect(await screen.findByText('Case type')).toBeInTheDocument();
-    expect(screen.queryByTestId('add-to-case-submit')).not.toBeInTheDocument();
-
-    fireEvent.click(await screen.findByTestId('attach-existing-case'));
-
-    expect(onAddToExistingCase).toHaveBeenCalledTimes(1);
-    expect(onAddToNewCase).not.toHaveBeenCalled();
+    expect(onAddToCase).toHaveBeenCalledTimes(1);
   });
 
   it('leaves an individual case action in the initial panel', () => {
@@ -75,16 +63,15 @@ describe('EventsTableBulkActionMenu', () => {
       <EventsTableBulkActionMenu
         items={[
           {
-            key: 'attach-new-case',
-            name: 'Add to new case',
-            'data-test-subj': 'attach-new-case',
+            key: 'attach-case',
+            name: 'Add to case',
+            'data-test-subj': 'attach-case',
           },
         ]}
         panels={[]}
       />
     );
 
-    expect(screen.getByTestId('attach-new-case')).toBeInTheDocument();
-    expect(screen.queryByTestId('add-to-case')).not.toBeInTheDocument();
+    expect(screen.getByTestId('attach-case')).toBeInTheDocument();
   });
 });

@@ -11,7 +11,7 @@ import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types'
 import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { CustomBulkAction } from '../../../../../common/types';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { ADD_TO_CASE } from '../translations';
 import { generateEventAttachmentWithoutOwner } from '../utils';
 
 /**
@@ -49,35 +49,23 @@ export const useBulkAddEventsToCaseActions = ({
     clearSelection();
   }, [clearSelection]);
 
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
   });
 
   return useMemo(() => {
     return isCasesContextAvailable &&
-      createCaseFlyout &&
       selectCaseModal &&
-      userCasesPermissions?.create &&
+      userCasesPermissions?.createComment &&
+      (userCasesPermissions.create || userCasesPermissions.update) &&
       userCasesPermissions?.read
       ? [
           {
-            label: ADD_TO_NEW_CASE,
-            key: 'attach-new-case',
-            'data-test-subj': 'attach-new-case',
+            label: ADD_TO_CASE,
+            key: 'attach-case',
+            'data-test-subj': 'attach-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_NEW_CASE,
-            onClick: (events: TimelineItem[] = []) =>
-              createCaseFlyout.open({
-                attachments: timelineItemsToCaseEventAttachment(events),
-              }),
-          },
-          {
-            label: ADD_TO_EXISTING_CASE,
-            key: 'attach-existing-case',
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_EXISTING_CASE,
-            'data-test-subj': 'attach-existing-case',
+            disabledLabel: ADD_TO_CASE,
             onClick: (events: TimelineItem[] = []) =>
               selectCaseModal.open({
                 getAttachments: (): CaseAttachmentWithoutOwner[] =>
@@ -87,10 +75,11 @@ export const useBulkAddEventsToCaseActions = ({
         ]
       : [];
   }, [
-    createCaseFlyout,
     isCasesContextAvailable,
     selectCaseModal,
     userCasesPermissions?.create,
+    userCasesPermissions?.createComment,
     userCasesPermissions?.read,
+    userCasesPermissions?.update,
   ]);
 };
