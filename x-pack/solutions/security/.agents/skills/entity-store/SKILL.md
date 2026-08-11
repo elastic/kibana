@@ -35,7 +35,7 @@ require `securitySolution` privileges in this phase.
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
 - **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`).
 - **Single shared index** — `.entities.v2.latest.{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
-- **Legacy rename** — pre-platform installs used `.entities.v2.*.security_{namespace}`; install migrates those assets to the neutral names, then adds compatibility aliases (`.entities.v2.latest.security_{ns}`, `.entities.v2.metadata.security_{ns}`) so roles granting `security_*` keep matching. Reindex runs as an async ES task (no HTTP timeout). Migration is re-runnable on the next install (no rollback). Coordinate elasticsearch-controller / ES reserved role updates with this Kibana release.
+- **Legacy rename** — pre-platform installs used `.entities.v2.*.security_{namespace}`; install migrates latest/metadata/history to the neutral names (and drops the short-retention updates buffer), then adds compatibility aliases (`.entities.v2.latest.security_{ns}`, `.entities.v2.metadata.security_{ns}`) so roles granting `security_*` keep matching. Reindex runs as an async ES task; source delete is gated on a successful copy (no document failures). Migration is re-runnable on the next install (no rollback). Coordinate elasticsearch-controller / ES reserved role updates with this Kibana release.
 - **Auto-enabled** — installs on Security Solution navigation. `entityStore` is a required plugin dependency of `securitySolution`.
 
 ## Entity Types

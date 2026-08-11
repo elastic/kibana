@@ -58,30 +58,40 @@ export const waitForEntityStoreStatus = async (
   expectedStatus: EntityStoreStatus,
   timeoutMs: number = 60000
 ): Promise<GetEntityStoreStatusResponse> => {
-  const startTime = Date.now();
   let lastStatus: GetEntityStoreStatusResponse | undefined;
 
-  while (Date.now() - startTime < timeoutMs) {
-    try {
-      const response = await kbnClient.request<GetEntityStoreStatusResponse>({
-        method: 'GET',
-        path: ENTITY_STORE_ROUTES.public.STATUS,
-        headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
-      });
-      lastStatus = response.data;
-      if (lastStatus.status === expectedStatus) {
-        return lastStatus;
-      }
-    } catch {
-      // Status can 404 while uninstalling; keep polling until timeout.
-    }
+  await expect
+    .poll(
+      async () => {
+        try {
+          const response = await kbnClient.request<GetEntityStoreStatusResponse>({
+            method: 'GET',
+            path: ENTITY_STORE_ROUTES.public.STATUS,
+            headers: { 'elastic-api-version': API_VERSIONS.public.v1 },
+          });
+          lastStatus = response.data;
+          return lastStatus.status;
+        } catch (err) {
+          // Only tolerate 404 during uninstall; surface anything else so tests fail fast.
+          const status =
+            err && typeof err === 'object' && 'response' in err
+              ? (err as { response?: { status?: number } }).response?.status
+              : undefined;
+          if (status === 404) {
+            return undefined;
+          }
+          throw err;
+        }
+      },
+      { timeout: timeoutMs, intervals: [1000] }
+    )
+    .toBe(expectedStatus);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  if (!lastStatus) {
+    throw new Error(
+      `Expected entity store status '${expectedStatus}' but no status response was captured`
+    );
   }
 
-  throw new Error(
-    `Timeout waiting for entity store status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
-      lastStatus
-    )}`
-  );
+  return lastStatus;
 };

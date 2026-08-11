@@ -24,10 +24,52 @@ export interface ReindexOptions {
   waitForTask?: Omit<WaitForTaskOptions, 'esClient' | 'taskId' | 'signal'>;
 }
 
+export interface ReindexResult {
+  created: number;
+  updated: number;
+  versionConflicts: number;
+  total: number;
+  failures: NonNullable<ReindexResponse['failures']>;
+}
+
+const toReindexResult = (response: ReindexResponse): ReindexResult => ({
+  created: response.created ?? 0,
+  updated: response.updated ?? 0,
+  versionConflicts: response.version_conflicts ?? 0,
+  total: response.total ?? 0,
+  failures: response.failures ?? [],
+});
+
+/**
+ * Throws when a reindex completed with document-level failures or left documents
+ * unaccounted for. Callers must not delete the source until this succeeds.
+ *
+ * `conflicts: 'proceed'` can leave `versionConflicts` (and `updated` for index
+ * destinations) on retry into a partial destination — those are accounted for,
+ * not treated as data loss.
+ */
+export const assertReindexSucceeded = (
+  result: ReindexResult,
+  context: string
+): void => {
+  if (result.failures.length > 0) {
+    throw new Error(
+      `${context}: reindex completed with ${result.failures.length} document failure(s); refusing to delete source`
+    );
+  }
+
+  const accounted = result.created + result.updated + result.versionConflicts;
+  if (accounted !== result.total) {
+    throw new Error(
+      `${context}: reindex incomplete (created=${result.created}, updated=${result.updated}, versionConflicts=${result.versionConflicts}, total=${result.total}); refusing to delete source`
+    );
+  }
+};
+
 export const reindex = async (
   esClient: EsClient,
   options: ReindexOptions
-): Promise<{ created: number; total: number }> => {
+): Promise<ReindexResult> => {
   const { source, dest, signal, waitForTask } = options;
   const body: ReindexRequest = {
     source: { index: source.index, query: source.query },
@@ -48,9 +90,9 @@ export const reindex = async (
       taskId: task,
       signal,
     });
-    return { created: response.created ?? 0, total: response.total ?? 0 };
+    return toReindexResult(response);
   }
 
   const response = await esClient.reindex(body, { signal });
-  return { created: response.created ?? 0, total: response.total ?? 0 };
+  return toReindexResult(response);
 };

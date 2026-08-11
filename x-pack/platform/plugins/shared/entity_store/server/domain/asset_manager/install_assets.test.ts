@@ -12,6 +12,7 @@ import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index'
 import {
   getHistorySnapshotIndexName,
   getHistorySnapshotIndexPattern,
+  getLegacySecurityHistorySnapshotIndexPattern,
 } from './history_snapshot_index';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
@@ -26,15 +27,21 @@ const { deleteIndex, deleteDataStream } = jest.requireMock('../../infra/elastics
 describe('uninstallElasticsearchAssets', () => {
   const namespace = 'default';
   const historyPattern = getHistorySnapshotIndexPattern(namespace);
+  const legacyHistoryPattern = getLegacySecurityHistorySnapshotIndexPattern(namespace);
   const historyIndexA = getHistorySnapshotIndexName(namespace, new Date('2026-07-29T10:00:00Z'));
   const historyIndexB = getHistorySnapshotIndexName(namespace, new Date('2026-07-29T11:00:00Z'));
 
   const createEsClient = (historyIndices: string[] = [historyIndexA, historyIndexB]) => ({
     indices: {
-      resolveIndex: jest.fn().mockResolvedValue({
-        indices: historyIndices.map((name) => ({ name })),
-        aliases: [],
-        data_streams: [],
+      resolveIndex: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+        if (name === historyPattern) {
+          return {
+            indices: historyIndices.map((indexName) => ({ name: indexName })),
+            aliases: [],
+            data_streams: [],
+          };
+        }
+        return { indices: [], aliases: [], data_streams: [] };
       }),
     },
   });
@@ -70,9 +77,13 @@ describe('uninstallElasticsearchAssets', () => {
     expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
       name: historyPattern,
     });
+    expect(esClient.indices.resolveIndex).toHaveBeenCalledWith({
+      name: legacyHistoryPattern,
+    });
     // Must not pass the wildcard pattern to delete — ES rejects it when
     // action.destructive_requires_name=true.
     expect(deleteIndex).not.toHaveBeenCalledWith(expect.anything(), historyPattern);
+    expect(deleteIndex).not.toHaveBeenCalledWith(expect.anything(), legacyHistoryPattern);
     expect(deleteIndex).toHaveBeenCalledWith(expect.anything(), historyIndexA);
     expect(deleteIndex).toHaveBeenCalledWith(expect.anything(), historyIndexB);
   });

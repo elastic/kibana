@@ -25,15 +25,19 @@ import {
   getLegacySecurityLatestEntitiesIndexName,
 } from '../../../common/domain/entity_index';
 
-jest.mock('../../infra/elasticsearch', () => ({
-  createDataStream: jest.fn(),
-  createIndex: jest.fn(),
-  deleteComponentTemplate: jest.fn(),
-  deleteDataStream: jest.fn(),
-  deleteIndex: jest.fn(),
-  deleteIndexTemplate: jest.fn(),
-  reindex: jest.fn(),
-}));
+jest.mock('../../infra/elasticsearch', () => {
+  const { assertReindexSucceeded } = jest.requireActual('../../infra/elasticsearch/reindex');
+  return {
+    assertReindexSucceeded,
+    createDataStream: jest.fn(),
+    createIndex: jest.fn(),
+    deleteComponentTemplate: jest.fn(),
+    deleteDataStream: jest.fn(),
+    deleteIndex: jest.fn(),
+    deleteIndexTemplate: jest.fn(),
+    reindex: jest.fn(),
+  };
+});
 
 const mockCreateDataStream = createDataStream as jest.MockedFunction<typeof createDataStream>;
 const mockCreateIndex = createIndex as jest.MockedFunction<typeof createIndex>;
@@ -63,6 +67,7 @@ describe('migrateLegacySecurityAssets', () => {
       getDataStream: jest.fn(),
       getAlias: jest.fn(),
       updateAliases: jest.fn(),
+      resolveIndex: jest.fn(),
     },
     ingest: {
       deletePipeline: jest.fn(),
@@ -94,11 +99,18 @@ describe('migrateLegacySecurityAssets', () => {
     mockCreateDataStream.mockResolvedValue(undefined as any);
     mockDeleteIndex.mockResolvedValue(undefined as any);
     mockDeleteDataStream.mockResolvedValue(undefined as any);
-    mockReindex.mockResolvedValue({ created: 1, total: 1 });
+    mockReindex.mockResolvedValue({
+      created: 1,
+      updated: 0,
+      versionConflicts: 0,
+      total: 1,
+      failures: [],
+    });
     mockDeleteComponentTemplate.mockResolvedValue(undefined as any);
     mockDeleteIndexTemplate.mockResolvedValue(undefined as any);
     esClient.indices.updateAliases.mockResolvedValue({});
     esClient.indices.getAlias.mockRejectedValue({ meta: { statusCode: 404 } });
+    esClient.indices.resolveIndex.mockResolvedValue({ indices: [], aliases: [], data_streams: [] });
     esClient.ingest.deletePipeline.mockResolvedValue({});
   });
 
@@ -214,6 +226,52 @@ describe('migrateLegacySecurityAssets', () => {
     expect(esClient.indices.updateAliases).toHaveBeenCalledWith({
       actions: [{ add: { index: newMetadata, alias: legacyMetadata } }],
     });
+  });
+
+  it('does not delete legacy latest when reindex reports document failures', async () => {
+    const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
+    mockConcrete([legacyIndex]);
+    mockReindex.mockResolvedValue({
+      created: 0,
+      updated: 0,
+      versionConflicts: 0,
+      total: 1,
+      failures: [{ index: legacyIndex, id: 'doc-1', cause: { type: 'mapper_parsing_exception' } }],
+    });
+
+    await expect(migrateLegacySecurityAssets({ esClient, logger, namespace })).rejects.toThrow(
+      /document failure/
+    );
+    expect(mockDeleteIndex).not.toHaveBeenCalled();
+  });
+
+  it('migrates legacy history snapshot indices to neutral names', async () => {
+    const legacyHistory = `.entities.v2.history.security_${namespace}.2026-08-01-12`;
+    const newHistory = `.entities.v2.history.${namespace}.2026-08-01-12`;
+
+    mockConcrete([]);
+    esClient.indices.resolveIndex.mockResolvedValue({
+      indices: [{ name: legacyHistory }],
+      aliases: [],
+      data_streams: [],
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockCreateIndex).toHaveBeenCalledWith(
+      esClient,
+      newHistory,
+      expect.objectContaining({ throwIfExists: false })
+    );
+    expect(mockReindex).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({
+        source: { index: legacyHistory },
+        dest: { index: newHistory },
+        waitForTask: expect.objectContaining({ forever: true }),
+      })
+    );
+    expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyHistory);
   });
 
   it('deletes index templates before component templates', async () => {

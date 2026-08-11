@@ -7,6 +7,7 @@
 
 import {
   getEntityIndexPattern,
+  getLegacySecurityEntityIndexPattern,
   ENTITY_HISTORY,
   ENTITY_SCHEMA_VERSION_V2,
 } from '../../../common/domain/entity_index';
@@ -17,6 +18,17 @@ import {
  */
 const getHistorySnapshotBasePattern = (namespace: string): string =>
   getEntityIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+    dataset: ENTITY_HISTORY,
+    namespace,
+  });
+
+/**
+ * @deprecated Legacy Security-scoped history base; used only for upgrade migration.
+ * Concrete indices: `.entities.v2.history.security_{namespace}.<YYYY-MM-DD>-<HH>`
+ */
+const getLegacySecurityHistorySnapshotBasePattern = (namespace: string): string =>
+  getLegacySecurityEntityIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V2,
     dataset: ENTITY_HISTORY,
     namespace,
@@ -46,3 +58,26 @@ export const getHistorySnapshotIndexName = (
  */
 export const getHistorySnapshotIndexPattern = (namespace: string): string =>
   `${getHistorySnapshotBasePattern(namespace)}.*`;
+
+/**
+ * @deprecated Legacy Security-scoped history pattern; used only for upgrade migration.
+ */
+export const getLegacySecurityHistorySnapshotIndexPattern = (namespace: string): string =>
+  `${getLegacySecurityHistorySnapshotBasePattern(namespace)}.*`;
+
+/**
+ * Maps a legacy Security-scoped history index name to the solution-neutral name,
+ * preserving the date-hour suffix.
+ */
+export const toNeutralHistorySnapshotIndexName = (
+  legacyIndex: string,
+  namespace: string
+): string => {
+  const legacyPrefix = `${getLegacySecurityHistorySnapshotBasePattern(namespace)}.`;
+  if (!legacyIndex.startsWith(legacyPrefix)) {
+    throw new Error(
+      `Expected legacy history index starting with ${legacyPrefix}, got ${legacyIndex}`
+    );
+  }
+  return `${getHistorySnapshotBasePattern(namespace)}.${legacyIndex.slice(legacyPrefix.length)}`;
+};

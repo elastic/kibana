@@ -27,7 +27,10 @@ import {
   getUpdatesEntityDefinitionComponentTemplate,
 } from './component_templates';
 import { getHistorySnapshotIndexTemplateConfig } from './history_snapshot_index_template';
-import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
+import {
+  getHistorySnapshotIndexPattern,
+  getLegacySecurityHistorySnapshotIndexPattern,
+} from './history_snapshot_index';
 import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
@@ -225,12 +228,28 @@ async function deleteHistorySnapshotIndices(
   namespace: string,
   logger: Logger
 ): Promise<void> {
-  const pattern = getHistorySnapshotIndexPattern(namespace);
-  const resolved = await esClient.indices.resolveIndex({ name: pattern });
+  // Include the legacy Security-scoped pattern so pre-migration leftovers (or a
+  // failed upgrade) are removed on uninstall, not left as orphaned storage.
+  const patterns = [
+    getHistorySnapshotIndexPattern(namespace),
+    getLegacySecurityHistorySnapshotIndexPattern(namespace),
+  ];
 
-  const historyIndices = resolved.indices.map((index) => index.name);
+  const historyIndices = (
+    await Promise.all(
+      patterns.map(async (pattern) => {
+        try {
+          const resolved = await esClient.indices.resolveIndex({ name: pattern });
+          return resolved.indices.map((index) => index.name);
+        } catch {
+          return [];
+        }
+      })
+    )
+  ).flat();
+
   if (historyIndices.length === 0) {
-    logger.debug(`no history snapshot indices to delete for pattern ${pattern}`);
+    logger.debug(`no history snapshot indices to delete for ${patterns.join(', ')}`);
     return;
   }
 
