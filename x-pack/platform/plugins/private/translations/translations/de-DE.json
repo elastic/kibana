@@ -24580,7 +24580,6 @@
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.stepTitle": "Logistik",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.totalRetentionInfiniteAriaLabel": "Daten werden auf unbestimmte Zeit aufbewahrt",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.metaJsonError": "Der Eingang ist nicht gültig.",
-    "xpack.idxMgmt.componentTemplateForm.stepLogistics.validation.nameSpacesError": "Leerzeichen sind in einem Komponentenvorlagennamen nicht erlaubt.",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionDescription": "Nummer, die von externen Verwaltungssystemen zur Identifizierung der Komponentenvorlage verwendet wird.",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionFieldLabel": "Version (optional)",
     "xpack.idxMgmt.componentTemplateForm.stepLogistics.versionTitle": "Version",
