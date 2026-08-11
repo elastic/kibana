@@ -179,7 +179,7 @@ describe('createEvaluateExternalDataset', () => {
     expect(runExperiment).toHaveBeenCalledWith(
       expect.objectContaining({
         dataset: {
-          name: 'dataset-from-es',
+          name: 'my-dataset',
           description: 'External dataset resolved from Elasticsearch by name',
           examples: [],
         },

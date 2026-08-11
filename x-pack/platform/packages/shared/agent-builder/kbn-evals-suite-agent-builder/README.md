@@ -191,5 +191,4 @@ node scripts/evals compare agent-builder-baseline agent-builder-change
 
 Notes:
 
-- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
 - `compare` reads from `EVALUATIONS_ES_URL` (defaults to `http://elastic:changeme@localhost:9220`).

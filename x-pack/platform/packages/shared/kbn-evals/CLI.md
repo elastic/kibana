@@ -134,7 +134,6 @@ node scripts/evals run --suite streams --dry-run
 | `--evaluation-connector-id <id>` | `--judge` | Connector for LLM-as-a-judge evaluators |
 | `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
 | `--repetitions <n>` | | Repeat each example N times |
-| `--executor <name>` | | `kibana` (default) or `phoenix` |
 | `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` |
 | `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` |
 | `--export-profile <name>` | | Load export settings from `config.<name>.json` |
