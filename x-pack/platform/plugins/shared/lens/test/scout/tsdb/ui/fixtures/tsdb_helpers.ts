@@ -421,11 +421,13 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         const cleanup = async () => deleteDataStream(stream);
         try {
           log.info(`Creating LogsDB data stream "${stream}"`);
-          await createDataStream(stream, 'logsdb');
+          await createDataStream(stream, 'logsdb', { includeTimeSeriesMetadata: false });
           await createDocs(stream, timeRange.beforeRollover, { isStream: true });
 
           log.info(`Downgrading LogsDB data stream "${stream}" to a regular data stream`);
-          await putDataStreamTemplate(stream, undefined);
+          await putDataStreamTemplate(stream, undefined, {
+            includeTimeSeriesMetadata: false,
+          });
           await esClient.indices.rollover({ alias: stream });
           await createDocs(stream, timeRange.afterRollover, { isStream: true });
 
