@@ -308,7 +308,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
             ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
-            bytes: Math.floor(Math.random() * 10000),
+            bytes: 6219,
             extension: ['deb', 'rpm', 'zip', 'gz', 'tar'][indexOffset % 5],
             host: { name: `host-${indexOffset % 3}` },
             ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),

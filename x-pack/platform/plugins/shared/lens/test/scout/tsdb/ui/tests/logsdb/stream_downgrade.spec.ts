@@ -56,10 +56,7 @@ const runScenario = async (
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
       field: '@timestamp',
-      keepOpen: true,
     });
-    await pageObjects.lens.dimensions.enableIncludeEmptyRows();
-    await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -74,55 +71,55 @@ const runScenario = async (
     return chartBars;
   });
 
-  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
-    await test.step('visualize data on both sides of the downgrade boundary', async () => {
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
-        to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes',
-      });
+  const includesBaseStream = indexes.some(({ index }) => index === BASE_STREAM);
+  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } = includesBaseStream
+    ? await test.step('visualize data on both sides of the downgrade boundary', async () => {
+        await pageObjects.lens.workspace.openFullEditor();
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
+          to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
+        });
+        await pageObjects.lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await pageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'min',
+          field: 'bytes',
+        });
 
-      await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsBeforeDowngrade =
-        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-          ?.bars ?? [];
+        await pageObjects.lens.waitForVisualization('xyVisChart');
+        const barsBeforeDowngrade =
+          (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+            ?.bars ?? [];
 
-      await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
-        to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
-      });
-      await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsAfterDowngrade =
-        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-          ?.bars ?? [];
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
+          to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
+        });
+        await pageObjects.lens.waitForVisualization('xyVisChart');
+        const barsAfterDowngrade =
+          (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+            ?.bars ?? [];
 
-      return {
-        hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
-        hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
-      };
-    });
+        return {
+          hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
+          hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
+        };
+      })
+    : { hasDataBeforeDowngrade: false, hasDataAfterDowngrade: false };
 
   const altDateFieldBars =
     await test.step('visualize date histogram chart using a different date field', async () => {
       await pageObjects.lens.workspace.openFullEditor();
+      await pageObjects.datePicker.setAbsoluteRange(TIME_RANGE.picker);
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: 'utc_time',
-        keepOpen: true,
       });
-      await pageObjects.lens.dimensions.enableIncludeEmptyRows();
-      await pageObjects.lens.closeDimensionEditor();
 
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -235,23 +232,17 @@ const assertDowngradeResult = (
   result: ScenarioResult,
   { includesBaseStream = true }: { includesBaseStream?: boolean } = {}
 ) => {
-  // Date histogram with @timestamp — always expect some data
-  expect.soft(result.bars.length).toBeGreaterThan(0);
-  expect.soft(result.bars.some(({ y }) => y > 0)).toBe(true);
+  // FTR parity: the first and last rendered buckets contain data for both date fields.
+  expect.soft(result.bars[0]?.y).toBeGreaterThan(0);
+  expect.soft(result.bars[result.bars.length - 1]?.y).toBeGreaterThan(0);
+  expect.soft(result.altDateFieldBars[0]?.y).toBeGreaterThan(0);
+  expect.soft(result.altDateFieldBars[result.altDateFieldBars.length - 1]?.y).toBeGreaterThan(0);
 
   if (includesBaseStream) {
-    // Boundary checks only apply when the downgraded base stream is in the data view.
-    // The FTR asserted bars[0].y > 0 and bars[last].y > 0 — data visible on both sides
-    // of the downgrade rollover. Using min(bytes) (not count), so no document-count assertions.
+    // Scout additionally checks the downgrade boundary with narrow time ranges.
     expect.soft(result.hasDataBeforeDowngrade).toBe(true);
     expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    expect.soft(result.bars[0]?.y).toBeGreaterThan(0);
-    expect.soft(result.bars[result.bars.length - 1]?.y).toBeGreaterThan(0);
   }
-
-  // Date histogram with utc_time
-  expect.soft(result.altDateFieldBars.length).toBeGreaterThan(0);
-  expect.soft(result.altDateFieldBars.some(({ y }) => y > 0)).toBe(true);
 
   // Annotation layers
   expect.soft(result.annotationVisible).toBe(true);
