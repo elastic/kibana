@@ -175,9 +175,7 @@ export const UnifiedChatCompleteParamsSchema = lazySchema(() =>
            */
           reasoning: z
             .object({
-              effort: z
-                .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
-                .optional(),
+              effort: z.enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh']).optional(),
               enabled: z.boolean().optional(),
               summary: z.enum(['auto', 'concise', 'detailed']).optional(),
               exclude: z.boolean().optional(),
