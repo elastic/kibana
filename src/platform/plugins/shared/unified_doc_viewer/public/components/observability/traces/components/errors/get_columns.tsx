@@ -11,7 +11,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiText, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
 import {
   TRACE_ID,
@@ -84,13 +84,17 @@ const ErrorMessageLinkCell = ({
 }) => {
   const { indexes } = useDataSourcesContext();
   const errorLabel = getErrorMessage(item.error);
+  const whereClause = useMemo(
+    () => createWhereClause({ traceId, docId, source, item }),
+    [traceId, docId, source, item]
+  );
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
   return (
     <DiscoverEsqlLink
       indexPattern={indexes.apm.errors}
-      whereClause={createWhereClause({ traceId, docId, source, item })}
+      whereClause={whereClause}
       tabLabel={errorLabel}
       dataTestSubj="error-group-link"
       ebt={errorEbt}

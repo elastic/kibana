@@ -12,7 +12,7 @@ import { EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import type { SpanLinkType } from '.';
@@ -41,6 +41,7 @@ const traceIdEbt = { action: TRACES_DOC_VIEWER_EBT_CLICK_ACTIONS.VIEW_TRACE, ...
 
 const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createSpanNameWhereClause(item), [item]);
 
   const content = (
     <EuiTextTruncate
@@ -54,7 +55,7 @@ const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDe
       indexPattern={indexes.apm.traces}
       dataTestSubj={`${type}-spanNameLink-${item.spanId}`}
       tabLabel={item.details?.spanName || NOT_AVAILABLE_LABEL}
-      whereClause={createSpanNameWhereClause(item)}
+      whereClause={whereClause}
       ebt={spanNameEbt}
     >
       {content}
@@ -64,6 +65,7 @@ const SpanNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDe
 
 const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createServiceNameWhereClause(item), [item]);
 
   const serviceName = item.details?.serviceName || NOT_AVAILABLE_LABEL;
   const content = (
@@ -78,7 +80,7 @@ const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLin
           indexPattern={indexes.apm.traces}
           dataTestSubj={`${type}-serviceNameLink-${serviceName}`}
           tabLabel={serviceName}
-          whereClause={createServiceNameWhereClause(item)}
+          whereClause={whereClause}
           ebt={serviceNameEbt}
         >
           {content}
@@ -90,6 +92,7 @@ const ServiceNameLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLin
 
 const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDetails }) => {
   const { indexes } = useDataSourcesContext();
+  const whereClause = useMemo(() => createTraceIdWhereClause(item), [item]);
 
   const content = (
     <EuiTextTruncate data-test-subj={`${type}-traceId-${item.traceId}`} text={item.traceId} />
@@ -100,7 +103,7 @@ const TraceIdLinkCell = ({ type, item }: { type: SpanLinkType; item: SpanLinkDet
       indexPattern={indexes.apm.traces}
       dataTestSubj={`${type}-traceIdLink-${item.traceId}`}
       tabLabel={item.traceId}
-      whereClause={createTraceIdWhereClause(item)}
+      whereClause={whereClause}
       ebt={traceIdEbt}
     >
       {content}
