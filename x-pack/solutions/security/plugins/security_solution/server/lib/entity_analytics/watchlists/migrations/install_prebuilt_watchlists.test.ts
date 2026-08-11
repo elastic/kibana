@@ -11,7 +11,7 @@ import {
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { installPrebuiltWatchlists } from './install_prebuilt_watchlists';
+import { installPrebuiltWatchlists, getPrebuiltWatchlists } from './install_prebuilt_watchlists';
 import {
   getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
@@ -363,5 +363,10 @@ describe('installPrebuiltWatchlists', function () {
         id: getPrivilegedUserWatchlistSavedObjectId('space-1'),
       });
     });
+  });
+
+  it('has no duplicate prebuilt watchlist names', () => {
+    const names = getPrebuiltWatchlists('default').map((w) => w.name);
+    expect(new Set(names).size).toBe(names.length);
   });
 });
