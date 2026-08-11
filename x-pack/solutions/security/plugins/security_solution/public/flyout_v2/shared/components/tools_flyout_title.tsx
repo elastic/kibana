@@ -63,7 +63,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
         {onTitleClick ? (
           <EuiButtonEmpty
             onClick={onTitleClick}
-            iconType="expand"
+            iconType="maximize"
             size="xs"
             flush="left"
             css={{ maxWidth: '100%', minWidth: 0 }}

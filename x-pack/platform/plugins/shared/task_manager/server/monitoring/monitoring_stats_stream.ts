@@ -71,9 +71,15 @@ export function createAggregators({
   adHocTaskCounter,
   startingCapacity,
   taskPollingLifecycle,
+  executionControlService,
 }: CreateMonitoringStatsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
-    createConfigurationAggregator(config, startingCapacity, taskPollingLifecycle),
+    createConfigurationAggregator(
+      config,
+      startingCapacity,
+      taskPollingLifecycle,
+      executionControlService
+    ),
 
     createWorkloadAggregator({
       taskStore,

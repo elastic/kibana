@@ -36,7 +36,7 @@ export const WorkflowYamlPreview: React.FC<WorkflowYamlPreviewProps> = ({
       <EuiCallOut
         announceOnMount
         color="danger"
-        iconType="alert"
+        iconType="warning"
         size="s"
         data-test-subj="evalsWorkflowYamlPreviewError"
       >
