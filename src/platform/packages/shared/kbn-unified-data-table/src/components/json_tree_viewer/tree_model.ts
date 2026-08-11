@@ -291,7 +291,10 @@ const normalizePrimitive = (value: unknown): JsonPrimitive => {
   return null;
 };
 
-const getNodeId = (path: string[]) => `json-viewer-${path.join('__')}`;
+// Length-prefixed (Pascal-string style) encoding: framing each segment with its length keeps the id
+// collision-proof even when a key contains the separators, so distinct paths never share an id.
+export const getNodeId = (path: readonly string[]): string =>
+  path.reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
 
 /**
  * Returns a list of Node ids that can be expanded. Empty coollections can't be expanded.

@@ -88,6 +88,33 @@ export class IndexManagement extends AbstractPageObject {
     await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
   }
 
+  // Selects the index row checkbox and opens its "manage index" context menu.
+  async manageIndex(indexName: string) {
+    const checkbox = this.page.locator(`input[id="checkboxSelectIndex-${indexName}"]`);
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click();
+    }
+    await this.page.testSubj.locator('indexActionsContextMenuButton').click();
+    await expect(this.page.testSubj.locator('indexContextMenu')).toBeVisible();
+  }
+
+  async changeManageIndexTab(
+    manageIndexTab:
+      | 'showOverviewIndexMenuButton'
+      | 'showSettingsIndexMenuButton'
+      | 'showMappingsIndexMenuButton'
+  ) {
+    await this.page.testSubj.locator(manageIndexTab).click();
+  }
+
+  async deleteIndexFromContextMenu() {
+    await this.page.testSubj.locator('deleteIndexMenuButton').click();
+  }
+
+  async confirmDeleteIndexModal() {
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+  }
+
   async navigateToIndexManagementTab(
     tab: 'indices' | 'data_streams' | 'templates' | 'component_templates' | 'enrich_policies'
   ) {
@@ -218,6 +245,16 @@ export class IndexManagement extends AbstractPageObject {
       await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
       await expect(this.page.testSubj.locator('appHeaderBack')).toBeVisible();
     },
+
+    changeTab: async (
+      tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
+    ) => {
+      await this.page.testSubj.locator(tab).click();
+    },
+
+    mappingsAddFieldButton: () => this.page.testSubj.locator('indexDetailsMappingsAddField'),
+
+    editSettingsSwitch: () => this.page.testSubj.locator('indexDetailsSettingsEditModeSwitch'),
   };
 
   indexTemplateWizard = {

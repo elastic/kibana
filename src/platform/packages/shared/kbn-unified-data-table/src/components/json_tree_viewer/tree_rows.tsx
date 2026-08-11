@@ -267,10 +267,12 @@ const CopyButton = function CopyButton({
     defaultMessage: 'Copied',
   });
 
+  const displayedLabel = copied ? copiedLabel : label;
+
   return (
-    <EuiToolTip content={copied ? copiedLabel : label} disableScreenReaderOutput>
+    <EuiToolTip content={displayedLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        aria-label={label}
+        aria-label={displayedLabel}
         className="jsonTreeViewerCopyButton"
         color={copied ? 'success' : 'text'}
         css={styles.copyButton}

@@ -8,7 +8,7 @@
  */
 
 import { getDocumentText, collectSearchMatches } from './doc_scan';
-import { buildNodes, ROOT_ID } from './tree_model';
+import { buildNodes, getNodeId, ROOT_ID } from './tree_model';
 
 describe('getDocumentText', () => {
   it('joins the keys and primitive values of a nested object with newlines', () => {
@@ -45,7 +45,7 @@ describe('getDocumentText', () => {
 describe('collectSearchMatches', () => {
   it('returns the ids of every collection whose subtree contains the term', () => {
     const nodes = buildNodes({ geo: { city: 'Berlin' }, other: 'x' });
-    expect([...collectSearchMatches(nodes, 'berl').containers]).toEqual(['json-viewer-geo']);
+    expect([...collectSearchMatches(nodes, 'berl').containers]).toEqual([getNodeId(['geo'])]);
   });
 
   it('returns an empty set when nothing matches', () => {
@@ -60,9 +60,10 @@ describe('collectSearchMatches', () => {
       ),
     });
     const matches = collectSearchMatches(nodes, 'needle');
+    const logsId = getNodeId(['logs']);
 
-    expect([...matches.containers]).toEqual(['json-viewer-logs']);
-    expect(matches.reveals.get('json-viewer-logs')).toBe(13);
+    expect([...matches.containers]).toEqual([logsId]);
+    expect(matches.reveals.get(logsId)).toBe(13);
     expect(matches.reveals.has(ROOT_ID)).toBe(false);
   });
 });
