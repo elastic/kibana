@@ -72,7 +72,7 @@ import { buildTimeRangeFilter } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import * as i18n from './translations';
 import { eventRenderedViewColumns } from '../../configurations/security_solution_detections/columns';
-import { getAlertsDefaultModel } from './default_config';
+import { ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE, getAlertsDefaultModel } from './default_config';
 import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
@@ -603,6 +603,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
           ...c,
         })),
       })
+    );
+    dispatch(
+      updateItemsPerPage({ id: tableType, itemsPerPage: ALERTS_TABLE_DEFAULT_ITEMS_PER_PAGE })
     );
   }, [dispatch, tableType, finalColumns, isDataTableInitialized]);
 
