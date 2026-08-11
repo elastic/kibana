@@ -110,7 +110,11 @@ export class AddEditMonitorAPI {
       ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
-        const failed = packagePolicyResult.failed.map((f) => f.error);
+        // Fleet reports saved object level failures (e.g. a policy id conflict) as plain
+        // objects, so they have to be formatted explicitly to stay readable.
+        const failed = packagePolicyResult.failed.map(({ error }) =>
+          error instanceof Error ? error.message : JSON.stringify(error)
+        );
         throw new Error(failed.join(', '));
       }
 
