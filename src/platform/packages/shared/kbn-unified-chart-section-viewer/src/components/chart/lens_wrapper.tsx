@@ -36,7 +36,12 @@ export type LensWrapperProps = {
   quickActionIds?: QuickActionIds;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'onBrushEnd' | 'onFilter'>;
 
-const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV', 'alertRule'];
+const DEFAULT_DISABLED_ACTIONS = [
+  'ACTION_CUSTOMIZE_PANEL',
+  'ACTION_EXPORT_CSV',
+  'ACTION_FILTERS_NOTIFICATION',
+  'alertRule',
+];
 export function LensWrapper({
   lensProps,
   services,

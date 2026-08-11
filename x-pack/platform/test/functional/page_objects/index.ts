@@ -24,7 +24,6 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
-import { LicenseManagementPageProvider } from './license_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
@@ -58,7 +57,6 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
-  licenseManagement: LicenseManagementPageProvider,
   apiKeys: ApiKeysPageProvider,
   indexManagement: IndexManagementPageProvider,
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
