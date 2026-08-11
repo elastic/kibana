@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/server/attachment_framework/types';
-
-export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
-  id: '.test',
-});
+export { RegisterRepositoryPage } from './register_repository_page';

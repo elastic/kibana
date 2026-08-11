@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/server/attachment_framework/types';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
-  id: '.test',
+export default createPlaywrightConfig({
+  testDir: './tests',
 });
