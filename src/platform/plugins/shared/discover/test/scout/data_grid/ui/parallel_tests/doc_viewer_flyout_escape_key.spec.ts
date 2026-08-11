@@ -23,9 +23,9 @@ spaceTest.describe(
   'Discover doc viewer flyout - escape key',
   { tag: '@local-stateful-classic' },
   () => {
-    // The FTR equivalent ran at 1600x1200 via `browser.setWindowSize`. The width
-    // matters: below EUI's breakpoint the doc viewer renders as an overlay
-    // flyout instead of a push flyout, which changes focus handling.
+    // Required, not inherited: below EUI's breakpoint the doc viewer renders as
+    // an overlay flyout rather than a push flyout, and the overlay traps focus —
+    // which is exactly what these key handlers depend on.
     spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {

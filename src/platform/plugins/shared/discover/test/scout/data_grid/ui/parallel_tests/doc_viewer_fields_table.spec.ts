@@ -32,8 +32,6 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
-
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -90,8 +88,7 @@ spaceTest.describe('Discover doc viewer - fields table', { tag: '@local-stateful
     await docViewer.closeFieldTypeFilter();
 
     await docViewer.toggleHideNullValues();
-    const hiddenCount = await docViewer.getFieldNameCount();
-    expect(hiddenCount).toBeLessThan(8);
+    await expect.poll(() => docViewer.getFieldNameCount()).toBeLessThan(8);
 
     // Toggling back restores the full set.
     await docViewer.toggleHideNullValues();
