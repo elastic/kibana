@@ -71,6 +71,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await lens.editDimensionLabel(longLabel);
       await lens.waitForVisualization('xyVisChart');
+      await retry.waitFor(
+        'long label to be applied',
+        async () => (await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')) === longLabel
+      );
       await lens.closeDimensionEditor();
 
       expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(longLabel);

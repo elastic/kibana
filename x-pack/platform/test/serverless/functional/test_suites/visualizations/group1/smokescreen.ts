@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const filterBar = getService('filterBar');
   const config = getService('config');
+  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     before(async () => {
@@ -203,6 +204,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
       await PageObjects.lens.editDimensionLabel(longLabel);
       await PageObjects.lens.waitForVisualization('xyVisChart');
+      await retry.waitFor(
+        'long label to be applied',
+        async () =>
+          (await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')) === longLabel
+      );
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
