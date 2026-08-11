@@ -56401,7 +56401,6 @@
     "xpack.synthetics.management.enableLabel": "Activer",
     "xpack.synthetics.management.enableMonitorLabel": "Activer le moniteur",
     "xpack.synthetics.management.enableStatusAlert": "Activer les alertes de statut",
-    "xpack.synthetics.management.filter.clickTypeMessage": "Cliquez pour filtrer les enregistrements pour le type {typeName}.",
     "xpack.synthetics.management.location.ariaLabel": "Afficher les détails de l'emplacement {locationLabel}",
     "xpack.synthetics.management.monitorDeleteFailureMessage": "Impossible de supprimer le moniteur. Réessayez plus tard.",
     "xpack.synthetics.management.monitorDeleteLoadingMessage": "Suppression du moniteur...",

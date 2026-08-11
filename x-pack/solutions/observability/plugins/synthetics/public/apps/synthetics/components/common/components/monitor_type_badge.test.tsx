@@ -16,30 +16,23 @@ describe('MonitorTypeBadge', () => {
     expect(screen.getByText('Journey')).toBeInTheDocument();
   });
 
-  it('does not override the accessible name when the badge is not clickable', () => {
-    render(<MonitorTypeBadge monitorType="browser" ariaLabel="Click to filter records." />);
-    // The visible text stays the accessible name; the prop is only a tooltip.
-    expect(screen.queryByLabelText('Click to filter records.')).not.toBeInTheDocument();
-    expect(screen.getByTitle('Click to filter records.')).toBeInTheDocument();
+  it('keeps the visible text as the accessible name when not clickable', () => {
+    render(<MonitorTypeBadge monitorType="browser" />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('Journey')).toBeInTheDocument();
   });
 
   it('announces the visible badge text before the filter instructions', () => {
-    render(
-      <MonitorTypeBadge
-        monitorType="browser"
-        ariaLabel="Click to filter records for type browser."
-        onClick={jest.fn()}
-      />
-    );
+    render(<MonitorTypeBadge monitorType="browser" onClick={jest.fn()} />);
 
     expect(
       screen.getByRole('button', {
-        name: 'Journey, Click to filter records for type browser.',
+        name: 'Journey, Click to filter monitors for type: Journey',
       })
     ).toBeInTheDocument();
   });
 
-  it('falls back to its own filter instructions when no ariaLabel is given', () => {
+  it('announces the visible badge text for non-browser monitors', () => {
     render(<MonitorTypeBadge monitorType="http" onClick={jest.fn()} />);
 
     expect(

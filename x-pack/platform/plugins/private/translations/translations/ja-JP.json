@@ -56823,7 +56823,6 @@
     "xpack.synthetics.management.enableLabel": "有効にする",
     "xpack.synthetics.management.enableMonitorLabel": "モニターを有効にする",
     "xpack.synthetics.management.enableStatusAlert": "ステータスアラートを有効にする",
-    "xpack.synthetics.management.filter.clickTypeMessage": "クリックして、タイプ{typeName}のレコードをフィルタリングします。",
     "xpack.synthetics.management.location.ariaLabel": "{locationLabel}ロケーションの詳細を表示",
     "xpack.synthetics.management.monitorDeleteFailureMessage": "モニターを削除できませんでした。しばらくたってから再試行してください。",
     "xpack.synthetics.management.monitorDeleteLoadingMessage": "モニターを削除しています...",

@@ -56826,7 +56826,6 @@
     "xpack.synthetics.management.enableLabel": "启用",
     "xpack.synthetics.management.enableMonitorLabel": "启用监测",
     "xpack.synthetics.management.enableStatusAlert": "启用状态告警",
-    "xpack.synthetics.management.filter.clickTypeMessage": "单击以筛选类型为 {typeName} 的记录。",
     "xpack.synthetics.management.location.ariaLabel": "查看 {locationLabel} 位置的详情",
     "xpack.synthetics.management.monitorDeleteFailureMessage": "无法删除监测。请稍后重试。",
     "xpack.synthetics.management.monitorDeleteLoadingMessage": "正在删除监测......",
