@@ -87,15 +87,14 @@ describe('createAnswerAgentStructured', () => {
   it('preserves a truthy wrapped response after unwrapping', async () => {
     const { agent } = createTestAgent({
       invokeResponse: { response: 'hello' },
+      outputSchema: { type: 'string' },
     });
 
     const result = await agent(baseState);
 
     expect(result.answerActions).toHaveLength(1);
     expect(result.answerActions[0].type).toBe(AgentActionType.StructuredAnswer);
-    expect((result.answerActions[0] as StructuredAnswerAction).data).toEqual({
-      response: 'hello',
-    });
+    expect((result.answerActions[0] as StructuredAnswerAction).data).toBe('hello');
   });
 
   it('does not unwrap an object schema response', async () => {
