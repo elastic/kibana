@@ -1732,6 +1732,7 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: (() => {
+            const nullableString = schema.oneOf([schema.literal(null), schema.string()]);
             const downloadSourceSchemaV2 = schema.object(
               {
                 source_id: schema.maybe(schema.string()),
@@ -1739,9 +1740,9 @@ export const getSavedObjectTypes = (
                 is_default: schema.maybe(schema.boolean()),
                 is_preconfigured: schema.maybe(schema.boolean()),
                 host: schema.maybe(schema.string()),
-                proxy_id: schema.maybe(schema.string()),
-                ssl: schema.maybe(schema.string()),
-                auth: schema.maybe(schema.string()),
+                proxy_id: schema.maybe(nullableString),
+                ssl: schema.maybe(nullableString),
+                auth: schema.maybe(nullableString),
                 secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               },
               { unknowns: 'ignore' }
