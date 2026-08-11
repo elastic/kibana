@@ -12,9 +12,6 @@ import { StringType } from '../types/string_type';
 import type { Type } from '../types/type';
 import { getReporter } from './violation_reporter';
 
-export type { SchemaViolationReporter } from './violation_reporter';
-export { registerSchemaViolationReporter } from './violation_reporter';
-
 // ---------------------------------------------------------------------------
 // Helper factory
 // ---------------------------------------------------------------------------

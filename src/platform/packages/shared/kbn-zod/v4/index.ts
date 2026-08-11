@@ -16,3 +16,15 @@ export { isZod } from './utils';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 export type { ZodObjectType } from './types';
 export type { OasMetaExtensions, OasMetaAvailability } from './openapi';
+export type { SchemaViolationReporter } from './violation_reporter';
+export { registerSchemaViolationReporter } from './violation_reporter';
+export {
+  savedObjectIdSchema,
+  spaceIdSchema,
+  displayNameSchema,
+  descriptionSchema,
+  searchFilterSchema,
+  aggregationSchema,
+  unboundedString,
+  deduplicatedArrayOf,
+} from './helpers';

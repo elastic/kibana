@@ -78,18 +78,7 @@ export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
-export type { SchemaHelper, SchemaViolationReporter } from './src/helpers';
-export {
-  registerSchemaViolationReporter,
-  savedObjectIdSchema,
-  spaceIdSchema,
-  displayNameSchema,
-  descriptionSchema,
-  searchFilterSchema,
-  aggregationSchema,
-  deduplicatedArrayOf,
-} from './src/helpers';
-export { zodUnboundedString as unboundedString } from './src/helpers';
+export type { SchemaHelper } from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);

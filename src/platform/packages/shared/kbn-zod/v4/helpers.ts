@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from 'zod/v4';
 import { getReporter } from './violation_reporter';
 
 // ---------------------------------------------------------------------------
@@ -33,7 +33,7 @@ function makeZodHelper(name: string, params: { min?: number; max: number }) {
 }
 
 // ---------------------------------------------------------------------------
-// Pre-built Zod schemas — equivalents of the @kbn/config-schema named helpers
+// Pre-built Zod string schemas
 // ---------------------------------------------------------------------------
 
 export const savedObjectIdSchema = makeZodHelper('savedObjectId', { min: 1, max: 512 });
@@ -44,7 +44,7 @@ export const searchFilterSchema = makeZodHelper('searchFilter', { max: 10000 });
 export const aggregationSchema = makeZodHelper('aggregation', { max: 100000 });
 
 // ---------------------------------------------------------------------------
-// Unbounded string escape hatch (Zod)
+// Unbounded string escape hatch
 // `reason` is required and visible at the call site for CodeQL suppression.
 // It is intentionally not stored at runtime — Zod v4's .meta() uses a global
 // side-effectful registry that does not survive schema composition.

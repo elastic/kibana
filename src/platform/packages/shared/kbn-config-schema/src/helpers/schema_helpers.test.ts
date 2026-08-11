@@ -15,8 +15,8 @@ import {
   searchFilter,
   aggregation,
   unboundedString,
-  registerSchemaViolationReporter,
 } from './schema_helpers';
+import { registerSchemaViolationReporter } from './violation_reporter';
 
 // ---------------------------------------------------------------------------
 // savedObjectId
@@ -165,7 +165,7 @@ describe('unboundedString', () => {
 // ---------------------------------------------------------------------------
 
 describe('.warn() report-only mode', () => {
-  let reports: Array<{ helper: string; length: number; maxLength: number }>;
+  let reports: Array<{ helper: string; length: number; maxLength: number; label?: string }>;
 
   beforeEach(() => {
     reports = [];

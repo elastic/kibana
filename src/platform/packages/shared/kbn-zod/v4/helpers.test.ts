@@ -16,9 +16,9 @@ import {
   aggregationSchema,
   unboundedString,
   deduplicatedArrayOf,
-} from './zod_helpers';
+} from './helpers';
 import { registerSchemaViolationReporter } from './violation_reporter';
-import { z } from '@kbn/zod';
+import { z } from 'zod/v4';
 
 // ---------------------------------------------------------------------------
 // Pre-built string schemas
@@ -106,7 +106,7 @@ describe('aggregationSchema', () => {
 // ---------------------------------------------------------------------------
 
 describe('.warn() report-only mode', () => {
-  let reports: Array<{ helper: string; length: number; maxLength: number }>;
+  let reports: Array<{ helper: string; length: number; maxLength: number; label?: string }>;
 
   beforeEach(() => {
     reports = [];
@@ -142,11 +142,6 @@ describe('.warn() report-only mode', () => {
     expect(reports[0]).toMatchObject({ helper: 'displayName', maxLength: 1024 });
   });
 
-  test('single registerSchemaViolationReporter call covers both schema and zod helpers', () => {
-    savedObjectIdSchema.warn().parse('a'.repeat(600));
-    expect(reports).toHaveLength(1);
-  });
-
   test('passes label through to reporter', () => {
     savedObjectIdSchema.warn({ label: 'dashboard.panelId' }).parse('a'.repeat(600));
     expect(reports[0]).toMatchObject({ helper: 'savedObjectId', label: 'dashboard.panelId' });
@@ -162,7 +157,7 @@ describe('.warn() report-only mode', () => {
 // unboundedString
 // ---------------------------------------------------------------------------
 
-describe('unboundedString (Zod)', () => {
+describe('unboundedString', () => {
   test('returns a schema that accepts any length string', () => {
     const huge = 'x'.repeat(200000);
     expect(unboundedString('stored in object store').parse(huge)).toBe(huge);
