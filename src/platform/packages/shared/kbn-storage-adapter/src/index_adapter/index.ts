@@ -249,6 +249,7 @@ export class StorageIndexAdapter<
           allow_auto_create: false,
           index_patterns: getIndexPattern(this.storage.name),
           _meta: { version },
+          ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
           template: {
             ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
             mappings,

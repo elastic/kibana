@@ -66,6 +66,27 @@ export const buildCreateActionPolicyData = (
   ...input,
 });
 
+/**
+ * Minimal valid workflow YAML. Action policy specs only need the workflow to
+ * exist and be searchable by name so it can be picked as a destination, so the
+ * body is deliberately a single no-op console step.
+ *
+ * `name` is emitted as a JSON string, which is also a valid YAML double-quoted
+ * scalar, so callers can pass names containing `:` or `#` without producing
+ * YAML that parses into something else.
+ */
+export const buildWorkflowYaml = (name: string): string => `name: ${JSON.stringify(name)}
+enabled: true
+description: Scout action policy destination
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "scout"
+`;
+
 export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     type: 'workflow' as const,
@@ -97,4 +118,24 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     space_id: 'default',
     ...input,
   };
+};
+
+/**
+ * Builds an external alert event (no `rule` field) for tests that exercise
+ * the source-based episode path (e.g. PagerDuty, Opsgenie).
+ */
+export type BuildExternalAlertEventInput = Omit<Partial<AlertEvent>, 'rule'>;
+
+export const buildExternalAlertEvent = (input: BuildExternalAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    group_hash: 'external-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'pagerduty',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  } as AlertEvent;
 };
