@@ -73,7 +73,7 @@ describe('useCaseActions', () => {
       casesServiceMock.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
     expect(onSuccessCallback).toBeDefined();
     act(() => {
-        onSuccessCallback?.({ id: 'case-id', updatedAt });
+      onSuccessCallback?.({ id: 'case-id', updatedAt });
     });
 
     expect(onAddToCase).toHaveBeenCalledWith({ isNewCase });
