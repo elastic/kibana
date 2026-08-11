@@ -96,7 +96,10 @@ steps:
           EVAL_SUITE_ID: 'agent-builder-dashboards'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # Keep in sync with `weeklyEisModelGroups` for agent-builder-dashboards in evals.suites.json.
+          # Intentionally not using *weekly_eis_core_models — Gemini Flash/Pro fail this suite's
+          # generate_dashboard tool-call schema and should not run weekly here.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/openai-gpt-5.2,eis/openai-gpt-5.4'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
