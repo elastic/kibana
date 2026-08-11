@@ -38,7 +38,10 @@ export const EmbeddableRenderer = <
   maybeId?: string;
   getParentApi: () => ParentApi;
   onApiAvailable?: (api: Api) => void;
-  panelProps?: Omit<PresentationPanelProps<Api>, 'Component' | 'componentApi'>;
+  panelProps?: Omit<
+    PresentationPanelProps<Api>,
+    'Component' | 'componentApi' | 'componentInternalApi'
+  >;
   hidePanelChrome?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
