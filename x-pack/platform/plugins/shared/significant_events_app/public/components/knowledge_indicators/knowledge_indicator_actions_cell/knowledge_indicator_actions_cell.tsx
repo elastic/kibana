@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import { QUERY_TYPE_STATS, isExpirable } from '@kbn/significant-events-schema';
 import { isComputedFeature } from '@kbn/significant-events-schema';
 import React, { useMemo, useState } from 'react';
 import {
@@ -23,6 +23,8 @@ import {
   EXCLUDE_LABEL,
   RESTORE_LABEL,
   PROMOTE_LABEL,
+  MAKE_DURABLE_LABEL,
+  MAKE_EXPIRING_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
@@ -40,9 +42,8 @@ export function KnowledgeIndicatorActionsCell({
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const { excludeFeature, restoreFeature, promoteQuery, isMutating } = useKnowledgeIndicatorActions(
-    { streamName }
-  );
+  const { excludeFeature, restoreFeature, promoteQuery, setDurability, isMutating } =
+    useKnowledgeIndicatorActions({ streamName });
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -82,6 +83,21 @@ export function KnowledgeIndicatorActionsCell({
           </EuiContextMenuItem>
         );
       }
+
+      const currentlyDurable = !isExpirable(knowledgeIndicator.feature);
+      items.push(
+        <EuiContextMenuItem
+          key="feature-durability"
+          icon={currentlyDurable ? 'clock' : 'pinFilled'}
+          disabled={isMutating}
+          onClick={() => {
+            setIsActionsMenuOpen(false);
+            setDurability({ knowledgeIndicator, durable: !currentlyDurable });
+          }}
+        >
+          {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
+        </EuiContextMenuItem>
+      );
     }
 
     items.push(
@@ -100,7 +116,14 @@ export function KnowledgeIndicatorActionsCell({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, onDeleteRequest, restoreFeature]);
+  }, [
+    excludeFeature,
+    isMutating,
+    knowledgeIndicator,
+    onDeleteRequest,
+    restoreFeature,
+    setDurability,
+  ]);
 
   const queryActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'query') return [];
@@ -110,6 +133,8 @@ export function KnowledgeIndicatorActionsCell({
       isMutating || blocksActivity || knowledgeIndicator.rule.backed || isStats;
     const promoteTooltip =
       activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
+
+    const currentlyDurable = !isExpirable(knowledgeIndicator.query);
 
     return [
       <EuiContextMenuItem
@@ -123,6 +148,17 @@ export function KnowledgeIndicatorActionsCell({
         }}
       >
         {PROMOTE_LABEL}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="query-durability"
+        icon={currentlyDurable ? 'clock' : 'pinFilled'}
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          setDurability({ knowledgeIndicator, durable: !currentlyDurable });
+        }}
+      >
+        {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="query-delete"
@@ -143,6 +179,7 @@ export function KnowledgeIndicatorActionsCell({
     knowledgeIndicator,
     onDeleteRequest,
     promoteQuery,
+    setDurability,
   ]);
 
   return (

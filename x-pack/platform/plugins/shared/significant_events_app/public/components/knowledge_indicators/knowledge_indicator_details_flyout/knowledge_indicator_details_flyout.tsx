@@ -28,7 +28,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type { Streams } from '@kbn/streams-schema';
-import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import { isComputedFeature, isExpirable, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -40,6 +40,8 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
+import { DurabilityBadge } from '../../../pages/significant_events/components/durability_badge/durability_badge';
+import { getKnowledgeIndicatorExpiresAt } from '../utils/get_knowledge_indicator_expires_at';
 import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { useRulesDemote } from '../hooks/use_rules_demote';
 import {
@@ -48,6 +50,8 @@ import {
   EXCLUDE_LABEL,
   RESTORE_LABEL,
   PROMOTE_LABEL,
+  MAKE_DURABLE_LABEL,
+  MAKE_EXPIRING_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
@@ -109,6 +113,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     excludeFeature,
     restoreFeature,
     promoteQuery,
+    setDurability,
     isMutating: isActionMutating,
   } = useKnowledgeIndicatorActions({ streamName, onSuccess: onClose });
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
@@ -189,6 +194,21 @@ export function KnowledgeIndicatorDetailsFlyout({
           </EuiContextMenuItem>
         );
       }
+
+      const currentlyDurable = !isExpirable(knowledgeIndicator.feature);
+      items.push(
+        <EuiContextMenuItem
+          key="feature-durability"
+          icon={currentlyDurable ? 'clock' : 'pinFilled'}
+          disabled={isMutating}
+          onClick={() => {
+            setIsActionsMenuOpen(false);
+            setDurability({ knowledgeIndicator, durable: !currentlyDurable });
+          }}
+        >
+          {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
+        </EuiContextMenuItem>
+      );
     }
 
     items.push(
@@ -207,7 +227,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
+  }, [excludeFeature, isMutating, knowledgeIndicator, restoreFeature, setDurability]);
 
   const queryActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'query') {
@@ -218,6 +238,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     const isPromoteDisabled = isMutating || blocksActivity || isStats;
     const promoteTooltip =
       activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
+    const currentlyDurable = !isExpirable(knowledgeIndicator.query);
 
     return [
       ...(!knowledgeIndicator.rule.backed
@@ -237,6 +258,17 @@ export function KnowledgeIndicatorDetailsFlyout({
           ]
         : []),
       <EuiContextMenuItem
+        key="query-durability"
+        icon={currentlyDurable ? 'clock' : 'pinFilled'}
+        disabled={isMutating}
+        onClick={() => {
+          setIsActionsMenuOpen(false);
+          setDurability({ knowledgeIndicator, durable: !currentlyDurable });
+        }}
+      >
+        {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="query-delete"
         icon="trash"
         color="danger"
@@ -249,7 +281,14 @@ export function KnowledgeIndicatorDetailsFlyout({
         {DELETE_LABEL}
       </EuiContextMenuItem>,
     ];
-  }, [activityBlockTooltip, blocksActivity, isMutating, knowledgeIndicator, promoteQuery]);
+  }, [
+    activityBlockTooltip,
+    blocksActivity,
+    isMutating,
+    knowledgeIndicator,
+    promoteQuery,
+    setDurability,
+  ]);
 
   const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
@@ -364,6 +403,11 @@ export function KnowledgeIndicatorDetailsFlyout({
                 </EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={DURABILITY_LABEL}>
+                <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(knowledgeIndicator)} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 
@@ -438,6 +482,11 @@ const STREAM_LABEL = i18n.translate(
 const SEVERITY_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.severityLabel',
   { defaultMessage: 'Severity' }
+);
+
+const DURABILITY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.durabilityLabel',
+  { defaultMessage: 'Durability' }
 );
 
 const QUERY_TYPE_LABEL = i18n.translate(
