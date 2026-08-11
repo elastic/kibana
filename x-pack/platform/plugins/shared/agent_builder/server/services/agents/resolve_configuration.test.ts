@@ -101,4 +101,52 @@ describe('createConfigurationResolver', () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"ghost"'));
   });
+
+  describe('resolveBase', () => {
+    const chatBase = { ai_indices: ['elastic'] };
+
+    it('returns the type base configuration', async () => {
+      const resolve = createConfigurationResolver({
+        typeRegistry: createTypeRegistryStub([
+          { id: 'investigation', baseConfiguration: { ai_indices: ['sig-events'] } },
+        ]),
+        logger: loggerMock.create(),
+      });
+
+      expect(await resolve.resolveBase('investigation', ctx)).toEqual({
+        ai_indices: ['sig-events'],
+      });
+    });
+
+    it('resolves the function form against the request context', async () => {
+      const baseConfiguration = jest.fn().mockReturnValue({ ai_indices: ['per-request'] });
+      const resolve = createConfigurationResolver({
+        typeRegistry: createTypeRegistryStub([{ id: 'investigation', baseConfiguration }]),
+        logger: loggerMock.create(),
+      });
+
+      expect(await resolve.resolveBase('investigation', ctx)).toEqual({
+        ai_indices: ['per-request'],
+      });
+      expect(baseConfiguration).toHaveBeenCalledWith(ctx);
+    });
+
+    // The merge path deliberately substitutes the chat base so execution keeps working. Reporting
+    // that substitution as the agent's own configuration would misattribute another type's values,
+    // so `resolveBase` says "unknown" instead.
+    it('returns undefined for an unknown type instead of falling back to the chat base', async () => {
+      const resolve = createConfigurationResolver({
+        typeRegistry: createTypeRegistryStub([
+          { id: chatAgentTypeId, baseConfiguration: chatBase },
+        ]),
+        logger: loggerMock.create(),
+      });
+
+      expect(await resolve.resolveBase('ghost', ctx)).toBeUndefined();
+      // ...while the merge path still applies the fallback.
+      expect(await resolve({ agentType: 'ghost', configuration: { tools: [] }, ctx })).toEqual(
+        expect.objectContaining({ ai_indices: ['elastic'] })
+      );
+    });
+  });
 });

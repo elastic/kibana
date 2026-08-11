@@ -14,8 +14,9 @@ import type { AgentDefinitionWithPermissions } from '../../../../common/http_api
 import { useAgentBuilderAgents } from '../../hooks/agents/use_agents';
 import { useCanUpdateAgent } from '../../hooks/agents/use_can_update_agent';
 import { useAgentAiIndices } from '../../hooks/ai_indices/use_agent_ai_indices';
+import { useBaseAiIndices } from '../../hooks/ai_indices/use_base_ai_indices';
 import { useListAiIndices } from '../../hooks/ai_indices/use_list_ai_indices';
-import { getContextStatus, hasDefaultAiIndex } from '../../hooks/ai_indices/context_status';
+import { getContextStatus } from '../../hooks/ai_indices/context_status';
 import { labels } from '../../utils/i18n';
 import { AiIndexSelector } from './ai_index_selector';
 import { ContextStatusBadge } from './context_status_badge';
@@ -23,10 +24,18 @@ import { ContextStatusBadge } from './context_status_badge';
 interface RetrievesFromCellProps {
   agent: AgentDefinitionWithPermissions;
   aiIndices: AiIndexHttpItem[];
+  ownIds: string[];
+  baseIds: string[];
   onChange: (agent: AgentDefinitionWithPermissions, selectedIds: string[]) => void;
 }
 
-const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({ agent, aiIndices, onChange }) => {
+const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({
+  agent,
+  aiIndices,
+  ownIds,
+  baseIds,
+  onChange,
+}) => {
   const canEditAgent = useCanUpdateAgent({ agent });
 
   const handleChange = useCallback(
@@ -34,9 +43,9 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({ agent, aiIndices,
     [agent, onChange]
   );
 
-  // Agents whose type contributes no AI indices never reach the Context Engine, so there is
-  // nothing to select for them.
-  if (getContextStatus(agent) === 'off') {
+  // An agent with neither its own AI indices nor any from its type never reaches the Context
+  // Engine, so there is nothing to select for it.
+  if (getContextStatus({ own: ownIds, base: baseIds }) === 'off') {
     return (
       <EuiText size="s" color="subdued" data-test-subj="agentBuilderContextOffMessage">
         {labels.context.contextOffMessage}
@@ -48,8 +57,8 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({ agent, aiIndices,
     <AiIndexSelector
       agentName={agent.name}
       aiIndices={aiIndices}
-      selectedIds={agent.configuration.ai_indices ?? []}
-      includesDefaultAiIndex={hasDefaultAiIndex(agent)}
+      selectedIds={ownIds}
+      defaultIds={baseIds}
       isDisabled={!canEditAgent}
       onChange={handleChange}
     />
@@ -59,7 +68,12 @@ const RetrievesFromCell: React.FC<RetrievesFromCellProps> = ({ agent, aiIndices,
 export const ContextTable: React.FC = () => {
   const { agents, isLoading: isLoadingAgents } = useAgentBuilderAgents();
   const { aiIndices, isLoading: isLoadingAiIndices, error: aiIndicesError } = useListAiIndices();
+  const { baseAiIndicesByAgentId, isLoading: isLoadingBaseAiIndices } = useBaseAiIndices();
   const { setAiIndices } = useAgentAiIndices();
+
+  // Until the base configuration lands every agent looks like it has no AI indices at all, which
+  // would render a column of "off" pills. Hold the rows back rather than show a wrong state.
+  const isLoading = isLoadingAgents || isLoadingAiIndices || isLoadingBaseAiIndices;
 
   const handleChange = useCallback(
     (agent: AgentDefinitionWithPermissions, selectedIds: string[]) => {
@@ -90,17 +104,28 @@ export const ContextTable: React.FC = () => {
         name: labels.context.columnContext,
         width: '120px',
         render: (agent: AgentDefinitionWithPermissions) => (
-          <ContextStatusBadge status={getContextStatus(agent)} />
+          <ContextStatusBadge
+            status={getContextStatus({
+              own: agent.configuration.ai_indices ?? [],
+              base: baseAiIndicesByAgentId[agent.id] ?? [],
+            })}
+          />
         ),
       },
       {
         name: labels.context.columnRetrievesFrom,
         render: (agent: AgentDefinitionWithPermissions) => (
-          <RetrievesFromCell agent={agent} aiIndices={aiIndices} onChange={handleChange} />
+          <RetrievesFromCell
+            agent={agent}
+            aiIndices={aiIndices}
+            ownIds={agent.configuration.ai_indices ?? []}
+            baseIds={baseAiIndicesByAgentId[agent.id] ?? []}
+            onChange={handleChange}
+          />
         ),
       },
     ],
-    [aiIndices, handleChange]
+    [aiIndices, baseAiIndicesByAgentId, handleChange]
   );
 
   return (
@@ -113,9 +138,9 @@ export const ContextTable: React.FC = () => {
         />
       ) : null}
       <EuiBasicTable
-        items={agents}
+        items={isLoading ? [] : agents}
         columns={columns}
-        loading={isLoadingAgents || isLoadingAiIndices}
+        loading={isLoading}
         noItemsMessage={labels.context.noAgentsMessage}
         tableCaption={labels.context.tableCaption}
         data-test-subj="agentBuilderContextTable"

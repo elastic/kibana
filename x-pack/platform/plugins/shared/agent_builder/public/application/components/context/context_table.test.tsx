@@ -19,6 +19,7 @@ const mockNavigateToContextEngine = jest.fn();
 
 jest.mock('../../hooks/agents/use_agents');
 jest.mock('../../hooks/ai_indices/use_list_ai_indices');
+jest.mock('../../hooks/ai_indices/use_base_ai_indices');
 jest.mock('../../hooks/ai_indices/use_agent_ai_indices');
 jest.mock('../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine: mockNavigateToContextEngine }),
@@ -26,18 +27,39 @@ jest.mock('../../hooks/use_navigation', () => ({
 
 const { useAgentBuilderAgents } = jest.requireMock('../../hooks/agents/use_agents');
 const { useListAiIndices } = jest.requireMock('../../hooks/ai_indices/use_list_ai_indices');
+const { useBaseAiIndices } = jest.requireMock('../../hooks/ai_indices/use_base_ai_indices');
 const { useAgentAiIndices } = jest.requireMock('../../hooks/ai_indices/use_agent_ai_indices');
 
-const agent = (
-  overrides: Partial<AgentDefinitionWithPermissions> & { id: string }
-): AgentDefinitionWithPermissions =>
+const agent = (id: string, ownAiIndices: string[] = [], canUpdate = true) =>
   ({
-    name: `Agent ${overrides.id}`,
+    id,
+    name: `Agent ${id}`,
     type: 'chat',
-    configuration: { tools: [], ai_indices: [] },
-    permissions: { update_agent: true },
-    ...overrides,
+    configuration: { tools: [], ai_indices: ownAiIndices },
+    permissions: { update_agent: canUpdate },
   } as unknown as AgentDefinitionWithPermissions);
+
+/** `own` comes from the agent list; `base` from the internal base-configuration route. */
+const show = (
+  agents: AgentDefinitionWithPermissions[],
+  baseAiIndicesByAgentId: Record<string, string[]> = {},
+  { isLoadingBase = false }: { isLoadingBase?: boolean } = {}
+) => {
+  useAgentBuilderAgents.mockReturnValue({ agents, isLoading: false });
+  useBaseAiIndices.mockReturnValue({
+    baseAiIndicesByAgentId,
+    isLoading: isLoadingBase,
+    error: undefined,
+  });
+};
+
+const openSelector = async () => {
+  await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
+  return screen.findByTestId('agentBuilderAiIndexSelectable');
+};
+
+const optionFor = (selectable: HTMLElement, id: string) =>
+  within(selectable).getByText(id).closest('li');
 
 const renderTable = () =>
   render(
@@ -53,18 +75,15 @@ describe('ContextTable', () => {
     jest.clearAllMocks();
     useAgentAiIndices.mockReturnValue({ setAiIndices, isUpdating: false });
     useListAiIndices.mockReturnValue({
-      aiIndices: [{ id: 'sales' }, { id: 'support' }],
+      aiIndices: [{ id: 'elastic' }, { id: 'sales' }, { id: 'support' }],
       isLoading: false,
       error: undefined,
     });
-    useAgentBuilderAgents.mockReturnValue({ agents: [], isLoading: false });
+    show([]);
   });
 
   it('renders one row per agent', () => {
-    useAgentBuilderAgents.mockReturnValue({
-      agents: [agent({ id: 'a' }), agent({ id: 'b' })],
-      isLoading: false,
-    });
+    show([agent('a'), agent('b')], { a: ['elastic'], b: ['elastic'] });
 
     renderTable();
 
@@ -72,44 +91,47 @@ describe('ContextTable', () => {
     expect(screen.getByText('Agent b')).toBeInTheDocument();
   });
 
-  it('shows the Auto badge and a selector for a chat agent with no AI indices', () => {
-    useAgentBuilderAgents.mockReturnValue({ agents: [agent({ id: 'a' })], isLoading: false });
+  describe('status badge', () => {
+    it('shows On when the agent has AI indices of its own', () => {
+      show([agent('a', ['sales'])], { a: ['elastic'] });
 
-    renderTable();
+      renderTable();
 
-    expect(screen.getByTestId('agentBuilderContextStatusBadge-auto')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderAiIndexSelectorButton')).toBeInTheDocument();
-  });
-
-  it('shows the On badge when the agent has AI indices configured', () => {
-    useAgentBuilderAgents.mockReturnValue({
-      agents: [agent({ id: 'a', configuration: { tools: [], ai_indices: ['sales'] } as never })],
-      isLoading: false,
+      expect(screen.getByTestId('agentBuilderContextStatusBadge-on')).toBeInTheDocument();
     });
 
-    renderTable();
+    it('shows Auto when only the agent type contributes AI indices', () => {
+      show([agent('a')], { a: ['elastic'] });
 
-    expect(screen.getByTestId('agentBuilderContextStatusBadge-on')).toBeInTheDocument();
-  });
+      renderTable();
 
-  it('shows the Off badge and static text, with no selector, for a non-chat agent type', () => {
-    useAgentBuilderAgents.mockReturnValue({
-      agents: [agent({ id: 'a', type: 'custom_type' })],
-      isLoading: false,
+      expect(screen.getByTestId('agentBuilderContextStatusBadge-auto')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderAiIndexSelectorButton')).toBeInTheDocument();
     });
 
-    renderTable();
+    it('shows Off, with static text and no selector, when neither layer contributes', () => {
+      show([agent('a')], { a: [] });
 
-    expect(screen.getByTestId('agentBuilderContextStatusBadge-off')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderContextOffMessage')).toBeInTheDocument();
-    expect(screen.queryByTestId('agentBuilderAiIndexSelectorButton')).not.toBeInTheDocument();
+      renderTable();
+
+      expect(screen.getByTestId('agentBuilderContextStatusBadge-off')).toBeInTheDocument();
+      expect(screen.getByTestId('agentBuilderContextOffMessage')).toBeInTheDocument();
+      expect(screen.queryByTestId('agentBuilderAiIndexSelectorButton')).not.toBeInTheDocument();
+    });
+
+    // A code-registered type such as the sig-events ones contributes AI indices, so its agents
+    // must not read as Off just because they store none of their own.
+    it('shows Auto for a type whose contributed index is not registered in the Context Engine', () => {
+      show([agent('a')], { a: ['another-one'] });
+
+      renderTable();
+
+      expect(screen.getByTestId('agentBuilderContextStatusBadge-auto')).toBeInTheDocument();
+    });
   });
 
   it('disables the selector when the user cannot update the agent', () => {
-    useAgentBuilderAgents.mockReturnValue({
-      agents: [agent({ id: 'a', permissions: { update_agent: false } as never })],
-      isLoading: false,
-    });
+    show([agent('a', ['sales'], false)], { a: [] });
 
     renderTable();
 
@@ -117,16 +139,11 @@ describe('ContextTable', () => {
   });
 
   it('submits the merged id list when an AI index is checked', async () => {
-    useAgentBuilderAgents.mockReturnValue({
-      agents: [agent({ id: 'a', configuration: { tools: [], ai_indices: ['sales'] } as never })],
-      isLoading: false,
-    });
+    show([agent('a', ['sales'])], { a: [] });
 
     renderTable();
 
-    await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
-    const selectable = await screen.findByTestId('agentBuilderAiIndexSelectable');
-    await userEvent.click(within(selectable).getByText('support'));
+    await userEvent.click(within(await openSelector()).getByText('support'));
 
     expect(setAiIndices).toHaveBeenCalledWith({
       agentId: 'a',
@@ -135,37 +152,35 @@ describe('ContextTable', () => {
     });
   });
 
-  describe('the default `elastic` AI index', () => {
-    beforeEach(() => {
-      useListAiIndices.mockReturnValue({
-        aiIndices: [{ id: 'elastic' }, { id: 'sales' }],
-        isLoading: false,
-        error: undefined,
-      });
-    });
-
-    it('is ticked and cannot be unticked for a chat agent', async () => {
-      useAgentBuilderAgents.mockReturnValue({ agents: [agent({ id: 'a' })], isLoading: false });
+  describe('AI indices contributed by the agent type', () => {
+    it('are ticked and cannot be unticked', async () => {
+      show([agent('a')], { a: ['elastic'] });
 
       renderTable();
 
-      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
-      const elasticOption = within(await screen.findByTestId('agentBuilderAiIndexSelectable'))
-        .getByText('elastic')
-        .closest('li');
+      const elastic = optionFor(await openSelector(), 'elastic');
 
-      expect(elasticOption).toHaveAttribute('aria-checked', 'true');
-      expect(elasticOption).toHaveAttribute('aria-disabled', 'true');
+      expect(elastic).toHaveAttribute('aria-checked', 'true');
+      expect(elastic).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it('is never persisted when another index is selected', async () => {
-      useAgentBuilderAgents.mockReturnValue({ agents: [agent({ id: 'a' })], isLoading: false });
+    it('are listed even when the Context Engine does not know them', async () => {
+      show([agent('a')], { a: ['another-one'] });
 
       renderTable();
 
-      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
-      const selectable = await screen.findByTestId('agentBuilderAiIndexSelectable');
-      await userEvent.click(within(selectable).getByText('sales'));
+      const unknown = optionFor(await openSelector(), 'another-one');
+
+      expect(unknown).toHaveAttribute('aria-checked', 'true');
+      expect(unknown).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('are never written back onto the agent', async () => {
+      show([agent('a')], { a: ['elastic'] });
+
+      renderTable();
+
+      await userEvent.click(within(await openSelector()).getByText('sales'));
 
       expect(setAiIndices).toHaveBeenCalledWith({
         agentId: 'a',
@@ -174,58 +189,69 @@ describe('ContextTable', () => {
       });
     });
 
-    // Storing it is redundant, but an unrelated edit must not silently drop it.
-    it('is preserved when the agent already stores it explicitly', async () => {
-      useAgentBuilderAgents.mockReturnValue({
-        agents: [
-          agent({ id: 'a', configuration: { tools: [], ai_indices: ['elastic'] } as never }),
-        ],
-        isLoading: false,
-      });
+    // The trap that made `base − own` wrong: an id in both layers is still type-contributed, so
+    // it must stay disabled rather than becoming editable.
+    it('stay disabled when the agent also stores the same id', async () => {
+      show([agent('a', ['elastic'])], { a: ['elastic'] });
 
       renderTable();
 
-      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
-      const selectable = await screen.findByTestId('agentBuilderAiIndexSelectable');
-      await userEvent.click(within(selectable).getByText('sales'));
-
-      expect(setAiIndices).toHaveBeenCalledWith({
-        agentId: 'a',
-        agentName: 'Agent a',
-        aiIndices: ['elastic', 'sales'],
-      });
+      expect(optionFor(await openSelector(), 'elastic')).toHaveAttribute('aria-disabled', 'true');
     });
 
-    it('is selectable like any other index for a non-chat agent that does not get it by default', async () => {
-      useAgentBuilderAgents.mockReturnValue({
-        agents: [
-          agent({
-            id: 'a',
-            type: 'custom_type',
-            configuration: { tools: [], ai_indices: ['sales'] } as never,
-          }),
-        ],
-        isLoading: false,
-      });
+    it('are selectable like any other index when the type contributes nothing', async () => {
+      show([agent('a', ['sales'])], { a: [] });
 
       renderTable();
 
-      await userEvent.click(screen.getByTestId('agentBuilderAiIndexSelectorButton'));
-      const elasticOption = within(await screen.findByTestId('agentBuilderAiIndexSelectable'))
-        .getByText('elastic')
-        .closest('li');
+      const elastic = optionFor(await openSelector(), 'elastic');
 
-      expect(elasticOption).toHaveAttribute('aria-checked', 'false');
-      expect(elasticOption).not.toHaveAttribute('aria-disabled', 'true');
+      expect(elastic).toHaveAttribute('aria-checked', 'false');
+      expect(elastic).not.toHaveAttribute('aria-disabled', 'true');
     });
   });
 
-  it('surfaces an error when the AI index list cannot be loaded', () => {
-    useListAiIndices.mockReturnValue({
-      aiIndices: [],
-      isLoading: false,
-      error: new Error('boom'),
+  // The API does not validate stored ids, so an agent can reference an index that was deleted or
+  // that falls outside the list endpoint's cap. Dropping those on an unrelated edit would destroy
+  // configuration with no warning.
+  describe('stored AI indices the Context Engine does not know about', () => {
+    it('are listed as checked', async () => {
+      show([agent('a', ['deleted-index'])], { a: [] });
+
+      renderTable();
+
+      expect(optionFor(await openSelector(), 'deleted-index')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
     });
+
+    it('survive an unrelated edit', async () => {
+      show([agent('a', ['deleted-index'])], { a: [] });
+
+      renderTable();
+
+      await userEvent.click(within(await openSelector()).getByText('sales'));
+
+      // Order carries no meaning here, so assert on membership rather than position.
+      expect(setAiIndices.mock.calls[0][0].aiIndices.sort()).toEqual(['deleted-index', 'sales']);
+    });
+  });
+
+  // Base config arrives on its own request. Rendering rows before it lands would show every agent
+  // as Off, since `base` would be empty for all of them.
+  it('renders no rows while the base configuration is still loading', () => {
+    show([agent('a')], {}, { isLoadingBase: true });
+
+    renderTable();
+
+    expect(screen.queryByText('Agent a')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderContextStatusBadge-off')).not.toBeInTheDocument();
+  });
+
+  it('surfaces an error when the AI index list cannot be loaded', () => {
+    useListAiIndices.mockReturnValue({ aiIndices: [], isLoading: false, error: new Error('boom') });
+    show([agent('a')], { a: [] });
 
     renderTable();
 

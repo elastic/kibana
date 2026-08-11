@@ -19,7 +19,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { CONTEXT_ENGINE_PATHS } from '@kbn/context-engine-plugin/common/paths';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -30,10 +29,10 @@ interface AiIndexSelectorProps {
   aiIndices: AiIndexHttpItem[];
   selectedIds: string[];
   /**
-   * Whether the agent's type merges the default `elastic` AI index in at runtime. When it does,
-   * that index is shown ticked and disabled: it always applies and cannot be removed.
+   * AI indices contributed by the agent's type. They always apply and cannot be removed here, so
+   * they render ticked and disabled, and are never sent back on save.
    */
-  includesDefaultAiIndex: boolean;
+  defaultIds: string[];
   isDisabled: boolean;
   onChange: (selectedIds: string[]) => void;
 }
@@ -42,7 +41,7 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
   agentName,
   aiIndices,
   selectedIds,
-  includesDefaultAiIndex,
+  defaultIds,
   isDisabled,
   onChange,
 }) => {
@@ -50,57 +49,61 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
   const { navigateToContextEngine } = useNavigation();
 
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-
-  // The default index is only *added* for display when it is not already stored on the agent.
-  // Storing it explicitly is redundant but legal, and an unrelated edit must not silently drop it.
-  const isDefaultForced =
-    includesDefaultAiIndex && !selectedIdSet.has(agentBuilderDefaultAiIndexId);
+  // Every type-contributed id is disabled, including one the agent also stores: it applies
+  // regardless, so unticking it would drop it from the agent and change nothing on screen.
+  const defaultIdSet = useMemo(() => new Set(defaultIds), [defaultIds]);
 
   const options = useMemo<EuiSelectableOption[]>(() => {
-    const knownIds = new Set(aiIndices.map((aiIndex) => aiIndex.id));
-    const items = [...aiIndices];
+    const registeredIds = new Set(aiIndices.map((aiIndex) => aiIndex.id));
 
-    // The default is registered in the Context Engine, so it is normally already in the list.
-    // Fall back to a synthetic entry if it has not been registered yet (first boot, for example).
-    if (includesDefaultAiIndex && !knownIds.has(agentBuilderDefaultAiIndexId)) {
-      items.unshift({ id: agentBuilderDefaultAiIndexId } as AiIndexHttpItem);
-    }
+    // Type-contributed and stored ids are listed even when the Context Engine does not know them:
+    // a type may point at an unregistered index, and an agent may reference one that was deleted.
+    // Omitting a stored id would also drop it on the next save, since only checked options are sent.
+    const orderedIds = [
+      ...defaultIds,
+      ...aiIndices.map((aiIndex) => aiIndex.id).filter((id) => !defaultIdSet.has(id)),
+      ...selectedIds.filter((id) => !defaultIdSet.has(id) && !registeredIds.has(id)),
+    ];
 
-    return items.map((aiIndex) => {
-      const isDefault = includesDefaultAiIndex && aiIndex.id === agentBuilderDefaultAiIndexId;
+    return orderedIds.map((id) => {
+      const isDefault = defaultIdSet.has(id);
+      const isUnregistered = !registeredIds.has(id);
+
       return {
-        key: aiIndex.id,
-        label: aiIndex.id,
-        checked: isDefault || selectedIdSet.has(aiIndex.id) ? 'on' : undefined,
+        key: id,
+        label: id,
+        checked: isDefault || selectedIdSet.has(id) ? 'on' : undefined,
         disabled: isDefault,
         append: isDefault ? (
           <EuiBadge color="hollow">{labels.context.defaultAiIndexBadge}</EuiBadge>
+        ) : isUnregistered ? (
+          <EuiBadge color="warning">{labels.context.unregisteredAiIndexBadge}</EuiBadge>
         ) : undefined,
       };
     });
-  }, [aiIndices, includesDefaultAiIndex, selectedIdSet]);
+  }, [aiIndices, defaultIds, defaultIdSet, selectedIds, selectedIdSet]);
 
+  // Type-contributed ids belong to the type, so they are stripped before saving even when the
+  // agent already stored one — persisting them would be redundant and imply they are editable.
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const checkedIds = newOptions
-        .filter((option) => option.checked === 'on')
-        .map((option) => option.key as string);
-
       onChange(
-        isDefaultForced
-          ? checkedIds.filter((id) => id !== agentBuilderDefaultAiIndexId)
-          : checkedIds
+        newOptions
+          .filter((option) => option.checked === 'on')
+          .map((option) => option.key as string)
+          .filter((id) => !defaultIdSet.has(id))
       );
     },
-    [onChange, isDefaultForced]
+    [onChange, defaultIdSet]
   );
 
-  // The button reports everything the agent actually retrieves from, including the forced default.
-  const buttonLabel = useMemo(() => {
-    const effectiveIds = isDefaultForced
-      ? [agentBuilderDefaultAiIndexId, ...selectedIds]
-      : selectedIds;
+  // Counts everything the agent retrieves from. An id in both lists is counted once.
+  const effectiveIds = useMemo(
+    () => [...defaultIds, ...selectedIds.filter((id) => !defaultIdSet.has(id))],
+    [defaultIds, defaultIdSet, selectedIds]
+  );
 
+  const buttonLabel = useMemo(() => {
     if (effectiveIds.length === 0) {
       return labels.context.selectorPlaceholder;
     }
@@ -108,7 +111,7 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
       return effectiveIds[0];
     }
     return labels.context.selectorSelectedCount(effectiveIds.length);
-  }, [selectedIds, isDefaultForced]);
+  }, [effectiveIds]);
 
   return (
     <EuiPopover
@@ -126,7 +129,7 @@ export const AiIndexSelector: React.FC<AiIndexSelectorProps> = ({
             onClick={() => setIsOpen((open) => !open)}
             aria-label={labels.context.selectorAriaLabel(agentName)}
             data-test-subj="agentBuilderAiIndexSelectorButton"
-            numActiveFilters={selectedIds.length || undefined}
+            numActiveFilters={effectiveIds.length || undefined}
           >
             {buttonLabel}
           </EuiFilterButton>

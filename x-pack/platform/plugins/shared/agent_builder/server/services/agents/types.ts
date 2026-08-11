@@ -10,6 +10,7 @@ import type {
   BuiltInAgentDefinition,
   AgentTypeDefinition,
   AgentAvailabilityConfig,
+  AgentBaseConfiguration,
 } from '@kbn/agent-builder-server/agents';
 import type {
   AgentConfiguration,
@@ -51,6 +52,19 @@ export interface AgentsServiceStart {
     agent: AgentDefinition;
     request: KibanaRequest;
   }) => Promise<AgentConfiguration>;
+  /**
+   * Resolves only the base configuration contributed by the agent's type, without merging the
+   * agent's own configuration into it. Callers that need to tell the two apart cannot use
+   * {@link AgentsServiceStart.resolveAgentConfiguration}, since the merge unions them.
+   *
+   * Resolves to `undefined` when the agent's type is not registered. Unlike the execution path,
+   * this does not fall back to the `chat` type: reporting another type's configuration as the
+   * agent's own would be a guess presented as fact.
+   */
+  resolveAgentBaseConfiguration: (opts: {
+    agent: Pick<AgentDefinition, 'type'>;
+    request: KibanaRequest;
+  }) => Promise<AgentBaseConfiguration | undefined>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;

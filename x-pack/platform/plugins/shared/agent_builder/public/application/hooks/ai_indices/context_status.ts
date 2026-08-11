@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
-
 export type ContextStatus = 'on' | 'auto' | 'off';
 
-type AgentShape = Pick<AgentDefinition, 'type' | 'configuration'>;
-
-/**
- * Whether the agent's type merges the default `elastic` AI index in at runtime, meaning the agent
- * always retrieves from it regardless of what is stored on the agent itself.
- */
-export const hasDefaultAiIndex = (agent: Pick<AgentDefinition, 'type'>): boolean =>
-  agent.type === chatAgentTypeId;
+interface ContextStatusArgs {
+  /** AI indices stored on the agent itself (`configuration.ai_indices`). */
+  own: string[];
+  /** AI indices contributed by the agent's type, which always apply. */
+  base: string[];
+}
 
 /**
  * Derives how an agent uses the Context Engine.
  *
- * - `on`   — the agent has explicitly-configured AI indices.
- * - `auto` — nothing configured, but the agent's *type* contributes a default. The `chat` agent
- *            type registers `baseConfiguration: { ai_indices: [agentBuilderDefaultAiIndexId] }`,
- *            which is merged in at runtime, so these agents still retrieve from the Context
- *            Engine even though the GET response shows an empty list.
- * - `off`  — nothing configured and the type contributes no default, so the agent does not use
- *            the Context Engine at all.
+ * - `on`   — the agent has AI indices of its own.
+ * - `auto` — none of its own, but its type contributes some, so it still retrieves.
+ * - `off`  — neither, so the agent does not use the Context Engine at all.
  *
- * Note this assumes `chat` is the only agent type whose base configuration supplies AI indices.
- * The type registry is server-side and its base configurations are not exposed over HTTP, so the
- * browser cannot determine this in general. Agent types are allow-listed, and
- * `agent-builder-server/allow_lists.test.ts` pins that list so a new type fails a test and gets
- * reviewed against this derivation.
+ * `base` comes from the internal base-configuration route: type base configurations are resolved
+ * per request on the server and are not part of the public agent response.
  */
-export const getContextStatus = (agent: AgentShape): ContextStatus => {
-  if ((agent.configuration.ai_indices?.length ?? 0) > 0) {
+export const getContextStatus = ({ own, base }: ContextStatusArgs): ContextStatus => {
+  if (own.length > 0) {
     return 'on';
   }
-  return hasDefaultAiIndex(agent) ? 'auto' : 'off';
+  return base.length > 0 ? 'auto' : 'off';
 };

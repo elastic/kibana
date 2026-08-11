@@ -10,6 +10,7 @@ import { chatAgentTypeId, type AgentConfiguration } from '@kbn/agent-builder-com
 import type {
   AgentConfigContext,
   AgentBaseConfiguration,
+  AgentTypeDefinition,
   AgentTypeRegistry,
 } from '@kbn/agent-builder-server/agents';
 import { mergeAgentConfiguration } from '@kbn/agent-builder-server/agents';
@@ -27,6 +28,14 @@ export const createConfigurationResolver = ({
 }) => {
   const warnedUnknownTypes = new Set<string>();
 
+  const readBaseConfiguration = async (
+    type: AgentTypeDefinition,
+    ctx: AgentConfigContext
+  ): Promise<AgentBaseConfiguration> => {
+    const base = type.baseConfiguration ?? {};
+    return typeof base === 'function' ? base(ctx) : base;
+  };
+
   const resolveBaseConfiguration = async (
     typeId: string,
     ctx: AgentConfigContext
@@ -41,11 +50,26 @@ export const createConfigurationResolver = ({
       }
       type = typeRegistry.get(chatAgentTypeId);
     }
-    const base = type?.baseConfiguration ?? {};
-    return typeof base === 'function' ? base(ctx) : base;
+    return type ? readBaseConfiguration(type, ctx) : {};
   };
 
-  return async ({
+  /**
+   * Resolves a type's base configuration without the unknown-type fallback, returning `undefined`
+   * when the type is not registered.
+   *
+   * The fallback above keeps execution working when a type is missing, but it substitutes another
+   * type's configuration. Callers that *report* configuration must not present that substitution
+   * as the agent's own, so they get "unknown" instead and can say so.
+   */
+  const resolveRegisteredBaseConfiguration = async (
+    typeId: string,
+    ctx: AgentConfigContext
+  ): Promise<AgentBaseConfiguration | undefined> => {
+    const type = typeRegistry.get(typeId);
+    return type ? readBaseConfiguration(type, ctx) : undefined;
+  };
+
+  const resolve = async ({
     agentType,
     configuration,
     ctx,
@@ -57,6 +81,11 @@ export const createConfigurationResolver = ({
     const base = await resolveBaseConfiguration(agentType, ctx);
     return mergeAgentConfiguration(base, configuration);
   };
+
+  // `resolveBase` is exposed alongside the merged result because callers that need to distinguish
+  // the type's contribution from the agent's own configuration cannot recover it from the merge:
+  // the two are unioned, so an entry present in both is indistinguishable afterwards.
+  return Object.assign(resolve, { resolveBase: resolveRegisteredBaseConfiguration });
 };
 
 export type ConfigurationResolver = ReturnType<typeof createConfigurationResolver>;

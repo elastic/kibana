@@ -14,16 +14,21 @@ import type {
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type {
+  AgentBaseConfigurationItem,
   CreateAgentResponse,
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
   GetAgentResponse,
+  ListAgentBaseConfigurationResponse,
   ListAgentResponse,
   ListAgentResponseItem,
   UpdateAgentAccessControlResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
-import { publicApiPath } from '../../../common/constants';
+import { internalApiPath, publicApiPath } from '../../../common/constants';
+
+/** Static, so it does not read as a dynamic http path. */
+const AGENT_BASE_CONFIGURATION_PATH = `${internalApiPath}/agents/_base_configuration`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -45,6 +50,19 @@ export class AgentService {
    */
   async get(id: string): Promise<GetAgentResponse> {
     return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+  }
+
+  /**
+   * Lists the configuration each listed agent inherits from its type, keyed by agent id.
+   *
+   * `list()` only reports an agent's own configuration, so this is the only way to tell which
+   * values are contributed by the type and therefore not editable on the agent.
+   */
+  async listBaseConfigurations(): Promise<AgentBaseConfigurationItem[]> {
+    const res = await this.http.get<ListAgentBaseConfigurationResponse>(
+      AGENT_BASE_CONFIGURATION_PATH
+    );
+    return res.results;
   }
 
   /**

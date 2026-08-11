@@ -37,6 +37,25 @@ export interface DeleteAgentResponse {
 }
 
 /**
+ * Configuration contributed by an agent's *type*, which always applies on top of the agent's own
+ * configuration and cannot be edited on the agent. Internal API only: it exists so the UI can tell
+ * type-contributed values apart from the agent's own, which the merged configuration cannot express.
+ *
+ * Projected rather than complete — a type's base `instructions` run to tens of kilobytes, and no
+ * consumer needs them in the browser.
+ */
+export interface AgentBaseConfigurationItem {
+  agent_id: string;
+  configuration: {
+    ai_indices: string[];
+  };
+}
+
+export interface ListAgentBaseConfigurationResponse {
+  results: AgentBaseConfigurationItem[];
+}
+
+/**
  * Response shape for `GET /api/agent_builder/agents/{id}/access_control`.
  *
  * `permissions.update_access_control` indicates whether the requesting user can edit access

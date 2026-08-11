@@ -5,56 +5,30 @@
  * 2.0.
  */
 
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { getContextStatus, hasDefaultAiIndex } from './context_status';
-
-type AgentShape = Pick<AgentDefinition, 'type' | 'configuration'>;
-
-const agent = (type: string, aiIndices?: string[]): AgentShape =>
-  ({
-    type,
-    configuration: { tools: [], ...(aiIndices === undefined ? {} : { ai_indices: aiIndices }) },
-  } as AgentShape);
-
-describe('hasDefaultAiIndex', () => {
-  it('is true for chat agents, which get the `elastic` index merged in at runtime', () => {
-    expect(hasDefaultAiIndex({ type: chatAgentTypeId })).toBe(true);
-  });
-
-  it('is false for any other agent type', () => {
-    expect(hasDefaultAiIndex({ type: 'custom_type' })).toBe(false);
-  });
-});
+import { getContextStatus } from './context_status';
 
 describe('getContextStatus', () => {
-  describe('with configured AI indices', () => {
-    it('returns "on" for a chat agent', () => {
-      expect(getContextStatus(agent(chatAgentTypeId, ['sales']))).toBe('on');
-    });
-
-    it('returns "on" for a non-chat agent type as well', () => {
-      expect(getContextStatus(agent('custom_type', ['sales']))).toBe('on');
+  describe('when the agent has AI indices of its own', () => {
+    it('returns "on" whether or not the type contributes any', () => {
+      expect(getContextStatus({ own: ['sales'], base: [] })).toBe('on');
+      expect(getContextStatus({ own: ['sales'], base: ['elastic'] })).toBe('on');
     });
   });
 
-  describe('with an empty AI index list', () => {
-    it('returns "auto" for a chat agent, which still gets the default index merged in', () => {
-      expect(getContextStatus(agent(chatAgentTypeId, []))).toBe('auto');
+  describe('when the agent has none of its own', () => {
+    it('returns "auto" when the type contributes some', () => {
+      expect(getContextStatus({ own: [], base: ['elastic'] })).toBe('auto');
+      expect(getContextStatus({ own: [], base: ['another-one'] })).toBe('auto');
     });
 
-    it('returns "off" for a type that contributes no default', () => {
-      expect(getContextStatus(agent('custom_type', []))).toBe('off');
+    it('returns "off" when the type contributes none', () => {
+      expect(getContextStatus({ own: [], base: [] })).toBe('off');
     });
   });
 
-  describe('with no ai_indices field at all', () => {
-    it('returns "auto" for a chat agent', () => {
-      expect(getContextStatus(agent(chatAgentTypeId))).toBe('auto');
-    });
-
-    it('returns "off" for a type that contributes no default', () => {
-      expect(getContextStatus(agent('custom_type'))).toBe('off');
-    });
+  // The same id can legally sit in both layers. It still counts as the agent's own, so the pill
+  // reads "on" rather than "auto".
+  it('returns "on" when the only index is present in both layers', () => {
+    expect(getContextStatus({ own: ['elastic'], base: ['elastic'] })).toBe('on');
   });
 });

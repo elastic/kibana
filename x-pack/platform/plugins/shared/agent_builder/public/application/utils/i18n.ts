@@ -2916,14 +2916,14 @@ export const labels = {
     }),
     badgeAutoTooltip: i18n.translate('xpack.agentBuilder.context.badgeAutoTooltip', {
       defaultMessage:
-        'This agent retrieves from the built-in Elastic AI index only. That index is always included; select others to add to it.',
+        'This agent retrieves only from the AI indexes its type always includes. Select others to add to them.',
     }),
     badgeOff: i18n.translate('xpack.agentBuilder.context.badgeOff', {
       defaultMessage: 'Off',
     }),
     badgeOffTooltip: i18n.translate('xpack.agentBuilder.context.badgeOffTooltip', {
       defaultMessage:
-        'This agent type does not use the Context Engine, so it does not retrieve from any AI index.',
+        'This agent has no AI indexes of its own and its type contributes none, so it does not retrieve from the Context Engine.',
     }),
     selectorPlaceholder: i18n.translate('xpack.agentBuilder.context.selectorPlaceholder', {
       defaultMessage: 'Select AI indexes',
@@ -2931,6 +2931,12 @@ export const labels = {
     defaultAiIndexBadge: i18n.translate('xpack.agentBuilder.context.defaultAiIndexBadge', {
       defaultMessage: 'Always included',
     }),
+    unregisteredAiIndexBadge: i18n.translate(
+      'xpack.agentBuilder.context.unregisteredAiIndexBadge',
+      {
+        defaultMessage: 'Not registered',
+      }
+    ),
     selectorSelectedCount: (count: number) =>
       i18n.translate('xpack.agentBuilder.context.selectorSelectedCount', {
         defaultMessage: '{count, plural, one {# AI index selected} other {# AI indexes selected}}',
