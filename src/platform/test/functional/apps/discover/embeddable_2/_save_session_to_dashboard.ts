@@ -200,6 +200,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
+
+        // saving as a copy adds a new session without touching the original, use a step when migrating to scout
+        await discover.editEmbeddableInDiscover();
+        expect(await discover.isOnDashboardsEditMode()).to.be(true);
+
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await discover.saveSearchToDashboard('Copied Rendering Test', 'new', {
+          saveAsNew: true,
+        });
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+          '13 documents',
+          '4,633 documents',
+        ]);
       });
     });
   });
