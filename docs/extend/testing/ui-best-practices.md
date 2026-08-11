@@ -281,8 +281,8 @@ await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName)
 
 Prefer a ready-made helper over raw locators for EUI components, and hold it in a `readonly` class field. Scout has two sources:
 
-- **`page.components`** — the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Prefer these where your component is covered; autocomplete shows what's available.
-- **`@kbn/scout` wrappers** (or your solution's Scout package) — the `Eui*Wrapper` classes, for components the published helpers don't reach yet.
+- **`page.components`**: the published [EUI test helpers](./eui-test-helpers.md), pre-bound to the page. Prefer these where your component is covered; autocomplete shows what's available.
+- **`@kbn/scout` wrappers** (or your solution's Scout package): the `Eui*Wrapper` classes, for components the published helpers don't reach yet.
 
 :::::{dropdown} Example
 
@@ -306,10 +306,10 @@ export class MyAppPage {
 
 :::::
 
-If neither covers your component, `page.testSubj` locators are fine. When the component is EUI's, add a wrapper under `kbn-scout`'s `eui_components/` instead of keeping the logic in your page object — that's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
+If neither covers your component, `page.testSubj` locators are fine. When the component is EUI's, add a wrapper under `kbn-scout`'s `eui_components/` instead of keeping the logic in your page object. That's also the first step of the [path to publishing it in EUI](./eui-test-helpers.md#scout-eui-test-helpers-contribute).
 
 :::::{note}
-If a Component Object lacks what you need, don't subclass it or drive the component yourself — that puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
+If a Component Object lacks what you need, don't subclass it or drive the component yourself, which puts you back on the selectors these helpers replace. [Add the missing method to the helper](./eui-test-helpers.md#scout-eui-test-helpers-contribute) so every suite gets it.
 :::::
 
 ## Add accessibility checks at key UI checkpoints [add-a11y-checks]
