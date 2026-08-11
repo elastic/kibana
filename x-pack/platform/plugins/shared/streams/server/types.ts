@@ -30,10 +30,6 @@ import type {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -63,7 +59,6 @@ export interface StreamsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -72,7 +67,7 @@ export interface StreamsServer {
   cloud?: CloudSetup;
   /**
    * The running Kibana's version, e.g. `9.2.0`. Populated by the
-   * significant_events plugin, which needs it to identify the connecting
+   * significantEvents plugin, which needs it to identify the connecting
    * deployment to the Relay service.
    */
   kibanaVersion: string;
@@ -90,7 +85,6 @@ export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
@@ -108,7 +102,6 @@ export interface StreamsPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
-  taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
   alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;

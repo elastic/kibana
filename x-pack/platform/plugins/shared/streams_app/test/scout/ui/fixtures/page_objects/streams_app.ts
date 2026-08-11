@@ -9,14 +9,17 @@
 
 import moment from 'moment';
 import type { Locator, ScoutPage } from '@kbn/scout';
-import {
-  EuiCodeBlockWrapper,
-  EuiDataGridWrapper,
-  EuiSuperSelectWrapper,
-  KibanaCodeEditorWrapper,
-} from '@kbn/scout';
+import { KibanaCodeEditorWrapper, type EuiDataGridObject } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/stream_management/data_management/schema_editor/constants';
+
+interface CellValueExpectation {
+  columnName: string;
+  rowIndex: number;
+  value: string;
+  invertCondition?: boolean;
+  timeout?: number;
+}
 
 const LEGACY_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -29,7 +32,6 @@ export class StreamsApp {
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
   public readonly schemaDataGrid;
-  public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
@@ -63,6 +65,10 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  // Streams layout
+  public readonly streamsLayoutSourcesPlaceholder;
+  public readonly streamsLayoutPipelinesPlaceholder;
+  public readonly streamsLayoutDestinationsPlaceholder;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -78,22 +84,12 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
-    this.fieldTypeSuperSelect = new EuiSuperSelectWrapper(
-      this.page,
-      'streamsAppFieldFormTypeSelect'
-    );
-    // TODO: Make locator more specific when possible
-    this.previewDataGrid = new EuiDataGridWrapper(this.page, { locator: '.euiDataGrid' });
-    this.schemaDataGrid = new EuiDataGridWrapper(
-      this.page,
-      'streamsAppSchemaEditorFieldsTableLoaded'
-    );
-    this.advancedSettingsCodeBlock = new EuiCodeBlockWrapper(this.page, {
-      locator: '.euiCodeBlock',
-    });
+    this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
+    this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
+    this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
-    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatFieldInput = this.page.components.superSelect('streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
     this.createStreamButton = this.page.getByTestId('streamsAppCreateStreamButton');
     this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
@@ -132,6 +128,16 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    // Streams layout locators
+    this.streamsLayoutSourcesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutSourcesPlaceholder'
+    );
+    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutPipelinesPlaceholder'
+    );
+    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
+      'streamsLayoutDestinationsPlaceholder'
+    );
   }
 
   async goto() {
@@ -174,8 +180,20 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'attachments');
   }
 
-  async gotoCanvasTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'canvas');
+  async gotoStreamsLayout() {
+    await this.page.gotoApp('streams/new-experience');
+  }
+
+  async gotoStreamsLayoutTab(tabName: string) {
+    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+  }
+
+  getStreamsLayoutTab(tabName: string) {
+    return this.page.testSubj.locator(`streamsLayoutTab-${tabName}`);
+  }
+
+  async clickStreamsLayoutTab(tabName: string) {
+    await this.getStreamsLayoutTab(tabName).click();
   }
 
   // Canvas utility methods
@@ -444,7 +462,10 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
+    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
+    await expect(button).toBeVisible();
+    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
+    await button.evaluate((el) => (el as HTMLElement).click());
   }
 
   async fillRoutingRuleName(name: string) {
@@ -460,6 +481,26 @@ export class StreamsApp {
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
     await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
+  }
+
+  /**
+   * Draft-stream samples are fetched via ES|QL from the parent stream's `$.` view,
+   * which the server creates asynchronously. Until it propagates, the query fails with
+   * "Unknown index" and the data-source machine treats that as terminal (empty grid, no
+   * auto-retry), so the preview grid — and the view-mode toggle inside its toolbar — never
+   * render and any wait times out. Re-trigger the fetch via the refresh button until the
+   * grid appears, so a not-yet-propagated parent view is retried rather than fatally awaited.
+   */
+  async waitForDraftPreviewSamples() {
+    const grid = this.page.getByTestId('euiDataGridBody');
+    const refreshButton = this.page.getByRole('button', { name: 'Refresh data preview' });
+
+    await expect(async () => {
+      if (await grid.isVisible()) return;
+      // `click` auto-waits for the button to be enabled (i.e. not mid-load) before refetching.
+      await refreshButton.click({ timeout: 15_000 });
+      await expect(grid).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 90_000 });
   }
 
   async saveRoutingRule() {
@@ -1014,20 +1055,20 @@ export class StreamsApp {
    * Uses a high default timeout so the simulation preview has time to refresh
    * after transient stale values (e.g. literal "null" from a Set processor).
    */
-  async expectCellValueContains({
-    columnName,
-    rowIndex,
-    value,
-    invertCondition = false,
-    timeout = 30_000,
-  }: {
-    columnName: string;
-    rowIndex: number;
-    value: string;
-    invertCondition?: boolean;
-    timeout?: number;
-  }) {
-    const cellLocator = this.previewDataGrid.getCellLocatorByColId(rowIndex, columnName);
+  async expectCellValueContains(params: CellValueExpectation) {
+    await this.expectGridCellValueContains(this.previewDataGrid, params);
+  }
+
+  /** Same as {@link expectCellValueContains}, against the schema editor fields table. */
+  async expectSchemaEditorCellValueContains(params: CellValueExpectation) {
+    await this.expectGridCellValueContains(this.schemaDataGrid, params);
+  }
+
+  private async expectGridCellValueContains(
+    grid: EuiDataGridObject,
+    { columnName, rowIndex, value, invertCondition = false, timeout = 30_000 }: CellValueExpectation
+  ) {
+    const cellLocator = grid.cell(rowIndex, columnName);
 
     if (invertCondition) {
       await expect(cellLocator).not.toContainText(value, { timeout });
@@ -1399,7 +1440,7 @@ export class StreamsApp {
   }
 
   async fillConcatFieldInput(value: string) {
-    await this.concatFieldInput.selectOption(value);
+    await this.concatFieldInput.selectOptionByValue(value);
   }
 
   async fillConcatLiteralInput(value: string) {

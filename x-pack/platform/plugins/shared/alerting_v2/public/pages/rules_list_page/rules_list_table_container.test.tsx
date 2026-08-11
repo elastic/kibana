@@ -52,6 +52,12 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 
+const mockRunRuleMutate = jest.fn();
+const mockUseRunRule = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => mockUseRunRule(),
+}));
+
 const mockRules = [
   {
     id: 'rule-1',
@@ -113,6 +119,10 @@ describe('RulesListTableContainer', () => {
     });
     mockUseBulkDisableRules.mockReturnValue({
       mutate: mockBulkDisableMutate,
+      isLoading: false,
+    });
+    mockUseRunRule.mockReturnValue({
+      mutate: mockRunRuleMutate,
       isLoading: false,
     });
   });
@@ -216,6 +226,109 @@ describe('RulesListTableContainer', () => {
       await waitFor(() => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
       });
+    });
+
+    it('deselects a checked row once its delete succeeds, so a stale ID cannot leak into a later bulk action', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      expect(screen.getByTestId('checkboxSelectRow-rule-1')).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[0];
+      options.onSuccess();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-1')).not.toBeChecked();
+      });
+    });
+
+    it('does not exclude the deleted row from an active select-all, so selectedCount is not double-decremented', async () => {
+      renderContainer();
+
+      // Select a row to surface the cross-page "Select all" action, then enter select-all mode.
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[mockDeleteMutate.mock.calls.length - 1];
+      options.onSuccess();
+
+      // The row stays selected (still un-excluded) and the displayed count is
+      // unaffected here — the actual -1 comes from the list refetch dropping
+      // totalItemCount, not from touching the exclusion set.
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-1')).toBeChecked();
+      });
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+    });
+
+    it('clears a stale exclusion when the excluded row is deleted in select-all mode', async () => {
+      renderContainer();
+
+      // Enter select-all, then explicitly exclude rule-1.
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+
+      expect(screen.getByTestId('checkboxSelectRow-rule-1')).not.toBeChecked();
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('1 Selected');
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[mockDeleteMutate.mock.calls.length - 1];
+      options.onSuccess();
+
+      // The stale exclusion is cleared, so the remaining row goes back to selected.
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-2')).toBeChecked();
+      });
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+    });
+  });
+
+  describe('run rule', () => {
+    it('calls runRule mutation when run action is clicked', async () => {
+      renderContainer();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('runRule-rule-1')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('runRule-rule-1'));
+
+      expect(mockRunRuleMutate).toHaveBeenCalledWith({ id: 'rule-1' });
     });
   });
 

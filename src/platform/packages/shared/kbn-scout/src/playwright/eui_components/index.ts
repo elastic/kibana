@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnComboBoxObject } from './combo_box_object';
-import { EuiSelectableWrapper } from './selectable';
-import { EuiCheckBoxWrapper } from './check_box';
+import { EuiComboBoxObject } from '@elastic/eui-test-helpers';
+import { EuiDataGridObject } from './data_grid_object';
+import { EuiGlobalToastListObject } from './global_toast_list_object';
+import { EuiSuperSelectObject } from './super_select_object';
 import { EuiDataGridWrapper } from './data_grid';
 import { EuiToastWrapper } from './toast';
 import { EuiFieldTextWrapper } from './field_text';
@@ -17,9 +18,13 @@ import { EuiCodeBlockWrapper } from './code_block';
 import { EuiSuperSelectWrapper } from './super_select';
 
 export {
-  KbnComboBoxObject,
-  EuiSelectableWrapper,
-  EuiCheckBoxWrapper,
+  // Component Objects (@elastic/eui-test-helpers + prototypes destined for it),
+  // consumed through the `page.components` factories.
+  EuiComboBoxObject,
+  EuiDataGridObject,
+  EuiGlobalToastListObject,
+  EuiSuperSelectObject,
+  // Deprecated wrappers, kept until all consumers are migrated to `page.components`.
   EuiDataGridWrapper,
   EuiToastWrapper,
   EuiFieldTextWrapper,
