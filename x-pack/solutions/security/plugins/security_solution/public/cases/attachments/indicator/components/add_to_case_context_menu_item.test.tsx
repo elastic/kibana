@@ -7,29 +7,34 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AddToExistingCase } from './add_to_existing_case';
-import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import {
   generateMockFileIndicator,
   type Indicator,
 } from '../../../../../common/threat_intelligence/types/indicator';
+import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
+import { IndicatorAddToCaseContextMenuItem } from './add_to_case_context_menu_item';
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
-const onClick = () => window.alert('clicked');
+const onClick = jest.fn();
 
-describe('AddToExistingCase', () => {
-  it('should render an EuiContextMenuItem', () => {
-    const { getByTestId, getAllByText } = render(
+describe('IndicatorAddToCaseContextMenuItem', () => {
+  it('renders the singular add-to-case action', () => {
+    const { getByTestId, getByText } = render(
       <TestProvidersComponent>
-        <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
+        <IndicatorAddToCaseContextMenuItem
+          indicator={indicator}
+          onClick={onClick}
+          data-test-subj={TEST_ID}
+        />
       </TestProvidersComponent>
     );
+
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
-    expect(getAllByText('Add to existing case')).toHaveLength(1);
+    expect(getByText('Add to case')).toBeInTheDocument();
   });
 
-  it('should render the EuiContextMenuItem disabled if indicator is missing name', () => {
+  it('is disabled if the indicator is missing its name', () => {
     const fields = { ...indicator.fields };
     delete fields['threat.indicator.name'];
     const indicatorMissingName = {
@@ -38,22 +43,14 @@ describe('AddToExistingCase', () => {
     };
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <AddToExistingCase
+        <IndicatorAddToCaseContextMenuItem
           indicator={indicatorMissingName}
           onClick={onClick}
           data-test-subj={TEST_ID}
         />
       </TestProvidersComponent>
     );
-    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
-  });
 
-  it('should render the EuiContextMenuItem disabled if user has no update permission', () => {
-    const { getByTestId } = render(
-      <TestProvidersComponent>
-        <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
-      </TestProvidersComponent>
-    );
-    expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
+    expect(getByTestId(TEST_ID)).toBeDisabled();
   });
 });

@@ -16,10 +16,7 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
 import type { Status } from '../../../../../common/api/detection_engine';
-import {
-  ADD_TO_CASE_ACTION_IDS,
-  useAddToCaseActions,
-} from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
@@ -92,22 +89,6 @@ export const TakeActionButton = memo(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => setIsPopoverOpen((open) => !open), []);
     const closePopoverHandler = useCallback(() => setIsPopoverOpen(false), []);
-    const reportAddToCaseAction = useCallback(
-      (
-        actionId:
-          | typeof ADD_TO_CASE_ACTION_IDS.addToNewCase
-          | typeof ADD_TO_CASE_ACTION_IDS.addToExistingCase
-      ) => {
-        reportActionClicked({
-          flyoutType: 'document',
-          action:
-            actionId === ADD_TO_CASE_ACTION_IDS.addToNewCase
-              ? FLYOUT_ACTION.ADD_TO_CASE_NEW
-              : FLYOUT_ACTION.ADD_TO_CASE_EXISTING,
-        });
-      },
-      [reportActionClicked]
-    );
     const [isolateAction, setIsolateAction] = useState<HostIsolationAction | null>(null);
 
     const isInSecurityApp = useIsInSecurityApp();
@@ -145,13 +126,11 @@ export const TakeActionButton = memo(
       onAddIsolationStatusClick: setIsolateAction,
     });
 
-    const { addToCaseActionItems, addToCaseActionPanels = [] } = useAddToCaseActions({
+    const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
       nonEcsData,
       onMenuItemClick: closePopoverHandler,
-      onActionClick: reportAddToCaseAction,
       onSuccess: refetchFlyoutData,
-      useNestedCaseActions: true,
     });
 
     const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
@@ -351,7 +330,6 @@ export const TakeActionButton = memo(
         >
           <ActionMenu
             addToCaseItems={addToCaseActionItems}
-            addToCasePanels={addToCaseActionPanels}
             alertAssigneeItems={alertAssigneesItems}
             alertAssigneePanels={alertAssigneesPanels}
             alertTagItems={alertTagsItems}
