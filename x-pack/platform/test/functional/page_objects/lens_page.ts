@@ -247,10 +247,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        // Field commits asynchronously; wait for it before the next action or the transition is dropped.
+        // The operation switch schedules a debounced re-render that can discard a field
+        // selection made mid-render, leaving the combobox uncommitted. Re-select until it
+        // sticks so the column is complete before the next action.
         await retry.waitFor('field selection to commit', async () => {
           const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+          if (await comboBox.isOptionSelected(fieldCombo, opts.field!)) {
+            return true;
+          }
+          await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field!);
+          return false;
         });
       }
 
