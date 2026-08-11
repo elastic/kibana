@@ -219,6 +219,19 @@ export class TaskPool {
     }
   }
 
+  public cancelRunningTasksByTypes(taskTypes: string[]) {
+    const types = new Set(taskTypes);
+    if (types.size === 0) {
+      return;
+    }
+    this.logger.debug(`Cancelling running tasks of types: ${[...types].join(', ')}.`);
+    for (const task of this.tasksInPool.values()) {
+      if (types.has(task.taskType)) {
+        this.cancelTask(task);
+      }
+    }
+  }
+
   private handleMarkAsRunning(taskRunner: TaskRunner) {
     taskRunner
       .run()
