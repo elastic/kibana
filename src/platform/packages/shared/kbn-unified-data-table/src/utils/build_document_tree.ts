@@ -98,6 +98,22 @@ export const flattenedToNestedDocument = ({
   return result;
 };
 
+/**
+ * Serializes a row to JSON exactly as the JSON tree viewer renders it.
+ */
+export const sourceDocumentToJsonString = (
+  params: {
+    row: DataTableRecord;
+    dataView: DataView;
+    columnsMeta: DataTableColumnsMeta | undefined;
+    shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  },
+  { multiline }: { multiline: boolean }
+): string => {
+  const { tree } = flattenedToNestedDocument(params);
+  return multiline ? JSON.stringify(tree, null, 2) : JSON.stringify(tree);
+};
+
 const processFieldValue = (
   rawValue: unknown,
   fieldName: string,

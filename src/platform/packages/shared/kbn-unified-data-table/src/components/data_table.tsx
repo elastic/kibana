@@ -719,6 +719,11 @@ const InternalUnifiedDataTable = React.forwardRef<
           sortedRows;
     }, [sortedRows, isFilterActive, hasSelectedDocs, isDocSelected]);
 
+    const shouldShowFieldHandler = useMemo(() => {
+      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
+      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
+    }, [dataView, showMultiFields]);
+
     const valueToStringConverter: ValueToStringConverter = useCallback(
       (rowIndex, columnId, options) => {
         return convertValueToString({
@@ -729,9 +734,18 @@ const InternalUnifiedDataTable = React.forwardRef<
           fieldFormats,
           columnsMeta,
           options,
+          sourceDisplayMode,
+          shouldShowFieldHandler,
         });
       },
-      [displayedRows, dataView, fieldFormats, columnsMeta]
+      [
+        displayedRows,
+        dataView,
+        fieldFormats,
+        columnsMeta,
+        sourceDisplayMode,
+        shouldShowFieldHandler,
+      ]
     );
 
     /**
@@ -829,6 +843,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         valueToStringConverter,
         componentsTourSteps,
         isPlainRecord,
+        sourceDisplayMode,
         pageIndex: isPaginationEnabled ? paginationObj?.pageIndex : 0,
         pageSize: isPaginationEnabled ? paginationObj?.pageSize : displayedRows.length,
       }),
@@ -836,6 +851,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         componentsTourSteps,
         dataView,
         isPlainRecord,
+        sourceDisplayMode,
         isPaginationEnabled,
         displayedRows,
         expandedDoc,
@@ -846,11 +862,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         valueToStringConverter,
       ]
     );
-
-    const shouldShowFieldHandler = useMemo(() => {
-      const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
-      return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
-    }, [dataView, showMultiFields]);
 
     const { dataGridDensity, onChangeDataGridDensity } = useDataGridDensity({
       storage,

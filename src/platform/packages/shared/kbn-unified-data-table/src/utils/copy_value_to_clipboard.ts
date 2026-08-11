@@ -172,7 +172,7 @@ export const copyRowsAsTextToClipboard = async ({
   toastNotifications,
   valueToStringConverter,
   format,
-  sourceDisplayMode,
+  sourceDisplayMode = 'summary',
 }: {
   columns: string[];
   dataView: DataView;
@@ -180,7 +180,7 @@ export const copyRowsAsTextToClipboard = async ({
   toastNotifications: ToastsStart;
   valueToStringConverter: ValueToStringConverter;
   format: CopyAsTextFormat;
-  sourceDisplayMode: SourceDisplayMode;
+  sourceDisplayMode?: SourceDisplayMode;
 }): Promise<string | null> => {
   const rowSeparator = '\n';
   let withFormula = false;
