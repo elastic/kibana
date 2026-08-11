@@ -25,15 +25,18 @@ describe('AgentBuilderDashboardsPlugin', () => {
       {},
     ] as never);
 
-    plugin.setup(coreSetup as never, {
-      agentBuilder: {
-        attachments: { registerType: registerAttachmentType },
-        skills: { register: registerSkill },
-      },
-      agentBuilderSml: {
-        registerType: registerSmlType,
-      },
-    } as never);
+    plugin.setup(
+      coreSetup as never,
+      {
+        agentBuilder: {
+          attachments: { registerType: registerAttachmentType },
+          skills: { register: registerSkill },
+        },
+        agentBuilderSml: {
+          registerType: registerSmlType,
+        },
+      } as never
+    );
 
     await new Promise((resolve) => setImmediate(resolve));
 
