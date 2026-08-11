@@ -53,17 +53,78 @@ export function getHighlightReact(
   return fieldValue;
 }
 
+/** A `[start, end)` range within a field value, in character offsets. */
+type MarkRange = [start: number, end: number];
+
 /**
- * Applies search highlighting to a field value, returning React nodes.
+ * Strips the Kibana tags from a single ES highlight fragment, returning the
+ * plaintext and the spans (in plaintext coordinates) that were tagged.
  *
- * Receives a field value and a list of substrings that requires highlighting.
+ *   "@kibana-highlighted-field@ipsum@/kibana-highlighted-field@ dolor"
+ *   → { plaintext: "ipsum dolor", taggedSpans: [[0, 5]] }
+ */
+function parseTaggedFragment(fragment: string): { plaintext: string; taggedSpans: MarkRange[] } {
+  const [head, ...taggedParts] = fragment.split(highlightTags.pre);
+  let plaintext = head;
+  const taggedSpans: MarkRange[] = [];
+  for (const part of taggedParts) {
+    const [highlighted, ...rest] = part.split(highlightTags.post);
+    taggedSpans.push([plaintext.length, plaintext.length + highlighted.length]);
+    plaintext += highlighted + rest.join('');
+  }
+  return { plaintext, taggedSpans };
+}
+
+/**
+ * Computes the highlighted ranges (in `fieldValue` coordinates) for the DSL
+ * case, where each ES highlight is a context-window fragment of the field value
+ * with only the matched portions wrapped in Kibana tags.
  *
- * Step 1: for each highlight, strip its Kibana tags to get the plain substring,
- * then replace every occurrence of that substring in the working string with
- * the tagged version. React automatically escapes text node content.
+ * Ranges are computed against the original value — never a partially tagged
+ * working string — so one fragment's markers can never be matched by another
+ * fragment's text (searching e.g. "field" would otherwise match inside a
+ * previously inserted `@kibana-highlighted-field@` literal and render tag
+ * debris). Occurrences of a fragment are matched left-to-right without overlap,
+ * and a later occurrence is skipped when an earlier fragment placed a tag
+ * strictly inside it.
+ */
+function findMarkRanges(fieldValue: string, highlights: string[]): MarkRange[] {
+  const markRanges: MarkRange[] = [];
+  const seenFragments = new Set<string>();
+
+  for (const fragment of highlights) {
+    if (seenFragments.has(fragment)) continue;
+    seenFragments.add(fragment);
+
+    const { plaintext, taggedSpans } = parseTaggedFragment(fragment);
+    if (!plaintext || !taggedSpans.length) continue;
+
+    let anchor = fieldValue.indexOf(plaintext);
+    while (anchor !== -1) {
+      const anchorEnd = anchor + plaintext.length;
+      const brokenByPriorTag = markRanges.some(
+        ([start, end]) => (anchor < start && start < anchorEnd) || (anchor < end && end < anchorEnd)
+      );
+      if (brokenByPriorTag) {
+        anchor = fieldValue.indexOf(plaintext, anchor + 1);
+        continue;
+      }
+      for (const [spanStart, spanEnd] of taggedSpans) {
+        markRanges.push([anchor + spanStart, anchor + spanEnd]);
+      }
+      anchor = fieldValue.indexOf(plaintext, anchorEnd);
+    }
+  }
+
+  return markRanges;
+}
+
+/**
+ * Applies DSL search highlighting to a field value, returning React nodes.
  *
- * Step 2: convert the tag-substituted string to React nodes, wrapping each
- * highlighted span in a <mark> element.
+ * ES sends the clean field value plus a list of highlight fragments; we resolve
+ * those to mark ranges over the original value, then render plain segments
+ * interleaved with <mark> elements. React escapes text node content.
  */
 function highlightWithSubstrings(
   fieldValue: string,
@@ -71,65 +132,11 @@ function highlightWithSubstrings(
 ): React.ReactNode {
   if (!highlights?.length) return fieldValue;
 
-  // Step 1 — compute the highlighted ranges within the full value.
-  //
-  // ES highlight snippets are context-window fragments of the field value in
-  // which only the matched portions carry the Kibana tags, e.g.
-  //   "@kibana-highlighted-field@ipsum@/kibana-highlighted-field@ dolor amet".
-  // For each fragment, strip the tags while recording which spans of the plain
-  // fragment were tagged, anchor the plain fragment inside the full value, and
-  // project the tagged spans to value coordinates.
-  //
-  // All ranges are computed against the original value — never against a
-  // partially tagged working string — so one fragment's markers can never be
-  // matched by another fragment's text (searching for e.g. "field" would
-  // otherwise match inside a previously inserted @kibana-highlighted-field@
-  // literal and render tag debris). Two semantics of the previous
-  // string-substitution loop are preserved: occurrences of one fragment are
-  // matched left-to-right without overlap, and a later fragment's occurrence
-  // is skipped when an earlier fragment placed a tag strictly inside it (the
-  // substitution would no longer have found its text contiguously).
-  const tagPositions: number[] = [];
-  const markRanges: Array<[start: number, end: number]> = [];
-  const seenFragments = new Set<string>();
-
-  for (const fragment of highlights) {
-    if (seenFragments.has(fragment)) continue;
-    seenFragments.add(fragment);
-
-    // strip the tags, recording the tagged spans in plain-fragment coordinates
-    const [head, ...taggedParts] = fragment.split(highlightTags.pre);
-    let untagged = head;
-    const spans: Array<[start: number, end: number]> = [];
-    for (const part of taggedParts) {
-      const [highlighted, ...rest] = part.split(highlightTags.post);
-      spans.push([untagged.length, untagged.length + highlighted.length]);
-      untagged += highlighted + rest.join('');
-    }
-    if (!untagged || !spans.length) continue;
-
-    let anchor = fieldValue.indexOf(untagged);
-    while (anchor !== -1) {
-      const anchorEnd = anchor + untagged.length;
-      const brokenByPriorTag = tagPositions.some((pos) => anchor < pos && pos < anchorEnd);
-      if (brokenByPriorTag) {
-        anchor = fieldValue.indexOf(untagged, anchor + 1);
-        continue;
-      }
-      for (const [spanStart, spanEnd] of spans) {
-        markRanges.push([anchor + spanStart, anchor + spanEnd]);
-        tagPositions.push(anchor + spanStart, anchor + spanEnd);
-      }
-      anchor = fieldValue.indexOf(untagged, anchorEnd);
-    }
-  }
-
+  const markRanges = findMarkRanges(fieldValue, highlights);
   if (!markRanges.length) return fieldValue;
 
   markRanges.sort(([aStart], [bStart]) => aStart - bStart);
 
-  // Step 2 — convert to React nodes: plain segments interleaved with <mark>
-  // elements for each highlighted range.
   const nodes: React.ReactNode[] = [];
   let cursor = 0;
   for (const [rangeStart, rangeEnd] of markRanges) {
