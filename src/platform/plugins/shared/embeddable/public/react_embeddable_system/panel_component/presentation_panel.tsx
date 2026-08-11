@@ -12,7 +12,11 @@ import React, { useCallback, useMemo, useRef } from 'react';
 
 import { EuiErrorBoundary, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { PublishesHideBorder, PublishesTitle } from '@kbn/presentation-publishing';
+import type {
+  PublishesFetchSetting,
+  PublishesHideBorder,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -155,12 +159,15 @@ export const PresentationPanel = <
   hidePanelChrome,
   ...rest
 }: PresentationPanelProps<ApiType, ComponentPropsType>) => {
-  const [blockingError, panelHideBorder, parentHideBorder] = useBatchedPublishingSubjects(
-    componentApi.blockingError$ ?? new BehaviorSubject(undefined),
-    componentApi.hideBorder$ ?? new BehaviorSubject(false),
-    (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
-      new BehaviorSubject(false)
-  );
+  const [blockingError, panelHideBorder, parentHideBorder, fetchSetting] =
+    useBatchedPublishingSubjects(
+      componentApi.blockingError$ ?? new BehaviorSubject(undefined),
+      componentApi.hideBorder$ ?? new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesHideBorder>)?.hideBorder$ ??
+        new BehaviorSubject(false),
+      (componentApi.parentApi as Partial<PublishesFetchSetting>)?.fetchSetting$ ??
+        new BehaviorSubject('all')
+    );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
@@ -176,7 +183,9 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
-        <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
+        {fetchSetting === 'visible' && (
+          <VisibilityTracker setVisibility={componentInternalApi.setVisibility} />
+        )}
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -188,7 +197,14 @@ export const PresentationPanel = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, Component, componentProps, componentInternalApi.setVisibility]);
+  }, [
+    blockingError,
+    componentApi,
+    Component,
+    componentProps,
+    componentInternalApi.setVisibility,
+    fetchSetting,
+  ]);
 
   return hidePanelChrome ? (
     InnerPanel
