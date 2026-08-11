@@ -7,10 +7,8 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import type { UXConfig } from '../../common/config';
 
 export type UxRouteHandlerResources = DefaultRouteHandlerResources & {
-  config: UXConfig;
   core: {
     setup: CoreSetup;
     start: () => Promise<CoreStart>;

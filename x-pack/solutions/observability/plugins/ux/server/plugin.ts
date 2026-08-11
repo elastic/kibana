@@ -14,28 +14,20 @@ import type {
 } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { registerRoutes } from '@kbn/server-route-repository';
-import type { UXConfig } from '../common/config';
 import { getUxServerRouteRepository } from './routes';
 import type { UxRouteHandlerResources } from './routes/types';
 
 export class Plugin implements PluginType {
   private readonly logger: Logger;
-  private readonly initContext: PluginInitializerContext<UXConfig>;
+  private readonly initContext: PluginInitializerContext;
 
-  constructor(initContext: PluginInitializerContext<UXConfig>) {
+  constructor(initContext: PluginInitializerContext) {
     this.initContext = initContext;
     this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup) {
-    const config = this.initContext.config.get();
-
-    if (!config.sessionReplay.enabled) {
-      return {};
-    }
-
     const dependencies: Omit<UxRouteHandlerResources, keyof DefaultRouteHandlerResources> = {
-      config,
       core: {
         setup: core,
         start: () => core.getStartServices().then(([coreStart]) => coreStart),

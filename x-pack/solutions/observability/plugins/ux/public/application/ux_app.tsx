@@ -78,12 +78,12 @@ function UxDashboardPage() {
   );
 }
 
-const createUxRoutes = (sessionReplayEnabled: boolean) => ({
+const uxRouter = createRouter({
   '/': {
     element: <UxDashboardPage />,
   },
   '/session-replay': {
-    element: sessionReplayEnabled ? <SessionListPage /> : <Redirect to="/" />,
+    element: <SessionListPage />,
   },
   '/session-replay/{sessionId}': {
     params: t.type({
@@ -91,7 +91,7 @@ const createUxRoutes = (sessionReplayEnabled: boolean) => ({
         sessionId: t.string,
       }),
     }),
-    element: sessionReplayEnabled ? <SessionPlayerPage /> : <Redirect to="/" />,
+    element: <SessionPlayerPage />,
   },
 });
 
@@ -113,7 +113,6 @@ export function UXAppRoot({
   },
   isDev,
   spaceId,
-  sessionReplayEnabled,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -121,14 +120,9 @@ export function UXAppRoot({
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
   spaceId: string;
-  sessionReplayEnabled: boolean;
 }) {
   const { history } = appMountParameters;
   const plugins = { ...deps, maps };
-  const uxRouter = React.useMemo(
-    () => createRouter(createUxRoutes(sessionReplayEnabled)),
-    [sessionReplayEnabled]
-  );
 
   createCallApmApi(core);
 
@@ -204,7 +198,6 @@ export const renderApp = ({
   corePlugins,
   isDev,
   spaceId,
-  sessionReplayEnabled,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
@@ -212,7 +205,6 @@ export const renderApp = ({
   corePlugins: ApmPluginStartDeps;
   isDev: boolean;
   spaceId: string;
-  sessionReplayEnabled: boolean;
 }) => {
   const { element } = appMountParameters;
 
@@ -236,7 +228,6 @@ export const renderApp = ({
       corePlugins={corePlugins}
       isDev={isDev}
       spaceId={spaceId}
-      sessionReplayEnabled={sessionReplayEnabled}
     />,
     element
   );

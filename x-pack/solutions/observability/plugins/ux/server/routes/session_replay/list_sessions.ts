@@ -51,17 +51,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       size: t.string,
     }),
   }),
-  handler: async ({
-    context,
-    params,
-    config,
-  }): Promise<{ sessions: SessionReplaySessionSummary[] }> => {
-    if (!config.sessionReplay.enabled) {
-      const err = new Error('Session replay is disabled') as Error & { statusCode?: number };
-      err.statusCode = 404;
-      throw err;
-    }
-
+  handler: async ({ context, params }): Promise<{ sessions: SessionReplaySessionSummary[] }> => {
     const { rangeFrom = 'now-24h', rangeTo = 'now', size = '25' } = params.query;
     const sizeNum = Math.min(Math.max(Number(size) || 25, 1), 100);
 

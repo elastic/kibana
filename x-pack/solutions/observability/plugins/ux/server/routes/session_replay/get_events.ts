@@ -23,13 +23,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
       sessionId: t.string,
     }),
   }),
-  handler: async ({ context, params, config }): Promise<SessionReplayEventsResponse> => {
-    if (!config.sessionReplay.enabled) {
-      const err = new Error('Session replay is disabled') as Error & { statusCode?: number };
-      err.statusCode = 404;
-      throw err;
-    }
-
+  handler: async ({ context, params }): Promise<SessionReplayEventsResponse> => {
     const { sessionId } = params.path;
     const { elasticsearch } = await context.core;
 

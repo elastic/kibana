@@ -46,7 +46,6 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { UXConfig } from '../common/config';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -84,15 +83,10 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
-  private readonly sessionReplayEnabled: boolean;
-
-  constructor(private readonly initContext: PluginInitializerContext<UXConfig>) {
-    this.sessionReplayEnabled = this.initContext.config.get().sessionReplay.enabled;
-  }
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
-    const { sessionReplayEnabled } = this;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
         const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
@@ -167,20 +161,16 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
                     matchFullPath: true,
                     ignoreTrailingSlash: true,
                   },
-                  ...(sessionReplayEnabled
-                    ? [
-                        {
-                          label: i18n.translate('xpack.ux.sessionReplay.nav', {
-                            defaultMessage: 'Session Replay',
-                          }),
-                          app: OBLT_UX_APP_ID,
-                          path: '/session-replay',
-                          matchFullPath: false,
-                          ignoreTrailingSlash: true,
-                          isTechnicalPreview: true,
-                        },
-                      ]
-                    : []),
+                  {
+                    label: i18n.translate('xpack.ux.sessionReplay.nav', {
+                      defaultMessage: 'Session Replay',
+                    }),
+                    app: OBLT_UX_APP_ID,
+                    path: '/session-replay',
+                    matchFullPath: false,
+                    ignoreTrailingSlash: true,
+                    isTechnicalPreview: true,
+                  },
                 ],
               },
             ];
@@ -231,7 +221,6 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           appMountParameters,
           corePlugins: corePlugins as ApmPluginStartDeps,
           spaceId: activeSpace?.id || 'default',
-          sessionReplayEnabled,
         });
       },
     });
