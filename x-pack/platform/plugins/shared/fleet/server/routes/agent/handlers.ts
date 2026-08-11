@@ -480,7 +480,9 @@ export const getAgentDataHandler: FleetRequestHandler<
 
     const dataStreams = packageInfo.data_streams || [];
     const namespacedPattern = dataStreams
-      .map((ds) => generateNamespaceTemplateIndexPattern(ds, namespace, isOtelDataStream(ds, packageInfo)))
+      .map((ds) =>
+        generateNamespaceTemplateIndexPattern(ds, namespace, isOtelDataStream(ds, packageInfo))
+      )
       .join(',');
 
     if (!namespacedPattern) {

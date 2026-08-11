@@ -790,14 +790,11 @@ export const GetAgentStatusResponseSchema = schema.object({
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.maybe(
-      schema.oneOf(
-        [schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()],
-        {
-          meta: {
-            description: 'Agent IDs to check data for, as an array or comma-separated string',
-          },
-        }
-      )
+      schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 10000 }), schema.string()], {
+        meta: {
+          description: 'Agent IDs to check data for, as an array or comma-separated string',
+        },
+      })
     ),
     policyId: schema.maybe(
       schema.string({
