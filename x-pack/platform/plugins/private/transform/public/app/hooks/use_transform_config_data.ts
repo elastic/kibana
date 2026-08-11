@@ -16,6 +16,7 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
@@ -58,7 +59,7 @@ export const isSourceIndexUnavailableError = (error: unknown): boolean =>
 export const isProjectScopedSourceIndexUnavailableError = (
   error: unknown,
   projectRouting?: StepDefineExposedState['projectRouting']
-): boolean => projectRouting !== undefined && isSourceIndexUnavailableError(error);
+): boolean => isCustomProjectRouting(projectRouting) && isSourceIndexUnavailableError(error);
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {

@@ -11,6 +11,7 @@ import {
   isSourceIndexUnavailableError,
 } from './use_transform_config_data';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 describe('getCombinedProperties', () => {
   test('extracts missing mappings from docs', () => {
@@ -103,10 +104,13 @@ describe('isSourceIndexUnavailableError', () => {
     ).toBe(false);
   });
 
-  test('treats source index unavailable errors as project-scoped only when routing is set', () => {
+  test('treats source index unavailable errors as project-scoped only for custom routing', () => {
     expect(
       isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, '_id:linked-id')
     ).toBe(true);
+    expect(
+      isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, PROJECT_ROUTING.ALL)
+    ).toBe(false);
     expect(isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(false);
   });
 });

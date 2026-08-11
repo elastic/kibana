@@ -11,6 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SimpleQuery } from '@kbn/ml-query-utils';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
@@ -20,15 +21,23 @@ jest.mock('../app_dependencies');
 
 const mockResetPagination = jest.fn();
 const mockUseDataGrid = jest.fn();
+const mockShowDataGridColumnChartErrorMessageToast = jest.fn();
+const mockUseGetHistogramsForFields = jest.fn();
 
 jest.mock('@kbn/ml-data-grid', () => {
   const actual = jest.requireActual('@kbn/ml-data-grid');
 
   return {
     ...actual,
+    showDataGridColumnChartErrorMessageToast: (...args: unknown[]) =>
+      mockShowDataGridColumnChartErrorMessageToast(...args),
     useDataGrid: (...args: unknown[]) => mockUseDataGrid(...args),
   };
 });
+
+jest.mock('./use_get_histograms_for_fields', () => ({
+  useGetHistogramsForFields: (...args: unknown[]) => mockUseGetHistogramsForFields(...args),
+}));
 
 const query: SimpleQuery = {
   query_string: {
@@ -84,6 +93,7 @@ describe('project routing pagination reset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseDataGrid.mockReturnValue(getMockDataGrid());
+    mockUseGetHistogramsForFields.mockReturnValue({ data: [], error: null });
   });
 
   test('resets source document pagination when project routing changes', async () => {
@@ -138,6 +148,36 @@ describe('project routing pagination reset', () => {
 
     await waitFor(() => {
       expect(mockResetPagination).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test('shows histogram errors when project routing is the default all-projects scope', async () => {
+    const histogramError = {
+      body: {
+        message: 'Not Found: [[index_not_found_exception] no such index [source-index]]',
+      },
+    };
+    mockUseGetHistogramsForFields.mockReturnValue({ data: undefined, error: histogramError });
+
+    renderHook(
+      () =>
+        useIndexData({
+          dataView,
+          query,
+          combinedRuntimeMappings: runtimeMappings,
+          populatedFields: ['the-populated-field'],
+          projectRouting: PROJECT_ROUTING.ALL,
+        }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(mockShowDataGridColumnChartErrorMessageToast).toHaveBeenCalledWith(
+        histogramError,
+        expect.any(Object)
+      );
     });
   });
 });

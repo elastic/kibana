@@ -27,6 +27,7 @@ import {
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 
 import { isNonLocalIndexName } from '@kbn/es-query';
 import {
@@ -233,7 +234,7 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
   useEffect(() => {
     if (histogramsForFieldsError !== null) {
       if (
-        projectRouting !== undefined &&
+        isCustomProjectRouting(projectRouting) &&
         isMissingProjectScopedIndexError(histogramsForFieldsError)
       ) {
         return;

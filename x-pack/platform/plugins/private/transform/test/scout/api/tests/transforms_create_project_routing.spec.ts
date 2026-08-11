@@ -7,14 +7,11 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
 import { generateDestIndex, generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
-
-const getBasicAuthHeader = ({ username, password }: { username: string; password: string }) => ({
-  Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-});
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create with project routing',
@@ -22,6 +19,12 @@ apiTest.describe(
   () => {
     const transformId = 'test_transform_id_create_with_project_routing';
     const projectRouting = '_id:linked-id';
+    let transformManagerCookieHeader: CookieHeader;
+
+    apiTest.beforeAll(async ({ samlAuth }) => {
+      const credentials = await samlAuth.asTransformManager();
+      transformManagerCookieHeader = credentials.cookieHeader;
+    });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.transform.cleanTransformIndices();
@@ -32,7 +35,7 @@ apiTest.describe(
 
     apiTest(
       'should save the selected project routing value',
-      async ({ apiClient, apiServices, config }) => {
+      async ({ apiClient, apiServices }) => {
         const transformConfig = generateTransformConfig(transformId);
 
         const { statusCode, body } = await apiClient.put(
@@ -40,7 +43,7 @@ apiTest.describe(
           {
             headers: {
               ...COMMON_HEADERS,
-              ...getBasicAuthHeader(config.auth),
+              ...transformManagerCookieHeader,
             },
             body: {
               ...transformConfig,
