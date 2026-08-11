@@ -86,6 +86,22 @@ export interface AttachmentsSubClient {
   addFile(params: AddFileArgs): Promise<Case>;
 }
 
+// Keep this exhaustive so every new client method requires an explicit telemetry decision.
+const usageCounterByMethod = {
+  add: 'add_attachment',
+  bulkCreate: 'bulk_create_attachments',
+  bulkGet: null,
+  deleteAll: 'delete_all_attachments',
+  delete: 'delete_attachment',
+  bulkDeleteFileAttachments: 'bulk_delete_file_attachments',
+  find: null,
+  getAllDocumentsAttachedToCase: null,
+  getAll: null,
+  get: null,
+  update: 'update_attachment',
+  addFile: 'add_file_attachment',
+} as const satisfies Record<keyof AttachmentsSubClient, string | null>;
+
 /**
  * Creates an API object for interacting with attachments.
  *
@@ -97,21 +113,25 @@ export const createAttachmentsSubClient = (
   casesClientInternal: CasesClientInternal
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
-    add: withUsageCounter('add_attachment', clientArgs, (params: AddArgs) =>
+    add: withUsageCounter(usageCounterByMethod.add, clientArgs, (params: AddArgs) =>
       addComment(params, clientArgs)
     ),
-    bulkCreate: withUsageCounter('bulk_create_attachments', clientArgs, (params: BulkCreateArgs) =>
-      bulkCreate(params, clientArgs)
+    bulkCreate: withUsageCounter(
+      usageCounterByMethod.bulkCreate,
+      clientArgs,
+      (params: BulkCreateArgs) => bulkCreate(params, clientArgs)
     ),
     bulkGet: (params: BulkGetArgs) => bulkGet(params, clientArgs, casesClient),
-    delete: withUsageCounter('delete_attachment', clientArgs, (params: DeleteArgs) =>
+    delete: withUsageCounter(usageCounterByMethod.delete, clientArgs, (params: DeleteArgs) =>
       deleteComment(params, clientArgs)
     ),
-    deleteAll: withUsageCounter('delete_all_attachments', clientArgs, (params: DeleteAllArgs) =>
-      deleteAll(params, clientArgs)
+    deleteAll: withUsageCounter(
+      usageCounterByMethod.deleteAll,
+      clientArgs,
+      (params: DeleteAllArgs) => deleteAll(params, clientArgs)
     ),
     bulkDeleteFileAttachments: withUsageCounter(
-      'bulk_delete_file_attachments',
+      usageCounterByMethod.bulkDeleteFileAttachments,
       clientArgs,
       (params: BulkDeleteFileArgs) => bulkDeleteFileAttachments(params, clientArgs, casesClient)
     ),
@@ -120,10 +140,10 @@ export const createAttachmentsSubClient = (
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),
     get: (params: GetArgs) => get(params, clientArgs),
-    update: withUsageCounter('update_attachment', clientArgs, (params: UpdateArgs) =>
+    update: withUsageCounter(usageCounterByMethod.update, clientArgs, (params: UpdateArgs) =>
       update(params, clientArgs)
     ),
-    addFile: withUsageCounter('add_file_attachment', clientArgs, (params: AddFileArgs) =>
+    addFile: withUsageCounter(usageCounterByMethod.addFile, clientArgs, (params: AddFileArgs) =>
       addFile(params, clientArgs, casesClient)
     ),
   };

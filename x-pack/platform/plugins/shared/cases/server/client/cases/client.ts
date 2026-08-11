@@ -160,6 +160,31 @@ export interface CasesSubClient {
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
 }
 
+// Keep this exhaustive so every new client method requires an explicit telemetry decision.
+const usageCounterByMethod = {
+  create: 'create_case',
+  bulkCreate: 'bulk_create_cases',
+  find: null,
+  search: null,
+  get: null,
+  resolve: null,
+  bulkGet: null,
+  push: 'push_case',
+  bulkUpdate: 'bulk_update_cases',
+  delete: 'delete_cases',
+  getTags: null,
+  getCategories: null,
+  getReporters: null,
+  getCasesByAlertID: null,
+  replaceCustomField: 'replace_custom_field',
+  similar: null,
+  addObservable: 'add_observable',
+  updateObservable: 'update_observable',
+  deleteObservable: 'delete_observable',
+  bulkAddObservables: 'bulk_add_observables',
+  getApplicableFields: null,
+} as const satisfies Record<keyof CasesSubClient, string | null>;
+
 /**
  * Creates the interface for CRUD on cases objects.
  *
@@ -171,24 +196,28 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: withUsageCounter('create_case', clientArgs, (data: CasePostRequest) =>
+    create: withUsageCounter(usageCounterByMethod.create, clientArgs, (data: CasePostRequest) =>
       create(data, clientArgs, casesClient)
     ),
-    bulkCreate: withUsageCounter('bulk_create_cases', clientArgs, (data: BulkCreateCasesRequest) =>
-      bulkCreate(data, clientArgs, casesClient)
+    bulkCreate: withUsageCounter(
+      usageCounterByMethod.bulkCreate,
+      clientArgs,
+      (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient)
     ),
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),
     bulkGet: (params: CasesBulkGetRequest) => bulkGet(params, clientArgs),
-    push: withUsageCounter('push_case', clientArgs, (params: PushParams) =>
+    push: withUsageCounter(usageCounterByMethod.push, clientArgs, (params: PushParams) =>
       push(params, clientArgs, casesClient)
     ),
-    bulkUpdate: withUsageCounter('bulk_update_cases', clientArgs, (cases: CasesPatchRequest) =>
-      bulkUpdate(cases, clientArgs, casesClient)
+    bulkUpdate: withUsageCounter(
+      usageCounterByMethod.bulkUpdate,
+      clientArgs,
+      (cases: CasesPatchRequest) => bulkUpdate(cases, clientArgs, casesClient)
     ),
-    delete: withUsageCounter('delete_cases', clientArgs, (ids: string[]) =>
+    delete: withUsageCounter(usageCounterByMethod.delete, clientArgs, (ids: string[]) =>
       deleteCases(ids, clientArgs)
     ),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
@@ -196,32 +225,32 @@ export const createCasesSubClient = (
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     replaceCustomField: withUsageCounter(
-      'replace_custom_field',
+      usageCounterByMethod.replaceCustomField,
       clientArgs,
       (params: ReplaceCustomFieldArgs) => replaceCustomField(params, clientArgs, casesClient)
     ),
     similar: (caseId: string, params: SimilarCasesSearchRequest) =>
       similar(caseId, params, clientArgs, casesClient),
     addObservable: withUsageCounter(
-      'add_observable',
+      usageCounterByMethod.addObservable,
       clientArgs,
       (caseId: string, params: AddObservableRequest) =>
         addObservable(caseId, params, clientArgs, casesClient)
     ),
     updateObservable: withUsageCounter(
-      'update_observable',
+      usageCounterByMethod.updateObservable,
       clientArgs,
       (caseId: string, observableId: string, params: UpdateObservableRequest) =>
         updateObservable(caseId, observableId, params, clientArgs, casesClient)
     ),
     deleteObservable: withUsageCounter(
-      'delete_observable',
+      usageCounterByMethod.deleteObservable,
       clientArgs,
       (caseId: string, observableId: string) =>
         deleteObservable(caseId, observableId, clientArgs, casesClient)
     ),
     bulkAddObservables: withUsageCounter(
-      'bulk_add_observables',
+      usageCounterByMethod.bulkAddObservables,
       clientArgs,
       (params: BulkAddObservablesRequest) => bulkAddObservables(params, clientArgs, casesClient)
     ),
