@@ -110,7 +110,7 @@ spaceTest.describe(
           ).toBeVisible();
         });
 
-        await lens.secondaryFlyoutBackButton.click();
+        await lens.workspace.secondaryFlyoutBackButton.click();
         await applyLensInlineEditorAndWaitClosed({ lens });
       }
     );
@@ -132,7 +132,7 @@ spaceTest.describe(
           await page.getByTestId('lnsMetric_background_chart_line').click();
           await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
 
-          await lens.secondaryFlyoutBackButton.click();
+          await lens.workspace.secondaryFlyoutBackButton.click();
         });
 
         await spaceTest.step(
