@@ -293,10 +293,17 @@ export class CasePlugin
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient('agent_builder'), core, {
-        analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
-        templatesEnabled: this.caseConfig.templates?.enabled === true,
-      });
+      registerCasesAgentBuilderTools(
+        plugins.agentBuilder,
+        getCasesClient('agent_builder'),
+        core,
+        this.unifiedAttachmentTypeRegistry,
+        {
+          analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+          attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+          templatesEnabled: this.caseConfig.templates?.enabled === true,
+        }
+      );
     }
 
     return {
