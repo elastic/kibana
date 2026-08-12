@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/workflows'
   - '@kbn/workflows-ui'
+  - '@kbn/utility-types'
 tags:
   - shared-browser
   - package

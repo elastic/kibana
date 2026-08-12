@@ -31,7 +31,7 @@ import {
   type ActionPolicySavedObjectAttributes,
   type PartiallyUpdateableActionPolicyAttributes,
 } from '../../saved_objects';
-import { ALERTING_V2_ERROR_CODES, ALERTING_V2_LOG_CODES } from '../errors/error_codes';
+import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getActionPolicyAlreadyExistsMessage,
   getActionPolicyNotFoundMessage,
@@ -105,12 +105,12 @@ interface ActionPolicyAuth {
  */
 const actionPolicyBulkErrorCodeForStatus = (statusCode: number): string => {
   if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND;
   }
   if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
+    return ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT;
   }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+  return ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
 const toActionPolicyBulkError = (
@@ -163,7 +163,7 @@ export class ActionPolicyClient {
       throw Boom.badRequest(
         getInvalidActionPolicyDataMessage(context, stringifyZodError(parsed.error)),
         {
-          code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
+          code: ALERTING_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
           details: { context, errors: treeifyError(parsed.error) },
         }
       );
@@ -185,7 +185,7 @@ export class ActionPolicyClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -214,7 +214,7 @@ export class ActionPolicyClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getActionPolicyVersionConflictMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_VERSION_CONFLICT,
           details: { action_policy_id: id },
         });
       }
@@ -251,11 +251,11 @@ export class ActionPolicyClient {
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_ALREADY_EXISTS,
           details: { action_policy_id: conflictId },
         });
       }
@@ -335,11 +335,11 @@ export class ActionPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
@@ -428,14 +428,11 @@ export class ActionPolicyClient {
       let isMatch = false;
       try {
         isMatch = evaluateKql(actionPolicy.matcher, context);
-      } catch (err) {
+      } catch {
         this.logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for action policy "${
-              actionPolicy.id
-            }" during pre-matching: ${
-              err instanceof Error ? err.message : String(err)
-            }. Treating as no-match.`,
+          message: 'Policy matcher failed to evaluate; treating as no-match',
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+          labels: { policy_id: actionPolicy.id },
         });
         continue;
       }
@@ -485,11 +482,11 @@ export class ActionPolicyClient {
         },
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
   }
 
   public async bulkEnableActionPolicies({
@@ -688,7 +685,7 @@ export class ActionPolicyClient {
   public async deleteActionPolicy({ id }: { id: string }): Promise<void> {
     if (!(await this.actionPolicyExists({ id }))) {
       throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-        code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+        code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
         details: { action_policy_id: id },
       });
     }
@@ -750,7 +747,7 @@ export class ActionPolicyClient {
       errors.push({
         id,
         error: {
-          code: ALERTING_V2_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
+          code: ALERTING_ERROR_CODES.API_KEY_INVALIDATION_FAILED,
           message: `Action policy with id "${id}" was not deleted because its API key could not be queued for invalidation${
             result ? `: ${result.message}` : ''
           }`,
@@ -767,7 +764,7 @@ export class ActionPolicyClient {
               ', '
             )}]; their API keys could not be queued for invalidation, and deleting them would leave the keys valid with nothing referencing them`
         ),
-        code: ALERTING_V2_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
+        code: ALERTING_LOG_CODES.ACTION_POLICY_DELETE_BLOCKED_BY_API_KEY_INVALIDATION,
       });
     }
 
@@ -786,16 +783,27 @@ export class ActionPolicyClient {
           ', '
         )}] for invalidation but failed to delete them; the policies remain with keys that are about to be invalidated and must be rotated to keep dispatching`
       ),
-      code: ALERTING_V2_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
+      code: ALERTING_LOG_CODES.ACTION_POLICY_API_KEY_INVALIDATION_DIVERGED,
     });
   }
 
-  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  private markApiKeysForInvalidation(
+    apiKey?: string,
+    createdByUser?: boolean,
+    policyId?: string
+  ): void {
     if (!apiKey || createdByUser) {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+      this.logger.warn({
+        message: 'Failed to mark superseded API key for invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        labels: policyId != null ? { policy_id: policyId } : undefined,
+        error,
+      });
+    });
   }
 
   private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
@@ -813,12 +821,12 @@ export class ActionPolicyClient {
         apiKey,
         createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch (e) {
-      this.logger.debug({
-        message: () =>
-          `Failed to decrypt auth for action policy "${id}": ${
-            e instanceof Error ? e.message : String(e)
-          }`,
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        labels: { policy_id: id },
+        error,
       });
       return null;
     }
@@ -852,8 +860,12 @@ export class ActionPolicyClient {
           break;
         }
       }
-    } catch {
-      // best-effort — same as getDecryptedAuth returning null on failure
+    } catch (error) {
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        error,
+      });
     }
 
     return authMap;
@@ -882,7 +894,7 @@ export class ActionPolicyClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getActionPolicyNotFoundMessage(id), {
-          code: ALERTING_V2_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ACTION_POLICY_NOT_FOUND,
           details: { action_policy_id: id },
         });
       }
@@ -947,11 +959,11 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
     return {
       policy: transformActionPolicySoAttributesToApiResponse({

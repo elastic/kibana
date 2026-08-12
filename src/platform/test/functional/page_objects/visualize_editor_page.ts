@@ -360,6 +360,9 @@ export class VisualizeEditorPageObject extends FtrService {
     if (toggleOpen !== toState) {
       this.log.debug(`toggle ${id} click()`);
       await toggle.click();
+      await this.retry.waitFor(`accordion ${id} to be ${toState}`, async () => {
+        return (await toggle.getAttribute('aria-expanded')) === toState;
+      });
     }
   }
 
