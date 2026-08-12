@@ -10,7 +10,7 @@ import { SuppressChromeBackButton } from '@kbn/app-header';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
@@ -58,15 +58,20 @@ export function ProfilingAppPageTemplate({
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
-  const history = useHistory();
+  const { search, pathname } = useLocation();
 
   const router = useProfilingRouter();
+
+  const searchParams = new URLSearchParams(search);
+  const kuery = searchParams.get('kuery') ?? '';
+  const rangeFrom = searchParams.get('rangeFrom') ?? 'now-15m';
+  const rangeTo = searchParams.get('rangeTo') ?? 'now';
 
   const backTarget = useBackNavigation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [history.location.pathname]);
+  }, [pathname]);
 
   return (
     <>
@@ -99,9 +104,9 @@ export function ProfilingAppPageTemplate({
                         label: 'Storage explorer',
                         href: router.link('/storage-explorer', {
                           query: {
-                            kuery: '',
-                            rangeFrom: 'now-15m',
-                            rangeTo: 'now',
+                            kuery,
+                            rangeFrom,
+                            rangeTo,
                             indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
                           },
                         }),
