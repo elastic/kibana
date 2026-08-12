@@ -13,8 +13,6 @@
 // Signals:
 //   - FTR tests pass on MKI on the latest `dev` commit (appex-qa-serverless-kibana-ftr-tests)
 //   - The commit in `dev` has been promoted less than 6h ago (elastic/serverless-gitops)
-//
-// https://github.com/elastic/kibana/issues/282202
 
 import { execSync } from 'child_process';
 import fs from 'fs';
