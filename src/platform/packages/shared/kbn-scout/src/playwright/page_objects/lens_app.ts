@@ -136,7 +136,8 @@ export class LensApp {
     } else if (options?.addToDashboard === 'new') {
       await this.page.locator('label[for="new-dashboard-option"]').click();
     } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('label[for="add-to-library-option"]').click();
+      // Prefer checking the radio input — label clicks race save-modal remounts.
+      await this.page.locator('#add-to-library-option').check();
     }
 
     await this.confirmSaveButton.click();

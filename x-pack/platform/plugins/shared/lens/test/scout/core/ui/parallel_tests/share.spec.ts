@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { extendPlaywrightPage, QueryBar } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   addDataLayer,
   completeLensCsvExport,
   createLogstashLensEditorSuiteSetup,
+  openSharedLensUrl,
   spaceTest,
   waitForLensCsvContent,
 } from '../fixtures';
@@ -19,7 +19,9 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
   spaceTest.beforeEach(suiteSetup.beforeEach);
+
   spaceTest.afterAll(suiteSetup.afterAll);
 
   // One journey: share enablement and CSV builds on the same editor session (FTR share.ts).
@@ -27,7 +29,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
     'enables share/export for a valid config and preserves filters in the shared URL',
     async ({ page, pageObjects, context, kbnUrl }) => {
       spaceTest.setTimeout(120_000);
-      const { lens, filterBar, queryBar } = pageObjects;
+      const { lens, queryBar } = pageObjects;
 
       await spaceTest.step('share disabled on empty visualization', async () => {
         await lens.waitForLensApp();
@@ -64,29 +66,36 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('preserve filter and query when sharing URL', async () => {
-        await filterBar.addFilter({ field: 'bytes', operator: 'is', value: '1' });
+        // Dismiss save/share toasts first — they sit over the filter bar and intercept clicks.
+        for (const button of await page.testSubj.locator('toastCloseButton').all()) {
+          await button.click();
+        }
+        // Prefer EUI comboBox helpers over FilterBar.typeWithDelay: under parallel load the
+        // operator combo input is "stable" but click still times out (overlay / remount race).
+        await page.testSubj.click('addFilter');
+        await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+        await page.components.comboBox('filterFieldSuggestionList').setSelectedOptions(['bytes']);
+        await page.components.comboBox('filterOperatorList').setSelectedOptions(['is']);
+        const valueInput = page.testSubj.locator('filterParams').locator('input');
+        await valueInput.fill('1');
+        await valueInput.press('Enter');
+        await page.testSubj.click('saveFilter');
+        await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+        await expect(page.testSubj.locator('~filter')).toHaveText(['bytes: 1']);
+
         await queryBar.setQuery('host.keyword www.elastic.co');
         await page.testSubj.click('querySubmitButton');
-        // Let the no-results request settle before opening the save modal (avoids
-        // remounting the radio group mid-click on add-to-library).
-        await lens.waitForVisualization('xyVisChart');
+        // Save while the filtered request is in flight — share can stay disabled on empty results.
+        // getSharedUrl → openShareModal waits until share is enabled (default waitForFunction timeout).
         await lens.save(`lens-share-${Date.now()}`, { addToDashboard: 'none' });
-        // Save toast + empty-state refresh can lag share enablement.
-        await lens.waitForVisualization('xyVisChart');
-        await expect(lens.workspace.shareButton).toBeEnabled();
 
         const url = await lens.workspace.getSharedUrl();
-        const sharedPage = extendPlaywrightPage({
-          page: await context.newPage(),
+        const { page: sharedPage, queryBar: sharedQueryBar } = await openSharedLensUrl({
+          context,
           kbnUrl,
+          url,
         });
-        const sharedQueryBar = new QueryBar(sharedPage);
         try {
-          await sharedPage.goto(url);
-          await sharedPage.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
-          await sharedPage
-            .locator('[data-test-subj="lnsWorkspace"] [data-test-subj="xyVisChart"]')
-            .waitFor({ state: 'visible' });
           // URL-restored filters mount asynchronously; web-first text assert retries.
           await expect(sharedPage.testSubj.locator('~filter')).toHaveText(['bytes: 1']);
           expect(await sharedQueryBar.getQuery()).toBe('host.keyword www.elastic.co');

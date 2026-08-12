@@ -297,8 +297,7 @@ export class LensWorkspace {
 
   /**
    * Opens the Share modal. Waits until the share button is enabled (can lag after save).
-   * Retries the click: save toasts / editor remounts can swallow a single top-nav click
-   * so the modal never mounts (FTR avoided this by not waiting mid-transition).
+   * Dismisses save toasts first — they sit over the top nav and intercept the click.
    */
   async openShareModal() {
     await this.page.waitForFunction(
@@ -312,26 +311,18 @@ export class LensWorkspace {
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
 
-    const deadline = Date.now() + 45_000;
-    while (Date.now() < deadline) {
-      if (await this.shareModal.isVisible()) {
-        break;
-      }
-      // Global toasts sit over the top nav and eat the share click.
-      try {
-        await this.page.testSubj.click('toastCloseButton', { timeout: 1_000 });
-      } catch {
-        // No toast to dismiss.
-      }
-      await this.shareButton.click({ timeout: 10_000 });
-      try {
-        await this.shareModal.waitFor({ state: 'visible', timeout: 5_000 });
-        break;
-      } catch {
-        // Click landed during a remount; try again until deadline.
-      }
+    const toastCloseButtons = this.page.testSubj.locator('toastCloseButton');
+    for (const button of await toastCloseButtons.all()) {
+      await button.click();
     }
-    await this.shareModal.waitFor({ state: 'visible', timeout: 5_000 });
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('[data-test-subj="toastCloseButton"]').length === 0,
+      undefined,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+
+    await this.shareButton.click();
+    await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
   }
 

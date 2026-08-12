@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { extendPlaywrightPage, KibanaCodeEditorWrapper, QueryBar } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
 import type { Locator, ScoutPage } from '@kbn/scout';
@@ -16,6 +16,8 @@ import {
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
 } from './constants';
+
+type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
@@ -153,17 +155,40 @@ export async function waitForLensCsvContent(
   page: ScoutPage,
   minLayers: number
 ): Promise<LensCsvContent> {
+  let content: LensCsvContent | undefined;
   await expect
     .poll(async () => {
-      const content = await getLensCsvContent(page);
-      return content && Object.keys(content).length >= minLayers ? content : undefined;
+      content = await getLensCsvContent(page);
+      return content && Object.keys(content).length >= minLayers;
     })
-    .toBeTruthy();
-  const content = await getLensCsvContent(page);
-  if (!content || Object.keys(content).length < minLayers) {
+    .toBe(true);
+  if (!content) {
     throw new Error(`Expected at least ${minLayers} CSV layer(s)`);
   }
   return content;
+}
+
+/**
+ * Opens a Lens share URL in a new tab and waits for the app + chart to mount.
+ * Caller must close the returned page (use `try`/`finally`).
+ */
+export async function openSharedLensUrl(options: {
+  context: { newPage: () => Promise<PlaywrightPage> };
+  kbnUrl: Parameters<typeof extendPlaywrightPage>[0]['kbnUrl'];
+  url: string;
+  chartTestSubj?: string;
+}): Promise<{ page: ScoutPage; queryBar: QueryBar }> {
+  const { context, kbnUrl, url, chartTestSubj = 'xyVisChart' } = options;
+  const sharedPage = extendPlaywrightPage({
+    page: await context.newPage(),
+    kbnUrl,
+  });
+  await sharedPage.goto(url);
+  await sharedPage.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
+  await sharedPage
+    .locator(`[data-test-subj="lnsWorkspace"] [data-test-subj="${chartTestSubj}"]`)
+    .waitFor({ state: 'visible' });
+  return { page: sharedPage, queryBar: new QueryBar(sharedPage) };
 }
 
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is

@@ -30,11 +30,13 @@ spaceTest.describe(
     });
 
     spaceTest.beforeAll(suiteSetup.beforeAll);
+
     spaceTest.beforeEach(suiteSetup.beforeEach);
+
     spaceTest.afterAll(suiteSetup.afterAll);
 
     // One journey: chart-type switches share the same dimension config (FTR chart_data.ts).
-    // Exact aggregation floats belong off UI; assert structural parity across types.
+    // Exact aggregation floats belong off UI; assert structural render parity across types.
     spaceTest(
       'renders the same terms + average config across chart types',
       async ({ pageObjects }) => {
@@ -71,8 +73,10 @@ spaceTest.describe(
 
         await spaceTest.step('pie chart', async () => {
           await lens.switchToVisualization('pie');
-          const data = await lens.workspace.getCurrentChartDebugState('partitionVisChart');
-          const names = partitionNames(data);
+          await lens.waitForVisualization('partitionVisChart');
+          const names = partitionNames(
+            await lens.workspace.getCurrentChartDebugState('partitionVisChart')
+          );
           expect(names).toHaveLength(6);
           // Partition "other" uses __other__; XY uses Other — compare non-other cardinality.
           expect(names.filter((name) => name !== '__other__')).toHaveLength(5);
@@ -83,14 +87,17 @@ spaceTest.describe(
           const data = await lens.workspace.getCurrentChartDebugState('partitionVisChart');
           expect(partitionNames(data)).toHaveLength(6);
           expect(await lens.style.getDonutHoleSize()).toBe('Large');
+          await lens.style.closeFlyoutWithBackButton();
+          // Style flyout close can remount the partition chart; wait before chart-type switch.
+          await lens.waitForVisualization('partitionVisChart');
         });
 
         await spaceTest.step('treemap chart', async () => {
-          // Search filters the switcher; option test-subj remains `treemap` (FTR parity).
           await lens.switchToVisualization('treemap', { search: 'treemap' });
           await lens.waitForVisualization('partitionVisChart');
-          const data = await lens.workspace.getCurrentChartDebugState('partitionVisChart');
-          expect(partitionNames(data)).toHaveLength(6);
+          expect(
+            partitionNames(await lens.workspace.getCurrentChartDebugState('partitionVisChart'))
+          ).toHaveLength(6);
         });
 
         await spaceTest.step('heatmap chart', async () => {

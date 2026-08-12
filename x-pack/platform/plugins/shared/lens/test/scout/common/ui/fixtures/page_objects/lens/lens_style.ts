@@ -12,20 +12,35 @@ import { normalizeComputedColor, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_edi
  * Lens style flyout, palette details, gauge/heatmap settings, reference lines, and annotations.
  */
 export class LensStyle {
+  /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
+  private readonly dimensionContainerTitle;
+  private readonly styleSettingsButton;
+  private readonly flyoutBackButton;
   private readonly closeDimensionEditorButton;
   /** Shared by palette open/close helpers and `getPaletteColorStops`. */
   private readonly palettePanelFlyout;
+  private readonly colorEditingTrigger;
+  private readonly paletteSiblingFlyoutBackButton;
   private readonly colorMappingPalettePicker;
+  private readonly legacyPalettePicker;
   readonly referenceLineFillBelowButton;
 
   constructor(private readonly page: ScoutPage) {
+    this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
+    this.styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
+    this.flyoutBackButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
     this.palettePanelFlyout = this.page.testSubj.locator('lns-palettePanelFlyout');
+    this.colorEditingTrigger = this.page.testSubj.locator('lns_colorEditing_trigger');
+    this.paletteSiblingFlyoutBackButton = this.page.testSubj.locator(
+      'lns-indexPattern-SettingWithSiblingFlyoutBack'
+    );
     this.colorMappingPalettePicker = this.page.testSubj.locator(
       'kbnColoring_ColorMapping_PalettePicker'
     );
+    this.legacyPalettePicker = this.page.testSubj.locator('lns-palettePicker');
     this.referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
   }
 
@@ -34,9 +49,8 @@ export class LensStyle {
    * Caller must close any open dimension/palette flyout first.
    */
   async openStyleSettingsFlyout() {
-    await this.page.locator('button[data-test-subj="style"]').click();
-    // Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity).
-    await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
+    await this.styleSettingsButton.click();
+    await this.dimensionContainerTitle.waitFor({ state: 'visible' });
   }
 
   /**
@@ -44,9 +58,8 @@ export class LensStyle {
    * Caller must have that flyout open (back button visible).
    */
   async closeFlyoutWithBackButton() {
-    const backButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
-    await backButton.click();
-    await backButton.waitFor({ state: 'hidden' });
+    await this.flyoutBackButton.click();
+    await this.flyoutBackButton.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -54,18 +67,16 @@ export class LensStyle {
    * Waits for the color-editing trigger (appears after field selection commits).
    */
   private async openPalettePanelFlyout() {
-    const colorEditingTrigger = this.page.testSubj.locator('lns_colorEditing_trigger');
-    await colorEditingTrigger.waitFor({ state: 'visible' });
-    await colorEditingTrigger.click();
+    await this.colorEditingTrigger.waitFor({ state: 'visible' });
+    await this.colorEditingTrigger.click();
     await this.palettePanelFlyout.waitFor({
       state: 'visible',
     });
   }
 
   private async closePalettePanelFlyout() {
-    const backButton = this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack');
-    await backButton.click();
-    await backButton.waitFor({ state: 'hidden' });
+    await this.paletteSiblingFlyoutBackButton.click();
+    await this.paletteSiblingFlyoutBackButton.waitFor({ state: 'hidden' });
   }
 
   private async closeDimensionEditor() {
@@ -73,13 +84,15 @@ export class LensStyle {
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
-  /** Reads the selected donut hole size from the style settings flyout. */
+  /**
+   * Reads the selected donut hole size from the style settings flyout.
+   * Leaves the flyout open — caller should close when done (e.g. `closeFlyoutWithBackButton`).
+   */
   async getDonutHoleSize(): Promise<string> {
     await this.openStyleSettingsFlyout();
     const selectedOptions = await this.page.components
       .comboBox('lnsEmptySizeRatioOption')
       .getSelectedOptions();
-    await this.closeFlyoutWithBackButton();
     return selectedOptions[0] ?? '';
   }
 
@@ -96,9 +109,7 @@ export class LensStyle {
    */
   async getSelectedPaletteId(isLegacy: boolean): Promise<string> {
     await this.openPalettePanelFlyout();
-    const palettePicker = isLegacy
-      ? this.page.testSubj.locator('lns-palettePicker')
-      : this.colorMappingPalettePicker;
+    const palettePicker = isLegacy ? this.legacyPalettePicker : this.colorMappingPalettePicker;
     await palettePicker.click();
     const selected = this.page.locator('[role=option][aria-selected=true]');
     await selected.waitFor({ state: 'visible' });
@@ -140,10 +151,15 @@ export class LensStyle {
     colorSwatchIndex: number,
     paletteColorIndex: number
   ) {
-    await this.page.testSubj.click(dimensionSelector);
-    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+    const dimensionLink = this.page.testSubj.locator(dimensionSelector);
+    await dimensionLink.waitFor({ state: 'visible' });
+    await dimensionLink.click();
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.openPalettePanelFlyout();
-    await this.page.testSubj.click('lns-colorMapping-assignmentsPromptAddAll');
+    // Assignments prompt remounts with the palette panel; native click avoids stability flakes.
+    const addAll = this.page.testSubj.locator('lns-colorMapping-assignmentsPromptAddAll');
+    await addAll.waitFor({ state: 'visible' });
+    await addAll.evaluate((el) => (el as HTMLElement).click());
     await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
     await this.page.testSubj.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
     await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);

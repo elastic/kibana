@@ -19,7 +19,9 @@ spaceTest.describe('Lens palette and color mapping', { tag: '@local-stateful-cla
   });
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
+
   spaceTest.beforeEach(suiteSetup.beforeEach);
+
   spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest('picks a legacy palette on an XY split dimension', async ({ pageObjects }) => {

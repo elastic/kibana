@@ -365,16 +365,18 @@ export class LensDimensions {
    */
   async clearTimeShift() {
     await this.timeShiftComboInput.click();
-    // asPlainText selection: Backspace → EUI onRemoveOption. Do not use comboBox.clear() —
-    // it looks for `.euiComboBoxPill` clear buttons that this control does not render.
-    await this.timeShiftSearchInput.press('Backspace');
+    // Prefer the EUI clear control — Backspace alone often leaves the humanized selection
+    // ("6 hours ago (6h)") when the options list is open.
+    const clearButton = this.timeShift.locator('[data-test-subj="comboBoxClearButton"]');
+    await clearButton.waitFor({ state: 'visible' });
+    await clearButton.click();
     await this.page.waitForFunction(
       (testSubj) => {
         const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
         const inputEl = rootEl?.querySelector(
           'input[data-test-subj="comboBoxSearchInput"]'
         ) as HTMLInputElement | null;
-        return !inputEl?.value;
+        return !inputEl?.value && !(rootEl?.textContent ?? '').match(/\d+\s*hours?\s*ago/i);
       },
       TIME_SHIFT_TEST_SUBJ,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
@@ -422,39 +424,17 @@ export class LensDimensions {
    *
    * FieldInputs uses `useDebouncedValue` (256ms) before `secondaryFields` reaches store
    * state. Closing the editor before that flush drops the pending commit and leaves a
-   * single-term column (fix-action then hits field-stats).
+   * single-term column (fix-action then hits field-stats). Wait for the dimension trigger
+   * text to reflect the extra field before returning.
    */
   async addTermToAgg(field: string) {
     const fieldCombos = this.page.locator('[data-test-subj^="indexPattern-dimension-field"]');
-    const lastIndex = await fieldCombos.count();
-    const comboTestSubj = `indexPattern-dimension-field-${lastIndex}`;
+    const nextIndex = await fieldCombos.count();
+    const comboTestSubj = `indexPattern-dimension-field-${nextIndex}`;
 
-    // FTR retries click+select together; the new combo can race the Add field remount.
-    for (let attempt = 0; attempt < 5; attempt++) {
-      if ((await this.page.testSubj.locator(comboTestSubj).count()) === 0) {
-        await this.page.testSubj.click('indexPattern-terms-add-field');
-        try {
-          await this.page.testSubj
-            .locator(comboTestSubj)
-            .waitFor({ state: 'visible', timeout: 2000 });
-        } catch {
-          continue;
-        }
-      }
-      const combo = this.page.components.comboBox(comboTestSubj);
-      await combo.setSelectedOptions([field]);
-      const selected = await combo.getSelectedOptions();
-      if (selected.some((label) => label.includes(field))) {
-        break;
-      }
-      if (attempt === 4) {
-        throw new Error(`addTermToAgg: failed to select "${field}" on ${comboTestSubj}`);
-      }
-    }
-
-    // Combo UI updates from local state immediately; wait for the debounced store commit.
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await this.page.waitForTimeout(FORMAT_PARAM_DEBOUNCE_FLUSH_MS);
+    await this.page.testSubj.click('indexPattern-terms-add-field');
+    await this.page.testSubj.locator(comboTestSubj).waitFor({ state: 'visible' });
+    await this.page.components.comboBox(comboTestSubj).setSelectedOptions([field]);
 
     await this.page.waitForFunction(
       ({ expected }) => {
