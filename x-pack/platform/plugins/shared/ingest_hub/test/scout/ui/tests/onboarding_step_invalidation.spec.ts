@@ -17,8 +17,8 @@ import { test } from '../fixtures';
 const NON_AGENTLESS_ID = 'guardduty';
 const AGENTLESS_ID = 'inspector';
 
-// Seeds session storage and reloads so react-use/useSessionStorage picks up the
-// values on mount. Must be called after gotoApp so the origin matches.
+// Seeds session storage before the app navigates so react-use/useSessionStorage
+// picks up the values on mount. Must be called after login but before gotoApp.
 async function seedSessionStorage(
   page: ScoutPage,
   {
@@ -29,20 +29,16 @@ async function seedSessionStorage(
     stepState: Record<string, 'complete' | 'incomplete'>;
   }
 ) {
-  // Wait for the app to finish its own navigation before writing to storage,
-  // otherwise the reload races with an in-flight redirect and ERR_ABORTs.
-  await page.testSubj.locator('onboardingShell').waitFor({ state: 'attached' });
-  await page.evaluate(
-    ([serviceIds, state]) => {
+  await page.addInitScript(
+    ({ ids, state }) => {
       sessionStorage.setItem(
         'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: serviceIds })
+        JSON.stringify({ selectedServiceIds: ids })
       );
       sessionStorage.setItem('onboarding.aws.stepState', JSON.stringify(state));
     },
-    [selectedServiceIds, stepState] as const
+    { ids: selectedServiceIds, state: stepState }
   );
-  await page.reload({ waitUntil: 'domcontentloaded' });
 }
 
 test.describe('Onboarding — downstream step invalidation', { tag: tags.stateful.classic }, () => {
@@ -84,9 +80,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
     page,
   }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#services');
-
-    // Seed: agentless service selected, service-settings already complete.
+    // Seed before navigation so react-use picks up the values on first mount.
     await seedSessionStorage(page, {
       selectedServiceIds: [AGENTLESS_ID],
       stepState: {
@@ -96,6 +90,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
         'deploy-and-detect': 'incomplete',
       },
     });
+    await page.gotoApp('onboarding/aws#services');
 
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
@@ -124,9 +119,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
     page,
   }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#services');
-
-    // Seed: only non-agentless service selected, deploy-settings auto-completed (skipped).
+    // Seed before navigation so react-use picks up the values on first mount.
     await seedSessionStorage(page, {
       selectedServiceIds: [NON_AGENTLESS_ID],
       stepState: {
@@ -136,6 +129,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
         'deploy-and-detect': 'incomplete',
       },
     });
+    await page.gotoApp('onboarding/aws#services');
 
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
