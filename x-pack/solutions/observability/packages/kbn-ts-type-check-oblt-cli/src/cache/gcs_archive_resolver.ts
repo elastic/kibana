@@ -113,13 +113,13 @@ export interface BestGcsArchive {
    *  Not guaranteed to be present in the local git object store. */
   prTipSha?: string;
   /** Best commit archive to fall back to when this archive is invalidated by a
-   *  node_modules change (i.e. yarn.lock differs between this archive and HEAD).
+   *  node_modules change (i.e. pnpm-lock.yaml differs between this archive and HEAD).
    *  Only set when this is a PR archive that supersedes an older commit archive. */
   fallbackCommitSha?: string;
-  /** File hashes (yarn.lock, .nvmrc, etc.) recorded when the PR archive was built.
+  /** File hashes (pnpm-lock.yaml, .nvmrc, etc.) recorded when the PR archive was built.
    *  Present only for PR archives. Used to verify node_modules compatibility via
    *  the stored hash rather than a git diff of the main merge commit — the merge
-   *  commit's yarn.lock may have been updated on main after the PR CI ran, making
+   *  commit's pnpm-lock.yaml may have been updated on main after the PR CI ran, making
    *  the git diff unreliable for PR archives. */
   prBuildFileHashes?: Record<string, string>;
   /** Packages added/removed from the project graph since the PR archive was built.
@@ -138,8 +138,8 @@ export interface BestGcsArchive {
  *
  * For PR archives the check compares the metadata's stored hashes against the
  * current file hashes rather than using a git diff of the main merge commit.
- * This is necessary because a PR's CI may run before a yarn.lock update lands
- * on main — the squash merge commit then gets main's updated yarn.lock, making
+ * This is necessary because a PR's CI may run before a pnpm-lock.yaml update lands
+ * on main — the squash merge commit then gets main's updated pnpm-lock.yaml, making
  * the git diff return "no changes" even though the archive was built with an
  * older lock file and is therefore incompatible with the current node_modules.
  */
@@ -156,7 +156,7 @@ async function archiveInvalidatedByNodeModulesChange(
   if (archive.prBuildFileHashes) {
     // PR archives: use the hashes recorded in the archive's metadata.json.
     // The metadata reflects what the archive was actually built with, which may
-    // differ from the main merge commit's files if yarn.lock was updated after
+    // differ from the main merge commit's files if pnpm-lock.yaml was updated after
     // the PR's CI ran.
     const filesToCheck = CACHE_INVALIDATION_FILES.filter(
       (f) => archive.prBuildFileHashes![f] !== undefined
@@ -408,7 +408,7 @@ export async function resolveBestGcsSha(
         const currCost = currIdx + (curr.projectGraphDiff?.added.length ?? 0) * STALENESS_WEIGHT;
         return currCost < bestCost ? curr : best;
       });
-      // Carry the commit archive as fallback for yarn.lock invalidation checks.
+      // Carry the commit archive as fallback for pnpm-lock.yaml invalidation checks.
       prArchive =
         commitMatched.length > 0 ? { ...bestPr, fallbackCommitSha: commitMatched[0] } : bestPr;
     }
@@ -534,7 +534,7 @@ export async function logArchiveFallback(
 
 /**
  * Returns the best archive that is safe to restore given the current node_modules.
- * First checks the primary archive; if its yarn.lock (or other invalidation file)
+ * First checks the primary archive; if its pnpm-lock.yaml (or other invalidation file)
  * differs from HEAD, falls back to `archive.fallbackCommitSha` when present.
  * Returns undefined if no safe archive can be found (both are invalidated or absent).
  */

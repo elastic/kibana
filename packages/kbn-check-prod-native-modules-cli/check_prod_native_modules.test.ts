@@ -9,7 +9,7 @@
 
 import { promises as fs, existsSync } from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validator';
+import { findProductionDependencies, readPnpmLock } from '@kbn/yarn-lock-validator';
 import {
   checkProdNativeModules,
   checkDependencies,
@@ -37,7 +37,7 @@ jest.mock('@kbn/tooling-log', () => ({
 
 jest.mock('@kbn/yarn-lock-validator', () => ({
   findProductionDependencies: jest.fn(),
-  readYarnLock: jest.fn(),
+  readPnpmLock: jest.fn(),
 }));
 
 jest.mock(
@@ -167,7 +167,7 @@ describe('Check Prod Native Modules', () => {
     it('should return false when no native modules are found', async () => {
       (existsSync as jest.Mock).mockReturnValue(true);
       (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
       (fs.readdir as jest.Mock).mockResolvedValue([]);
       jest
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -187,7 +187,7 @@ describe('Check Prod Native Modules', () => {
       (findProductionDependencies as jest.Mock).mockReturnValue(
         new Map([['native-module@1.0.0', { name: 'native-module', version: '1.0.0' }]])
       );
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
 
       // Mock loadPackageJson to return a mock package JSON object
       jest
@@ -231,7 +231,7 @@ describe('Check Prod Native Modules', () => {
     it('should throw an error if root node_modules folder is not found', async () => {
       (existsSync as jest.Mock).mockReturnValue(false);
       (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
 
       const result = await checkProdNativeModules(mockLog);
 

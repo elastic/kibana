@@ -71,7 +71,7 @@ export abstract class AbstractFileSystem {
 
   /**
    * Reads prs/<prNumber>/metadata.json and returns the file hashes recorded at
-   * build time (yarn.lock, .nvmrc, .node-version). Used to verify that the PR
+   * build time (pnpm-lock.yaml, .nvmrc, .node-version). Used to verify that the PR
    * archive was built against the same node_modules as the current checkout.
    */
   public async getPrArchiveFileHashes(

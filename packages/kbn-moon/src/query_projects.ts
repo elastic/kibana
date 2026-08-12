@@ -91,7 +91,7 @@ export const getMoonExecutablePath = async () => {
   }
 
   const execa = (await import('execa')).default;
-  const { stdout } = await execa('yarn', ['--silent', 'which', 'moon'], {
+  const { stdout } = await execa('pnpm', ['exec', 'which', 'moon'], {
     cwd: REPO_ROOT,
     stdin: 'ignore',
   });
