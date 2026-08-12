@@ -171,9 +171,6 @@ export const AgentsList: React.FC = () => {
     services: { settings },
   } = useKibana();
   const dateFormat = settings?.client.get<string>('dateFormat');
-  // The space's currently assigned default agent id (null if unconfigured).
-  // Used to render the "Space default" badge and to switch the row action
-  // between "Set as space default" and "Remove as space default".
   const { defaultAgentId: spaceDefaultAgentId } = useSpaceDefaultAgent();
   const setSpaceDefaultAgent = useSetSpaceDefaultAgent({
     onSuccess: (defaultAgentId) => {
@@ -253,9 +250,6 @@ export const AgentsList: React.FC = () => {
                       <EuiBadge
                         color="hollow"
                         iconType="starFilled"
-                        // tabIndex makes the badge keyboard-focusable so the
-                        // tooltip is reachable without a mouse (EUI a11y rule
-                        // `@elastic/eui/tooltip-focusable-anchor`).
                         tabIndex={0}
                         data-test-subj={`agentBuilderAgentsListSpaceDefaultBadge-${agent.id}`}
                       >
@@ -363,17 +357,6 @@ export const AgentsList: React.FC = () => {
           available: canManageAgentAccess,
         },
         {
-          // Toggle between assigning this agent as the space default and
-          // clearing the assignment. Only offered to users who can manage
-          // agents; the button is a no-op mutation call that updates the
-          // per-space settings singleton via the internal API.
-          //
-          // We also gate against Private agents client-side. The server will
-          // reject the assignment anyway (see `space_settings.ts` PUT), but
-          // catching it here gives the admin proactive feedback via the
-          // action's tooltip instead of a delayed toast. We still allow the
-          // action for a Private agent that is _currently_ the space default
-          // (a legacy/broken state) so the admin can clear the assignment.
           type: 'icon',
           icon: (agent) => (spaceDefaultAgentId === agent.id ? 'starFilled' : 'starEmpty'),
           name: (agent) =>
