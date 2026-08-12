@@ -139,7 +139,23 @@ describe('filterToolsByNamespace', () => {
   });
 });
 
-describe('MCP route — annotation argument logic', () => {
+const mockServerTool = jest.fn();
+jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
+  McpServer: jest.fn().mockImplementation(() => ({
+    tool: mockServerTool,
+    connect: jest.fn(),
+    close: jest.fn(),
+  })),
+}));
+
+jest.mock('../utils/mcp/kibana_mcp_http_transport', () => ({
+  KibanaMcpHttpTransport: jest.fn().mockImplementation(() => ({
+    handleRequest: jest.fn().mockResolvedValue({ status: 200 }),
+    close: jest.fn(),
+  })),
+}));
+
+describe('MCP route — server.tool() positional arguments', () => {
   const mockAnnotations = {
     title: 'List Indices',
     readOnlyHint: true as const,
@@ -148,16 +164,83 @@ describe('MCP route — annotation argument logic', () => {
     openWorldHint: false as const,
   };
 
-  it('resolves tool.annotations when present', () => {
-    const tool = createMockTool('platform.core.list_indices', { annotations: mockAnnotations });
-    const annotationsArg = tool.annotations ?? {};
-    expect(annotationsArg).toEqual(mockAnnotations);
+  let postHandler: Function;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    const mockLogger = loggingSystemMock.createLogger();
+
+    const annotatedTool = createMockTool('platform.core.list_indices', {
+      annotations: mockAnnotations,
+    });
+    const unannotatedTool = createMockTool('platform.core.search');
+
+    const mockRegistry = {
+      list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool]),
+      execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
+    };
+    const getInternalServices = jest.fn().mockReturnValue({
+      tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
+    });
+
+    const captureVersioned = (method: string) =>
+      jest.fn().mockImplementation((routeConfig: { path: string }) => {
+        const versionedRoute = {
+          addVersion: jest.fn().mockImplementation((_config: any, handler: Function) => {
+            if (method === 'POST') {
+              postHandler = handler;
+            }
+            return versionedRoute;
+          }),
+        };
+        return versionedRoute;
+      });
+
+    const mockRouter = {
+      get: jest.fn(),
+      versioned: { post: captureVersioned('POST') },
+    } as unknown as jest.Mocked<IRouter>;
+
+    registerMCPRoutes({
+      router: mockRouter,
+      getInternalServices,
+      logger: mockLogger,
+    } as unknown as RouteDependencies);
   });
 
-  it('resolves to empty object when annotations are absent', () => {
-    const tool = createMockTool('platform.core.list_indices');
-    const annotationsArg = tool.annotations ?? {};
-    expect(annotationsArg).toEqual({});
+  const createMockRequest = () => ({
+    query: {},
+    events: { aborted$: { subscribe: jest.fn() } },
+  });
+
+  const createMockContext = () => ({
+    core: Promise.resolve({ uiSettings: { client: { get: jest.fn() } } }),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: () => true },
+    }),
+  });
+
+  it('passes annotations as the 4th arg when the tool has them', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const annotatedCall = mockServerTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_list_indices'
+    );
+    expect(annotatedCall).toBeDefined();
+    expect(annotatedCall![3]).toEqual(mockAnnotations);
+    expect(typeof annotatedCall![4]).toBe('function');
+  });
+
+  it('passes empty object as the 4th arg when annotations are absent', async () => {
+    await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
+
+    const unannotatedCall = mockServerTool.mock.calls.find(
+      (call: any[]) => call[0] === 'platform_core_search'
+    );
+    expect(unannotatedCall).toBeDefined();
+    expect(unannotatedCall![3]).toEqual({});
+    expect(typeof unannotatedCall![4]).toBe('function');
   });
 });
 
