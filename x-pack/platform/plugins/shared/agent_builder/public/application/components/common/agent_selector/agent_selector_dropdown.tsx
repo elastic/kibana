@@ -148,7 +148,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // useAgentOptions restricts the list to the space default for non-admins.
   const { agentOptions, renderAgentOption } = useAgentOptions({
     agents,
     selectedAgentId: selectedAgent?.id,
