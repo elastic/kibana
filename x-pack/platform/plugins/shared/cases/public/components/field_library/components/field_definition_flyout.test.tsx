@@ -130,3 +130,114 @@ describe('FieldDefinitionFlyout — isGlobal checkbox', () => {
     expect(screen.getByText('Global field')).toBeInTheDocument();
   });
 });
+
+describe('FieldDefinitionFlyout — permanent identity', () => {
+  const fieldDefinition = {
+    fieldDefinitionId: 'fd-1',
+    name: 'my_field',
+    owner: 'securitySolution' as const,
+    definition: VALID_YAML,
+    isGlobal: false,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('shows the read-only identity (name and type) when editing', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    expect(screen.getByTestId('fieldDefinitionIdentityPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('fieldDefinitionIdentityName')).toHaveTextContent('my_field');
+    expect(screen.getByTestId('fieldDefinitionIdentityType')).toHaveTextContent('keyword');
+    expect(
+      screen.getByText(
+        'This is the permanent key used to access this field in case data and Cases analytics. It cannot be changed after creation.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('does not show the identity panel when creating', () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    expect(screen.queryByTestId('fieldDefinitionIdentityPanel')).not.toBeInTheDocument();
+  });
+
+  it('disables save and shows an inline error when the name is changed', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    fireEvent.change(screen.getByTestId('fieldDefinitionYamlInput'), {
+      target: { value: 'name: renamed_field\ncontrol: INPUT_TEXT\ntype: keyword\n' },
+    });
+
+    expect(screen.getByTestId('fieldDefinitionSaveButton')).toBeDisabled();
+    expect(
+      screen.getByText(
+        'The field name and type are permanent. Restore the name to "my_field" and the type to "keyword" to save your changes.'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
+    expect(defaultProps.onSave).not.toHaveBeenCalled();
+  });
+
+  it('disables save and shows an inline error when the type is changed', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    fireEvent.change(screen.getByTestId('fieldDefinitionYamlInput'), {
+      target: { value: 'name: my_field\ncontrol: INPUT_NUMBER\ntype: integer\n' },
+    });
+
+    expect(screen.getByTestId('fieldDefinitionSaveButton')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
+    expect(defaultProps.onSave).not.toHaveBeenCalled();
+  });
+
+  it('re-enables save when the identity is restored', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
+    fireEvent.change(yamlInput, {
+      target: { value: 'name: renamed_field\ncontrol: INPUT_TEXT\ntype: keyword\n' },
+    });
+    expect(screen.getByTestId('fieldDefinitionSaveButton')).toBeDisabled();
+
+    fireEvent.change(yamlInput, { target: { value: VALID_YAML } });
+    expect(screen.getByTestId('fieldDefinitionSaveButton')).not.toBeDisabled();
+  });
+
+  it('allows saving metadata-only edits (label, validation)', () => {
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    fireEvent.change(screen.getByTestId('fieldDefinitionYamlInput'), {
+      target: {
+        value:
+          'name: my_field\nlabel: "Renamed Label"\ncontrol: INPUT_TEXT\ntype: keyword\nvalidation:\n  required: true\n',
+      },
+    });
+
+    expect(screen.getByTestId('fieldDefinitionSaveButton')).not.toBeDisabled();
+    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
+    expect(defaultProps.onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'my_field' }));
+  });
+
+  it('mentions the permanent identity in the create-mode YAML help text', () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    expect(
+      screen.getByText(
+        /The name and type become the permanent key for case data and Cases analytics/
+      )
+    ).toBeInTheDocument();
+  });
+});

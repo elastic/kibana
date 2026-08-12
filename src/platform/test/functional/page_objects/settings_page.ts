@@ -357,7 +357,10 @@ export class SettingsPageObject extends FtrService {
 
     expect(await this.isOptionChecked(option)).to.be(true);
     await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(false);
+    await this.retry.waitFor(
+      'option to be unchecked',
+      async () => !(await this.isOptionChecked(option))
+    );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -369,7 +372,7 @@ export class SettingsPageObject extends FtrService {
 
     expect(await this.isOptionChecked(option)).to.be(false);
     await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(true);
+    await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
@@ -1113,8 +1116,27 @@ export class SettingsPageObject extends FtrService {
     }
 
     if (activeTab) {
+      // The flyout slides in with an entrance animation; a tab click issued before it settles can
+      // miss the moving target and leave the default Syntax tab selected, so wait for it to stop.
+      await this.waitForScriptedFieldHelpFlyoutToSettle();
       await this.testSubjects.click(activeTab);
+      await this.testSubjects.existOrFail('runScriptButton');
     }
+  }
+
+  private async waitForScriptedFieldHelpFlyoutToSettle() {
+    let previousPosition = await (
+      await this.testSubjects.find('scriptedFieldsHelpFlyout')
+    ).getPosition();
+    await this.retry.waitFor('scripted fields help flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('scriptedFieldsHelpFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
   }
 
   async closeScriptedFieldHelp() {

@@ -10,15 +10,16 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
+import { waitForRequestCount } from '../helpers/request_counts_shared';
 
 const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
 
-const ESE_ENDPOINT = '/internal/search/ese';
 const REQUEST_COUNT_OPTIONS = {
+  endpoint: '/internal/search/ese',
   method: 'POST',
   exactPathname: true,
-} as const;
+};
 
 spaceTest.describe(
   'Discover request counts - data view mode',
@@ -29,19 +30,29 @@ spaceTest.describe(
       await scoutSpace.savedObjects.load(LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
+    spaceTest.beforeEach(async ({ browserAuth, network, pageObjects, page }) => {
       await browserAuth.loginAsPrivilegedUser();
-      // Register the drain promise before goto so it captures the initial-load ESE requests.
-      // waitUntilSearchingHasFinished() has a 2-second appear-timeout that can return before the
-      // chart ESE response arrives in CI, causing it to bleed into the next test's listener window.
+      // Register the drain before goto so it captures the initial-load requests, which
+      // would otherwise bleed into the first test's listener window.
       let eseCount = 0;
       const drainInitialLoad = page
-        .waitForResponse((r) => r.url().includes(ESE_ENDPOINT) && ++eseCount >= 2, {
-          timeout: 30_000,
-        })
+        .waitForResponse(
+          (response) =>
+            network.matchesEndpoint(response.request(), REQUEST_COUNT_OPTIONS) && ++eseCount >= 2,
+          { timeout: 30_000 }
+        )
         .catch(() => {});
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await drainInitialLoad;
+      // The first response isn't completion: an async search answers immediately with
+      // `is_running: true` and finishes over its polls. Leaving with searches in flight
+      // makes showChart() re-request that data, so the "no requests" test counts 1
+      // instead of 0. Settle on UI state, which covers the whole poll cycle.
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
+      await page.testSubj
+        .locator('unifiedHistogramProgressBar')
+        .waitFor({ state: 'hidden', timeout: 30_000 });
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -51,21 +62,12 @@ spaceTest.describe(
     spaceTest(
       'should send 2 search requests (documents + chart) on page load',
       async ({ page, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
-            // Register the counter before reload so the listener is live when requests fire.
-            // waitUntilSearchingHasFinished() uses a 2-second appear-timeout that can expire before
-            // the ESE responses arrive in CI, closing the countMatchingRequests window too early.
-            let eseCount = 0;
-            const waitForBothResponses = page.waitForResponse(
-              (r) => r.url().includes(ESE_ENDPOINT) && ++eseCount >= 2,
-              { timeout: 30_000 }
-            );
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await page.reload();
-            await waitForBothResponses;
-          },
-          REQUEST_COUNT_OPTIONS
+            await waitForRequestCount(getCount, 2);
+          }
         );
         expect(count).toBe(2);
       }
@@ -74,13 +76,13 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when refreshing',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.submitQuery();
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -89,14 +91,14 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when changing the query',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.queryBar.setQuery('bytes > 1000');
             await pageObjects.discover.submitQuery();
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -105,16 +107,16 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when changing the time range',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.datePicker.setAbsoluteRange({
               from: 'Sep 21, 2015 @ 06:31:44.000',
               to: 'Sep 23, 2015 @ 00:00:00.000',
             });
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -123,14 +125,10 @@ spaceTest.describe(
     spaceTest(
       'should send no requests when toggling the chart visibility',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
-            await pageObjects.discover.hideChart();
-            await pageObjects.discover.showChart();
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const count = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.hideChart();
+          await pageObjects.discover.showChart();
+        });
         expect(count).toBe(0);
       }
     );
@@ -145,13 +143,13 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.showChart();
+            await waitForRequestCount(getCount, 1);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(1);
       }
@@ -168,46 +166,42 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const saveCount = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
-            await pageObjects.discover.saveSearch('data view test');
-          },
-          REQUEST_COUNT_OPTIONS
-        );
+        const saveCount = await network.countMatchingRequests(REQUEST_COUNT_OPTIONS, async () => {
+          await pageObjects.discover.saveSearch('data view test');
+        });
         expect(saveCount).toBe(0);
 
         await pageObjects.queryBar.setQuery('bytes < 2000');
         await pageObjects.discover.submitQuery();
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const revertCount = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const revertCount = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.revertUnsavedChanges();
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(revertCount).toBe(2);
 
-        const newSearchCount = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const newSearchCount = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.clickNewSearch();
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(newSearchCount).toBe(2);
 
-        const loadCount = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const loadCount = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.loadSavedSearch('data view test');
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(loadCount).toBe(2);
       }
@@ -216,17 +210,17 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when adding a filter',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.filterBar.addFilter({
               field: 'extension',
               operator: 'is',
               value: 'jpg',
             });
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -235,17 +229,17 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when sorting',
       async ({ page, pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.dataGrid.openColumnMenuByField('@timestamp');
             await page.testSubj
               .locator('dataGridHeaderCellActionGroup-@timestamp')
               .getByRole('button', { name: 'Sort Old-New' })
               .click();
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -254,13 +248,13 @@ spaceTest.describe(
     spaceTest(
       'should send 1 request (chart) when changing to a breakdown field without an other bucket',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.chooseBreakdownField('type');
+            await waitForRequestCount(getCount, 1);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(1);
       }
@@ -269,13 +263,13 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.chooseBreakdownField('geo.src');
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
@@ -284,13 +278,13 @@ spaceTest.describe(
     spaceTest(
       'should send 1 request (chart) when changing the chart interval',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.setChartInterval('Day');
+            await waitForRequestCount(getCount, 1);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(1);
       }
@@ -299,13 +293,13 @@ spaceTest.describe(
     spaceTest(
       'should send 2 requests (documents + chart) when changing the data view',
       async ({ pageObjects, network }) => {
-        const count = await network.countMatchingRequests(
-          ESE_ENDPOINT,
-          async () => {
+        const count = await network.trackMatchingRequests(
+          REQUEST_COUNT_OPTIONS,
+          async (getCount) => {
             await pageObjects.discover.selectDataView('long-window-logstash-*');
+            await waitForRequestCount(getCount, 2);
             await pageObjects.discover.waitUntilSearchingHasFinished();
-          },
-          REQUEST_COUNT_OPTIONS
+          }
         );
         expect(count).toBe(2);
       }
