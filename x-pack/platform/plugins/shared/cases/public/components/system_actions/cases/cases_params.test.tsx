@@ -349,6 +349,20 @@ describe('CasesParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].groupingBy).toEqual(['alert.name']);
     });
 
+    it('shows an error when the typed grouping by field does not match any field', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      await user.click(await screen.findByTestId('group-by-alert-field-combobox'));
+
+      await showEuiComboBoxOptions();
+
+      await user.type(await screen.findByTestId('comboBoxSearchInput'), 'foobar');
+
+      expect(
+        await screen.findByText('Invalid field. Select a field from the list.')
+      ).toBeInTheDocument();
+    });
+
     it('renders default template correctly', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
