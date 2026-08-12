@@ -323,7 +323,7 @@ export async function openDimensionEditorAndWaitForFlyout(
   await dimensionButton.click();
 
   // Confirm that the secondary flyout is opened
-  await expect(lens.secondaryFlyoutBackButton).toBeVisible();
+  await expect(lens.workspace.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
@@ -332,17 +332,17 @@ export async function openInlineEditorAndWaitVisible(
   panelId: string
 ) {
   await dashboard.openInlineEditor(panelId);
-  await expect(lens.inlineEditor).toBeVisible();
+  await expect(lens.workspace.inlineEditor).toBeVisible();
 }
 
 export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.applyFlyoutButton.click();
-  await expect(lens.inlineEditor).toBeHidden();
+  await expect(lens.workspace.inlineEditor).toBeHidden();
 }
 
 export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.cancelFlyoutButton.click();
-  await expect(lens.inlineEditor).toBeHidden();
+  await expect(lens.workspace.inlineEditor).toBeHidden();
 }
 
 /**
@@ -368,15 +368,15 @@ export async function convertToEsqlViaModal({
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
-  await lens.convertToEsqlButton.click();
+  await lens.workspace.convertToEsqlButton.click();
 
   // Click on the confirmation button in the modal
-  const modal = lens.convertToEsqlModal;
-  await lens.convertToEsqlModalConfirmButton.click();
+  const modal = lens.workspace.convertToEsqlModal;
+  await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
   // Confirm that the in-line editor has been updated
-  await expect(lens.convertToEsqlButton).toBeHidden();
+  await expect(lens.workspace.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }
