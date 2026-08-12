@@ -39,6 +39,19 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % BREAKING CHANGES
 % Paste in breaking-changes.md
 
+## 9.5.1 [kibana-9.5.1-breaking-changes]
+
+$$$kibana-282404$$$
+::::{dropdown} Reject additional_datastreams_permissions values that don't match the datastream grammar
+**Details**<br> {{fleet}} package policy validation for `additional_datastreams_permissions` previously used a regex that didn't enforce its documented `<type>-<suffix>` datastream prefix grammar (for example `logs-nginx-*`). A value only needed to start with `logs`, contain `metrics`, `traces`, or `synthetics`, or end with `profiles-...` to pass.
+
+**Impact**<br> Package policy requests that set `additional_datastreams_permissions` to a value that doesn't match the `<type>-<suffix>` grammar — such as a dashless value or one starting with a wildcard, for example `logs*` — are now rejected.
+
+**Action**<br> Update any `additional_datastreams_permissions` values to the `<type>-<suffix>` form, for example `logs-nginx-*`.
+
+View [#282404]({{kib-pull}}282404).
+::::
+
 ## 9.5.0 [kibana-9.5.0-breaking-changes]
 
 $$$kibana-274792$$$
