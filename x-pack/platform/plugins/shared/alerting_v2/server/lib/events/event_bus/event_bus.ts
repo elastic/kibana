@@ -26,8 +26,8 @@ const ASYNC_RESOURCE_NAME = 'AsyncDomainEventBus';
 type AnyHandler = (event: DomainEvent, ...extra: unknown[]) => Promise<void> | void;
 
 type EventBusErrorCode =
-  | typeof ALERTING_LOG_CODES.EVENT_BUS_HANDLER_FAILURE
-  | typeof ALERTING_LOG_CODES.EVENT_BUS_EMITTER_ERROR;
+  | typeof ALERTING_LOG_CODES.EVENTS_BUS_HANDLER_FAILED
+  | typeof ALERTING_LOG_CODES.EVENTS_BUS_EMITTER_FAILED;
 
 /**
  * Event names that have special semantics on Node's {@link EventEmitter} and
@@ -93,7 +93,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     // safe regardless of what is published or what `captureRejections`
     // routes here.
     this.#emitter.on('error', (err) =>
-      this.#logError(err, ALERTING_LOG_CODES.EVENT_BUS_EMITTER_ERROR)
+      this.#logError(err, ALERTING_LOG_CODES.EVENTS_BUS_EMITTER_FAILED)
     );
   }
 
@@ -112,7 +112,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
         message: () =>
           `[alerting_v2.EventBus] Refused to publish event with reserved \`type\` "${event.type}". ` +
           `These names are reserved by Node's EventEmitter.`,
-        code: ALERTING_LOG_CODES.EVENT_BUS_PUBLISH_REJECTED,
+        code: ALERTING_LOG_CODES.EVENTS_BUS_PUBLISH_SKIPPED,
         labels: { event_type: event.type },
       });
 
@@ -128,7 +128,8 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
       this.#emitter.emit(event.type, event);
     }
     this.logger.debug({
-      message: () => `[alerting_v2.EventBus] Emitted ${event.type} with ${JSON.stringify(event)} `,
+      message: () => `[alerting_v2.EventBus] Emitted ${event.type}`,
+      labels: { event_type: event.type },
     });
   }
 
@@ -141,7 +142,7 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
         try {
           await (handler as (...args: unknown[]) => Promise<void> | void)(event, ...extra);
         } catch (err) {
-          this.#logError(err, ALERTING_LOG_CODES.EVENT_BUS_HANDLER_FAILURE, {
+          this.#logError(err, ALERTING_LOG_CODES.EVENTS_BUS_HANDLER_FAILED, {
             event_type: event.type,
           });
         }
