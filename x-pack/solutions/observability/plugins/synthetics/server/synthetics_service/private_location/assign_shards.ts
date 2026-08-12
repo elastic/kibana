@@ -262,51 +262,62 @@ export const rebalanceByCost = (
         undefined
       );
 
-    // Bounded by monitor count: each iteration moves one monitor and strictly
-    // lowers the objective, so it can't cycle.
+    // Each iteration performs one move that strictly lowers the objective, so it
+    // can never cycle; the monitor-count cap just bounds the work done per pass.
     for (let i = 0; i < monitors.length; i++) {
+      // Recipient = the most under-utilised recovery agent. Fixing it loses
+      // nothing: Δ = 2c(c − gap) shrinks as the recipient's surplus does, so the
+      // lowest-surplus recipient minimises Δ for *every* candidate monitor — if no
+      // move helps it, no move helps any other recipient either.
       const recipient = pick(
         recovery,
         (a, b) => surplusOf(a) < surplusOf(b) - EPSILON || (surplusOf(a) <= surplusOf(b) && a < b)
       );
-      const donor = pick(
-        healthyAgentIds.filter(
-          (id) => id !== recipient && (monitorsByAgentId.get(id)?.length ?? 0) > 0
-        ),
-        (a, b) => surplusOf(a) > surplusOf(b) + EPSILON || (surplusOf(a) >= surplusOf(b) && a < b)
-      );
-      if (recipient === undefined || donor === undefined) {
+      if (recipient === undefined) {
         break;
       }
-      const gap = surplusOf(donor) - surplusOf(recipient);
-      if (gap <= EPSILON) {
-        break; // balanced — nothing left to improve
-      }
 
-      // Δ objective for moving cost c donor→recipient is 2c(c − gap); pick the
-      // monitor with the most negative Δ (id tie-break). c ≥ gap never helps.
-      let mover: MonitorPlacement | undefined;
-      let bestDelta = -EPSILON;
-      for (const monitor of monitorsByAgentId.get(donor)!) {
-        const delta = 2 * monitor.cost * (monitor.cost - gap);
-        if (
-          delta < bestDelta ||
-          (mover !== undefined && delta <= bestDelta && monitor.id < mover.id)
-        ) {
-          bestDelta = delta;
-          mover = monitor;
+      // Δ objective for moving cost c donor→recipient is 2c(c − gap), so c ≥ gap
+      // never helps. Scan every donor's monitors and take the most negative Δ,
+      // tie-broken on (agent id, monitor id) so the result stays deterministic and
+      // independent of input order. Scanning *all* donors matters: the single
+      // highest-surplus donor may hold only monitors too heavy to help (e.g. one
+      // browser check) while a lighter donor still has a beneficial move — stopping
+      // at the first donor would leave the recovery agent starved.
+      let best: { donor: string; monitor: MonitorPlacement; delta: number } | undefined;
+      for (const donor of healthyAgentIds) {
+        if (donor === recipient) {
+          continue;
+        }
+        const gap = surplusOf(donor) - surplusOf(recipient);
+        if (gap <= EPSILON) {
+          continue; // donor carries no more than its share relative to the recipient
+        }
+        for (const monitor of monitorsByAgentId.get(donor) ?? []) {
+          const delta = 2 * monitor.cost * (monitor.cost - gap);
+          if (delta >= -EPSILON) {
+            continue; // not a strict improvement (c ≥ gap)
+          }
+          const breaksTie =
+            best !== undefined &&
+            delta <= best.delta &&
+            (donor < best.donor || (donor === best.donor && monitor.id < best.monitor.id));
+          if (best === undefined || delta < best.delta || breaksTie) {
+            best = { donor, monitor, delta };
+          }
         }
       }
-      if (mover === undefined) {
-        break; // no single move improves balance
+      if (best === undefined) {
+        break; // balanced — no single move improves it
       }
 
+      const { donor: moverDonor, monitor: mover } = best;
       assignment.set(mover.id, recipient);
-      load.set(donor, load.get(donor)! - mover.cost);
+      load.set(moverDonor, load.get(moverDonor)! - mover.cost);
       load.set(recipient, load.get(recipient)! + mover.cost);
       monitorsByAgentId.set(
-        donor,
-        monitorsByAgentId.get(donor)!.filter((m) => m.id !== mover!.id)
+        moverDonor,
+        (monitorsByAgentId.get(moverDonor) ?? []).filter((m) => m.id !== mover.id)
       );
       monitorsByAgentId.set(recipient, [...(monitorsByAgentId.get(recipient) ?? []), mover]);
     }

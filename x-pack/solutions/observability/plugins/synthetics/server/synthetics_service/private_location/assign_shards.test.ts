@@ -305,6 +305,23 @@ describe('rebalanceByCost', () => {
     expect(Math.max(...loads) - Math.min(...loads)).toBeLessThanOrEqual(LIGHTWEIGHT_COST_MIB);
   });
 
+  it('fills an empty recovery host from a lighter donor when the heaviest one cannot help', () => {
+    // h1 holds a single browser (150) and h2 fifty lightweights (150) — both exactly
+    // as loaded, fairShare 100 each, h3 empty. h1 is the (tie-broken) highest-surplus
+    // donor but its only monitor costs exactly the gap, so no move off h1 helps.
+    // h2's lightweights do, so h3 must not be left starved.
+    const monitors = [br('b0', 'h1'), ...Array.from({ length: 50 }, (_, i) => lw(`m${i}`, 'h2'))];
+    const assignment = rebalanceByCost(monitors, hosts, { recoveryAgentIds: hosts });
+
+    const loads = hosts.map((h) => loadByHost(assignment, monitors)[h] ?? 0);
+    expect(loadByHost(assignment, monitors).h3 ?? 0).toBeGreaterThan(0);
+    // Optimal here is 150/75/75 — the browser is indivisible, so the 50 lightweights
+    // split evenly across the two remaining hosts.
+    expect(loads.sort((a, b) => a - b)).toEqual([75, 75, 150]);
+    // Only lightweights move, and only onto h3 — the browser stays put.
+    expect(assignment.get('b0')).toBe('h1');
+  });
+
   it('does not churn for a sub-monitor imbalance (cost is the anti-churn threshold)', () => {
     // h1 has one more lightweight than h2 → gap equals one monitor's cost, so no
     // move strictly improves balance.
