@@ -8,6 +8,7 @@
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { hasStartEndParams } from '@kbn/esql-utils';
 import {
   executeEsql,
   buildTimeRangeParams,
@@ -33,7 +34,7 @@ const executeEsqlToolSchema = z.object({
     })
     .optional()
     .describe(
-      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours.'
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend; otherwise the query runs without it and a warning is returned.'
     ),
   limit: z
     .number()
@@ -70,13 +71,15 @@ Note that this option can't be used to increase the number of results if the que
       { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
       { esClient, attachments }
     ) => {
+      const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
+      const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
 
       const params: Array<Record<string, FieldValue>> = [
         ...Object.entries(esqlParams).map(([key, value]) => {
           return { [key]: value };
         }),
-        ...(buildTimeRangeParams(timeRange) ?? []),
+        ...timeRangeParams,
       ];
 
       const result = await executeEsql({
@@ -110,9 +113,21 @@ Note that this option can't be used to increase the number of results if the que
               query: interpolatedQuery,
               columns: result.columns,
               values: result.values,
-              time_range: timeRange,
+              ...(usesTimeRangeParams ? { time_range: timeRange } : {}),
             },
           },
+          // A caller-supplied parameter that has no effect must not fail silently.
+          ...(explicitTimeRange && !usesTimeRangeParams
+            ? [
+                {
+                  type: ToolResultType.other as const,
+                  data: {
+                    warning:
+                      'The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.',
+                  },
+                },
+              ]
+            : []),
         ],
       };
     },
