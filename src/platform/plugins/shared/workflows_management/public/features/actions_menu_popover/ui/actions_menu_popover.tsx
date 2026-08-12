@@ -30,7 +30,8 @@ const panelCss = css({
   left: '50%',
   transform: 'translate(-50%, -50%)',
   zIndex: 2001,
-  width: '1085px',
+  // Sized for smaller viewports; still caps to the available window.
+  width: 'min(920px, calc(100vw - 48px))',
   overflow: 'hidden',
 });
 

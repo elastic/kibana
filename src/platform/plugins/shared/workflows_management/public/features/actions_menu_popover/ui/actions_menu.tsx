@@ -1198,7 +1198,7 @@ const componentStyles = {
   container: css({
     display: 'flex',
     flexDirection: 'column',
-    width: '1085px',
+    width: '100%',
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -1228,7 +1228,7 @@ const componentStyles = {
     },
   }),
   body: css({
-    height: '640px',
+    height: 'min(520px, calc(100vh - 160px))',
     overflow: 'hidden',
   }),
   leftColumn: ({ euiTheme }: UseEuiTheme) =>
