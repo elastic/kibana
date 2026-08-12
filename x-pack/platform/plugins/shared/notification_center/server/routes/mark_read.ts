@@ -10,7 +10,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { notificationIdSchema } from '../../common/notification_schema';
 import { MARK_READ_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import { markRead } from '../lib/read_state';
-import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
+import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
 
 const markReadBodySchema = z.object({ notification_id: notificationIdSchema }).strict();
 

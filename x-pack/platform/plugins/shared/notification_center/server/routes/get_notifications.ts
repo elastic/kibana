@@ -9,7 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import { notificationQueryParamsSchema } from '../../common/notification_schema';
 import { queryNotifications } from '../lib/query_notifications';
-import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
+import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
 
 /**
  * `GET /internal/notification_center/notifications`

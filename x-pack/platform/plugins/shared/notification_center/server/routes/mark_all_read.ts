@@ -7,7 +7,7 @@
 
 import { MARK_ALL_READ_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import { markAllRead } from '../lib/read_state';
-import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from '.';
+import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
 
 /**
  * `POST /internal/notification_center/notifications/_mark_all_read`
