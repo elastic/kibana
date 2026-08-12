@@ -12,14 +12,19 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   AddAttachmentInput,
   AddCommentInput,
+  AddWatcherInput,
   AssignIssueInput,
   CreateIssueInput,
+  DeleteIssueInput,
+  GetAttachmentInput,
   GetCreateMetadataInput,
   GetIssueInput,
   GetIssueTypesInput,
   GetProjectInput,
   GetProjectsInput,
   GetTransitionsInput,
+  LinkIssuesInput,
+  RemoveWatcherInput,
   SearchIssuesWithJqlInput,
   SearchUsersInput,
   TransitionIssueInput,
@@ -28,14 +33,19 @@ import type {
 import {
   AddAttachmentInputSchema,
   AddCommentInputSchema,
+  AddWatcherInputSchema,
   AssignIssueInputSchema,
   CreateIssueInputSchema,
+  DeleteIssueInputSchema,
+  GetAttachmentInputSchema,
   GetCreateMetadataInputSchema,
   GetIssueInputSchema,
   GetIssueTypesInputSchema,
   GetProjectInputSchema,
   GetProjectsInputSchema,
   GetTransitionsInputSchema,
+  LinkIssuesInputSchema,
+  RemoveWatcherInputSchema,
   SearchUsersInputSchema,
   SearchIssuesWithJqlInputSchema,
   TransitionIssueInputSchema,
@@ -434,6 +444,104 @@ export const JiraConnector: ConnectorSpec = {
           { headers: { 'X-Atlassian-Token': 'no-check' } }
         );
         return response.data;
+      },
+    },
+
+    // =========================================================================
+    // Nice-to-have actions
+    // =========================================================================
+
+    getAttachment: {
+      isTool: true,
+      description:
+        'Download the content of a Jira attachment by its ID. ' +
+        'Returns the file as a base64-encoded string along with its MIME type. ' +
+        'Attachment IDs are found in the attachments array of a getIssue response.',
+      input: GetAttachmentInputSchema,
+      handler: async (ctx, input: GetAttachmentInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/3/attachment/content/${input.attachmentId}`,
+          { responseType: 'arraybuffer' }
+        );
+        return {
+          content: Buffer.from(response.data as ArrayBuffer).toString('base64'),
+          contentType: response.headers['content-type'] ?? 'application/octet-stream',
+          attachmentId: input.attachmentId,
+        };
+      },
+    },
+
+    linkIssues: {
+      isTool: true,
+      description:
+        'Create a link between two Jira issues (e.g. "relates to", "blocks", "duplicates"). ' +
+        'Use when you need to establish a relationship between tickets.',
+      input: LinkIssuesInputSchema,
+      handler: async (ctx, input: LinkIssuesInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const body: Record<string, unknown> = {
+          type: { name: input.linkType },
+          inwardIssue: { key: input.inwardIssueKey },
+          outwardIssue: { key: input.outwardIssueKey },
+        };
+        if (input.comment !== undefined) {
+          body.comment = { body: toAdf(input.comment) };
+        }
+        await ctx.client.post(`${baseUrl}/rest/api/3/issueLink`, body);
+        return {
+          linked: true,
+          inwardIssueKey: input.inwardIssueKey,
+          outwardIssueKey: input.outwardIssueKey,
+          linkType: input.linkType,
+        };
+      },
+    },
+
+    deleteIssue: {
+      isTool: false,
+      description:
+        'Permanently delete a Jira issue. This is irreversible. ' +
+        'Set deleteSubtasks to true if the issue has subtasks, otherwise Jira returns a 400.',
+      input: DeleteIssueInputSchema,
+      handler: async (ctx, input: DeleteIssueInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        await ctx.client.delete(`${baseUrl}/rest/api/3/issue/${input.issueId}`, {
+          params:
+            input.deleteSubtasks !== undefined ? { deleteSubtasks: input.deleteSubtasks } : {},
+        });
+        return { deleted: true, issueId: input.issueId };
+      },
+    },
+
+    addWatcher: {
+      isTool: true,
+      description:
+        'Add a user as a watcher on a Jira issue so they receive notifications. ' +
+        'Use searchUsers to resolve a name or email to an accountId before calling this.',
+      input: AddWatcherInputSchema,
+      handler: async (ctx, input: AddWatcherInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        // Jira REST v3 expects the body to be a bare JSON string (the accountId), not an object.
+        await ctx.client.post(
+          `${baseUrl}/rest/api/3/issue/${input.issueId}/watchers`,
+          JSON.stringify(input.accountId),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+        return { watching: true, issueId: input.issueId, accountId: input.accountId };
+      },
+    },
+
+    removeWatcher: {
+      isTool: true,
+      description: 'Remove a user from the watcher list of a Jira issue.',
+      input: RemoveWatcherInputSchema,
+      handler: async (ctx, input: RemoveWatcherInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        await ctx.client.delete(`${baseUrl}/rest/api/3/issue/${input.issueId}/watchers`, {
+          params: { accountId: input.accountId },
+        });
+        return { unwatched: true, issueId: input.issueId, accountId: input.accountId };
       },
     },
   },
