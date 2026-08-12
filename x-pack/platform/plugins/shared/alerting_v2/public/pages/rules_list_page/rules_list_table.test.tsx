@@ -166,14 +166,14 @@ describe('RulesListTable', () => {
       );
     });
 
-    it('renders Mode column with Alert and Signal', () => {
+    it('renders Mode column with Alerts and Events', () => {
       renderTable();
 
       expect(screen.getByText('Alerts')).toBeInTheDocument();
       expect(screen.getByText('Events')).toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Alert mode badge', async () => {
+    it('renders kind-specific tooltip for Alerts mode badge', async () => {
       renderTable();
 
       fireEvent.mouseOver(screen.getByText('Alerts'));
@@ -184,7 +184,7 @@ describe('RulesListTable', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('renders kind-specific tooltip for Signal mode badge', async () => {
+    it('renders kind-specific tooltip for Events mode badge', async () => {
       renderTable();
 
       fireEvent.mouseOver(screen.getByText('Events'));

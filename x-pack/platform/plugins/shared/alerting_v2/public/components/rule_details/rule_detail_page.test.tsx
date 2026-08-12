@@ -122,7 +122,7 @@ const baseRule: RuleApiResponse = {
   kind: 'signal',
   enabled: true,
   metadata: {
-    name: 'Test Signal Rule',
+    name: 'Test Events Rule',
     version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
@@ -168,14 +168,14 @@ describe('RuleDetailPage', () => {
   it('wires breadcrumbs with the rule name', () => {
     renderPage(baseRule);
     expect(mockUseBreadcrumbs).toHaveBeenCalledWith('rule_details', {
-      ruleName: 'Test Signal Rule',
+      ruleName: 'Test Events Rule',
     });
   });
 
   it('renders the app header title and sidebar sections', async () => {
     renderPage(baseRule);
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
-      'Test Signal Rule'
+      'Test Events Rule'
     );
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.metadata)).toBeInTheDocument();
     expect(screen.queryByTestId('ruleTags')).not.toBeInTheDocument();
@@ -226,7 +226,7 @@ describe('RuleDetailPage', () => {
     expect(screen.getByText('infra')).toBeInTheDocument();
   });
 
-  it('renders alert kind badge with its icon and disabled status badge', () => {
+  it('renders Alerts kind badge with its icon and disabled status badge', () => {
     renderPage({ ...baseRule, kind: 'alert', enabled: false });
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Alerts');
@@ -305,7 +305,7 @@ describe('RuleDetailPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteRule).toHaveBeenCalledWith(
-      { id: 'rule-1', name: 'Test Signal Rule' },
+      { id: 'rule-1', name: 'Test Events Rule' },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       })

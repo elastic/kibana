@@ -28,7 +28,7 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Signal Rule', version: 1 },
+  metadata: { name: 'Test Events Rule', version: 1 },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: {
@@ -264,7 +264,7 @@ describe('RuleConditions', () => {
     );
   });
 
-  it('does not render no data behavior for signal rules', () => {
+  it('does not render no data behavior for Events rules', () => {
     renderConditions(baseRule);
     expect(screen.queryByTestId('alertingV2RuleDetailsNoDataStrategy')).not.toBeInTheDocument();
   });
@@ -302,7 +302,7 @@ describe('RuleConditions', () => {
     it('renders description text before the ES|QL heading when it exists', () => {
       const ruleWithDesc = {
         ...baseRule,
-        metadata: { ...baseRule.metadata, name: 'Test Signal Rule', description: 'My rule desc' },
+        metadata: { ...baseRule.metadata, name: 'Test Events Rule', description: 'My rule desc' },
       };
       renderConditions(ruleWithDesc);
       const desc = screen.getByTestId('ruleConditionsDescription');

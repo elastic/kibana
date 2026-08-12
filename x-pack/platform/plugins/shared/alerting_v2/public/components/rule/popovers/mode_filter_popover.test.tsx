@@ -35,7 +35,7 @@ describe('ModeFilterPopover', () => {
     expect(screen.getByText('Events')).toBeInTheDocument();
   });
 
-  it('calls onChange with "alert" when Alert is selected', () => {
+  it('calls onChange with "alert" when Alerts is selected', () => {
     const onChange = jest.fn();
     render(<ModeFilterPopover value="" onChange={onChange} />);
 
@@ -45,7 +45,7 @@ describe('ModeFilterPopover', () => {
     expect(onChange).toHaveBeenCalledWith('alert');
   });
 
-  it('calls onChange with "signal" when Signal is selected', () => {
+  it('calls onChange with "signal" when Events is selected', () => {
     const onChange = jest.fn();
     render(<ModeFilterPopover value="" onChange={onChange} />);
 

@@ -43,14 +43,14 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toBeInTheDocument();
   });
 
-  it('renders "Events" kind badge for signal rules', () => {
+  it('renders "Events" kind badge for Events rules', () => {
     renderPanel(mockRule);
 
     const badge = screen.getByTestId('alertingV2EpisodeDetailsRuleKindBadge');
     expect(badge).toHaveTextContent('Events');
   });
 
-  it('renders "Alerts" kind badge for alert rules', () => {
+  it('renders "Alerts" kind badge for Alerts rules', () => {
     renderPanel(alertRule);
 
     const badge = screen.getByTestId('alertingV2EpisodeDetailsRuleKindBadge');

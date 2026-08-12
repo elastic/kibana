@@ -75,17 +75,17 @@ describe('RuleTitleWithBadges', () => {
     expect(screen.getByTestId('ruleName')).toHaveTextContent('My Rule');
   });
 
-  it('renders kind as Events for signal rules', () => {
+  it('renders kind as Events for Events rules', () => {
     wrap(<RuleTitleWithBadges />);
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Events');
   });
 
-  it('renders kind as Alerts for alert rules', () => {
+  it('renders kind as Alerts for Alerts rules', () => {
     wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
     expect(screen.getByTestId('kindBadge')).toHaveTextContent('Alerts');
   });
 
-  it('renders kind-specific tooltip for signal rules', async () => {
+  it('renders kind-specific tooltip for Events rules', async () => {
     wrap(<RuleTitleWithBadges />);
 
     fireEvent.mouseOver(screen.getByTestId('kindBadge'));
@@ -95,7 +95,7 @@ describe('RuleTitleWithBadges', () => {
     });
   });
 
-  it('renders kind-specific tooltip for alert rules', async () => {
+  it('renders kind-specific tooltip for Alerts rules', async () => {
     wrap(<RuleTitleWithBadges />, { ...baseRule, kind: 'alert' } as RuleApiResponse);
 
     fireEvent.mouseOver(screen.getByTestId('kindBadge'));
