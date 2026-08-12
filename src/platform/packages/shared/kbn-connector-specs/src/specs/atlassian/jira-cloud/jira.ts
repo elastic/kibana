@@ -10,19 +10,28 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type {
+  AddCommentInput,
+  CreateIssueInput,
   GetIssueInput,
   GetProjectInput,
   GetProjectsInput,
   SearchIssuesWithJqlInput,
   SearchUsersInput,
+  TransitionIssueInput,
+  UpdateIssueInput,
 } from './types';
 import {
+  AddCommentInputSchema,
+  CreateIssueInputSchema,
   GetIssueInputSchema,
   GetProjectInputSchema,
   GetProjectsInputSchema,
   SearchUsersInputSchema,
   SearchIssuesWithJqlInputSchema,
+  TransitionIssueInputSchema,
+  UpdateIssueInputSchema,
 } from './types';
+import { toAdf } from './adf';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 
 const buildBaseUrl = (ctx: ActionContext): string => {
@@ -216,6 +225,119 @@ export const JiraConnector: ConnectorSpec = {
           params: typedInput,
         });
         return response.data;
+      },
+    },
+
+    // =========================================================================
+    // Must-have write actions
+    // =========================================================================
+
+    createIssue: {
+      isTool: true,
+      description:
+        'Create a new Jira issue. Use when you need to file a bug, task, story, or other issue type. ' +
+        'Call getIssueTypes first to discover valid issue types for the project, and ' +
+        'getCreateMetadata to discover required fields.',
+      input: CreateIssueInputSchema,
+      handler: async (ctx, input: CreateIssueInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const fields: Record<string, unknown> = {
+          project: { key: input.projectKey },
+          summary: input.summary,
+        };
+        if (input.issueType !== undefined) {
+          fields.issuetype = /^\d+$/.test(input.issueType)
+            ? { id: input.issueType }
+            : { name: input.issueType };
+        }
+        if (input.description !== undefined) {
+          fields.description = toAdf(input.description);
+        }
+        if (input.priority !== undefined) {
+          fields.priority = { name: input.priority };
+        }
+        if (input.labels !== undefined) {
+          fields.labels = input.labels;
+        }
+        if (input.assigneeAccountId !== undefined) {
+          fields.assignee = { accountId: input.assigneeAccountId };
+        }
+        if (input.parent !== undefined) {
+          fields.parent = { key: input.parent };
+        }
+        const response = await ctx.client.post(`${baseUrl}/rest/api/3/issue`, { fields });
+        return response.data;
+      },
+    },
+
+    updateIssue: {
+      isTool: true,
+      description:
+        'Update fields on an existing Jira issue. Use when you need to change the summary, description, ' +
+        'priority, labels, assignee, or issue type. Only the fields you provide are updated; ' +
+        'omitted fields are left unchanged.',
+      input: UpdateIssueInputSchema,
+      handler: async (ctx, input: UpdateIssueInput) => {
+        const { issueId, ...rest } = input;
+        const baseUrl = buildBaseUrl(ctx);
+        const fields: Record<string, unknown> = {};
+        if (rest.summary !== undefined) {
+          fields.summary = rest.summary;
+        }
+        if (rest.description !== undefined) {
+          fields.description = toAdf(rest.description);
+        }
+        if (rest.issueType !== undefined) {
+          fields.issuetype = /^\d+$/.test(rest.issueType)
+            ? { id: rest.issueType }
+            : { name: rest.issueType };
+        }
+        if (rest.priority !== undefined) {
+          fields.priority = { name: rest.priority };
+        }
+        if (rest.labels !== undefined) {
+          fields.labels = rest.labels;
+        }
+        if (rest.assigneeAccountId !== undefined) {
+          fields.assignee =
+            rest.assigneeAccountId === null ? null : { accountId: rest.assigneeAccountId };
+        }
+        if (rest.parent !== undefined) {
+          fields.parent = { key: rest.parent };
+        }
+        await ctx.client.put(`${baseUrl}/rest/api/3/issue/${issueId}`, { fields });
+        return { updated: true, issueId };
+      },
+    },
+
+    addComment: {
+      isTool: true,
+      description:
+        'Add a comment to an existing Jira issue. Use when you need to post an update, note, or ' +
+        'remediation detail on a ticket without changing its fields.',
+      input: AddCommentInputSchema,
+      handler: async (ctx, input: AddCommentInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.post(
+          `${baseUrl}/rest/api/3/issue/${input.issueId}/comment`,
+          { body: toAdf(input.body) }
+        );
+        return response.data;
+      },
+    },
+
+    transitionIssue: {
+      isTool: true,
+      description:
+        'Move a Jira issue to a new status by executing a workflow transition. ' +
+        'Call getTransitions first — Jira requires a transition ID, not a status name.',
+      input: TransitionIssueInputSchema,
+      handler: async (ctx, input: TransitionIssueInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        await ctx.client.post(`${baseUrl}/rest/api/3/issue/${input.issueId}/transitions`, {
+          transition: { id: input.transitionId },
+        });
+        return { transitioned: true, issueId: input.issueId, transitionId: input.transitionId };
       },
     },
   },
