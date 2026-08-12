@@ -80,6 +80,11 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
+import {
+  dispatchConnectorEvents,
+  registerInboundRoutes,
+  type ConnectorEventEmitter,
+} from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -173,6 +178,12 @@ export interface PluginSetupContract {
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
 
   registerConnectorLifecycleListener(listener: ConnectorLifecycleListener): void;
+
+  /**
+   * Registers the single consumer that receives connector events from the public inbound hub.
+   * Later registrations overwrite the previous emitter (with a warning).
+   */
+  registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
 }
 
 export interface PluginStartContract {
@@ -291,6 +302,7 @@ export class ActionsPlugin
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
   private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
+  private connectorEventEmitter?: ConnectorEventEmitter;
   private skippedPreconfiguredConnectorIds: Set<string> = new Set();
   // Process-wide: a warm client must outlive a single action, and the per-action context is
   // discarded when the action returns, so the plugin instance owns the pool.
@@ -490,6 +502,22 @@ export class ActionsPlugin
       oauthRateLimiter,
     });
 
+    registerInboundRoutes({
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      inboundEventsEnabled: actionsConfigUtils.isInboundEventsEnabled(),
+      maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+      inMemoryConnectors: this.inMemoryConnectors,
+      emitConnectorEvents: (params) =>
+        dispatchConnectorEvents({
+          emitter: this.connectorEventEmitter,
+          params,
+          logger: this.logger,
+        }),
+    });
+
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -550,6 +578,14 @@ export class ActionsPlugin
       },
       registerConnectorLifecycleListener: (listener: ConnectorLifecycleListener) => {
         this.connectorLifecycleListeners.push(listener);
+      },
+      registerConnectorEventEmitter: (emitter: ConnectorEventEmitter) => {
+        if (this.connectorEventEmitter !== undefined) {
+          this.logger.warn(
+            'A connector event emitter is already registered; overwriting the previous emitter.'
+          );
+        }
+        this.connectorEventEmitter = emitter;
       },
     };
   }
