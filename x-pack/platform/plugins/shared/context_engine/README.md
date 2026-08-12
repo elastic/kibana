@@ -19,6 +19,10 @@ Notes:
 
 - The API is gated behind the `contextEngine:enabled` advanced setting
   (disabled by default). All routes return 404 while the setting is off.
+- The `contextEngine:feedbackLoopEnabled` (global) advanced setting gates the
+  feedback loop (disabled by default): the always-scheduled hourly
+  `contextEngine:signalGenerator` background task turns Agent Builder trace
+  spans into per-space signals, and no-ops while the setting is off.
 - The backing store is set via `dest`, an object of the form
   `{ "type": "data_stream" | "index", "value": "<data stream or index>" }`.
   `dest.value` must match `dest.type`. Every

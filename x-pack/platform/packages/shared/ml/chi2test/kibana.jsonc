@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/ml-chi2test",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "shared"
