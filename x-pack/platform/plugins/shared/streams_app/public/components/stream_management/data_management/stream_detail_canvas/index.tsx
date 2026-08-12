@@ -36,6 +36,8 @@ import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import type { ClassicCanvasNode } from './types';
 import { StreamFlyout } from '../../../stream_flyout';
+import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
+import { CanvasStateContextProvider, useCanvasEvents, useCanvasUrlRef } from './state_management';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 
@@ -50,6 +52,17 @@ interface CanvasContextMenuState {
  * wired to real data.
  */
 export function StreamsCanvas() {
+  const { core } = useKibana();
+  const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
+  return (
+    <CanvasStateContextProvider core={core} urlStateStorageContainer={urlStateStorageContainer}>
+      <StreamsCanvasInner />
+    </CanvasStateContextProvider>
+  );
+}
+
+function StreamsCanvasInner() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
@@ -58,7 +71,8 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
-  const [flyout, setFlyout] = useState<string | null>(null);
+  const { flyoutName } = useCanvasUrlRef();
+  const { openFlyout, closeFlyout } = useCanvasEvents();
 
   const { value, loading } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
@@ -157,14 +171,15 @@ export function StreamsCanvas() {
     [closeContextMenu]
   );
 
-  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>((event, node) => {
-    if (node.type === 'destination' && !event.shiftKey) {
-      event.preventDefault();
-      setFlyout(node.data.title);
-    }
-  }, []);
-
-  const onCloseFlyout = useCallback(() => setFlyout(null), []);
+  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event, node) => {
+      if (node.type === 'destination' && !event.shiftKey) {
+        event.preventDefault();
+        openFlyout(node.data.title);
+      }
+    },
+    [openFlyout]
+  );
 
   const reopenContextMenu = useCallback(
     (position: ContextMenuPosition) => setContextMenu({ position, target: 'pane' }),
@@ -220,10 +235,10 @@ export function StreamsCanvas() {
     if (selected.length === 1) {
       const selectedNode = selected[0];
       if (selectedNode.type === 'destination') {
-        setFlyout(selectedNode.data.title);
+        openFlyout(selectedNode.data.title);
       }
     }
-  }, [nodes]);
+  }, [nodes, openFlyout]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -288,7 +303,7 @@ export function StreamsCanvas() {
           })}
         />
       )}
-      {flyout && <StreamFlyout name={flyout} onClose={onCloseFlyout} />}
+      {flyoutName && <StreamFlyout name={flyoutName} onClose={closeFlyout} />}
       <EuiScreenReaderOnly>
         <p id={KEYBOARD_INSTRUCTIONS_ID}>
           {i18n.translate('xpack.streams.canvas.keyboardInstructions', {
