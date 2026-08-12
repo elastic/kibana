@@ -19,6 +19,11 @@ import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { fetchV1AlertsAsEpisodes } from '../apis/classic_alerts_api';
 import { mergeEpisodes } from '../utils/merge_episodes';
 
+interface CombinedEpisodesResult {
+  episodes: AlertEpisode[];
+  v1FetchError: Error | null;
+}
+
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;
   filterState?: EpisodesFilterState;
@@ -53,13 +58,11 @@ export const useFetchAlertingEpisodesQuery = ({
     timeRange ?? undefined
   );
 
-  const query = useQuery<AlertEpisode[], unknown, AlertEpisode[]>({
+  const query = useQuery<CombinedEpisodesResult>({
     enabled: dataView != null,
     queryKey,
     queryFn: async ({ signal: abortSignal }) => {
-      // Fetch the v2 episodes and the classic (v1) alerts (reshaped as episodes,
-      // read with RBAC through the authorized RAC alerts API) in parallel, then
-      // merge them into a single sorted, paginated list.
+      let v1FetchError: Error | null = null;
       const [v2Rows, v1Episodes] = await Promise.all([
         fetchAlertingEpisodes({
           spaceId,
@@ -70,8 +73,6 @@ export const useFetchAlertingEpisodesQuery = ({
           sortState,
           timeRange,
         }),
-        // v1 alerts are a best-effort overlay: never let a v1 read failure break
-        // the v2 episodes table.
         fetchV1AlertsAsEpisodes({
           abortSignal,
           pageSize,
@@ -79,7 +80,10 @@ export const useFetchAlertingEpisodesQuery = ({
           filterState,
           sortState,
           timeRange,
-        }).catch(() => [] as AlertEpisode[]),
+        }).catch((err: unknown) => {
+          v1FetchError = err instanceof Error ? err : new Error(String(err));
+          return [] as AlertEpisode[];
+        }),
       ]);
 
       const v2Episodes: AlertEpisode[] = v2Rows.map((ep) => ({
@@ -87,10 +91,15 @@ export const useFetchAlertingEpisodesQuery = ({
         last_tags: normalizeTags(ep.last_tags),
       }));
 
-      return mergeEpisodes(v2Episodes, v1Episodes, sortState, pageSize);
+      return { episodes: mergeEpisodes(v2Episodes, v1Episodes, sortState, pageSize), v1FetchError };
     },
     keepPreviousData: true,
   });
 
-  return { ...query, dataView };
+  return {
+    ...query,
+    data: query.data?.episodes,
+    v1FetchError: query.data?.v1FetchError ?? null,
+    dataView,
+  };
 };

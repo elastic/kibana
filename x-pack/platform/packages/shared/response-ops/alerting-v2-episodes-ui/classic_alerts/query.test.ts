@@ -22,10 +22,16 @@ const getFilters = (query: unknown): unknown[] => {
   return filters;
 };
 
+const DELAYED_EXCLUSION_FILTER = {
+  bool: { must_not: { term: { 'kibana.alert.status': 'delayed' } } },
+};
+
 describe('buildClassicAlertsQuery', () => {
-  it('returns match_all when no filters or time range are provided', () => {
-    expect(buildClassicAlertsQuery()).toEqual({ match_all: {} });
-    expect(buildClassicAlertsQuery(undefined, undefined)).toEqual({ match_all: {} });
+  it('always excludes delayed alerts even when no other filters are provided', () => {
+    const q1 = buildClassicAlertsQuery();
+    const q2 = buildClassicAlertsQuery(undefined, undefined);
+    expect(getFilters(q1)).toContainEqual(DELAYED_EXCLUSION_FILTER);
+    expect(getFilters(q2)).toContainEqual(DELAYED_EXCLUSION_FILTER);
   });
 
   it('adds a time range filter', () => {
@@ -105,7 +111,9 @@ describe('buildClassicAlertsQuery', () => {
 
   it('ignores empty/whitespace query strings', () => {
     const query = buildClassicAlertsQuery({ queryString: '   ' });
-    expect(query).toEqual({ match_all: {} });
+    const filters = getFilters(query);
+    expect(filters).toContainEqual(DELAYED_EXCLUSION_FILTER);
+    expect(filters.some((f) => (f as Record<string, unknown>).query_string)).toBe(false);
   });
 });
 

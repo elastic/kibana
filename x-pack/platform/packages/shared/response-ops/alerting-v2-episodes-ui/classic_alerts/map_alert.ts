@@ -51,35 +51,22 @@ import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
-export type ClassicAlertSource = Record<string, unknown>;
+export interface ClassicAlertSource {
+  [TIMESTAMP]: string;
+  [ALERT_UUID]: string;
+  [ALERT_START]?: string;
+  [ALERT_END]?: string;
+  [ALERT_DURATION]?: number;
+  [ALERT_STATUS]?: string;
+  [ALERT_RULE_UUID]?: string;
+  [ALERT_RULE_TAGS]?: string | string[];
+  [ALERT_SEVERITY]?: string;
+  [ALERT_WORKFLOW_STATUS]?: string;
+}
 
-const asString = (value: unknown): string | undefined => {
-  if (typeof value === 'string') {
-    return value;
-  }
-  if (Array.isArray(value) && typeof value[0] === 'string') {
-    return value[0];
-  }
-  return undefined;
-};
-
-const asNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number') {
-    return value;
-  }
-  if (Array.isArray(value) && typeof value[0] === 'number') {
-    return value[0];
-  }
-  return undefined;
-};
-
-const asStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.filter((entry): entry is string => typeof entry === 'string');
-  }
-  if (typeof value === 'string') {
-    return [value];
-  }
+const asStringArray = (value: string | string[] | undefined): string[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') return [value];
   return [];
 };
 
@@ -99,13 +86,12 @@ export const mapClassicStatusToEpisodeStatus = (status: string | undefined): Ale
  * emitted as `null`. Capability flags are set to `false`.
  */
 export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpisode => {
-  const uuid = asString(source[ALERT_UUID]) ?? '';
-  const start = asString(source[ALERT_START]);
-  const timestamp = asString(source[TIMESTAMP]) ?? start ?? new Date().toISOString();
-  const end = asString(source[ALERT_END]);
+  const { [TIMESTAMP]: timestamp, [ALERT_UUID]: uuid } = source;
+  const start = source[ALERT_START];
+  const end = source[ALERT_END];
   const lastTimestamp = end ?? timestamp;
 
-  const durationUs = asNumber(source[ALERT_DURATION]);
+  const durationUs = source[ALERT_DURATION];
   const durationMs =
     durationUs != null
       ? Math.round(durationUs / 1000)
@@ -116,8 +102,8 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
   return {
     '@timestamp': timestamp,
     'episode.id': uuid,
-    'episode.status': mapClassicStatusToEpisodeStatus(asString(source[ALERT_STATUS])),
-    'rule.id': asString(source[ALERT_RULE_UUID]) ?? '',
+    'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
+    'rule.id': source[ALERT_RULE_UUID] ?? '',
     group_hash: uuid,
     first_timestamp: start ?? timestamp,
     last_timestamp: lastTimestamp,
@@ -126,7 +112,7 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     last_assignee_uid: null,
     last_tags: asStringArray(source[ALERT_RULE_TAGS]),
     episode_data: null,
-    severity: asString(source[ALERT_SEVERITY]) ?? null,
+    severity: source[ALERT_SEVERITY] ?? null,
     supports_actions: false,
     supports_timeline: false,
   };
@@ -146,9 +132,9 @@ const resolveBreakdownValue = (
     case 'episode.status':
       return episode['episode.status'];
     case 'rule.id':
-      return asString(source[ALERT_RULE_UUID]) ?? null;
+      return source[ALERT_RULE_UUID] ?? null;
     case 'last_ack_action':
-      return asString(source[ALERT_WORKFLOW_STATUS]) === 'acknowledged' ? 'ack' : 'unack';
+      return source[ALERT_WORKFLOW_STATUS] === 'acknowledged' ? 'ack' : 'unack';
     default:
       // assignee and any other v2-only breakdowns have no v1 equivalent.
       return null;
@@ -163,14 +149,14 @@ export const mapClassicAlertToHistogramRow = (
   source: ClassicAlertSource,
   breakdownField?: string
 ): HistogramEpisodeRow => {
-  const start = asString(source[ALERT_START]);
-  const timestamp = asString(source[TIMESTAMP]) ?? start ?? new Date().toISOString();
-  const end = asString(source[ALERT_END]);
+  const { [TIMESTAMP]: timestamp } = source;
+  const start = source[ALERT_START];
+  const end = source[ALERT_END];
 
   const row: HistogramEpisodeRow = {
     first_timestamp: start ?? timestamp,
     last_timestamp: end ?? timestamp,
-    'episode.status': mapClassicStatusToEpisodeStatus(asString(source[ALERT_STATUS])),
+    'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
   };
 
   if (breakdownField && breakdownField !== 'episode.status') {

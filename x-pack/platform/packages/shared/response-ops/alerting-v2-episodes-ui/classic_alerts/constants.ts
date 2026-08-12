@@ -19,9 +19,10 @@ export const CLASSIC_STACK_ALERTS_INDEX = '.alerts-stack.*';
 
 export const CLASSIC_ALERTS_INDEX = `${CLASSIC_OBSERVABILITY_ALERTS_INDEX},${CLASSIC_STACK_ALERTS_INDEX}`;
 
-/** `kibana.alert.muted` / `kibana.alert.snoozed` are not exported by `@kbn/rule-data-utils`. */
-export const CLASSIC_ALERT_MUTED_FIELD = 'kibana.alert.muted';
-export const CLASSIC_ALERT_SNOOZED_FIELD = 'kibana.alert.snoozed';
+export {
+  ALERT_MUTED as CLASSIC_ALERT_MUTED_FIELD,
+  ALERT_SNOOZED as CLASSIC_ALERT_SNOOZED_FIELD,
+} from '@kbn/rule-data-utils';
 
 /** Max classic alerts returned per list/histogram request. Mirrors the v2 list/histogram limits. */
 export const CLASSIC_ALERTS_LIST_PAGE_SIZE = 1000;

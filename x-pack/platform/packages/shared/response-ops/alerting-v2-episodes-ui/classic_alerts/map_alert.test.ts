@@ -102,19 +102,18 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.duration).toBe(300_000);
   });
 
-  it('handles array-wrapped field values', () => {
+  it('handles all typed optional fields', () => {
     const source = {
-      'kibana.alert.uuid': ['uuid-array'],
-      'kibana.alert.start': ['2024-01-01T00:00:00.000Z'],
-      '@timestamp': ['2024-01-01T00:00:00.000Z'],
-      'kibana.alert.status': ['active'],
-      'kibana.alert.rule.uuid': ['rule-uuid'],
-      'kibana.alert.rule.name': ['Array Rule'],
-      'kibana.alert.duration.us': [5_000_000],
+      'kibana.alert.uuid': 'uuid-1',
+      'kibana.alert.start': '2024-01-01T00:00:00.000Z',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      'kibana.alert.status': 'active',
+      'kibana.alert.rule.uuid': 'rule-uuid',
+      'kibana.alert.duration.us': 5_000_000,
     };
 
     const episode = mapClassicAlertToEpisode(source);
-    expect(episode['episode.id']).toBe('uuid-array');
+    expect(episode['episode.id']).toBe('uuid-1');
     expect(episode.duration).toBe(5_000);
   });
 
@@ -128,6 +127,7 @@ describe('mapClassicAlertToEpisode', () => {
 
 describe('mapClassicAlertToHistogramRow', () => {
   const source = {
+    'kibana.alert.uuid': 'uuid-1',
     'kibana.alert.start': '2024-01-01T00:00:00.000Z',
     'kibana.alert.end': '2024-01-01T01:00:00.000Z',
     '@timestamp': '2024-01-01T01:00:00.000Z',

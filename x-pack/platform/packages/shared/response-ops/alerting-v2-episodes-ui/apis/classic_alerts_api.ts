@@ -24,6 +24,7 @@ import {
   type ClassicAlertsTimeRange,
 } from '../classic_alerts/query';
 import {
+  type ClassicAlertSource,
   mapClassicAlertToEpisode,
   mapClassicAlertToHistogramRow,
   CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
@@ -146,7 +147,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   );
 
   return response.hits.hits.flatMap((hit) =>
-    hit._source ? [mapClassicAlertToEpisode(hit._source)] : []
+    hit._source ? [mapClassicAlertToEpisode(hit._source as ClassicAlertSource)] : []
   );
 };
 
@@ -219,7 +220,9 @@ export const fetchV1AlertsHistogram = async ({
   );
 
   return response.hits.hits.flatMap((hit) =>
-    hit._source ? [mapClassicAlertToHistogramRow(hit._source, breakdownField)] : []
+    hit._source
+      ? [mapClassicAlertToHistogramRow(hit._source as ClassicAlertSource, breakdownField)]
+      : []
   );
 };
 

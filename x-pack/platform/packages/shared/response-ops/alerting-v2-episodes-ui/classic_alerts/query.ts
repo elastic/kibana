@@ -14,6 +14,7 @@ import {
   ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
@@ -22,7 +23,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { EpisodesFilterState, EpisodesSortState } from '../queries/episodes_query';
-import { EPISODE_SEVERITY_FILTER_NONE } from '../components/severity/severity_utils';
+import {
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_FILTER_NONE,
+} from '../components/severity/severity_utils';
 import { CLASSIC_ALERT_MUTED_FIELD, CLASSIC_ALERT_SNOOZED_FIELD } from './constants';
 
 export interface ClassicAlertsTimeRange {
@@ -147,9 +152,9 @@ export const buildClassicAlertsQuery = (
     filters.push(MATCH_NONE);
   }
 
-  if (!filters.length) {
-    return { match_all: {} };
-  }
+  filters.push({
+    bool: { must_not: { term: { [ALERT_STATUS]: ALERT_STATUS_DELAYED } } },
+  });
 
   return { bool: { filter: filters } };
 };
@@ -160,12 +165,32 @@ const SORT_FIELD_MAP: Record<string, string> = {
   'episode.status': ALERT_STATUS,
   'rule.id': ALERT_RULE_UUID,
   duration: ALERT_DURATION,
-  severity: ALERT_SEVERITY,
 };
 
+const SEVERITY_SORT_SCRIPT = [
+  `def v = doc.containsKey('${ALERT_SEVERITY}') && !doc['${ALERT_SEVERITY}'].empty ? doc['${ALERT_SEVERITY}'].value : '';`,
+  ...EPISODE_SEVERITIES.map(
+    (s) => `if (v == '${s}') { return ${EPISODE_SEVERITY_CHART_VALUE[s]}; }`
+  ),
+  `return -1;`,
+].join(' ');
+
 export const buildClassicAlertsSort = (sortState?: EpisodesSortState): estypes.SortOptions[] => {
-  const field = (sortState && SORT_FIELD_MAP[sortState.sortField]) ?? TIMESTAMP;
   const order = sortState?.sortDirection === 'asc' ? 'asc' : 'desc';
+
+  if (sortState?.sortField === 'severity') {
+    return [
+      {
+        _script: {
+          type: 'number',
+          script: { source: SEVERITY_SORT_SCRIPT, lang: 'painless' },
+          order,
+        },
+      } as unknown as estypes.SortOptions,
+    ];
+  }
+
+  const field = (sortState && SORT_FIELD_MAP[sortState.sortField]) ?? TIMESTAMP;
   return [{ [field]: { order, unmapped_type: 'keyword' } }];
 };
 
