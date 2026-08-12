@@ -159,6 +159,17 @@ const buildResolutionBoolQuery = (targetEntityId: string) => ({
 });
 
 /**
+ * Keeps only filters that constrain documents by field value / bool logic.
+ * Drops @kbn/grouping's companion script filters (field-size checks) — they are
+ * redundant for nested grouping and break client-side facelift matching.
+ */
+const isQueryableGroupFilter = (filter: Filter): boolean => {
+  const query = filter?.query as Record<string, unknown> | undefined;
+  if (!query) return false;
+  return Boolean(query.match_phrase || query.match || query.term || query.terms || query.bool);
+};
+
+/**
  * Processes group filters from @kbn/grouping, replacing resolution-specific
  * filters with a single correct bool/should query that includes both the target
  * entity (by entity.id) and its aliases (by resolved_to).
@@ -177,12 +188,11 @@ export const processGroupFilters = (filters: Filter[]): Filter[] => {
   const otherFilters: Filter[] = [];
 
   for (const f of filters) {
-    if (f?.query) {
-      if (f?.meta?.key === ENTITY_FIELDS.RESOLVED_TO) {
-        resolutionFilters.push(f);
-      } else {
-        otherFilters.push(f);
-      }
+    if (!isQueryableGroupFilter(f)) continue;
+    if (f?.meta?.key === ENTITY_FIELDS.RESOLVED_TO) {
+      resolutionFilters.push(f);
+    } else {
+      otherFilters.push(f);
     }
   }
 
@@ -191,9 +201,13 @@ export const processGroupFilters = (filters: Filter[]): Filter[] => {
   const targetEntityId = resolutionFilters
     .map((f) => {
       const matchPhrase = f?.query?.match_phrase as MatchPhraseQuery | undefined;
-      if (!matchPhrase) return undefined;
-      const value = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
-      return value ? getMatchPhraseStringValue(value) : undefined;
+      if (matchPhrase) {
+        const value = matchPhrase[ENTITY_FIELDS.RESOLVED_TO];
+        if (value) return getMatchPhraseStringValue(value);
+      }
+      // Fallback: phrase filters also stash the value on meta.params.query
+      const metaQuery = f?.meta?.params && (f.meta.params as { query?: unknown }).query;
+      return typeof metaQuery === 'string' ? metaQuery : undefined;
     })
     .find(Boolean);
 
@@ -265,7 +279,11 @@ const GroupWithLocalPagination = ({
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
 
-  const groupFilters = parentGroupFilters ? JSON.parse(parentGroupFilters) : [];
+  // Stabilize filter identity so nested grouping queries aren't rebuilt every render.
+  const groupFilters = useMemo(
+    () => (parentGroupFilters ? (JSON.parse(parentGroupFilters) as Filter[]) : []),
+    [parentGroupFilters]
+  );
 
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },

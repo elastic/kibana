@@ -73,4 +73,23 @@ describe('getRiskScoreSummaryAttributes', () => {
 
     expect((result?.current?.state.query as Query).query).toBe(query);
   });
+
+  it('builds an ES|QL ROW metric when staticScore is provided', () => {
+    const attributes = getRiskScoreSummaryAttributes({
+      severity: RiskSeverity.Critical,
+      riskEntity: EntityType.user,
+      staticScore: 96,
+      metricLabel: 'Entity risk score',
+    });
+
+    expect(attributes.visualizationType).toBe('lnsMetric');
+    expect(attributes.state.query).toEqual({ esql: 'ROW risk_score = 96' });
+    expect(attributes.state.datasourceStates.textBased).toBeDefined();
+    expect(
+      (attributes.state.visualization as MetricVisualizationState).subtitle
+    ).toBe(RiskSeverity.Critical);
+    expect(
+      (attributes.state.visualization as MetricVisualizationState).trendlineLayerId
+    ).toBeUndefined();
+  });
 });

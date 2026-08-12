@@ -33,6 +33,7 @@ import {
 } from './use_fetch_grouped_data';
 import { createGroupPanelRenderer, createGroupStatsRenderer } from './entity_group_renderer';
 import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
+import { USE_FACELIFT_MOCK_ENTITIES } from '../../facelift/data';
 
 const MAX_GROUPING_LEVELS = 3;
 
@@ -220,7 +221,27 @@ export const useEntityGrouping = ({
     [defaultGroupingOptions, hasResolutionLicense, groupingId]
   );
 
-  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  // Facelift mock: pass parent group filter queries through directly so nested
+  // grouping (e.g. Entity type → Resolution) does not depend on buildEsQuery /
+  // data-view field availability against an empty entity store index.
+  const additionalFilters = useMemo(() => {
+    if (USE_FACELIFT_MOCK_ENTITIES) {
+      return {
+        bool: {
+          filter: groupFilters
+            .map((filter) => filter.query)
+            .filter((filterQuery): filterQuery is NonNullable<Filter['query']> =>
+              Boolean(filterQuery)
+            ),
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      };
+    }
+    return buildEsQuery(dataView, [], groupFilters);
+  }, [dataView, groupFilters]);
+
   const isResolutionGrouping = selectedGroup === ENTITY_GROUPING_OPTIONS.RESOLUTION;
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 

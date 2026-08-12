@@ -47,7 +47,8 @@ describe('ResolutionSection', () => {
     );
 
     expect(getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getByText('alice')).toBeInTheDocument();
+    // Flyout section lists raw-record aliases only (not the resolved target).
+    expect(getByText('alice-azure')).toBeInTheDocument();
   });
 
   it('shows loading spinner while loading', () => {

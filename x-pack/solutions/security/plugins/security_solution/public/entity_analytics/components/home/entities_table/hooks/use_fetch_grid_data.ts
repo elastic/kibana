@@ -25,14 +25,8 @@ import {
 } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
 import { DataViewContext } from '..';
-import { getIdentityEsHits } from '../../facelift/data';
-import { useFaceliftFilter } from '../../facelift/filter_context';
-
-/**
- * EA Facelift design prototype: feed the production Entities table UI with
- * static mock documents instead of querying Elasticsearch.
- */
-const USE_FACELIFT_MOCK_ENTITIES = true;
+import { USE_FACELIFT_MOCK_ENTITIES } from '../../facelift/data';
+import { getSortedEntityStoreHits } from '../../facelift/grouping_data';
 
 interface UseEntitiesOptions extends BaseEsQuery {
   sort: string[][];
@@ -107,16 +101,13 @@ export function useFetchGridData(options: UseEntitiesOptions) {
   } = useKibana().services;
 
   const { dataView } = useContext(DataViewContext);
-  const activeFilter = useFaceliftFilter();
 
   const dataViewIndexPattern = useMemo(() => {
     return dataView?.getIndexPattern();
   }, [dataView]);
 
-  const faceliftFilterKey = USE_FACELIFT_MOCK_ENTITIES
-    ? activeFilter
-      ? JSON.stringify(activeFilter)
-      : 'none'
+  const faceliftQueryKey = USE_FACELIFT_MOCK_ENTITIES
+    ? JSON.stringify({ query: options.query, sort: options.sort })
     : undefined;
 
   return useInfiniteQuery(
@@ -124,13 +115,22 @@ export function useFetchGridData(options: UseEntitiesOptions) {
       QUERY_KEY_ENTITY_ANALYTICS,
       QUERY_KEY_GRID_DATA,
       USE_FACELIFT_MOCK_ENTITIES ? 'facelift-mock' : { params: options },
-      faceliftFilterKey,
+      faceliftQueryKey,
     ],
     async ({ pageParam }) => {
       if (USE_FACELIFT_MOCK_ENTITIES) {
-        const page = getIdentityEsHits(activeFilter).map((hit) =>
-          buildDataTableRecord(hit as unknown as EsHitRecord)
-        );
+        // Include the same entity-type filter the live query always adds.
+        const queryWithTypeFilter = options.query
+          ? {
+              ...options.query,
+              bool: {
+                ...options.query.bool,
+                filter: [...(options.query.bool?.filter ?? []), ENTITY_TYPE_FILTER],
+              },
+            }
+          : { bool: { filter: [ENTITY_TYPE_FILTER] } };
+        const hits = getSortedEntityStoreHits(queryWithTypeFilter, options.sort);
+        const page = hits.map((hit) => buildDataTableRecord(hit as unknown as EsHitRecord));
         return {
           page,
           total: page.length,

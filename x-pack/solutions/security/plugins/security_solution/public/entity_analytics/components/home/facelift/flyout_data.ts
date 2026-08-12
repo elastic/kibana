@@ -17,12 +17,16 @@ import type {
   GetAnomalyOverviewResponse,
 } from '../../../../../common/api/entity_analytics';
 import { EntityRiskLevelsEnum } from '../../../../../common/api/entity_analytics/common';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { EntityType } from '../../../../../common/entity_analytics/types';
+import type { EntityRiskScore, RiskStats } from '../../../../../common/search_strategy';
+import type { RiskScoreState } from '../../../api/hooks/use_risk_score';
 import type { ResolutionGroup } from '../../entity_resolution/hooks/use_resolution_group';
-import type { FaceliftIdentity, FaceliftRiskLevel } from './data';
+import type { FaceliftIdentity, FaceliftRawRecord, FaceliftRiskLevel } from './data';
 import {
   IDENTITY_BY_ID,
   IDENTITIES,
+  RAW_RECORDS,
   getFaceliftRiskLevel,
   recordsForIdentity,
   sourcesForIdentity,
@@ -33,9 +37,19 @@ export const USE_FACELIFT_MOCK_FLYOUT = true;
 /** Entity Store document shape used by flyout short-circuits. */
 export type FaceliftEntityStoreRecord = HostEntity | UserEntity | ServiceEntity;
 
-/** Shared flag used by table + flyout short-circuits. */
+const rawRecordByEntityId = Object.fromEntries(
+  RAW_RECORDS.map((record) => [record.entityId, record])
+);
+
+/** Map alias entity ids to their target identity id; pass through for targets. */
+const resolveIdentityId = (entityId: string): string | undefined => {
+  if (IDENTITY_BY_ID[entityId]) return entityId;
+  return rawRecordByEntityId[entityId]?.resolvedTo;
+};
+
+/** True for targets, aliases, and unresolved solos in the facelift corpus. */
 export const isFaceliftMockEntityId = (entityId: string | undefined | null): boolean =>
-  Boolean(entityId && IDENTITY_BY_ID[entityId]);
+  Boolean(entityId && (IDENTITY_BY_ID[entityId] || rawRecordByEntityId[entityId]));
 
 const SOURCE_TOKEN: Record<string, string> = {
   AD: 'active_directory',
@@ -70,9 +84,7 @@ const domainFor = (identity: FaceliftIdentity): string => {
 const sourceTokensFor = (identity: FaceliftIdentity): string[] =>
   sourcesForIdentity(identity.id).map((source) => SOURCE_TOKEN[source] ?? source.toLowerCase());
 
-const assetCriticalityFor = (
-  criticality: FaceliftIdentity['criticality']
-): UserEntity['asset'] => {
+const assetCriticalityFor = (criticality: FaceliftIdentity['criticality']): UserEntity['asset'] => {
   if (criticality === 'unassigned') {
     return { criticality: null };
   }
@@ -197,22 +209,156 @@ const buildServiceEntity = (identity: FaceliftIdentity): ServiceEntity => {
   };
 };
 
-const ENTITY_STORE_BY_ID: Record<string, FaceliftEntityStoreRecord> = Object.fromEntries(
-  IDENTITIES.map((identity) => {
-    let record: FaceliftEntityStoreRecord;
-    switch (identity.entityType) {
-      case EntityType.host:
-        record = buildHostEntity(identity);
-        break;
-      case EntityType.service:
-        record = buildServiceEntity(identity);
-        break;
-      default:
-        record = buildUserEntity(identity);
-    }
-    return [identity.id, record];
-  })
-);
+/**
+ * Entity Store docs for individual raw records, so opening an alias or an
+ * unresolved solo from the table shows that row's risk / criticality / source
+ * rather than the parent's aggregated identity (or an empty Observed flyout).
+ */
+const buildUserEntityFromRecord = (record: FaceliftRawRecord): UserEntity => {
+  const domain = record.domain;
+  const emailLocal = record.name.includes('@') ? record.name : `${record.name}@acme.com`;
+  const fullName = record.name
+    .replace(/^CORP\\/i, '')
+    .split(/[.@\s(]/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
+  return {
+    '@timestamp': record.lastSeen,
+    entity: {
+      id: record.entityId,
+      name: record.name,
+      type: 'user',
+      EngineMetadata: { Type: 'user' },
+      source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
+      lifecycle: {
+        first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+        last_activity: record.lastSeen,
+      },
+      attributes: {
+        managed: true,
+        mfa_enabled: true,
+      },
+      risk: {
+        calculated_score_norm: record.riskScore,
+        calculated_level: toRiskLevel(record.riskScore),
+        calculated_score: record.riskScore,
+      },
+    },
+    user: {
+      name: record.name,
+      id: [record.entityId, `uid-${record.id}`],
+      domain: [domain.split('.')[0]?.toUpperCase() ?? 'CORP', domain],
+      full_name: [fullName || record.name],
+      email: [emailLocal],
+      roles: ['Domain Users'],
+    },
+    asset: assetCriticalityFor(record.criticality),
+  };
+};
+
+const buildHostEntityFromRecord = (record: FaceliftRawRecord): HostEntity => ({
+  '@timestamp': record.lastSeen,
+  entity: {
+    id: record.entityId,
+    name: record.name,
+    type: 'host',
+    EngineMetadata: { Type: 'host' },
+    source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
+    lifecycle: {
+      first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+      last_activity: record.lastSeen,
+    },
+    risk: {
+      calculated_score_norm: record.riskScore,
+      calculated_level: toRiskLevel(record.riskScore),
+      calculated_score: record.riskScore,
+    },
+  },
+  host: {
+    name: record.name,
+    id: [record.entityId, `uuid-${record.id}-aaaa-bbbb`],
+    ip: [`10.40.${record.riskScore % 50}.${(record.alerts % 200) + 1}`, '10.0.0.1'],
+    mac: ['0a:1b:2c:3d:4e:5f', 'aa:bb:cc:dd:ee:ff'],
+    architecture: ['x86_64'],
+    type: record.name.startsWith('iot') ? ['iot'] : ['server'],
+    os: {
+      name: 'Ubuntu',
+      family: 'debian',
+      version: '22.04',
+      platform: 'linux',
+    },
+    hostname: [`${record.name}.${record.domain}`],
+  },
+  asset: assetCriticalityFor(record.criticality),
+});
+
+const buildServiceEntityFromRecord = (record: FaceliftRawRecord): ServiceEntity => ({
+  '@timestamp': record.lastSeen,
+  entity: {
+    id: record.entityId,
+    name: record.name,
+    type: 'service',
+    EngineMetadata: { Type: 'service' },
+    source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
+    lifecycle: {
+      first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+      last_activity: record.lastSeen,
+    },
+    risk: {
+      calculated_score_norm: record.riskScore,
+      calculated_level: toRiskLevel(record.riskScore),
+      calculated_score: record.riskScore,
+    },
+  },
+  service: {
+    name: record.name,
+    id: record.entityId,
+    type: 'application',
+    environment: 'production',
+    version: '1.4.2',
+    address: `${record.name}.svc.cluster.local`,
+    state: 'running',
+    node: {
+      name: `node-${record.id}`,
+      roles: ['backend'],
+    },
+  },
+  asset: assetCriticalityFor(record.criticality),
+});
+
+const storeRecordFromIdentity = (identity: FaceliftIdentity): FaceliftEntityStoreRecord => {
+  switch (identity.entityType) {
+    case EntityType.host:
+      return buildHostEntity(identity);
+    case EntityType.service:
+      return buildServiceEntity(identity);
+    default:
+      return buildUserEntity(identity);
+  }
+};
+
+const storeRecordFromRawRecord = (record: FaceliftRawRecord): FaceliftEntityStoreRecord => {
+  switch (record.entityType) {
+    case EntityType.host:
+      return buildHostEntityFromRecord(record);
+    case EntityType.service:
+      return buildServiceEntityFromRecord(record);
+    default:
+      return buildUserEntityFromRecord(record);
+  }
+};
+
+const ENTITY_STORE_BY_ID: Record<string, FaceliftEntityStoreRecord> = {
+  ...Object.fromEntries(
+    IDENTITIES.map((identity) => [identity.id, storeRecordFromIdentity(identity)])
+  ),
+  ...Object.fromEntries(
+    RAW_RECORDS.map((record) => [record.entityId, storeRecordFromRawRecord(record)])
+  ),
+};
 
 export const getFaceliftEntityStoreRecord = (
   entityId: string | undefined | null
@@ -221,11 +367,118 @@ export const getFaceliftEntityStoreRecord = (
   return ENTITY_STORE_BY_ID[entityId] ?? null;
 };
 
-export const getFaceliftAnomalyOverview = (
+/** Display contributions for the Risk score summary table (not product modifiers). */
+const CRITICALITY_TABLE_CONTRIBUTION: Record<CriticalityLevelWithUnassigned, number> = {
+  extreme_impact: 12,
+  high_impact: 8,
+  medium_impact: 4,
+  low_impact: 2,
+  unassigned: 0,
+};
+
+const noopRefetch = () => undefined;
+
+/**
+ * RiskScoreState for the flyout Risk score section: category inputs sum toward
+ * the entity's risk score so the contributions table matches the rest of the mock.
+ */
+export const getFaceliftRiskScoreState = <T extends EntityType>(
+  entityType: T,
   entityId: string
-): GetAnomalyOverviewResponse | null => {
-  const identity = IDENTITY_BY_ID[entityId];
-  if (!identity) return null;
+): RiskScoreState<T> | null => {
+  const storeRecord = getFaceliftEntityStoreRecord(entityId);
+  if (!storeRecord) return null;
+
+  const rawRecord = rawRecordByEntityId[entityId] as FaceliftRawRecord | undefined;
+  const identityId = resolveIdentityId(entityId);
+  const identity = identityId ? IDENTITY_BY_ID[identityId] : undefined;
+
+  const riskScore = rawRecord?.riskScore ?? identity?.riskScore ?? 0;
+  const alerts = rawRecord?.alerts ?? identity?.alerts ?? 0;
+  const criticality: CriticalityLevelWithUnassigned =
+    rawRecord?.criticality ?? identity?.criticality ?? 'unassigned';
+
+  const criticalityScore = CRITICALITY_TABLE_CONTRIBUTION[criticality] ?? 0;
+  const alertsScore = Math.max(0, Number((riskScore - criticalityScore).toFixed(2)));
+
+  const name =
+    entityType === EntityType.host && 'host' in storeRecord
+      ? storeRecord.host?.name ?? storeRecord.entity?.name ?? ''
+      : entityType === EntityType.service && 'service' in storeRecord
+      ? storeRecord.service?.name ?? storeRecord.entity?.name ?? ''
+      : 'user' in storeRecord
+      ? storeRecord.user?.name ?? storeRecord.entity?.name ?? ''
+      : storeRecord.entity?.name ?? '';
+
+  const idField =
+    entityType === EntityType.host
+      ? 'host.name'
+      : entityType === EntityType.service
+      ? 'service.name'
+      : 'user.name';
+
+  const timestamp = storeRecord['@timestamp'] ?? new Date().toISOString();
+  const level = toRiskLevel(riskScore);
+
+  const modifiers: RiskStats['modifiers'] =
+    criticality !== 'unassigned'
+      ? [
+          {
+            type: 'asset_criticality',
+            contribution: criticalityScore,
+            metadata: { criticality_level: criticality },
+          },
+        ]
+      : undefined;
+
+  const riskStats: RiskStats = {
+    '@timestamp': timestamp,
+    id_field: idField,
+    id_value: name,
+    calculated_level: level,
+    calculated_score: riskScore,
+    calculated_score_norm: riskScore,
+    category_1_score: alertsScore,
+    category_1_count: alerts,
+    category_2_score: criticalityScore,
+    inputs: [],
+    notes: [],
+    rule_risks: [],
+    multipliers: [],
+    ...(modifiers ? { modifiers } : {}),
+  };
+
+  const dataItem = {
+    '@timestamp': timestamp,
+    [entityType]: { name, risk: riskStats },
+  } as unknown as EntityRiskScore<T>;
+
+  return {
+    data: [dataItem] as RiskScoreState<T>['data'],
+    inspect: { dsl: [], response: [] },
+    isInspected: false,
+    refetch: noopRefetch,
+    totalCount: 1,
+    isAuthorized: true,
+    hasEngineBeenInstalled: true,
+    loading: false,
+    error: null,
+  };
+};
+
+interface AnomalyTimeBucket {
+  timestamp: string;
+  maxScore: number;
+  threatTactics: string[];
+  tacticCounts: Record<string, number>;
+}
+
+export const getFaceliftAnomalyOverview = (entityId: string): GetAnomalyOverviewResponse | null => {
+  const identityId = resolveIdentityId(entityId);
+  const identity = identityId ? IDENTITY_BY_ID[identityId] : undefined;
+  if (!identity || !identityId) return null;
+  // Normalize so downstream payload ids match the target identity.
+  entityId = identityId;
 
   const now = Date.now();
   const from = now - 30 * 24 * 36e5;
@@ -245,7 +498,7 @@ export const getFaceliftAnomalyOverview = (
     };
   }
 
-  const buckets = [6, 5, 4, 3, 2, 1, 0].map((daysAgo, index) => {
+  const buckets = [6, 5, 4, 3, 2, 1, 0].map((daysAgo, index): AnomalyTimeBucket => {
     const timestamp = new Date(now - daysAgo * 24 * 36e5).toISOString();
     const maxScore = 45 + index * 7 + (identity.riskScore % 10);
     return {
@@ -253,9 +506,7 @@ export const getFaceliftAnomalyOverview = (
       maxScore,
       threatTactics: index % 2 === 0 ? ['TA0001', 'TA0006'] : ['TA0003'],
       tacticCounts:
-        index % 2 === 0
-          ? { TA0001: 2 + index, TA0006: 1 }
-          : { TA0003: 1 + (index % 3) },
+        index % 2 === 0 ? { TA0001: 2 + index, TA0006: 1 } : { TA0003: 1 + (index % 3) },
     };
   });
 
@@ -301,13 +552,17 @@ export interface FaceliftAlertsByStatus {
 
 /** Alert counts by status for the Insights → Alerts preview. */
 export const getFaceliftAlertsByStatus = (entityId: string): FaceliftAlertsByStatus | null => {
-  const identity = IDENTITY_BY_ID[entityId];
-  if (!identity || identity.alerts <= 0) return null;
+  // Prefer the specific raw record when the flyout was opened from one, so the
+  // Insights preview matches the Alerts column in the table.
+  const rawRecord = rawRecordByEntityId[entityId];
+  const identity = IDENTITY_BY_ID[entityId] ?? IDENTITY_BY_ID[resolveIdentityId(entityId) ?? ''];
+  const alerts = rawRecord && !IDENTITY_BY_ID[entityId] ? rawRecord.alerts : identity?.alerts ?? 0;
+  if (alerts <= 0) return null;
 
-  const openCount = Math.max(1, Math.ceil(identity.alerts * 0.7));
-  const ackCount = Math.max(0, identity.alerts - openCount);
-  const critical = Math.min(openCount, Math.max(1, Math.round(identity.alerts * 0.35)));
-  const high = Math.min(openCount - critical, Math.max(0, Math.round(identity.alerts * 0.3)));
+  const openCount = Math.max(1, Math.ceil(alerts * 0.7));
+  const ackCount = Math.max(0, alerts - openCount);
+  const critical = Math.min(openCount, Math.max(1, Math.round(alerts * 0.35)));
+  const high = Math.min(openCount - critical, Math.max(0, Math.round(alerts * 0.3)));
   const medium = Math.max(0, openCount - critical - high);
 
   return {
@@ -325,7 +580,10 @@ export const getFaceliftAlertsByStatus = (entityId: string): FaceliftAlertsBySta
         ackCount > 0
           ? [
               { key: 'high', value: Math.max(1, Math.floor(ackCount / 2)) },
-              { key: 'medium', value: Math.max(0, ackCount - Math.max(1, Math.floor(ackCount / 2))) },
+              {
+                key: 'medium',
+                value: Math.max(0, ackCount - Math.max(1, Math.floor(ackCount / 2))),
+              },
             ].filter((bucket) => bucket.value > 0)
           : [],
     },
@@ -336,17 +594,26 @@ export const getFaceliftAlertsByStatus = (entityId: string): FaceliftAlertsBySta
  * Resolution group: target + raw-record aliases when the identity has 2+ records.
  */
 export const getFaceliftResolutionGroup = (entityId: string): ResolutionGroup | null => {
-  const identity = IDENTITY_BY_ID[entityId];
-  if (!identity) return null;
+  const identityId = resolveIdentityId(entityId);
+  const identity = identityId ? IDENTITY_BY_ID[identityId] : undefined;
+  if (!identity || !identityId) return null;
 
-  const records = recordsForIdentity(entityId);
-  const storeRecord = ENTITY_STORE_BY_ID[entityId];
+  const records = recordsForIdentity(identityId);
+  // A resolution group needs at least two raw records.
+  if (records.length < 2) return null;
+
+  const storeRecord = ENTITY_STORE_BY_ID[identityId];
 
   const target = {
     entity: {
       id: identity.id,
       name: identity.name,
       type: identity.entityType,
+      risk: {
+        calculated_score_norm: identity.riskScore,
+        calculated_level: toRiskLevel(identity.riskScore),
+        calculated_score: identity.riskScore,
+      },
     },
     ...(storeRecord && 'user' in storeRecord
       ? { user: storeRecord.user }
@@ -357,12 +624,17 @@ export const getFaceliftResolutionGroup = (entityId: string): ResolutionGroup | 
       : {}),
   };
 
-  const aliases = records.slice(1).map((record) => ({
+  const aliases = records.map((record) => ({
     entity: {
-      id: record.id,
+      id: record.entityId,
       name: record.name,
       type: record.entityType,
       source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
+      risk: {
+        calculated_score_norm: record.riskScore,
+        calculated_level: toRiskLevel(record.riskScore),
+        calculated_score: record.riskScore,
+      },
     },
   }));
 

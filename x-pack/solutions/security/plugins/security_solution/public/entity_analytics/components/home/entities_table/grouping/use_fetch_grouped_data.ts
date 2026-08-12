@@ -21,6 +21,11 @@ import {
   QUERY_KEY_ENTITY_ANALYTICS,
 } from '../constants';
 import { DataViewContext } from '..';
+import { USE_FACELIFT_MOCK_ENTITIES } from '../../facelift/data';
+import {
+  getFaceliftGroupingAggregations,
+  getFaceliftTargetMetadata,
+} from '../../facelift/grouping_data';
 
 export type EntitiesGroupingQuery = GroupingQuery | SearchRequest;
 
@@ -118,6 +123,10 @@ export const useFetchGroupedData = ({
   return useQuery(
     [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GROUPING_DATA, { query }],
     async () => {
+      if (USE_FACELIFT_MOCK_ENTITIES) {
+        return getFaceliftGroupingAggregations(query);
+      }
+
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
@@ -138,7 +147,7 @@ export const useFetchGroupedData = ({
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
-      enabled: enabled && !!indexPattern,
+      enabled: enabled && (USE_FACELIFT_MOCK_ENTITIES || !!indexPattern),
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }
@@ -151,6 +160,10 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
   const { data: metadataMap } = useQuery(
     [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_TARGET_METADATA, entityIds],
     async () => {
+      if (USE_FACELIFT_MOCK_ENTITIES) {
+        return getFaceliftTargetMetadata(entityIds);
+      }
+
       const {
         rawResponse: { hits },
       } = await lastValueFrom(
@@ -181,7 +194,7 @@ export const useFetchTargetMetadata = (entityIds: string[]): TargetMetadataMap =
     },
     {
       onError: (err: Error) => showErrorToast(toasts, err),
-      enabled: entityIds.length > 0 && !!indexPattern,
+      enabled: entityIds.length > 0 && (USE_FACELIFT_MOCK_ENTITIES || !!indexPattern),
       keepPreviousData: true,
       refetchOnWindowFocus: false,
     }

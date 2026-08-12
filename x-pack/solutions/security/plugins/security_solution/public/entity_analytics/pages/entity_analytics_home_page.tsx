@@ -9,15 +9,20 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  EuiBadge,
+  EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
+  type IconType,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,21 +38,23 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useLicense } from '../../common/hooks/use_license';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
-import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import { ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY } from '../components/home/constants';
 import {
   DataViewContext,
   useEntityURLState,
-  DEFAULT_ENTITIES_TABLE_CONFIG,
   DEFAULT_ENTITIES_TABLE_SORT,
   type EntitiesBaseURLQuery,
-  EntitiesTableSection,
   type URLQuery,
 } from '../components/home/entities_table';
-import type { ActiveFilter } from '../components/home/facelift/data';
+import type { ActiveFilter, PageFilters, TableView } from '../components/home/facelift/data';
+import { EMPTY_PAGE_FILTERS } from '../components/home/facelift/data';
+import { EntityFiltersGroup } from '../components/home/facelift/entity_filters_group';
 import { OverviewBand } from '../components/home/facelift/overview_band';
-import { FaceliftFilterProvider } from '../components/home/facelift/filter_context';
+import { ResolvedEntitiesGrid } from '../components/home/facelift/resolved_entities_grid';
+import { getEntitySummary } from '../components/home/facelift/resolved_entities_data';
+import type { PageFilterFacet } from '../components/home/facelift/overview_filter';
+import { useSyncEntityFilters } from '../components/home/facelift/overview_filter';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
@@ -116,11 +123,50 @@ export const EntityAnalyticsHomePage = () => {
   );
 };
 
+/**
+ * Page scope at a glance: how many entities there are, how many of them are
+ * worth attention, and which way that number is moving.
+ */
+const EntityAnalyticsPageDescription = () => {
+  const { euiTheme } = useEuiTheme();
+  const summary = useMemo(() => getEntitySummary(), []);
+
+  const climbing = summary.criticalAndHighDelta >= 0;
+  const separator = (
+    <span
+      aria-hidden={true}
+      css={css`
+        margin-inline: ${euiTheme.size.s};
+        color: ${euiTheme.colors.textDisabled};
+      `}
+    >
+      {'●'}
+    </span>
+  );
+
+  return (
+    <span data-test-subj="eaFaceliftPageDescription">
+      {`${summary.total.toLocaleString()} entities`}
+      {separator}
+      {`${summary.criticalAndHigh.toLocaleString()} critical- and high-risk`}
+      {separator}
+      <EuiIcon
+        type={climbing ? 'sortUp' : 'sortDown'}
+        size="s"
+        color={climbing ? 'danger' : 'success'}
+        aria-hidden={true}
+      />
+      {` ${Math.abs(summary.criticalAndHighDelta).toLocaleString()} vs yesterday`}
+    </span>
+  );
+};
+
 const EntityAnalyticsHomePageContent = () => {
   const dispatch = useDispatch();
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
+  const [pageFilters, setPageFilters] = useState<PageFilters>(EMPTY_PAGE_FILTERS);
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -155,6 +201,21 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const clearActiveFilter = useCallback(() => setActiveFilter(null), []);
+
+  const clearFacet = useCallback(
+    (facet: PageFilterFacet) => setPageFilters((current) => ({ ...current, [facet]: [] })),
+    []
+  );
+
+  // Every selection on the page lives in the KQL bar as a regular filter pill,
+  // which is also what drives the entities table.
+  useSyncEntityFilters({
+    activeFilter,
+    pageFilters,
+    onClearOverview: clearActiveFilter,
+    onClearFacet: clearFacet,
+    dataViewId: dataView?.id,
+  });
 
   // Design prototype: show "Today" in the KQL bar date picker on page entry
   // (same relative range Alerts/Discover use via DEFAULT_FROM / DEFAULT_TO).
@@ -198,42 +259,17 @@ const EntityAnalyticsHomePageContent = () => {
   }
 
   return (
-    <FaceliftFilterProvider activeFilter={activeFilter}>
+    <>
       <FiltersGlobal>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
-          </EuiFlexItem>
-          {activeFilter && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="cross"
-                iconSide="right"
-                iconOnClick={clearActiveFilter}
-                iconOnClickAriaLabel={i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.facelift.clearFilterAriaLabel',
-                  { defaultMessage: 'Clear filter' }
-                )}
-                data-test-subj="eaFaceliftActiveFilterBadge"
-              >
-                {activeFilter.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
 
       <HeaderPage
         title={PAGE_TITLE}
+        border
+        subtitle={<EntityAnalyticsPageDescription />}
         rightSideItems={[
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <WatchlistFilter
-                selectedId={selectedWatchlistId ?? ''}
-                onChangeSelectedId={setSelectedWatchlist}
-              />
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
@@ -263,19 +299,37 @@ const EntityAnalyticsHomePageContent = () => {
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <OverviewBand activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          <EntityFiltersGroup
+            pageFilters={pageFilters}
+            onPageFiltersChange={setPageFilters}
+            selectedWatchlistId={selectedWatchlistId}
+            onWatchlistChange={setSelectedWatchlist}
+          />
         </EuiFlexItem>
 
-        <EuiPanel hasBorder>
+        <EuiFlexItem grow={false}>
+          <OverviewBand
+            activeFilter={activeFilter}
+            pageFilters={pageFilters}
+            onFilterChange={setActiveFilter}
+          />
+        </EuiFlexItem>
+
+        <EuiPanel hasBorder paddingSize="l">
           <EntityAnalyticsEntitiesTable
             entityDataView={dataView}
             entityDataViewLoading={dataViewLoading}
           />
         </EuiPanel>
       </EuiFlexGroup>
-    </FaceliftFilterProvider>
+    </>
   );
 };
+
+const TABLE_VIEW_OPTIONS: Array<{ id: TableView; label: string; iconType: IconType }> = [
+  { id: 'resolved', label: 'Resolved entities', iconType: 'aggregate' },
+  { id: 'raw', label: 'Raw records', iconType: 'listBullet' },
+];
 
 const EntityAnalyticsEntitiesTable = ({
   entityDataView,
@@ -284,9 +338,11 @@ const EntityAnalyticsEntitiesTable = ({
   entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
   entityDataViewLoading: boolean;
 }) => {
-  // Stable provider value so consumers below (e.g. the memoized
-  // `EntitiesTableSection` subtree) are not forced to re-render by a new
-  // context reference when this component re-renders on an unrelated URL change.
+  const [view, setView] = useState<TableView>('resolved');
+
+  // Stable provider value so consumers below are not forced to re-render by a
+  // new context reference when this component re-renders on an unrelated URL
+  // change.
   const dataViewContextValue = useMemo(
     () => ({
       dataView: entityDataView,
@@ -295,32 +351,54 @@ const EntityAnalyticsEntitiesTable = ({
     [entityDataView, entityDataViewLoading]
   );
 
+  const onChangeView = useCallback((id: string) => setView(id as TableView), []);
+
   if (entityDataViewLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsEntitiesTableLoader" />;
   }
 
   return (
     <DataViewContext.Provider value={dataViewContextValue}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
-              defaultMessage="Entities"
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EntityAnalyticsEntitiesTableContent />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.homePage.entitiesTableTitle"
+                defaultMessage="Entities"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Entities table view"
+            options={TABLE_VIEW_OPTIONS}
+            idSelected={view}
+            onChange={onChangeView}
+            buttonSize="compressed"
+            data-test-subj="eaFaceliftEntitiesViewToggle"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EntityAnalyticsEntitiesTableContent view={view} />
     </DataViewContext.Provider>
   );
 };
 
-const EntityAnalyticsEntitiesTableContent = () => {
+const EntityAnalyticsEntitiesTableContent = ({ view }: { view: TableView }) => {
   const urlState = useEntityURLState({
     paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
     defaultQuery: getDefaultQuery,
   });
 
-  return <EntitiesTableSection state={urlState} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
+  return <ResolvedEntitiesGrid query={urlState.query} view={view} />;
 };

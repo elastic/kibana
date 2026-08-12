@@ -109,18 +109,6 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {entityStoreEntityId && (
-        <>
-          <VisualizationsSection
-            entityId={entityStoreEntityId}
-            isPreviewMode={isPreviewMode}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
-      )}
       {entityStoreEntityId && hasEntityResolutionLicense && (
         <>
           <ResolutionSection
@@ -132,6 +120,18 @@ export const ServicePanelContent = ({
             hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule />
+        </>
+      )}
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
+          />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
       {!entityRecord && (

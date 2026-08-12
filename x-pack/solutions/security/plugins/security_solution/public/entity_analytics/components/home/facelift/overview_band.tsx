@@ -5,25 +5,43 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { ActiveFilter, CriticalityTier, FaceliftRiskLevel, SignalCardId } from './data';
-import { CRITICALITY_TIER_LABELS, SIGNAL_CARDS } from './data';
+import type {
+  ActiveFilter,
+  CriticalityTier,
+  FaceliftIdentity,
+  FaceliftRiskLevel,
+  PageFilters,
+  SignalCardId,
+} from './data';
+import { CRITICALITY_TIER_LABELS, getSignalCards } from './data';
+import { NeedsAttentionPanel } from './needs_attention_panel';
 import { RiskMatrixPanel } from './risk_matrix_panel';
-import { NON_FILTERABLE_CARD_IDS, SignalCards } from './signal_cards';
+import { SignalCards } from './signal_cards';
 
 export interface OverviewBandProps {
   activeFilter: ActiveFilter | null;
+  /** Facet selections from the filter group; every number in the band respects them. */
+  pageFilters: PageFilters;
   onFilterChange: (next: ActiveFilter | null) => void;
 }
 
 /**
- * Overview band: Entity risk levels matrix (~40%) + Where to start cards (~60%).
- * One active filter at a time; toggle-off by clicking the active source again.
+ * Overview band between the page header and the entities table:
+ * row 1 — six signal metric cards; row 2 — Needs attention + Entity risk levels, split 50/50.
+ * One active filter at a time across all three sources; clicking the active
+ * source again clears it.
  */
-export const OverviewBand: React.FC<OverviewBandProps> = ({ activeFilter, onFilterChange }) => {
+export const OverviewBand: React.FC<OverviewBandProps> = ({
+  activeFilter,
+  pageFilters,
+  onFilterChange,
+}) => {
+  const cards = useMemo(() => getSignalCards(pageFilters), [pageFilters]);
+
   const onSelectCell = useCallback(
     (riskLevel: FaceliftRiskLevel, tier: CriticalityTier) => {
       const isSame =
@@ -47,11 +65,7 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({ activeFilter, onFilt
 
   const onSelectCard = useCallback(
     (cardId: SignalCardId) => {
-      if (NON_FILTERABLE_CARD_IDS.has(cardId)) {
-        return;
-      }
-
-      const card = SIGNAL_CARDS.find((entry) => entry.id === cardId);
+      const card = cards.find((entry) => entry.id === cardId);
       if (!card) {
         return;
       }
@@ -59,31 +73,47 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({ activeFilter, onFilt
       const isSame = activeFilter?.type === 'card' && activeFilter.cardId === cardId;
       onFilterChange(isSame ? null : { type: 'card', cardId, label: card.filterLabel });
     },
+    [activeFilter, cards, onFilterChange]
+  );
+
+  const onSelectIdentity = useCallback(
+    (identity: FaceliftIdentity) => {
+      const isSame = activeFilter?.type === 'identity' && activeFilter.identityId === identity.id;
+      onFilterChange(
+        isSame ? null : { type: 'identity', identityId: identity.id, label: identity.name }
+      );
+    },
     [activeFilter, onFilterChange]
   );
 
   return (
-    <EuiFlexGroup
-      gutterSize="m"
-      alignItems="stretch"
-      responsive={true}
-      data-test-subj="eaFaceliftOverviewBand"
-    >
-      <EuiFlexItem
-        grow={2}
-        css={css`
-          min-width: 0;
-        `}
-      >
-        <RiskMatrixPanel activeFilter={activeFilter} onSelectCell={onSelectCell} />
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="eaFaceliftOverviewBand">
+      <EuiFlexItem grow={false}>
+        <SignalCards activeFilter={activeFilter} cards={cards} onSelectCard={onSelectCard} />
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={3}
-        css={css`
-          min-width: 0;
-        `}
-      >
-        <SignalCards activeFilter={activeFilter} onSelectCard={onSelectCard} />
+
+      <EuiFlexItem grow={false}>
+        {/* Grid rather than flex so both panels are exactly half the row, whatever they contain. */}
+        <EuiFlexGrid
+          columns={2}
+          gutterSize="m"
+          css={css`
+            > * {
+              min-width: 0;
+            }
+          `}
+        >
+          <NeedsAttentionPanel
+            activeFilter={activeFilter}
+            pageFilters={pageFilters}
+            onSelectIdentity={onSelectIdentity}
+          />
+          <RiskMatrixPanel
+            activeFilter={activeFilter}
+            pageFilters={pageFilters}
+            onSelectCell={onSelectCell}
+          />
+        </EuiFlexGrid>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

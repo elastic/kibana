@@ -21,30 +21,31 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 
 export type FaceliftRiskLevel = 'Critical' | 'High' | 'Medium' | 'Low' | 'Unknown';
 
-/** Matrix columns: low_impact and unassigned are folded into one tier. */
-export type CriticalityTier = 'extreme' | 'high' | 'medium' | 'lowOrUnassigned';
+/** Matrix columns: one per asset criticality level, plus unassigned. */
+export type CriticalityTier = 'extreme' | 'high' | 'medium' | 'low' | 'unassigned';
 
 export type TableView = 'resolved' | 'raw';
 
 export type SignalCardId =
-  | 'riskMovers'
+  | 'untriagedHighRisk'
   | 'newToCritical'
-  | 'privilegedAtRisk'
+  | 'riskMovers'
+  | 'newAndAlerting'
   | 'newAnomalies'
-  | 'dormantActive'
-  | 'unresolvedHighRisk';
+  | 'hiddenRisk';
 
 export interface SignalCardData {
   id: SignalCardId;
+  /** Short label shown as the card headline. */
   title: string;
   value: number;
-  label: string;
-  /** 24h change. Positive = worse (red), negative = better (green). */
-  delta: number;
+  /** One-line explanation of what the value counts. */
+  description: string;
+  /** 24h change. Positive = worse (red), negative = better (green). Used to scale filtered cards. */
+  delta?: number;
   /** Label shown in the dismissible filter badge when the card is active. */
   filterLabel: string;
   trend?: number[];
-  secondaryLinkText?: string;
 }
 
 export interface FaceliftRawRecord {
@@ -55,6 +56,8 @@ export interface FaceliftRawRecord {
   domain: string;
   source: string;
   riskScore: number;
+  /** 24h risk score change, in points. */
+  riskDelta24h: number;
   criticality: CriticalityLevelWithUnassigned;
   alerts: number;
   lastSeen: string;
@@ -76,6 +79,10 @@ export interface FaceliftIdentity {
   isNewToCritical: boolean;
   hasNewAnomalies: boolean;
   isDormantActive: boolean;
+  /** No triage action taken yet (drives the “Untriaged” signal + badge). */
+  isUntriaged?: boolean;
+  /** First seen within the last 7 days. */
+  isNewThisWeek?: boolean;
   topRiskContributions?: Array<{ label: string; value: number }>;
 }
 
@@ -88,29 +95,51 @@ export type ActiveFilter =
 // Level / tier helpers
 // ---------------------------------------------------------------------------
 
-/** Standard mapping: Critical >90, High 70–90, Medium 40–70, Low 20–40, Unknown <20. */
-export const getFaceliftRiskLevel = (score: number): FaceliftRiskLevel => {
-  if (score > 90) return 'Critical';
-  if (score >= 70) return 'High';
-  if (score >= 40) return 'Medium';
-  if (score >= 20) return 'Low';
-  return 'Unknown';
+export const RISK_LEVELS: FaceliftRiskLevel[] = ['Critical', 'High', 'Medium', 'Low', 'Unknown'];
+
+export interface ScoreRange {
+  gt?: number;
+  gte?: number;
+  lt?: number;
+  lte?: number;
+}
+
+/**
+ * Score band per risk level, in ES range-query shape so the risk level page
+ * filter and {@link getFaceliftRiskLevel} can never disagree about a boundary.
+ */
+export const RISK_LEVEL_SCORE_RANGE: Record<FaceliftRiskLevel, ScoreRange> = {
+  Critical: { gt: 90 },
+  High: { gte: 70, lte: 90 },
+  Medium: { gte: 40, lt: 70 },
+  Low: { gte: 20, lt: 40 },
+  Unknown: { lt: 20 },
 };
 
-export const RISK_LEVELS: FaceliftRiskLevel[] = ['Critical', 'High', 'Medium', 'Low', 'Unknown'];
+const inScoreRange = (score: number, range: ScoreRange): boolean =>
+  (range.gt == null || score > range.gt) &&
+  (range.gte == null || score >= range.gte) &&
+  (range.lt == null || score < range.lt) &&
+  (range.lte == null || score <= range.lte);
+
+/** Standard mapping: Critical >90, High 70–90, Medium 40–70, Low 20–40, Unknown <20. */
+export const getFaceliftRiskLevel = (score: number): FaceliftRiskLevel =>
+  RISK_LEVELS.find((level) => inScoreRange(score, RISK_LEVEL_SCORE_RANGE[level])) ?? 'Unknown';
 
 export const CRITICALITY_TIERS: CriticalityTier[] = [
   'extreme',
   'high',
   'medium',
-  'lowOrUnassigned',
+  'low',
+  'unassigned',
 ];
 
 export const CRITICALITY_TIER_LABELS: Record<CriticalityTier, string> = {
   extreme: 'Extreme impact',
   high: 'High impact',
   medium: 'Medium impact',
-  lowOrUnassigned: 'Low/Unassigned',
+  low: 'Low impact',
+  unassigned: 'Unassigned',
 };
 
 export const tierOfCriticality = (criticality: CriticalityLevelWithUnassigned): CriticalityTier => {
@@ -121,27 +150,11 @@ export const tierOfCriticality = (criticality: CriticalityLevelWithUnassigned): 
       return 'high';
     case 'medium_impact':
       return 'medium';
+    case 'low_impact':
+      return 'low';
     default:
-      return 'lowOrUnassigned';
+      return 'unassigned';
   }
-};
-
-// ---------------------------------------------------------------------------
-// Matrix headline numbers (presentational)
-// ---------------------------------------------------------------------------
-
-export const MATRIX_SUMMARY = {
-  totalEntities: '5,000',
-  criticalEntities: '2,500',
-  deltaVsYesterday: '120',
-};
-
-export const RISK_MATRIX_COUNTS: Record<FaceliftRiskLevel, Record<CriticalityTier, number>> = {
-  Critical: { extreme: 412, high: 968, medium: 754, lowOrUnassigned: 366 },
-  High: { extreme: 118, high: 301, medium: 227, lowOrUnassigned: 154 },
-  Medium: { extreme: 64, high: 189, medium: 340, lowOrUnassigned: 305 },
-  Low: { extreme: 12, high: 45, medium: 156, lowOrUnassigned: 387 },
-  Unknown: { extreme: 3, high: 9, medium: 38, lowOrUnassigned: 152 },
 };
 
 // ---------------------------------------------------------------------------
@@ -150,55 +163,53 @@ export const RISK_MATRIX_COUNTS: Record<FaceliftRiskLevel, Record<CriticalityTie
 
 export const SIGNAL_CARDS: SignalCardData[] = [
   {
-    id: 'riskMovers',
-    title: 'Risk movers',
-    value: 14,
-    label: 'entities with risk spike +20 or more in 24h',
-    delta: 4,
-    filterLabel: 'Risk movers (+20 in 24h)',
-    trend: [6, 8, 7, 9, 11, 10, 14],
+    id: 'untriagedHighRisk',
+    title: 'Untriaged high-risk',
+    value: 23,
+    description: 'High- or critical-risk entities with open alerts',
+    filterLabel: 'Untriaged high-risk',
   },
   {
     id: 'newToCritical',
     title: 'New to Critical',
     value: 6,
-    label: 'entities that crossed into critical today',
+    description: 'Entities that crossed into critical risk',
     delta: 2,
     filterLabel: 'New to Critical today',
   },
   {
-    id: 'privilegedAtRisk',
-    title: 'Privileged users at risk',
-    value: 9,
-    label: 'privileged users at high or critical risk',
+    id: 'riskMovers',
+    title: 'Risk movers',
+    value: 14,
+    description: 'Entities with risk spike 20% or more',
+    delta: 4,
+    filterLabel: 'Risk movers (+20% in 24h)',
+    trend: [6, 8, 7, 9, 11, 10, 14],
+  },
+  {
+    id: 'newAndAlerting',
+    title: 'New & alerting',
+    value: 4,
+    description: 'First seen entities that are already alerting',
     delta: 1,
-    filterLabel: 'Privileged users at risk',
+    filterLabel: 'New this week and alerting',
   },
   {
     id: 'newAnomalies',
     title: 'New anomalies',
     value: 37,
-    label: 'entities with new anomalies today',
+    description: 'Entities with new anomalies',
     delta: -5,
-    filterLabel: 'New anomalies today',
+    filterLabel: 'New anomalies',
     trend: [52, 48, 45, 41, 44, 39, 37],
-    secondaryLinkText: 'Open in Anomaly Explorer',
   },
   {
-    id: 'dormantActive',
-    title: 'Dormant accounts active',
-    value: 3,
-    label: 'dormant accounts with new activity',
-    delta: 3,
-    filterLabel: 'Dormant accounts with new activity',
-  },
-  {
-    id: 'unresolvedHighRisk',
-    title: 'Unresolved high-risk records',
+    id: 'hiddenRisk',
+    title: 'Hidden risk',
     value: 12,
-    label: 'high-risk records not resolved to an identity',
+    description: 'Low- or medium-risk entities containing a high- or critical-risk record',
     delta: -2,
-    filterLabel: 'Unresolved high-risk records',
+    filterLabel: 'Hidden risk',
   },
 ];
 
@@ -228,6 +239,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: true,
     hasNewAnomalies: true,
     isDormantActive: false,
+    isUntriaged: true,
     topRiskContributions: [
       { label: 'Critical alerts', value: 42 },
       { label: 'Privileged status', value: 15 },
@@ -266,6 +278,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: true,
     isDormantActive: false,
+    isUntriaged: true,
   },
   {
     id: 'id-james',
@@ -294,6 +307,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: false,
     isDormantActive: false,
+    isUntriaged: true,
   },
   {
     id: 'id-maria',
@@ -308,6 +322,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: true,
     isDormantActive: false,
+    isUntriaged: true,
   },
   {
     id: 'id-vpn-gw',
@@ -322,6 +337,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: false,
     isDormantActive: false,
+    isNewThisWeek: true,
   },
   {
     id: 'id-svc-backup',
@@ -336,6 +352,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: false,
     isDormantActive: true,
+    isNewThisWeek: true,
   },
   {
     id: 'id-liam',
@@ -350,6 +367,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: true,
     isDormantActive: false,
+    isUntriaged: true,
   },
   {
     id: 'id-kiosk',
@@ -364,6 +382,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: false,
     isDormantActive: false,
+    isNewThisWeek: true,
   },
   {
     id: 'id-sofia',
@@ -378,6 +397,7 @@ export const IDENTITIES: FaceliftIdentity[] = [
     isNewToCritical: false,
     hasNewAnomalies: true,
     isDormantActive: false,
+    isNewThisWeek: true,
   },
   {
     id: 'id-build-runner',
@@ -483,6 +503,13 @@ export const IDENTITY_BY_ID: Record<string, FaceliftIdentity> = Object.fromEntri
   IDENTITIES.map((identity) => [identity.id, identity])
 );
 
+/**
+ * Records are listed in contribution order within each resolution group: the
+ * first record of a group is the one the resolved entity takes its name from,
+ * and its criticality is the highest in the group, so the aggregated row in the
+ * Resolved entities table always has a visible origin. Group totals (records,
+ * sources, alerts, last seen) are the sum / union / max of the records below.
+ */
 export const RAW_RECORDS: FaceliftRawRecord[] = [
   // amber.rodriguez (3)
   {
@@ -493,6 +520,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 96,
+    riskDelta24h: 24,
     criticality: 'extreme_impact',
     alerts: 9,
     lastSeen: ago(0.1),
@@ -506,7 +534,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 91,
-    criticality: 'extreme_impact',
+    riskDelta24h: 19,
+    criticality: 'high_impact',
     alerts: 4,
     lastSeen: ago(0.3),
     resolvedTo: 'id-amber',
@@ -519,7 +548,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.wd5.myworkday.com',
     source: 'Workday',
     riskScore: 88,
-    criticality: 'extreme_impact',
+    riskDelta24h: 2,
+    criticality: 'medium_impact',
     alerts: 1,
     lastSeen: ago(5),
     resolvedTo: 'id-amber',
@@ -533,6 +563,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 92,
+    riskDelta24h: 8,
     criticality: 'high_impact',
     alerts: 6,
     lastSeen: ago(0.5),
@@ -546,7 +577,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 87,
-    criticality: 'high_impact',
+    riskDelta24h: 5,
+    criticality: 'medium_impact',
     alerts: 3,
     lastSeen: ago(1.2),
     resolvedTo: 'id-svc-ci',
@@ -560,6 +592,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 88,
+    riskDelta24h: 21,
     criticality: 'extreme_impact',
     alerts: 8,
     lastSeen: ago(0.2),
@@ -573,7 +606,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'CrowdStrike',
     riskScore: 85,
-    criticality: 'extreme_impact',
+    riskDelta24h: 16,
+    criticality: 'high_impact',
     alerts: 3,
     lastSeen: ago(0.6),
     resolvedTo: 'id-web-prod',
@@ -587,6 +621,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 84,
+    riskDelta24h: 3,
     criticality: 'high_impact',
     alerts: 3,
     lastSeen: ago(1),
@@ -600,7 +635,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 79,
-    criticality: 'high_impact',
+    riskDelta24h: 1,
+    criticality: 'medium_impact',
     alerts: 2,
     lastSeen: ago(1.4),
     resolvedTo: 'id-james',
@@ -613,7 +649,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.wd5.myworkday.com',
     source: 'Workday',
     riskScore: 71,
-    criticality: 'high_impact',
+    riskDelta24h: 0,
+    criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(30),
     resolvedTo: 'id-james',
@@ -626,7 +663,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acmecorp.onmicrosoft.com',
     source: 'Entra ID',
     riskScore: 76,
-    criticality: 'high_impact',
+    riskDelta24h: 4,
+    criticality: 'medium_impact',
     alerts: 1,
     lastSeen: ago(2.5),
     resolvedTo: 'id-james',
@@ -640,6 +678,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 81,
+    riskDelta24h: -4,
     criticality: 'extreme_impact',
     alerts: 4,
     lastSeen: ago(2),
@@ -654,6 +693,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 78,
+    riskDelta24h: 26,
     criticality: 'medium_impact',
     alerts: 5,
     lastSeen: ago(0.4),
@@ -667,7 +707,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 74,
-    criticality: 'medium_impact',
+    riskDelta24h: 18,
+    criticality: 'low_impact',
     alerts: 2,
     lastSeen: ago(0.9),
     resolvedTo: 'id-maria',
@@ -681,6 +722,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 74,
+    riskDelta24h: 0,
     criticality: 'high_impact',
     alerts: 2,
     lastSeen: ago(3),
@@ -694,7 +736,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'ot.acme.local',
     source: 'Network',
     riskScore: 69,
-    criticality: 'high_impact',
+    riskDelta24h: -1,
+    criticality: 'medium_impact',
     alerts: 1,
     lastSeen: ago(4),
     resolvedTo: 'id-vpn-gw',
@@ -708,6 +751,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 71,
+    riskDelta24h: 2,
     criticality: 'medium_impact',
     alerts: 2,
     lastSeen: ago(0.7),
@@ -722,6 +766,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 72,
+    riskDelta24h: 22,
     criticality: 'high_impact',
     alerts: 3,
     lastSeen: ago(0.25),
@@ -735,7 +780,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 68,
-    criticality: 'high_impact',
+    riskDelta24h: 15,
+    criticality: 'medium_impact',
     alerts: 2,
     lastSeen: ago(0.6),
     resolvedTo: 'id-liam',
@@ -748,7 +794,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.wd5.myworkday.com',
     source: 'Workday',
     riskScore: 61,
-    criticality: 'high_impact',
+    riskDelta24h: 0,
+    criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(26),
     resolvedTo: 'id-liam',
@@ -761,7 +808,9 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.host,
     domain: 'corp.acme.com',
     source: 'Endpoint',
-    riskScore: 64,
+    // Elevated raw record under a Medium identity → Hidden risk signal.
+    riskScore: 78,
+    riskDelta24h: 14,
     criticality: 'low_impact',
     alerts: 1,
     lastSeen: ago(6),
@@ -775,7 +824,9 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.user,
     domain: 'corp.acme.com',
     source: 'AD',
-    riskScore: 58,
+    // Elevated raw record under a Medium identity → Hidden risk signal.
+    riskScore: 91,
+    riskDelta24h: 18,
     criticality: 'medium_impact',
     alerts: 2,
     lastSeen: ago(2),
@@ -789,7 +840,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acmecorp.onmicrosoft.com',
     source: 'Entra ID',
     riskScore: 54,
-    criticality: 'medium_impact',
+    riskDelta24h: 2,
+    criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(3.5),
     resolvedTo: 'id-sofia',
@@ -803,6 +855,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 52,
+    riskDelta24h: 1,
     criticality: 'medium_impact',
     alerts: 0,
     lastSeen: ago(0.8),
@@ -815,8 +868,10 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.host,
     domain: 'corp.acme.com',
     source: 'CrowdStrike',
-    riskScore: 49,
-    criticality: 'medium_impact',
+    // Elevated raw record under a Medium identity → Hidden risk signal.
+    riskScore: 74,
+    riskDelta24h: 22,
+    criticality: 'low_impact',
     alerts: 0,
     lastSeen: ago(1.1),
     resolvedTo: 'id-build-runner',
@@ -829,7 +884,9 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.user,
     domain: 'corp.acme.com',
     source: 'AD',
-    riskScore: 47,
+    // Elevated raw record under a Medium identity → Hidden risk signal.
+    riskScore: 86,
+    riskDelta24h: 12,
     criticality: 'low_impact',
     alerts: 1,
     lastSeen: ago(72),
@@ -843,7 +900,9 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     entityType: EntityType.service,
     domain: 'corp.acme.com',
     source: 'AD',
-    riskScore: 38,
+    // Elevated raw record under a Low identity → Hidden risk signal.
+    riskScore: 71,
+    riskDelta24h: 2,
     criticality: 'low_impact',
     alerts: 0,
     lastSeen: ago(8),
@@ -857,7 +916,8 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 34,
-    criticality: 'low_impact',
+    riskDelta24h: 1,
+    criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(10),
     resolvedTo: 'id-svc-report',
@@ -871,6 +931,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 33,
+    riskDelta24h: 0,
     criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(24),
@@ -885,6 +946,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 26,
+    riskDelta24h: -3,
     criticality: 'low_impact',
     alerts: 0,
     lastSeen: ago(96),
@@ -899,6 +961,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.wd5.myworkday.com',
     source: 'Workday',
     riskScore: 18,
+    riskDelta24h: 1,
     criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(48),
@@ -913,12 +976,13 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'ot.acme.local',
     source: 'Network',
     riskScore: 8,
+    riskDelta24h: 0,
     criticality: 'unassigned',
     alerts: 0,
     lastSeen: ago(120),
     resolvedTo: 'id-iot-sensor',
   },
-  // Unresolved high-risk records (signal card 6)
+  // Unresolved high-risk solos (still in the corpus; not the Hidden risk signal)
   {
     id: 'rec-ad-un01',
     name: 'CORP\\jdoe_admin',
@@ -927,6 +991,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 94,
+    riskDelta24h: 31,
     criticality: 'unassigned',
     alerts: 8,
     lastSeen: ago(0.3),
@@ -939,6 +1004,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'Endpoint',
     riskScore: 88,
+    riskDelta24h: 12,
     criticality: 'unassigned',
     alerts: 5,
     lastSeen: ago(1.5),
@@ -951,6 +1017,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'corp.acme.com',
     source: 'AD',
     riskScore: 82,
+    riskDelta24h: -6,
     criticality: 'unassigned',
     alerts: 3,
     lastSeen: ago(7),
@@ -963,6 +1030,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'acme.okta.com',
     source: 'Okta',
     riskScore: 76,
+    riskDelta24h: 9,
     criticality: 'unassigned',
     alerts: 2,
     lastSeen: ago(4),
@@ -975,6 +1043,7 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
     domain: 'ot.acme.local',
     source: 'Network',
     riskScore: 71,
+    riskDelta24h: 0,
     criticality: 'unassigned',
     alerts: 1,
     lastSeen: ago(9),
@@ -988,18 +1057,104 @@ export const RAW_RECORDS: FaceliftRawRecord[] = [
 export const recordsForIdentity = (identityId: string): FaceliftRawRecord[] =>
   RAW_RECORDS.filter((record) => record.resolvedTo === identityId);
 
+/** Distinct data sources present in the corpus, used to populate the page filters. */
+export const ENTITY_SOURCE_LABELS: string[] = Array.from(
+  new Set(RAW_RECORDS.map((record) => record.source))
+).sort();
+
+// ---------------------------------------------------------------------------
+// Needs attention (mocked ranking)
+// ---------------------------------------------------------------------------
+
+export const ATTENTION_RANKING_EXPLANATION =
+  'Ranked by risk score × asset criticality, boosted by 24h risk change and untriaged status.';
+
+/**
+ * Top entities to investigate, in mocked rank order. Deliberately not a plain
+ * risk-score sort: web-prod-042 (88) outranks svc-ci-deploy (92) on extreme
+ * criticality plus a steeper climb, and liam.novak (72) outranks db-core-003
+ * (81) because he is privileged, climbing and untriaged while db-core is falling.
+ */
+export const ATTENTION_IDENTITY_IDS: string[] = [
+  'id-amber',
+  'id-web-prod',
+  'id-svc-ci',
+  'id-maria',
+  'id-liam',
+];
+
+/** A point change expressed as a percentage of the score it started from. */
+export const scoreDeltaPercent = (score: number, delta: number): number => {
+  const previous = score - delta;
+  if (previous <= 0) return 100;
+  return Math.round((delta / previous) * 100);
+};
+
+/** 24h risk change as a percentage of yesterday's score, rather than points. */
+export const riskDeltaPercent = (identity: FaceliftIdentity): number =>
+  scoreDeltaPercent(identity.riskScore, identity.riskDelta24h);
+
+/** A reason badge; `trend` renders a sort up/down icon in front of the label. */
+export interface AttentionReason {
+  label: string;
+  trend?: 'up' | 'down';
+}
+
+/**
+ * “Why” badges for the attention list, derived from the identity's own row data
+ * so they can never contradict what the entities table shows. Capped at four.
+ */
+export const attentionReasonsFor = (identity: FaceliftIdentity): AttentionReason[] => {
+  const reasons: AttentionReason[] = [];
+
+  if (identity.isPrivileged) reasons.push({ label: 'Privileged' });
+  if (identity.riskDelta24h >= 20) {
+    reasons.push({ label: `${riskDeltaPercent(identity)}% in 24h`, trend: 'up' });
+  }
+  if (identity.isUntriaged) reasons.push({ label: 'Untriaged' });
+  if (identity.criticality === 'extreme_impact') reasons.push({ label: 'Extreme-impact asset' });
+  if (identity.isNewToCritical) reasons.push({ label: 'New to critical' });
+  if (identity.hasNewAnomalies) reasons.push({ label: 'New anomaly' });
+  if (identity.alerts >= 3) reasons.push({ label: `${identity.alerts} alerts` });
+
+  return reasons.slice(0, 4);
+};
+
+export interface AttentionEntry {
+  identity: FaceliftIdentity;
+  reasons: AttentionReason[];
+}
+
+export const getAttentionList = (filters: PageFilters = EMPTY_PAGE_FILTERS): AttentionEntry[] =>
+  ATTENTION_IDENTITY_IDS.map((id) => IDENTITY_BY_ID[id])
+    .filter(Boolean)
+    .filter((identity) => identityMatchesPageFilters(identity, filters))
+    .map((identity) => ({ identity, reasons: attentionReasonsFor(identity) }));
+
 export const sourcesForIdentity = (identityId: string): string[] =>
   Array.from(new Set(recordsForIdentity(identityId).map((record) => record.source)));
 
+/** Low/Medium entity that still contains a High/Critical raw record (Hidden risk). */
+export const isHiddenRiskIdentity = (identity: FaceliftIdentity): boolean => {
+  const identityLevel = getFaceliftRiskLevel(identity.riskScore);
+  if (identityLevel !== 'Low' && identityLevel !== 'Medium') {
+    return false;
+  }
+  return recordsForIdentity(identity.id).some((record) =>
+    ['High', 'Critical'].includes(getFaceliftRiskLevel(record.riskScore))
+  );
+};
+
 const CARD_IDENTITY_PREDICATES: Record<SignalCardId, (identity: FaceliftIdentity) => boolean> = {
-  riskMovers: (identity) => identity.riskDelta24h >= 20,
-  newToCritical: (identity) => identity.isNewToCritical,
-  privilegedAtRisk: (identity) =>
-    identity.isPrivileged &&
+  untriagedHighRisk: (identity) =>
+    Boolean(identity.isUntriaged) &&
+    identity.alerts > 0 &&
     ['High', 'Critical'].includes(getFaceliftRiskLevel(identity.riskScore)),
+  newToCritical: (identity) => identity.isNewToCritical,
+  riskMovers: (identity) => riskDeltaPercent(identity) >= 20,
+  newAndAlerting: (identity) => Boolean(identity.isNewThisWeek) && identity.alerts > 0,
   newAnomalies: (identity) => identity.hasNewAnomalies,
-  dormantActive: (identity) => identity.isDormantActive,
-  unresolvedHighRisk: () => true,
+  hiddenRisk: isHiddenRiskIdentity,
 };
 
 export const filterIdentities = (filter: ActiveFilter | null): FaceliftIdentity[] => {
@@ -1028,9 +1183,6 @@ export const filterRawRecords = (filter: ActiveFilter | null): FaceliftRawRecord
           tierOfCriticality(record.criticality) === filter.tier
       );
     case 'card': {
-      if (filter.cardId === 'unresolvedHighRisk') {
-        return RAW_RECORDS.filter((record) => !record.resolvedTo && record.riskScore >= 70);
-      }
       const predicate = CARD_IDENTITY_PREDICATES[filter.cardId];
       return RAW_RECORDS.filter(
         (record) => record.resolvedTo && predicate(IDENTITY_BY_ID[record.resolvedTo])
@@ -1045,6 +1197,13 @@ export const filterRawRecords = (filter: ActiveFilter | null): FaceliftRawRecord
 // ES hit shape for the production Entities table (UnifiedDataTable)
 // ---------------------------------------------------------------------------
 
+/**
+ * Shared toggle for EA Facelift presentation mocks (table + grouping).
+ * Keep this name free of a “mock*” path segment — Kibana’s import lint blocks
+ * browser imports from paths containing “mock”.
+ */
+export const USE_FACELIFT_MOCK_ENTITIES = true;
+
 /** Map display labels used in RAW_RECORDS onto typical entity.source tokens. */
 const SOURCE_TOKEN: Record<string, string> = {
   AD: 'active_directory',
@@ -1055,6 +1214,8 @@ const SOURCE_TOKEN: Record<string, string> = {
   'Entra ID': 'entra_id',
   Network: 'network',
 };
+
+const ENTITY_STORE_INDEX = '.entities.v2.latest.security_default';
 
 export interface FaceliftEntityEsHit {
   _index: string;
@@ -1067,31 +1228,284 @@ export interface FaceliftEntityEsHit {
       source: string[];
       EngineMetadata: { Type: string };
       risk: { calculated_score_norm: number };
+      relationships?: {
+        resolution?: {
+          /** Present on aliases only — the target entity id. */
+          resolved_to?: string;
+          /** Present on targets (and optionally aliases) — group risk score. */
+          risk?: { calculated_score_norm: number };
+        };
+      };
     };
     asset: { criticality: CriticalityLevelWithUnassigned };
   };
 }
 
-/**
- * Builds ES-shaped hits for the existing Entities table data path
- * (`useFetchGridData` → `buildDataTableRecord`). One hit per resolved identity.
- * When `filter` is set, only identities matching the Overview band filter are returned.
- */
-export const getIdentityEsHits = (filter: ActiveFilter | null = null): FaceliftEntityEsHit[] =>
-  filterIdentities(filter).map((identity) => ({
-    _index: '.entities.v2.latest.security_default',
-    _id: identity.id,
-    _source: {
-      '@timestamp': identity.lastSeen,
-      entity: {
-        id: identity.id,
-        name: identity.name,
-        source: sourcesForIdentity(identity.id).map(
-          (source) => SOURCE_TOKEN[source] ?? source.toLowerCase()
-        ),
-        EngineMetadata: { Type: identity.entityType },
-        risk: { calculated_score_norm: identity.riskScore },
+const sourceTokens = (sources: string[]): string[] =>
+  sources.map((source) => SOURCE_TOKEN[source] ?? source.toLowerCase());
+
+/** Target document: no `resolved_to`, carries resolution group risk. */
+const targetHitFromIdentity = (identity: FaceliftIdentity): FaceliftEntityEsHit => ({
+  _index: ENTITY_STORE_INDEX,
+  _id: `target-${identity.id}`,
+  _source: {
+    '@timestamp': identity.lastSeen,
+    entity: {
+      id: identity.id,
+      name: identity.name,
+      source: sourceTokens(sourcesForIdentity(identity.id)),
+      EngineMetadata: { Type: identity.entityType },
+      risk: { calculated_score_norm: identity.riskScore },
+      relationships: {
+        resolution: {
+          risk: { calculated_score_norm: identity.riskScore },
+        },
       },
-      asset: { criticality: identity.criticality },
     },
-  }));
+    asset: { criticality: identity.criticality },
+  },
+});
+
+/** Alias document: `resolved_to` points at the identity / target id. */
+const aliasHitFromRecord = (record: FaceliftRawRecord): FaceliftEntityEsHit => {
+  const target = record.resolvedTo ? IDENTITY_BY_ID[record.resolvedTo] : undefined;
+  return {
+    _index: ENTITY_STORE_INDEX,
+    _id: `alias-${record.id}`,
+    _source: {
+      '@timestamp': record.lastSeen,
+      entity: {
+        id: record.entityId,
+        name: record.name,
+        source: sourceTokens([record.source]),
+        EngineMetadata: { Type: record.entityType },
+        risk: { calculated_score_norm: record.riskScore },
+        relationships: {
+          resolution: {
+            resolved_to: record.resolvedTo,
+            ...(target ? { risk: { calculated_score_norm: target.riskScore } } : {}),
+          },
+        },
+      },
+      asset: { criticality: record.criticality },
+    },
+  };
+};
+
+/** Unresolved solo document: no resolution relationship. */
+const unresolvedHitFromRecord = (record: FaceliftRawRecord): FaceliftEntityEsHit => ({
+  _index: ENTITY_STORE_INDEX,
+  _id: `unresolved-${record.id}`,
+  _source: {
+    '@timestamp': record.lastSeen,
+    entity: {
+      id: record.entityId,
+      name: record.name,
+      source: sourceTokens([record.source]),
+      EngineMetadata: { Type: record.entityType },
+      risk: { calculated_score_norm: record.riskScore },
+    },
+    asset: { criticality: record.criticality },
+  },
+});
+
+/**
+ * Full Entity Store latest-index corpus for the prototype:
+ * - one target per resolved identity (no `resolved_to`, has resolution risk)
+ * - one alias per raw record that resolves to an identity (`resolved_to` set)
+ * - one solo doc per unresolved raw record
+ */
+export const buildAllEntityStoreHits = (): FaceliftEntityEsHit[] => {
+  const targets = IDENTITIES.map(targetHitFromIdentity);
+  const aliases = RAW_RECORDS.filter((record) => record.resolvedTo).map(aliasHitFromRecord);
+  const unresolved = RAW_RECORDS.filter((record) => !record.resolvedTo).map(
+    unresolvedHitFromRecord
+  );
+  return [...targets, ...aliases, ...unresolved];
+};
+
+// ---------------------------------------------------------------------------
+// Page filters (the filter group under the page title)
+// ---------------------------------------------------------------------------
+
+/**
+ * Facet selections from the page filter group. An empty facet means
+ * "everything"; several facets combine with AND, values within one with OR —
+ * the same semantics as the filter pills these selections write to the KQL bar.
+ */
+export interface PageFilters {
+  entityTypes: EntityType[];
+  /** Display labels, e.g. `Okta`. See {@link entitySourceToken} for the doc value. */
+  sources: string[];
+  riskLevels: FaceliftRiskLevel[];
+  criticalities: CriticalityLevelWithUnassigned[];
+}
+
+export const EMPTY_PAGE_FILTERS: PageFilters = {
+  entityTypes: [],
+  sources: [],
+  riskLevels: [],
+  criticalities: [],
+};
+
+export const isPageFiltersEmpty = (filters: PageFilters): boolean =>
+  !filters.entityTypes.length &&
+  !filters.sources.length &&
+  !filters.riskLevels.length &&
+  !filters.criticalities.length;
+
+/** The `entity.source` value stored on documents for a source display label. */
+export const entitySourceToken = (label: string): string =>
+  SOURCE_TOKEN[label] ?? label.toLowerCase();
+
+const matchesFacets = (
+  filters: PageFilters,
+  candidate: {
+    entityType: EntityType | string;
+    sources: string[];
+    riskScore: number;
+    criticality: CriticalityLevelWithUnassigned;
+  }
+): boolean => {
+  const { entityTypes, sources, riskLevels, criticalities } = filters;
+
+  if (entityTypes.length && !entityTypes.includes(candidate.entityType as EntityType)) return false;
+  if (sources.length && !candidate.sources.some((source) => sources.includes(source))) return false;
+  if (riskLevels.length && !riskLevels.includes(getFaceliftRiskLevel(candidate.riskScore))) {
+    return false;
+  }
+  if (criticalities.length && !criticalities.includes(candidate.criticality)) return false;
+
+  return true;
+};
+
+export const identityMatchesPageFilters = (
+  identity: FaceliftIdentity,
+  filters: PageFilters
+): boolean =>
+  matchesFacets(filters, {
+    entityType: identity.entityType,
+    sources: sourcesForIdentity(identity.id),
+    riskScore: identity.riskScore,
+    criticality: identity.criticality,
+  });
+
+export const recordMatchesPageFilters = (
+  record: FaceliftRawRecord,
+  filters: PageFilters
+): boolean =>
+  matchesFacets(filters, {
+    entityType: record.entityType,
+    sources: [record.source],
+    riskScore: record.riskScore,
+    criticality: record.criticality,
+  });
+
+const hitMatchesPageFilters = (hit: FaceliftEntityEsHit, filters: PageFilters): boolean => {
+  const { entity, asset } = hit._source;
+  return matchesFacets(
+    { ...filters, sources: filters.sources.map(entitySourceToken) },
+    {
+      entityType: entity.EngineMetadata.Type,
+      sources: entity.source,
+      riskScore: entity.risk.calculated_score_norm,
+      criticality: asset.criticality,
+    }
+  );
+};
+
+/**
+ * Share of a card's own population that survives the page filters. The cards
+ * keep their designed headline numbers (which are larger than the mock corpus),
+ * and filtering scales them, so the whole band moves together and stays
+ * consistent with the table underneath.
+ */
+const cardPopulationRatio = (cardId: SignalCardId, filters: PageFilters): number => {
+  const population = IDENTITIES.filter(CARD_IDENTITY_PREDICATES[cardId]);
+  if (!population.length) return 0;
+  return (
+    population.filter((identity) => identityMatchesPageFilters(identity, filters)).length /
+    population.length
+  );
+};
+
+export const getSignalCards = (filters: PageFilters = EMPTY_PAGE_FILTERS): SignalCardData[] => {
+  if (isPageFiltersEmpty(filters)) return SIGNAL_CARDS;
+
+  return SIGNAL_CARDS.map((card) => {
+    const ratio = cardPopulationRatio(card.id, filters);
+    return {
+      ...card,
+      value: Math.round(card.value * ratio),
+      ...(card.delta === undefined ? {} : { delta: Math.round(card.delta * ratio) }),
+      ...(card.trend ? { trend: card.trend.map((value) => Math.round(value * ratio)) } : {}),
+    };
+  });
+};
+
+/**
+ * Risk level × asset criticality counts for the Overview matrix, counted over the
+ * same corpus the Entities table renders. Every cell therefore equals the number
+ * of rows the table shows once that cell is clicked, and the grid totals the
+ * entity count on the page.
+ */
+export const getRiskMatrixCounts = (
+  filters: PageFilters = EMPTY_PAGE_FILTERS
+): Record<FaceliftRiskLevel, Record<CriticalityTier, number>> => {
+  const counts = {} as Record<FaceliftRiskLevel, Record<CriticalityTier, number>>;
+  for (const level of RISK_LEVELS) {
+    counts[level] = {} as Record<CriticalityTier, number>;
+    for (const tier of CRITICALITY_TIERS) {
+      counts[level][tier] = 0;
+    }
+  }
+
+  const matching = buildAllEntityStoreHits().filter((hit) => hitMatchesPageFilters(hit, filters));
+  for (const hit of matching) {
+    const level = getFaceliftRiskLevel(hit._source.entity.risk.calculated_score_norm);
+    const tier = tierOfCriticality(hit._source.asset.criticality);
+    counts[level][tier] += 1;
+  }
+
+  return counts;
+};
+
+const hitMatchesActiveFilter = (hit: FaceliftEntityEsHit, filter: ActiveFilter | null): boolean => {
+  if (!filter) return true;
+
+  const { entity, asset } = hit._source;
+  const resolvedTo = entity.relationships?.resolution?.resolved_to;
+  const riskScore = entity.risk.calculated_score_norm;
+  const criticality = asset.criticality;
+
+  switch (filter.type) {
+    case 'matrix':
+      return (
+        getFaceliftRiskLevel(riskScore) === filter.riskLevel &&
+        tierOfCriticality(criticality) === filter.tier
+      );
+    case 'card': {
+      const isTarget = !resolvedTo && Boolean(IDENTITY_BY_ID[entity.id]);
+      const isUnresolvedSolo = !resolvedTo && !IDENTITY_BY_ID[entity.id];
+      // Card filters are identity-centric: keep matching targets and their aliases.
+      if (isUnresolvedSolo) return false;
+      const identityId = resolvedTo ?? entity.id;
+      const identity = IDENTITY_BY_ID[identityId];
+      if (!identity || (!resolvedTo && !isTarget)) return false;
+      return CARD_IDENTITY_PREDICATES[filter.cardId](identity);
+    }
+    case 'identity':
+      return entity.id === filter.identityId || resolvedTo === filter.identityId;
+  }
+};
+
+/**
+ * Builds ES-shaped hits for the Entities table / grouping paths.
+ * Includes targets, aliases (with Resolved to filled), and unresolved solos.
+ * When `filter` is set, only docs matching the Overview band filter are returned.
+ */
+export const getEntityStoreEsHits = (filter: ActiveFilter | null = null): FaceliftEntityEsHit[] =>
+  buildAllEntityStoreHits().filter((hit) => hitMatchesActiveFilter(hit, filter));
+
+/** @deprecated Use {@link getEntityStoreEsHits} — kept for existing call sites. */
+export const getIdentityEsHits = getEntityStoreEsHits;

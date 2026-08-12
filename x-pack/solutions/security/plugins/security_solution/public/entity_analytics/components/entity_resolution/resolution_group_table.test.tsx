@@ -44,6 +44,23 @@ describe('ResolutionGroupTable', () => {
     expect(getByText('alice-azure')).toBeInTheDocument();
   });
 
+  it('renders only alias rows when aliasesOnly is set', () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          targetEntityId="alice-id"
+          aliasesOnly
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(RESOLUTION_GROUP_TABLE_TEST_ID)).toBeInTheDocument();
+    expect(queryByText('alice')).not.toBeInTheDocument();
+    expect(getByText('alice-azure')).toBeInTheDocument();
+  });
+
   it('shows target entity icon next to target entity name', () => {
     const { container } = render(
       <TestProviders>

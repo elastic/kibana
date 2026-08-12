@@ -40,6 +40,10 @@ import type { EntityRiskScoresState } from '../../api/hooks/use_entity_risk_scor
 import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import {
+  USE_FACELIFT_MOCK_FLYOUT,
+  isFaceliftMockEntityId,
+} from '../home/facelift/flyout_data';
 
 import {
   columnsArray,
@@ -105,11 +109,20 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       : undefined;
   const riskData = baseRiskData ?? fallbackRiskData;
   const entityData = getEntityData<T>(entityType, riskData);
+  const useFaceliftStaticMetric =
+    USE_FACELIFT_MOCK_FLYOUT && isFaceliftMockEntityId(entityId);
+
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const query = entityId
       ? `${entityType}.risk.id_value: "${entityId}" AND NOT ${entityType}.risk.score_type: "resolution"`
       : `${EntityTypeToIdentifierField[entityType]}: "${entityName}" AND NOT ${entityType}.risk.score_type: "resolution"`;
+    const metricLabel = i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.riskSummary.entityRiskScoreLabel',
+      {
+        defaultMessage: 'Entity risk score',
+      }
+    );
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
@@ -117,14 +130,20 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       spaceId,
       riskEntity: entityType,
       dataSource: 'risk_index',
-      metricLabel: i18n.translate(
-        'xpack.securitySolution.flyout.entityDetails.riskSummary.entityRiskScoreLabel',
-        {
-          defaultMessage: 'Entity risk score',
-        }
-      ),
+      metricLabel,
+      ...(useFaceliftStaticMetric && entityData?.risk?.calculated_score_norm != null
+        ? { staticScore: entityData.risk.calculated_score_norm }
+        : {}),
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, entityId, spaceId]);
+  }, [
+    entityData?.name,
+    entityData?.risk?.calculated_level,
+    entityData?.risk?.calculated_score_norm,
+    entityType,
+    entityId,
+    spaceId,
+    useFaceliftStaticMetric,
+  ]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(

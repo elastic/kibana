@@ -161,6 +161,19 @@ export const Content = ({
             <EuiHorizontalRule />
           </>
         )}
+      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
+        <>
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.user}
+            scopeId={scopeId}
+            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
+            onShowEntity={onShowEntity}
+            hideHeaderIcons={hideHeaderIcons}
+          />
+          <EuiHorizontalRule />
+        </>
+      )}
       {loadAnomalies &&
         (anomalyOverview.isLoading || anomalyOverview.isError || anomalyOverview.data) && (
           <>
@@ -185,19 +198,6 @@ export const Content = ({
             hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
-        </>
-      )}
-      {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.user}
-            scopeId={scopeId}
-            openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
-            onShowEntity={onShowEntity}
-            hideHeaderIcons={hideHeaderIcons}
-          />
-          <EuiHorizontalRule />
         </>
       )}
       {!skipRiskAndCriticality && !entityRecord && (

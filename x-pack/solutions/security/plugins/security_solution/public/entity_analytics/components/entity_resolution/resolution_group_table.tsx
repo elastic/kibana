@@ -61,6 +61,11 @@ export interface ResolutionGroupTableProps {
   removingEntityId?: string;
   onEntityNameClick?: (entity: Record<string, unknown>) => void;
   currentEntityId?: string;
+  /**
+   * When true, only raw-record aliases are listed (used by the flyout Resolution
+   * section). The full Resolution tab keeps the resolved/target entity row.
+   */
+  aliasesOnly?: boolean;
 }
 
 export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
@@ -73,14 +78,19 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
   removingEntityId,
   onEntityNameClick,
   currentEntityId,
+  aliasesOnly = false,
 }) => {
-  const hasGroup = group && group.group_size > 1;
+  const hasGroup = Boolean(group && (aliasesOnly ? group.aliases.length > 0 : group.group_size > 1));
 
   const items: TableEntityRow[] = useMemo(() => {
-    if (!hasGroup) return [];
+    if (!hasGroup || !group) return [];
 
-    return [{ entity: group.target }, ...group.aliases.map((alias) => ({ entity: alias }))];
-  }, [group, hasGroup]);
+    const aliasRows = group.aliases.map((alias) => ({ entity: alias }));
+    if (aliasesOnly) {
+      return aliasRows;
+    }
+    return [{ entity: group.target }, ...aliasRows];
+  }, [group, hasGroup, aliasesOnly]);
 
   const columns: Array<EuiBasicTableColumn<TableEntityRow>> = useMemo(() => {
     const cols: Array<EuiBasicTableColumn<TableEntityRow>> = [];

@@ -19,11 +19,14 @@ import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
 import { EntitySourceBadge } from '../shared/components/entity_source_badge';
 import { RiskLevelBadge } from '../shared/components/risk_level_badge';
+import { ResolvedRecordsBadge } from '../shared/components/resolved_records_badge';
 
 interface ServicePanelHeaderProps {
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   isEntityInStore?: boolean;
+  /** Entity store entity ID — used for the resolved-records badge. */
+  entityId?: string;
   riskLevel?: RiskSeverity;
   /**
    * Overrides forwarded to the underlying {@link FlyoutHeader} (e.g. `css` / `panelProps` for
@@ -36,6 +39,7 @@ export const ServicePanelHeader = ({
   serviceName,
   observedService,
   isEntityInStore,
+  entityId,
   riskLevel,
   flyoutHeaderProps,
 }: ServicePanelHeaderProps) => {
@@ -76,6 +80,11 @@ export const ServicePanelHeader = ({
             {isEntityInStore && riskLevel && (
               <EuiFlexItem grow={false}>
                 <RiskLevelBadge riskLevel={riskLevel} />
+              </EuiFlexItem>
+            )}
+            {isEntityInStore && (
+              <EuiFlexItem grow={false}>
+                <ResolvedRecordsBadge entityId={entityId} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

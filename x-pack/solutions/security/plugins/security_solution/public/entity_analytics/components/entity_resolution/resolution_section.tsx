@@ -146,6 +146,7 @@ export const ResolutionSection: React.FC<ResolutionSectionProps> = ({
           targetEntityId={targetEntityId}
           onEntityNameClick={handleEntityNameClick}
           currentEntityId={entityId}
+          aliasesOnly
         />
       </ExpandablePanel>
     </EuiAccordion>

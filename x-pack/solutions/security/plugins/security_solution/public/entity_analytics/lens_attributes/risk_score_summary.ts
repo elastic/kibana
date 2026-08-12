@@ -29,7 +29,116 @@ interface GetRiskScoreSummaryAttributesProps {
   entityId?: string;
   dataSource?: 'auto' | 'entity_store' | 'risk_index';
   metricLabel?: string;
+  /**
+   * When set, builds a real Lens metric chart fed by an ES|QL `ROW` query with this
+   * value (no risk-score index / history). Used by the EA Facelift flyout prototype.
+   */
+  staticScore?: number;
 }
+
+const severityPalette = {
+  type: 'palette' as const,
+  name: 'custom',
+  params: {
+    steps: 3,
+    name: 'custom',
+    reverse: false,
+    rangeType: 'number' as const,
+    rangeMin: 0,
+    rangeMax: null,
+    progression: 'fixed' as const,
+    colorStops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
+      color: RISK_SEVERITY_COLOUR[riskSeverity],
+      stop: RISK_SCORE_RANGES[riskSeverity].start,
+    })),
+    stops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
+      color: RISK_SEVERITY_COLOUR[riskSeverity],
+      stop: RISK_SCORE_RANGES[riskSeverity].stop,
+    })),
+    continuity: 'above' as const,
+    maxSteps: 5,
+  },
+};
+
+/** Lens metric with a static ES|QL ROW — real Lens UI, no index dependency. */
+const getStaticRiskScoreSummaryAttributes = ({
+  severity,
+  riskEntity,
+  metricLabel,
+  staticScore,
+}: Required<Pick<GetRiskScoreSummaryAttributesProps, 'staticScore'>> &
+  Pick<GetRiskScoreSummaryAttributesProps, 'severity' | 'riskEntity' | 'metricLabel'>): LensAttributes => {
+  const layerId = `layer-id1-${uuidv4()}`;
+  const columnId = `column-id1-${uuidv4()}`;
+  const dataViewId = `dataview-id-${uuidv4()}`;
+  const label = metricLabel ?? `${capitalize(riskEntity)} Risk`;
+  const esqlQuery = `ROW risk_score = ${Number(staticScore)}`;
+
+  return {
+    title: 'Risk score summary',
+    description: '',
+    visualizationType: 'lnsMetric',
+    state: {
+      visualization: {
+        layerId,
+        layerType: 'data',
+        metricAccessor: columnId,
+        palette: severityPalette,
+        subtitle: severity,
+      },
+      query: {
+        esql: esqlQuery,
+      },
+      filters: [],
+      datasourceStates: {
+        textBased: {
+          layers: {
+            [layerId]: {
+              columns: [
+                {
+                  columnId,
+                  fieldName: 'risk_score',
+                  label,
+                  customLabel: true,
+                  inMetricDimension: true,
+                  meta: {
+                    type: 'number',
+                  },
+                  params: {
+                    format: {
+                      id: 'number',
+                      params: {
+                        decimals: 2,
+                        compact: false,
+                      },
+                    },
+                  },
+                },
+              ],
+              query: {
+                esql: esqlQuery,
+              },
+              index: dataViewId,
+            },
+          },
+        },
+      },
+      internalReferences: [
+        {
+          type: 'index-pattern',
+          id: dataViewId,
+          name: `indexpattern-datasource-layer-${layerId}`,
+        },
+      ],
+      adHocDataViews: {
+        [dataViewId]: {
+          id: dataViewId,
+        },
+      },
+    },
+    references: [],
+  };
+};
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
@@ -41,7 +150,17 @@ export const getRiskScoreSummaryAttributes: (
   entityId,
   dataSource = 'auto',
   metricLabel,
+  staticScore,
 }) => {
+  if (staticScore != null && Number.isFinite(staticScore)) {
+    return getStaticRiskScoreSummaryAttributes({
+      staticScore,
+      severity,
+      riskEntity,
+      metricLabel,
+    });
+  }
+
   const layerIds = [`layer-id1-${uuidv4()}`, `layer-id2-${uuidv4()}`];
   const internalReferenceId = `internal-reference-id-${uuidv4()}`;
   const columnIds = [`column-id1-${uuidv4()}`, `column-id2-${uuidv4()}`, `column-id3-${uuidv4()}`];
@@ -66,29 +185,7 @@ export const getRiskScoreSummaryAttributes: (
         trendlineLayerType: 'metricTrendline',
         trendlineTimeAccessor: columnIds[1],
         trendlineMetricAccessor: columnIds[2],
-        palette: {
-          type: 'palette',
-          name: 'custom',
-          params: {
-            steps: 3,
-            name: 'custom',
-            reverse: false,
-            rangeType: 'number',
-            rangeMin: 0,
-            rangeMax: null,
-            progression: 'fixed',
-            colorStops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
-              color: RISK_SEVERITY_COLOUR[riskSeverity],
-              stop: RISK_SCORE_RANGES[riskSeverity].start,
-            })),
-            stops: SEVERITY_UI_SORT_ORDER.map((riskSeverity) => ({
-              color: RISK_SEVERITY_COLOUR[riskSeverity],
-              stop: RISK_SCORE_RANGES[riskSeverity].stop,
-            })),
-            continuity: 'above',
-            maxSteps: 5,
-          },
-        },
+        palette: severityPalette,
         subtitle: severity,
       },
       query: {

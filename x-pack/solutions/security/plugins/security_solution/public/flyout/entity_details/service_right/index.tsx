@@ -191,6 +191,7 @@ export const ServicePanel = memo(function ServicePanel({
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
+        entityId={entityStoreEntityId}
         riskLevel={
           entityFromStoreResult.entityRecord
             ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??

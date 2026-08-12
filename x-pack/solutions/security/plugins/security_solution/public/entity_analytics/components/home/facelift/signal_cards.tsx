@@ -5,146 +5,169 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { Chart, Metric, Settings, type MetricDatum } from '@elastic/charts';
+import React, { useCallback, useMemo } from 'react';
 import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+  Chart,
+  Metric,
+  Settings,
+  isMetricElementEvent,
+  type ElementClickListener,
+  type MetricDatum,
+} from '@elastic/charts';
+import { EuiIcon, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
 import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
-import { SIGNAL_CARDS } from './data';
 
 export interface SignalCardsProps {
   activeFilter: ActiveFilter | null;
+  /** Card values for the current page filters — see `getSignalCards`. */
+  cards: SignalCardData[];
   onSelectCard: (cardId: SignalCardId) => void;
 }
 
-/** Cards that do not participate in table filtering (display-only for now). */
-const NON_FILTERABLE_CARD_IDS = new Set<SignalCardId>(['unresolvedHighRisk']);
+/**
+ * Tall enough for the 42px value, title and subtitle at six columns once the
+ * value sits in the bottom-right corner.
+ */
+const CARDS_HEIGHT = 160;
+const VALUE_FONT_SIZE = 42;
 
-const DeltaExtra: React.FC<{ delta: number }> = ({ delta }) => {
-  if (delta === 0) {
-    return <EuiTextColor color="subdued">—</EuiTextColor>;
-  }
-  // Positive delta = worse for these risk signals (red ↑); negative = better (green ↓).
-  if (delta > 0) {
-    return <EuiTextColor color="danger">{`▲ ${delta}`}</EuiTextColor>;
-  }
-  return <EuiTextColor color="success">{`▼ ${Math.abs(delta)}`}</EuiTextColor>;
-};
+const ANOMALY_EXPLORER_LINK_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.signalCards.openInAnomalyExplorer',
+  { defaultMessage: 'Open in Anomaly explorer' }
+);
 
-const SignalMetricCard: React.FC<{
-  card: SignalCardData;
-  selected: boolean;
-  onSelect: () => void;
-}> = ({ card, selected, onSelect }) => {
+/**
+ * Metric chart's top-right icon slot. Blue and interactive like a link; click
+ * is a no-op for the prototype (and must not toggle the card filter).
+ */
+const AnomalyExplorerIcon: React.FC<{
+  width: number;
+  height: number;
+  color: string;
+}> = ({ width, height }) => {
   const { euiTheme } = useEuiTheme();
-  const chartTheme = useElasticChartsTheme();
-  const filterable = !NON_FILTERABLE_CARD_IDS.has(card.id);
-
-  const datum = useMemo<MetricDatum>(
-    () => ({
-      title: card.title,
-      subtitle: card.label,
-      value: card.value,
-      valueFormatter: (v) => String(v),
-      color: selected ? euiTheme.colors.backgroundBasePrimary : euiTheme.colors.backgroundBasePlain,
-      extra: <DeltaExtra delta={card.delta} />,
-      ...(card.trend
-        ? {
-            trend: card.trend.map((y, x) => ({ x, y })),
-            trendShape: 'area' as const,
-          }
-        : {}),
-    }),
-    [card, euiTheme.colors.backgroundBasePlain, euiTheme.colors.backgroundBasePrimary, selected]
-  );
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="none"
-      onClick={filterable ? onSelect : undefined}
-      aria-pressed={filterable ? selected : undefined}
-      data-test-subj={`eaFaceliftSignalCard-${card.id}`}
-      css={css`
-        height: 100%;
-        overflow: hidden;
-        cursor: ${filterable ? 'pointer' : 'default'};
-        border-color: ${selected ? euiTheme.colors.primary : euiTheme.colors.borderBasePlain};
-        outline: ${selected ? `1px solid ${euiTheme.colors.primary}` : 'none'};
-      `}
-    >
-      <div
+    <EuiToolTip content={ANOMALY_EXPLORER_LINK_LABEL}>
+      <button
+        type="button"
+        aria-label={ANOMALY_EXPLORER_LINK_LABEL}
+        data-test-subj="eaFaceliftAnomalyExplorerLink"
+        onMouseDown={(event) => event.stopPropagation()}
+        onMouseUp={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
         css={css`
-          height: 128px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: ${width}px;
+          height: ${height}px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+          color: ${euiTheme.colors.textPrimary};
+
+          &:hover,
+          &:focus-visible {
+            color: ${euiTheme.colors.textPrimary};
+          }
         `}
       >
-        <Chart size={['100%', '100%']}>
-          <Settings
-            baseTheme={chartTheme}
-            locale={i18n.getLocale()}
-            theme={{ metric: { valueTextAlign: 'left' } }}
-          />
-          <Metric id={`facelift-signal-${card.id}`} data={[[datum]]} />
-        </Chart>
-      </div>
-      {card.secondaryLinkText && (
-        <div
-          css={css`
-            padding: 0 ${euiTheme.size.s} ${euiTheme.size.s};
-          `}
-        >
-          <EuiText size="xs">
-            <EuiLink
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-              }}
-            >
-              {card.secondaryLinkText}
-            </EuiLink>
-          </EuiText>
-        </div>
-      )}
-    </EuiPanel>
+        <EuiIcon type="popout" size="m" color="primary" aria-hidden={true} />
+      </button>
+    </EuiToolTip>
   );
 };
 
 /**
- * Right Overview panel — “Where to start” 2×3 metric cards (@elastic/charts Metric).
+ * Row 1 — six equal-width, clickable signal metrics rendered as a single
+ * horizontal Metric grid (`data={[[col1, …, col6]]}`). Clicking a tile toggles
+ * the Overview filter; the active tile gets a primary background.
  */
-export const SignalCards: React.FC<SignalCardsProps> = ({ activeFilter, onSelectCard }) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj="eaFaceliftSignalCards">
-    <EuiTitle size="xs">
-      <h3>Where to start</h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <EuiFlexGrid columns={3} gutterSize="s">
-      {SIGNAL_CARDS.map((card) => (
-        <EuiFlexItem key={card.id}>
-          <SignalMetricCard
-            card={card}
-            selected={activeFilter?.type === 'card' && activeFilter.cardId === card.id}
-            onSelect={() => onSelectCard(card.id)}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
-  </EuiPanel>
-);
+export const SignalCards: React.FC<SignalCardsProps> = ({ activeFilter, cards, onSelectCard }) => {
+  const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
-export { NON_FILTERABLE_CARD_IDS };
+  const row = useMemo<MetricDatum[]>(
+    () =>
+      cards.map((card) => {
+        const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+
+        return {
+          title: card.title,
+          subtitle: card.description,
+          value: card.value,
+          valueFormatter: (value: number) => String(value),
+          color: selected
+            ? euiTheme.colors.backgroundBasePrimary
+            : euiTheme.colors.backgroundBasePlain,
+          ...(card.id === 'newAnomalies' ? { icon: AnomalyExplorerIcon } : {}),
+          ...(card.trend
+            ? { trend: card.trend.map((y, x) => ({ x, y })), trendShape: 'area' as const }
+            : {}),
+        };
+      }),
+    [
+      activeFilter,
+      cards,
+      euiTheme.colors.backgroundBasePlain,
+      euiTheme.colors.backgroundBasePrimary,
+    ]
+  );
+
+  const onElementClick = useCallback<ElementClickListener>(
+    (elements) => {
+      const [element] = elements;
+      if (!isMetricElementEvent(element)) {
+        return;
+      }
+
+      const card = cards[element.columnIndex];
+      if (card) {
+        onSelectCard(card.id);
+      }
+    },
+    [cards, onSelectCard]
+  );
+
+  return (
+    <EuiPanel hasBorder paddingSize="none" data-test-subj="eaFaceliftSignalCards">
+      <div
+        css={css`
+          height: ${CARDS_HEIGHT}px;
+
+          /* Metric theme exposes titleWeight but not value weight — match the 700 title. */
+          .echMetricText__value {
+            font-weight: ${euiTheme.font.weight.bold};
+          }
+        `}
+      >
+        <Chart size={['100%', '100%']}>
+          <Settings
+            baseTheme={chartBaseTheme}
+            locale={i18n.getLocale()}
+            theme={{
+              metric: {
+                titleWeight: 'bold',
+                valueFontSize: VALUE_FONT_SIZE,
+                valueTextAlign: 'right',
+                valuePosition: 'bottom',
+                iconAlign: 'right',
+              },
+            }}
+            onElementClick={onElementClick}
+          />
+          <Metric id="eaFaceliftSignalCards" data={[row]} />
+        </Chart>
+      </div>
+    </EuiPanel>
+  );
+};

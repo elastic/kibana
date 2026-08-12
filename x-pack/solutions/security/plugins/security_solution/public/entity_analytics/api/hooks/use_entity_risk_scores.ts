@@ -10,11 +10,32 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useRiskScore, type RiskScoreState } from './use_risk_score';
 import { useResolutionGroup } from '../../components/entity_resolution/hooks/use_resolution_group';
 import { getEntityId } from '../../components/entity_resolution/helpers';
+import {
+  USE_FACELIFT_MOCK_FLYOUT,
+  getFaceliftRiskScoreState,
+  getFaceliftResolutionGroup,
+  isFaceliftMockEntityId,
+} from '../../components/home/facelift/flyout_data';
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
   querySize: 1,
 };
+
+const noopRefetch = () => undefined;
+
+const emptyRiskScoreState = <T extends EntityType>(): RiskScoreState<T> =>
+  ({
+    data: undefined,
+    inspect: { dsl: [], response: [] },
+    isInspected: false,
+    refetch: noopRefetch,
+    totalCount: 0,
+    isAuthorized: true,
+    hasEngineBeenInstalled: true,
+    loading: false,
+    error: null,
+  } as RiskScoreState<T>);
 
 export interface EntityRiskScoresState<T extends EntityType> {
   base: RiskScoreState<T>;
@@ -34,6 +55,10 @@ export const useEntityRiskScores = <T extends EntityType>(
   entityType: T,
   entityId: string | undefined
 ): EntityRiskScoresState<T> => {
+  const useFaceliftMock = Boolean(
+    USE_FACELIFT_MOCK_FLYOUT && entityId && isFaceliftMockEntityId(entityId)
+  );
+
   const baseFilterQuery = useMemo(
     () =>
       entityId
@@ -51,11 +76,11 @@ export const useEntityRiskScores = <T extends EntityType>(
     filterQuery: baseFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: !entityId,
+    skip: !entityId || useFaceliftMock,
   });
 
   const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
-    enabled: Boolean(entityId),
+    enabled: Boolean(entityId) && !useFaceliftMock,
   });
   const hasResolutionGroup = (resolutionGroup?.group_size ?? 0) > 1;
   const resolutionTargetEntityId = useMemo(
@@ -82,7 +107,7 @@ export const useEntityRiskScores = <T extends EntityType>(
     filterQuery: resolutionFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
-    skip: !shouldFetchResolution,
+    skip: !shouldFetchResolution || useFaceliftMock,
   });
 
   const refetch = useCallback(() => {
@@ -90,9 +115,39 @@ export const useEntityRiskScores = <T extends EntityType>(
     resolution.refetch();
   }, [base, resolution]);
 
-  return {
+  return useMemo(() => {
+    if (useFaceliftMock && entityId) {
+      const mockGroup = getFaceliftResolutionGroup(entityId);
+      const mockResolutionTargetEntityId = mockGroup?.target
+        ? getEntityId(mockGroup.target)
+        : undefined;
+      const mockBase = getFaceliftRiskScoreState(entityType, entityId) ?? emptyRiskScoreState<T>();
+
+      // Facelift prototype: show only the Entity risk score panel (no Resolution group panel).
+      return {
+        base: mockBase,
+        resolution: {
+          state: emptyRiskScoreState<T>(),
+          hasResolutionGroup: false,
+          resolutionTargetEntityId: mockResolutionTargetEntityId,
+        },
+        refetch: noopRefetch,
+      };
+    }
+
+    return {
+      base,
+      resolution: { state: resolution, hasResolutionGroup, resolutionTargetEntityId },
+      refetch,
+    };
+  }, [
+    useFaceliftMock,
+    entityId,
+    entityType,
     base,
-    resolution: { state: resolution, hasResolutionGroup, resolutionTargetEntityId },
+    resolution,
+    hasResolutionGroup,
+    resolutionTargetEntityId,
     refetch,
-  };
+  ]);
 };

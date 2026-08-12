@@ -274,6 +274,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
         serviceName={serviceName}
         observedService={observedService}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
+        entityId={entityStoreEntityId}
         flyoutHeaderProps={{
           css: css`
             padding-block: ${euiTheme.size.s} !important;
