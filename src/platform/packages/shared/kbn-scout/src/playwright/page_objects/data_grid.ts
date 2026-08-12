@@ -518,14 +518,7 @@ export class DataGrid {
   }
 
   async openGridDisplaySettings() {
-    const gridDisplayPanel = this.page.testSubj.locator('densityButtonGroup');
-    await expect(async () => {
-      const isGridDisplayPanelVisible = await gridDisplayPanel.isVisible();
-      if (!isGridDisplayPanelVisible) {
-        await this.page.testSubj.click('dataGridDisplaySelectorButton');
-      }
-      await gridDisplayPanel.waitFor({ state: 'visible', timeout: 2_000 });
-    }).toPass();
+    await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
 
   async openInTableSearch() {
