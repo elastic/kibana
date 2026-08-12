@@ -18,11 +18,8 @@ import { getPackUsersRoute } from '../get_users_route';
 
 export const initPackRoutes = (router: IRouter, context: OsqueryAppContext) => {
   createPackRoute(router, context);
-  if (context.experimentalFeatures.queryHistoryRework) {
-    copyPackRoute(router, context);
-    getPackUsersRoute(router, context);
-  }
-
+  copyPackRoute(router, context);
+  getPackUsersRoute(router, context);
   deletePackRoute(router, context);
   findPackRoute(router, context);
   readPackRoute(router, context);

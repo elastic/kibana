@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
@@ -93,7 +92,6 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
   const [pageIndex, setPageIndex] = useState(0);
@@ -125,7 +123,7 @@ const PacksTableComponent = () => {
     );
   }, []);
 
-  const newQueryPath = isHistoryEnabled ? '/new' : '/live_queries/new';
+  const newQueryPath = '/new';
   const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
     (item) => () =>
       push(newQueryPath, {
@@ -223,14 +221,10 @@ const PacksTableComponent = () => {
           },
         ],
       } as EuiTableActionsColumnType<PackSavedObject>,
-      ...(isHistoryEnabled
-        ? [
-            {
-              width: '40px',
-              render: (item: PackSavedObject) => <PackRowActions item={item} />,
-            },
-          ]
-        : []),
+      {
+        width: '40px',
+        render: (item: PackSavedObject) => <PackRowActions item={item} />,
+      },
     ],
     [
       permissions.runSavedQueries,
@@ -240,7 +234,6 @@ const PacksTableComponent = () => {
       renderPlayAction,
       renderQueries,
       renderUpdatedAt,
-      isHistoryEnabled,
     ]
   );
 

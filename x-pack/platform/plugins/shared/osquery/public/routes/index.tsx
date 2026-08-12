@@ -10,15 +10,16 @@ import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
-import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { useKibana } from '../common/lib/kibana';
-import { LiveQueries } from './live_queries';
 import { History } from './history';
 import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
 import { NewLiveQueryPage } from './live_queries/new';
 import { MissingPrivileges, NotFoundPage } from './components';
 
+// Keeps pre-9.4 `/live_queries` bookmarks working: maps `/live_queries/new` to the
+// top-level `/new` page and any other subpath (e.g. `/live_queries/<actionId>`) onto
+// its `/history` equivalent, preserving the query string and hash.
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
   const suffix = location.search + location.hash;
@@ -41,35 +42,6 @@ const NewQueryRoute = () => {
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
-
-  if (isHistoryEnabled) {
-    return (
-      <Routes>
-        <Route path={`/packs`}>
-          <Packs />
-        </Route>
-        <Route path={`/saved_queries`}>
-          <SavedQueries />
-        </Route>
-        <Route path="/new">
-          <NewQueryRoute />
-        </Route>
-        <Route path="/history">
-          <History />
-        </Route>
-        <Route path="/live_queries">
-          <LiveQueriesToHistoryRedirect />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/history" />
-        </Route>
-        <Route>
-          <NotFoundPage />
-        </Route>
-      </Routes>
-    );
-  }
 
   return (
     <Routes>
@@ -79,10 +51,21 @@ const OsqueryAppRoutesComponent = () => {
       <Route path={`/saved_queries`}>
         <SavedQueries />
       </Route>
-      <Route path="/live_queries">
-        <LiveQueries />
+      <Route path="/new">
+        <NewQueryRoute />
       </Route>
-      <Redirect to="/live_queries" />
+      <Route path="/history">
+        <History />
+      </Route>
+      <Route path="/live_queries">
+        <LiveQueriesToHistoryRedirect />
+      </Route>
+      <Route exact path="/">
+        <Redirect to="/history" />
+      </Route>
+      <Route>
+        <NotFoundPage />
+      </Route>
     </Routes>
   );
 };

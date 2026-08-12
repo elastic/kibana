@@ -20,9 +20,9 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should enable a valid feature flag', () => {
-    const { features, invalid } = parseExperimentalConfigValue(['queryHistoryRework']);
+    const { features, invalid } = parseExperimentalConfigValue(['exportResults']);
 
-    expect(features.queryHistoryRework).toBe(true);
+    expect(features.exportResults).toBe(true);
     expect(invalid).toEqual([]);
   });
 
@@ -35,22 +35,22 @@ describe('parseExperimentalConfigValue', () => {
 
   it('should handle mix of valid and invalid feature flags', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      'queryHistoryRework',
+      'exportResults',
       'invalidFeature1',
       'invalidFeature2',
     ]);
 
-    expect(features.queryHistoryRework).toBe(true);
+    expect(features.exportResults).toBe(true);
     expect(invalid).toEqual(['invalidFeature1', 'invalidFeature2']);
   });
 
   it('should handle disable: prefix to turn off features', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      'queryHistoryRework',
-      'disable:queryHistoryRework',
+      'exportResults',
+      'disable:exportResults',
     ]);
 
-    expect(features.queryHistoryRework).toBe(false);
+    expect(features.exportResults).toBe(false);
     expect(invalid).toEqual([]);
   });
 
@@ -67,6 +67,6 @@ describe('getExperimentalAllowedValues', () => {
     const allowedValues = getExperimentalAllowedValues();
 
     expect(allowedValues).toEqual(Object.keys(allowedExperimentalValues));
-    expect(allowedValues).toContain('queryHistoryRework');
+    expect(allowedValues).toContain('exportResults');
   });
 });

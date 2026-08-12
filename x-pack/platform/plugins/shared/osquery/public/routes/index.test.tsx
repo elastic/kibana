@@ -7,17 +7,15 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
 import { OsqueryAppRoutes } from '.';
 import { ExperimentalFeaturesProvider } from '../common/experimental_features_context';
-import {
-  allowedExperimentalValues,
-  type ExperimentalFeatures,
-} from '../../common/experimental_features';
+import { allowedExperimentalValues } from '../../common/experimental_features';
 
 jest.mock('../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -55,7 +53,6 @@ jest.mock('../common/hooks/use_breadcrumbs', () => ({
 }));
 
 // Mock lazy-loaded route components to avoid loading full component trees
-jest.mock('./live_queries', () => ({ LiveQueries: () => <div data-test-subj="live-queries" /> }));
 jest.mock('./history', () => ({ History: () => <div data-test-subj="history" /> }));
 jest.mock('./saved_queries', () => ({
   SavedQueries: () => <div data-test-subj="saved-queries" />,
@@ -72,11 +69,17 @@ jest.mock('./components', () => ({
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });
 
-const renderWithRouter = (
-  path: string,
-  experimentalFeatures: Partial<ExperimentalFeatures> = {}
-) => {
-  const features = { ...allowedExperimentalValues, ...experimentalFeatures };
+// Records the router's resolved location so redirect targets (path + search + hash)
+// can be asserted even though the destination page components are mocked out.
+const LocationSpy = ({ onLocation }: { onLocation: (location: string) => void }) => {
+  const location = useLocation();
+  onLocation(location.pathname + location.search + location.hash);
+
+  return null;
+};
+
+const renderWithRouter = (path: string, onLocation: (location: string) => void = () => {}) => {
+  const features = { ...allowedExperimentalValues };
 
   return render(
     <EuiProvider>
@@ -84,6 +87,9 @@ const renderWithRouter = (
         <QueryClientProvider client={createTestQueryClient()}>
           <ExperimentalFeaturesProvider value={features}>
             <MemoryRouter initialEntries={[path]}>
+              <Route path="*">
+                <LocationSpy onLocation={onLocation} />
+              </Route>
               <OsqueryAppRoutes />
             </MemoryRouter>
           </ExperimentalFeaturesProvider>
@@ -93,62 +99,67 @@ const renderWithRouter = (
   );
 };
 
+const resolveLocation = (path: string) => {
+  let resolved = '';
+  renderWithRouter(path, (location) => {
+    resolved = location;
+  });
+
+  return resolved;
+};
+
 describe('OsqueryAppRoutes', () => {
-  describe('with queryHistoryRework enabled', () => {
-    const featureFlags = { queryHistoryRework: true };
+  it('redirects root path to /history', () => {
+    renderWithRouter('/');
+    expect(screen.getByTestId('history')).toBeInTheDocument();
+  });
 
-    it('redirects root path to /history', () => {
-      renderWithRouter('/', featureFlags);
-      expect(screen.getByTestId('history')).toBeInTheDocument();
+  it('redirects /live_queries to /history', () => {
+    renderWithRouter('/live_queries');
+    expect(screen.getByTestId('history')).toBeInTheDocument();
+  });
+
+  describe('legacy /live_queries redirects', () => {
+    it('maps /live_queries/new to the top-level /new page', () => {
+      expect(resolveLocation('/live_queries/new')).toBe('/new');
     });
 
-    it('redirects /live_queries to /history', () => {
-      renderWithRouter('/live_queries', featureFlags);
-      expect(screen.getByTestId('history')).toBeInTheDocument();
+    it('preserves the action id on a live query deep link', () => {
+      expect(resolveLocation('/live_queries/abc-123')).toBe('/history/abc-123');
     });
 
-    it('renders history page at /history', () => {
-      renderWithRouter('/history', featureFlags);
-      expect(screen.getByTestId('history')).toBeInTheDocument();
+    it('preserves the query string when redirecting', () => {
+      expect(resolveLocation('/live_queries?kuery=foo')).toBe('/history?kuery=foo');
     });
 
-    it('renders new live query form at /new', () => {
-      renderWithRouter('/new', featureFlags);
-      expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
+    it('preserves the query string and hash on a deep link', () => {
+      expect(resolveLocation('/live_queries/abc-123?tab=results#top')).toBe(
+        '/history/abc-123?tab=results#top'
+      );
     });
 
-    it('renders saved queries at /saved_queries', () => {
-      renderWithRouter('/saved_queries', featureFlags);
-      expect(screen.getByTestId('saved-queries')).toBeInTheDocument();
-    });
-
-    it('renders packs at /packs', () => {
-      renderWithRouter('/packs', featureFlags);
-      expect(screen.getByTestId('packs')).toBeInTheDocument();
+    it('preserves the query string when redirecting /live_queries/new', () => {
+      expect(resolveLocation('/live_queries/new?packId=pack-1')).toBe('/new?packId=pack-1');
     });
   });
 
-  describe('with queryHistoryRework disabled', () => {
-    const featureFlags = { queryHistoryRework: false };
+  it('renders history page at /history', () => {
+    renderWithRouter('/history');
+    expect(screen.getByTestId('history')).toBeInTheDocument();
+  });
 
-    it('redirects root path to /live_queries', () => {
-      renderWithRouter('/', featureFlags);
-      expect(screen.getByTestId('live-queries')).toBeInTheDocument();
-    });
+  it('renders new live query form at /new', () => {
+    renderWithRouter('/new');
+    expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
+  });
 
-    it('renders live queries at /live_queries', () => {
-      renderWithRouter('/live_queries', featureFlags);
-      expect(screen.getByTestId('live-queries')).toBeInTheDocument();
-    });
+  it('renders saved queries at /saved_queries', () => {
+    renderWithRouter('/saved_queries');
+    expect(screen.getByTestId('saved-queries')).toBeInTheDocument();
+  });
 
-    it('renders saved queries at /saved_queries', () => {
-      renderWithRouter('/saved_queries', featureFlags);
-      expect(screen.getByTestId('saved-queries')).toBeInTheDocument();
-    });
-
-    it('renders packs at /packs', () => {
-      renderWithRouter('/packs', featureFlags);
-      expect(screen.getByTestId('packs')).toBeInTheDocument();
-    });
+  it('renders packs at /packs', () => {
+    renderWithRouter('/packs');
+    expect(screen.getByTestId('packs')).toBeInTheDocument();
   });
 });

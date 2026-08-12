@@ -35,14 +35,6 @@ jest.mock('../../../common/lib/kibana', () => ({
   },
 }));
 
-const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
-
-jest.mock('../../../common/experimental_features_context', () => ({
-  ...jest.requireActual('../../../common/experimental_features_context'),
-  useIsExperimentalFeatureEnabled: (feature: string) =>
-    mockUseIsExperimentalFeatureEnabled(feature),
-}));
-
 const mockMutateAsync = jest.fn().mockResolvedValue(undefined);
 
 jest.mock('../../../saved_queries', () => ({
@@ -129,21 +121,14 @@ const setupKibana = (overrides: Record<string, unknown> = {}) => {
 describe('EditSavedQueryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     setupKibana();
     mockMutateAsync.mockResolvedValue(undefined);
   });
 
   describe('Duplicate query button', () => {
-    it('renders the Duplicate query button when queryHistoryRework is enabled and user has writeSavedQueries', () => {
+    it('renders the Duplicate query button when user has writeSavedQueries', () => {
       renderComponent();
       expect(screen.getByText('Duplicate query')).toBeInTheDocument();
-    });
-
-    it('does not render the Duplicate query button when queryHistoryRework is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      renderComponent();
-      expect(screen.queryByText('Duplicate query')).not.toBeInTheDocument();
     });
 
     it('does not render the Duplicate query button when user lacks writeSavedQueries', () => {
