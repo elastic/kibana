@@ -2715,7 +2715,7 @@ describe('ActionPolicyClient', () => {
       );
     });
 
-    it('passes search parameter as include prefix pattern', async () => {
+    it('passes search parameter as a case-insensitive include pattern', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(
         makeFindAggResponse([{ key: 'production' }])
       );
@@ -2728,7 +2728,7 @@ describe('ActionPolicyClient', () => {
           aggs: expect.objectContaining({
             tags: expect.objectContaining({
               terms: expect.objectContaining({
-                include: 'prod.*',
+                include: '.*[pP][rR][oO][dD].*',
               }),
             }),
           }),

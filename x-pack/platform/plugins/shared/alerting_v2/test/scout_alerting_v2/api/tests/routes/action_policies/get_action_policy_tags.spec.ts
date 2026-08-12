@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
+  ACTION_POLICY_SEARCH_MAX_LENGTH,
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
@@ -73,7 +74,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   );
 
   apiTest(
-    'search: should return only tags matching the prefix',
+    'search: should return only tags matching the search',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -102,7 +103,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   });
 
   apiTest(
-    'search: should escape regex special characters in the prefix',
+    'search: should escape regex special characters in the search',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'policy-a', tags: ['a.b-real', 'axb-fake'] })
@@ -119,7 +120,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   );
 
   apiTest(
-    'search: should escape Elasticsearch-only regexp operators in the prefix',
+    'search: should escape Elasticsearch-only regexp operators in the search',
     async ({ apiClient, apiServices }) => {
       // `<` opens an interval and `"` a quoted literal in the Lucene regexp the
       // terms aggregation `include` uses. Unescaped, either one makes the pattern
@@ -161,6 +162,61 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
     expect(response).toHaveStatusCode(200);
     expect(response.body.tags.length).toBeLessThanOrEqual(20);
   });
+
+  apiTest(
+    'sort: should return the most-used tags before less-used ones',
+    async ({ apiClient, apiServices }) => {
+      await Promise.all([
+        ...Array.from({ length: 3 }, (_, i) =>
+          apiServices.alertingV2.actionPolicies.create(
+            buildCreateActionPolicyData({ name: `hot-policy-${i}`, tags: ['hot'] })
+          )
+        ),
+        apiServices.alertingV2.actionPolicies.create(
+          buildCreateActionPolicyData({ name: 'cold-policy', tags: ['cold'] })
+        ),
+      ]);
+
+      const response = await apiClient.get(TAGS_URL, { headers: readerHeaders });
+
+      expect(response).toHaveStatusCode(200);
+      const { tags } = response.body;
+      expect(tags.indexOf('hot')).toBeLessThan(tags.indexOf('cold'));
+    }
+  );
+
+  apiTest(
+    'search: should match case-insensitively and anywhere in the tag',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'policy-a', tags: ['Production', 'team-payments'] })
+      );
+
+      const lowerCased = await apiClient.get(tagsUrl({ search: 'prod' }), {
+        headers: readerHeaders,
+      });
+      expect(lowerCased).toHaveStatusCode(200);
+      expect(lowerCased.body.tags).toContain('Production');
+
+      const infix = await apiClient.get(tagsUrl({ search: 'payments' }), {
+        headers: readerHeaders,
+      });
+      expect(infix).toHaveStatusCode(200);
+      expect(infix.body.tags).toContain('team-payments');
+    }
+  );
+
+  apiTest(
+    'validation: should return 400 when search exceeds the maximum length',
+    async ({ apiClient }) => {
+      const response = await apiClient.get(
+        tagsUrl({ search: 'a'.repeat(ACTION_POLICY_SEARCH_MAX_LENGTH + 1) }),
+        { headers: readerHeaders }
+      );
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'validation: should return 400 when unknown query parameters are sent',

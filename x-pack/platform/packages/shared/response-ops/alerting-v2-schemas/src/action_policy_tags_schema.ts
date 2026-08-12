@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { tagsResponseSchema } from './rule_data_schema';
+import { tagsResponseSchema } from './common';
 
 export const actionPolicyTagsQuerySchema = z
   .object({
