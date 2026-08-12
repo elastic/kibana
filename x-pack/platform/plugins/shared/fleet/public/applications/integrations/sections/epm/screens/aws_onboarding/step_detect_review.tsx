@@ -68,44 +68,52 @@ const SummaryItem: React.FunctionComponent<{ label: string; value: React.ReactNo
 );
 
 const DeploymentSummaryCard: React.FunctionComponent<{
+  deploymentMethod: 'agent' | 'managed';
   services: AwsServiceEntry[];
   triggerSources: Record<string, string>;
   region: string;
   identityName: string;
   stackName: string;
   receivedCount: number;
-}> = ({ services, triggerSources, region, identityName, stackName, receivedCount }) => {
-  // The Managed Integrations data streams confirm here (fast spinner-to-check
-  // animation): first after 800ms, then one every 700ms. The CloudFormation
-  // services arrive already-received from the Authenticate & Deploy step.
-  const [managedReceived, setManagedReceived] = useState(0);
-  const managedTimers = useRef<number[]>([]);
-  useEffect(() => {
-    setManagedReceived(0);
-    MANAGED_INTEGRATION_EXAMPLES.forEach((_, i) => {
-      managedTimers.current.push(
-        window.setTimeout(() => setManagedReceived((c) => c + 1), 800 + i * 700)
-      );
-    });
-    return () => managedTimers.current.forEach((t) => window.clearTimeout(t));
-  }, []);
-
-  // The selected CloudFormation services plus the Managed Integrations
-  // examples, so the summary covers everything deployed.
-  const allServices = [
-    ...services.map((service, i) => ({
-      key: service.id,
-      name: service.name,
-      receiving: i < receivedCount,
-      badge: `Trigger: ${triggerSources[service.id] ?? 'S3'}`,
-    })),
-    ...MANAGED_INTEGRATION_EXAMPLES.map((name, i) => ({
-      key: name,
-      name,
-      receiving: i < managedReceived,
-      badge: 'Managed Integration',
-    })),
-  ];
+  agentPolicyName: string;
+  managedReceivedCount: number;
+  agentReceivedCount: number;
+}> = ({
+  deploymentMethod,
+  services,
+  triggerSources,
+  region,
+  identityName,
+  stackName,
+  receivedCount,
+  agentPolicyName,
+  managedReceivedCount,
+  agentReceivedCount,
+}) => {
+  // All deploy/arrival animations run on the Authenticate & Deploy step; the
+  // summary simply reads the lifted state, so it arrives already settled.
+  const allServices =
+    deploymentMethod === 'agent'
+      ? services.map((service, i) => ({
+          key: service.id,
+          name: service.name,
+          receiving: i < agentReceivedCount,
+          badge: 'Elastic Agent',
+        }))
+      : [
+          ...services.map((service, i) => ({
+            key: service.id,
+            name: service.name,
+            receiving: i < receivedCount,
+            badge: `Trigger: ${triggerSources[service.id] ?? 'S3'}`,
+          })),
+          ...MANAGED_INTEGRATION_EXAMPLES.map((name, i) => ({
+            key: name,
+            name,
+            receiving: i < managedReceivedCount,
+            badge: 'Managed Integration',
+          })),
+        ];
   const receivingCount = allServices.filter((s) => s.receiving).length;
 
   return (
@@ -117,18 +125,37 @@ const DeploymentSummaryCard: React.FunctionComponent<{
       />
       <EuiSpacer size="m" />
       <EuiFlexGrid columns={4} gutterSize="l">
-        <EuiFlexItem>
-          <SummaryItem label="Deployment method" value="Elastic Managed Integration" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SummaryItem label="Region" value={REGION_LABELS[region] ?? region} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SummaryItem label="Federated Identity Name" value={identityName || '—'} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SummaryItem label="CloudFormation stack" value={stackName || '—'} />
-        </EuiFlexItem>
+        {deploymentMethod === 'agent' ? (
+          <>
+            <EuiFlexItem>
+              <SummaryItem label="Deployment method" value="Agent-based" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Agent policy" value={agentPolicyName || '—'} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Enrollment token" value="Default" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Agents" value="1 agent enrolled" />
+            </EuiFlexItem>
+          </>
+        ) : (
+          <>
+            <EuiFlexItem>
+              <SummaryItem label="Deployment method" value="Elastic Managed Integration" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Region" value={REGION_LABELS[region] ?? region} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="Federated Identity Name" value={identityName || '—'} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SummaryItem label="CloudFormation stack" value={stackName || '—'} />
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGrid>
       <EuiHorizontalRule margin="m" />
       <EuiText size="s" color="subdued">
@@ -307,13 +334,28 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
 };
 
 export const StepDetectReview: React.FunctionComponent<{
+  deploymentMethod: 'agent' | 'managed';
   services: AwsServiceEntry[];
   triggerSources: Record<string, string>;
   region: string;
   identityName: string;
   stackName: string;
   receivedCount: number;
-}> = ({ services, triggerSources, region, identityName, stackName, receivedCount }) => {
+  agentPolicyName: string;
+  managedReceivedCount: number;
+  agentReceivedCount: number;
+}> = ({
+  deploymentMethod,
+  services,
+  triggerSources,
+  region,
+  identityName,
+  stackName,
+  receivedCount,
+  agentPolicyName,
+  managedReceivedCount,
+  agentReceivedCount,
+}) => {
   return (
     <>
       <EuiTitle size="m">
@@ -329,12 +371,16 @@ export const StepDetectReview: React.FunctionComponent<{
       <EuiSpacer size="m" />
 
       <DeploymentSummaryCard
+        deploymentMethod={deploymentMethod}
         services={services}
         triggerSources={triggerSources}
         region={region}
         identityName={identityName}
         stackName={stackName}
         receivedCount={receivedCount}
+        agentPolicyName={agentPolicyName}
+        managedReceivedCount={managedReceivedCount}
+        agentReceivedCount={agentReceivedCount}
       />
       <EuiSpacer size="m" />
       <InstallContentCard services={services} />

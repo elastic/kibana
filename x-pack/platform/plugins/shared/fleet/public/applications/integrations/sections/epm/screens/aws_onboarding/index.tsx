@@ -33,6 +33,7 @@ import type { EuiStepsHorizontalProps } from '@elastic/eui';
 
 import {
   AWS_SERVICE_CATEGORIES,
+  MANAGED_INTEGRATION_EXAMPLES,
   type AwsServiceCategory,
   type AwsServiceEntry,
 } from './aws_services_data';
@@ -188,9 +189,19 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const deployTimers = useRef<number[]>([]);
   // Step 3: Next is disabled until the selected credential fields are filled.
   const [isCredentialsValid, setIsCredentialsValid] = useState(false);
-  // Step 4: Next is disabled until the CloudFormation stack name is entered.
+  // Step 3 (managed): Next is disabled until the CloudFormation stack name
+  // is entered.
   const [stackName, setStackName] = useState('');
   const [stackVersion, setStackVersion] = useState('');
+  // Step 3 (managed): the Managed Integrations card deploys its own data
+  // streams (fast arrival animation), so step 4's summary is already settled.
+  const [isManagedDeployed, setIsManagedDeployed] = useState(false);
+  const [managedReceivedCount, setManagedReceivedCount] = useState(0);
+  // Step 3 (agent): policy + simulated enrollment, lifted so the Detect &
+  // Review summary can read them and Next can gate on enrollment.
+  const [agentPolicyName, setAgentPolicyName] = useState('Agent policy 1');
+  const [isAgentEnrolled, setIsAgentEnrolled] = useState(false);
+  const [agentReceivedCount, setAgentReceivedCount] = useState(0);
 
   useEffect(() => {
     return () => deployTimers.current.forEach((t) => window.clearTimeout(t));
@@ -209,6 +220,30 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     selectedServices.forEach((_, i) => {
       const delay = 5000 + i * 8000;
       deployTimers.current.push(window.setTimeout(() => setReceivedCount((c) => c + 1), delay));
+    });
+  };
+
+  // Managed Integrations data streams confirm quickly: first after 800ms,
+  // then one every 700ms.
+  const onDeployManagedIntegrations = () => {
+    setIsManagedDeployed(true);
+    setManagedReceivedCount(0);
+    MANAGED_INTEGRATION_EXAMPLES.forEach((_, i) => {
+      deployTimers.current.push(
+        window.setTimeout(() => setManagedReceivedCount((c) => c + 1), 800 + i * 700)
+      );
+    });
+  };
+
+  // Agent path: once the agent enrolls, incoming data confirms per service
+  // at the same fast cadence.
+  const onAgentEnrolled = () => {
+    setIsAgentEnrolled(true);
+    setAgentReceivedCount(0);
+    selectedServices.forEach((_, i) => {
+      deployTimers.current.push(
+        window.setTimeout(() => setAgentReceivedCount((c) => c + 1), 800 + i * 700)
+      );
     });
   };
 
@@ -420,29 +455,30 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onStackNameChange={setStackName}
           stackVersion={stackVersion}
           onStackVersionChange={setStackVersion}
+          agentPolicyName={agentPolicyName}
+          onAgentPolicyNameChange={setAgentPolicyName}
+          isAgentEnrolled={isAgentEnrolled}
+          onAgentEnrolled={onAgentEnrolled}
+          isManagedDeployed={isManagedDeployed}
+          onDeployManagedIntegrations={onDeployManagedIntegrations}
+          managedReceivedCount={managedReceivedCount}
+          agentReceivedCount={agentReceivedCount}
         />
       )}
 
-      {currentStep === 4 && deploymentMethod === 'managed' && (
+      {currentStep === 4 && (
         <StepDetectReview
+          deploymentMethod={deploymentMethod}
           services={selectedServices}
           triggerSources={triggerSources}
           region={deployRegion}
           identityName={deployIdentityName}
           stackName={stackName}
           receivedCount={receivedCount}
+          agentPolicyName={agentPolicyName}
+          managedReceivedCount={managedReceivedCount}
+          agentReceivedCount={agentReceivedCount}
         />
-      )}
-      {currentStep === 4 && deploymentMethod === 'agent' && (
-        <>
-          <EuiTitle size="m">
-            <h2>Detect &amp; Review</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>[Placeholder — not yet designed for Agent-based.]</p>
-          </EuiText>
-        </>
       )}
 
       {/* Steps 3-4 end in bordered cards, so a rule above the footer reads as
@@ -479,7 +515,8 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 (currentStep === 3 &&
                   (!isCredentialsValid ||
                     (deploymentMethod === 'managed' &&
-                      (!isDeployed || stackName.trim().length === 0))))
+                      (!isDeployed || stackName.trim().length === 0 || !isManagedDeployed)) ||
+                    (deploymentMethod === 'agent' && !isAgentEnrolled)))
               }
               onClick={() => setCurrentStep(currentStep + 1)}
               data-test-subj="awsOnboardingNext"
@@ -488,7 +525,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </EuiButton>
           </EuiFlexItem>
         )}
-        {currentStep === totalSteps && deploymentMethod === 'managed' && (
+        {currentStep === totalSteps && (
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
