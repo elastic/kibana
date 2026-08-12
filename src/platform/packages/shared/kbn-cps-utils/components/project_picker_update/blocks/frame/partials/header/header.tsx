@@ -105,7 +105,7 @@ export function ProjectPickerFrameHeader({
       </EuiFlexItem>
       {state.controlsState === 'hidden' ? null : (
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false}>
+          <EuiFlexGroup responsive={false} alignItems="center">
             {state.isUsingSpaceDefaults && (
               <EuiFlexItem>
                 <EuiToolTip content={strings.getProjectPickerReadonlyCallout()}>

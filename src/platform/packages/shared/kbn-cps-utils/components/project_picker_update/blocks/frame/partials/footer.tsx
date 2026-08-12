@@ -30,8 +30,12 @@ export function ProjectPickerFrameFooter() {
   }, [actions]);
 
   const isActionBtnDisabled = useMemo(() => {
-    return state.visibleProjectIds.length === 0 || includedCount === state.visibleProjectIds.length;
-  }, [state.visibleProjectIds.length, includedCount]);
+    return (
+      state.visibleProjectIds.length === 0 ||
+      includedCount === state.visibleProjectIds.length ||
+      state.controlsState !== 'enabled'
+    );
+  }, [state.visibleProjectIds.length, includedCount, state.controlsState]);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>

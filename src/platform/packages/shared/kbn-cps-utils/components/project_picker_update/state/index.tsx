@@ -257,10 +257,18 @@ export const ProjectPickerStateProvider = ({
 
   useEffect(() => {
     const routing = store.state.currentProjectRouting;
-    if (routing !== (currentProjectRoutingGetter() ?? '')) {
+    if (
+      routing !== (currentProjectRoutingGetter() ?? '') &&
+      store.state.controlsState === 'enabled'
+    ) {
       onProjectRoutingChange(routing);
     }
-  }, [store.state.currentProjectRouting, onProjectRoutingChange, currentProjectRoutingGetter]);
+  }, [
+    store.state.currentProjectRouting,
+    onProjectRoutingChange,
+    currentProjectRoutingGetter,
+    store.state.controlsState,
+  ]);
 
   const contextValue = useMemo((): ProjectPickerContext => {
     const { _setStoreState, _setFilterSearchResult, _setControlsState, ...publicActions } =
