@@ -7,14 +7,17 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
-  EuiButton,
+  EuiCheckbox,
+  EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -43,14 +46,6 @@ const CONTENT_TYPE_ICONS: Record<AwsContentItem['type'], string> = {
   alert_rule: 'bell',
   content_package: 'package',
   detection_rule: 'securityApp',
-};
-
-const CONTENT_TYPE_LABELS: Record<AwsContentItem['type'], string> = {
-  dashboard: 'Dashboard',
-  search: 'Saved search',
-  alert_rule: 'Alert rule template',
-  content_package: 'Content package',
-  detection_rule: 'Detection rule',
 };
 
 const SummaryItem: React.FunctionComponent<{ label: string; value: React.ReactNode }> = ({
@@ -197,102 +192,174 @@ const DeploymentSummaryCard: React.FunctionComponent<{
   );
 };
 
-type InstallState = 'idle' | 'installing' | 'installed';
+// Everything ships installed with the package today (all-or-nothing), so
+// this card is an OPT-OUT review, not an installer: every item starts
+// checked/"Installed" and unticking removes it (re-tick to reinstall). Only
+// removable *content* is listed — required technical assets (templates,
+// pipelines, transforms) are summarized in a single non-interactive line.
+type AssetState = 'installed' | 'removing' | 'removed' | 'installing';
 
-const ContentItemCard: React.FunctionComponent<{
-  item: AwsContentItem;
-  state: InstallState;
-  onInstall: () => void;
-}> = ({ item, state, onInstall }) => (
-  <EuiPanel hasBorder paddingSize="m">
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={CONTENT_TYPE_ICONS[item.type]} size="l" />
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 0 }}>
-        <EuiText size="s" className="eui-textTruncate">
-          <strong>{item.title}</strong>
-        </EuiText>
-        <EuiText size="xs" color="subdued">
-          {CONTENT_TYPE_LABELS[item.type]}
-          {item.description ? ` — ${item.description}` : ''}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {state === 'installed' ? (
-          <EuiBadge color="success" iconType="check">
-            Installed
-          </EuiBadge>
-        ) : (
-          <EuiButton
-            size="s"
-            isLoading={state === 'installing'}
-            onClick={onInstall}
-            data-test-subj={`awsOnboardingInstallContent-${item.id}`}
-          >
-            {state === 'installing' ? 'Installing…' : 'Install'}
-          </EuiButton>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiPanel>
-);
+// Real package-wide counts from the aws package's Assets tab.
+const REQUIRED_ASSETS_SUMMARY =
+  '48 index templates, 99 component templates, 48 ingest pipelines, 3 transforms';
+
+const TYPE_ORDER: Array<AwsContentItem['type']> = [
+  'dashboard',
+  'search',
+  'alert_rule',
+  'detection_rule',
+  'content_package',
+];
+
+const TYPE_GROUP_LABELS: Record<AwsContentItem['type'], string> = {
+  dashboard: 'Dashboards',
+  search: 'Saved searches',
+  alert_rule: 'Alert rule templates',
+  detection_rule: 'Detection rules',
+  content_package: 'Content packages',
+};
+
+interface ReviewItem extends AwsContentItem {
+  serviceName: string;
+}
+
+const ContentItemRow: React.FunctionComponent<{
+  item: ReviewItem;
+  state: AssetState;
+  onToggle: () => void;
+}> = ({ item, state, onToggle }) => {
+  const isChecked = state === 'installed' || state === 'installing';
+  const isTransitioning = state === 'removing' || state === 'installing';
+  return (
+    <EuiPanel hasBorder paddingSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiCheckbox
+            id={`awsOnboardingKeep-${item.id}`}
+            checked={isChecked}
+            disabled={isTransitioning}
+            onChange={onToggle}
+            aria-label={`Keep ${item.title} installed`}
+            data-test-subj={`awsOnboardingKeepContent-${item.id}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={CONTENT_TYPE_ICONS[item.type]} size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiText size="s" className="eui-textTruncate">
+            <strong>{item.title}</strong>
+          </EuiText>
+          <EuiText size="xs" color="subdued">
+            {item.serviceName}
+            {item.description ? ` — ${item.description}` : ''}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {state === 'installed' && (
+            <EuiBadge color="success" iconType="check">
+              Installed
+            </EuiBadge>
+          )}
+          {state === 'removing' && (
+            <EuiBadge color="hollow" iconType="empty">
+              Removing…
+            </EuiBadge>
+          )}
+          {state === 'installing' && (
+            <EuiBadge color="hollow" iconType="empty">
+              Installing…
+            </EuiBadge>
+          )}
+          {state === 'removed' && (
+            <EuiBadge color="hollow">Available to install</EuiBadge>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] }> = ({
   services,
 }) => {
-  const [installState, setInstallState] = useState<Record<string, InstallState>>({});
+  const [assetState, setAssetState] = useState<Record<string, AssetState>>({});
+  const [searchQuery, setSearchQuery] = useState('');
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
     return () => timers.current.forEach((t) => window.clearTimeout(t));
   }, []);
 
-  // Prebuilt SIEM detection rules for the selected services (from the
-  // security_detection_engine package) — presented as their own group since
-  // they install from a separate package than the aws integration.
-  const detectionRules = services.flatMap((s) => DETECTION_RULES_BY_SERVICE[s.id] ?? []);
+  // Flatten all content for the selected services, tagged with the service
+  // it belongs to. Detection rules come from the separate
+  // security_detection_engine package.
+  const allItems: ReviewItem[] = [
+    ...GENERAL_CONTENT.map((item) => ({ ...item, serviceName: 'Amazon Web Services' })),
+    ...services.flatMap((service) =>
+      (CONTENT_BY_SERVICE[service.id] ?? []).map((item) => ({
+        ...item,
+        serviceName: service.name,
+      }))
+    ),
+    ...services.flatMap((service) =>
+      (DETECTION_RULES_BY_SERVICE[service.id] ?? []).map((item) => ({
+        ...item,
+        serviceName: service.name,
+      }))
+    ),
+  ];
 
-  const groups = [
-    { service: { id: '_general', name: 'Amazon Web Services (all services)' }, items: GENERAL_CONTENT },
-    ...services.map((service) => ({ service, items: CONTENT_BY_SERVICE[service.id] ?? [] })),
-    { service: { id: '_security', name: 'Security detection rules' }, items: detectionRules },
-  ].filter((g) => g.items.length > 0);
+  const stateOf = (id: string): AssetState => assetState[id] ?? 'installed';
+  const installedCount = allItems.filter((i) => stateOf(i.id) === 'installed').length;
 
-  // Two-column layout: GuardDuty and the detection rules anchor the right
-  // column; everything else stacks on the left. If nothing lands on the
-  // right, alternate groups between the columns instead.
-  const RIGHT_COLUMN_IDS = new Set(['guardduty', '_security']);
-  let leftGroups = groups.filter((g) => !RIGHT_COLUMN_IDS.has(g.service.id));
-  let rightGroups = groups.filter((g) => RIGHT_COLUMN_IDS.has(g.service.id));
-  if (rightGroups.length === 0 && leftGroups.length > 1) {
-    rightGroups = leftGroups.filter((_, i) => i % 2 === 1);
-    leftGroups = leftGroups.filter((_, i) => i % 2 === 0);
-  }
-
-  const allItems = groups.flatMap((g) => g.items);
-  const installedCount = allItems.filter((i) => installState[i.id] === 'installed').length;
-
-  const onInstall = (id: string) => {
-    setInstallState((prev) => ({ ...prev, [id]: 'installing' }));
-    timers.current.push(
-      window.setTimeout(
-        () => setInstallState((prev) => ({ ...prev, [id]: 'installed' })),
-        1200
-      )
-    );
+  const onToggle = (id: string) => {
+    const current = stateOf(id);
+    if (current === 'installed') {
+      setAssetState((prev) => ({ ...prev, [id]: 'removing' }));
+      timers.current.push(
+        window.setTimeout(
+          () => setAssetState((prev) => ({ ...prev, [id]: 'removed' })),
+          800
+        )
+      );
+    } else if (current === 'removed') {
+      setAssetState((prev) => ({ ...prev, [id]: 'installing' }));
+      timers.current.push(
+        window.setTimeout(
+          () => setAssetState((prev) => ({ ...prev, [id]: 'installed' })),
+          800
+        )
+      );
+    }
   };
+
+  const query = searchQuery.trim().toLowerCase();
+  const matches = (item: ReviewItem) =>
+    !query ||
+    item.title.toLowerCase().includes(query) ||
+    item.serviceName.toLowerCase().includes(query);
+
+  const typeGroups = TYPE_ORDER.map((type) => ({
+    type,
+    items: allItems.filter((i) => i.type === type && matches(i)),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-      <CardHeader iconType="dashboardApp" title="Install content" servicesCount={services.length} />
+      <CardHeader
+        iconType="dashboardApp"
+        title="Installed content"
+        servicesCount={services.length}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" responsive={false}>
         <EuiFlexItem>
           <EuiText size="s">
             <p>
-              Prebuilt content for the services you deployed. Install only what you need — you
-              can add or remove content later from the integration&apos;s Assets tab.
+              Everything below was installed with the AWS integration. Remove anything you
+              don&apos;t need — you can reinstall it at any time, here or from the
+              integration&apos;s Assets tab.
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -302,33 +369,68 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-        {[leftGroups, rightGroups].map((column, colIndex) => (
-          <EuiFlexItem key={colIndex} style={{ minWidth: 0 }}>
-            {column.map(({ service, items }) => (
-              <React.Fragment key={service.id}>
-                <EuiSpacer size="l" />
-                <EuiTitle size="xxs">
-                  <h4>{service.name}</h4>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {items.map((item, itemIndex) => (
-                  <React.Fragment key={item.id}>
-                    {itemIndex > 0 && <EuiSpacer size="m" />}
-                    <ContentItemCard
-                      item={item}
-                      state={installState[item.id] ?? 'idle'}
-                      onInstall={() => onInstall(item.id)}
-                    />
-                  </React.Fragment>
-                ))}
-              </React.Fragment>
-            ))}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        <p>
+          <EuiIcon type="check" color="success" size="s" /> Required assets installed:{' '}
+          {REQUIRED_ASSETS_SUMMARY}. These are needed for data ingestion and cannot be removed.
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFieldSearch
+        fullWidth
+        compressed
+        placeholder="Search content by name or service"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        isClearable
+        data-test-subj="awsOnboardingContentSearch"
+      />
+
+      {typeGroups.map(({ type, items }) => {
+        const groupInstalled = items.filter((i) => stateOf(i.id) === 'installed').length;
+        return (
+          <React.Fragment key={type}>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={`awsOnboardingContentGroup-${type}`}
+              forceState={query ? 'open' : undefined}
+              buttonContent={
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={CONTENT_TYPE_ICONS[type]} size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxs">
+                      <h4>{TYPE_GROUP_LABELS[type]}</h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              extraAction={
+                <EuiText size="xs" color="subdued">
+                  {`${groupInstalled} of ${items.length} installed`}
+                </EuiText>
+              }
+            >
+              <EuiSpacer size="s" />
+              {items.map((item, i) => (
+                <React.Fragment key={item.id}>
+                  {i > 0 && <EuiSpacer size="s" />}
+                  <ContentItemRow
+                    item={item}
+                    state={stateOf(item.id)}
+                    onToggle={() => onToggle(item.id)}
+                  />
+                </React.Fragment>
+              ))}
+            </EuiAccordion>
+          </React.Fragment>
+        );
+      })}
     </EuiPanel>
   );
 };
@@ -364,8 +466,8 @@ export const StepDetectReview: React.FunctionComponent<{
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>
-          Review your deployment, then choose the prebuilt content you want to install for your
-          services.
+          Review your deployment and the prebuilt content installed for your services — keep
+          what you need, remove the rest.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
