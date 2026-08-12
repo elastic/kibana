@@ -21,14 +21,12 @@ import { useSuperTimelineGate } from './use_super_timeline_gate';
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
-  searchResults,
   showExportAction = true,
   tableRef,
   timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
-  searchResults?: OpenTimelineResult[] | null;
   showExportAction?: boolean;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
@@ -46,7 +44,7 @@ export const useEditTimelineBatchActions = ({
     isEnabled: isSuperTimelineActionEnabled,
     tooltip: superTimelineTooltip,
     handleOpen: handleOpenSuperTimeline,
-  } = useSuperTimelineGate({ selectedItems, searchResults });
+  } = useSuperTimelineGate({ selectedItems });
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
