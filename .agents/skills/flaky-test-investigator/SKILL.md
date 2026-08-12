@@ -112,7 +112,7 @@ Any fix you recommend must stay within the shared fix guardrails at `.github/wor
 Watch out for these pitfalls when investigating the failure:
 
 - **Ignoring the bigger picture**: gather a solid baseline of data about the test environment and related failures (in the same test file, test config or elsewhere) before concluding.
-- **Trusting flaky-test-runner alone**: a fully green run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
+- **Trusting flaky-test-runner alone**: a fully green run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs). It is also a local pipeline that cannot reproduce a real Elastic Cloud environment (see `references/pipelines.md`) — for a failure that happens on Cloud pipelines, a green flaky-runner result says little about whether the fix holds there.
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
 - **Reading fault from the throwing stack frame**: a waiting-side timeout always throws from the waiter (FTR/Playwright service code), so the frame tells you who threw, not whose fault it is. It is not evidence against a product bug.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
