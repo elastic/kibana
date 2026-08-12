@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 
 export interface LogCategoriesCancelledContentProps {
-  onRetry?: () => void;
+  onRetry: () => void;
 }
 
 export const LogCategoriesCancelledContent: React.FC<LogCategoriesCancelledContentProps> = ({
@@ -33,20 +33,16 @@ export const LogCategoriesCancelledContent: React.FC<LogCategoriesCancelledConte
       title={<h2>{cancelledContentTitle}</h2>}
       titleSize="m"
       body={<p>{cancelledContentDescription}</p>}
-      actions={
-        onRetry != null
-          ? [
-              <EuiButton
-                key="load"
-                buttonRef={loadButtonRef}
-                data-test-subj="logsOverviewLogCategoriesLoadButton"
-                onClick={onRetry}
-              >
-                {cancelledContentRetryButtonLabel}
-              </EuiButton>,
-            ]
-          : []
-      }
+      actions={[
+        <EuiButton
+          key="load"
+          buttonRef={loadButtonRef}
+          data-test-subj="logsOverviewLogCategoriesLoadButton"
+          onClick={onRetry}
+        >
+          {cancelledContentRetryButtonLabel}
+        </EuiButton>,
+      ]}
     />
   );
 };

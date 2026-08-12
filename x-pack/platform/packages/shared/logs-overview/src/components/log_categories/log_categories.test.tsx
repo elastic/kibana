@@ -56,7 +56,7 @@ const makeProps = (searchMock: jest.Mock): LogCategoriesProps => ({
   onChangeGrouping: jest.fn(),
 });
 
-describe('LogCategories cancel flow', () => {
+describe('LogCategories', () => {
   it('Cancel shows neutral cancelled prompt, NOT the error prompt', async () => {
     // Return a never-completing Subject so the machine stays in countingDocuments
     const subject = new Subject();
@@ -79,7 +79,6 @@ describe('LogCategories cancel flow', () => {
     // …and the error prompt must NOT appear
     expect(screen.queryByText('Failed to categorize logs')).not.toBeInTheDocument();
 
-    // No raw stack trace content visible
     subject.complete();
   });
 

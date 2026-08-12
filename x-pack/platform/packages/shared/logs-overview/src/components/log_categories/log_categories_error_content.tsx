@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiAccordion, EuiCodeBlock, EuiEmptyPrompt, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -14,6 +14,10 @@ export interface LogCategoriesErrorContentProps {
 }
 
 export const LogCategoriesErrorContent: React.FC<LogCategoriesErrorContentProps> = ({ error }) => {
+  const errorDetailsAccordionId = useGeneratedHtmlId({
+    prefix: 'logsOverviewLogCategoriesErrorDetails',
+  });
+
   return (
     <EuiEmptyPrompt
       color="danger"
@@ -26,7 +30,7 @@ export const LogCategoriesErrorContent: React.FC<LogCategoriesErrorContentProps>
           <p>{error?.message ?? unknownErrorDescription}</p>
           {error?.stack != null && (
             <EuiAccordion
-              id="logsOverviewLogCategoriesErrorDetails"
+              id={errorDetailsAccordionId}
               buttonContent={errorDetailsAccordionLabel}
               paddingSize="s"
             >

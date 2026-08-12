@@ -10,6 +10,13 @@ import type { LogCategory } from '../../types';
 import { categorizeLogsService } from './categorize_logs_service';
 import type { LogCategorizationParams } from './types';
 
+// Matches the real actor input signature in categorize_documents.ts
+type CategorizeDocumentsInput = LogCategorizationParams & {
+  samplingProbability: number;
+  ignoredCategoryTerms: string[];
+  minDocsPerCategory: number;
+};
+
 const testParameters: LogCategorizationParams = {
   documentFilters: [],
   endTimestamp: '2024-01-02T00:00:00.000Z',
@@ -115,7 +122,7 @@ describe('categorizeLogsService', () => {
               documentCount: 5000,
               samplingProbability: 0.5,
             })),
-            categorizeDocuments: fromPromise(({ input }) => {
+            categorizeDocuments: fromPromise(() => {
               callCount++;
               if (callCount === 1) {
                 // pass 1 (sampled) resolves immediately with one category
@@ -190,9 +197,10 @@ describe('categorizeLogsService', () => {
       // Scenario: cancel during pass 2, then retry. Stale `categories` from pass 1
       // must NOT appear in the retry's pass 2 `ignoredCategoryTerms`, otherwise
       // the retry will silently omit those patterns from its result.
+      // Expected call order: run1-pass1, run1-pass2 (held/cancelled), run2-pass1, run2-pass2.
       let callCount = 0;
       let resolvePass2!: (v: { categories: LogCategory[]; hasReachedLimit: boolean }) => void;
-      const pass2Inputs: Array<{ ignoredCategoryTerms: string[] }> = [];
+      const calls: Array<{ ignoredCategoryTerms: string[] }> = [];
 
       const actor = createActor(
         categorizeLogsService.provide({
@@ -203,16 +211,9 @@ describe('categorizeLogsService', () => {
             })),
             categorizeDocuments: fromPromise(({ input }) => {
               callCount++;
-              // Record the ignoredCategoryTerms every time pass 2 is called
-              if (
-                (input as { ignoredCategoryTerms: string[] }).ignoredCategoryTerms.length > 0 ||
-                callCount % 2 === 0
-              ) {
-                pass2Inputs.push({
-                  ignoredCategoryTerms: (input as { ignoredCategoryTerms: string[] })
-                    .ignoredCategoryTerms,
-                });
-              }
+              calls.push({
+                ignoredCategoryTerms: (input as CategorizeDocumentsInput).ignoredCategoryTerms,
+              });
 
               if (callCount === 1) {
                 // pass 1 of run 1: resolves with a category
@@ -257,14 +258,10 @@ describe('categorizeLogsService', () => {
       // (0 in this test, since we returned [] for all retry passes)
       expect(actor.getSnapshot().context.categories).toEqual([]);
 
-      // The critical assertion: no stale ignoredCategoryTerms leaked into pass 2 of the retry
-      const retryPass2Input = pass2Inputs.find((_, i) => {
-        // pass2Inputs[0] is run1-pass2 (before cancel); pass2Inputs[1] would be run2-pass2
-        return i > 0;
-      });
-      if (retryPass2Input) {
-        expect(retryPass2Input.ignoredCategoryTerms).toEqual([]);
-      }
+      // The critical assertion: all 4 calls happened and the retry's pass 2 started
+      // with no stale terms from run 1's categories.
+      expect(calls).toHaveLength(4);
+      expect(calls[3].ignoredCategoryTerms).toEqual([]);
 
       // Prevent leaking
       resolvePass2({ categories: [] as LogCategory[], hasReachedLimit: false as boolean });
