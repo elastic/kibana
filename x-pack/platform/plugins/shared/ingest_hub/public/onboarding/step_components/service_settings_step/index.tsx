@@ -11,7 +11,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -29,6 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import { AWS_REGION_OPTIONS, getRegionFieldName } from './field_config';
@@ -230,33 +230,30 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         width: '40px',
         render: (inst: ServiceInstance) => {
           const isOpen = openMenuInstanceId === inst.instanceId;
+          const actionsLabel = i18n.translate(
+            'xpack.ingestHub.serviceSettingsStep.table.actionsAriaLabel',
+            {
+              defaultMessage: 'Actions for {name}',
+              values: { name: inst.name },
+            }
+          );
           return (
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  size="xs"
-                  color="text"
-                  onClick={() => setOpenMenuInstanceId(isOpen ? null : inst.instanceId)}
-                  aria-label={i18n.translate(
-                    'xpack.ingestHub.serviceSettingsStep.table.actionsAriaLabel',
-                    {
-                      defaultMessage: 'Actions for {name}',
-                      values: { name: inst.name },
-                    }
-                  )}
-                  data-test-subj={`serviceSettingsStep-actionsButton-${inst.instanceId}`}
-                />
+                <EuiToolTip content={actionsLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    size="xs"
+                    color="text"
+                    onClick={() => setOpenMenuInstanceId(isOpen ? null : inst.instanceId)}
+                    aria-label={actionsLabel}
+                    data-test-subj={`serviceSettingsStep-actionsButton-${inst.instanceId}`}
+                  />
+                </EuiToolTip>
               }
               isOpen={isOpen}
               closePopover={() => setOpenMenuInstanceId(null)}
-              aria-label={i18n.translate(
-                'xpack.ingestHub.serviceSettingsStep.table.actionsPopover',
-                {
-                  defaultMessage: 'Actions for {name}',
-                  values: { name: inst.name },
-                }
-              )}
+              aria-label={actionsLabel}
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
@@ -383,10 +380,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
       {incompleteInstances.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="warning"
             size="s"
             title={i18n.translate('xpack.ingestHub.serviceSettingsStep.attentionCallout.title', {
               defaultMessage: 'Some services need your input',
