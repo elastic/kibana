@@ -70,6 +70,14 @@ export const MAX_FINGERPRINT_FIELDS = 10;
 /** Maximum number of keys in the open `data` bag on external alert ingest. */
 export const MAX_ALERT_EVENT_DATA_KEYS = 100;
 
+/**
+ * Maximum number of fields in an artifact's `data` record. Well above what any
+ * artifact type needs today, but it keeps the record bounded so the per-field
+ * limits cannot be sidestepped by sending many small fields instead of one
+ * large one.
+ */
+export const MAX_ARTIFACT_DATA_FIELDS = 32;
+
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
