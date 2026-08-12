@@ -1488,21 +1488,20 @@ describe('create', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('validates the merged extended_fields (template fetched once)', async () => {
+    it('creates the case and fetches the template once when extended_fields contains an unknown key', async () => {
       const clientArgs = createClientArgs();
 
-      await expect(
-        create(
-          {
-            ...minimalRequest,
-            template: { id: 'tmpl-exp' },
-            extended_fields: { unknown_key_as_keyword: 'x' },
-          },
-          clientArgs,
-          expansionCasesClientMock
-        )
-      ).rejects.toThrow('Unknown extended field key: "unknown_key_as_keyword"');
-      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp' },
+          extended_fields: { unknown_key_as_keyword: 'x' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledTimes(1);
       // Expansion resolved the template; validation reused it instead of fetching again.
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
     });

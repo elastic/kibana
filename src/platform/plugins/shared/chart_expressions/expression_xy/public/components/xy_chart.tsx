@@ -1087,6 +1087,7 @@ export function XYChart({
                 syncColors={syncColors}
                 valueLabels={valueLabels}
                 fillOpacity={args.fillOpacity}
+                areaFill={args.areaFill}
                 minBarHeight={args.minBarHeight}
                 formatFactory={formatFactory}
                 paletteService={paletteService}
