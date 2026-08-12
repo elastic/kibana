@@ -267,9 +267,6 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
-    // Per-space Agent Builder settings (e.g. the space's assigned default
-    // agent). Backed by a hidden saved object type; the request-scoped SO
-    // client isolates each space, so no explicit space resolution is needed.
     const spaceSettings = createSpaceSettingsService({
       savedObjects,
       logger: logger.get('space-settings'),
