@@ -254,11 +254,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const firstRow = await grouping.getRowAtIndex(0);
           await (await firstRow.findByCssSelector('button')).click();
         });
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const latestFindingsTable = findings.createDataTableObject('latest_vulnerabilities_table');
-        expect(await latestFindingsTable.getRowsCount()).to.be(1);
-        expect(await latestFindingsTable.hasColumnValue('resource.name', resourceName1)).to.be(
-          true
-        );
+        await retry.try(async () => {
+          expect(await latestFindingsTable.getRowsCount()).to.be(1);
+          expect(await latestFindingsTable.hasColumnValue('resource.name', resourceName1)).to.be(
+            true
+          );
+        });
       });
     });
   });
