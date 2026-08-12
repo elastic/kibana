@@ -854,9 +854,9 @@ describe('conversation model converters', () => {
   // Template fields: metadata + template_id round-trips
   // ---------------------------------------------------------------------------
 
-  describe('metadata and template_id round-trips', () => {
+  describe('metadata, template_id, and template_version round-trips', () => {
     describe('fromEs', () => {
-      it('deserializes metadata and template_id when present in the document', () => {
+      it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-tmpl',
           _source: {
@@ -868,18 +868,20 @@ describe('conversation model converters', () => {
             conversation_rounds: [],
             created_at: creationDate,
             updated_at: updateDate,
-            template_id: 'security.account-compromise',
-            metadata: { severity: 'high', is_confirmed: 'true' },
+            template_id: 'phishing',
+            template_version: 2,
+            metadata: { severity: 'high', tags: ['tag-a', 'tag-b'] },
           },
         };
 
         const result = fromEs(doc);
 
-        expect(result.template_id).toBe('security.account-compromise');
-        expect(result.metadata).toEqual({ severity: 'high', is_confirmed: 'true' });
+        expect(result.template_id).toBe('phishing');
+        expect(result.template_version).toBe(2);
+        expect(result.metadata).toEqual({ severity: 'high', tags: ['tag-a', 'tag-b'] });
       });
 
-      it('omits metadata and template_id when absent from the document', () => {
+      it('omits metadata, template_id, and template_version when absent from the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-no-tmpl',
           _source: {
@@ -897,12 +899,13 @@ describe('conversation model converters', () => {
         const result = fromEs(doc);
 
         expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
         expect(result.metadata).toBeUndefined();
       });
     });
 
     describe('toEs', () => {
-      it('serializes metadata and template_id when present on the conversation', () => {
+      it('serializes metadata, template_id, and template_version when present on the conversation', () => {
         const conversation: Conversation = {
           id: 'conv-tmpl',
           agent_id: 'agent_id',
@@ -911,17 +914,19 @@ describe('conversation model converters', () => {
           created_at: creationDate,
           updated_at: updateDate,
           rounds: [],
-          template_id: 'security.phishing',
-          metadata: { severity: 'low', is_confirmed: 'false' },
+          template_id: 'security-finding',
+          template_version: 3,
+          metadata: { severity: 'low', entities: ['host-a', 'host-b'] },
         };
 
         const result = toEs(conversation, 'space');
 
-        expect(result.template_id).toBe('security.phishing');
-        expect(result.metadata).toEqual({ severity: 'low', is_confirmed: 'false' });
+        expect(result.template_id).toBe('security-finding');
+        expect(result.template_version).toBe(3);
+        expect(result.metadata).toEqual({ severity: 'low', entities: ['host-a', 'host-b'] });
       });
 
-      it('does not include template_id or metadata when absent', () => {
+      it('does not include template_id, template_version, or metadata when absent', () => {
         const conversation: Conversation = {
           id: 'conv-no-tmpl',
           agent_id: 'agent_id',
@@ -935,18 +940,20 @@ describe('conversation model converters', () => {
         const result = toEs(conversation, 'space');
 
         expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
         expect(result.metadata).toBeUndefined();
       });
     });
 
     describe('createRequestToEs', () => {
-      it('serializes metadata and template_id from a create request', () => {
+      it('serializes metadata, template_id, and template_version from a create request', () => {
         const conversation = {
           agent_id: 'agent_id',
           title: 'Template conv',
           rounds: [] as Conversation['rounds'],
-          template_id: 'security.malware',
-          metadata: { severity: 'critical' },
+          template_id: 'phishing',
+          template_version: 1,
+          metadata: { severity: 'critical', tags: ['spray', 'phish'] },
         };
 
         const result = createRequestToEs({
@@ -956,11 +963,12 @@ describe('conversation model converters', () => {
           creationDate: new Date(creationDate),
         });
 
-        expect(result.template_id).toBe('security.malware');
-        expect(result.metadata).toEqual({ severity: 'critical' });
+        expect(result.template_id).toBe('phishing');
+        expect(result.template_version).toBe(1);
+        expect(result.metadata).toEqual({ severity: 'critical', tags: ['spray', 'phish'] });
       });
 
-      it('omits template_id and metadata when not provided in the create request', () => {
+      it('omits template_id, template_version, and metadata when not provided', () => {
         const conversation = {
           agent_id: 'agent_id',
           title: 'No template',
@@ -975,6 +983,7 @@ describe('conversation model converters', () => {
         });
 
         expect(result.template_id).toBeUndefined();
+        expect(result.template_version).toBeUndefined();
         expect(result.metadata).toBeUndefined();
       });
     });

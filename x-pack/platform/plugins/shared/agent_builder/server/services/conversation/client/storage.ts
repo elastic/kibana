@@ -52,6 +52,7 @@ const storageSettings = {
       }),
       metadata: types.flattened({}),
       template_id: types.keyword({}),
+      template_version: types.long({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -73,8 +74,9 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, string | string[]>;
   template_id?: string;
+  template_version?: number;
   // legacy field
   rounds?: PersistentConversationRound[];
 }

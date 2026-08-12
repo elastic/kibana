@@ -492,10 +492,24 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
-  /** Arbitrary key/value pairs seeded from a template or set by callers. */
-  metadata?: Record<string, string>;
+  /**
+   * Arbitrary key/value pairs seeded from a template or set by callers.
+   *
+   * Stored in Elasticsearch as a `flattened` field. String leaves are keyword-indexed;
+   * string-array leaves are multi-value keyword-indexed. Numeric, boolean, and date
+   * values are serialized to strings on write and recovered via runtime fields (KQL)
+   * or type casting (ES|QL). Only `TEXT_ARRAY` template fields produce array values.
+   */
+  metadata?: Record<string, string | string[]>;
   /** ID of the template that was last applied to this conversation. */
   template_id?: string;
+  /**
+   * Version of the template as it was when it was last applied.
+   * Pinned so that updating a template definition does not invalidate existing conversations.
+   * Reads always tolerate old shapes; migrating to a newer version is an explicit action
+   * (re-apply the template via `_apply_template`).
+   */
+  template_version?: number;
   /** Whether the conversation has been pinned by the user. */
   pinned?: boolean;
 }

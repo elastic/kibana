@@ -65,6 +65,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     list: jest.fn(),
     delete: jest.fn(),
     applyTemplate: jest.fn(),
+    patchMetadata: jest.fn(),
   };
 };
 

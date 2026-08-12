@@ -7,6 +7,13 @@
 
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import { CONVERSATION_TEMPLATES } from '../../../../common/templates';
+import { validateTemplateDefinition } from './validation';
+
+// Validate all code-registered templates at module load time so a malformed
+// built-in fails fast rather than at first use.
+for (const template of CONVERSATION_TEMPLATES) {
+  validateTemplateDefinition(template);
+}
 
 export const getTemplate = (id: string): ConversationTemplate | undefined =>
   CONVERSATION_TEMPLATES.find((t) => t.id === id);

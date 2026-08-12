@@ -5,261 +5,352 @@
  * 2.0.
  */
 
-import type { ConversationTemplate, ConversationTemplateField } from '@kbn/agent-builder-common';
-import { validateSingleField, validateTemplateFields } from './validation';
+import type {
+  ConversationTemplate,
+  ConversationTemplateFieldDefinition,
+} from '@kbn/agent-builder-common';
+import {
+  collectFieldViolations,
+  validateMetadataUpdate,
+  validateTemplateDefaults,
+  validateTemplateDefinition,
+  collectTemplateDefinitionErrors,
+} from './validation';
 
 const TEMPLATE_ID = 'test-template';
 
-const makeField = (overrides: Partial<ConversationTemplateField> = {}): ConversationTemplateField =>
-  ({
-    name: 'field_name',
-    type: 'keyword',
-    description: 'A test field',
-    ...overrides,
-  } as ConversationTemplateField);
+const makeDef = (
+  overrides: Partial<ConversationTemplateFieldDefinition> = {}
+): ConversationTemplateFieldDefinition => ({
+  input_type: 'TEXT',
+  ...overrides,
+});
 
 const makeTemplate = (
-  fields: ConversationTemplateField[],
+  fields: Record<string, ConversationTemplateFieldDefinition> = {},
   id = TEMPLATE_ID
 ): ConversationTemplate => ({
   id,
+  version: 1,
   name: 'Test Template',
   description: 'Template for tests',
-  definition: { fields },
+  fields,
 });
 
 // ---------------------------------------------------------------------------
-// validateSingleField
+// collectFieldViolations — per-field checks
 // ---------------------------------------------------------------------------
 
-describe('validateSingleField', () => {
-  describe('required rule', () => {
-    const requiredField = makeField({ validation: { required: true } });
-
-    it('throws for an empty string on a required field', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, requiredField, '')).toThrow(
-        'value is required'
-      );
+describe('collectFieldViolations', () => {
+  // required
+  describe('required', () => {
+    it('returns a violation for an empty string when required=true', () => {
+      const def = makeDef({ required: true });
+      expect(collectFieldViolations('f', def, '')).toHaveLength(1);
     });
 
-    it('passes for a non-empty value on a required field', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, requiredField, 'hello')).not.toThrow();
+    it('returns a violation for an empty array when required=true', () => {
+      const def = makeDef({ input_type: 'TEXT_ARRAY', required: true });
+      expect(collectFieldViolations('f', def, [])).toHaveLength(1);
     });
 
-    it('does not throw for boolean false on a required boolean field', () => {
-      const boolField = makeField({ type: 'boolean', validation: { required: true } });
-      // `false` is a valid boolean; only `undefined`/empty-string trigger required
-      expect(() => validateSingleField(TEMPLATE_ID, boolField, false)).not.toThrow();
-    });
-  });
-
-  describe('type checks', () => {
-    it('passes a valid integer string', () => {
-      const f = makeField({ type: 'integer' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, '42')).not.toThrow();
+    it('returns no violation for false TOGGLE even when required=true', () => {
+      const def = makeDef({ input_type: 'TOGGLE', required: true });
+      // false is a valid boolean value, not "empty"
+      expect(collectFieldViolations('f', def, false)).toHaveLength(0);
     });
 
-    it('throws for a non-integer string on integer field', () => {
-      const f = makeField({ type: 'integer' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'not-a-number')).toThrow(
-        'not a valid integer'
-      );
-    });
-
-    it('throws for a float string on integer field', () => {
-      const f = makeField({ type: 'integer' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, '1.5')).toThrow('not a valid integer');
-    });
-
-    it('passes a valid float string', () => {
-      const f = makeField({ type: 'float' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, '3.14')).not.toThrow();
-    });
-
-    it('throws for a non-numeric string on float field', () => {
-      const f = makeField({ type: 'float' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'abc')).toThrow('not a valid float');
-    });
-
-    it('passes boolean true on a boolean field', () => {
-      const f = makeField({ type: 'boolean' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, true)).not.toThrow();
-    });
-
-    it('throws for a string value on a boolean field', () => {
-      const f = makeField({ type: 'boolean' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'true')).toThrow('must be a boolean');
-    });
-
-    it('passes a valid ISO 8601 date', () => {
-      const f = makeField({ type: 'date' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, '2024-01-15')).not.toThrow();
-    });
-
-    it('throws for an invalid date string', () => {
-      const f = makeField({ type: 'date' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'not-a-date')).toThrow(
-        'not a valid ISO 8601 date'
-      );
-    });
-
-    it('passes any string for keyword and text types', () => {
-      const kw = makeField({ type: 'keyword' });
-      const tx = makeField({ type: 'text' });
-      expect(() => validateSingleField(TEMPLATE_ID, kw, 'anything')).not.toThrow();
-      expect(() => validateSingleField(TEMPLATE_ID, tx, 'anything')).not.toThrow();
-    });
-
-    it('throws for a boolean value on a keyword field', () => {
-      const f = makeField({ type: 'keyword' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, true)).toThrow('must be a string');
-    });
-
-    it('throws for a boolean value on a text field', () => {
-      const f = makeField({ type: 'text' });
-      expect(() => validateSingleField(TEMPLATE_ID, f, false)).toThrow('must be a string');
+    it('skips required when skipRequired=true', () => {
+      const def = makeDef({ required: true });
+      expect(collectFieldViolations('f', def, '', true)).toHaveLength(0);
     });
   });
 
-  describe('allowed_values rule', () => {
-    const f = makeField({ validation: { allowed_values: ['low', 'medium', 'high'] } });
+  // SELECT
+  describe('SELECT', () => {
+    const def = makeDef({ input_type: 'SELECT', options: ['a', 'b', 'c'] });
 
-    it('passes for a value in the allowed list', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'low')).not.toThrow();
+    it('passes for a value in options', () => {
+      expect(collectFieldViolations('f', def, 'a')).toHaveLength(0);
     });
 
-    it('throws for a value not in the allowed list', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'critical')).toThrow(
-        'not in allowed_values'
-      );
+    it('returns a violation for a value not in options', () => {
+      const violations = collectFieldViolations('f', def, 'd');
+      expect(violations).toHaveLength(1);
+      expect(violations[0]).toContain('allowed options');
+    });
+
+    it('returns a type violation for a non-string value', () => {
+      expect(collectFieldViolations('f', def, 42)).toHaveLength(1);
     });
   });
 
-  describe('pattern rule', () => {
-    const f = makeField({ validation: { pattern: { regex: '^[A-Z]{3}-\\d+$' } } });
-
-    it('passes a matching value', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'ABC-123')).not.toThrow();
+  // TEXT
+  describe('TEXT', () => {
+    it('passes for a string value', () => {
+      expect(collectFieldViolations('f', makeDef({ input_type: 'TEXT' }), 'hello')).toHaveLength(0);
     });
 
-    it('throws for a non-matching value', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'bad-value')).toThrow(
-        'does not match pattern'
-      );
+    it('returns violation when max_length is exceeded', () => {
+      const def = makeDef({ input_type: 'TEXT', max_length: 5 });
+      expect(collectFieldViolations('f', def, 'toolongstring')).toHaveLength(1);
     });
 
-    it('uses the custom message when provided', () => {
-      const fWithMsg = makeField({
-        validation: { pattern: { regex: '^\\d+$', message: 'must be digits only' } },
+    it('passes when value is within max_length', () => {
+      const def = makeDef({ input_type: 'TEXT', max_length: 10 });
+      expect(collectFieldViolations('f', def, 'short')).toHaveLength(0);
+    });
+
+    it('returns violation when regex does not match', () => {
+      const def = makeDef({
+        input_type: 'TEXT',
+        regex: { pattern: '^\\d+$', message: 'digits only' },
       });
-      expect(() => validateSingleField(TEMPLATE_ID, fWithMsg, 'abc')).toThrow(
-        'must be digits only'
-      );
+      expect(collectFieldViolations('f', def, 'abc')).toHaveLength(1);
+    });
+
+    it('passes when regex matches', () => {
+      const def = makeDef({ input_type: 'TEXT', regex: { pattern: '^\\d+$' } });
+      expect(collectFieldViolations('f', def, '123')).toHaveLength(0);
     });
   });
 
-  describe('min_length / max_length rules', () => {
-    const f = makeField({ validation: { min_length: 3, max_length: 8 } });
+  // NUMBER
+  describe('NUMBER', () => {
+    const def = makeDef({ input_type: 'NUMBER', min: 0, max: 10 });
 
-    it('passes for a value within the length range', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'hello')).not.toThrow();
+    it('passes for a valid number', () => {
+      expect(collectFieldViolations('f', def, 5)).toHaveLength(0);
     });
 
-    it('throws when shorter than min_length', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'hi')).toThrow('at least 3');
+    it('passes for a numeric string', () => {
+      expect(collectFieldViolations('f', def, '5')).toHaveLength(0);
     });
 
-    it('throws when longer than max_length', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, 'toolongvalue')).toThrow('at most 8');
-    });
-  });
-
-  describe('min / max numeric rules', () => {
-    const f = makeField({ type: 'integer', validation: { min: 0, max: 100 } });
-
-    it('passes for a value within the range', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, '50')).not.toThrow();
+    it('returns violation for a non-numeric value', () => {
+      expect(collectFieldViolations('f', def, 'abc')).toHaveLength(1);
     });
 
-    it('throws when below minimum', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, '-1')).toThrow('less than minimum 0');
+    it('returns violation when below min', () => {
+      expect(collectFieldViolations('f', def, -1)).toHaveLength(1);
     });
 
-    it('throws when above maximum', () => {
-      expect(() => validateSingleField(TEMPLATE_ID, f, '101')).toThrow('greater than maximum 100');
+    it('returns violation when above max', () => {
+      expect(collectFieldViolations('f', def, 11)).toHaveLength(1);
     });
   });
 
-  describe('boolean fields skip non-boolean rules', () => {
-    it('does not run pattern / allowed_values on boolean fields', () => {
-      // boolean + allowed_values — the rule should be silently skipped
-      const f = makeField({
-        type: 'boolean',
-        validation: { allowed_values: ['yes', 'no'] },
-      });
-      expect(() => validateSingleField(TEMPLATE_ID, f, true)).not.toThrow();
+  // DATE
+  describe('DATE', () => {
+    const def = makeDef({ input_type: 'DATE' });
+
+    it('passes for an ISO 8601 date', () => {
+      expect(collectFieldViolations('f', def, '2025-01-15')).toHaveLength(0);
+    });
+
+    it('passes for a full ISO 8601 datetime', () => {
+      expect(collectFieldViolations('f', def, '2025-01-15T12:00:00Z')).toHaveLength(0);
+    });
+
+    it('returns violation for a non-ISO string', () => {
+      expect(collectFieldViolations('f', def, 'not-a-date')).toHaveLength(1);
+    });
+  });
+
+  // TOGGLE
+  describe('TOGGLE', () => {
+    const def = makeDef({ input_type: 'TOGGLE' });
+
+    it('passes for true', () => {
+      expect(collectFieldViolations('f', def, true)).toHaveLength(0);
+    });
+
+    it('passes for false', () => {
+      expect(collectFieldViolations('f', def, false)).toHaveLength(0);
+    });
+
+    it('returns violation for a string "true"', () => {
+      expect(collectFieldViolations('f', def, 'true')).toHaveLength(1);
+    });
+  });
+
+  // TEXT_ARRAY
+  describe('TEXT_ARRAY', () => {
+    const def = makeDef({ input_type: 'TEXT_ARRAY', max_length: 10 });
+
+    it('passes for an array of strings', () => {
+      expect(collectFieldViolations('f', def, ['a', 'b', 'c'])).toHaveLength(0);
+    });
+
+    it('passes for a single string (coerced)', () => {
+      expect(collectFieldViolations('f', def, 'single')).toHaveLength(0);
+    });
+
+    it('returns violation when an item exceeds max_length', () => {
+      expect(collectFieldViolations('f', def, ['ok', 'toolongstring'])).toHaveLength(1);
+    });
+
+    it('returns violation for an array containing a non-string', () => {
+      expect(collectFieldViolations('f', def, [1, 2])).toHaveLength(1);
+    });
+  });
+
+  // USER
+  describe('USER', () => {
+    const def = makeDef({ input_type: 'USER' });
+
+    it('passes for a non-empty string', () => {
+      expect(collectFieldViolations('f', def, 'user@example.com')).toHaveLength(0);
+    });
+
+    it('returns type violation for a non-string', () => {
+      expect(collectFieldViolations('f', def, 42)).toHaveLength(1);
     });
   });
 });
 
 // ---------------------------------------------------------------------------
-// validateTemplateFields (apply-time: required is skipped, type/rules checked)
+// validateMetadataUpdate — per-field error accumulation
 // ---------------------------------------------------------------------------
 
-describe('validateTemplateFields', () => {
-  it('does not throw for a template with no fields', () => {
-    const t = makeTemplate([]);
-    expect(() => validateTemplateFields(t)).not.toThrow();
+describe('validateMetadataUpdate', () => {
+  const fields: Record<string, ConversationTemplateFieldDefinition> = {
+    severity: { input_type: 'SELECT', options: ['low', 'high'], required: true },
+    summary: { input_type: 'TEXT', max_length: 20 },
+    score: { input_type: 'NUMBER', min: 0, max: 10 },
+  };
+
+  it('passes when all values are valid', () => {
+    expect(() =>
+      validateMetadataUpdate(TEMPLATE_ID, fields, { severity: 'high', summary: 'ok', score: 5 })
+    ).not.toThrow();
   });
 
-  it('does not throw for fields with no default value', () => {
-    const t = makeTemplate([makeField({ name: 'no_default' })]);
-    expect(() => validateTemplateFields(t)).not.toThrow();
+  it('throws for an unknown key', () => {
+    expect(() => validateMetadataUpdate(TEMPLATE_ID, fields, { unknown_key: 'x' })).toThrow(
+      'not declared in template'
+    );
   });
 
-  it('does not enforce required on fields with no value (apply-time skip)', () => {
-    const t = makeTemplate([makeField({ validation: { required: true } })]);
-    // No default value; required is skipped — should not throw
-    expect(() => validateTemplateFields(t)).not.toThrow();
+  it('accumulates multiple violations in one error', () => {
+    expect(() =>
+      validateMetadataUpdate(TEMPLATE_ID, fields, {
+        severity: 'critical', // invalid option
+        summary: 'x'.repeat(30), // exceeds max_length
+        score: -5, // below min
+      })
+    ).toThrowError(
+      // All three violations should be in the message
+      expect.objectContaining({
+        message: expect.stringMatching(/severity.*summary.*score|score.*summary.*severity/s),
+      })
+    );
   });
 
-  it('validates the type of a field that has a default value', () => {
-    const t = makeTemplate([
-      makeField({ type: 'integer', name: 'count', value: 'not-an-integer' }),
-    ]);
-    expect(() => validateTemplateFields(t)).toThrow('not a valid integer');
+  it('reports required violation when setting an empty string', () => {
+    expect(() => validateMetadataUpdate(TEMPLATE_ID, fields, { severity: '' })).toThrow('required');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateTemplateDefaults — apply-time validation (skips required)
+// ---------------------------------------------------------------------------
+
+describe('validateTemplateDefaults', () => {
+  it('passes for a template with no defaults', () => {
+    const template = makeTemplate({
+      name: { input_type: 'TEXT' },
+    });
+    expect(() => validateTemplateDefaults(template)).not.toThrow();
   });
 
-  it('validates allowed_values for a field with a default value', () => {
-    const t = makeTemplate([
-      makeField({
-        name: 'severity',
-        value: 'critical',
-        validation: { allowed_values: ['low', 'medium', 'high'] },
-      }),
-    ]);
-    expect(() => validateTemplateFields(t)).toThrow('not in allowed_values');
+  it('passes for valid defaults', () => {
+    const template = makeTemplate({
+      severity: { input_type: 'SELECT', options: ['low', 'high'], default_value: 'low' },
+      toggled: { input_type: 'TOGGLE', default_value: false },
+    });
+    expect(() => validateTemplateDefaults(template)).not.toThrow();
   });
 
-  it('passes when all default values are valid', () => {
-    const t = makeTemplate([
-      makeField({
-        name: 'severity',
-        value: 'high',
-        validation: { allowed_values: ['low', 'medium', 'high'] },
-      }),
-      makeField({ type: 'integer', name: 'count', value: '10' }),
-    ]);
-    expect(() => validateTemplateFields(t)).not.toThrow();
+  it('does NOT throw when a required field has no default (field starts empty)', () => {
+    const template = makeTemplate({
+      name: { input_type: 'TEXT', required: true }, // no default_value
+    });
+    expect(() => validateTemplateDefaults(template)).not.toThrow();
   });
 
-  it('handles a template with undefined definition.fields gracefully', () => {
-    const t: ConversationTemplate = {
-      id: TEMPLATE_ID,
-      name: 'No fields',
-      description: 'desc',
-      definition: { fields: undefined },
-    };
-    expect(() => validateTemplateFields(t)).not.toThrow();
+  it('throws when a default value fails a type check', () => {
+    const template = makeTemplate({
+      score: { input_type: 'NUMBER', default_value: 'not-a-number' },
+    });
+    expect(() => validateTemplateDefaults(template)).toThrow();
+  });
+
+  it('throws when a SELECT default is not in options', () => {
+    const template = makeTemplate({
+      severity: { input_type: 'SELECT', options: ['low', 'high'], default_value: 'critical' },
+    });
+    expect(() => validateTemplateDefaults(template)).toThrow('allowed options');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateTemplateDefinition — self-validation of template metadata
+// ---------------------------------------------------------------------------
+
+describe('validateTemplateDefinition', () => {
+  it('passes a valid template', () => {
+    const template = makeTemplate({
+      severity: { input_type: 'SELECT', options: ['low', 'high'] },
+      notes: { input_type: 'TEXT', max_length: 500 },
+    });
+    expect(() => validateTemplateDefinition(template)).not.toThrow();
+  });
+
+  it('rejects a SELECT field with no options', () => {
+    const template = makeTemplate({
+      severity: { input_type: 'SELECT' },
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('options');
+  });
+
+  it('rejects max_length on a NUMBER field', () => {
+    const template = makeTemplate({
+      score: { input_type: 'NUMBER', max_length: 10 } as ConversationTemplateFieldDefinition,
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('max_length');
+  });
+
+  it('rejects min/max on a TEXT field', () => {
+    const template = makeTemplate({
+      notes: { input_type: 'TEXT', min: 0, max: 100 } as ConversationTemplateFieldDefinition,
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('"min"/"max"');
+  });
+
+  it('rejects regex on a TOGGLE field', () => {
+    const template = makeTemplate({
+      flag: {
+        input_type: 'TOGGLE',
+        regex: { pattern: '^true$' },
+      } as ConversationTemplateFieldDefinition,
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('"regex"');
+  });
+
+  it('rejects options on a TEXT field', () => {
+    const template = makeTemplate({
+      note: { input_type: 'TEXT', options: ['a'] } as ConversationTemplateFieldDefinition,
+    });
+    expect(() => validateTemplateDefinition(template)).toThrow('"options"');
+  });
+
+  it('returns an array of all errors via collectTemplateDefinitionErrors', () => {
+    const template = makeTemplate({
+      severity: { input_type: 'SELECT' }, // missing options
+      score: { input_type: 'NUMBER', max_length: 5 } as ConversationTemplateFieldDefinition, // wrong constraint
+    });
+    const errors = collectTemplateDefinitionErrors(template);
+    expect(errors.length).toBeGreaterThanOrEqual(2);
   });
 });

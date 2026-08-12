@@ -5,51 +5,70 @@
  * 2.0.
  */
 
-export type ConversationTemplateFieldType =
-  | 'keyword'
-  | 'text'
-  | 'integer'
-  | 'float'
-  | 'boolean'
-  | 'date';
+/**
+ * The authoring type that governs what a user/agent supplies for a field.
+ *
+ * Maps to Elasticsearch storage types through serialization:
+ *   TEXT_ARRAY → string[]  (flattened keyword array)
+ *   TOGGLE     → "true"/"false" string
+ *   NUMBER     → numeric string
+ *   DATE       → ISO 8601 string
+ *   USER       → plain string (profile uid or username)
+ *   SELECT     → exact string from `options`
+ *   TEXT       → string
+ */
+export type ConversationTemplateInputType =
+  | 'SELECT'
+  | 'TEXT'
+  | 'NUMBER'
+  | 'DATE'
+  | 'TOGGLE'
+  | 'TEXT_ARRAY'
+  | 'USER';
 
-export interface ConversationTemplateFieldValidation {
-  /** Field must have a non-empty value when the template is applied. */
-  required?: boolean;
-  /** Regex the value must match, with an optional custom error message. */
-  pattern?: { regex: string; message?: string };
-  /** Minimum string length — applies to `keyword` and `text` fields. */
-  min_length?: number;
-  /** Maximum string length — applies to `keyword` and `text` fields. */
-  max_length?: number;
-  /** Minimum numeric value — applies to `integer` and `float` fields. */
-  min?: number;
-  /** Maximum numeric value — applies to `integer` and `float` fields. */
-  max?: number;
-  /** Exhaustive list of accepted values. */
-  allowed_values?: string[];
-}
-
-export interface ConversationTemplateField {
-  /** ES field name */
-  name: string;
-  /** ES mapping type for this field */
-  type: ConversationTemplateFieldType;
-  /** Human-readable description shown to the LLM so it knows what to capture. */
+export interface ConversationTemplateFieldDefinition {
+  input_type: ConversationTemplateInputType;
+  /**
+   * Human-readable hint shown to the LLM in the system prompt and, in future, in the UI.
+   * Describes what value is expected for this field.
+   */
   description?: string;
-  /** Default value applied to the conversation when the template is used */
-  value?: string | boolean;
-  /** Optional validation rules checked whenever the template is applied. */
-  validation?: ConversationTemplateFieldValidation;
+  /**
+   * Initial value seeded into `metadata` when the template is applied.
+   * For TEXT_ARRAY fields this must be an array of strings.
+   * For TOGGLE fields this must be a boolean.
+   * For NUMBER fields this may be a number or a numeric string.
+   */
+  default_value?: string | string[] | number | boolean;
+  /** When true, the field must be non-empty on every metadata write. */
+  required?: boolean;
+  /** SELECT only — the exhaustive set of accepted values. */
+  options?: string[];
+  /** TEXT / TEXT_ARRAY — maximum string length for the value (or per item for TEXT_ARRAY). */
+  max_length?: number;
+  /** NUMBER only — lower bound. */
+  min?: number;
+  /** NUMBER only — upper bound. */
+  max?: number;
+  /** TEXT / SELECT — value must match this regex pattern. */
+  regex?: { pattern: string; message?: string };
 }
 
-export interface ConversationTemplateDefinition {
-  fields?: ConversationTemplateField[];
-}
-
+/**
+ * A user-authored (or code-registered) conversation template.
+ *
+ * `fields` is a plain object — insertion order is significant and is preserved
+ * by both the JS runtime and Elasticsearch `_source` round-trips. The UI must
+ * render fields in the order they appear here (RFC success criteria).
+ */
 export interface ConversationTemplate {
   id: string;
+  version: number;
   name: string;
   description?: string;
-  definition: ConversationTemplateDefinition;
+  /**
+   * Named field definitions, keyed by the metadata key they govern.
+   * Do not use integer-like keys — insertion order is only guaranteed for string keys.
+   */
+  fields: Record<string, ConversationTemplateFieldDefinition>;
 }

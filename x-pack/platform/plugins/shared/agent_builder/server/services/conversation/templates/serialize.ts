@@ -5,14 +5,29 @@
  * 2.0.
  */
 
+import type { ConversationTemplateInputType } from '@kbn/agent-builder-common';
+
 /**
- * Normalizes a metadata value to a string for storage.
+ * Normalizes a template field value to a string or string array for storage.
  *
- * The conversation metadata field is mapped as `flattened` in Elasticsearch,
- * which indexes every key as a keyword. All values must therefore be strings
- * so that term/terms queries and aggregations work uniformly. The LLM-facing
- * tool and the template field definitions retain `string | boolean` to keep
- * authoring ergonomics natural; serialization happens here on the write path.
+ * The conversation `metadata` field is mapped as `flattened` in Elasticsearch,
+ * which indexes every leaf as a keyword. Values must therefore be either strings
+ * or arrays of strings so that term/terms queries and aggregations work uniformly.
+ *
+ * The LLM-facing tool and the template field definitions retain richer types
+ * (boolean, number) to keep authoring ergonomics natural; serialization happens
+ * here on the write path.
+ *
+ * - TEXT_ARRAY  → string[] (each item stringified)
+ * - Everything else → String(value)
  */
-export const serializeMetadataValue = (value: string | boolean): string =>
-  typeof value === 'boolean' ? String(value) : value;
+export const serializeMetadataValue = (
+  value: string | string[] | number | boolean,
+  inputType: ConversationTemplateInputType
+): string | string[] => {
+  if (inputType === 'TEXT_ARRAY') {
+    const arr = Array.isArray(value) ? value : [String(value)];
+    return arr.map(String);
+  }
+  return String(value);
+};

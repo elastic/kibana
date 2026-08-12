@@ -314,8 +314,6 @@ export {
 export { MCP_SERVER_PATH } from './mcp';
 export type {
   ConversationTemplate,
-  ConversationTemplateDefinition,
-  ConversationTemplateField,
-  ConversationTemplateFieldType,
-  ConversationTemplateFieldValidation,
+  ConversationTemplateInputType,
+  ConversationTemplateFieldDefinition,
 } from './templates';

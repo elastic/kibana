@@ -20,7 +20,7 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { ConversationTemplateField } from '@kbn/agent-builder-common';
+import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -48,7 +48,7 @@ import { isVersionConflictError } from '../../../utils/is_version_conflict_error
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
-import { validateTemplateFields } from '../templates/validation';
+import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
@@ -62,13 +62,18 @@ import {
   type VersionedDocument,
 } from './converters';
 
-const buildMetadataFromFields = (
-  fields: ConversationTemplateField[] | undefined
-): Record<string, string> =>
-  (fields ?? []).reduce<Record<string, string>>((acc, { name, value }) => {
-    if (value !== undefined) acc[name] = serializeMetadataValue(value);
-    return acc;
-  }, {});
+const buildMetadataFromTemplate = (
+  template: ConversationTemplate
+): Record<string, string | string[]> =>
+  Object.entries(template.fields).reduce<Record<string, string | string[]>>(
+    (acc, [fieldName, def]) => {
+      if (def.default_value !== undefined) {
+        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
+      }
+      return acc;
+    },
+    {}
+  );
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -90,6 +95,7 @@ export interface ConversationClient {
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
+  patchMetadata(conversationId: string, updates: Record<string, unknown>): Promise<Conversation>;
 }
 
 export const createClient = ({
@@ -232,13 +238,15 @@ class ConversationClientImpl implements ConversationClient {
 
     let resolvedMetadata = conversationWithoutTemplateId.metadata;
     let resolvedTemplateId: string | undefined;
+    let resolvedTemplateVersion: number | undefined;
     if (templateId) {
       const template = getTemplate(templateId);
       if (template) {
-        validateTemplateFields(template);
-        const templateMetadata = buildMetadataFromFields(template.definition.fields);
+        validateTemplateDefaults(template);
+        const templateMetadata = buildMetadataFromTemplate(template);
         resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
         resolvedTemplateId = templateId;
+        resolvedTemplateVersion = template.version;
       }
     }
 
@@ -247,6 +255,9 @@ class ConversationClientImpl implements ConversationClient {
         ...conversationWithoutTemplateId,
         metadata: resolvedMetadata,
         ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
+        ...(resolvedTemplateVersion !== undefined
+          ? { template_version: resolvedTemplateVersion }
+          : {}),
       },
       currentUser: this.user,
       creationDate: now,
@@ -367,14 +378,42 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError(`Template not found: ${templateId}`);
     }
 
-    validateTemplateFields(template);
-    const templateMetadata = buildMetadataFromFields(template.definition.fields);
+    validateTemplateDefaults(template);
+    const newTemplateFieldNames = new Set(Object.keys(template.fields));
+    const newTemplateMetadata = buildMetadataFromTemplate(template);
 
-    // Remove keys that were owned by the previously-applied template so switching
-    // templates does not leave orphan keys from the old template. Keys that were not
-    // part of any template (user-defined) are preserved unchanged.
+    const isSameTemplate = existing.template_id === templateId;
+
+    if (isSameTemplate) {
+      // Version bump on the same template: preserve existing values for fields still
+      // declared in the new version, seed defaults for newly added fields, and drop
+      // everything else (fields the new version removed). Without the old schema we
+      // can't distinguish "removed template field" from "user-defined key", so all
+      // keys not in the new template are dropped — safe for MVP where metadata is
+      // entirely template-driven.
+      const preservedValues = Object.fromEntries(
+        Object.entries(existing.metadata ?? {}).filter(([key]) => newTemplateFieldNames.has(key))
+      );
+      const metadata: Record<string, string | string[]> = {
+        // Defaults fill any newly-added fields; existing values take precedence.
+        ...newTemplateMetadata,
+        ...preservedValues,
+      };
+      return this.update(
+        {
+          id: conversationId,
+          metadata,
+          template_id: templateId,
+          template_version: template.version,
+        },
+        { access: 'owner' }
+      );
+    }
+
+    // Different template: remove all keys owned by the previous template so orphan
+    // keys don't leak from the old template into the new one. User-defined keys survive.
     const previousTemplateFieldNames = existing.template_id
-      ? new Set(getTemplate(existing.template_id)?.definition.fields?.map((f) => f.name) ?? [])
+      ? new Set(Object.keys(getTemplate(existing.template_id)?.fields ?? {}))
       : new Set<string>();
 
     const cleanedExistingMetadata = Object.fromEntries(
@@ -384,15 +423,56 @@ class ConversationClientImpl implements ConversationClient {
     );
 
     // New template defaults always win for template-owned keys; user-defined keys survive.
-    const metadata: Record<string, string> = {
+    const metadata: Record<string, string | string[]> = {
       ...cleanedExistingMetadata,
-      ...templateMetadata,
+      ...newTemplateMetadata,
     };
 
     return this.update(
-      { id: conversationId, metadata, template_id: templateId },
+      { id: conversationId, metadata, template_id: templateId, template_version: template.version },
       { access: 'owner' }
     );
+  }
+
+  async patchMetadata(
+    conversationId: string,
+    updates: Record<string, unknown>
+  ): Promise<Conversation> {
+    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const existing = fromEs(document);
+
+    if (!existing.template_id) {
+      throw createBadRequestError(
+        `Conversation "${conversationId}" has no template — apply a template before writing metadata`
+      );
+    }
+
+    const template = getTemplate(existing.template_id);
+    if (!template) {
+      throw createBadRequestError(
+        `Template "${existing.template_id}" referenced by this conversation was not found`
+      );
+    }
+
+    // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
+    validateMetadataUpdate(template.id, template.fields, updates);
+
+    const serialized = Object.fromEntries(
+      Object.entries(updates).map(([k, v]) => {
+        const def = template.fields[k];
+        return [
+          k,
+          serializeMetadataValue(v as string | string[] | number | boolean, def.input_type),
+        ];
+      })
+    );
+
+    const mergedMetadata: Record<string, string | string[]> = {
+      ...(existing.metadata ?? {}),
+      ...serialized,
+    };
+
+    return this.update({ id: conversationId, metadata: mergedMetadata }, { access: 'owner' });
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {

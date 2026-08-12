@@ -67,22 +67,30 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+const renderFieldValue = (value: string | string[] | undefined): string => {
+  if (value === undefined) return '_not yet set_';
+  if (Array.isArray(value)) return `**[${value.join(', ')}]**`;
+  return `**${value}**`;
+};
+
 const getConversationContextSection = (
   templateId: string | undefined,
-  metadata: Record<string, string> | undefined
+  metadata: Record<string, string | string[]> | undefined
 ): string => {
   const template = templateId ? getTemplate(templateId) : undefined;
   if (!template) return '';
 
-  const fields = template.definition.fields ?? [];
-  if (fields.length === 0) return '';
+  const fieldEntries = Object.entries(template.fields);
+  if (fieldEntries.length === 0) return '';
 
-  const fieldLines = fields
-    .map((f) => {
-      const current = metadata?.[f.name];
-      const valueStr = current !== undefined ? `**${current}**` : '_not yet set_';
-      const descStr = f.description ? ` — ${f.description}` : '';
-      return `- \`${f.name}\` (${f.type})${descStr}: ${valueStr}`;
+  const fieldLines = fieldEntries
+    .map(([fieldName, def]) => {
+      const current = metadata?.[fieldName];
+      const valueStr = renderFieldValue(current);
+      const descStr = def.description ? ` — ${def.description}` : '';
+      const optionsStr =
+        def.input_type === 'SELECT' && def.options ? ` (options: ${def.options.join(' | ')})` : '';
+      return `- \`${fieldName}\` (${def.input_type})${optionsStr}${descStr}: ${valueStr}`;
     })
     .join('\n');
 

@@ -14,6 +14,7 @@ import type {
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
 import type { ApplyTemplateResponse } from '../../../common/http_api/apply_template';
+import type { PatchConversationMetadataResponse } from '../../../common/http_api/patch_metadata';
 import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 
@@ -87,6 +88,54 @@ export function registerInternalConversationRoutes({
 
       return response.ok<ApplyTemplateResponse>({
         body: { id: updatedConversation.id },
+      });
+    })
+  );
+
+  router.patch(
+    {
+      path: `${internalApiPath}/conversations/{conversation_id}/metadata`,
+      validate: {
+        params: schema.object({
+          conversation_id: schema.string({ maxLength: 256 }),
+        }),
+        body: schema.object({
+          metadata: schema.recordOf(
+            schema.string({ maxLength: 256 }),
+            schema.oneOf([
+              schema.string({ maxLength: 10_000 }),
+              schema.number(),
+              schema.boolean(),
+              schema.arrayOf(schema.string({ maxLength: 2_000 }), { maxSize: 100 }),
+            ]),
+            {
+              validate: (record) => {
+                if (Object.keys(record).length > 100) {
+                  return 'metadata may not have more than 100 keys';
+                }
+              },
+            }
+          ),
+        }),
+      },
+      options: { access: 'internal' },
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const { conversations: conversationsService } = getInternalServices();
+      const { conversation_id: conversationId } = request.params;
+      const { metadata } = request.body;
+
+      const client = await conversationsService.getScopedClient({ request });
+      const updatedConversation = await client.patchMetadata(conversationId, metadata);
+
+      return response.ok<PatchConversationMetadataResponse>({
+        body: {
+          id: updatedConversation.id,
+          metadata: updatedConversation.metadata ?? {},
+        },
       });
     })
   );

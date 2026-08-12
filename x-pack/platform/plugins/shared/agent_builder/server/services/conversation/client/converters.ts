@@ -68,6 +68,9 @@ const convertBaseFromEs = (document: Document) => {
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
+    ...(document._source.template_version !== undefined
+      ? { template_version: document._source.template_version }
+      : {}),
   };
 };
 
@@ -248,6 +251,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
+      : {}),
   };
 };
 
@@ -302,5 +308,8 @@ export const createRequestToEs = ({
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
+      : {}),
   };
 };

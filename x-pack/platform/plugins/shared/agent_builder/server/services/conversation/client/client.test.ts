@@ -1066,20 +1066,24 @@ describe('ConversationClient', () => {
 
   const makeTemplate = (
     id: string,
-    fields: ConversationTemplate['definition']['fields'] = []
+    fields: ConversationTemplate['fields'] = {},
+    version = 1
   ): ConversationTemplate => ({
     id,
+    version,
     name: `Template ${id}`,
     description: 'A test template',
-    definition: { fields },
+    fields,
   });
 
   const createConversationDocumentWithTemplate = ({
     templateId,
+    templateVersion,
     metadata = {},
   }: {
     templateId?: string;
-    metadata?: Record<string, string>;
+    templateVersion?: number;
+    metadata?: Record<string, string | string[]>;
   } = {}): Document =>
     ({
       _id: 'conversation-1',
@@ -1097,6 +1101,7 @@ describe('ConversationClient', () => {
         conversation_rounds: [],
         access_control: { access_mode: ConversationAccessControlMode.Private },
         ...(templateId ? { template_id: templateId } : {}),
+        ...(templateVersion !== undefined ? { template_version: templateVersion } : {}),
         ...(Object.keys(metadata).length ? { metadata } : {}),
       },
     } as Document);
@@ -1121,11 +1126,20 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('seeds template default values into metadata', async () => {
-      const template = makeTemplate('tmpl-a', [
-        { name: 'severity', type: 'keyword', description: 'Severity', value: 'low' },
-        { name: 'region', type: 'keyword', description: 'Region' }, // no default
-      ]);
+    it('seeds template default values into metadata and stamps template_version', async () => {
+      const template = makeTemplate(
+        'tmpl-a',
+        {
+          severity: {
+            input_type: 'SELECT',
+            description: 'Severity',
+            default_value: 'low',
+            options: ['low', 'high'],
+          },
+          region: { input_type: 'TEXT', description: 'Region' }, // no default
+        },
+        2
+      );
       getTemplateMock.mockReturnValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
@@ -1138,21 +1152,20 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({
             metadata: { severity: 'low' }, // only the field with a default value
             template_id: 'tmpl-a',
+            template_version: 2,
           }),
         })
       );
     });
 
     it('clears orphan keys from the previously-applied template when switching', async () => {
-      const templateA = makeTemplate('tmpl-a', [
-        { name: 'old_key', type: 'keyword', description: 'Old key', value: 'old_value' },
-      ]);
-      const templateB = makeTemplate('tmpl-b', [
-        { name: 'new_key', type: 'keyword', description: 'New key', value: 'new_value' },
-      ]);
+      const templateA = makeTemplate('tmpl-a', {
+        old_key: { input_type: 'TEXT', description: 'Old key', default_value: 'old_value' },
+      });
+      const templateB = makeTemplate('tmpl-b', {
+        new_key: { input_type: 'TEXT', description: 'New key', default_value: 'new_value' },
+      });
 
-      // First call: resolve the old template (getDocumentWithAccess in applyTemplate)
-      // Second call: resolve the new template (getDocumentWithAccess inside update)
       getTemplateMock.mockImplementation((id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
@@ -1176,18 +1189,19 @@ describe('ConversationClient', () => {
             // old_key must NOT appear; new_key must be seeded from template B
             metadata: { new_key: 'new_value' },
             template_id: 'tmpl-b',
+            template_version: 1,
           }),
         })
       );
     });
 
     it('preserves non-template user-defined metadata keys when switching templates', async () => {
-      const templateA = makeTemplate('tmpl-a', [
-        { name: 'tmpl_a_key', type: 'keyword', description: 'Template A key' },
-      ]);
-      const templateB = makeTemplate('tmpl-b', [
-        { name: 'tmpl_b_key', type: 'keyword', description: 'Template B key', value: 'b_val' },
-      ]);
+      const templateA = makeTemplate('tmpl-a', {
+        tmpl_a_key: { input_type: 'TEXT', description: 'Template A key' },
+      });
+      const templateB = makeTemplate('tmpl-b', {
+        tmpl_b_key: { input_type: 'TEXT', description: 'Template B key', default_value: 'b_val' },
+      });
 
       getTemplateMock.mockImplementation((id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
@@ -1222,10 +1236,61 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('serializes boolean field defaults to strings when applying a template', async () => {
-      const template = makeTemplate('tmpl-bool', [
-        { name: 'mfa_enabled', type: 'boolean', description: 'MFA flag', value: false },
-      ]);
+    it('on same-template version bump: preserves existing field values, drops removed fields', async () => {
+      const templateV2 = makeTemplate(
+        'tmpl-a',
+        {
+          kept_field: { input_type: 'TEXT', description: 'Still in new version' },
+          new_field: {
+            input_type: 'TEXT',
+            description: 'Added in v2',
+            default_value: 'new_default',
+          },
+        },
+        2
+      );
+
+      // Registry always returns the latest version; existing conversation stores v1's fields.
+      getTemplateMock.mockReturnValue(templateV2);
+      // The conversation currently stores v1's fields
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              templateVersion: 1,
+              metadata: {
+                kept_field: 'user_value',
+                dropped_field: 'old_value',
+              },
+            }),
+          ],
+        },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-a');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            template_id: 'tmpl-a',
+            template_version: 2,
+            metadata: expect.objectContaining({
+              kept_field: 'user_value', // existing value preserved
+              new_field: 'new_default', // new field seeded with default
+              // dropped_field: absent (not in new version's field set)
+            }),
+          }),
+        })
+      );
+      const doc = mockEsClient.index.mock.calls[0][0].document;
+      expect(doc.metadata).not.toHaveProperty('dropped_field');
+    });
+
+    it('serializes TOGGLE field defaults to strings when applying a template', async () => {
+      const template = makeTemplate('tmpl-bool', {
+        mfa_enabled: { input_type: 'TOGGLE', description: 'MFA flag', default_value: false },
+      });
       getTemplateMock.mockReturnValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
@@ -1237,6 +1302,26 @@ describe('ConversationClient', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             metadata: { mfa_enabled: 'false' },
+          }),
+        })
+      );
+    });
+
+    it('serializes TEXT_ARRAY field defaults to string arrays when applying a template', async () => {
+      const template = makeTemplate('tmpl-arr', {
+        tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['a', 'b'] },
+      });
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-arr');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: { tags: ['a', 'b'] },
           }),
         })
       );
@@ -1265,11 +1350,20 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('seeds metadata from template fields that have a default value', async () => {
-      const template = makeTemplate('tmpl-seed', [
-        { name: 'priority', type: 'keyword', description: 'Priority', value: 'medium' },
-        { name: 'no_default_field', type: 'text', description: 'Empty' },
-      ]);
+    it('seeds metadata from template fields that have a default value and stamps template_version', async () => {
+      const template = makeTemplate(
+        'tmpl-seed',
+        {
+          priority: {
+            input_type: 'SELECT',
+            description: 'Priority',
+            default_value: 'medium',
+            options: ['low', 'medium', 'high'],
+          },
+          no_default_field: { input_type: 'TEXT', description: 'Empty' },
+        },
+        3
+      );
       getTemplateMock.mockReturnValue(template);
 
       await client.create({
@@ -1285,17 +1379,22 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({
             metadata: { priority: 'medium' }, // only fields with defaults
             template_id: 'tmpl-seed',
+            template_version: 3,
           }),
         })
       );
     });
 
-    it('serializes boolean field defaults to strings in metadata', async () => {
-      const template = makeTemplate('tmpl-bool', [
-        { name: 'mfa_enabled', type: 'boolean', description: 'MFA flag', value: false },
-        { name: 'containment_applied', type: 'boolean', description: 'Containment', value: true },
-        { name: 'label', type: 'keyword', description: 'Label', value: 'active' },
-      ]);
+    it('serializes TOGGLE field defaults to strings in metadata on create', async () => {
+      const template = makeTemplate('tmpl-bool', {
+        mfa_enabled: { input_type: 'TOGGLE', description: 'MFA flag', default_value: false },
+        containment_applied: {
+          input_type: 'TOGGLE',
+          description: 'Containment',
+          default_value: true,
+        },
+        label: { input_type: 'TEXT', description: 'Label', default_value: 'active' },
+      });
       getTemplateMock.mockReturnValue(template);
 
       await client.create({
@@ -1309,8 +1408,31 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
-            // Booleans are serialized to strings for the flattened field mapping.
+            // TOGGLE and NUMBER values are serialized to strings for the flattened field mapping.
             metadata: { mfa_enabled: 'false', containment_applied: 'true', label: 'active' },
+          }),
+        })
+      );
+    });
+
+    it('serializes TEXT_ARRAY field defaults to string arrays in metadata on create', async () => {
+      const template = makeTemplate('tmpl-arr', {
+        tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['alpha', 'beta'] },
+      });
+      getTemplateMock.mockReturnValue(template);
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        template_id: 'tmpl-arr',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: { tags: ['alpha', 'beta'] },
           }),
         })
       );

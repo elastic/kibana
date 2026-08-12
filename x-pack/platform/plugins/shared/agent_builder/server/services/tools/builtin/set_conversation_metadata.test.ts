@@ -14,13 +14,12 @@ jest.mock('@kbn/agent-builder-server', () => ({
   getToolResultId: jest.fn(() => 'tool-result-id'),
 }));
 
-const makeTemplate = (
-  fields: ConversationTemplate['definition']['fields'] = []
-): ConversationTemplate => ({
-  id: 'security.account-compromise',
-  name: 'Account Compromise',
-  description: 'Template for account compromise investigations',
-  definition: { fields },
+const makeTemplate = (fields: ConversationTemplate['fields'] = {}): ConversationTemplate => ({
+  id: 'test-template',
+  version: 1,
+  name: 'Test Template',
+  description: 'Template for tests',
+  fields,
 });
 
 describe('createSetConversationMetadataTool', () => {
@@ -30,27 +29,31 @@ describe('createSetConversationMetadataTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateConversationMetadata = jest.fn().mockResolvedValue(undefined);
-    template = makeTemplate([
-      {
-        name: 'severity',
-        type: 'keyword',
+    template = makeTemplate({
+      severity: {
+        input_type: 'SELECT',
         description: 'Severity level',
-        validation: { allowed_values: ['low', 'medium', 'high'] },
+        options: ['low', 'medium', 'high'],
       },
-      { name: 'affected_user', type: 'text', description: 'The compromised user' },
-      { name: 'is_confirmed', type: 'boolean', description: 'Has the compromise been confirmed' },
-    ]);
+      affected_user: { input_type: 'TEXT', description: 'The affected user' },
+      is_confirmed: { input_type: 'TOGGLE', description: 'Has the incident been confirmed' },
+      score: { input_type: 'NUMBER', description: 'Risk score', min: 0, max: 10 },
+      tags: { input_type: 'TEXT_ARRAY', description: 'Labels for this finding' },
+    });
   });
 
-  const callHandler = (updates: Record<string, string | boolean>) => {
+  const callHandler = (updates: Record<string, unknown>) => {
     const tool = createSetConversationMetadataTool({ updateConversationMetadata, template });
     return (tool.handler as Function)({ updates });
   };
 
-  it('calls updateConversationMetadata with the validated updates', async () => {
+  it('calls updateConversationMetadata with serialized updates', async () => {
     const updates = { severity: 'high', affected_user: 'alice' };
     await callHandler(updates);
-    expect(updateConversationMetadata).toHaveBeenCalledWith(updates);
+    expect(updateConversationMetadata).toHaveBeenCalledWith({
+      severity: 'high',
+      affected_user: 'alice',
+    });
   });
 
   it('returns acknowledged: true with the updated keys', async () => {
@@ -68,43 +71,57 @@ describe('createSetConversationMetadataTool', () => {
     expect(updateConversationMetadata).not.toHaveBeenCalled();
   });
 
-  it('throws when a value fails validation (allowed_values)', async () => {
+  it('throws when a SELECT value is not in options', async () => {
     await expect(callHandler({ severity: 'critical' })).rejects.toMatchObject({
-      message: expect.stringContaining('not in allowed_values'),
+      message: expect.stringContaining('allowed options'),
     });
     expect(updateConversationMetadata).not.toHaveBeenCalled();
   });
 
-  it('throws when a boolean field receives a string value', async () => {
+  it('throws when a TOGGLE field receives a string value', async () => {
     await expect(callHandler({ is_confirmed: 'true' })).rejects.toMatchObject({
-      message: expect.stringContaining('must be a boolean'),
+      message: expect.stringContaining('TOGGLE'),
     });
     expect(updateConversationMetadata).not.toHaveBeenCalled();
+  });
+
+  it('serializes a TOGGLE boolean to a string in the stored value', async () => {
+    await callHandler({ is_confirmed: true });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ is_confirmed: 'true' });
+  });
+
+  it('serializes a NUMBER to a string in the stored value', async () => {
+    await callHandler({ score: 7 });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ score: '7' });
+  });
+
+  it('serializes a TEXT_ARRAY as a string array', async () => {
+    await callHandler({ tags: ['alpha', 'beta'] });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ tags: ['alpha', 'beta'] });
   });
 
   it('allows updating multiple fields in a single call', async () => {
-    const updates = { severity: 'medium', affected_user: 'bob', is_confirmed: true };
+    const updates = { severity: 'medium', affected_user: 'bob', is_confirmed: false };
     const result = await callHandler(updates);
-    // Boolean values are serialized to strings before being persisted (flattened mapping).
     expect(updateConversationMetadata).toHaveBeenCalledWith({
       severity: 'medium',
       affected_user: 'bob',
-      is_confirmed: 'true',
+      is_confirmed: 'false',
     });
     expect(result.results[0].data.updated_keys).toEqual(
       expect.arrayContaining(['severity', 'affected_user', 'is_confirmed'])
     );
   });
 
-  it('validates all keys before calling the updater (rejects on first invalid key)', async () => {
-    // First key is valid, second is invalid — updater must NOT be called
+  it('validates all keys before calling the updater (rejects when any key is invalid)', async () => {
+    // First key is valid, second is unknown — updater must NOT be called
     await expect(callHandler({ severity: 'high', unknown_key: 'x' })).rejects.toThrow();
     expect(updateConversationMetadata).not.toHaveBeenCalled();
   });
 
-  it('does not call the updater when the updates object is empty', async () => {
+  it('invokes the updater even when the updates object is empty', async () => {
     await callHandler({});
-    // Empty updates are technically valid; the updater is still invoked (no-op merge)
+    // Empty updates are valid; the updater is still called (no-op merge)
     expect(updateConversationMetadata).toHaveBeenCalledWith({});
   });
 });
