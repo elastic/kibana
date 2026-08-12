@@ -40,6 +40,8 @@ import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../flyout_components/flyout_toolbar_header';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
+import { DurabilityBadge } from '../../../pages/significant_events/components/durability_badge/durability_badge';
+import { getKnowledgeIndicatorExpiresAt } from '../utils/get_knowledge_indicator_expires_at';
 import { useStreamKnowledgeIndicatorsBulkDelete } from '../hooks/use_stream_knowledge_indicators_bulk_delete';
 import { useRulesDemote } from '../hooks/use_rules_demote';
 import {
@@ -49,6 +51,7 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
@@ -115,6 +118,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     excludeFeature,
     restoreFeature,
     promoteQuery,
+    setDurability,
     isMutating: isActionMutating,
   } = useKnowledgeIndicatorActions({
     streamName,
@@ -207,6 +211,17 @@ export function KnowledgeIndicatorDetailsFlyout({
           </EuiContextMenuItem>
         );
       }
+
+      items.push(
+        durabilityMenuItem({
+          knowledgeIndicator,
+          disabled: isMutating,
+          onToggle: (durable) => {
+            setIsActionsMenuOpen(false);
+            setDurability({ knowledgeIndicator, durable });
+          },
+        })
+      );
     }
 
     items.push(
@@ -225,7 +240,15 @@ export function KnowledgeIndicatorDetailsFlyout({
     );
 
     return items;
-  }, [blocksActivity, canManage, excludeFeature, isMutating, knowledgeIndicator, restoreFeature]);
+  }, [
+    blocksActivity,
+    canManage,
+    excludeFeature,
+    isMutating,
+    knowledgeIndicator,
+    restoreFeature,
+    setDurability,
+  ]);
 
   const queryActionItems = useMemo(() => {
     if (!canManage || knowledgeIndicator.kind !== 'query') {
@@ -236,7 +259,6 @@ export function KnowledgeIndicatorDetailsFlyout({
     const isPromoteDisabled = isMutating || blocksActivity || isStats;
     const promoteTooltip =
       activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
-
     return [
       ...(!knowledgeIndicator.rule.backed
         ? [
@@ -254,6 +276,14 @@ export function KnowledgeIndicatorDetailsFlyout({
             </EuiContextMenuItem>,
           ]
         : []),
+      durabilityMenuItem({
+        knowledgeIndicator,
+        disabled: isMutating,
+        onToggle: (durable) => {
+          setIsActionsMenuOpen(false);
+          setDurability({ knowledgeIndicator, durable });
+        },
+      }),
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"
@@ -274,6 +304,7 @@ export function KnowledgeIndicatorDetailsFlyout({
     isMutating,
     knowledgeIndicator,
     promoteQuery,
+    setDurability,
   ]);
 
   const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
@@ -396,6 +427,11 @@ export function KnowledgeIndicatorDetailsFlyout({
                 />
               </FlyoutMetadataCard>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <FlyoutMetadataCard title={DURABILITY_LABEL}>
+                <DurabilityBadge expiresAt={getKnowledgeIndicatorExpiresAt(knowledgeIndicator)} />
+              </FlyoutMetadataCard>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 
@@ -477,6 +513,11 @@ const SOURCE_LABEL = i18n.translate(
 const SEVERITY_LABEL = i18n.translate(
   'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.severityLabel',
   { defaultMessage: 'Severity' }
+);
+
+const DURABILITY_LABEL = i18n.translate(
+  'xpack.significantEventsApp.knowledgeIndicatorDetailsFlyout.durabilityLabel',
+  { defaultMessage: 'Durability' }
 );
 
 const QUERY_TYPE_LABEL = i18n.translate(

@@ -12,13 +12,12 @@ import type { QueryWithOccurrences } from '../api/significant_events';
 import { type KnowledgeIndicatorSource } from '../source';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '../significant_events/constants';
 
-export function isExpirable(
-  ki: Feature | QueryLink
-): ki is (Feature | QueryLink) & { expires_at: string } {
+export function isExpirable<T extends { expires_at?: string }>(
+  ki: T
+): ki is T & { expires_at: string } {
   return !!ki.expires_at;
 }
 
-/** Whether an expiry timestamp has passed. Callers must exclude durable indicators (`isDurable`) first. */
 export function isExpired(expiresAt: string): boolean {
   return new Date(expiresAt).getTime() <= Date.now();
 }
