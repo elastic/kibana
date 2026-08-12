@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'cspSecurity', 'cloudPostureDashboard', 'header']);
   const chance = new Chance();
 
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
         'Cloud posture integration dashboard to be displayed',
-        async () => !!dashboard.getIntegrationDashboardContainer()
+        async () => testSubjects.exists('dashboard-container', { timeout: 0 })
       );
     });
 
@@ -86,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cspDashboard.navigateToComplianceDashboardPage();
         await retry.waitFor(
           'Cloud posture integration dashboard to be displayed',
-          async () => !!dashboard.getIntegrationDashboardContainer()
+          async () => testSubjects.exists('dashboard-container', { timeout: 0 })
         );
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 

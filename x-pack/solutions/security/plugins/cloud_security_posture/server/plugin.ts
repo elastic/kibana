@@ -345,7 +345,7 @@ const isTransformAssetIncluded = (integrationVersion: string): boolean => {
 
 const getRetryOptions = (logger: Logger, operation: string): Options => {
   return {
-    retries: 5,
+    retries: 3,
     minTimeout: 5_000,
     maxTimeout: 30_000,
     onFailedAttempt: (err: FailedAttemptError) => {
