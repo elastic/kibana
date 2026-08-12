@@ -250,6 +250,38 @@ describe('create()', () => {
     });
   });
 
+  describe('support-only connectors', () => {
+    test('throws a 400 when creating a connector type with no supported feature IDs', async () => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.mcp_v2',
+          supportedFeatureIds: [],
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my mcp',
+            actionTypeId: '.mcp_v2',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(
+        'Connector type ".mcp_v2" is support-only and cannot be used to create new connectors.'
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('system actions', () => {
     test('throws an error when creating a system action', async () => {
       (actionTypeRegistry.isSystemActionType as jest.Mock).mockReturnValue(true);

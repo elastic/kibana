@@ -33,9 +33,9 @@ export const McpV2Connector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    // First release: agentBuilder only. Add workflows (and other features) in a follow-up once
-    // the type is registered in every Production-NonCanary version.
-    supportedFeatureIds: ['agentBuilder'],
+    // Support-only intermediate release: register and keep existing connectors executable for
+    // rollback, but block new creation and feature attachment until a later enablement PR.
+    supportedFeatureIds: [],
   },
 
   auth: {

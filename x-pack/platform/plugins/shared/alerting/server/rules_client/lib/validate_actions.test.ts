@@ -352,4 +352,22 @@ describe('validateActions', () => {
       '"Failed to validate actions due to the following error: This type of connector cannot be used as alerting actions"'
     );
   });
+
+  it('should return error message if the action uses a support-only connector type', async () => {
+    getBulkMock.mockResolvedValueOnce([
+      { actionTypeId: 'test.supportOnlyConnector', name: 'test name' },
+    ]);
+    listTypesMock.mockResolvedValueOnce([
+      {
+        id: 'test.supportOnlyConnector',
+        name: 'Support Only',
+        supportedFeatureIds: [],
+      },
+    ]);
+    await expect(
+      validateActions(context as unknown as RulesClientContext, ruleType, data, false)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: This type of connector cannot be used as alerting actions"'
+    );
+  });
 });

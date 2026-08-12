@@ -34,7 +34,7 @@ describe('McpV2Connector', () => {
     expect(McpV2Connector.metadata.id).toBe('.mcp_v2');
     expect(McpV2Connector.auth?.types).toEqual(['none', 'bearer', 'api_key_header', 'basic']);
     expect(McpV2Connector.test?.enabled).toBe(true);
-    expect(McpV2Connector.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    expect(McpV2Connector.metadata.supportedFeatureIds).toEqual([]);
   });
 
   describe('listTools action', () => {

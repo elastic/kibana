@@ -166,15 +166,19 @@ export class ActionTypeRegistry {
     }
 
     if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
-      throw new Error(
-        i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
-          defaultMessage:
-            'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
-          values: {
-            connectorTypeId: actionType.id,
-          },
-        })
-      );
+      // Spec connectors may register with an empty feature list (support-only / rollback target).
+      // Non-spec connector types must still declare at least one feature.
+      if (actionType.source !== ACTION_TYPE_SOURCES.spec) {
+        throw new Error(
+          i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
+            defaultMessage:
+              'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
+            values: {
+              connectorTypeId: actionType.id,
+            },
+          })
+        );
+      }
     }
 
     if (actionType.supportedFeatureIds.some((id) => id.length > MAX_FEATURE_ID_LENGTH)) {
