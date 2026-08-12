@@ -101,3 +101,6 @@ export type {
   MissingDashboard,
   ResolveDashboardsResult,
 } from './form/field_groups/search_related_dashboards';
+
+export { getRunbookContent, getDashboardId } from './form';
+export type { RunbookArtifactData, DashboardArtifactData } from './form';
