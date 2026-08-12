@@ -414,7 +414,7 @@ describe('isExistingDateGtEqThanAlert with nested existing alert source', () => 
           },
           _id: 'a1',
           _index: 'test-index',
-        } as unknown as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
+        } as unknown as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
         {
           _id: 'alert-a',
           _source: {
