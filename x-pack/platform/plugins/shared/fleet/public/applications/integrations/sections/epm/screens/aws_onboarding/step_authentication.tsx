@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiFieldPassword,
   EuiFieldText,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,6 +20,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiLink,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -32,6 +34,8 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+
+import type { AwsServiceEntry } from './aws_services_data';
 
 // Light lavender-white tint used for card header bands, matched to the
 // design reference (Step 14.svg / Deploy & Detect mockups).
@@ -99,27 +103,89 @@ const REGION_OPTIONS = [
   { value: 'ap-southeast-1', text: 'AP-Southeast-1' },
 ];
 
-// Elastic Cloud Forwarder widget — the ONE place CloudFormation is launched
-// (state is lifted to the parent flow so step 4 "Deploy" can pick up the
-// resulting deploy/detect state without asking the user to launch again).
-// Credentials (incl. the Federated Identity Name) live in the Setup access
-// card above; Launch itself is always active.
+const STATUS_BADGE_SIZE = 32;
+
+// Colored circle behind the spinner/checkmark (light blue while detecting,
+// light green once data is received).
+const ServiceStatusBadge: React.FunctionComponent<{ receiving: boolean }> = ({ receiving }) => (
+  <div
+    style={{
+      width: STATUS_BADGE_SIZE,
+      height: STATUS_BADGE_SIZE,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: receiving ? '#EAF3DE' : '#E6F1FA',
+      flexShrink: 0,
+    }}
+  >
+    {receiving ? (
+      <EuiIcon type="check" color="success" size="m" />
+    ) : (
+      <EuiLoadingSpinner size="m" />
+    )}
+  </div>
+);
+
+const ServiceDetectionCard: React.FunctionComponent<{
+  service: { name: string };
+  receiving: boolean;
+}> = ({ service, receiving }) => (
+  <EuiPanel hasBorder paddingSize="m">
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <ServiceStatusBadge receiving={receiving} />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ minWidth: 0 }}>
+        <EuiText size="s" className="eui-textTruncate">
+          <strong>{service.name}</strong>
+        </EuiText>
+        <EuiText size="xs" color="subdued">
+          {receiving ? 'Receiving data' : 'Detecting data...'}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+);
+
+// Elastic Cloud Forwarder widget — owns the FULL CloudFormation lifecycle:
+// launch → per-service detection animation → stack name/version capture.
+// Deploy state is lifted to the parent flow so Detect & Review can read it.
 const CloudFormationWidget: React.FunctionComponent<{
-  servicesCount: number;
+  services: AwsServiceEntry[];
   region: string;
   onRegionChange: (value: string) => void;
   isLaunched: boolean;
   onLaunch: () => void;
-}> = ({ servicesCount, region, onRegionChange, isLaunched, onLaunch }) => {
+  receivedCount: number;
+  stackName: string;
+  onStackNameChange: (value: string) => void;
+  stackVersion: string;
+  onStackVersionChange: (value: string) => void;
+}> = ({
+  services,
+  region,
+  onRegionChange,
+  isLaunched,
+  onLaunch,
+  receivedCount,
+  stackName,
+  onStackNameChange,
+  stackVersion,
+  onStackVersionChange,
+}) => {
+  const allReceived = services.length > 0 && receivedCount >= services.length;
+
   return (
     <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-      <PanelHeader iconType="rocket" title="Elastic Cloud Forwarder" servicesCount={servicesCount} />
+      <PanelHeader iconType="rocket" title="Elastic Cloud Forwarder" servicesCount={services.length} />
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
           Log collection via a single AWS CloudFormation stack — no agents required. Trigger
-          source (S3 or CloudWatch) is configured per service in Service settings. Complete
-          Setup access above, then launch CloudFormation to deploy.
+          source (S3 or CloudWatch) is configured per service in Service settings. Launch
+          CloudFormation to deploy.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -157,22 +223,87 @@ const CloudFormationWidget: React.FunctionComponent<{
         >
           Launch CloudFormation
         </EuiButton>
-      ) : (
+      ) : !allReceived ? (
         <EuiButton isLoading disabled data-test-subj="awsOnboardingStep3CloudFormationDeploying">
           Cloudformation stack deploying...
         </EuiButton>
+      ) : (
+        <EuiText size="s">
+          <p>
+            The Elastic Cloud Forwarder has been created in your AWS account. Log collection is
+            now active.
+          </p>
+        </EuiText>
       )}
 
       {isLaunched && (
         <>
           <EuiSpacer size="m" />
           <EuiText size="s" color="subdued">
-            <p>
-              Elastic Cloud Forwarder is being set up in your AWS account. Once the stack is
-              ready, log collection will start automatically. Continue to the next step to
-              monitor deployment.
-            </p>
+            {`${receivedCount} of ${services.length} - data received`}
           </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGrid columns={4} gutterSize="m">
+            {services.map((service, i) => (
+              <EuiFlexItem key={service.id} style={{ minWidth: 0 }}>
+                <ServiceDetectionCard service={service} receiving={i < receivedCount} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        </>
+      )}
+
+      {allReceived && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiText size="s">
+            <p>Copy the stack name and stack version from AWS Console and paste it below:</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <span>
+                Stack name{' '}
+                <EuiIconTip
+                  content="Used to link this deployment to the CloudFormation stack in your account."
+                  position="right"
+                />
+              </span>
+            }
+            style={HALF_WIDTH}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              placeholder="e.g.: elastic-cloud-forwarder-xxxx"
+              value={stackName}
+              onChange={(e) => onStackNameChange(e.target.value)}
+              aria-label="Stack name"
+              data-test-subj="awsOnboardingStackName"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <span>
+                Stack version{' '}
+                <EuiIconTip
+                  content="The version of the CloudFormation stack deployed in your account."
+                  position="right"
+                />
+              </span>
+            }
+            style={HALF_WIDTH}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              placeholder="e.g.: 1.0.0"
+              value={stackVersion}
+              onChange={(e) => onStackVersionChange(e.target.value)}
+              aria-label="Stack version"
+              data-test-subj="awsOnboardingStackVersion"
+            />
+          </EuiFormRow>
         </>
       )}
     </EuiPanel>
@@ -181,32 +312,33 @@ const CloudFormationWidget: React.FunctionComponent<{
 
 type ManagedAccessMethod = 'access_keys' | 'identity_federation';
 
-// Managed Integrations widget — a second, separate credential set (used by
-// the managed integration itself to query data, distinct from the
-// CloudFormation/Setup access credentials above it). Defaults to Identity
-// Federation.
+// Managed Integrations widget — the single credentials card for the managed
+// path (the separate "Setup access" card was removed as a duplicate).
+// Defaults to Identity Federation; the Federated Identity Name is lifted to
+// the parent flow so Detect & Review's summary can read it.
 const ManagedIntegrationsWidget: React.FunctionComponent<{
   servicesCount: number;
   onValidityChange: (isValid: boolean) => void;
-}> = ({ servicesCount, onValidityChange }) => {
+  identityName: string;
+  onIdentityNameChange: (value: string) => void;
+}> = ({ servicesCount, onValidityChange, identityName, onIdentityNameChange }) => {
   const [method, setMethod] = useState<ManagedAccessMethod>('identity_federation');
   const [accessKeyId, setAccessKeyId] = useState('');
   const [isAccessKeyIdTouched, setIsAccessKeyIdTouched] = useState(false);
   const [secretAccessKey, setSecretAccessKey] = useState('');
-  const [federatedIdentityName, setFederatedIdentityName] = useState('');
   const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
   const [roleArn, setRoleArn] = useState('');
 
   const isAccessKeyIdInvalid = isAccessKeyIdTouched && accessKeyId.trim().length === 0;
-  const isIdentityNameInvalid = isIdentityNameTouched && federatedIdentityName.trim().length === 0;
+  const isIdentityNameInvalid = isIdentityNameTouched && identityName.trim().length === 0;
 
   useEffect(() => {
     const isValid =
       method === 'access_keys'
         ? accessKeyId.trim().length > 0 && secretAccessKey.trim().length > 0
-        : federatedIdentityName.trim().length > 0;
+        : identityName.trim().length > 0;
     onValidityChange(isValid);
-  }, [method, accessKeyId, secretAccessKey, federatedIdentityName, onValidityChange]);
+  }, [method, accessKeyId, secretAccessKey, identityName, onValidityChange]);
 
   return (
     <EuiPanel
@@ -282,14 +414,47 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           >
             <EuiFieldText
               fullWidth
-              value={federatedIdentityName}
-              onChange={(e) => setFederatedIdentityName(e.target.value)}
+              value={identityName}
+              onChange={(e) => onIdentityNameChange(e.target.value)}
               onBlur={() => setIsIdentityNameTouched(true)}
               isInvalid={isIdentityNameInvalid}
               aria-label="Federated Identity Name"
               data-test-subj="awsOnboardingManagedFederatedIdentityName"
             />
           </EuiFormRow>
+          <EuiSpacer size="s" />
+          <EuiAccordion id="awsOnboardingStepsToAssumeRole" buttonContent="Steps to assume role">
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <ol>
+                <li>
+                  Log in as an <strong>admin</strong> in the AWS account you want to onboard
+                </li>
+                <li>
+                  (Optional) Change the <strong>AWS region</strong> in the upper right corner to
+                  the region you want to deploy your stack to
+                </li>
+                <li>
+                  Tick the checkbox under <strong>capabilities</strong> in the opened
+                  CloudFormation stack review form:{' '}
+                  <strong>
+                    I acknowledge that AWS CloudFormation might create IAM resources.
+                  </strong>
+                </li>
+                <li>
+                  Click <strong>Create stack</strong>.
+                </li>
+                <li>
+                  Once stack status is <strong>CREATE_COMPLETE</strong> then click the Outputs tab
+                </li>
+                <li>
+                  Copy <strong>Role ARN</strong> and <strong>External ID</strong> then paste the
+                  role credentials below
+                </li>
+              </ol>
+            </EuiText>
+          </EuiAccordion>
+          <EuiSpacer size="m" />
           <EuiFormRow label="Role ARN" style={HALF_WIDTH} fullWidth>
             <EuiFieldText
               fullWidth
@@ -305,273 +470,8 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   );
 };
 
-type PreferredAccessMethod = 'identity_federation' | 'direct_access_keys';
-type IdentityMode = 'new_identity' | 'existing_identity';
-
-const PolicySecretsLink: React.FunctionComponent = () => (
-  <EuiLink href="#" target="_blank" external>
-    Learn more about policy secrets.
-  </EuiLink>
-);
-
-// Setup access widget for the managed-integration path — a "Preferred method"
-// dropdown (defaults to Identity Federation) drives which credential form
-// renders below. Within Identity Federation, New vs Existing identity is a
-// radio choice, not tabs. The Federated Identity Name is lifted to the parent
-// flow: it's the single place the name is entered (the Cloud Forwarder widget
-// no longer has its own field) and step 5's summary reads it from there.
-const SetupAccessWidget: React.FunctionComponent<{
-  servicesCount: number;
-  onValidityChange: (isValid: boolean) => void;
-  identityName: string;
-  onIdentityNameChange: (value: string) => void;
-}> = ({ servicesCount, onValidityChange, identityName, onIdentityNameChange }) => {
-  const [preferredMethod, setPreferredMethod] = useState<PreferredAccessMethod>(
-    'identity_federation'
-  );
-  const [identityMode, setIdentityMode] = useState<IdentityMode>('new_identity');
-  const federatedIdentityName = identityName;
-  const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
-  const [existingRoleArn, setExistingRoleArn] = useState('');
-  const [accessKeyId, setAccessKeyId] = useState('');
-  const [secretAccessKey, setSecretAccessKey] = useState('');
-
-  const isIdentityNameInvalid = isIdentityNameTouched && federatedIdentityName.trim().length === 0;
-
-  useEffect(() => {
-    const isValid =
-      preferredMethod === 'direct_access_keys'
-        ? accessKeyId.trim().length > 0 && secretAccessKey.trim().length > 0
-        : identityMode === 'new_identity'
-        ? federatedIdentityName.trim().length > 0
-        : existingRoleArn.trim().length > 0;
-    onValidityChange(isValid);
-  }, [
-    preferredMethod,
-    identityMode,
-    federatedIdentityName,
-    existingRoleArn,
-    accessKeyId,
-    secretAccessKey,
-    onValidityChange,
-  ]);
-
-  return (
-    <EuiPanel
-      hasBorder
-      paddingSize="l"
-      style={{ overflow: 'hidden' }}
-      data-test-subj="awsOnboardingSetupAccessPanel"
-    >
-      <PanelHeader iconType="lock" title="Setup access" servicesCount={servicesCount} />
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <span>
-            Preferred method{' '}
-            <EuiIconTip
-              content="How Elastic connects to your AWS account to collect data."
-              position="right"
-            />
-          </span>
-        }
-        style={HALF_WIDTH}
-        fullWidth
-      >
-        <EuiSelect
-          fullWidth
-          options={[
-            { value: 'identity_federation', text: 'Identity Federation' },
-            { value: 'direct_access_keys', text: 'Direct Access Keys' },
-          ]}
-          value={preferredMethod}
-          onChange={(e) => setPreferredMethod(e.target.value as PreferredAccessMethod)}
-          aria-label="Preferred method"
-          data-test-subj="awsOnboardingPreferredMethod"
-        />
-      </EuiFormRow>
-
-      {preferredMethod === 'identity_federation' ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiRadioGroup
-            options={[
-              { id: 'new_identity', label: 'New Identity' },
-              { id: 'existing_identity', label: 'Existing Identity' },
-            ]}
-            idSelected={identityMode}
-            onChange={(id) => setIdentityMode(id as IdentityMode)}
-            name="awsOnboardingIdentityMode"
-            legend={{ children: 'Identity mode' }}
-            data-test-subj="awsOnboardingIdentityModeRadioGroup"
-          />
-          <EuiSpacer size="m" />
-
-          {identityMode === 'new_identity' && (
-            <>
-              <EuiFormRow
-                label="Federated Identity Name"
-                isInvalid={isIdentityNameInvalid}
-                error="Federated Identity Name is required"
-                style={HALF_WIDTH}
-                fullWidth
-              >
-                <EuiFieldText
-                  fullWidth
-                  isInvalid={isIdentityNameInvalid}
-                  value={federatedIdentityName}
-                  onChange={(e) => onIdentityNameChange(e.target.value)}
-                  onBlur={() => setIsIdentityNameTouched(true)}
-                  aria-label="Federated Identity Name"
-                  data-test-subj="awsOnboardingFederatedIdentityName"
-                />
-              </EuiFormRow>
-              <EuiSpacer size="s" />
-              <EuiAccordion id="awsOnboardingStepsToAssumeRole" buttonContent="Steps to assume role">
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <ol>
-                    <li>
-                      Log in as an <strong>admin</strong> in the AWS account you want to onboard
-                    </li>
-                    <li>
-                      (Optional) Change the <strong>AWS region</strong> in the upper right corner
-                      to the region you want to deploy your stack to
-                    </li>
-                    <li>
-                      Tick the checkbox under <strong>capabilities</strong> in the opened
-                      CloudFormation stack review form:{' '}
-                      <strong>
-                        I acknowledge that AWS CloudFormation might create IAM resources.
-                      </strong>
-                    </li>
-                    <li>
-                      Click <strong>Create stack</strong>.
-                    </li>
-                    <li>
-                      Once stack status is <strong>CREATE_COMPLETE</strong> then click the Outputs
-                      tab
-                    </li>
-                    <li>
-                      Copy <strong>Role ARN</strong> and <strong>External ID</strong> then paste
-                      the role credentials below
-                    </li>
-                  </ol>
-                </EuiText>
-              </EuiAccordion>
-              <EuiSpacer size="m" />
-              <EuiFormRow label="Role ARN" style={HALF_WIDTH} fullWidth>
-                <EuiFieldText fullWidth aria-label="Role ARN" />
-              </EuiFormRow>
-            </>
-          )}
-
-          {identityMode === 'existing_identity' && (
-            <EuiFormRow label="Role ARN" style={HALF_WIDTH} fullWidth>
-              <EuiFieldText
-                fullWidth
-                placeholder="arn:aws:iam::123456789012:role/elastic-forwarder"
-                value={existingRoleArn}
-                onChange={(e) => setExistingRoleArn(e.target.value)}
-                aria-label="Role ARN"
-                data-test-subj="awsOnboardingExistingRoleArn"
-              />
-            </EuiFormRow>
-          )}
-
-          <EuiSpacer size="m" />
-          <EuiPanel color="subdued" paddingSize="m" style={HALF_WIDTH}>
-            <EuiFormRow
-              label={
-                <span>
-                  External ID{' '}
-                  <EuiIconTip
-                    type="info"
-                    content="A unique identifier used to prevent the confused-deputy problem when assuming a role in another AWS account."
-                    position="right"
-                  />
-                </span>
-              }
-              helpText={
-                <>
-                  External ID to use when assuming a role in another account, see the{' '}
-                  <EuiLink href="#" target="_blank" external>
-                    AWS documentation for use of external IDs
-                  </EuiLink>
-                </>
-              }
-              fullWidth
-            >
-              <EuiFieldPassword type="dual" fullWidth aria-label="External ID" />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <PolicySecretsLink />
-          </EuiPanel>
-        </>
-      ) : (
-        <>
-          <EuiSpacer size="m" />
-          <EuiPanel color="subdued" paddingSize="m" style={HALF_WIDTH}>
-            <EuiFormRow
-              label={
-                <span>
-                  Access Key ID{' '}
-                  <EuiIconTip
-                    type="info"
-                    content="The AWS access key ID for the credentials Elastic uses to collect data."
-                    position="right"
-                  />
-                </span>
-              }
-              fullWidth
-            >
-              <EuiFieldPassword
-                type="dual"
-                fullWidth
-                value={accessKeyId}
-                onChange={(e) => setAccessKeyId(e.target.value)}
-                aria-label="Access Key ID"
-                data-test-subj="awsOnboardingAccessKeyId"
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <PolicySecretsLink />
-          </EuiPanel>
-          <EuiSpacer size="m" />
-          <EuiPanel color="subdued" paddingSize="m" style={HALF_WIDTH}>
-            <EuiFormRow
-              label={
-                <span>
-                  Secret Access Key{' '}
-                  <EuiIconTip
-                    type="info"
-                    content="The AWS secret access key paired with the access key ID above."
-                    position="right"
-                  />
-                </span>
-              }
-              fullWidth
-            >
-              <EuiFieldPassword
-                type="dual"
-                fullWidth
-                value={secretAccessKey}
-                onChange={(e) => setSecretAccessKey(e.target.value)}
-                aria-label="Secret Access Key"
-                data-test-subj="awsOnboardingSecretAccessKey"
-              />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <PolicySecretsLink />
-          </EuiPanel>
-        </>
-      )}
-    </EuiPanel>
-  );
-};
-
 export const StepAuthentication: React.FunctionComponent<{
-  servicesCount: number;
+  services: AwsServiceEntry[];
   deploymentMethod: DeploymentMethod;
   onDeploymentMethodChange: (method: DeploymentMethod) => void;
   onCredentialsValidChange: (isValid: boolean) => void;
@@ -581,8 +481,13 @@ export const StepAuthentication: React.FunctionComponent<{
   onDeployRegionChange: (value: string) => void;
   isDeployed: boolean;
   onLaunchCloudFormation: () => void;
+  receivedCount: number;
+  stackName: string;
+  onStackNameChange: (value: string) => void;
+  stackVersion: string;
+  onStackVersionChange: (value: string) => void;
 }> = ({
-  servicesCount,
+  services,
   deploymentMethod,
   onDeploymentMethodChange,
   onCredentialsValidChange,
@@ -592,13 +497,19 @@ export const StepAuthentication: React.FunctionComponent<{
   onDeployRegionChange,
   isDeployed,
   onLaunchCloudFormation,
+  receivedCount,
+  stackName,
+  onStackNameChange,
+  stackVersion,
+  onStackVersionChange,
 }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [pendingMethod, setPendingMethod] = useState<DeploymentMethod>(deploymentMethod);
   const [agentAccessKeyId, setAgentAccessKeyId] = useState('');
   const [agentSecretAccessKey, setAgentSecretAccessKey] = useState('');
-  const [managedCredsValid, setManagedCredsValid] = useState(false);
   const [managedIntegrationsValid, setManagedIntegrationsValid] = useState(false);
+
+  const servicesCount = services.length;
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -612,13 +523,12 @@ export const StepAuthentication: React.FunctionComponent<{
     const isValid =
       deploymentMethod === 'agent'
         ? agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0
-        : managedCredsValid && managedIntegrationsValid;
+        : managedIntegrationsValid;
     onCredentialsValidChange(isValid);
   }, [
     deploymentMethod,
     agentAccessKeyId,
     agentSecretAccessKey,
-    managedCredsValid,
     managedIntegrationsValid,
     onCredentialsValidChange,
   ]);
@@ -626,13 +536,13 @@ export const StepAuthentication: React.FunctionComponent<{
   return (
     <>
       <EuiTitle size="m">
-        <h2>Authentication</h2>
+        <h2>Authenticate &amp; Deploy</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>
-          Select a deployment method and provide the credentials needed to connect your AWS
-          services to Elastic.
+          Select a deployment method, provide the credentials needed to connect your AWS services
+          to Elastic, and deploy.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -728,24 +638,24 @@ export const StepAuthentication: React.FunctionComponent<{
         </EuiPanel>
       ) : (
         <>
-          <SetupAccessWidget
+          <ManagedIntegrationsWidget
             servicesCount={servicesCount}
-            onValidityChange={setManagedCredsValid}
+            onValidityChange={setManagedIntegrationsValid}
             identityName={deployIdentityName}
             onIdentityNameChange={onDeployIdentityNameChange}
           />
           <EuiSpacer size="m" />
           <CloudFormationWidget
-            servicesCount={servicesCount}
+            services={services}
             region={deployRegion}
             onRegionChange={onDeployRegionChange}
             isLaunched={isDeployed}
             onLaunch={onLaunchCloudFormation}
-          />
-          <EuiSpacer size="m" />
-          <ManagedIntegrationsWidget
-            servicesCount={servicesCount}
-            onValidityChange={setManagedIntegrationsValid}
+            receivedCount={receivedCount}
+            stackName={stackName}
+            onStackNameChange={onStackNameChange}
+            stackVersion={stackVersion}
+            onStackVersionChange={onStackVersionChange}
           />
         </>
       )}

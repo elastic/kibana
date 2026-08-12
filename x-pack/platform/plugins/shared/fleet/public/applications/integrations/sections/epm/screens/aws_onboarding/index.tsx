@@ -38,7 +38,6 @@ import {
 } from './aws_services_data';
 import { StepServiceSettings } from './step_service_settings';
 import { StepAuthentication, type DeploymentMethod } from './step_authentication';
-import { StepDeploy } from './step_deploy';
 import { StepDetectReview } from './step_detect_review';
 
 type DataTypeFilterId = 'all' | 'logs' | 'metrics';
@@ -213,7 +212,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     });
   };
 
-  const totalSteps = 5;
+  const totalSteps = 4;
 
   const onToggle = (id: string) => {
     setSelected((prev) => {
@@ -248,14 +247,13 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     ? AWS_SERVICE_CATEGORIES.filter((c) => (visibleByCategory.get(c.id) ?? []).length > 0)
     : AWS_SERVICE_CATEGORIES.filter((c) => c.id === activeCategoryId);
 
-  // Both deployment methods share the same 5-step frame. Agent-based doesn't
-  // have Deploy/Detect & Review content designed yet (see placeholders below),
-  // but the step bar itself stays consistent between methods.
+  // Both deployment methods share the same 4-step frame. Step 3 owns the full
+  // authenticate + deploy lifecycle (CloudFormation launch and detection
+  // animation included); step 4 reviews and installs content.
   const stepTitles = [
     'Choose Services',
     'Service Settings',
-    'Authentication',
-    'Deploy',
+    'Authenticate & Deploy',
     'Detect & Review',
   ];
 
@@ -407,7 +405,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 3 && (
         <StepAuthentication
-          servicesCount={selectedServices.length}
+          services={selectedServices}
           deploymentMethod={deploymentMethod}
           onDeploymentMethodChange={onDeploymentMethodChange}
           onCredentialsValidChange={setIsCredentialsValid}
@@ -417,13 +415,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onDeployRegionChange={setDeployRegion}
           isDeployed={isDeployed}
           onLaunchCloudFormation={onLaunchCloudFormation}
-        />
-      )}
-
-      {currentStep === 4 && deploymentMethod === 'managed' && (
-        <StepDeploy
-          services={selectedServices}
-          isLaunched={isDeployed}
           receivedCount={receivedCount}
           stackName={stackName}
           onStackNameChange={setStackName}
@@ -431,19 +422,8 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onStackVersionChange={setStackVersion}
         />
       )}
-      {currentStep === 4 && deploymentMethod === 'agent' && (
-        <>
-          <EuiTitle size="m">
-            <h2>Deploy</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>[Placeholder — not yet designed for Agent-based.]</p>
-          </EuiText>
-        </>
-      )}
 
-      {currentStep === 5 && deploymentMethod === 'managed' && (
+      {currentStep === 4 && deploymentMethod === 'managed' && (
         <StepDetectReview
           services={selectedServices}
           triggerSources={triggerSources}
@@ -453,7 +433,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           receivedCount={receivedCount}
         />
       )}
-      {currentStep === 5 && deploymentMethod === 'agent' && (
+      {currentStep === 4 && deploymentMethod === 'agent' && (
         <>
           <EuiTitle size="m">
             <h2>Detect &amp; Review</h2>
@@ -465,7 +445,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         </>
       )}
 
-      {/* Steps 3-5 end in bordered cards, so a rule above the footer reads as
+      {/* Steps 3-4 end in bordered cards, so a rule above the footer reads as
           a duplicate line there — keep it only on the first two steps. */}
       {currentStep < 3 ? <EuiHorizontalRule margin="xl" /> : <EuiSpacer size="xl" />}
       <EuiFlexGroup alignItems="center" responsive={false}>
@@ -492,15 +472,14 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               fill
               isDisabled={
                 selected.size === 0 ||
-                // Authentication: credential fields for the selected method must be
-                // filled, and (managed only) CloudFormation must already be launched —
-                // step 4 only displays the resulting deploy/detect state, it can't
-                // trigger the launch itself.
+                // Authenticate & Deploy: credentials for the selected method must
+                // be filled, and (managed only) CloudFormation must be launched
+                // and the stack name entered — the stack fields only appear once
+                // every service is receiving data.
                 (currentStep === 3 &&
-                  (!isCredentialsValid || (deploymentMethod === 'managed' && !isDeployed))) ||
-                (currentStep === 4 &&
-                  deploymentMethod === 'managed' &&
-                  stackName.trim().length === 0)
+                  (!isCredentialsValid ||
+                    (deploymentMethod === 'managed' &&
+                      (!isDeployed || stackName.trim().length === 0))))
               }
               onClick={() => setCurrentStep(currentStep + 1)}
               data-test-subj="awsOnboardingNext"

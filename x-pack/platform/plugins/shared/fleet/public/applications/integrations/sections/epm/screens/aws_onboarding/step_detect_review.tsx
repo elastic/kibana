@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -74,8 +75,23 @@ const DeploymentSummaryCard: React.FunctionComponent<{
   stackName: string;
   receivedCount: number;
 }> = ({ services, triggerSources, region, identityName, stackName, receivedCount }) => {
-  // Mirror step 4: the selected CloudFormation services plus the Managed
-  // Integrations examples, so the summary covers everything shown there.
+  // The Managed Integrations data streams confirm here (fast spinner-to-check
+  // animation): first after 800ms, then one every 700ms. The CloudFormation
+  // services arrive already-received from the Authenticate & Deploy step.
+  const [managedReceived, setManagedReceived] = useState(0);
+  const managedTimers = useRef<number[]>([]);
+  useEffect(() => {
+    setManagedReceived(0);
+    MANAGED_INTEGRATION_EXAMPLES.forEach((_, i) => {
+      managedTimers.current.push(
+        window.setTimeout(() => setManagedReceived((c) => c + 1), 800 + i * 700)
+      );
+    });
+    return () => managedTimers.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  // The selected CloudFormation services plus the Managed Integrations
+  // examples, so the summary covers everything deployed.
   const allServices = [
     ...services.map((service, i) => ({
       key: service.id,
@@ -83,10 +99,10 @@ const DeploymentSummaryCard: React.FunctionComponent<{
       receiving: i < receivedCount,
       badge: `Trigger: ${triggerSources[service.id] ?? 'S3'}`,
     })),
-    ...MANAGED_INTEGRATION_EXAMPLES.map((name) => ({
+    ...MANAGED_INTEGRATION_EXAMPLES.map((name, i) => ({
       key: name,
       name,
-      receiving: true,
+      receiving: i < managedReceived,
       badge: 'Managed Integration',
     })),
   ];
@@ -127,18 +143,18 @@ const DeploymentSummaryCard: React.FunctionComponent<{
             <EuiPanel hasBorder paddingSize="m">
               <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={service.receiving ? 'checkCircle' : 'clock'}
-                    color={service.receiving ? 'success' : 'subdued'}
-                    size="l"
-                  />
+                  {service.receiving ? (
+                    <EuiIcon type="checkCircle" color="success" size="l" />
+                  ) : (
+                    <EuiLoadingSpinner size="l" />
+                  )}
                 </EuiFlexItem>
                 <EuiFlexItem style={{ minWidth: 0 }}>
                   <EuiText size="s" className="eui-textTruncate">
                     <strong>{service.name}</strong>
                   </EuiText>
                   <EuiText size="xs" color="subdued">
-                    {service.receiving ? 'Receiving data' : 'Waiting for data'}
+                    {service.receiving ? 'Receiving data' : 'Detecting data...'}
                   </EuiText>
                   <EuiSpacer size="xs" />
                   <div>
