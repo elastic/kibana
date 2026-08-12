@@ -75,7 +75,9 @@ describe('scriptsJavaScriptStepDefinition', () => {
 
     const result = await scriptsJavaScriptStepDefinition.handler(context);
 
-    expect(result.error?.message).toContain(`exceeds maximum allowed size of ${CODE_MAX_LENGTH_MB} MB`);
+    expect(result.error?.message).toContain(
+      `exceeds maximum allowed size of ${CODE_MAX_LENGTH_MB} MB`
+    );
     expect(result.error?.message).toContain('Reduce interpolated data or split the workflow');
   });
 
