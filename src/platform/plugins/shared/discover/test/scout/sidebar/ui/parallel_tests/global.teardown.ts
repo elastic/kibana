@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { globalTeardownHook } from '@kbn/scout';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-  };
-}
+globalTeardownHook('Teardown Discover sidebar tests data', async ({ log }) => {
+  log.debug('[teardown:sidebar] no custom teardown required');
+});

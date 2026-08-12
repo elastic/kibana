@@ -22,6 +22,21 @@ export const DATE_NESTED_ES_ARCHIVE =
 export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
+export const MANY_FIELDS_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/many_fields';
+
+export const MANY_FIELDS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view';
+
+export const INDEX_PATTERN_WITHOUT_TIMEFIELD_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield';
+
+export const INDEX_PATTERN_WITHOUT_TIMEFIELD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield';
+
+export const LOGSTASH_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
+
 /**
  * Saved searches exercising ES|QL column rendering (initial/custom columns for
  * transformational and non-transformational commands).
@@ -32,6 +47,12 @@ export const DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE =
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 export const SAVED_SEARCH_TITLE = 'A Saved Search';
+
+export const LOGSTASH_AVAILABLE_FIELD_COUNT = 49;
+export const LOGSTASH_META_FIELD_COUNT = 4;
+
+export const LOGSTASH_ESQL_AVAILABLE_FIELD_COUNT = 77;
+export const LOGSTASH_ESQL_EMPTY_FIELD_COUNT = 6;
 
 /**
  * Default time range that covers the `logstash_functional` fixture data.
