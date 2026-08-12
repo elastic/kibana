@@ -165,7 +165,9 @@ fi
 # trigger so that a Vault or GCS failure does not block the trigger upload.
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   echo "--- Publish workflow step schema to CDN"
-  (cd "$(git rev-parse --show-toplevel)" && .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless)
+  if ! (cd "$(git rev-parse --show-toplevel)" && .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless); then
+    echo "^^^ Workflow step schema CDN publish failed; continuing so the image-tag-update trigger is not blocked."
+  fi
 fi
 
 # This part is related with updating the configuration of kibana-controller,
