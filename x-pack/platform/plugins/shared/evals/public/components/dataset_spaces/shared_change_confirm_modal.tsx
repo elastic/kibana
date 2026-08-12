@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { DatasetSharedNotice, type SharedDatasetAction } from './dataset_shared_notice';
 import { useDatasetSharing } from './use_dataset_sharing';
@@ -17,6 +18,8 @@ interface SharedChangeConfirmModalProps {
   action: Extract<SharedDatasetAction, 'edit-dataset' | 'edit-example'>;
   /** Spaces the edit takes the dataset out of, losing access rather than changing content. */
   removedSpaceIds?: string[];
+  /** What it will be assigned to instead, to say what a narrowing leaves behind. */
+  nextSpaceIds?: string[];
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -30,13 +33,19 @@ export const SharedChangeConfirmModal: React.FC<SharedChangeConfirmModalProps> =
   spaceIds,
   action,
   removedSpaceIds,
+  nextSpaceIds,
   onConfirm,
   onCancel,
   isLoading,
 }) => {
   const { spaceNamesFor } = useDatasetSharing(spaceIds);
-  const removedSpaceNames = spaceNamesFor(removedSpaceIds ?? []);
-  const isRemoving = removedSpaceNames.length > 0;
+  // `*` stands for every space rather than naming one, so dropping it takes its
+  // own sentence instead of appearing in a list of spaces losing the dataset.
+  const isLeavingAllSpaces = (removedSpaceIds ?? []).includes(ALL_SPACES_ID);
+  const removedSpaceNames = spaceNamesFor(
+    (removedSpaceIds ?? []).filter((spaceId) => spaceId !== ALL_SPACES_ID)
+  );
+  const isRemoving = isLeavingAllSpaces || removedSpaceNames.length > 0;
   const title = isRemoving
     ? i18n.CONFIRM_REMOVE_SPACES_TITLE
     : action === 'edit-dataset'
@@ -63,7 +72,13 @@ export const SharedChangeConfirmModal: React.FC<SharedChangeConfirmModalProps> =
             announceOnMount
             size="s"
             title={i18n.REMOVED_SPACES_TITLE}
-            text={<p>{i18n.getRemovedSpacesMessage(removedSpaceNames)}</p>}
+            text={
+              <p>
+                {isLeavingAllSpaces
+                  ? i18n.getLeavingAllSpacesMessage(spaceNamesFor(nextSpaceIds ?? []))
+                  : i18n.getRemovedSpacesMessage(removedSpaceNames)}
+              </p>
+            }
             data-test-subj="datasetRemovedSpacesNotice"
           />
           <EuiSpacer size="m" />

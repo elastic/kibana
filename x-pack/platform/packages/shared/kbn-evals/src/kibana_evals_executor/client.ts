@@ -58,8 +58,11 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       model: Model;
       executionId?: string;
       repetitions?: number;
-      /** Persists the dataset and resolves to the id the server assigned it. */
-      upsertDataset?: (dataset: EvaluationDataset) => Promise<string | void>;
+      /**
+       * Persists the dataset and resolves to the id the server stored it under,
+       * which scores are stamped with. An id it didn't return would detach them.
+       */
+      upsertDataset?: (dataset: EvaluationDataset) => Promise<string>;
       getDatasetByName?: (
         datasetName: string
       ) => Promise<EvaluationDataset | EvaluationDatasetWithId | null>;

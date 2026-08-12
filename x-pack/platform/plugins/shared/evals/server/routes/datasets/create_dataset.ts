@@ -10,6 +10,7 @@ import {
   CreateEvaluationDatasetRequestBody,
   EVALS_DATASETS_URL,
   INTERNAL_API_ACCESS,
+  resolveDatasetHomeSpace,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -21,11 +22,7 @@ import {
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
 import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
-import {
-  resolveDatasetHomeSpace,
-  resolveTargetSpaces,
-  withoutSpaceIds,
-} from '../shared/resolve_dataset_spaces';
+import { resolveTargetSpaces, withoutSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerCreateDatasetRoute = ({

@@ -132,7 +132,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
           <p>
             <FormattedMessage
               id="xpack.evals.deleteDatasetModal.unshareWarning"
-              defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example} other {# examples}} stay available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
+              defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
               values={{ examplesCount, remainingCount: spaceCount - 1 }}
             />
           </p>

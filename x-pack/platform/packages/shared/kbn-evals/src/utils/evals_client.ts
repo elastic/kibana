@@ -10,6 +10,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
   API_VERSIONS,
   DATASET_UUID_NAMESPACE,
+  DeleteEvaluationDatasetResponse,
   EVALS_DATASETS_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
@@ -25,8 +26,10 @@ import {
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
+  DEFAULT_SPACE_ID,
   ResolveEvaluationDatasetResponse,
   UpsertEvaluationDatasetResponse,
+  resolveDatasetHomeSpace,
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
@@ -175,12 +178,30 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
-  constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
+  /** The space every request is sent to, when it isn't the default one. */
+  private readonly homeSpaceId?: string;
+
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: SomeDevLog,
+    { spaceIds }: { spaceIds?: string[] } = {}
+  ) {
+    // Runs in the space the datasets are written to, rather than writing to it
+    // from the default space, so ids resolve and privileges are checked where
+    // the data lands. `*` stays unprefixed: it is not a path segment, and the
+    // privilege it needs is global anyway.
+    const homeSpaceId = resolveDatasetHomeSpace(DEFAULT_SPACE_ID, spaceIds ?? []);
+    this.homeSpaceId = homeSpaceId === DEFAULT_SPACE_ID ? undefined : homeSpaceId;
+  }
+
+  private path(path: string): string {
+    return this.homeSpaceId ? `/s/${encodeURIComponent(this.homeSpaceId)}${path}` : path;
+  }
 
   async ingestScores(request: IngestScoresRequestBodyInput): Promise<IngestScoresResult> {
     const body = IngestScoresRequestBody.parse(request);
     const response = await this.kbnClient.request({
-      path: EVALS_SCORES_URL,
+      path: this.path(EVALS_SCORES_URL),
       method: 'POST',
       body,
       headers: VERSIONED_HEADERS,
@@ -214,7 +235,9 @@ export class EvalsClient {
   ): Promise<ExperimentStats | null> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId)),
+        path: this.path(
+          EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId))
+        ),
         method: 'GET',
         query: buildExperimentQuery(options),
         headers: VERSIONED_HEADERS,
@@ -233,9 +256,8 @@ export class EvalsClient {
   ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENT_SCORES_URL.replace(
-          '{experimentId}',
-          encodeURIComponent(experimentId)
+        path: this.path(
+          EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', encodeURIComponent(experimentId))
         ),
         method: 'GET',
         query: buildExperimentQuery(options),
@@ -262,7 +284,7 @@ export class EvalsClient {
    */
   async upsertDataset(dataset: UpsertDatasetInput): Promise<string> {
     const response = await this.kbnClient.request({
-      path: EVALS_DATASET_UPSERT_URL,
+      path: this.path(EVALS_DATASET_UPSERT_URL),
       method: 'POST',
       body: {
         name: dataset.name,
@@ -284,7 +306,7 @@ export class EvalsClient {
   private async fetchDatasetById(datasetId: string): Promise<DatasetWithId | null> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
+        path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
         method: 'GET',
         headers: VERSIONED_HEADERS,
         retries: 0,
@@ -314,8 +336,8 @@ export class EvalsClient {
   }
 
   /**
-   * Looks a dataset up by name, guessing the default-space id first — the
-   * common case, and all an older Kibana understands — then asking the server.
+   * Looks a dataset up by name within the run's space, guessing the legacy id
+   * first — all an older Kibana understands — then asking the server.
    */
   async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
     const defaultSpaceDataset = await this.fetchDatasetById(
@@ -327,7 +349,7 @@ export class EvalsClient {
 
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_DATASET_RESOLVE_URL,
+        path: this.path(EVALS_DATASET_RESOLVE_URL),
         method: 'GET',
         query: { name: datasetName },
         headers: VERSIONED_HEADERS,
@@ -346,6 +368,26 @@ export class EvalsClient {
     }
   }
 
+  /**
+   * Deletes a dataset, or detaches it from the run's space when other spaces
+   * still use it. The server decides which and reports it back as `unshared`.
+   *
+   * Takes an id rather than a name: names are only unique within a space, so a
+   * wrong one could resolve to a dataset the caller never meant to touch.
+   */
+  async deleteDataset(datasetId: string): Promise<{ unshared: boolean }> {
+    const response = await this.kbnClient.request({
+      path: this.path(EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId))),
+      method: 'DELETE',
+      headers: VERSIONED_HEADERS,
+      retries: 0,
+    });
+
+    const { unshared } = DeleteEvaluationDatasetResponse.parse(getResponseData(response));
+
+    return { unshared: unshared ?? false };
+  }
+
   async findLatestExperimentForBuild({
     suiteId,
     branch,
@@ -362,7 +404,7 @@ export class EvalsClient {
         : baseExecutionId;
 
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENTS_URL,
+        path: this.path(EVALS_EXPERIMENTS_URL),
         method: 'GET',
         query: {
           suite_id: suiteId,
@@ -412,7 +454,7 @@ export class EvalsClient {
   }): Promise<BaselineExperiment | undefined> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENTS_URL,
+        path: this.path(EVALS_EXPERIMENTS_URL),
         method: 'GET',
         query: {
           suite_id: suiteId,
@@ -452,7 +494,7 @@ export class EvalsClient {
   async assertPluginEnabled(): Promise<void> {
     try {
       await this.kbnClient.request({
-        path: EVALS_DATASETS_URL,
+        path: this.path(EVALS_DATASETS_URL),
         method: 'GET',
         query: { page: 1, per_page: 1 },
         headers: VERSIONED_HEADERS,
@@ -460,7 +502,13 @@ export class EvalsClient {
       });
     } catch (error: unknown) {
       if (getStatusCode(error) === 404) {
-        throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
+        // Kibana answers 404 for a space that doesn't exist, before the request
+        // reaches the route that would name the bad id.
+        throw new Error(
+          this.homeSpaceId
+            ? `Evaluations API returned 404 for space "${this.homeSpaceId}". The space may not exist on the target Kibana; --space-ids must name existing spaces. ${EVALS_PLUGIN_DISABLED_MESSAGE}`
+            : EVALS_PLUGIN_DISABLED_MESSAGE
+        );
       }
       throw error;
     }

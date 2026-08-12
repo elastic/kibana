@@ -979,6 +979,89 @@ describe('DatasetClient', () => {
       ]);
     });
 
+    it('refuses a name a dataset shared into the space already holds', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      await marketing.create({
+        name: 'shared-name',
+        description: 'Marketing',
+        spaceIds: ['marketing', 'sales'],
+      });
+
+      await expect(sales.create({ name: 'shared-name', description: 'Sales' })).rejects.toThrow(
+        DatasetAlreadyExistsError
+      );
+    });
+
+    it('refuses a name taken anywhere when creating for all spaces', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      await marketing.create({ name: 'shared-name', description: 'Marketing' });
+
+      // Assigning to `*` makes it visible alongside the marketing one.
+      await expect(
+        sales.create({ name: 'shared-name', description: 'Everywhere', spaceIds: ['*'] })
+      ).rejects.toThrow(DatasetAlreadyExistsError);
+    });
+
+    it('refuses a name already held in another space the dataset is created for', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      await sales.create({ name: 'shared-name', description: 'Sales' });
+
+      await expect(
+        marketing.create({
+          name: 'shared-name',
+          description: 'Marketing',
+          spaceIds: ['marketing', 'sales'],
+        })
+      ).rejects.toThrow(DatasetAlreadyExistsError);
+    });
+
+    it('reuses a name whose derived id is held by a dataset that moved away', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      // Ids encode the space a dataset was created in, so one reassigned
+      // elsewhere keeps holding the slot the name derives to here. The name is
+      // free, so creating it again has to succeed rather than 409 on a dataset
+      // this space can't see.
+      const moved = await client.create({ name: 'shared-name', description: 'Marketing' });
+      await client.update(moved.id, { spaceIds: ['sales'] });
+
+      const recreated = await client.create({
+        name: 'shared-name',
+        description: 'Marketing again',
+      });
+
+      expect(recreated.id).not.toBe(moved.id);
+      await expect(client.getByName('shared-name')).resolves.toEqual(
+        expect.objectContaining({ id: recreated.id, description: 'Marketing again' })
+      );
+    });
+
+    it('resolves a name to the same dataset every time when duplicates predate the check', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      const older = await client.create({ name: 'first', description: 'Older' });
+      storage.datasetsStorage.docs.set('duplicate-id', {
+        ...storage.datasetsStorage.docs.get(older.id)!,
+        name: 'first',
+        description: 'Newer',
+        created_at: '2999-01-01T00:00:00.000Z',
+      });
+
+      expect((await client.resolveByName('first'))?.id).toBe(older.id);
+      expect((await client.getByName('first'))?.id).toBe(older.id);
+    });
+
     it('treats a dataset without a stored assignment as belonging to the default space', async () => {
       const storage = {
         datasetsStorage: createDatasetStorageClient(),

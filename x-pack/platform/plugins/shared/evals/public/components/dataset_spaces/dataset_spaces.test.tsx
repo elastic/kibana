@@ -15,6 +15,8 @@ import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { DatasetSharedNotice } from './dataset_shared_notice';
 import { DatasetSpacesBadge } from './dataset_spaces_badge';
 import { DatasetSpacesPicker } from './dataset_spaces_picker';
+import { SharedChangeConfirmModal } from './shared_change_confirm_modal';
+import { getRemovedSpaceIds } from './use_dataset_sharing';
 
 jest.mock('../../hooks/use_spaces');
 
@@ -154,5 +156,63 @@ describe('DatasetSpacesPicker', () => {
     await userEvent.click(screen.getByRole('option', { name: 'Marketing' }));
 
     expect(onChange).toHaveBeenCalledWith(['default', 'marketing', UNKNOWN_SPACE]);
+  });
+});
+
+describe('getRemovedSpaceIds', () => {
+  it('takes the dataset out of nowhere when it is expanded to all spaces', () => {
+    // Granting access everywhere is the opposite of a removal, so the spaces it
+    // already had must not read as losing it.
+    expect(getRemovedSpaceIds(['default', 'marketing'], [ALL_SPACES_ID])).toEqual([]);
+    expect(getRemovedSpaceIds(['default'], [ALL_SPACES_ID])).toEqual([]);
+  });
+
+  it('reports all spaces itself when a dataset is narrowed out of it', () => {
+    expect(getRemovedSpaceIds([ALL_SPACES_ID], ['marketing'])).toEqual([ALL_SPACES_ID]);
+  });
+
+  it('reports the spaces an edit drops', () => {
+    expect(getRemovedSpaceIds(['default', 'marketing'], ['default'])).toEqual(['marketing']);
+  });
+
+  it('leaves spaces the caller cannot see out of the removals', () => {
+    expect(getRemovedSpaceIds(['default', UNKNOWN_SPACE], ['default'])).toEqual([]);
+  });
+});
+
+describe('SharedChangeConfirmModal', () => {
+  const renderModal = (props: Partial<React.ComponentProps<typeof SharedChangeConfirmModal>>) =>
+    render(
+      <SharedChangeConfirmModal
+        spaceIds={['default', 'marketing']}
+        action="edit-dataset"
+        onConfirm={jest.fn()}
+        onCancel={jest.fn()}
+        {...props}
+      />,
+      { wrapper: Wrapper }
+    );
+
+  it('names the spaces an edit takes the dataset out of', () => {
+    renderModal({ removedSpaceIds: ['marketing'], nextSpaceIds: ['default'] });
+
+    expect(screen.getByTestId('datasetRemovedSpacesNotice')).toHaveTextContent(
+      'It will no longer appear in Marketing.'
+    );
+  });
+
+  it('says what a dataset leaving all spaces is left with', () => {
+    // `*` stands for every space rather than naming one, so listing it as a
+    // space losing the dataset would read as a space called "*".
+    renderModal({
+      spaceIds: [ALL_SPACES_ID],
+      removedSpaceIds: [ALL_SPACES_ID],
+      nextSpaceIds: ['marketing'],
+    });
+
+    const notice = screen.getByTestId('datasetRemovedSpacesNotice');
+    expect(notice).toHaveTextContent('It is in every space today.');
+    expect(notice).toHaveTextContent('it will only be in Marketing');
+    expect(notice).not.toHaveTextContent(ALL_SPACES_ID);
   });
 });

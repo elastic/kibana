@@ -248,10 +248,14 @@ export const useDeleteDataset = () => {
         version: API_VERSIONS.internal.v1,
       });
     },
-    onSuccess: async (_response, { datasetId }) => {
+    onSuccess: async () => {
+      // Invalidating `datasets.all` would cover both in one call, but it is a
+      // prefix of `datasets.detail`, so it would also refetch the dataset just
+      // deleted, from the detail page still on screen while it redirects away.
+      // That request 404s, so the stale detail entry is left to expire instead.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });

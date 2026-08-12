@@ -31,12 +31,12 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const mutateAsync = jest.fn().mockResolvedValue({ deleted: true, unshared: false });
 
-const renderModal = (spaceIds?: string[]) =>
+const renderModal = (spaceIds?: string[], examplesCount = 3) =>
   render(
     <DeleteDatasetModal
       datasetId="dataset-1"
       datasetName="Golden set"
-      examplesCount={3}
+      examplesCount={examplesCount}
       spaceIds={spaceIds}
       onClose={jest.fn()}
     />,
@@ -77,6 +77,25 @@ describe('DeleteDatasetModal', () => {
     expect(confirmButton).toBeEnabled();
   });
 
+  it.each([
+    ['spaces are unavailable', { isEnabled: false, isLoading: false }],
+    ['the active space is still loading', { isEnabled: true, isLoading: true }],
+  ])('still treats it as an irreversible delete when %s', (_, spacesState) => {
+    // Neither state knows the active space. Reading that as "shared" would drop
+    // the confirmation gate and promise the examples survive somewhere else,
+    // while the server deletes the dataset outright.
+    mockUseAccessibleSpaces.mockReturnValue({
+      ...spacesState,
+      activeSpaceId: undefined,
+      spaces: [],
+    });
+
+    renderModal(['default']);
+
+    expect(screen.getByText('Delete dataset "Golden set"?')).toBeInTheDocument();
+    expect(screen.getByTestId('deleteDatasetConfirmInput')).toBeInTheDocument();
+  });
+
   it('offers to leave a space rather than delete a dataset others still use', async () => {
     renderModal(['default', 'marketing']);
 
@@ -88,6 +107,15 @@ describe('DeleteDatasetModal', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Remove from this space' }));
 
     expect(mutateAsync).toHaveBeenCalledWith({ datasetId: 'dataset-1' });
+  });
+
+  it.each([
+    [1, 'Its 1 example stays available'],
+    [3, 'Its 3 examples stay available'],
+  ])('agrees the verb with the example count (%i)', (examplesCount, sentence) => {
+    renderModal(['default', 'marketing'], examplesCount);
+
+    expect(screen.getByText(new RegExp(sentence))).toBeInTheDocument();
   });
 
   it('says a dataset stays in spaces it cannot name', () => {

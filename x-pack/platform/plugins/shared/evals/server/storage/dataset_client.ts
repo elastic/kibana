@@ -7,7 +7,7 @@
 
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
-import { v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   InternalIStorageClient,
@@ -117,6 +117,13 @@ const DATASET_SORTABLE_FIELDS: readonly DatasetSortField[] = [
   'examples_count',
   'maturity',
 ];
+
+/**
+ * Settles name lookups on the dataset that has held the name longest, so
+ * anything predating the per-space name check still resolves the same way
+ * every time.
+ */
+const OLDEST_FIRST = [{ created_at: { order: 'asc' as const } }];
 
 export interface DatasetListOptions {
   page?: number;
@@ -267,29 +274,43 @@ export class DatasetClient {
     spaceIds,
   }: CreateDatasetInput): Promise<DatasetWithExamples> {
     const activeSpaceId = this.spaceId;
-    const datasetId = DatasetClient.getDatasetId(activeSpaceId, name);
+    const targetSpaceIds = normalizeSpaceIds(spaceIds, activeSpaceId);
     const now = new Date().toISOString();
 
+    if (await this.hasNameConflict(name, targetSpaceIds)) {
+      throw new DatasetAlreadyExistsError(name);
+    }
+
+    const document = buildDatasetDocument(
+      {
+        name,
+        description,
+        created_at: now,
+        updated_at: now,
+        space_ids: targetSpaceIds,
+      },
+      { tags, maturity, examples_count: 0 }
+    );
+
+    let datasetId = DatasetClient.getDatasetId(activeSpaceId, name);
     try {
-      await this.datasetsStorage.index({
-        id: datasetId,
-        op_type: 'create',
-        document: buildDatasetDocument(
-          {
-            name,
-            description,
-            created_at: now,
-            updated_at: now,
-            space_ids: normalizeSpaceIds(spaceIds, activeSpaceId),
-          },
-          { tags, maturity, examples_count: 0 }
-        ),
-      });
+      await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
     } catch (error) {
-      if (isResponseError(error) && error.statusCode === 409) {
+      if (!isResponseError(error) || error.statusCode !== 409) {
+        throw error;
+      }
+
+      // The name is free here, so the id is held by a dataset of the same name
+      // that has since moved to other spaces. Its slot can't be reused, but the
+      // derivation is only there to keep default-space ids stable for older
+      // clients, so a fresh one costs nothing. Re-check first: a create that
+      // raced us is a real duplicate.
+      if (await this.hasNameConflict(name, targetSpaceIds)) {
         throw new DatasetAlreadyExistsError(name);
       }
-      throw error;
+
+      datasetId = uuidv4();
+      await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
     }
 
     if (examples.length > 0) {
@@ -307,7 +328,7 @@ export class DatasetClient {
   }
 
   async get(datasetId: string): Promise<DatasetWithExamples | undefined> {
-    const dataset = await this.getDatasetById(datasetId);
+    const dataset = await this.getMetadata(datasetId);
     if (!dataset) {
       return undefined;
     }
@@ -318,6 +339,39 @@ export class DatasetClient {
       ...dataset,
       examples,
     };
+  }
+
+  /**
+   * Whether a dataset already holds `name` in any space the new one would show
+   * up in. The id only encodes the space creating it, so `op_type: 'create'`
+   * catches a same-named dataset made here but not one shared in from
+   * elsewhere. Names are how the CLI and `_resolve` find a dataset, so two
+   * under one name in a space would make that a coin toss.
+   *
+   * Deliberately unscoped: the check has to cover every target space, not just
+   * the one this client reads from.
+   */
+  private async hasNameConflict(name: string, spaceIds: string[]): Promise<boolean> {
+    const query: QueryDslQueryContainer = spaceIds.includes(ALL_SPACES_ID)
+      ? // Visible everywhere, so any dataset holding the name conflicts.
+        { term: { name } }
+      : {
+          bool: {
+            must: [{ term: { name } }],
+            filter: [
+              { bool: { should: spaceIds.map(buildDatasetSpaceFilter), minimum_should_match: 1 } },
+            ],
+          },
+        };
+
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['name'],
+      query,
+    });
+
+    return response.hits.hits.length > 0;
   }
 
   async datasetExists(datasetId: string): Promise<boolean> {
@@ -339,6 +393,7 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
+      sort: OLDEST_FIRST,
       query: this.scoped({
         term: {
           name,
@@ -359,6 +414,7 @@ export class DatasetClient {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,
+      sort: OLDEST_FIRST,
       query: this.scoped({
         term: {
           name,
@@ -808,7 +864,7 @@ export class DatasetClient {
 
   /**
    * Reads a dataset along with the `_seq_no`/`_primary_term` a conditional write has
-   * to send back. Separate from `getDatasetById` so `seq_no_primary_term` can't be
+   * to send back. Separate from `getMetadata` so `seq_no_primary_term` can't be
    * forgotten: without it both are undefined and the write silently becomes
    * unconditional.
    */
@@ -838,7 +894,8 @@ export class DatasetClient {
     };
   }
 
-  private async getDatasetById(datasetId: string): Promise<DatasetDocument | undefined> {
+  /** A dataset without its examples, for callers that only need its metadata. */
+  async getMetadata(datasetId: string): Promise<DatasetDocument | undefined> {
     const response = await this.datasetsStorage.search({
       track_total_hits: false,
       size: 1,

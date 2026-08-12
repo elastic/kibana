@@ -13,6 +13,7 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -28,6 +29,7 @@ export const registerDeleteDatasetRoute = ({
   canEncrypt,
   getEncryptedSavedObjectsStart,
   getSpaceId,
+  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .delete({
@@ -82,6 +84,25 @@ export const registerDeleteDatasetRoute = ({
           const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
+
+          // A dataset in every space has no single space to be removed from, so
+          // deleting it destroys it everywhere. That takes the privilege it took
+          // to put it there, not just the one covering the space deleting it.
+          const existing = await datasetClient.getMetadata(datasetId);
+          if (existing?.space_ids?.includes(ALL_SPACES_ID)) {
+            const authorizedGlobally = checkManageEvalsPrivilegesGlobally
+              ? await checkManageEvalsPrivilegesGlobally(request)
+              : false;
+
+            if (!authorizedGlobally) {
+              return response.forbidden({
+                body: {
+                  message: `Insufficient privileges to delete a dataset assigned to all spaces ("${ALL_SPACES_ID}"); it requires permission to manage evaluations in every space.`,
+                },
+              });
+            }
+          }
+
           const result = await datasetClient.delete(datasetId);
 
           if (result === 'not_found') {

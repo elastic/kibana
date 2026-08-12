@@ -781,4 +781,91 @@ describe('EvalsClient', () => {
       expect(log.error).toHaveBeenCalledWith(expect.stringContaining('timeout'));
     });
   });
+
+  describe('deleteDataset', () => {
+    it('deletes by id and reports that the dataset is gone', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ success: true, unshared: false }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.deleteDataset('ds-1')).resolves.toEqual({ unshared: false });
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_DATASET_URL.replace('{datasetId}', 'ds-1'),
+          method: 'DELETE',
+        })
+      );
+    });
+
+    it('reports a dataset that other spaces still use', async () => {
+      // The server unshares instead of deleting, so a caller that reads this as
+      // a delete would report data gone that other spaces can still see.
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ success: true, unshared: true }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.deleteDataset('ds-1')).resolves.toEqual({ unshared: true });
+    });
+
+    it('escapes the id rather than letting it shape the path', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ success: true }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await client.deleteDataset('../datasets');
+
+      expect(kbnClient.request.mock.calls[0][0].path).toBe(
+        EVALS_DATASET_URL.replace('{datasetId}', '..%2Fdatasets')
+      );
+    });
+  });
+
+  describe('space scoping', () => {
+    const requestFor = async (spaceIds: string[] | undefined) => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ dataset_id: 'ds-1', added: 0, removed: 0, unchanged: 0 })
+      );
+      const client = new EvalsClient(kbnClient, createLog(), { spaceIds });
+
+      await client.upsertDataset({ name: 'ds', description: '', spaceIds, examples: [] });
+
+      return kbnClient.request.mock.calls[0][0] as { path: string };
+    };
+
+    it('sends the run to the space its datasets are written to', async () => {
+      // The id the server derives comes from the space the request lands in, so
+      // a run targeting another space has to be made from there.
+      await expect(requestFor(['marketing'])).resolves.toEqual(
+        expect.objectContaining({ path: `/s/marketing${EVALS_DATASET_UPSERT_URL}` })
+      );
+      await expect(requestFor(['marketing', 'sales'])).resolves.toEqual(
+        expect.objectContaining({ path: `/s/marketing${EVALS_DATASET_UPSERT_URL}` })
+      );
+    });
+
+    it.each([
+      ['no spaces are requested', undefined],
+      ['the default space is among them', ['default', 'marketing']],
+      ['every space is requested', ['*']],
+    ])('stays in the default space when %s', async (_, spaceIds) => {
+      // `*` is not a path segment, and the privilege it needs is global, so it
+      // is checked from wherever the request lands.
+      await expect(requestFor(spaceIds)).resolves.toEqual(
+        expect.objectContaining({ path: EVALS_DATASET_UPSERT_URL })
+      );
+    });
+
+    it('names the space when a prefixed request finds nothing there', async () => {
+      // Kibana 404s a request to a space that doesn't exist before it reaches
+      // the route that would name the bad id.
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockRejectedValue(
+        Object.assign(new Error('Not Found'), { response: { status: 404 } })
+      );
+      const client = new EvalsClient(kbnClient, createLog(), { spaceIds: ['markting'] });
+
+      await expect(client.assertPluginEnabled()).rejects.toThrow(/space "markting"/);
+    });
+  });
 });

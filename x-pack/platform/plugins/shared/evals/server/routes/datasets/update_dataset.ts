@@ -98,7 +98,7 @@ export const registerUpdateDatasetRoute = ({
 
           let targetSpaceIds: string[] | undefined;
           if (requestedSpaceIds) {
-            const existing = await datasetClient.get(datasetId);
+            const existing = await datasetClient.getMetadata(datasetId);
             if (!existing) {
               return response.notFound({
                 body: { message: `Evaluation dataset not found: ${datasetId}` },

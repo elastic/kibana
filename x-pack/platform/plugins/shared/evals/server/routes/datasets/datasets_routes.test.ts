@@ -96,6 +96,7 @@ const buildRouteSetup = ({
     list: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
+    getMetadata: jest.fn(),
     datasetExists: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -583,6 +584,56 @@ describe('dataset routes', () => {
       expect(datasetService.getClient).toHaveBeenCalledWith({ spaceId: 'sales' });
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({ success: true, unshared: true });
+    });
+
+    it('takes privileges everywhere to delete an all-spaces dataset', async () => {
+      const denied = buildRouteSetup({
+        registerRoute: registerDeleteDatasetRoute,
+        method: 'delete',
+        path: EVALS_DATASET_URL,
+        hasManageEvalsPrivileges: false,
+      });
+      denied.datasetClient.getMetadata.mockResolvedValueOnce({
+        ...dataset,
+        space_ids: [ALL_SPACES_ID],
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'delete',
+        path: EVALS_DATASET_URL.replace('{datasetId}', datasetId),
+        params: { datasetId },
+      });
+
+      const deniedResponse = await denied.handler(
+        denied.context as any,
+        request,
+        kibanaResponseFactory
+      );
+
+      // There is no single space to remove it from, so this would destroy it
+      // everywhere on the strength of one space's privileges.
+      expect(deniedResponse.status).toBe(403);
+      expect(denied.datasetClient.delete).not.toHaveBeenCalled();
+
+      const allowed = buildRouteSetup({
+        registerRoute: registerDeleteDatasetRoute,
+        method: 'delete',
+        path: EVALS_DATASET_URL,
+      });
+      allowed.datasetClient.getMetadata.mockResolvedValueOnce({
+        ...dataset,
+        space_ids: [ALL_SPACES_ID],
+      });
+      allowed.datasetClient.delete.mockResolvedValueOnce('deleted');
+
+      const allowedResponse = await allowed.handler(
+        allowed.context as any,
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(allowedResponse.status).toBe(200);
+      expect(allowed.checkManageEvalsPrivilegesGlobally).toHaveBeenCalled();
     });
 
     it('returns 404 when dataset does not exist', async () => {

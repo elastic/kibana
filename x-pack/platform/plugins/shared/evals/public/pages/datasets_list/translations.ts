@@ -67,6 +67,13 @@ export const CREATE_DATASET_CANCEL_BUTTON = i18n.translate(
   }
 );
 
+export const getCreatedInOtherSpacesMessage = (datasetName: string, spaceNames: string[]) =>
+  i18n.translate('xpack.evals.datasetsList.createdInOtherSpacesMessage', {
+    defaultMessage:
+      'Created "{datasetName}" in {spaceNames}. It is not assigned to this space, so it will not appear in this list.',
+    values: { datasetName, spaceNames: spaceNames.join(', ') },
+  });
+
 export const CREATE_DATASET_SUBMIT_BUTTON = i18n.translate(
   'xpack.evals.datasetsList.createDatasetFlyout.submitButton',
   {

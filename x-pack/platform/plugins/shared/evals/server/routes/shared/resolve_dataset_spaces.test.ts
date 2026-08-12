@@ -8,12 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
-import {
-  redactSpaceIds,
-  resolveDatasetHomeSpace,
-  resolveTargetSpaces,
-  withoutSpaceIds,
-} from './resolve_dataset_spaces';
+import { redactSpaceIds, resolveTargetSpaces, withoutSpaceIds } from './resolve_dataset_spaces';
 
 const request = {} as KibanaRequest;
 
@@ -74,7 +69,43 @@ describe('resolveTargetSpaces', () => {
   it('rejects an unauthorized space before it reaches storage', async () => {
     const { result } = resolve({ requestedSpaceIds: ['sales'], authorized: false });
 
-    await expect(result).resolves.toMatchObject({ authorized: false, statusCode: 403 });
+    await expect(result).resolves.toEqual({
+      authorized: false,
+      statusCode: 403,
+      message: 'Insufficient privileges to assign a dataset to sales.',
+    });
+  });
+
+  it('counts rather than names the spaces a refused removal would disclose', async () => {
+    // The read redacted `finance` to `?`, so an error naming it would hand back
+    // the id the redaction withheld.
+    const { result } = resolve({
+      requestedSpaceIds: [DEFAULT_SPACE_ID],
+      currentSpaceIds: [DEFAULT_SPACE_ID, 'finance'],
+      accessibleSpaceIds: [DEFAULT_SPACE_ID],
+      authorized: false,
+    });
+
+    await expect(result).resolves.toEqual({
+      authorized: false,
+      statusCode: 403,
+      message:
+        'Insufficient privileges to remove a dataset from 1 space you do not have access to.',
+    });
+  });
+
+  it('names a space the caller can see when a removal is refused', async () => {
+    const { result } = resolve({
+      requestedSpaceIds: [DEFAULT_SPACE_ID],
+      currentSpaceIds: [DEFAULT_SPACE_ID, 'sales'],
+      authorized: false,
+    });
+
+    await expect(result).resolves.toEqual({
+      authorized: false,
+      statusCode: 403,
+      message: 'Insufficient privileges to remove a dataset from sales.',
+    });
   });
 
   it('requires privileges everywhere for all spaces, and refuses to mix it with named ones', async () => {
@@ -130,6 +161,23 @@ describe('resolveTargetSpaces', () => {
     expect(checkManageEvalsPrivileges).toHaveBeenCalledWith(request, ['sales', 'marketing']);
   });
 
+  it('takes privileges everywhere to narrow an all-spaces dataset', async () => {
+    const { result, checkManageEvalsPrivilegesGlobally } = resolve({
+      requestedSpaceIds: [DEFAULT_SPACE_ID],
+      currentSpaceIds: [ALL_SPACES_ID],
+      authorizedGlobally: false,
+    });
+
+    // Managing one space would otherwise be enough to pull the dataset out of
+    // every other one, undoing an assignment that took global privileges.
+    await expect(result).resolves.toMatchObject({ authorized: false, statusCode: 403 });
+    expect(checkManageEvalsPrivilegesGlobally).toHaveBeenCalledWith(request);
+
+    await expect(
+      resolve({ requestedSpaceIds: [DEFAULT_SPACE_ID], currentSpaceIds: [ALL_SPACES_ID] }).result
+    ).resolves.toEqual({ authorized: true, spaceIds: [DEFAULT_SPACE_ID] });
+  });
+
   it('accepts a space already on the dataset even if it has since disappeared', async () => {
     const { result } = resolve({
       requestedSpaceIds: [DEFAULT_SPACE_ID, 'deleted-space'],
@@ -151,17 +199,6 @@ describe('resolveTargetSpaces', () => {
         checkManageEvalsPrivilegesGlobally: jest.fn().mockResolvedValue(true),
       })
     ).resolves.toMatchObject({ authorized: false, statusCode: 400 });
-  });
-});
-
-describe('resolveDatasetHomeSpace', () => {
-  it('keeps the active space when the dataset will be visible there', () => {
-    expect(resolveDatasetHomeSpace('marketing', ['marketing', 'sales'])).toBe('marketing');
-    expect(resolveDatasetHomeSpace('marketing', [ALL_SPACES_ID])).toBe('marketing');
-  });
-
-  it('picks a target space when the dataset is created for somewhere else', () => {
-    expect(resolveDatasetHomeSpace('marketing', ['sales', 'finance'])).toBe('sales');
   });
 });
 

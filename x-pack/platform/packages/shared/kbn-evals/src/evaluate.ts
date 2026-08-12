@@ -37,6 +37,7 @@ import { ESQL_EQUIVALENCE_EVALUATOR_NAME } from './evaluators/esql';
 import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
+import { getSpaceIdsFromEnv } from './utils/space_ids';
 import { buildIngestRequest } from './utils/build_ingest_request';
 import type {
   DefaultEvaluators,
@@ -84,7 +85,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   evalsClient: [
     async ({ kbnClient, log }, use) => {
       const evaluationsKbnClient = getEvaluationsKbnClient({ kbnClient, log });
-      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
+      const evalsClient = new EvalsClient(evaluationsKbnClient, log, {
+        spaceIds: getSpaceIdsFromEnv(),
+      });
       await evalsClient.assertPluginEnabled();
       await use(evalsClient);
     },
@@ -292,13 +295,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
-      // Set by `--space-ids`, comma-separated so a run can target several
-      // spaces. Omitted means the target Kibana's default space.
-      const parsedSpaceIds = (process.env.EVAL_SPACE_IDS ?? '')
-        .split(',')
-        .map((id) => id.trim())
-        .filter(Boolean);
-      const spaceIds = parsedSpaceIds.length > 0 ? parsedSpaceIds : undefined;
+      const spaceIds = getSpaceIdsFromEnv();
 
       const executionId = buildExecutionId({
         baseExecutionId: process.env.TEST_RUN_ID,

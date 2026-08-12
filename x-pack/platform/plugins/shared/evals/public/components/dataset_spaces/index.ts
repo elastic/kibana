@@ -9,4 +9,4 @@ export { DatasetSharedNotice } from './dataset_shared_notice';
 export { DatasetSpacesBadge } from './dataset_spaces_badge';
 export { DatasetSpacesPicker } from './dataset_spaces_picker';
 export { SharedChangeConfirmModal } from './shared_change_confirm_modal';
-export { isSharedAssignment, useDatasetSharing } from './use_dataset_sharing';
+export { getRemovedSpaceIds, isSharedAssignment, useDatasetSharing } from './use_dataset_sharing';

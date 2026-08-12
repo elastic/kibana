@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from './spaces';
+
 // ---------------------------------------------------------------------------
 // Shared types
 // ---------------------------------------------------------------------------
@@ -86,8 +88,6 @@ export interface ExperimentsListingResult {
 // ---------------------------------------------------------------------------
 // Space filtering
 // ---------------------------------------------------------------------------
-const DEFAULT_SPACE_ID = 'default';
-const ALL_SPACES_ID = '*';
 
 /**
  * Builds a filter that matches score documents visible in the given space: those

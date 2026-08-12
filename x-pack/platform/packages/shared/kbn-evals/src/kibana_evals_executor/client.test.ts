@@ -392,7 +392,7 @@ describe('KibanaEvalsClient', () => {
       description: 'resolved from ES',
       examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
     });
-    const upsertDataset = jest.fn().mockResolvedValue(undefined);
+    const upsertDataset = jest.fn().mockResolvedValue('server-assigned-id');
     const client = createClient({ getDatasetByName, upsertDataset });
 
     const task = jest.fn(async () => ({ ok: true }));
@@ -451,10 +451,9 @@ describe('KibanaEvalsClient', () => {
     expect(onEvaluationComplete.mock.calls[0][0].datasetId).toBe('server-assigned-id');
   });
 
-  it('falls back to the upstream dataset id when the upsert reports none', async () => {
+  it('falls back to the upstream dataset id when nothing persists the dataset', async () => {
     const client = createClient({
       repetitions: 1,
-      upsertDataset: jest.fn().mockResolvedValue(undefined),
       getDatasetByName: jest.fn().mockResolvedValue({
         id: 'upstream-dataset-id',
         name: 'ds',

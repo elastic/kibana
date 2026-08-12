@@ -49,7 +49,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   MAX_DATASET_DESCRIPTION_LENGTH,
   type DatasetExample,
@@ -76,6 +76,7 @@ import {
   DatasetSpacesBadge,
   DatasetSpacesPicker,
   SharedChangeConfirmModal,
+  getRemovedSpaceIds,
   useDatasetSharing,
 } from '../../components/dataset_spaces';
 import * as i18n from './translations';
@@ -241,9 +242,7 @@ export const DatasetDetailPage: React.FC = () => {
   };
 
   const currentSpaceIds = dataset?.space_ids ?? [];
-  const removedSpaceIds = currentSpaceIds.filter(
-    (spaceId) => spaceId !== UNKNOWN_SPACE && !metadataSpaceIds.includes(spaceId)
-  );
+  const removedSpaceIds = getRemovedSpaceIds(currentSpaceIds, metadataSpaceIds);
 
   const saveMetadata = async () => {
     if (!dataset) return;
@@ -1292,6 +1291,7 @@ export const DatasetDetailPage: React.FC = () => {
           spaceIds={dataset?.space_ids}
           action={pendingSharedChange}
           removedSpaceIds={pendingSharedChange === 'edit-dataset' ? removedSpaceIds : undefined}
+          nextSpaceIds={pendingSharedChange === 'edit-dataset' ? metadataSpaceIds : undefined}
           onCancel={() => setPendingSharedChange(null)}
           onConfirm={pendingSharedChange === 'edit-dataset' ? saveMetadata : saveEditExample}
           isLoading={updateDataset.isLoading || updateExample.isLoading}

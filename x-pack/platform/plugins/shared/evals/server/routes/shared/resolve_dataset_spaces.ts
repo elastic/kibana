@@ -114,6 +114,23 @@ export const resolveTargetSpaces = async ({
     };
   }
 
+  // `*` can't go through the per-space check below, so narrowing away from it
+  // needs the same global privilege that assigning it did. Otherwise managing
+  // one space would be enough to pull a dataset out of every other one.
+  if (current.has(ALL_SPACES_ID)) {
+    const authorizedGlobally = checkManageEvalsPrivilegesGlobally
+      ? await checkManageEvalsPrivilegesGlobally(request)
+      : false;
+
+    if (!authorizedGlobally) {
+      return {
+        authorized: false,
+        statusCode: 403,
+        message: `Insufficient privileges to change the spaces of a dataset assigned to all spaces ("${ALL_SPACES_ID}"); it requires permission to manage evaluations in every space.`,
+      };
+    }
+  }
+
   const removed = Array.from(current).filter(
     (spaceId) => !requested.includes(spaceId) && spaceId !== ALL_SPACES_ID
   );
@@ -126,31 +143,26 @@ export const resolveTargetSpaces = async ({
   });
 
   if (unauthorizedSpaceIds.length > 0) {
+    const refusedAdditions = unauthorizedSpaceIds.filter((spaceId) => added.includes(spaceId));
+    const action =
+      refusedAdditions.length === unauthorizedSpaceIds.length
+        ? 'assign a dataset to'
+        : refusedAdditions.length === 0
+        ? 'remove a dataset from'
+        : "change a dataset's spaces:";
+
     return {
       authorized: false,
       statusCode: 403,
-      message: `Insufficient privileges to assign a dataset to space(s): ${unauthorizedSpaceIds.join(
-        ', '
-      )}.`,
+      message: `Insufficient privileges to ${action} ${await describeSpaces({
+        request,
+        spaceIds: unauthorizedSpaceIds,
+        getAccessibleSpaceIds,
+      })}.`,
     };
   }
 
   return { authorized: true, spaceIds: requested };
-};
-
-/**
- * The space a new dataset is created in. It fixes the dataset's id and the
- * client has to be scoped there to read the dataset back afterwards.
- */
-export const resolveDatasetHomeSpace = (
-  activeSpaceId: string,
-  targetSpaceIds: string[]
-): string => {
-  if (targetSpaceIds.includes(ALL_SPACES_ID) || targetSpaceIds.includes(activeSpaceId)) {
-    return activeSpaceId;
-  }
-
-  return targetSpaceIds[0] ?? activeSpaceId;
 };
 
 /**
@@ -192,6 +204,38 @@ const findUnknownSpaces = async ({
 
   const accessibleSpaceIds = new Set(await getAccessibleSpaceIds(request));
   return foreignSpaceIds.filter((spaceId) => !accessibleSpaceIds.has(spaceId));
+};
+
+/**
+ * Names the spaces in an error, counting the ones the caller can't see instead.
+ * Those ids reach here from the stored assignment, not from the request, and a
+ * read would have redacted them: naming them here would hand back what the
+ * redaction withheld. Ids the caller sent are quoted back as-is elsewhere,
+ * since those tell them nothing they didn't already type.
+ */
+const describeSpaces = async ({
+  request,
+  spaceIds,
+  getAccessibleSpaceIds,
+}: {
+  request: KibanaRequest;
+  spaceIds: string[];
+  getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
+}): Promise<string> => {
+  const accessibleSpaceIds = getAccessibleSpaceIds
+    ? new Set(await getAccessibleSpaceIds(request))
+    : undefined;
+  const nameable = accessibleSpaceIds
+    ? spaceIds.filter((spaceId) => accessibleSpaceIds.has(spaceId))
+    : spaceIds;
+  const hiddenCount = spaceIds.length - nameable.length;
+
+  return [
+    ...(nameable.length > 0 ? [nameable.join(', ')] : []),
+    ...(hiddenCount > 0
+      ? [`${hiddenCount} space${hiddenCount === 1 ? '' : 's'} you do not have access to`]
+      : []),
+  ].join(' and ');
 };
 
 /**

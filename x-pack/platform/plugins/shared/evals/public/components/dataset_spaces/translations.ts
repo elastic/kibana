@@ -142,6 +142,13 @@ export const getRemovedSpacesMessage = (spaceNames: string[]) =>
     values: { spaceNames: spaceNames.join(', '), spaceCount: spaceNames.length },
   });
 
+export const getLeavingAllSpacesMessage = (spaceNames: string[]) =>
+  i18n.translate('xpack.evals.datasetSpaces.leavingAllSpacesMessage', {
+    defaultMessage:
+      'It is in every space today. Afterwards it will only be in {spaceNames}, and every other space will lose it. Its examples are kept.',
+    values: { spaceNames: spaceNames.join(', ') },
+  });
+
 export const CONFIRM_SAVE_BUTTON = i18n.translate('xpack.evals.datasetSpaces.confirmSaveButton', {
   defaultMessage: 'Save changes',
 });

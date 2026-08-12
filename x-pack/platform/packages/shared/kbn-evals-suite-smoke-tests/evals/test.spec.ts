@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@playwright/test';
 import { MessageRole } from '@kbn/inference-common';
 import type { Evaluator } from '@kbn/evals';
@@ -17,6 +18,53 @@ interface TaskOutput {
 }
 
 evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classic }, () => {
+  evaluate('smoke tests: dataset lifecycle', async ({ evalsClient, log }) => {
+    // Names are only unique within a space, and several smoke runs can be in
+    // flight against the same deployment.
+    const datasetName = `smoke tests: dataset lifecycle ${randomUUID()}`;
+    const description = 'Verifies dataset create, update and delete for @kbn/evals';
+    let datasetToCleanUp: string | undefined;
+
+    try {
+      const datasetId = await evalsClient.upsertDataset({
+        name: datasetName,
+        description,
+        examples: [{ input: { prompt: 'first' } }],
+      });
+      datasetToCleanUp = datasetId;
+
+      const created = await evalsClient.getDatasetByName(datasetName);
+      expect(created?.id).toBe(datasetId);
+      expect(created?.examples).toHaveLength(1);
+
+      // A second upsert has to land on the same dataset: scores are stamped
+      // with this id, so a new one each run would detach them.
+      const updatedId = await evalsClient.upsertDataset({
+        name: datasetName,
+        description,
+        examples: [{ input: { prompt: 'first' } }, { input: { prompt: 'second' } }],
+      });
+      expect(updatedId).toBe(datasetId);
+
+      const updated = await evalsClient.getDatasetByName(datasetName);
+      expect(updated?.examples).toHaveLength(2);
+
+      const { unshared } = await evalsClient.deleteDataset(datasetId);
+      datasetToCleanUp = undefined;
+      expect(unshared).toBe(false);
+
+      expect(await evalsClient.getDatasetByName(datasetName)).toBeNull();
+    } finally {
+      if (datasetToCleanUp) {
+        // A failed assertion above would otherwise leave the dataset behind on
+        // a shared deployment.
+        await evalsClient.deleteDataset(datasetToCleanUp).catch((error: Error) => {
+          log.warning(`Failed to clean up dataset "${datasetName}": ${error.message}`);
+        });
+      }
+    }
+  });
+
   evaluate(
     'smoke tests: score ingestion and code evaluator',
     async ({ executorClient, inferenceClient }) => {

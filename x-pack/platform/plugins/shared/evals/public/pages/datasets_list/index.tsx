@@ -39,7 +39,9 @@ import {
   type DatasetMaturity,
   type DatasetSummary,
 } from '@kbn/evals-common';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import type { NotificationsStart } from '@kbn/core/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
@@ -50,7 +52,11 @@ import {
   DatasetTagFilters,
   DatasetTagsFields,
 } from '../../components/dataset_tags';
-import { DatasetSpacesBadge, DatasetSpacesPicker } from '../../components/dataset_spaces';
+import {
+  DatasetSpacesBadge,
+  DatasetSpacesPicker,
+  useDatasetSharing,
+} from '../../components/dataset_spaces';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import * as i18n from './translations';
 
@@ -84,6 +90,9 @@ export const DatasetsListPage: React.FC = () => {
 
   const createDataset = useCreateDataset();
   const { isEnabled: spacesEnabled, activeSpaceId } = useAccessibleSpaces();
+  const { spaceNamesFor } = useDatasetSharing(spaceIds);
+  const { services } = useKibana<{ notifications?: NotificationsStart }>();
+  const { notifications } = services;
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -269,15 +278,31 @@ export const DatasetsListPage: React.FC = () => {
     const isDefaultSpaceSelection =
       !spacesEnabled || (spaceIds.length === 1 && spaceIds[0] === activeSpaceId);
 
+    const isVisibleHere =
+      isDefaultSpaceSelection ||
+      spaceIds.includes(ALL_SPACES_ID) ||
+      (activeSpaceId != null && spaceIds.includes(activeSpaceId));
+
     try {
+      const datasetName = name.trim();
       const { dataset_id: datasetId } = await createDataset.mutateAsync({
-        name: name.trim(),
+        name: datasetName,
         description: description.trim(),
         ...(tags.length > 0 ? { tags } : {}),
         ...(maturity ? { maturity } : {}),
         ...(isDefaultSpaceSelection ? {} : { space_ids: spaceIds }),
       });
       closeCreateFlyout();
+
+      // The detail page reads through the active space, so a dataset created
+      // only for other spaces would open on a not-found.
+      if (!isVisibleHere) {
+        notifications?.toasts.addSuccess(
+          i18n.getCreatedInOtherSpacesMessage(datasetName, spaceNamesFor(spaceIds))
+        );
+        return;
+      }
+
       history.push(`/datasets/${datasetId}`);
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : String(err));

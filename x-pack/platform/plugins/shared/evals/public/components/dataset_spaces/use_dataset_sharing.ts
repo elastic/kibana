@@ -16,6 +16,19 @@ import { useAccessibleSpaces } from '../../hooks/use_spaces';
 export const isSharedAssignment = (spaceIds: string[] | undefined): boolean =>
   (spaceIds?.length ?? 0) > 1 || Boolean(spaceIds?.includes(ALL_SPACES_ID));
 
+/**
+ * The spaces an edit takes a dataset out of. Expanding to `*` takes it out of
+ * none of them, and narrowing away from `*` takes it out of every space that
+ * isn't kept, which only `*` itself can stand for. Spaces the caller cannot see
+ * are held out: the picker re-attaches them rather than dropping them.
+ */
+export const getRemovedSpaceIds = (currentSpaceIds: string[], nextSpaceIds: string[]): string[] =>
+  nextSpaceIds.includes(ALL_SPACES_ID)
+    ? []
+    : currentSpaceIds.filter(
+        (spaceId) => spaceId !== UNKNOWN_SPACE && !nextSpaceIds.includes(spaceId)
+      );
+
 export interface DatasetSharing {
   /** Spaces are available, so sharing is worth showing at all. */
   isEnabled: boolean;
@@ -56,9 +69,9 @@ export const useDatasetSharing = (spaceIds: string[] | undefined): DatasetSharin
       isLoading,
       activeSpaceId,
       isGlobal,
-      // An unassigned dataset predates space awareness: default space only.
-      isShared:
-        isGlobal || assigned.some((spaceId) => spaceId !== activeSpaceId) || hiddenSpaceCount > 0,
+      // Not compared against the active space, which is undefined in
+      // single-space deployments and while spaces load.
+      isShared: isSharedAssignment(assigned),
       spaceCount: assigned.length,
       otherSpaceNames: namedSpaceIds
         .filter((spaceId) => spaceId !== activeSpaceId && spaceId !== ALL_SPACES_ID)
