@@ -95,9 +95,12 @@ export const DiscoverTopNav = ({
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
     return (
-      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isEsqlMode ||
+      (!isEsqlMode && Boolean(dataView?.isTimeBased()) && dataView?.type !== DataViewType.ROLLUP)
     );
   }, [dataView, isEsqlMode]);
+
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -146,7 +149,7 @@ export const DiscoverTopNav = ({
   }, []);
 
   const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || dataView?.isPersisted() === false;
 
   const editField = useMemo(
     () =>
@@ -259,7 +262,11 @@ export const DiscoverTopNav = ({
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
-        label: dataView?.getName() || '',
+        label:
+          dataView?.getName() ||
+          i18n.translate('discover.dataViewPicker.noDataViewSelectedLabel', {
+            defaultMessage: 'Select a data view',
+          }),
         'data-test-subj': 'discover-dataView-switch-link',
         title: dataView?.getIndexPattern() || '',
       },
@@ -350,7 +357,7 @@ export const DiscoverTopNav = ({
           !!services.capabilities.discover_v2.storeSearchSession
         }
         appName="discover"
-        indexPatterns={[dataView]}
+        indexPatterns={indexPatterns}
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}

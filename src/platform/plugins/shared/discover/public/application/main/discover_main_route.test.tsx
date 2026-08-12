@@ -89,12 +89,14 @@ const setupComponent = ({
   locationState,
   onAppLeave = jest.fn(),
   hasESQLDatasets = false,
+  services = getServicesMock(hasESData, hasUserDataView, locationState, hasESQLDatasets),
 }: {
   hasESData?: boolean;
   hasUserDataView?: boolean;
   locationState?: MainHistoryLocationState;
   onAppLeave?: AppMountParameters['onAppLeave'];
   hasESQLDatasets?: boolean;
+  services?: ReturnType<typeof getServicesMock>;
 } = {}) => {
   const props: MainRouteProps = {
     customizationCallbacks: [],
@@ -104,9 +106,7 @@ const setupComponent = ({
 
   renderWithI18n(
     <MemoryRouter>
-      <DiscoverTestProvider
-        services={getServicesMock(hasESData, hasUserDataView, locationState, hasESQLDatasets)}
-      >
+      <DiscoverTestProvider services={services}>
         <DiscoverMainRoute {...props} />
       </DiscoverTestProvider>
     </MemoryRouter>
@@ -157,28 +157,33 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test('renders no data page when hasESData=false & hasUserDataView=false', async () => {
+  // A data view is no longer required to render Discover, so the data availability
+  // of the current space doesn't gate the main app anymore
+  test('renders the main app when hasESData=false & hasUserDataView=false', async () => {
     setupComponent({ hasESData: false, hasUserDataView: false });
-
-    await waitForLoad();
-
-    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
-  });
-
-  test('renders the main app when ES|QL datasets exist but no local ES data or user data view', async () => {
-    setupComponent({ hasESData: false, hasUserDataView: false, hasESQLDatasets: true });
 
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
-  test('renders no data view when hasESData=true & hasUserDataView=false', async () => {
+  test('renders the main app when hasESData=true & hasUserDataView=false', async () => {
     setupComponent({ hasESData: true, hasUserDataView: false });
 
     await waitForLoad();
 
-    expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('renders the main app when no data view can be resolved', async () => {
+    const services = getServicesMock();
+    services.data.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+
+    setupComponent({ services });
+
+    await waitForLoad();
+
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
   test('renders LoadingIndicator while customizations are loading', async () => {

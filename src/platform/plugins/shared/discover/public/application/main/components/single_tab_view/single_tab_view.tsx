@@ -175,7 +175,7 @@ export const SingleTabView = ({
     );
   }
 
-  if (!currentDataStateContainer || !currentCustomizationService || !currentDataView) {
+  if (!currentDataStateContainer || !currentCustomizationService) {
     return <BrandedLoadingIndicator />;
   }
 

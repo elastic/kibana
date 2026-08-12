@@ -115,7 +115,7 @@ export const buildStateSubscribe =
           internalStateActions.updateAppStateAndReplaceUrl({
             tabId: getCurrentTab().id,
             appState: {
-              dataSource: nextDataView.id
+              dataSource: nextDataView?.id
                 ? createDataViewDataSource({ dataViewId: nextDataView.id })
                 : undefined,
             },

@@ -45,7 +45,7 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   type InitialUnifiedHistogramLayoutProps,
   internalStateActions,
-  useCurrentDataView,
+  useRequiredCurrentDataView,
   useCurrentTabAction,
   useCurrentTabSelector,
   useCurrentTabDataStateContainer,
@@ -198,7 +198,7 @@ export const useDiscoverHistogram = (
     searchSessionId,
   } = requestParams;
 
-  const dataView = useCurrentDataView();
+  const dataView = useRequiredCurrentDataView();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 

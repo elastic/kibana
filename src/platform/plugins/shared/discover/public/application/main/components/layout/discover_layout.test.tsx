@@ -28,24 +28,40 @@ const setup = async ({
   dataView,
   hideSidebar,
   hideTable = false,
+  hasESData = true,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
   },
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   hideSidebar?: boolean;
   hideTable?: boolean;
+  hasESData?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
 
   services.profilesManager = profilesManagerMock;
+  services.dataViews.hasData = {
+    hasESData: jest.fn(() => Promise.resolve(hasESData)),
+    hasUserDataView: jest.fn(() => Promise.resolve(true)),
+    hasDataView: jest.fn(() => Promise.resolve(true)),
+  };
+  services.core.application.capabilities = {
+    ...services.core.application.capabilities,
+    navLinks: { ...services.core.application.capabilities.navLinks, integrations: true },
+  };
+
+  if (!dataView) {
+    // Simulate a space without any data view
+    services.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+  }
 
   const toolkit = getDiscoverInternalStateMock({
     services,
-    persistedDataViews: [dataView],
+    persistedDataViews: dataView ? [dataView] : [],
   });
 
   await toolkit.initializeTabs();
@@ -54,7 +70,9 @@ const setup = async ({
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
       appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        dataSource: dataView?.id
+          ? createDataViewDataSource({ dataViewId: dataView.id })
+          : undefined,
         hideTable,
         hideSidebar,
         query: { query: '', language: 'kuery' },
@@ -83,15 +101,17 @@ const setup = async ({
     })
   );
 
-  dataStateContainer.data$.documents$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
-  });
-  dataStateContainer.data$.totalHits$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHitsMock.length),
-  });
-  dataStateContainer.data$.main$.next(dataMainMsg);
+  if (dataView) {
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: Number(esHitsMock.length),
+    });
+    dataStateContainer.data$.main$.next(dataMainMsg);
+  }
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
@@ -153,6 +173,25 @@ describe('Discover component', () => {
       });
     }, 10000);
   });
+
+  it('shows the no data views prompt when no data view is available', async () => {
+    await setup({ dataView: undefined });
+    await waitFor(() => {
+      expect(screen.queryByTestId('noDataViewsPrompt')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('discoverNoDataCallOut')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  }, 10000);
+
+  it('shows the add data call out additionally when the cluster has no data', async () => {
+    await setup({ dataView: undefined, hasESData: false });
+    await waitFor(() => {
+      expect(screen.queryByTestId('discoverNoDataCallOut')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('discoverNoDataBrowseIntegrations')).toBeInTheDocument();
+    expect(screen.queryByTestId('noDataViewsPrompt')).toBeInTheDocument();
+  }, 10000);
 
   it('shows the no results error display', async () => {
     await setup({

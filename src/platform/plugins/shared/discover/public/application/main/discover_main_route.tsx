@@ -10,7 +10,6 @@
 import { useHistory, useParams } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
@@ -118,14 +117,12 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
-      const [] = await Promise.all([
-        core.http
-          .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-          .then((res) => res.datasets.length > 0)
-          .catch(() => false),
+      await Promise.all([
         dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
+      // Discover no longer requires a data view to be present, so the no data page
+      // is never shown and the checks it relied on can be skipped
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData: true,
         hasUserDataView: true,

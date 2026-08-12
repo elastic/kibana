@@ -179,7 +179,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Tab initialization
      */
 
-    let dataView: DataView;
+    let dataView: DataView | undefined;
 
     if (isOfAggregateQueryType(initialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL

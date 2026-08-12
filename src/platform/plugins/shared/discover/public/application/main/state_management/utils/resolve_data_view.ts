@@ -15,9 +15,10 @@ import type { RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**
-   * Loaded data view (might be default data view if requested was not found)
+   * Loaded data view (might be default data view if requested was not found),
+   * or undefined if no data view is available at all
    */
-  loadedDataView: DataView;
+  loadedDataView: DataView | undefined;
   /**
    * Id of the requested data view
    */
@@ -109,8 +110,7 @@ export async function loadDataView({
   }
 
   return {
-    // We can be certain that a data view exists due to an earlier hasData check
-    loadedDataView: (fetchedDataView || defaultDataView || defaultAdHocDataView)!,
+    loadedDataView: fetchedDataView || defaultDataView || defaultAdHocDataView || undefined,
     requestedDataViewId: fetchId,
     requestedDataViewFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
@@ -166,14 +166,16 @@ function resolveDataView({
 
     toastNotifications.addWarning({
       title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
+      text: loadedDataView
+        ? i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+            defaultMessage:
+              'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+            values: {
+              loadedDataViewTitle: loadedDataView.getIndexPattern(),
+              loadedDataViewId: loadedDataView.id,
+            },
+          })
+        : undefined,
       'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
     });
   }
@@ -232,7 +234,7 @@ export const loadAndResolveDataView = async ({
   // If dataView is an ad hoc data view with no fields, refresh its field list.
   // This can happen when default profile data views are created without fields
   // to avoid unnecessary requests on startup.
-  if (dataView && !dataView?.isPersisted() && !dataView?.fields.length) {
+  if (dataView && !dataView.isPersisted() && !dataView.fields.length) {
     await dataViews.refreshFields(dataView);
   }
 

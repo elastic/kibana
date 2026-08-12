@@ -17,7 +17,10 @@ import type { UnifiedDataTableSettings } from '../types';
 
 export interface UseColumnsProps {
   capabilities: Capabilities;
-  dataView: DataView;
+  /**
+   * Undefined when no data view is available, e.g. when none exists in the current space
+   */
+  dataView: DataView | undefined;
   dataViews: DataViewsContract;
   setAppState: (state: {
     columns: string[];

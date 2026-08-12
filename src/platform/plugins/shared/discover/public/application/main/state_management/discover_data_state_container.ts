@@ -262,6 +262,21 @@ export function getDataStateContainer({
     refetch$,
     searchSessionManager,
   }).pipe(
+    // Outside of ES|QL mode the data view defines what to query,
+    // so there is nothing to fetch as long as none is available
+    filter(() => {
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
+      const hasSourceToQuery =
+        Boolean(currentDataView$.getValue()) ||
+        isOfAggregateQueryType(getCurrentTab().appState.query);
+
+      if (!hasSourceToQuery) {
+        // Make sure we don't report a pending fetch which never happens
+        sendResetMsg(dataSubjects, FetchStatus.UNINITIALIZED);
+      }
+
+      return hasSourceToQuery;
+    }),
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
     map((val) => ({
