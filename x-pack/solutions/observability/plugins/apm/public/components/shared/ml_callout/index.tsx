@@ -66,11 +66,10 @@ export function MLCallout({
     case AnomalyDetectionSetupState.NoJobs:
       properties = {
         title: i18n.translate('xpack.apm.mlCallout.noJobsCalloutTitle', {
-          defaultMessage:
-            'Enable anomaly detection to add health status indicators to your services',
+          defaultMessage: 'Enable anomaly detection to surface anomaly scores across your services',
         }),
         text: i18n.translate('xpack.apm.mlCallout.noJobsCalloutText', {
-          defaultMessage: `Pinpoint anomalous transactions and see the health of upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
+          defaultMessage: `Pinpoint anomalous transactions and monitor anomaly scores for upstream and downstream services with APM's anomaly detection integration. Get started in just a few minutes.`,
         }),
         icon: 'info',
         color: 'primary',
