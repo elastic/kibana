@@ -10,12 +10,7 @@
 import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
 import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
-import {
-  getIncompleteOperatorReason,
-  isExpressionParenthesized,
-  getRightmostOperator,
-  isNullCheckOperator,
-} from './utils';
+import { getIncompleteOperatorReason, getRightmostOperator, isNullCheckOperator } from './utils';
 import { getExpressionType } from '../../expressions';
 import { escapeRegExp } from '../../regex';
 
@@ -73,10 +68,6 @@ export function getPosition(
 
   // Function expression (operators or variadic functions like CONCAT)
   if (isFunctionExpression(expressionRoot)) {
-    if (!expressionRoot.incomplete && isExpressionParenthesized(innerText, expressionRoot)) {
-      return 'after_complete';
-    }
-
     const rightmostExpression = getRightmostOperator(expressionRoot);
 
     if (

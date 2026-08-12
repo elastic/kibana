@@ -1201,6 +1201,14 @@ describe('functions arg suggestions', () => {
       });
     });
 
+    it('preserves comparison suggestions after a parenthesized boolean function', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | WHERE (CASE(booleanField, true, false)) /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toEqual(expect.arrayContaining(['==', '!=']));
+    });
+
     it('COALESCE return type matches first parameter - accepts type-compatible expressions', async () => {
       const { suggest } = await setup();
 

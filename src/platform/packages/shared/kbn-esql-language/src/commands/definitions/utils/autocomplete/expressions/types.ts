@@ -44,6 +44,7 @@ export interface ExpressionContext {
   cursorPosition: number;
   innerText: string;
   expressionRoot?: ESQLSingleAstItem;
+  isExpressionRootParenthesized: boolean;
   position?: ExpressionPosition;
   location: Location;
   command: ESQLAstAllCommands;

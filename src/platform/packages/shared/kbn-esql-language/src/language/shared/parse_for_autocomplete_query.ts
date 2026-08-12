@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Parser, PromQLParser } from '@elastic/esql';
+import { isQuery, isUnknownNode, Parser, PromQLParser, Walker } from '@elastic/esql';
 import type { PromQLAstQueryExpression } from '@elastic/esql';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
@@ -26,11 +26,27 @@ interface ParsedAutocompleteQuery {
   tokens: EsqlLexerToken[];
 }
 
-const parseCorrectedQuery = (query: string): ESQLAstQueryExpression => {
-  const correctedQuery = correctQuerySyntax(query);
+const parseCorrectedQuery = (correctedQuery: string): ESQLAstQueryExpression => {
   const { root } = Parser.parse(correctedQuery, { withFormatting: true });
 
   return removeAutocompleteMarkers(root);
+};
+
+/**
+ * Detects an expression the parser could not build. The node under the cursor is either the
+ * collapsed node itself, or the subquery holding it when the cursor sits inside one.
+ */
+const hasCollapsedExpression = (root: ESQLAstQueryExpression, offset: number): boolean => {
+  const { node } = findAstPosition(root, offset);
+
+  if (isUnknownNode(node)) {
+    return true;
+  }
+
+  return (
+    isQuery(node) &&
+    Boolean(Walker.find(node, (item) => isUnknownNode(item) && item.text.trim().length > 0))
+  );
 };
 
 /**
@@ -41,15 +57,25 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
   const innerText = fullText.substring(0, offset);
   // Keep tokens tied to the real editor text; correctedQuery can add synthetic markers/brackets.
   const tokens = getEsqlLexerTokens(innerText);
-  let root = parseCorrectedQuery(innerText);
+  const correctedQuery = correctQuerySyntax(innerText);
+  let root = parseCorrectedQuery(correctedQuery);
 
-  // A missing operand can collapse a nested expression to `unknown`; retry with a temporary operand to preserve its AST.
-  if (findAstPosition(root, offset).node?.type === 'unknown') {
-    const recoveredRoot = parseCorrectedQuery(`${innerText} ${EDITOR_MARKER}`);
-    const recoveredNode = findAstPosition(recoveredRoot, offset).node;
+  // While typing a nested expression, e.g. `COALESCE(field IN (FROM `, the parser can return
+  // a single `unknown` node and lose its AST hierarchy. Retry with an EDITOR_MARKER to recover it.
+  if (hasCollapsedExpression(root, offset)) {
+    const recoveredQuery = correctQuerySyntax(`${innerText} ${EDITOR_MARKER}`);
 
-    if (recoveredNode && recoveredNode.type !== 'unknown') {
-      root = recoveredRoot;
+    if (recoveredQuery !== correctedQuery) {
+      const recoveredRoot = parseCorrectedQuery(recoveredQuery);
+      const recoveredNode = findAstPosition(recoveredRoot, offset).node;
+
+      if (
+        recoveredNode &&
+        !isUnknownNode(recoveredNode) &&
+        !hasCollapsedExpression(recoveredRoot, offset)
+      ) {
+        root = recoveredRoot;
+      }
     }
   }
 

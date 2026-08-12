@@ -1194,8 +1194,38 @@ describe('autocomplete', () => {
     );
 
     it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+    ])('suggests subqueries inside %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['(FROM $0)', '(ROW $0)', '(TS $0)']));
+    });
+
+    it.each([
       ['CASE', 'FROM index | WHERE CASE(doubleField IN (FROM /), true, false)'],
       ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN (FROM /), false)'],
+      [
+        'nested CASE and COALESCE',
+        'FROM index | WHERE CASE(COALESCE(doubleField IN (FROM /), false), true, false)',
+      ],
+      [
+        'nested COALESCE calls',
+        'FROM index | WHERE COALESCE(COALESCE(doubleField IN (FROM /), false), false)',
+      ],
+      [
+        'a non-condition CASE argument',
+        'FROM index | WHERE CASE(booleanField, doubleField IN (FROM /), false)',
+      ],
+      [
+        'a non-first COALESCE argument',
+        'FROM index | WHERE COALESCE(false, doubleField IN (FROM /))',
+      ],
+      [
+        'COALESCE inside a FROM subquery',
+        'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
+      ],
     ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
       const { suggest: suggestFn } = await setup();
       const suggestions = await suggestFn(query);
