@@ -46,6 +46,7 @@ import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } fr
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
+import { ManagedEcfPocPage } from './sections/managed_ecf_poc';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -182,6 +183,9 @@ export const AppRoutes = memo(() => {
   return (
     <>
       <Routes>
+        <Route path={INTEGRATIONS_ROUTING_PATHS.managed_ecf_poc}>
+          <ManagedEcfPocPage />
+        </Route>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>

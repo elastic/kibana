@@ -34,6 +34,7 @@ import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_syn
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
 import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
+import { registerRoutes as registerManagedEcfPocRoutes } from './managed_ecf_poc';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -73,6 +74,7 @@ export function registerRoutes(
   }
 
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
+  registerManagedEcfPocRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

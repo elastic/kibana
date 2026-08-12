@@ -25,7 +25,12 @@ export type MonitoringDeepLinkId = MonitoringAppId;
 export type IntegrationsAppId = typeof INTEGRATIONS_APP_ID;
 export type FleetAppId = typeof FLEET_APP_ID;
 export type OsQueryAppId = typeof OSQUERY_APP_ID;
-export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryAppId;
+export type IntegrationsLinkId = 'managed_ecf_poc';
+export type IntegrationsDeepLinkId =
+  | IntegrationsAppId
+  | FleetAppId
+  | OsQueryAppId
+  | `${IntegrationsAppId}:${IntegrationsLinkId}`;
 
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
