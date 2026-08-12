@@ -9,7 +9,6 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
 import { EsqlService } from '@kbn/esql-server-utils';
 
@@ -38,8 +37,7 @@ export const registerGetJoinIndicesRoute = (
         const core = await requestHandlerContext.core;
         const { remoteClusters } = request.query;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const signal = getRequestAbortedSignal(request.events.aborted$);
-        const result = await service.getIndicesByIndexMode('lookup', remoteClusters, signal);
+        const result = await service.getIndicesByIndexMode('lookup', remoteClusters);
 
         return response.ok({
           body: result,

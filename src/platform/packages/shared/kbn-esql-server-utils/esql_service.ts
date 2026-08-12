@@ -36,13 +36,11 @@ export class EsqlService {
    * Get indices by their mode (lookup or time_series).
    * @param mode The mode to filter indices by.
    * @param remoteClusters Optional comma-separated list of remote clusters to include.
-   * @param signal Optional signal used to abort the Elasticsearch request.
    * @returns A promise that resolves to the indices autocomplete result.
    */
   public async getIndicesByIndexMode(
     mode: 'lookup' | 'time_series',
-    remoteClusters?: string,
-    signal?: AbortSignal
+    remoteClusters?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
@@ -58,13 +56,10 @@ export class EsqlService {
     }
 
     // It doesn't return hidden indices
-    const resolveIndexParams = {
+    const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
-    } as Parameters<typeof client.indices.resolveIndex>[0];
-    const sources = (await client.indices.resolveIndex(resolveIndexParams, {
-      signal,
     })) as ResolveIndexResponse;
 
     const mappedMode = this.getIndexSourceType(mode);

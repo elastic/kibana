@@ -13,17 +13,17 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
 import { getRemoteClustersFromESQLQuery } from '../query_parsing_helpers';
 
 const getLookupIndices = cacheParametrizedAsyncFunction(
-  async (http: HttpStart, remoteClusters?: string, signal?: AbortSignal) => {
+  async (http: HttpStart, remoteClusters?: string) => {
     const query = remoteClusters ? { remoteClusters } : {};
 
     const result = await http.get<IndicesAutocompleteResult>(
       '/internal/esql/autocomplete/join/indices',
-      { query, signal }
+      { query }
     );
 
     return result;
   },
-  (http: HttpStart, remoteClusters?: string, _signal?: AbortSignal) => remoteClusters || '',
+  (http: HttpStart, remoteClusters?: string) => remoteClusters || '',
   1000 * 60 * 5, // Keep the value in cache for 5 minutes
   1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
 );
@@ -33,21 +33,18 @@ const getLookupIndices = cacheParametrizedAsyncFunction(
  * @param query The ESQL query string to extract remote clusters from.
  * @param http The HTTP service to use for the request.
  * @param cacheOptions Optional cache options to control cache behavior.
- * @param signal Optional signal used to cancel the request.
  * @returns A promise that resolves to an IndicesAutocompleteResult object.
  */
 export const getJoinIndices = async (
   query: string,
   http: HttpStart,
-  cacheOptions?: { forceRefresh?: boolean },
-  signal?: AbortSignal
+  cacheOptions?: { forceRefresh?: boolean }
 ) => {
   const remoteClusters = getRemoteClustersFromESQLQuery(query);
   const result = await getLookupIndices.call(
     { forceRefresh: cacheOptions?.forceRefresh },
     http,
-    remoteClusters?.join(','),
-    signal
+    remoteClusters?.join(',')
   );
   return result;
 };

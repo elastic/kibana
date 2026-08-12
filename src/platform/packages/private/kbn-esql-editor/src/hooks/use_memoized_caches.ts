@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { memoize } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -134,24 +134,10 @@ export const useMemoizedCaches = ({
 
   const minimalQueryRef = useRef(minimalQuery);
   minimalQueryRef.current = minimalQuery;
-  const joinIndicesAbortControllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    return () => joinIndicesAbortControllerRef.current?.abort();
-  }, []);
 
   const getJoinIndicesCallback = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
-      joinIndicesAbortControllerRef.current?.abort();
-      const controller = new AbortController();
-      joinIndicesAbortControllerRef.current = controller;
-
-      const result = await getJoinIndices(
-        minimalQueryRef.current,
-        core.http,
-        cacheOptions,
-        controller.signal
-      );
+      const result = await getJoinIndices(minimalQueryRef.current, core.http, cacheOptions);
       return result;
     },
     [core.http]

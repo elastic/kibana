@@ -16,18 +16,6 @@ const makeClient = (resolveIndexMock: jest.Mock) =>
 
 const emptyResponse = { indices: [], aliases: [], data_streams: [] };
 
-describe('EsqlService.getIndicesByIndexMode', () => {
-  it('forwards the abort signal to resolveIndex', async () => {
-    const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
-    const service = new EsqlService({ client: makeClient(resolveIndex) });
-    const signal = new AbortController().signal;
-
-    await service.getIndicesByIndexMode('lookup', 'cluster-a', signal);
-
-    expect(resolveIndex).toHaveBeenCalledWith(expect.anything(), { signal });
-  });
-});
-
 describe('EsqlService.getAllIndices', () => {
   it('passes filter_path to limit response payload on both resolveIndex calls', async () => {
     const resolveIndex = jest.fn().mockResolvedValue(emptyResponse);
