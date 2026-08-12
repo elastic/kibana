@@ -54,5 +54,8 @@
     "@kbn/zod",
     "@kbn/shared-ux-ai-components",
     "@kbn/security-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/es-types",
+    "@kbn/task-manager-plugin",
   ]
 }

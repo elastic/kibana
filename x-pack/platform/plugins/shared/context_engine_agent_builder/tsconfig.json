@@ -17,6 +17,7 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-tools-base",
     "@kbn/core-http-server-mocks",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/agent-builder-plugin"
   ]
 }
