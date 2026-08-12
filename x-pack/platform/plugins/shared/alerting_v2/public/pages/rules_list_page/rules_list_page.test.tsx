@@ -451,7 +451,7 @@ describe('RulesListPage', () => {
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
     const list = await screen.findByTestId('rulesListModeFilter-list');
-    fireEvent.click(within(list).getByText('Signal'));
+    fireEvent.click(within(list).getByText('Events'));
 
     await waitFor(() => {
       expect(lastFindItemsArgs().filters.kind).toMatchObject({ include: ['signal'] });

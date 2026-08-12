@@ -47,7 +47,7 @@ const SIGNAL_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.modeField.signal.description',
   {
     defaultMessage:
-      'Matches are stored as queryable data points. No alerts, no notifications - just data.',
+      'Matches are stored as queryable events. No alerts, no notifications - just data.',
   }
 );
 

@@ -26,13 +26,13 @@ describe('ModeFilterPopover', () => {
     expect(screen.getByText('Mode')).toBeInTheDocument();
   });
 
-  it('displays Alert and Signal options when opened', () => {
+  it('displays Alerts and Events options when opened', () => {
     render(<ModeFilterPopover {...defaultProps} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
 
-    expect(screen.getByText('Alert')).toBeInTheDocument();
-    expect(screen.getByText('Signal')).toBeInTheDocument();
+    expect(screen.getByText('Alerts')).toBeInTheDocument();
+    expect(screen.getByText('Events')).toBeInTheDocument();
   });
 
   it('calls onChange with "alert" when Alert is selected', () => {
@@ -40,7 +40,7 @@ describe('ModeFilterPopover', () => {
     render(<ModeFilterPopover value="" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Alert'));
+    fireEvent.click(screen.getByText('Alerts'));
 
     expect(onChange).toHaveBeenCalledWith('alert');
   });
@@ -50,7 +50,7 @@ describe('ModeFilterPopover', () => {
     render(<ModeFilterPopover value="" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Signal'));
+    fireEvent.click(screen.getByText('Events'));
 
     expect(onChange).toHaveBeenCalledWith('signal');
   });
@@ -60,7 +60,7 @@ describe('ModeFilterPopover', () => {
     render(<ModeFilterPopover value="alert" onChange={onChange} />);
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByText('Alert'));
+    fireEvent.click(screen.getByText('Alerts'));
 
     expect(onChange).toHaveBeenCalledWith('');
   });

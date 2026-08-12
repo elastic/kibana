@@ -45,13 +45,13 @@ export const MODE_FILTER_OPTIONS = [
   {
     key: 'alert' as const,
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alert',
+      defaultMessage: 'Alerts',
     }),
   },
   {
     key: 'signal' as const,
     label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Signal',
+      defaultMessage: 'Events',
     }),
   },
 ];

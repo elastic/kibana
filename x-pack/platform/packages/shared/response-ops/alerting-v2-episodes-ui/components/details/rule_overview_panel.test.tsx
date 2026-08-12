@@ -43,18 +43,18 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toBeInTheDocument();
   });
 
-  it('renders "Signal" kind badge for signal rules', () => {
+  it('renders "Events" kind badge for signal rules', () => {
     renderPanel(mockRule);
 
     const badge = screen.getByTestId('alertingV2EpisodeDetailsRuleKindBadge');
-    expect(badge).toHaveTextContent('Signal');
+    expect(badge).toHaveTextContent('Events');
   });
 
-  it('renders "Alert" kind badge for alert rules', () => {
+  it('renders "Alerts" kind badge for alert rules', () => {
     renderPanel(alertRule);
 
     const badge = screen.getByTestId('alertingV2EpisodeDetailsRuleKindBadge');
-    expect(badge).toHaveTextContent('Alert');
+    expect(badge).toHaveTextContent('Alerts');
   });
 
   it('renders composed query with breach segment (alert condition)', () => {

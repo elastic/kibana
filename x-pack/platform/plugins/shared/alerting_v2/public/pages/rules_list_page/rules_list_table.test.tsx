@@ -169,14 +169,14 @@ describe('RulesListTable', () => {
     it('renders Mode column with Alert and Signal', () => {
       renderTable();
 
-      expect(screen.getByText('Alert')).toBeInTheDocument();
-      expect(screen.getByText('Signal')).toBeInTheDocument();
+      expect(screen.getByText('Alerts')).toBeInTheDocument();
+      expect(screen.getByText('Events')).toBeInTheDocument();
     });
 
     it('renders kind-specific tooltip for Alert mode badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Alert'));
+      fireEvent.mouseOver(screen.getByText('Alerts'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.alert)).toBeInTheDocument();
       expect(
@@ -187,7 +187,7 @@ describe('RulesListTable', () => {
     it('renders kind-specific tooltip for Signal mode badge', async () => {
       renderTable();
 
-      fireEvent.mouseOver(screen.getByText('Signal'));
+      fireEvent.mouseOver(screen.getByText('Events'));
 
       expect(await screen.findByText(RULE_KIND_TOOLTIPS.signal)).toBeInTheDocument();
     });

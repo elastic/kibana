@@ -217,8 +217,8 @@ describe('RuleDetailPage', () => {
   it('renders native kind, status, and tag badges in the app header', () => {
     renderPage(baseRule);
     const kindBadge = screen.getByTestId('kindBadge');
-    expect(kindBadge).toHaveTextContent('Signal');
-    expect(kindBadge.querySelector('[data-euiicon-type="radar"]')).toBeInTheDocument();
+    expect(kindBadge).toHaveTextContent('Events');
+    expect(kindBadge.querySelector('[data-euiicon-type="stats"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('+2'));
@@ -229,7 +229,7 @@ describe('RuleDetailPage', () => {
   it('renders alert kind badge with its icon and disabled status badge', () => {
     renderPage({ ...baseRule, kind: 'alert', enabled: false });
     const kindBadge = screen.getByTestId('kindBadge');
-    expect(kindBadge).toHaveTextContent('Alert');
+    expect(kindBadge).toHaveTextContent('Alerts');
     expect(kindBadge.querySelector('[data-euiicon-type="bell"]')).toBeInTheDocument();
     expect(screen.getByTestId('disabledBadge')).toHaveTextContent('Disabled');
     expect(screen.queryByTestId('enabledBadge')).not.toBeInTheDocument();

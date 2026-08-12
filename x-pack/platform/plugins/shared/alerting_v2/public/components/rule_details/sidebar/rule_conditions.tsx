@@ -24,10 +24,10 @@ import { RuleDetailsTable } from './rule_details_table';
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Signal',
+    defaultMessage: 'Events',
   }),
   alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alert',
+    defaultMessage: 'Alerts',
   }),
 };
 
