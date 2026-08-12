@@ -3,7 +3,7 @@ name: Flaky Fix Verifier
 description: Verify a Flaky Test Fixer PR by running the Flaky Test Runner, attributing results, iterating the fix, and reporting confidence.
 on:
   pull_request_target:
-    types: [opened, labeled]
+    types: [labeled]
   issue_comment:
     types: [created]
   workflow_dispatch:
@@ -29,8 +29,7 @@ permissions:
 
 # Activation rules:
 # - Manual runs always activate.
-# - `kickoff`: any PR is opened with (or labeled) `flaky-test-fixer`. Applying that
-#   label requires write access, so this is the gate — the PR author is not checked.
+# - `kickoff`: a PR is labeled `flaky-test-fixer`.
 #   NOTE: not checking the author is a temporary measure for testing; tighten it
 #   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
@@ -43,10 +42,8 @@ if: >-
     github.event_name == 'workflow_dispatch' ||
     (
       github.event_name == 'pull_request_target' &&
-      (
-        (github.event.action == 'labeled' && github.event.label.name == 'flaky-test-fixer') ||
-        (github.event.action == 'opened' && contains(github.event.pull_request.labels.*.name, 'flaky-test-fixer'))
-      )
+      github.event.action == 'labeled' &&
+      github.event.label.name == 'flaky-test-fixer'
     ) ||
     (
       github.event_name == 'issue_comment' &&
@@ -295,7 +292,7 @@ Only fetch data live when it is not in these files. In particular, the linked `f
 
 You run in one of two modes, selected from the triggering event:
 
-- `kickoff`: the trigger is `pull_request_target` (a `flaky-test-fixer` PR was opened or labeled), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Decide whether the fix needs a run (see below); if so, resolve configs and trigger the first flaky test runner run.
+- `kickoff`: the trigger is `pull_request_target` (a PR was labeled `flaky-test-fixer`), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Decide whether the fix needs a run (see below); if so, resolve configs and trigger the first flaky test runner run.
 - `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`, or a manual `workflow_dispatch` on a PR that **already** has the `flaky-fix-check:started` label and flaky test runner result comments. Read the results, attribute them, and decide whether to finish or iterate.
 
 ## Number of runs
