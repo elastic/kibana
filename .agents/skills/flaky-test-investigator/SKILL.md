@@ -92,13 +92,14 @@ Work through all of these questions:
 
 ### Does the test follow best practices?
 
-Common best-practice violations that cause flakiness:
+Check the test against these best practices — the ones flaky tests most often violate. A violated practice is frequently the root cause, and bringing the test in line with it is the fix:
 
-- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`). UI tests are notoriously more flaky than component, API, and Jest unit/integration tests.
-- **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`). Driving setup/teardown through the UI is slower and flakier.
-- **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`). Confirm the action produced the expected result and the UI has rendered before continuing.
+- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`): UI tests are notoriously more flaky than component, API, and Jest unit/integration tests — a test that doesn't need a browser shouldn't use one.
+- **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
+- **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`): confirm the action produced the expected result and the UI has rendered before continuing.
 - **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
-- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`). If a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guardrails below).
+- **Don't use manual retry loops** (`docs/extend/testing/ui-best-practices#dont-use-manual-retry-loops`): if a click or type only works "sometimes", don't re-issue it in a retry — that hides an actionability bug a real user would hit. Fix the interaction or wait on a stable readiness signal instead (see the fix guardrails below).
+- **Expect a shared test environment** (`docs/extend/testing/scout-best-practices#expect-a-shared-test-environment`): tests can't assume a clean deployment — other suites leave objects behind, and Cloud ships preinstalled content (Fleet dashboards, prebuilt detection rules, preconfigured connectors). Assertions over lists must tolerate entries the test didn't create: narrow queries to the test's own data, address objects by identity (not position), and assert containment (not totality).
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/testing/scout-best-practices.md`, the UI best practices in `docs/extend/testing/ui-best-practices.md`, and the API best practices in `docs/extend/testing/api-best-practices.md`.
 
