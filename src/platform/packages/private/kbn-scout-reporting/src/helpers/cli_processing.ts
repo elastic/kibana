@@ -12,7 +12,7 @@ import { ScoutTestTarget } from '@kbn/scout-info';
 export const stripRunCommand = (commandArgs: string[]): string => {
   if (!Array.isArray(commandArgs) || commandArgs.length < 3) {
     throw new Error(
-      `Invalid command arguments: expected at least 'node <playwright-path> test' or 'npx playwright test'`
+      `Invalid command arguments: expected 'node scripts/playwright test'`
     );
   }
 
