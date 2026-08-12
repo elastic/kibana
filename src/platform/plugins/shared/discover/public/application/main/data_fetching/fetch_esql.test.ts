@@ -225,7 +225,7 @@ describe('fetchEsql', () => {
       expect.anything(),
       null,
       expect.objectContaining({
-        searchContext: expect.objectContaining({ esqlApproximation: true }),
+        searchContext: expect.objectContaining({ isApproximate: true }),
       })
     );
   });
