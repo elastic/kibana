@@ -76,9 +76,10 @@ export const applyGrouping = ({
 
     const groupConfig = INTEGRATION_GROUPS[groupId];
 
-    const memberCards = representativeItems.map((item) =>
-      mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId })
-    );
+    const memberCards = representativeItems.map((item) => ({
+      ...mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId }),
+      fromCollection: { groupId, title: groupConfig.title },
+    }));
 
     const anyInstalled = representativeItems.some(
       (m) => m.installationInfo?.install_status === installationStatuses.Installed

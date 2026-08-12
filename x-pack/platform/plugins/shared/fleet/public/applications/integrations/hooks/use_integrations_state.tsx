@@ -13,23 +13,36 @@ import { useIntraAppState } from '../../../hooks';
 
 interface IntegrationsStateContextValue {
   getFromIntegrations(): string | undefined;
+  getFromCollection(): { groupId: string; title: string } | undefined;
 }
 
 const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
   getFromIntegrations: () => undefined,
+  getFromCollection: () => undefined,
 });
 
 export const IntegrationsStateContextProvider: FunctionComponent<{
   children?: React.ReactNode;
 }> = ({ children }) => {
-  const maybeState = useIntraAppState<undefined | IntegrationsAppBrowseRouteState>();
+  const maybeState = useIntraAppState<
+    | undefined
+    | (IntegrationsAppBrowseRouteState & { fromCollection?: { groupId: string; title: string } })
+  >();
   const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
+  const fromCollectionRef = useRef<{ groupId: string; title: string } | undefined>(
+    maybeState?.fromCollection
+  );
 
   const getFromIntegrations = useCallback(() => {
     return fromIntegrationsRef.current;
   }, []);
+
+  const getFromCollection = useCallback(() => {
+    return fromCollectionRef.current;
+  }, []);
+
   return (
-    <IntegrationsStateContext.Provider value={{ getFromIntegrations }}>
+    <IntegrationsStateContext.Provider value={{ getFromIntegrations, getFromCollection }}>
       {children}
     </IntegrationsStateContext.Provider>
   );

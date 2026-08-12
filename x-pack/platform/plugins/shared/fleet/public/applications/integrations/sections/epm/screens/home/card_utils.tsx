@@ -46,6 +46,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  fromCollection?: { groupId: string; title: string };
   hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
