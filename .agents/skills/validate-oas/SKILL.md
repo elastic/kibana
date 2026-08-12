@@ -54,10 +54,15 @@ node scripts/capture_oas_snapshot \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
   --include-path /api/workflows \
-  --include-path /api/security/entity_store \
   --include-path /api/dashboards \
-  --include-path /api/visualizations
+  --include-path /api/visualizations \
+  --include-path /api/markdowns \
+  --include-path /api/links \
+  --include-path /api/tags \
+  --include-path /api/security/entity_store
 ```
+
+A path missing from this list is dropped with no error. It then vanishes from `oas_docs/output/*.yaml` after `make api-docs`, and the API contract check reads it as a removed endpoint. Copy the list from the Buildkite script. Don't edit it by hand.
 
 3. Run the OpenAPI bundling scripts:
 
@@ -118,9 +123,12 @@ node scripts/capture_oas_snapshot \
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
   --include-path /api/workflows \
-  --include-path /api/security/entity_store \
   --include-path /api/dashboards \
-  --include-path /api/visualizations
+  --include-path /api/visualizations \
+  --include-path /api/markdowns \
+  --include-path /api/links \
+  --include-path /api/tags \
+  --include-path /api/security/entity_store
 bash .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 bash .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 cd oas_docs && make api-docs
