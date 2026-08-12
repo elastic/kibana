@@ -14,10 +14,4 @@ export interface SpaceSettingsResponse {
   default_agent_id: string | null;
 }
 
-/**
- * Request body for PUT `/internal/agent_builder/space_settings`. Passing
- * `default_agent_id: null` clears the assignment.
- */
-export interface UpdateSpaceSettingsRequestBody {
-  default_agent_id: string | null;
-}
+export type UpdateSpaceSettingsRequestBody = SpaceSettingsResponse;

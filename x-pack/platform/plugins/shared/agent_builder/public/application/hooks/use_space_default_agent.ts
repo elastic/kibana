@@ -27,6 +27,12 @@ export const useSpaceDefaultAgent = () => {
   };
 };
 
+/**
+ * Canonical source of truth for the "space default agent" UX rule.
+ *
+ * The per-space assignment is UI-only: the server never filters the agents
+ * API by the assignment.
+ */
 export const useEffectiveSpaceDefaultAgent = () => {
   const { defaultAgentId, isFetched: settingsFetched } = useSpaceDefaultAgent();
   const { agents, isFetched: agentsFetched } = useAgentBuilderAgents();

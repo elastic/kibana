@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -19,12 +18,11 @@ const setup = () => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
   const soClient = savedObjectsServiceMock.createStartContract().getScopedClient({} as any);
   savedObjects.getScopedClient.mockReturnValue(soClient);
-  const logger = loggingSystemMock.createLogger();
 
-  const service = createSpaceSettingsService({ savedObjects, logger });
+  const service = createSpaceSettingsService({ savedObjects });
   const request = httpServerMock.createKibanaRequest();
 
-  return { service, soClient, savedObjects, request, logger };
+  return { service, soClient, savedObjects, request };
 };
 
 describe('createSpaceSettingsService', () => {

@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { i18n } from '@kbn/i18n';
 
 /* Attributes stored on the per-space Agent Builder settings singleton. */
 export interface AgentBuilderSpaceSettingsAttributes {
@@ -17,7 +16,7 @@ export const AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE = 'agent_builder_spa
 
 export const AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID = 'agent-builder-space-settings';
 
-/* Saved object type definition for the per-space Agent Builder settings. */
+/* Saved object type for the per-space Agent Builder settings */
 export const agentBuilderSpaceSettingsType: SavedObjectsType<AgentBuilderSpaceSettingsAttributes> =
   {
     name: AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
@@ -28,8 +27,5 @@ export const agentBuilderSpaceSettingsType: SavedObjectsType<AgentBuilderSpaceSe
       properties: {
         defaultAgentId: { type: 'keyword' },
       },
-    },
-    management: {
-      importableAndExportable: false,
     },
   };

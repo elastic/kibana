@@ -6,10 +6,13 @@
  */
 
 import { randomUUID } from 'crypto';
+import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ListAgentResponse } from '../../../../common/http_api/agents';
 import type { SpaceSettingsResponse } from '../../../../common/http_api/space_settings';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
+import { withAuth } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
@@ -22,26 +25,12 @@ import { spaceUrl } from '../fixtures/space_paths';
 const TEST_PREFIX = 'space-default-agent-test';
 
 /**
- * Kibana role shape (Kibana Security API). Kept local so this spec can build
- * up its own role definitions without leaking test-specific shapes into shared
- * fixture types.
- */
-interface KibanaRole {
-  elasticsearch?: { cluster?: string[]; indices?: unknown[]; run_as?: string[] };
-  kibana?: Array<{
-    base?: string[];
-    feature?: Record<string, string[]>;
-    spaces: string[];
-  }>;
-}
-
-/**
  * Convenience helper for building a Kibana role scoped to a single space with
  * the given Agent Builder sub-feature privileges.
  */
 function agentBuilderRole(spaceId: string, privileges: string[]): KibanaRole {
   return {
-    elasticsearch: { cluster: [], indices: [], run_as: [] },
+    elasticsearch: { cluster: [], indices: [] },
     kibana: [
       {
         base: [],
@@ -53,11 +42,6 @@ function agentBuilderRole(spaceId: string, privileges: string[]): KibanaRole {
       },
     ],
   };
-}
-
-function basicAuthHeader(username: string, password: string): Record<string, string> {
-  const token = Buffer.from(`${username}:${password}`).toString('base64');
-  return { Authorization: `Basic ${token}` };
 }
 
 function mockAgent(id: string) {
@@ -83,46 +67,22 @@ apiTest.describe(
     const AGENT_IN_A_2 = `${TEST_PREFIX}-agent-a2-${testRunId}`;
     const AGENT_IN_B_1 = `${TEST_PREFIX}-agent-b1-${testRunId}`;
 
-    const readOnlyPrincipal = {
-      roleName: `${TEST_PREFIX}-read-only-role-${testRunId}`,
-      username: `${TEST_PREFIX}-read-only-user-${testRunId}`,
-      password: 'read-only-password',
-    };
-    const manageAgentsPrincipal = {
-      roleName: `${TEST_PREFIX}-manage-agents-role-${testRunId}`,
-      username: `${TEST_PREFIX}-manage-agents-user-${testRunId}`,
-      password: 'manage-agents-password',
-    };
+    // API-key-authed clients for the two Agent Builder personas in SPACE_A
+    let asReadOnly: AuthedApiClient;
+    let asManageAgents: AuthedApiClient;
 
-    let adminInteractiveCookieHeader: Record<string, string>;
-
-    const adminInternalHeaders = () => ({
-      ...COMMON_HEADERS,
-      ...adminInteractiveCookieHeader,
+    const adminApiVersionHeaders = () => ({
       'elastic-api-version': ELASTIC_API_VERSION,
     });
 
-    const adminKibanaRequestHeaders = () => ({
-      'elastic-api-version': ELASTIC_API_VERSION,
-    });
-
-    const userHeaders = (username: string, password: string) => ({
-      ...COMMON_HEADERS,
-      ...basicAuthHeader(username, password),
-      'elastic-api-version': ELASTIC_API_VERSION,
-    });
-
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      adminInteractiveCookieHeader = cookieHeader;
-
+    apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
       // Two isolated spaces so we can prove that an assignment in one space
       // does not leak into the other.
       for (const spaceId of [SPACE_A, SPACE_B]) {
         await kbnClient.request({
           method: 'POST',
           path: '/api/spaces/space',
-          headers: adminKibanaRequestHeaders(),
+          headers: adminApiVersionHeaders(),
           body: { id: spaceId, name: spaceId, disabledFeatures: [] },
         });
       }
@@ -137,52 +97,29 @@ apiTest.describe(
           await kbnClient.request({
             method: 'POST',
             path: spaceUrl(`${API_AGENT_BUILDER}/agents`, spaceId),
-            headers: adminKibanaRequestHeaders(),
+            headers: adminApiVersionHeaders(),
             body: mockAgent(agentId),
           });
         }
       }
 
-      // Read-only user (no manage_agents) in space A — should be constrained
-      // to the assigned agent once one is set.
-      await kbnClient.request({
-        method: 'PUT',
-        path: `/api/security/role/${encodeURIComponent(readOnlyPrincipal.roleName)}`,
-        headers: adminKibanaRequestHeaders(),
-        body: agentBuilderRole(SPACE_A, ['minimal_read']),
-      });
-      await kbnClient.request({
-        method: 'POST',
-        path: `/internal/security/users/${encodeURIComponent(readOnlyPrincipal.username)}`,
-        headers: adminInternalHeaders(),
-        body: {
-          username: readOnlyPrincipal.username,
-          password: readOnlyPrincipal.password,
-          roles: [readOnlyPrincipal.roleName],
-          full_name: 'Space default fixture read-only user',
-          enabled: true,
-        },
+      // Read-only user (no manage_agents) in SPACE_A
+      const readOnly = await requestAuth.getApiKeyForCustomRole(
+        agentBuilderRole(SPACE_A, ['minimal_read'])
+      );
+      asReadOnly = withAuth(apiClient, {
+        ...COMMON_HEADERS,
+        ...readOnly.apiKeyHeader,
+        'elastic-api-version': ELASTIC_API_VERSION,
       });
 
-      // Admin-ish user with manage_agents in space A — the assignment must
-      // NOT restrict them.
-      await kbnClient.request({
-        method: 'PUT',
-        path: `/api/security/role/${encodeURIComponent(manageAgentsPrincipal.roleName)}`,
-        headers: adminKibanaRequestHeaders(),
-        body: agentBuilderRole(SPACE_A, ['minimal_read', 'manage_agents']),
-      });
-      await kbnClient.request({
-        method: 'POST',
-        path: `/internal/security/users/${encodeURIComponent(manageAgentsPrincipal.username)}`,
-        headers: adminInternalHeaders(),
-        body: {
-          username: manageAgentsPrincipal.username,
-          password: manageAgentsPrincipal.password,
-          roles: [manageAgentsPrincipal.roleName],
-          full_name: 'Space default fixture manage-agents user',
-          enabled: true,
-        },
+      const manageAgents = await requestAuth.getApiKeyForCustomRole(
+        agentBuilderRole(SPACE_A, ['minimal_read', 'manage_agents'])
+      );
+      asManageAgents = withAuth(apiClient, {
+        ...COMMON_HEADERS,
+        ...manageAgents.apiKeyHeader,
+        'elastic-api-version': ELASTIC_API_VERSION,
       });
     });
 
@@ -192,30 +129,13 @@ apiTest.describe(
       for (const spaceId of [SPACE_A, SPACE_B]) {
         try {
           await asAdmin.put(spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, spaceId), {
-            headers: {
-              ...adminKibanaRequestHeaders(),
-              'kbn-xsrf': 'kibana',
-              'x-elastic-internal-origin': 'kibana',
-            },
+            headers: adminApiVersionHeaders(),
             body: { default_agent_id: null },
             responseType: 'json',
           });
         } catch {
           // Ignore — cleanup is best-effort.
         }
-      }
-
-      for (const { username, roleName } of [readOnlyPrincipal, manageAgentsPrincipal]) {
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/security/users/${encodeURIComponent(username)}`,
-          headers: adminInternalHeaders(),
-        });
-        await kbnClient.request({
-          method: 'DELETE',
-          path: `/api/security/role/${encodeURIComponent(roleName)}`,
-          headers: adminKibanaRequestHeaders(),
-        });
       }
 
       for (const [spaceId, agents] of [
@@ -226,7 +146,7 @@ apiTest.describe(
           try {
             await asAdmin.delete(
               spaceUrl(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, spaceId),
-              { headers: adminKibanaRequestHeaders() }
+              { headers: adminApiVersionHeaders() }
             );
           } catch {
             // Ignore — the "clears on delete" test may have removed one already.
@@ -238,7 +158,7 @@ apiTest.describe(
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/spaces/space/${encodeURIComponent(spaceId)}`,
-          headers: adminKibanaRequestHeaders(),
+          headers: adminApiVersionHeaders(),
         });
       }
     });
@@ -278,7 +198,7 @@ apiTest.describe(
 
     apiTest(
       'assignment is readable by everyone and does not filter the agents API (UI-only)',
-      async ({ apiClient, asAdmin }) => {
+      async ({ asAdmin }) => {
         // Assign AGENT_IN_A_1 in SPACE_A.
         const putRes = await asAdmin.put(
           spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, SPACE_A),
@@ -292,12 +212,9 @@ apiTest.describe(
 
         // A restricted (no manage_agents) user can READ the assignment so the
         // UI knows which agent to pin them to.
-        const settingsAsReadOnly = await apiClient.get(
+        const settingsAsReadOnly = await asReadOnly.get(
           spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, SPACE_A),
-          {
-            headers: userHeaders(readOnlyPrincipal.username, readOnlyPrincipal.password),
-            responseType: 'json',
-          }
+          { responseType: 'json' }
         );
         expect(settingsAsReadOnly).toHaveStatusCode(200);
         expect((settingsAsReadOnly.body as SpaceSettingsResponse).default_agent_id).toBe(
@@ -306,12 +223,9 @@ apiTest.describe(
 
         // The restriction is UI-only: the agents API is NOT filtered server
         // side, so the restricted user still sees every agent they can access.
-        const listAsReadOnly = await apiClient.get(
+        const listAsReadOnly = await asReadOnly.get(
           spaceUrl(`${API_AGENT_BUILDER}/agents`, SPACE_A),
-          {
-            headers: userHeaders(readOnlyPrincipal.username, readOnlyPrincipal.password),
-            responseType: 'json',
-          }
+          { responseType: 'json' }
         );
         expect(listAsReadOnly).toHaveStatusCode(200);
         const restrictedAgentIds = (listAsReadOnly.body as ListAgentResponse).results
@@ -321,12 +235,9 @@ apiTest.describe(
         expect(restrictedAgentIds).toStrictEqual([AGENT_IN_A_1, AGENT_IN_A_2].sort());
 
         // The manage_agents user also sees both agents.
-        const listAsManager = await apiClient.get(
+        const listAsManager = await asManageAgents.get(
           spaceUrl(`${API_AGENT_BUILDER}/agents`, SPACE_A),
-          {
-            headers: userHeaders(manageAgentsPrincipal.username, manageAgentsPrincipal.password),
-            responseType: 'json',
-          }
+          { responseType: 'json' }
         );
         expect(listAsManager).toHaveStatusCode(200);
         const managerAgentIds = (listAsManager.body as ListAgentResponse).results
@@ -347,12 +258,11 @@ apiTest.describe(
       expect((response.body as SpaceSettingsResponse).default_agent_id).toBeNull();
     });
 
-    apiTest('restricted users cannot mutate the space assignment (403)', async ({ apiClient }) => {
-      // The read-only role has no manage_agents privilege — PUT must fail.
-      const response = await apiClient.put(
+    apiTest('restricted users cannot mutate the space assignment (403)', async () => {
+      // The read-only role has no `manage_agents` privilege — PUT must fail.
+      const response = await asReadOnly.put(
         spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, SPACE_A),
         {
-          headers: userHeaders(readOnlyPrincipal.username, readOnlyPrincipal.password),
           body: { default_agent_id: AGENT_IN_A_2 },
           responseType: 'json',
         }
@@ -363,11 +273,9 @@ apiTest.describe(
     apiTest(
       'does not auto-clear the assignment when the pinned agent is deleted',
       async ({ asAdmin }) => {
-        // Deleting the pinned agent leaves a dangling assignment server-side.
-        // The restriction is UI-only: the client cross-checks the assignment
-        // against the visible agents list and degrades to "unconfigured" when
-        // the agent is gone, so the server intentionally does not eagerly clear
-        // it. An admin re-assigns (or clears) to fix.
+        // The server intentionally does not eagerly clear a dangling assignment;
+        // the client-side cross-check in `useEffectiveSpaceDefaultAgent` degrades
+        // it to "unconfigured" for users, and an admin can re-assign or clear it.
         const deleteRes = await asAdmin.delete(
           spaceUrl(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(AGENT_IN_A_1)}`, SPACE_A),
           { responseType: 'json' }

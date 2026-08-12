@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT, AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -131,13 +131,6 @@ const actionLabels = {
   setSpaceDefaultDescription: i18n.translate(
     'xpack.agentBuilder.agents.actions.setSpaceDefaultDescription',
     { defaultMessage: 'Make this the default agent for users in this space' }
-  ),
-  setSpaceDefaultDisabledPrivateDescription: i18n.translate(
-    'xpack.agentBuilder.agents.actions.setSpaceDefaultDisabledPrivateDescription',
-    {
-      defaultMessage:
-        'Private agents can only be used by their owner and explicitly granted users, so they can\u2019t be a space default. Change the agent access to public or shared first.',
-    }
   ),
   clearSpaceDefault: i18n.translate('xpack.agentBuilder.agents.actions.clearSpaceDefault', {
     defaultMessage: 'Remove as space default',
@@ -363,21 +356,13 @@ export const AgentsList: React.FC = () => {
             spaceDefaultAgentId === agent.id
               ? actionLabels.clearSpaceDefault
               : actionLabels.setSpaceDefault,
-          description: (agent) => {
-            if (spaceDefaultAgentId === agent.id) {
-              return actionLabels.clearSpaceDefaultDescription;
-            }
-            if (agent.access_control?.access_mode === AgentAccessControlMode.Private) {
-              return actionLabels.setSpaceDefaultDisabledPrivateDescription;
-            }
-            return actionLabels.setSpaceDefaultDescription;
-          },
+          description: (agent) =>
+            spaceDefaultAgentId === agent.id
+              ? actionLabels.clearSpaceDefaultDescription
+              : actionLabels.setSpaceDefaultDescription,
           'data-test-subj': (agent) => `agentBuilderAgentsListSpaceDefault-${agent.id}`,
           showOnHover: true,
           available: () => manageAgents,
-          enabled: (agent) =>
-            spaceDefaultAgentId === agent.id ||
-            agent.access_control?.access_mode !== AgentAccessControlMode.Private,
           onClick: (agent) => {
             const isCurrent = spaceDefaultAgentId === agent.id;
             setSpaceDefaultAgent.mutate(isCurrent ? null : agent.id);

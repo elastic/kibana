@@ -12,12 +12,14 @@ import { ActiveSpaceProvider } from '../context/active_space_context';
 import { storageKeys } from '../storage_keys';
 import { getLastAgentId, useLastAgentId } from './use_last_agent_id';
 
-// `useLastAgentId` resolves the space default via `useEffectiveSpaceDefaultAgent`
-// (which cross-checks the assignment against the agents list). We mock it so we
-// don't have to wire up the react-query client and services context.
 const mockUseEffectiveSpaceDefaultAgent = jest.fn();
 jest.mock('./use_space_default_agent', () => ({
   useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
+}));
+
+const mockValidateAgentId = jest.fn();
+jest.mock('./agents/use_validate_agent_id', () => ({
+  useValidateAgentId: () => mockValidateAgentId,
 }));
 
 const wrapperFor = (spaceId: string) => {
@@ -37,6 +39,7 @@ describe('use_last_agent_id', () => {
       isReady: true,
       isRestricted: false,
     });
+    mockValidateAgentId.mockReturnValue(true);
   });
 
   it('reads the cached agent ID for the active space', () => {
@@ -49,6 +52,9 @@ describe('use_last_agent_id', () => {
 
   it('does not leak agents between spaces', () => {
     localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('agent-a'));
+    // No stored value for the 'marketing' space → validation is asked about
+    // `undefined`, which the real hook also rejects.
+    mockValidateAgentId.mockImplementation((id?: string) => id === 'agent-a');
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('marketing') });
 
@@ -76,15 +82,23 @@ describe('use_last_agent_id', () => {
     expect(result.current.agentId).toBe('siemens-agent');
   });
 
+  it('degrades to the platform default when the stored id no longer resolves in the agents list', () => {
+    localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('deleted-agent'));
+    mockValidateAgentId.mockReturnValue(false);
+
+    const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
+
+    expect(result.current.agentId).toBe(agentBuilderDefaultAgentId);
+  });
+
   it('returns the last-used localStorage agent, and isReady:false, while not ready', () => {
-    // Redirects gate on isReady (spinner) until ready, so this transient value
-    // never drives navigation.
     localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('agent-a'));
     mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
       effectiveDefaultAgentId: null,
       isReady: false,
       isRestricted: false,
     });
+    mockValidateAgentId.mockReturnValue(false);
 
     const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
 

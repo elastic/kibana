@@ -267,10 +267,7 @@ export class ServiceManager {
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
 
-    const spaceSettings = createSpaceSettingsService({
-      savedObjects,
-      logger: logger.get('space-settings'),
-    });
+    const spaceSettings = createSpaceSettingsService({ savedObjects });
 
     this.internalStart = {
       tools,

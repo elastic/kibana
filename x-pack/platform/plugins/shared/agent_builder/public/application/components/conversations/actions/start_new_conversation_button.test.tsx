@@ -67,7 +67,7 @@ describe('StartNewConversationButton', () => {
       navigateToAgentBuilderUrl,
     } as unknown as ReturnType<typeof useNavigation>);
 
-    mockUseLastAgentId.mockReturnValue('agent-1');
+    mockUseLastAgentId.mockReturnValue({ agentId: 'agent-1', isReady: true });
   });
 
   it('calls resetAttachments and setConversationId when in embedded context', () => {

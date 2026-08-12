@@ -9,7 +9,6 @@ import type {
   KibanaRequest,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
-  Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
@@ -27,37 +26,28 @@ export interface SpaceSettingsService {
   set(request: KibanaRequest, defaultAgentId: string | null): Promise<AgentBuilderSpaceSettings>;
 }
 
-const NO_ASSIGNMENT: AgentBuilderSpaceSettings = { defaultAgentId: null };
-
-const toDomain = (
-  attributes: AgentBuilderSpaceSettingsAttributes | undefined
-): AgentBuilderSpaceSettings => ({
-  defaultAgentId: attributes?.defaultAgentId ?? null,
-});
-
+/* Reads and writes the single per-space Agent Builder settings SO */
 export const createSpaceSettingsService = ({
   savedObjects,
-  logger,
 }: {
   savedObjects: SavedObjectsServiceStart;
-  logger: Logger;
 }): SpaceSettingsService => {
   const getScopedClient = (request: KibanaRequest): SavedObjectsClientContract =>
     savedObjects.getScopedClient(request, {
       includedHiddenTypes: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
     });
 
-  const readForRequest = async (request: KibanaRequest): Promise<AgentBuilderSpaceSettings> => {
+  const get = async (request: KibanaRequest): Promise<AgentBuilderSpaceSettings> => {
     const client = getScopedClient(request);
     try {
       const so = await client.get<AgentBuilderSpaceSettingsAttributes>(
         AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
         AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID
       );
-      return toDomain(so.attributes);
+      return { defaultAgentId: so.attributes?.defaultAgentId ?? null };
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        return NO_ASSIGNMENT;
+        return { defaultAgentId: null };
       }
       throw err;
     }
@@ -77,12 +67,8 @@ export const createSpaceSettingsService = ({
       attributes,
       { id: AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID, overwrite: true }
     );
-    logger.debug(`Updated Agent Builder space default agent to ${defaultAgentId ?? '<cleared>'}`);
-    return toDomain(saved.attributes);
+    return { defaultAgentId: saved.attributes?.defaultAgentId ?? null };
   };
 
-  return {
-    get: readForRequest,
-    set,
-  };
+  return { get, set };
 };
