@@ -250,10 +250,9 @@ describe('MCP route — registerTool arguments', () => {
 describe('MCP route — real SDK tool registration', () => {
   it('registers an unannotated tool without throwing', () => {
     jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } =
-      jest.requireActual<typeof import('@modelcontextprotocol/sdk/server/mcp.js')>(
-        '@modelcontextprotocol/sdk/server/mcp.js'
-      );
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn().mockResolvedValue({
@@ -271,10 +270,9 @@ describe('MCP route — real SDK tool registration', () => {
 
   it('registers an annotated tool without throwing', () => {
     jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } =
-      jest.requireActual<typeof import('@modelcontextprotocol/sdk/server/mcp.js')>(
-        '@modelcontextprotocol/sdk/server/mcp.js'
-      );
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn().mockResolvedValue({
@@ -302,26 +300,17 @@ describe('MCP route — real SDK tool registration', () => {
 
   it('rejects duplicate registration (proves first registration took effect)', () => {
     jest.restoreAllMocks();
-    const { McpServer: RealMcpServer } =
-      jest.requireActual<typeof import('@modelcontextprotocol/sdk/server/mcp.js')>(
-        '@modelcontextprotocol/sdk/server/mcp.js'
-      );
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = jest.fn();
 
-    server.registerTool(
-      'my_tool',
-      { description: 'first', inputSchema: {} },
-      handler
-    );
+    server.registerTool('my_tool', { description: 'first', inputSchema: {} }, handler);
 
     expect(() => {
-      server.registerTool(
-        'my_tool',
-        { description: 'duplicate', inputSchema: {} },
-        handler
-      );
+      server.registerTool('my_tool', { description: 'duplicate', inputSchema: {} }, handler);
     }).toThrow(/already registered/);
   });
 });
