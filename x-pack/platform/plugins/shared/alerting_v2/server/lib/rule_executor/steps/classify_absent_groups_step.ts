@@ -17,6 +17,7 @@ import {
 import { detectDataPresence } from '../detect_data_presence';
 import { executeRecoveryQuery } from '../execute_recovery_query';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
+import { isClassifyAbsentGroupsEnabled } from '../is_classify_absent_groups_enabled';
 import { forwardThenFinalize } from '../stream_utils';
 import {
   LoggerServiceToken,
@@ -106,22 +107,22 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   ): Promise<AlertEvent[]> {
     const { rule, input } = state;
 
-    if (rule?.kind !== 'alert') {
+    if (!rule || !isClassifyAbsentGroupsEnabled(rule)) {
       return [];
     }
 
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
     const noDataEnabled = getNoDataEsqlQuery(rule.query, rule.no_data_strategy) != null;
 
-    if (!recoveryEnabled && !noDataEnabled) {
-      return [];
-    }
-
-    const activeGroups = await fetchActiveAlertGroupHashes(
-      this.internalQueryService,
-      rule.id,
-      input.executionContext
-    );
+    // Reuse the active groups already fetched by `FetchActiveGroupsStep`.
+    // Falls back to a fetch in case they were not threaded onto state.
+    const activeGroups = state.activeGroups
+      ? [...state.activeGroups]
+      : await fetchActiveAlertGroupHashes(
+          this.internalQueryService,
+          rule.id,
+          input.executionContext
+        );
 
     if (activeGroups.length === 0) {
       return [];

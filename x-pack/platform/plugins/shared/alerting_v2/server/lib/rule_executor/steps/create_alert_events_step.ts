@@ -40,13 +40,13 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
-    let buildBatch: AlertEventsBatchBuilder | undefined;
+    let builder: AlertEventsBatchBuilder | undefined;
 
     const built = guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       const eventType = resolveAlertEventType(state.rule);
 
-      if (!buildBatch) {
-        buildBatch = createAlertEventsBatchBuilder({
+      if (!builder) {
+        builder = createAlertEventsBatchBuilder({
           ruleId: state.input.ruleId,
           spaceId: state.input.spaceId,
           ruleAttributes: state.rule,
@@ -54,6 +54,9 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ruleVersion: state.rule.metadata.version,
           type: eventType,
           maxGroupsPerExecution: step.maxGroupsPerExecution,
+          activeGroupHashes: new Set(
+            (state.activeGroups ?? []).map(({ group_hash: groupHash }) => groupHash)
+          ),
         });
 
         step.logger.debug({
@@ -61,25 +64,28 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         });
       }
 
-      const alertEventsBatch = buildBatch([...state.esqlRowBatch]);
-      const droppedInBatch = state.esqlRowBatch.length - alertEventsBatch.length;
+      const droppedGroupsBefore = builder.droppedGroupCount;
+      const alertEventsBatch = builder.buildBatch([...state.esqlRowBatch]);
+      // Count distinct groups newly dropped by the max this batch
+      const groupsDroppedInBatch = builder.droppedGroupCount - droppedGroupsBefore;
 
       yield {
         type: 'continue',
         state: { ...state, alertEventsBatch },
         meta: {
           counters: {
-            [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: droppedInBatch,
+            [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: groupsDroppedInBatch,
           },
         },
       };
     });
 
     return forwardThenFinalize(built, {
-      seed: 0,
-      accumulate: (dropped, state) =>
-        dropped + ((state.esqlRowBatch?.length ?? 0) - (state.alertEventsBatch?.length ?? 0)),
-      finalize: (droppedGroupCount, lastState) => {
+      // The builder keeps track of the dropped group count, so there is nothing to accumulate
+      seed: undefined,
+      accumulate: (acc) => acc,
+      finalize: (_acc, lastState) => {
+        const droppedGroupCount = builder?.droppedGroupCount ?? 0;
         if (droppedGroupCount > 0) {
           step.logger.warn({
             message: `[${step.name}] Rule ${lastState.input.ruleId} (space ${lastState.input.spaceId}) exceeded maxGroupsPerExecution=${step.maxGroupsPerExecution}; dropped ${droppedGroupCount} new group(s) this run`,

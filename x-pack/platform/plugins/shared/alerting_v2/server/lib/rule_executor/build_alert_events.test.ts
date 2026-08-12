@@ -8,6 +8,7 @@
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   createAlertEventsBatchBuilder,
+  buildGroupHash,
   buildRecoveryAlertEvents,
   buildQueryRecoveryAlertEvents,
   buildContinuedBreachAlertEvents,
@@ -26,7 +27,7 @@ function buildAlertEventsFromEsqlResponse({
   maxGroupsPerExecution = 10000,
   ...baseOpts
 }: BuildFromResponseOpts) {
-  const buildBatch = createAlertEventsBatchBuilder({ ...baseOpts, maxGroupsPerExecution });
+  const builder = createAlertEventsBatchBuilder({ ...baseOpts, maxGroupsPerExecution });
   const rows = (esqlResponse.values ?? []).map((row) => {
     const record: Record<string, unknown> = {};
     (esqlResponse.columns ?? []).forEach((col, i) => {
@@ -34,7 +35,7 @@ function buildAlertEventsFromEsqlResponse({
     });
     return record;
   });
-  return buildBatch(rows);
+  return builder.buildBatch(rows);
 }
 
 describe('resolveAlertEventType', () => {
@@ -72,7 +73,7 @@ describe('createAlertEventsBatchBuilder', () => {
       { 'host.name': 'host-b', region: 'eu-west', count: 5 },
     ];
 
-    const buildBatch = createAlertEventsBatchBuilder({
+    const builder = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
@@ -82,7 +83,7 @@ describe('createAlertEventsBatchBuilder', () => {
       maxGroupsPerExecution: 10000,
     });
 
-    const docs = buildBatch(rows);
+    const docs = builder.buildBatch(rows);
 
     expect(docs).toHaveLength(2);
 
@@ -107,7 +108,7 @@ describe('createAlertEventsBatchBuilder', () => {
   });
 
   it('sets space_id on breached alert events from the provided spaceId', () => {
-    const buildBatch = createAlertEventsBatchBuilder({
+    const builder = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'custom-space',
@@ -117,7 +118,7 @@ describe('createAlertEventsBatchBuilder', () => {
       maxGroupsPerExecution: 10000,
     });
 
-    const docs = buildBatch([{ 'host.name': 'host-a' }]);
+    const docs = builder.buildBatch([{ 'host.name': 'host-a' }]);
 
     expect(docs).toHaveLength(1);
     expect(docs[0].space_id).toBe('custom-space');
@@ -133,7 +134,7 @@ describe('createAlertEventsBatchBuilder', () => {
         scheduledTimestamp: '2024-12-31T23:59:00.000Z',
         type: 'signal',
         maxGroupsPerExecution: 10000,
-      })(rows);
+      }).buildBatch(rows);
 
     it.each(['info', 'low', 'medium', 'high', 'critical'] as const)(
       'sets severity to %s when the row has a matching severity column',
@@ -206,9 +207,9 @@ describe('createAlertEventsBatchBuilder', () => {
       });
 
     it('drops rows that would introduce a new group past the limit', () => {
-      const buildBatch = createBuilder(2);
+      const builder = createBuilder(2);
 
-      const docs = buildBatch([
+      const docs = builder.buildBatch([
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
         { 'host.name': 'host-c' },
@@ -219,7 +220,7 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('keeps emitting rows for groups already seen even past the limit', () => {
-      const buildBatch = createAlertEventsBatchBuilder({
+      const builder = createAlertEventsBatchBuilder({
         ruleId: 'rule-123',
         ruleVersion: 1,
         spaceId: 'default',
@@ -229,7 +230,7 @@ describe('createAlertEventsBatchBuilder', () => {
         maxGroupsPerExecution: 2,
       });
 
-      const docs = buildBatch([
+      const docs = builder.buildBatch([
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
         // Repeats of already-seen groups still pass despite being at the cap.
@@ -243,11 +244,44 @@ describe('createAlertEventsBatchBuilder', () => {
       expect(docs).toHaveLength(4);
     });
 
-    it('applies the cap across multiple batches from the same builder', () => {
-      const buildBatch = createBuilder(2);
+    it('never drops an active group, even once the cap is full', () => {
+      const groupKeyFields = ['host.name'];
+      const hashFor = (host: string) =>
+        buildGroupHash({
+          rowDoc: { 'host.name': host },
+          groupKeyFields,
+          fallbackSeed: 'unused',
+        });
 
-      const batch1 = buildBatch([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
-      const batch2 = buildBatch([{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }]);
+      const builder = createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: groupKeyFields } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 1,
+        // host-c already has an episode; it must survive even though host-a fills the cap.
+        activeGroupHashes: new Set([hashFor('host-c')]),
+      });
+
+      const docs = builder.buildBatch([
+        { 'host.name': 'host-a' }, // new group, fills the cap
+        { 'host.name': 'host-b' }, // new group past the cap -> dropped
+        { 'host.name': 'host-c' }, // active group -> always kept
+      ]);
+
+      const keptHosts = docs.map((doc) => (doc.data as { 'host.name': string })['host.name']);
+      expect(keptHosts).toEqual(['host-a', 'host-c']);
+      // Only the brand-new host-b was shed; the active host-c is never counted as dropped.
+      expect(builder.droppedGroupCount).toBe(1);
+    });
+
+    it('applies the cap across multiple batches from the same builder', () => {
+      const builder = createBuilder(2);
+
+      const batch1 = builder.buildBatch([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
+      const batch2 = builder.buildBatch([{ 'host.name': 'host-c' }, { 'host.name': 'host-d' }]);
 
       // First batch fills the cap (2 groups); the second batch is all new -> dropped.
       expect(batch1).toHaveLength(2);
@@ -255,9 +289,9 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('does not drop anything when the group count stays within the limit', () => {
-      const buildBatch = createBuilder(10);
+      const builder = createBuilder(10);
 
-      const docs = buildBatch([
+      const docs = builder.buildBatch([
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
         { 'host.name': 'host-c' },
@@ -267,8 +301,11 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('keeps non-dropped rows deterministic regardless of drops (index advances per row)', () => {
-      const cappedDocs = createBuilder(1)([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
-      const uncappedDocs = createBuilder(10)([
+      const cappedDocs = createBuilder(1).buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+      ]);
+      const uncappedDocs = createBuilder(10).buildBatch([
         { 'host.name': 'host-a' },
         { 'host.name': 'host-b' },
       ]);

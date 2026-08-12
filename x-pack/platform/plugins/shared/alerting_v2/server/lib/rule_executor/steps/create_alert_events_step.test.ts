@@ -16,6 +16,7 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { buildGroupHash } from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
@@ -41,6 +42,7 @@ describe('CreateAlertEventsStep', () => {
 
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
+
     return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
   }
 
@@ -180,7 +182,7 @@ describe('CreateAlertEventsStep', () => {
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') throw new Error('expected a continue result');
       expect(result.state.alertEventsBatch).toHaveLength(2);
-      // The dropped rows surface as a telemetry counter for this batch.
+      // The dropped groups surface as a telemetry counter for this batch.
       expect(result.meta?.counters).toEqual({
         [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 2,
       });
@@ -197,6 +199,36 @@ describe('CreateAlertEventsStep', () => {
       );
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining('dropped 2 new group(s) this run'),
+        expect.anything()
+      );
+    });
+
+    it('counts distinct dropped groups, not dropped rows, when a group spans multiple rows', async () => {
+      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 1 } });
+
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const esqlRowBatch = [
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-b' },
+        { 'host.name': 'host-b' },
+      ];
+
+      const state = createRulePipelineState({ input, rule, esqlRowBatch });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') throw new Error('expected a continue result');
+      expect(result.state.alertEventsBatch).toHaveLength(1);
+      expect(result.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 1,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('dropped 1 new group(s) this run'),
         expect.anything()
       );
     });
@@ -263,6 +295,43 @@ describe('CreateAlertEventsStep', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('active group protection', () => {
+    const hashFor = (host: string) =>
+      buildGroupHash({
+        rowDoc: { 'host.name': host },
+        groupKeyFields: ['host.name'],
+        fallbackSeed: 'unused',
+      });
+
+    it('never drops an active group and preserves the active set on state for reuse', async () => {
+      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 1 } });
+
+      const input = createRuleExecutionInput();
+      const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
+      const esqlRowBatch = [
+        { 'host.name': 'host-a' }, // new group -> fills the cap
+        { 'host.name': 'host-b' }, // new group past the cap -> dropped
+        { 'host.name': 'host-c' }, // active group -> kept despite the cap
+      ];
+      const activeGroups = [{ group_hash: hashFor('host-c') }];
+
+      const state = createRulePipelineState({ input, rule, esqlRowBatch, activeGroups });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+
+      if (result.type !== 'continue') throw new Error('expected a continue result');
+      const keptHosts = (result.state.alertEventsBatch ?? []).map(
+        (event) => (event.data as { 'host.name': string })['host.name']
+      );
+      expect(keptHosts).toEqual(['host-a', 'host-c']);
+      expect(result.meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.groupsDroppedByLimit]: 1,
+      });
+      expect(result.state.activeGroups).toEqual(activeGroups);
     });
   });
 });

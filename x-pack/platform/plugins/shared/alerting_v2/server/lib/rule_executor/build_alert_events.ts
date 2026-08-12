@@ -125,9 +125,13 @@ export interface BuildAlertEventsBaseOpts {
    */
   scheduledTimestamp: string;
   maxGroupsPerExecution: number;
+  activeGroupHashes?: ReadonlySet<string>;
 }
 
-export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+export interface AlertEventsBatchBuilder {
+  buildBatch(batch: Array<Record<string, unknown>>): AlertEvent[];
+  readonly droppedGroupCount: number;
+}
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -137,6 +141,7 @@ export function createAlertEventsBatchBuilder({
   type,
   scheduledTimestamp,
   maxGroupsPerExecution,
+  activeGroupHashes = new Set<string>(),
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   // Stable per run to support retries without duplicating documents.
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
@@ -147,9 +152,10 @@ export function createAlertEventsBatchBuilder({
   const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const groupHashes = new Set<string>();
+  const droppedGroupHashes = new Set<string>();
   let index = 0;
 
-  return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
+  const buildBatch = (batch: Array<Record<string, unknown>>): AlertEvent[] => {
     const alertEventsBatch: AlertEvent[] = [];
 
     for (const rowDoc of batch) {
@@ -165,7 +171,10 @@ export function createAlertEventsBatchBuilder({
       });
 
       const isNewGroup = !groupHashes.has(groupHash);
-      if (isNewGroup && groupHashes.size >= maxGroupsPerExecution) {
+      const isActiveGroup = activeGroupHashes.has(groupHash);
+      // Active groups with an existing episode should not be dropped.
+      if (isNewGroup && !isActiveGroup && groupHashes.size >= maxGroupsPerExecution) {
+        droppedGroupHashes.add(groupHash);
         continue;
       }
 
@@ -190,6 +199,13 @@ export function createAlertEventsBatchBuilder({
     }
 
     return alertEventsBatch;
+  };
+
+  return {
+    buildBatch,
+    get droppedGroupCount() {
+      return droppedGroupHashes.size;
+    },
   };
 }
 
