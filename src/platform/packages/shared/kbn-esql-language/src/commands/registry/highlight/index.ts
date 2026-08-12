@@ -31,11 +31,13 @@ export const highlightCommand: ICommand = {
       defaultMessage:
         'Highlights matching terms in text fields and returns the highlighted content as a new column.',
     }),
-    declaration: 'HIGHLIGHT query_text ON field1 [, field2, ...]',
+    declaration:
+      'HIGHLIGHT [prefix = "<prefix>"] <query> ON field1 [, field2, ...] [WITH { <options> }]',
     examples: [
       'FROM books | HIGHLIGHT "star wars" ON title',
-      'FROM books | HIGHLIGHT "hobbit" ON title, description',
-      'FROM books | HIGHLIGHT "hobbit" ON title, description WITH { "pre_tags": "<mark>", "post_tags": "</mark>", "number_of_fragments": 3, "fragment_size": 150 }',
+      'FROM books | HIGHLIGHT prefix = "hl_" "star wars" ON title',
+      'FROM books | HIGHLIGHT MATCH(title, "return") ON title',
+      'FROM books | HIGHLIGHT "hobbit" ON title, description WITH { "pre_tags": ["<b>"], "post_tags": ["</b>"], "number_of_fragments": 3, "fragment_size": 150 }',
     ],
     preview: true,
     hidden: false,
