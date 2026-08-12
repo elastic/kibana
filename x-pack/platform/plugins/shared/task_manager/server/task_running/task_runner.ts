@@ -74,6 +74,7 @@ export interface TaskRunner {
   isExpired: boolean;
   expiration: Date;
   startedAt: Date | null;
+  taskType: string;
   definition: TaskDefinition | undefined;
   /** Effective cost for this task (instance override, then definition, then Normal). */
   cost: number;
