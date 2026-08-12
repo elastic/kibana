@@ -1427,14 +1427,13 @@
       "enabled": true
     },
     {
-      "groupName": "mapbox-gl-draw (pinned until Kibana supports ESM)",
+      "groupName": "mapbox-gl-draw",
       "matchDepNames": ["@mapbox/mapbox-gl-draw"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<1.5.0"
+      "enabled": true
     },
     {
       "groupName": "mapbox-gl-rtl-text",

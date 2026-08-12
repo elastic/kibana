@@ -7,10 +7,10 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-// @ts-expect-error
+// Jest resolves package main (UMD dist with nanoid inlined); webpack/rspack
+// resolve exports['.'] (ESM source). MapboxDraw.lib is present on both.
+// @ts-expect-error no types shipped for @mapbox/mapbox-gl-draw
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-// @ts-expect-error
-import mapboxDrawStyles from '@mapbox/mapbox-gl-draw/src/lib/theme';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
@@ -41,7 +41,7 @@ export class DrawControl extends Component<Props> {
   private _mbDrawControl = new MapboxDraw({
     displayControlsDefault: false,
     modes: mbDrawModes,
-    styles: [...mapboxDrawStyles, DRAW_CIRCLE_RADIUS_LABEL_STYLE],
+    styles: [...MapboxDraw.lib.theme, DRAW_CIRCLE_RADIUS_LABEL_STYLE],
   });
 
   componentDidUpdate() {
