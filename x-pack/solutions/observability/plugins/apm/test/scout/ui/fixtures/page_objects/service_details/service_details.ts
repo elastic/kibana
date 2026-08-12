@@ -105,7 +105,10 @@ export class ServiceDetailsPage {
 
   // #region Service Header
   getServiceHeaderName() {
-    return this.page.getByTestId('apmMainTemplateHeaderServiceName');
+    // AppHeader title test id; fall back to the legacy service-template test id.
+    return this.page
+      .getByTestId('appHeaderTitle')
+      .or(this.page.getByTestId('apmMainTemplateHeaderServiceName'));
   }
   // #endregion
 

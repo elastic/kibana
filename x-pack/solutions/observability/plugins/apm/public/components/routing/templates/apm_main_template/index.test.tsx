@@ -146,6 +146,36 @@ describe('ApmMainTemplate', () => {
     expect(mockRegisterAppMenu).not.toHaveBeenCalled();
   });
 
+  it('composes page-local menu items with the registered app menu', async () => {
+    mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
+
+    renderTemplate(
+      <ApmMainTemplate
+        header={{
+          title: 'opbeans-java',
+          menu: {
+            items: [
+              {
+                id: 'exploreData',
+                label: 'Explore data',
+                href: '/explore',
+                iconType: 'chartBarVerticalStack',
+                testId: 'apmAnalyzeDataButtonExploreDataButton',
+              },
+            ],
+          },
+        }}
+      >
+        <div>body</div>
+      </ApmMainTemplate>
+    );
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('opbeans-java');
+    // Global primary is preserved when the page only adds items
+    expect(await screen.findByTestId('apmAddDataHeaderLink')).toBeInTheDocument();
+    expect(mockRegisterAppMenu).not.toHaveBeenCalled();
+  });
+
   it('registers the app menu with chrome on the legacy pageHeader path', () => {
     mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -28,13 +29,12 @@ interface ServiceHeaderBadgesProps {
   alertsTabHref: string;
 }
 
-export function ServiceHeaderBadges({
+export function useServiceHeaderBadges({
   start,
   end,
   onSloClick,
   alertsTabHref,
-}: ServiceHeaderBadgesProps) {
-  const { euiTheme } = useEuiTheme();
+}: ServiceHeaderBadgesProps): AppHeaderBadge[] {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
@@ -126,25 +126,22 @@ export function ServiceHeaderBadges({
     }
   }, [showSloBadge, telemetry]);
 
-  if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
-    return null;
-  }
+  return useMemo(() => {
+    const badges: AppHeaderBadge[] = [];
 
-  const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
-    defaultMessage:
-      '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
-    values: { count: alertsCount },
-  });
+    if (showAlertsBadge) {
+      const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
+        defaultMessage:
+          '{count, plural, one {# active alert} other {# active alerts}}. Click to view more.',
+        values: { count: alertsCount },
+      });
 
-  return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
-      css={{ marginBottom: euiTheme.size.m }}
-    >
-      {showAlertsBadge && (
-        <EuiFlexItem grow={false}>
+      badges.push({
+        label: String(alertsCount),
+        color: 'danger',
+        tooltip: alertsTooltip,
+        'data-test-subj': 'serviceHeaderAlertsBadge',
+        renderCustomBadge: () => (
           <EuiToolTip position="bottom" content={alertsTooltip}>
             <EuiBadge
               data-test-subj="serviceHeaderAlertsBadge"
@@ -155,41 +152,103 @@ export function ServiceHeaderBadges({
               {alertsCount}
             </EuiBadge>
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {showSloBadge && (
-        <EuiFlexItem grow={false}>
+        ),
+      });
+    }
+
+    if (showSloBadge) {
+      badges.push({
+        label: i18n.translate('xpack.apm.serviceHeader.sloBadge.label', {
+          defaultMessage: 'SLO',
+        }),
+        renderCustomBadge: () => (
           <SloStatusBadge
             sloStatus={mostCriticalSloStatus.status}
             sloCount={mostCriticalSloStatus.count}
             serviceName={serviceName}
             onClick={onSloClick}
           />
+        ),
+      });
+    }
+
+    if (showAnomaliesBadge) {
+      badges.push({
+        label: i18n.translate('xpack.apm.serviceHeader.anomaliesBadge.label', {
+          defaultMessage: 'Anomalies',
+        }),
+        'data-test-subj': 'serviceHeaderAnomaliesBadge',
+        renderCustomBadge: () => (
+          <span data-test-subj="serviceHeaderAnomaliesBadge">
+            <AnomaliesBadge
+              score={anomalyData?.anomalyScore}
+              detectorType={anomalyData?.detectorType}
+              navigationProps={
+                agentName && anomalyData?.anomalyEnvironment && share?.url?.locators
+                  ? {
+                      serviceName,
+                      agentName: agentName as AgentName,
+                      anomalyEnvironment: anomalyData.anomalyEnvironment,
+                      transactionType: query.transactionType,
+                      rangeFrom: query.rangeFrom,
+                      rangeTo: query.rangeTo,
+                      locators: share.url.locators,
+                      comparisonEnabled: isInOverviewTab ? !isShowingExpectedBounds : true,
+                      isInServiceOverview: isInOverviewTab,
+                    }
+                  : undefined
+              }
+            />
+          </span>
+        ),
+      });
+    }
+
+    return badges;
+  }, [
+    agentName,
+    alertsCount,
+    alertsTabHref,
+    anomalyData?.anomalyEnvironment,
+    anomalyData?.anomalyScore,
+    anomalyData?.detectorType,
+    isInOverviewTab,
+    isShowingExpectedBounds,
+    mostCriticalSloStatus.count,
+    mostCriticalSloStatus.status,
+    onSloClick,
+    query.rangeFrom,
+    query.rangeTo,
+    query.transactionType,
+    serviceName,
+    share?.url?.locators,
+    showAlertsBadge,
+    showAnomaliesBadge,
+    showSloBadge,
+  ]);
+}
+
+/** @deprecated Prefer {@link useServiceHeaderBadges} with AppHeader. Kept for unit tests. */
+export function ServiceHeaderBadges(props: ServiceHeaderBadgesProps) {
+  const { euiTheme } = useEuiTheme();
+  const badges = useServiceHeaderBadges(props);
+
+  if (badges.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      css={{ marginBottom: euiTheme.size.m }}
+    >
+      {badges.map((badge) => (
+        <EuiFlexItem key={badge.label} grow={false}>
+          {badge.renderCustomBadge?.({ badgeText: badge.label })}
         </EuiFlexItem>
-      )}
-      {showAnomaliesBadge && (
-        <EuiFlexItem grow={false} data-test-subj="serviceHeaderAnomaliesBadge">
-          <AnomaliesBadge
-            score={anomalyData?.anomalyScore}
-            detectorType={anomalyData?.detectorType}
-            navigationProps={
-              agentName && anomalyData?.anomalyEnvironment && share?.url?.locators
-                ? {
-                    serviceName,
-                    agentName: agentName as AgentName,
-                    anomalyEnvironment: anomalyData.anomalyEnvironment,
-                    transactionType: query.transactionType,
-                    rangeFrom: query.rangeFrom,
-                    rangeTo: query.rangeTo,
-                    locators: share.url.locators,
-                    comparisonEnabled: isInOverviewTab ? !isShowingExpectedBounds : true,
-                    isInServiceOverview: isInOverviewTab,
-                  }
-                : undefined
-            }
-          />
-        </EuiFlexItem>
-      )}
+      ))}
     </EuiFlexGroup>
   );
 }
