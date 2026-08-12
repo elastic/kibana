@@ -685,4 +685,43 @@ describe('stepInstallWorkflowAssets', () => {
       { allowManagedWorkflowMutation: true }
     );
   });
+
+  it('rejects enabled scheduled-trigger workflows installed with no request context', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const scheduledWorkflowYaml = `name: my-workflow
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+steps: []`;
+
+    workflowsManagementSetupMock.management.createWorkflow.mockRejectedValue(
+      new Error('Unable to clone an API key, request does not contain an authorization header')
+    );
+
+    const context = createContext({
+      logger,
+      request: undefined,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: true },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(scheduledWorkflowYaml),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await expect(stepInstallWorkflowAssets(context)).rejects.toThrow(
+      'Unable to clone an API key, request does not contain an authorization header'
+    );
+  });
 });
