@@ -395,6 +395,7 @@ describe('RulesListTableContainer', () => {
   describe('single rule update API key', () => {
     it('shows the update API key confirmation modal when the row action is clicked', async () => {
       renderContainer();
+      await waitForRules();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
@@ -412,6 +413,7 @@ describe('RulesListTableContainer', () => {
 
     it('calls the update API key mutation with the rule id when confirmed', async () => {
       renderContainer();
+      await waitForRules();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
@@ -435,6 +437,7 @@ describe('RulesListTableContainer', () => {
 
     it('dismisses the modal on cancel without calling the mutation', async () => {
       renderContainer();
+      await waitForRules();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
@@ -458,6 +461,7 @@ describe('RulesListTableContainer', () => {
 
     it('disables the update API key action for a disabled rule', async () => {
       renderContainer();
+      await waitForRules();
 
       // rule-2 is disabled; open its row actions menu.
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
@@ -786,9 +790,9 @@ describe('RulesListTableContainer', () => {
 
     it('rotates API keys by query (force) when confirmed in select-all mode', async () => {
       renderContainer();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
