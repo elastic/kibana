@@ -113,7 +113,10 @@ function setupSimpleCheckPrivsMockResolve(
   } as CheckPrivilegesResponse);
 }
 
-function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: boolean } = {}) {
+function setup({
+  includeSavedObjectNames = true,
+  savedObjectDiffEnabled = false,
+}: { includeSavedObjectNames?: boolean; savedObjectDiffEnabled?: boolean } = {}) {
   const actions = new Actions();
   jest
     .spyOn(actions.savedObject, 'get')
@@ -136,6 +139,7 @@ function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: b
     checkPrivileges,
     getCurrentUser,
     typeRegistry: typeRegistryMocked,
+    savedObjectDiffEnabled,
   });
   return { actions, auditLogger, errors, checkPrivileges, securityExtension };
 }
@@ -1413,6 +1417,7 @@ describe('#create', () => {
         enforceMap: expectedEnforceMap,
         options: { allowGlobalResource: true },
         auditOptions: {
+          bypass: 'never',
           objects: [obj1],
         },
       });
@@ -1438,7 +1443,7 @@ describe('#create', () => {
           create: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
-        auditOptions: { objects: [obj1] },
+        auditOptions: { bypass: 'never', objects: [obj1] },
       });
     });
 
@@ -1683,6 +1688,7 @@ describe('#create', () => {
         enforceMap: expectedEnforceMap,
         options: { allowGlobalResource: true },
         auditOptions: {
+          bypass: 'never',
           objects,
         },
       });
@@ -1712,7 +1718,7 @@ describe('#create', () => {
         action: SecurityAction.BULK_CREATE,
         typesAndSpaces: expectedEnforceMap,
         typeMap: expectedTypeMap,
-        auditOptions: { objects },
+        auditOptions: { bypass: 'never', objects },
       });
     });
 
@@ -1937,6 +1943,7 @@ describe('update', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
+          bypass: 'never',
           objects: [obj1],
         },
       });
@@ -1962,7 +1969,7 @@ describe('update', () => {
           update: { isGloballyAuthorized: true, authorizedSpaces: [] },
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
-        auditOptions: { objects: [obj1] },
+        auditOptions: { bypass: 'never', objects: [obj1] },
       });
     });
 
@@ -2205,6 +2212,7 @@ describe('update', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
+          bypass: 'never',
           objects,
         },
       });
@@ -2234,7 +2242,7 @@ describe('update', () => {
         action: SecurityAction.BULK_UPDATE,
         typesAndSpaces: expectedEnforceMap,
         typeMap: expectedTypeMap,
-        auditOptions: { objects },
+        auditOptions: { bypass: 'never', objects },
       });
     });
 
@@ -2452,6 +2460,7 @@ describe('delete', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
+          bypass: 'never',
           objects: [{ ...obj3, existingNamespaces: [] }],
         },
       });
@@ -2478,6 +2487,7 @@ describe('delete', () => {
           ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
         }),
         auditOptions: {
+          bypass: 'never',
           objects: [{ ...obj3, existingNamespaces: [] }],
         },
       });
@@ -2686,6 +2696,7 @@ describe('delete', () => {
         spaces: expectedSpaces,
         enforceMap: expectedEnforceMap,
         auditOptions: {
+          bypass: 'never',
           objects,
         },
       });
@@ -2715,7 +2726,7 @@ describe('delete', () => {
         action: SecurityAction.BULK_DELETE,
         typesAndSpaces: expectedEnforceMap,
         typeMap: expectedTypeMap,
-        auditOptions: { objects },
+        auditOptions: { bypass: 'never', objects },
       });
     });
 
@@ -7369,7 +7380,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     expect(secretsOp).toEqual({ op: 'remove', path: '/secrets', oldValue: '[redacted]' });
   });
 
-  it('skips the diff event for types in savedObjectDiffTypesToExclude', () => {
+  it('omits the diff, but still emits the event, for types in savedObjectDiffTypesToExclude', () => {
     const { securityExtension } = setupForEmit(true, {
       savedObjectDiffTypesToExclude: ['telemetry'],
     });
@@ -7382,7 +7393,11 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       after: { a: 2 },
     });
 
-    expect(addAuditEventSpy).not.toHaveBeenCalled();
+    // In this mode the pre-operation event is suppressed, so this success event is
+    // the operation's only audit record; exclusion only drops the diff payload.
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect((addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff).toBeUndefined();
+    expect((addAuditEventSpy.mock.calls[0][0] as any).outcome).toBe('success');
   });
 
   it('still emits the diff event for types not in the exclude list', () => {
@@ -7449,5 +7464,148 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
 
     const { savedObject } = addAuditEventSpy.mock.calls[0][0] as any;
     expect(savedObject).toEqual({ type: 'dashboard', id: '1', name: 'My Dashboard' });
+  });
+
+  it('emits an unknown-outcome event with an empty diff when no attributes are known', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_create',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'unknown',
+      before: {},
+      after: {},
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const event = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(event.outcome).toBe('unknown');
+    expect(event.error).toBeUndefined();
+    expect(event.savedObjectDiff.ops).toEqual([]);
+    expect(event.savedObject).toEqual({ type: 'dashboard', id: '1', name: undefined });
+  });
+
+  it('includes a diff on unknown-outcome events when before/after are provided', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'unknown',
+      before: { title: 'old' },
+      after: { title: 'new' },
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const event = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(event.outcome).toBe('unknown');
+    expect(event.savedObjectDiff.ops).toContainEqual({
+      op: 'replace',
+      path: '/title',
+      value: 'new',
+      oldValue: 'old',
+    });
+  });
+});
+
+describe('result-only audit mode (savedObjectDiffEnabled)', () => {
+  const namespace = 'x';
+  const writeObj = { type: 'a', id: 'wp-1', existingNamespaces: [], name: 'WP' };
+
+  const fullyAuthorizedEntry = { isGloballyAuthorized: true, authorizedSpaces: [] };
+  const fullyAuthorizedTypeMap = new Map([
+    [
+      'a',
+      {
+        create: fullyAuthorizedEntry,
+        update: fullyAuthorizedEntry,
+        delete: fullyAuthorizedEntry,
+        get: fullyAuthorizedEntry,
+        ['login:']: fullyAuthorizedEntry,
+      },
+    ],
+  ]);
+
+  beforeEach(() => {
+    auditHelperSpy.mockClear();
+    addAuditEventSpy.mockClear();
+    // The shared spies and access-control mocks carry state from earlier describe
+    // blocks (mockReset / persistent mockResolvedValue); pin them to known values.
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'fully_authorized',
+      typeMap: fullyAuthorizedTypeMap,
+    });
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReset();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValue({
+      typesRequiringAccessControl: new Set(),
+    });
+    accessControlServiceMock.enforceAccessControl.mockReset();
+    getCurrentUser.mockReturnValue(null);
+  });
+
+  it('suppresses the pre-operation (unknown outcome) event for authorized creates', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+
+    await securityExtension.authorizeCreate({ namespace, object: writeObj });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  it('suppresses the pre-operation (unknown outcome) event for authorized updates', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+
+    await securityExtension.authorizeUpdate({ namespace, object: writeObj });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  it('suppresses the pre-operation (unknown outcome) event for authorized deletes', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+
+    await securityExtension.authorizeDelete({ namespace, object: writeObj });
+
+    expect(auditLogger.log).not.toHaveBeenCalled();
+  });
+
+  it('still audits authorization failures for writes', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+    checkAuthorizationSpy.mockResolvedValue({ status: 'unauthorized', typeMap: new Map() });
+
+    await expect(
+      securityExtension.authorizeCreate({ namespace, object: writeObj })
+    ).rejects.toThrow();
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'saved_object_create', outcome: 'failure' }),
+      })
+    );
+  });
+
+  it('does not suppress the pre-operation event for reads (get)', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: true });
+
+    await securityExtension.authorizeGet({ namespace, object: writeObj });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'saved_object_get', outcome: 'unknown' }),
+      })
+    );
+  });
+
+  it('keeps the pre-operation event for writes when the feature is disabled', async () => {
+    const { securityExtension, auditLogger } = setup({ savedObjectDiffEnabled: false });
+
+    await securityExtension.authorizeCreate({ namespace, object: writeObj });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ action: 'saved_object_create', outcome: 'unknown' }),
+      })
+    );
   });
 });

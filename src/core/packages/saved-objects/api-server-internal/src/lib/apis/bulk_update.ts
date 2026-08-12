@@ -248,223 +248,267 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
-  let bulkUpdateRequestIndexCounter = 0;
-  const bulkUpdateParams: object[] = [];
+  // Per-object audit state for the events emitted in the `finally` below: one entry per
+  // authorized object, keyed by `type:id`. `after` starts as the requested attributes
+  // and `before`/`after` are refined to the preflight/merged attributes during response
+  // mapping; `outcome` flips to 'success' per object once ES confirms its write.
+  // Objects rejected before authorization are not audited.
+  const auditRecords = new Map<
+    string,
+    {
+      savedObject: { type: string; id: string };
+      before: Record<string, unknown>;
+      after: Record<string, unknown>;
+      outcome: 'success' | 'unknown';
+    }
+  >();
+  for (const { value } of validObjects) {
+    auditRecords.set(`${value.type}:${value.id}`, {
+      savedObject: { type: value.type, id: value.id },
+      before: {},
+      after: (value.documentToSave[value.type] ?? {}) as Record<string, unknown>,
+      outcome: 'unknown',
+    });
+  }
 
-  const expectedBulkUpdateResults = await Promise.all(
-    (expectedAuthorizedResults ?? expectedBulkGetResults).map<Promise<ExpectedBulkUpdateResult>>(
-      async (expectedBulkGetResult) => {
-        if (isLeft(expectedBulkGetResult)) {
-          return expectedBulkGetResult;
+  // When saved object diff auditing is enabled, the authorization step above did not
+  // audit the operation (its pre-operation events are suppressed) — the events emitted
+  // in the `finally` below are the operation's only record, on both the success and the
+  // failure path (errors propagate unchanged).
+  try {
+    let bulkUpdateRequestIndexCounter = 0;
+    const bulkUpdateParams: object[] = [];
+
+    const expectedBulkUpdateResults = await Promise.all(
+      (expectedAuthorizedResults ?? expectedBulkGetResults).map<Promise<ExpectedBulkUpdateResult>>(
+        async (expectedBulkGetResult) => {
+          if (isLeft(expectedBulkGetResult)) {
+            return expectedBulkGetResult;
+          }
+
+          const {
+            esRequestIndex,
+            id,
+            type,
+            version,
+            documentToSave,
+            objectNamespace,
+            mergeAttributes,
+          } = expectedBulkGetResult.value;
+
+          const versionProperties = getExpectedVersionProperties(version);
+          const indexFound = bulkGetResponse?.statusCode !== 404;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+          const isMultiNS = registry.isMultiNamespace(type);
+
+          if (
+            !docFound ||
+            (isMultiNS &&
+              !rawDocExistsInNamespace(
+                registry,
+                actualResult as SavedObjectsRawDoc,
+                getNamespaceId(objectNamespace)
+              ))
+          ) {
+            return left({
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            });
+          }
+
+          let savedObjectNamespace: string | undefined;
+          let savedObjectNamespaces: string[] | undefined;
+
+          if (isMultiNS) {
+            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+            savedObjectNamespaces = actualResult!._source.namespaces ?? [
+              // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
+              SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
+            ];
+          } else if (registry.isSingleNamespace(type)) {
+            // if `objectNamespace` is undefined, fall back to `options.namespace`
+            savedObjectNamespace = getNamespaceId(objectNamespace);
+          }
+
+          const document = getSavedObjectFromSource<T>(
+            registry,
+            type,
+            id,
+            actualResult as SavedObjectsRawDoc,
+            { migrationVersionCompatibility }
+          );
+
+          let migrated: SavedObject<T>;
+          try {
+            migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+          } catch (migrateStorageDocError) {
+            throw SavedObjectsErrorHelpers.decorateGeneralError(
+              migrateStorageDocError,
+              'Failed to migrate document to the latest version.'
+            );
+          }
+
+          const typeDefinition = registry.getType(type)!;
+
+          const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+            type,
+            id,
+            objectNamespace || namespace,
+            documentToSave[type]
+          );
+
+          const updatedAttributes = mergeAttributes
+            ? mergeForUpdate({
+                targetAttributes: {
+                  ...(migrated!.attributes as Record<string, unknown>),
+                },
+                updatedAttributes: encryptedUpdatedAttributes,
+                typeMappings: typeDefinition.mappings,
+              })
+            : encryptedUpdatedAttributes;
+
+          const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
+            ...migrated!,
+            id,
+            type,
+            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+            attributes: updatedAttributes,
+            updated_at: time,
+            updated_by: updatedBy,
+            ...(migrated.accessControl ? { accessControl: migrated.accessControl } : {}),
+            ...(Array.isArray(documentToSave.references) && {
+              references: documentToSave.references,
+            }),
+          });
+          const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
+            migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+          );
+
+          const namespaces =
+            savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
+
+          const expectedResult = {
+            type,
+            id,
+            namespaces,
+            esRequestIndex: bulkUpdateRequestIndexCounter++,
+            documentToSave: expectedBulkGetResult.value.documentToSave,
+            rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
+            migrationVersionCompatibility,
+            beforeAttributes: migrated.attributes as Record<string, unknown>,
+            afterAttributes: updatedAttributes as Record<string, unknown>,
+          };
+
+          bulkUpdateParams.push(
+            {
+              index: {
+                _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
+                _index: commonHelper.getIndexForType(type),
+                ...versionProperties,
+              },
+            },
+            updatedMigratedDocumentToSave._source
+          );
+
+          return right(expectedResult);
+        }
+      )
+    );
+
+    const { refresh = DEFAULT_REFRESH_SETTING } = options;
+    const bulkUpdateResponse = bulkUpdateParams.length
+      ? await client.bulk({
+          refresh,
+          operations: bulkUpdateParams,
+          _source_includes: ['originId'],
+          require_alias: true,
+        })
+      : undefined;
+
+    const result = {
+      saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
+        if (isLeft(expectedResult)) {
+          return expectedResult.value as any;
         }
 
         const {
-          esRequestIndex,
-          id,
           type,
-          version,
+          id,
           documentToSave,
-          objectNamespace,
-          mergeAttributes,
-        } = expectedBulkGetResult.value;
+          esRequestIndex,
+          rawMigratedUpdatedDoc,
+          beforeAttributes,
+          afterAttributes,
+        } = expectedResult.value;
+        const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
+        const rawResponse = Object.values(response)[0] as any;
 
-        const versionProperties = getExpectedVersionProperties(version);
-        const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
-        const isMultiNS = registry.isMultiNamespace(type);
-
-        if (
-          !docFound ||
-          (isMultiNS &&
-            !rawDocExistsInNamespace(
-              registry,
-              actualResult as SavedObjectsRawDoc,
-              getNamespaceId(objectNamespace)
-            ))
-        ) {
-          return left({
-            id,
-            type,
-            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-          });
+        // Refine the audit record with the preflight/merged attributes; the outcome
+        // only flips to 'success' below, once ES confirms this object's write.
+        const auditRecord = auditRecords.get(`${type}:${id}`);
+        if (auditRecord) {
+          auditRecord.before = (beforeAttributes ?? {}) as Record<string, unknown>;
+          auditRecord.after = (afterAttributes ?? {}) as Record<string, unknown>;
         }
 
-        let savedObjectNamespace: string | undefined;
-        let savedObjectNamespaces: string[] | undefined;
-
-        if (isMultiNS) {
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          savedObjectNamespaces = actualResult!._source.namespaces ?? [
-            // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-            SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
-          ];
-        } else if (registry.isSingleNamespace(type)) {
-          // if `objectNamespace` is undefined, fall back to `options.namespace`
-          savedObjectNamespace = getNamespaceId(objectNamespace);
+        const error = getBulkOperationError(type, id, rawResponse);
+        if (error) {
+          return { type, id, error };
         }
 
-        const document = getSavedObjectFromSource<T>(
-          registry,
-          type,
-          id,
-          actualResult as SavedObjectsRawDoc,
-          { migrationVersionCompatibility }
-        );
-
-        let migrated: SavedObject<T>;
-        try {
-          migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-        } catch (migrateStorageDocError) {
-          throw SavedObjectsErrorHelpers.decorateGeneralError(
-            migrateStorageDocError,
-            'Failed to migrate document to the latest version.'
-          );
+        if (auditRecord) {
+          auditRecord.outcome = 'success';
         }
 
-        const typeDefinition = registry.getType(type)!;
+        const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
-        const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
-          type,
-          id,
-          objectNamespace || namespace,
-          documentToSave[type]
-        );
+        const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
-        const updatedAttributes = mergeAttributes
-          ? mergeForUpdate({
-              targetAttributes: {
-                ...(migrated!.attributes as Record<string, unknown>),
-              },
-              updatedAttributes: encryptedUpdatedAttributes,
-              typeMappings: typeDefinition.mappings,
-            })
-          : encryptedUpdatedAttributes;
-
-        const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
-          ...migrated!,
+        const {
+          originId,
+          namespaces: docNamespaces,
+          namespace: docNamespace,
+        } = rawMigratedUpdatedDoc._source;
+        return {
           id,
           type,
-          ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-          ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-          attributes: updatedAttributes,
-          updated_at: time,
-          updated_by: updatedBy,
-          ...(migrated.accessControl ? { accessControl: migrated.accessControl } : {}),
-          ...(Array.isArray(documentToSave.references) && {
-            references: documentToSave.references,
+          ...(registry.isMultiNamespace(type) && { namespaces: docNamespaces }),
+          ...(registry.isSingleNamespace(type) && {
+            namespaces: [SavedObjectsUtils.namespaceIdToString(docNamespace)],
           }),
-        });
-        const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
-          migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
-        );
-
-        const namespaces =
-          savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);
-
-        const expectedResult = {
-          type,
-          id,
-          namespaces,
-          esRequestIndex: bulkUpdateRequestIndexCounter++,
-          documentToSave: expectedBulkGetResult.value.documentToSave,
-          rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
-          migrationVersionCompatibility,
-          beforeAttributes: migrated.attributes as Record<string, unknown>,
-          afterAttributes: updatedAttributes as Record<string, unknown>,
+          ...(originId && { originId }),
+          updated_at,
+          updated_by,
+          ...(registry.supportsAccessControl(type) && {
+            accessControl: rawMigratedUpdatedDoc._source.accessControl,
+          }),
+          version: encodeVersion(seqNo, primaryTerm),
+          attributes,
+          references,
         };
+      }),
+    };
 
-        bulkUpdateParams.push(
-          {
-            index: {
-              _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
-              _index: commonHelper.getIndexForType(type),
-              ...versionProperties,
-            },
-          },
-          updatedMigratedDocumentToSave._source
-        );
-
-        return right(expectedResult);
-      }
-    )
-  );
-
-  const { refresh = DEFAULT_REFRESH_SETTING } = options;
-  const bulkUpdateResponse = bulkUpdateParams.length
-    ? await client.bulk({
-        refresh,
-        operations: bulkUpdateParams,
-        _source_includes: ['originId'],
-        require_alias: true,
-      })
-    : undefined;
-
-  const result = {
-    saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
-      if (isLeft(expectedResult)) {
-        return expectedResult.value as any;
-      }
-
-      const {
-        type,
-        id,
-        documentToSave,
-        esRequestIndex,
-        rawMigratedUpdatedDoc,
-        beforeAttributes,
-        afterAttributes,
-      } = expectedResult.value;
-      const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
-      const rawResponse = Object.values(response)[0] as any;
-
-      const error = getBulkOperationError(type, id, rawResponse);
-      if (error) {
-        return { type, id, error };
-      }
-
+    return encryptionHelper.optionallyDecryptAndRedactBulkResult(
+      result,
+      authorizationResult?.typeMap,
+      objects
+    );
+  } finally {
+    for (const [, { savedObject, before, after, outcome }] of auditRecords) {
       emitSavedObjectDiffAuditEvent({
         securityExtension,
         encryptionExtension,
         logger,
         action: 'saved_object_update',
-        savedObject: { type, id },
-        before: (beforeAttributes ?? {}) as Record<string, unknown>,
-        after: (afterAttributes ?? {}) as Record<string, unknown>,
+        savedObject,
+        outcome,
+        before,
+        after,
       });
-
-      const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
-
-      const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
-
-      const {
-        originId,
-        namespaces: docNamespaces,
-        namespace: docNamespace,
-      } = rawMigratedUpdatedDoc._source;
-      return {
-        id,
-        type,
-        ...(registry.isMultiNamespace(type) && { namespaces: docNamespaces }),
-        ...(registry.isSingleNamespace(type) && {
-          namespaces: [SavedObjectsUtils.namespaceIdToString(docNamespace)],
-        }),
-        ...(originId && { originId }),
-        updated_at,
-        updated_by,
-        ...(registry.supportsAccessControl(type) && {
-          accessControl: rawMigratedUpdatedDoc._source.accessControl,
-        }),
-        version: encodeVersion(seqNo, primaryTerm),
-        attributes,
-        references,
-      };
-    }),
-  };
-
-  return encryptionHelper.optionallyDecryptAndRedactBulkResult(
-    result,
-    authorizationResult?.typeMap,
-    objects
-  );
+    }
+  }
 };

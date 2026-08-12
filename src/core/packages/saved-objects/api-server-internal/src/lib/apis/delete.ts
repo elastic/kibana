@@ -87,93 +87,109 @@ export const performDelete = async <T>(
   }
 
   const rawId = serializer.generateRawId(namespace, type, id);
-  let preflightResult: PreflightCheckNamespacesResult | undefined;
 
-  if (registry.isMultiNamespace(type)) {
-    // note: this check throws an error if the object is found but does not exist in this namespace
-    preflightResult = await preflightHelper.preflightCheckNamespaces({
-      type,
-      id,
-      namespace,
-    });
-    if (
-      preflightResult.checkResult === 'found_outside_namespace' ||
-      preflightResult.checkResult === 'not_found'
-    ) {
+  // Outcome for the single post-operation audit event emitted in the `finally` below;
+  // flips to 'success' once ES confirms the document was deleted. The before-attributes
+  // were captured by the feature-gated fetch above.
+  let outcome: 'success' | 'unknown' = 'unknown';
+
+  // When saved object diff auditing is enabled, the authorization step above did not
+  // audit the operation (its pre-operation event is suppressed) — the event emitted in
+  // the `finally` below is the operation's only record, on both the success and the
+  // failure path (errors propagate unchanged).
+  try {
+    let preflightResult: PreflightCheckNamespacesResult | undefined;
+
+    if (registry.isMultiNamespace(type)) {
+      // note: this check throws an error if the object is found but does not exist in this namespace
+      preflightResult = await preflightHelper.preflightCheckNamespaces({
+        type,
+        id,
+        namespace,
+      });
+      if (
+        preflightResult.checkResult === 'found_outside_namespace' ||
+        preflightResult.checkResult === 'not_found'
+      ) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
+      if (
+        !force &&
+        (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
+      ) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
+        );
+      }
+    }
+
+    const { body, statusCode, headers } = await client.delete(
+      {
+        id: rawId,
+        index: commonHelper.getIndexForType(type),
+        ...getExpectedVersionProperties(undefined),
+        refresh,
+      },
+      { ignore: [404], meta: true }
+    );
+
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
+    }
+
+    const deleted = body.result === 'deleted';
+    if (deleted) {
+      outcome = 'success';
+
+      const namespaces = preflightResult?.savedObjectNamespaces;
+      if (namespaces) {
+        // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
+        await deleteLegacyUrlAliases({
+          mappings,
+          registry,
+          client,
+          getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
+          type,
+          id,
+          ...(namespaces.includes(ALL_NAMESPACES_STRING)
+            ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
+            : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
+        }).catch((err) => {
+          // The object has already been deleted, but we caught an error when attempting to delete aliases.
+          // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
+          logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
+        });
+      }
+      return {};
+    }
+
+    const deleteDocNotFound = body.result === 'not_found';
+    // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
+    const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
+    if (deleteDocNotFound || deleteIndexNotFound) {
+      // see "404s from missing index" above
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-    const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
-    if (
-      !force &&
-      (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
-    ) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
-      );
-    }
-  }
 
-  const { body, statusCode, headers } = await client.delete(
-    {
-      id: rawId,
-      index: commonHelper.getIndexForType(type),
-      ...getExpectedVersionProperties(undefined),
-      refresh,
-    },
-    { ignore: [404], meta: true }
-  );
-
-  if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(type, id);
-  }
-
-  const deleted = body.result === 'deleted';
-  if (deleted) {
+    throw new Error(
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
+        type,
+        id,
+        response: { body, statusCode },
+      })}`
+    );
+  } finally {
     emitSavedObjectDiffAuditEvent({
       securityExtension,
       encryptionExtension,
       logger,
       action: 'saved_object_delete',
       savedObject: { type, id },
+      outcome,
+      // Empty attributes still emit — the delete itself is the audit signal.
       before: deleteBeforeAttributes,
-      after: {} as Record<string, unknown>,
+      after: {},
     });
-
-    const namespaces = preflightResult?.savedObjectNamespaces;
-    if (namespaces) {
-      // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
-      await deleteLegacyUrlAliases({
-        mappings,
-        registry,
-        client,
-        getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-        type,
-        id,
-        ...(namespaces.includes(ALL_NAMESPACES_STRING)
-          ? { namespaces: [], deleteBehavior: 'exclusive' } // delete legacy URL aliases for this type/ID for all spaces
-          : { namespaces, deleteBehavior: 'inclusive' }), // delete legacy URL aliases for this type/ID for these specific spaces
-      }).catch((err) => {
-        // The object has already been deleted, but we caught an error when attempting to delete aliases.
-        // A consumer cannot attempt to delete the object again, so just log the error and swallow it.
-        logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
-      });
-    }
-    return {};
   }
-
-  const deleteDocNotFound = body.result === 'not_found';
-  // @ts-expect-error @elastic/elasticsearch doesn't declare error on DeleteResponse
-  const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
-  if (deleteDocNotFound || deleteIndexNotFound) {
-    // see "404s from missing index" above
-    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-  }
-
-  throw new Error(
-    `Unexpected Elasticsearch DELETE response: ${JSON.stringify({
-      type,
-      id,
-      response: { body, statusCode },
-    })}`
-  );
 };

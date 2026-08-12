@@ -522,6 +522,26 @@ describe('#delete', () => {
         await repository.delete(type, id);
         expect((client.get.mock.calls[0][0] as any)._source_includes).not.toContain(type);
       });
+
+      it('emits an unknown-outcome event when the delete fails after authorization', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        // ES reports the document as already gone -> repository throws 404 post-authz
+        client.delete.mockResponseOnce({ result: 'not_found' } as estypes.DeleteResponse);
+
+        await expect(repository.delete(type, id)).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: { type, id },
+            outcome: 'unknown',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
     });
   });
 });

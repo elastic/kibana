@@ -673,6 +673,27 @@ describe('#bulkDelete', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
+      it('emits unknown-outcome events for every object when the bulk request fails', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
+        client.bulk.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.bulkDelete([obj1, obj2])).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: { type: obj1.type, id: obj1.id },
+            outcome: 'unknown',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
+
       it('does not fail the bulk delete when the diff audit emit throws', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {

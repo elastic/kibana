@@ -1005,6 +1005,26 @@ describe('#create', () => {
         });
         await expect(createSuccess(type, attributes, { id })).resolves.toBeDefined();
       });
+
+      it('emits an unknown-outcome event when the create fails after authorization', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.create.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.create(type, attributes, { id })).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: { type, id },
+            outcome: 'unknown',
+            before: {},
+            after: expect.objectContaining(attributes),
+          })
+        );
+      });
     });
   });
 });

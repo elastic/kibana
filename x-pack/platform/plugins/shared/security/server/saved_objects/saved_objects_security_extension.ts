@@ -613,6 +613,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  /**
+   * When saved object diff auditing is enabled, write operations (create/update/delete)
+   * are audited after the ES write succeeds (via `emitSavedObjectDiffAuditEvent`), so the
+   * pre-operation 'unknown'-outcome event is suppressed ('on_success' bypasses only the
+   * success path of enforcement — authorization failures are still audited here as usual).
+   */
+  private writeAuditBypass(): 'on_success' | 'never' {
+    return this.savedObjectDiffEnabled ? 'on_success' : 'never';
+  }
+
   private allAccessControlObjectsAreInaccessible(
     allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
     inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
@@ -853,45 +863,50 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   emitSavedObjectDiffAuditEvent(params: {
     action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
     savedObject: { type: string; id: string; name?: string };
-    outcome: 'success';
+    /** 'success' when the write completed; 'unknown' when it was attempted but did not complete. */
+    outcome: 'success' | 'unknown';
     before: Record<string, unknown>;
     after: Record<string, unknown>;
     fieldsToRedact?: string[];
   }): void {
-    // Only emit when the feature is enabled and the type isn't excluded. The
-    // caller also gates on `savedObjectDiffEnabled`, but checking here keeps the
-    // public method correct on its own. Excluded types still get their normal
-    // pre-write audit event; we only skip the additional diff event for them.
-    if (
-      !this.savedObjectDiffEnabled ||
-      this.savedObjectDiffTypesToExclude.has(params.savedObject.type)
-    ) {
+    // Only emit when the feature is enabled. The caller also gates on
+    // `savedObjectDiffEnabled`, but checking here keeps the public method
+    // correct on its own.
+    if (!this.savedObjectDiffEnabled) {
       return;
     }
 
     const { type, id } = params.savedObject;
 
+    // The diff is independent of the outcome: it describes the (attempted) change,
+    // including on 'unknown'-outcome events. The pre-operation audit event is
+    // suppressed in this mode, so this event is the operation's only audit record:
+    // excluded types still emit it, they just don't carry the attribute diff.
     // `before`/`after` are the object's attributes (not the full SO), so there
     // are no system-managed root fields to filter out here.
-    const savedObjectDiff = computeJsonPatch({
-      a: params.before,
-      b: params.after,
-      // ESO attributes are compared as ciphertext here; forwarding them as
-      // fieldsToRedact hides their values in the emitted diff. Because ESO
-      // encryption is non-deterministic, an encrypted attribute included in a
-      // write may surface as a (redacted) change even when its plaintext is
-      // unchanged.
-      fieldsToRedact: params.fieldsToRedact,
-      fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
-    });
+    const savedObjectDiff = this.savedObjectDiffTypesToExclude.has(type)
+      ? undefined
+      : computeJsonPatch({
+          a: params.before,
+          b: params.after,
+          // ESO attributes are compared as ciphertext here; forwarding them as
+          // fieldsToRedact hides their values in the emitted diff. Because ESO
+          // encryption is non-deterministic, an encrypted attribute included in a
+          // write may surface as a (redacted) change even when its plaintext is
+          // unchanged.
+          fieldsToRedact: params.fieldsToRedact,
+          fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
+        });
 
-    // Resolve the object name from its attributes (create/update populate
-    // `after`, delete populates `before`) so the diff event is self-contained
-    // like the other audit events. `addAuditEvent` handles name redaction.
+    // Resolve the object name from its attributes (create/update populate `after`,
+    // delete populates `before`) so the event is self-contained like the other audit
+    // events, falling back to the caller-provided name when the attributes don't
+    // yield one. `addAuditEvent` handles name redaction.
     const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
-    const name = SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
-      attributes: attributesForName,
-    });
+    const name =
+      SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
+        attributes: attributesForName,
+      }) ?? params.savedObject.name;
 
     this.addAuditEvent({
       // `action` is the narrow SO-diff union; cast to the internal AuditAction enum.
@@ -991,6 +1006,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       options: { allowGlobalResource: true },
       auditOptions: {
         objects,
+        bypass: this.writeAuditBypass(),
       },
     });
 
@@ -1054,6 +1070,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap,
       auditOptions: {
         objects,
+        bypass: this.writeAuditBypass(),
       },
     });
 
@@ -1110,6 +1127,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       enforceMap,
       auditOptions: {
         objects,
+        bypass: this.writeAuditBypass(),
       },
     });
   }

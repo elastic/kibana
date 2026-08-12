@@ -144,164 +144,203 @@ export const performBulkDelete = async <T>(
     );
   } else expectedResults = expectedMultiNamespaceResults;
 
-  // Filter valid objects
-  const validObjects = expectedResults.filter(isRight);
-  if (validObjects.length === 0) {
-    // We only have error results; return early.
-    const savedObjects = expectedResults.map((expectedResult) => {
-      return { ...expectedResult.value, success: false };
-    });
-    return { statuses: [...savedObjects] };
-  }
-
-  // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
-  // mget keyed by object covers both single- and multi-namespace types correctly, and a
-  // normal (diff-disabled) bulk delete pays nothing extra. Results are matched back to
-  // objects by the returned `_id` (not by array position), so a reordered or partial mget
-  // response can never misattribute one object's attributes to another in the audit log.
-  // Failure-isolated: an mget error must not fail the delete — degrade to no before-state.
-  if (securityExtension?.savedObjectDiffEnabled) {
-    try {
-      const beforeAttrsRequests = validObjects.map(({ value: { type, id } }) => ({
-        rawId: serializer.generateRawId(namespace, type, id),
-        type,
-        id,
-      }));
-      const objectByRawId = new Map(beforeAttrsRequests.map((req) => [req.rawId, req]));
-      const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
-        {
-          docs: beforeAttrsRequests.map(({ rawId, type }) => ({
-            _id: rawId,
-            _index: commonHelper.getIndexForType(type),
-            _source: [type],
-          })),
-        },
-        { ignore: [404] }
-      );
-      beforeDocs.docs?.forEach((doc) => {
-        if (!isMgetDoc(doc)) return;
-        const target = objectByRawId.get(doc._id);
-        if (!target) return;
-        const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
-        if (attrs) {
-          beforeAttributesMap.set(`${target.type}:${target.id}`, attrs as Record<string, unknown>);
-        }
+  // Per-object audit state for the events emitted in the `finally` below: one entry per
+  // authorized object, keyed by `type:id` (bulk delete authorizes both valid and
+  // already-errored objects). `before` is populated by the feature-gated pre-delete
+  // fetch; `outcome` flips to 'success' per object once ES confirms its deletion.
+  const auditRecords = new Map<
+    string,
+    { savedObject: { type: string; id: string }; outcome: 'success' | 'unknown' }
+  >();
+  for (const { value } of expectedResults) {
+    if (value.id) {
+      auditRecords.set(`${value.type}:${value.id}`, {
+        savedObject: { type: value.type, id: value.id },
+        outcome: 'unknown',
       });
-    } catch (error) {
-      logger.error(
-        `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
-      );
     }
   }
 
-  // Create the bulkDeleteParams
-  const bulkDeleteParams: BulkDeleteParams[] = [];
-  validObjects.map((expectedResult) => {
-    bulkDeleteParams.push({
-      delete: {
-        _id: serializer.generateRawId(
-          namespace,
-          expectedResult.value.type,
-          expectedResult.value.id
-        ),
-        _index: commonHelper.getIndexForType(expectedResult.value.type),
-        ...getExpectedVersionProperties(undefined),
-      },
+  // When saved object diff auditing is enabled, the authorization step above did not
+  // audit the operation (its pre-operation events are suppressed) — the events emitted
+  // in the `finally` below are the operation's only record, on both the success and the
+  // failure path (errors propagate unchanged).
+  try {
+    // Filter valid objects
+    const validObjects = expectedResults.filter(isRight);
+    if (validObjects.length === 0) {
+      // We only have error results; return early.
+      const savedObjects = expectedResults.map((expectedResult) => {
+        return { ...expectedResult.value, success: false };
+      });
+      return { statuses: [...savedObjects] };
+    }
+
+    // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
+    // mget keyed by object covers both single- and multi-namespace types correctly, and a
+    // normal (diff-disabled) bulk delete pays nothing extra. Results are matched back to
+    // objects by the returned `_id` (not by array position), so a reordered or partial mget
+    // response can never misattribute one object's attributes to another in the audit log.
+    // Failure-isolated: an mget error must not fail the delete — degrade to no before-state.
+    if (securityExtension?.savedObjectDiffEnabled) {
+      try {
+        const beforeAttrsRequests = validObjects.map(({ value: { type, id } }) => ({
+          rawId: serializer.generateRawId(namespace, type, id),
+          type,
+          id,
+        }));
+        const objectByRawId = new Map(beforeAttrsRequests.map((req) => [req.rawId, req]));
+        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+          {
+            docs: beforeAttrsRequests.map(({ rawId, type }) => ({
+              _id: rawId,
+              _index: commonHelper.getIndexForType(type),
+              _source: [type],
+            })),
+          },
+          { ignore: [404] }
+        );
+        beforeDocs.docs?.forEach((doc) => {
+          if (!isMgetDoc(doc)) return;
+          const target = objectByRawId.get(doc._id);
+          if (!target) return;
+          const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
+          if (attrs) {
+            beforeAttributesMap.set(
+              `${target.type}:${target.id}`,
+              attrs as Record<string, unknown>
+            );
+          }
+        });
+      } catch (error) {
+        logger.error(
+          `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
+        );
+      }
+    }
+
+    // Create the bulkDeleteParams
+    const bulkDeleteParams: BulkDeleteParams[] = [];
+    validObjects.map((expectedResult) => {
+      bulkDeleteParams.push({
+        delete: {
+          _id: serializer.generateRawId(
+            namespace,
+            expectedResult.value.type,
+            expectedResult.value.id
+          ),
+          _index: commonHelper.getIndexForType(expectedResult.value.type),
+          ...getExpectedVersionProperties(undefined),
+        },
+      });
     });
-  });
 
-  const bulkDeleteResponse = bulkDeleteParams.length
-    ? await client.bulk({
-        refresh,
-        operations: bulkDeleteParams,
-        require_alias: true,
-      })
-    : undefined;
+    const bulkDeleteResponse = bulkDeleteParams.length
+      ? await client.bulk({
+          refresh,
+          operations: bulkDeleteParams,
+          require_alias: true,
+        })
+      : undefined;
 
-  // extracted to ensure consistency in the error results returned
-  let errorResult: BulkDeleteItemErrorResult;
-  const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
+    // extracted to ensure consistency in the error results returned
+    let errorResult: BulkDeleteItemErrorResult;
+    const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
 
-  const savedObjects = expectedResults.map((expectedResult) => {
-    if (isLeft(expectedResult)) {
-      return { ...expectedResult.value, success: false };
-    }
+    const savedObjects = expectedResults.map((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return { ...expectedResult.value, success: false };
+      }
 
-    const { type, id, namespaces, esRequestIndex: esBulkDeleteRequestIndex } = expectedResult.value;
-    // we assume this wouldn't happen but is needed to ensure type consistency
-    if (bulkDeleteResponse === undefined) {
-      throw new Error(
-        `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
-      );
-    }
-    const rawResponse = Object.values(
-      bulkDeleteResponse.items[esBulkDeleteRequestIndex]
-    )[0] as NewBulkItemResponse;
-
-    const error = getBulkOperationError(type, id, rawResponse);
-    if (error) {
-      errorResult = { success: false, type, id, error };
-      return errorResult;
-    }
-    if (rawResponse.result === 'not_found') {
-      errorResult = {
-        success: false,
+      const {
         type,
         id,
-        error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-      };
-      return errorResult;
-    }
+        namespaces,
+        esRequestIndex: esBulkDeleteRequestIndex,
+      } = expectedResult.value;
+      // we assume this wouldn't happen but is needed to ensure type consistency
+      if (bulkDeleteResponse === undefined) {
+        throw new Error(
+          `Unexpected error in bulkDelete saved objects: bulkDeleteResponse is undefined`
+        );
+      }
+      const rawResponse = Object.values(
+        bulkDeleteResponse.items[esBulkDeleteRequestIndex]
+      )[0] as NewBulkItemResponse;
 
-    if (rawResponse.result === 'deleted') {
+      const error = getBulkOperationError(type, id, rawResponse);
+      if (error) {
+        errorResult = { success: false, type, id, error };
+        return errorResult;
+      }
+      if (rawResponse.result === 'not_found') {
+        errorResult = {
+          success: false,
+          type,
+          id,
+          error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+        };
+        return errorResult;
+      }
+
+      if (rawResponse.result === 'deleted') {
+        const auditRecord = auditRecords.get(`${type}:${id}`);
+        if (auditRecord) {
+          auditRecord.outcome = 'success';
+        }
+
+        // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
+        if (namespaces) {
+          objectsToDeleteAliasesFor.push({
+            type,
+            id,
+            ...(namespaces.includes(ALL_NAMESPACES_STRING)
+              ? { namespaces: [], deleteBehavior: 'exclusive' }
+              : { namespaces, deleteBehavior: 'inclusive' }),
+          });
+        }
+      }
+      const successfulResult = {
+        success: true,
+        id,
+        type,
+      };
+      return successfulResult;
+    });
+
+    // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
+    const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) => {
+      await deleteLegacyUrlAliases({
+        mappings,
+        registry,
+        client,
+        getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
+        type,
+        id,
+        namespaces,
+        deleteBehavior,
+      }).catch((err) => {
+        logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
+      });
+    };
+    await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
+
+    return { statuses: [...savedObjects] };
+  } finally {
+    for (const [key, { savedObject, outcome }] of auditRecords) {
       emitSavedObjectDiffAuditEvent({
         securityExtension,
         encryptionExtension,
         logger,
         action: 'saved_object_delete',
-        savedObject: { type, id },
+        savedObject,
+        outcome,
         // Empty attributes still emit — the delete itself is the audit signal.
-        before: beforeAttributesMap.get(`${type}:${id}`) ?? {},
-        after: {} as Record<string, unknown>,
+        before: beforeAttributesMap.get(key) ?? {},
+        after: {},
       });
-
-      // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
-      if (namespaces) {
-        objectsToDeleteAliasesFor.push({
-          type,
-          id,
-          ...(namespaces.includes(ALL_NAMESPACES_STRING)
-            ? { namespaces: [], deleteBehavior: 'exclusive' }
-            : { namespaces, deleteBehavior: 'inclusive' }),
-        });
-      }
     }
-    const successfulResult = {
-      success: true,
-      id,
-      type,
-    };
-    return successfulResult;
-  });
-
-  // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
-  const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) => {
-    await deleteLegacyUrlAliases({
-      mappings,
-      registry,
-      client,
-      getIndexForType: commonHelper.getIndexForType.bind(commonHelper),
-      type,
-      id,
-      namespaces,
-      deleteBehavior,
-    }).catch((err) => {
-      logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
-    });
-  };
-  await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
-
-  return { statuses: [...savedObjects] };
+  }
 };
 
 /**

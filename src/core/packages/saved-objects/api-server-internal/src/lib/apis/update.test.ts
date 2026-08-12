@@ -988,6 +988,26 @@ describe('#update', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
+      it('emits an unknown-outcome event when the update fails after authorization', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        // Not-found without upsert throws after authorizeUpdate has run
+        await expect(
+          updateSuccess(client, repository, registry, type, id, attributes, undefined, {
+            mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
+          })
+        ).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: { type, id },
+            outcome: 'unknown',
+            after: expect.objectContaining(attributes),
+          })
+        );
+      });
+
       it('emits a single audit event per successful update', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         await updateSuccess(client, repository, registry, type, id, attributes);

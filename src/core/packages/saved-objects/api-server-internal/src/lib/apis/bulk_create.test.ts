@@ -1091,6 +1091,30 @@ describe('#bulkCreate', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
+      it('emits unknown-outcome events for every object when the bulk request fails', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.bulk.mockImplementationOnce(() =>
+          elasticsearchClientMock.createErrorTransportRequestPromise(new Error('es boom'))
+        );
+
+        await expect(repository.bulkCreate([obj1, obj2])).rejects.toThrow();
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: { type: obj1.type, id: obj1.id },
+            outcome: 'unknown',
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: { type: obj2.type, id: obj2.id },
+            outcome: 'unknown',
+          })
+        );
+      });
+
       it('does not fail the bulk create when the diff audit emit throws', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         securityExtension.emitSavedObjectDiffAuditEvent.mockImplementationOnce(() => {

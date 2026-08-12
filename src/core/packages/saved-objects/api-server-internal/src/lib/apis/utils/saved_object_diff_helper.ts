@@ -31,6 +31,7 @@ export interface EmitSavedObjectDiffAuditEventParams {
   before: Record<string, unknown>;
   /** The object's attributes after the mutation (`{}` for delete). */
   after: Record<string, unknown>;
+  outcome?: 'success' | 'unknown';
 }
 
 /**
@@ -60,6 +61,7 @@ export const emitSavedObjectDiffAuditEvent = ({
   savedObject,
   before,
   after,
+  outcome = 'success',
 }: EmitSavedObjectDiffAuditEventParams): void => {
   if (!securityExtension?.savedObjectDiffEnabled) {
     return;
@@ -72,18 +74,19 @@ export const emitSavedObjectDiffAuditEvent = ({
     securityExtension.emitSavedObjectDiffAuditEvent({
       action,
       savedObject,
-      outcome: 'success',
+      outcome,
       before,
       after,
       fieldsToRedact,
     });
-  } catch (error) {
-    // This runs after the ES write has committed, so it must never throw. Use String(error)
-    // rather than error.message, which would throw if a non-Error (e.g. null) was thrown.
+  } catch (auditError) {
+    // This may run after the ES write has committed, so it must never throw. Use
+    // String(auditError) rather than auditError.message, which would throw if a
+    // non-Error (e.g. null) was thrown.
     logger.error(
       `Failed to emit saved object diff audit event for ${savedObject.type}:${
         savedObject.id
-      }: ${String(error)}`
+      }: ${String(auditError)}`
     );
   }
 };
