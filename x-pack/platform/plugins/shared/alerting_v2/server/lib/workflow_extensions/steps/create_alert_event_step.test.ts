@@ -37,6 +37,11 @@ const createMockContext = () => {
 const allowedPrivilege = jest.fn().mockResolvedValue(true);
 const deniedPrivilege = jest.fn().mockResolvedValue(false);
 
+beforeEach(() => {
+  allowedPrivilege.mockClear();
+  deniedPrivilege.mockClear();
+});
+
 describe('getCreateAlertEventStepDefinition', () => {
   it('returns group_hash and episode_id on success', async () => {
     const mockIngest = jest.fn().mockResolvedValue({ group_hash: 'abc123', episode_id: 'ep-456' });
