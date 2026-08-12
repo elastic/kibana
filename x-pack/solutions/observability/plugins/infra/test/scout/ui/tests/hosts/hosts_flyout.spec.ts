@@ -227,7 +227,7 @@ test.describe(
       await test.step('verify date range is preserved', async () => {
         const datePicker = page.getByTestId('superDatePickerstartDatePopoverButton');
         await expect(datePicker).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-        await expect(datePicker).toContainText('Mar 28, 2023');
+        await expect(datePicker).toContainText('Mar 28, 2024');
       });
 
       await test.step('return to hosts view', async () => {
