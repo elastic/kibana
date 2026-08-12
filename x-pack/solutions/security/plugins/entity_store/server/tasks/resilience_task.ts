@@ -17,9 +17,9 @@ import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import { createAssetManagerClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
-import { ENTITY_STORE_STATUS } from '../domain/constants';
 import { createReportEvent } from '../telemetry/events';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.resilience];
 
@@ -46,6 +46,11 @@ async function runTask({
     return { state: { namespace } };
   }
 
+  const [coreStart] = await core.getStartServices();
+  if (await shouldDeleteOrphanedEntityStoreTask({ coreStart, namespace, logger })) {
+    return { state: { namespace }, shouldDeleteTask: true };
+  }
+
   const telemetryReporter = createReportEvent(core.analytics);
 
   const { assetManagerClient } = await createAssetManagerClient({
@@ -55,12 +60,6 @@ async function runTask({
     namespace,
     analytics: telemetryReporter,
   });
-
-  const { status } = await assetManagerClient.getStatus();
-  if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
-    logger.debug(`Entity store not installed in namespace ${namespace}, skipping resilience check`);
-    return { state: { namespace } };
-  }
 
   await assetManagerClient.reinstallSharedAssetsIfMissing();
 

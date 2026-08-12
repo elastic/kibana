@@ -10,10 +10,11 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 import { registerResilienceTask } from './resilience_task';
 import { createAssetManagerClient } from './factories';
-import { ENTITY_STORE_STATUS } from '../domain/constants';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import type { EntityStoreCoreSetup } from '../types';
 
 jest.mock('./factories');
+jest.mock('./should_delete_orphaned_task');
 // wrapTaskRun adds a tracing span around the run callback; here it just invokes it.
 jest.mock('../telemetry/traces', () => ({
   wrapTaskRun: jest.fn(({ run }: { run: () => Promise<unknown> }) => run()),
@@ -23,12 +24,12 @@ jest.mock('../telemetry/events', () => ({
 }));
 
 const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
+const shouldDeleteOrphanedEntityStoreTaskMock = shouldDeleteOrphanedEntityStoreTask as jest.Mock;
 
 const NAMESPACE = 'default';
 
 describe('resilience task', () => {
   let logger: MockedLogger;
-  let getStatus: jest.Mock;
   let reinstallSharedAssetsIfMissing: jest.Mock;
 
   const runResilienceTask = async ({
@@ -38,7 +39,10 @@ describe('resilience task', () => {
     const taskManager = {
       registerTaskDefinitions: jest.fn(),
     } as unknown as TaskManagerSetupContract;
-    const core = { analytics: {} } as unknown as EntityStoreCoreSetup;
+    const core = {
+      analytics: {},
+      getStartServices: jest.fn().mockResolvedValue([{}]),
+    } as unknown as EntityStoreCoreSetup;
 
     registerResilienceTask({ taskManager, logger, core });
 
@@ -55,38 +59,28 @@ describe('resilience task', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggerMock.create();
-    getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     reinstallSharedAssetsIfMissing = jest.fn().mockResolvedValue(false);
 
+    shouldDeleteOrphanedEntityStoreTaskMock.mockResolvedValue(false);
     createAssetManagerClientMock.mockResolvedValue({
-      assetManagerClient: { getStatus, reinstallSharedAssetsIfMissing },
+      assetManagerClient: { reinstallSharedAssetsIfMissing },
     });
   });
 
-  it('exits early and does not call reinstall when entity store is not installed', async () => {
-    getStatus.mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
+  it('self-deletes when the entity store is orphaned (no engine descriptors)', async () => {
+    shouldDeleteOrphanedEntityStoreTaskMock.mockResolvedValue(true);
 
     const result = await runResilienceTask();
 
     expect(reinstallSharedAssetsIfMissing).not.toHaveBeenCalled();
-    expect(result).toEqual({ state: { namespace: NAMESPACE } });
+    expect(result).toEqual({ state: { namespace: NAMESPACE }, shouldDeleteTask: true });
   });
 
   it('calls reinstallSharedAssetsIfMissing when entity store is installed', async () => {
-    getStatus.mockResolvedValue({ status: ENTITY_STORE_STATUS.RUNNING });
-
     const result = await runResilienceTask();
 
     expect(reinstallSharedAssetsIfMissing).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ state: { namespace: NAMESPACE } });
-  });
-
-  it('calls reinstallSharedAssetsIfMissing when entity store is stopped', async () => {
-    getStatus.mockResolvedValue({ status: ENTITY_STORE_STATUS.STOPPED });
-
-    await runResilienceTask();
-
-    expect(reinstallSharedAssetsIfMissing).toHaveBeenCalledTimes(1);
   });
 
   it('returns state and logs error when fakeRequest is missing', async () => {
