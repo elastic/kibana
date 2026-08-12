@@ -37,8 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  // Failing: See https://github.com/elastic/kibana/issues/277858
-  describe.skip('Cloud Posture Dashboard Page', function () {
+  describe('Cloud Posture Dashboard Page', function () {
     this.tags(['cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
