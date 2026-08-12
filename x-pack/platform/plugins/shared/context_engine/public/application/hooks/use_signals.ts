@@ -48,6 +48,9 @@ export const useSignals = ({
       return listSignals(http, { tag, from, size, signal });
     },
     enabled: tag !== undefined,
+    // Keep the current page rendered while a larger `size` (group flyout "Load more") refetches,
+    // so the member list grows in place instead of collapsing to the loading skeleton.
+    keepPreviousData: true,
   });
 
   return {
