@@ -119,6 +119,8 @@ const MinimapDot = React.memo(
   )
 );
 
+MinimapDot.displayName = 'MinimapDot';
+
 interface MinimapColors {
   activeBg: string;
   activeBgHover: string;
@@ -222,6 +224,8 @@ const MinimapStepRow = React.memo(
     );
   }
 );
+
+MinimapStepRow.displayName = 'MinimapStepRow';
 
 // ── Main component ────────────────────────────────────────────────────────────
 
