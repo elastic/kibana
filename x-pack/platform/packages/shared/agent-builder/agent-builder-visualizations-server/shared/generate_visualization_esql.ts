@@ -11,7 +11,8 @@ import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server'
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
-import { esqlAdditionalInstructions } from './esql_instructions';
+import { buildEsqlAdditionalInstructions } from './esql_instructions';
+import { validateQueryTarget } from './validate_query_target';
 
 /** Normalized result of resolving an ES|QL query for a visualization. */
 export interface GeneratedVisualizationEsql {
@@ -84,6 +85,17 @@ const buildFallbackContext = (failedQuery: string | undefined, error: string): s
     : `A previous attempt with a smaller model failed to produce a query (error: ${error}).`;
 
 /**
+ * Reject a query that reads from an index other than the one the caller grounded it
+ * against. `generateEsql` reports only syntax and execution problems, and neither catches
+ * a hallucinated wildcard source — it validates and executes cleanly against nothing.
+ *
+ * Only checkable when the caller passed an explicit `index`: an auto-discovered target is
+ * resolved inside `generateEsql` and never surfaces here.
+ */
+const findTargetError = (query: string | undefined, index: string | undefined) =>
+  query && index ? validateQueryTarget({ query, target: index }) : undefined;
+
+/**
  * Resolve a visualization-ready ES|QL query, shared by the Lens and Vega
  * engines so both generate queries the same way.
  *
@@ -109,6 +121,7 @@ export const generateVisualizationEsql = async ({
   timeRange,
   extraInstructions,
 }: GenerateVisualizationEsqlParams): Promise<GeneratedVisualizationEsql> => {
+  const instructions = buildEsqlAdditionalInstructions(index);
   const requestParams = {
     nlQuery: buildEsqlEditContext(nlQuery, existingQueries),
     index,
@@ -116,18 +129,19 @@ export const generateVisualizationEsql = async ({
     logger,
     esClient: esClient.asCurrentUser,
     additionalInstructions: extraInstructions
-      ? `${esqlAdditionalInstructions}\n${extraInstructions}`
-      : esqlAdditionalInstructions,
+      ? `${instructions}\n${extraInstructions}`
+      : instructions,
     ...(timeRange ? { timeRange } : {}),
   };
 
   const response = await generateEsql({ ...requestParams, modelProvider, maxRetries: 2 });
+  const responseError = response.error ?? findTargetError(response.query, index);
 
-  if (response.query && !response.error) {
+  if (response.query && !responseError) {
     return { query: response.query, columns: response.results?.columns };
   }
 
-  const error = response.error ?? 'No queries generated';
+  const error = responseError ?? 'No queries generated';
 
   logger.warn(
     `ES|QL generation with the low-effort model failed (${error}), retrying with the default model`
@@ -140,9 +154,10 @@ export const generateVisualizationEsql = async ({
     maxRetries: 1,
     additionalContext: buildFallbackContext(response.query, error),
   });
+  const fallbackError = fallbackResponse.error ?? findTargetError(fallbackResponse.query, index);
 
-  if (!fallbackResponse.query || fallbackResponse.error) {
-    return { error: fallbackResponse.error ?? 'No queries generated' };
+  if (!fallbackResponse.query || fallbackError) {
+    return { error: fallbackError ?? 'No queries generated' };
   }
 
   return { query: fallbackResponse.query, columns: fallbackResponse.results?.columns };
