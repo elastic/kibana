@@ -246,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
         'report:execute',
         'report:execute-scheduled',
         'reporting_telemetry',
+        'savedObjectsSemanticReconciler:sweep',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
         'security:endpoint-diagnostics',

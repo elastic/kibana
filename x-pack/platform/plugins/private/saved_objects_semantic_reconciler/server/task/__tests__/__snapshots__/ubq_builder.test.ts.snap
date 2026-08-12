@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildUbqBody matches the R1-proven UBQ request shape snapshot 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "type": "dashboard",
+          },
+        },
+      ],
+      "minimum_should_match": 1,
+      "should": Array [
+        Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "dashboard.title",
+                      },
+                    },
+                  ],
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "dashboard.title_semantic",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "dashboard.description",
+                      },
+                    },
+                  ],
+                  "must_not": Array [
+                    Object {
+                      "exists": Object {
+                        "field": "dashboard.description_semantic",
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        Object {
+          "range": Object {
+            "updated_at": Object {
+              "gte": "2026-08-09T00:00:00.000Z",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "script": Object {
+    "lang": "painless",
+    "source": "def _t = ctx._source.get('dashboard'); if (_t == null) { ctx.op = 'noop'; return; } boolean _changed = false; def _v0 = _t.get('title'); if (_v0 != null && _v0 instanceof String && !((String)_v0).isEmpty()) {   if (!_v0.equals(_t.get('title_semantic'))) { _t['title_semantic'] = _v0; _changed = true; } } else {   if (_t.containsKey('title_semantic')) { _t.remove('title_semantic'); _changed = true; } } def _v1 = _t.get('description'); if (_v1 != null && _v1 instanceof String && !((String)_v1).isEmpty()) {   if (!_v1.equals(_t.get('description_semantic'))) { _t['description_semantic'] = _v1; _changed = true; } } else {   if (_t.containsKey('description_semantic')) { _t.remove('description_semantic'); _changed = true; } } if (!_changed) { ctx.op = 'noop'; }",
+  },
+}
+`;

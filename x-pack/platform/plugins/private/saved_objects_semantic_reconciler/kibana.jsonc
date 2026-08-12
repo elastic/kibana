@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-semantic-reconciler-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Reconciler task that backfills and refreshes ELSER semantic shadow fields for opted-in saved-object types (Phase 2/4 of the SO semantic-search POC).",
+  "plugin": {
+    "id": "savedObjectsSemanticReconciler",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "savedObjectsSemanticReconciler"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "extraPublicDirs": []
+  }
+}
