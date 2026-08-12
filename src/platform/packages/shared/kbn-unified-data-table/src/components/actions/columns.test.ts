@@ -248,7 +248,6 @@ describe('Test column actions', () => {
         })
       );
     });
-
   });
 
   describe('Display-only time column', () => {
