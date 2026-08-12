@@ -43,6 +43,8 @@ export function toAutoOpsDeploymentUrl(
   }
 
   // Rebuild the pathname up to and including the org id, then append the deployment tail.
-  parsed.pathname = `${parts.slice(0, orgIdx + 2).join('/')}/deployments/${deploymentId}/deployment`;
+  parsed.pathname = `${parts
+    .slice(0, orgIdx + 2)
+    .join('/')}/deployments/${deploymentId}/deployment`;
   return parsed.toString();
 }

@@ -40,8 +40,7 @@ describe('toAutoOpsDeploymentUrl', () => {
   });
 
   it('returns service_url unchanged when organizations segment has no following id', () => {
-    const truncated =
-      'https://app.auto-ops.cloud.elastic.co/regions/aws-us-east-1/organizations';
+    const truncated = 'https://app.auto-ops.cloud.elastic.co/regions/aws-us-east-1/organizations';
     expect(toAutoOpsDeploymentUrl(truncated, DEPLOYMENT_ID)).toBe(truncated);
   });
 
