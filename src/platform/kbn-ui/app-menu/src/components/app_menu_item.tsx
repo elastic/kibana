@@ -13,6 +13,7 @@ import { upperFirst } from 'lodash';
 import { css } from '@emotion/react';
 import {
   createReturnFocus,
+  getAppMenuEbtDomProps,
   getIsSelectedColor,
   getLinkProps,
   getTooltip,
@@ -34,6 +35,7 @@ export const AppMenuItem = ({
   htmlId,
   label,
   testId,
+  ebt,
   iconType,
   disableButton,
   href,
@@ -94,6 +96,7 @@ export const AppMenuItem = ({
       <EuiHeaderLink
         id={htmlId}
         data-test-subj={testId || getAppMenuItemTestSubj(id)}
+        {...getAppMenuEbtDomProps(ebt)}
         iconType={iconType}
         isDisabled={isDisabled(disableButton)}
         href={href}
