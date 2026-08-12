@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { Query } from '@elastic/eui';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
@@ -44,15 +45,11 @@ export const STATUS_FILTER_OPTIONS = [
 export const MODE_FILTER_OPTIONS = [
   {
     key: 'alert' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alerts',
-    }),
+    label: RULE_KIND_LABELS.alert,
   },
   {
     key: 'signal' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Events',
-    }),
+    label: RULE_KIND_LABELS.signal,
   },
 ];
 

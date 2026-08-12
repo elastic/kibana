@@ -7,6 +7,7 @@
 
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { getBreachEsqlQuery, getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -21,15 +22,6 @@ import {
   getRecoverEsqlSegment,
 } from '../utils';
 import { RuleDetailsTable } from './rule_details_table';
-
-const MODE_LABELS: Record<string, string> = {
-  signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
-    defaultMessage: 'Events',
-  }),
-  alert: i18n.translate('xpack.alertingV2.ruleDetails.modeAlert', {
-    defaultMessage: 'Alerts',
-  }),
-};
 
 export interface RuleConditionsProps {
   /**
@@ -91,7 +83,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       title: i18n.translate('xpack.alertingV2.ruleDetails.mode', {
         defaultMessage: 'Mode',
       }),
-      description: MODE_LABELS[rule.kind] ?? rule.kind,
+      description: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
       'data-test-subj': 'alertingV2RuleDetailsMode',
     },
     ...(isAlertMode && !isSummary

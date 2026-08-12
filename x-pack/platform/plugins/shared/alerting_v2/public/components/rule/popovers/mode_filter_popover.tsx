@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { RULE_KIND_ICONS, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
 import type { FilterPopoverOption } from './single_selection_filter_popover';
 import { SingleSelectionFilterPopover } from './single_selection_filter_popover';
@@ -13,17 +14,13 @@ import { SingleSelectionFilterPopover } from './single_selection_filter_popover'
 const MODE_FILTER_OPTIONS: FilterPopoverOption[] = [
   {
     value: 'alert',
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alerts',
-    }),
-    iconType: 'bell',
+    label: RULE_KIND_LABELS.alert,
+    iconType: RULE_KIND_ICONS.alert,
   },
   {
     value: 'signal',
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Events',
-    }),
-    iconType: 'stats',
+    label: RULE_KIND_LABELS.signal,
+    iconType: RULE_KIND_ICONS.signal,
   },
 ];
 
