@@ -12,7 +12,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
-} from '../common/constants';
+} from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';

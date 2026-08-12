@@ -138,9 +138,19 @@ describe('build_step_schema_for_agent', () => {
       expect(shape).toHaveProperty('timeout');
     });
 
-    it('omits if and timeout for FlowControl steps', () => {
+    it('includes `if` but omits `timeout` for FlowControl steps', () => {
       const schema = buildBuiltInStepSchema(
-        makeBuiltInStep({ category: StepCategory.FlowControl })
+        makeBuiltInStep({ id: 'wait', category: StepCategory.FlowControl })
+      );
+      const shape = getShape(schema);
+
+      expect(shape).toHaveProperty('if');
+      expect(shape).not.toHaveProperty('timeout');
+    });
+
+    it('omits `if` for the `if` step', () => {
+      const schema = buildBuiltInStepSchema(
+        makeBuiltInStep({ id: 'if', category: StepCategory.FlowControl })
       );
       const shape = getShape(schema);
 
