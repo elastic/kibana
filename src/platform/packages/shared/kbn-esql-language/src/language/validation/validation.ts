@@ -107,16 +107,10 @@ async function validateAst(
       datasets: datasets?.datasets ?? [],
     };
 
-    const commandMessages = validateCommand(
-      command,
-      references,
-      rootCommands,
-      isRootTimeseries,
-      {
-        ...callbacks,
-        hasMinimumLicenseRequired,
-      }
-    );
+    const commandMessages = validateCommand(command, references, rootCommands, isRootTimeseries, {
+      ...callbacks,
+      hasMinimumLicenseRequired,
+    });
     messages.push(...commandMessages);
   }
 
