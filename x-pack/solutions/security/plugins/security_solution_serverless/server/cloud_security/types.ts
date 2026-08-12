@@ -32,6 +32,13 @@ export interface AssetCountAggregation {
   resource_sub_type: {
     buckets: ResourceSubtypeAggregationBucket[];
   };
+  // SPIKE Option A: total corroborated witnessed running ms of gcp-compute-instance
+  // resources in the sampling window.
+  gcp_confirmed?: {
+    total_confirmed_ms: {
+      value: number | null;
+    };
+  };
 }
 
 export interface MinTimestamp {

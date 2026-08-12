@@ -46,13 +46,28 @@ export const getUsageRecords = (
 
     const billableAssets = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution].values;
     assetCount = resourceSubtypeBuckets
-      .filter((bucket) => billableAssets.includes(bucket.key))
+      .filter(
+        (bucket) =>
+          billableAssets.includes(bucket.key) &&
+          // SPIKE Option A: gcp-compute-instance is billed by corroborated witnessed span below
+          !(cloudSecuritySolution === CSPM && bucket.key === GCP_COMPUTE_INSTANCE_SUB_TYPE)
+      )
       .reduce((acc, bucket) => acc + bucket.unique_assets.value, 0);
+
+    // SPIKE Option A: corroborated witnessed running time as a fraction of asset-days.
+    const gcpConfirmedMs = assetCountAggregation.gcp_confirmed?.total_confirmed_ms?.value ?? 0;
+    const gcpProportionalAssets = gcpConfirmedMs / (24 * 60 * 60 * 1000);
+    if (cloudSecuritySolution === CSPM) {
+      assetCount += gcpProportionalAssets;
+    }
 
     resourceSubtypeCounterMap = assetCountAggregation.resource_sub_type.buckets.reduce(
       (resourceMap, item) => {
         // By the usage spec, the resource subtype counter should be a string // https://github.com/elastic/usage-api/blob/main/api/user-v1-spec.yml
-        resourceMap[item.key] = String(item.unique_assets.value);
+        resourceMap[item.key] =
+          cloudSecuritySolution === CSPM && item.key === GCP_COMPUTE_INSTANCE_SUB_TYPE
+            ? gcpProportionalAssets.toFixed(4)
+            : String(item.unique_assets.value);
         return resourceMap;
       },
       {} as ResourceSubtypeCounter
@@ -289,6 +304,49 @@ export const getGcpComputeDurationFilter = () => {
   };
 };
 
+/**
+ * SPIKE — Option A: within-window scan corroboration + proportional billing.
+ *
+ * A gcp-compute-instance is billed only if the sampling window contains >=2 DISTINCT
+ * scans observing it RUNNING (a single scan cannot corroborate its own timestamps),
+ * and it bills the witnessed span between the first and last such scan — exact
+ * seconds, not full days. Stateless approximation of lifetime scan-corroboration:
+ * cross-window corroboration (a resource scanned once today but often last week)
+ * requires per-resource state and is out of scope (#17662).
+ */
+export const getGcpRunningScanTsRuntimeMapping = () => ({
+  _kibana_cspm_gcp_running_scan_ts: {
+    type: 'long',
+    script: {
+      lang: 'painless',
+      source: `
+        if (doc['resource.sub_type'].size() == 0) return;
+        if (!doc['resource.sub_type'].value.equals(params['subType'])) return;
+        try {
+          def src = params['_source'];
+          if (src == null) return;
+          def resourceMap = (Map) src.get('resource');
+          if (resourceMap == null) return;
+          def raw = (Map) resourceMap.get('raw');
+          if (raw == null) return;
+          def rawResource = (Map) raw.get('resource');
+          if (rawResource == null) return;
+          def data = (Map) rawResource.get('data');
+          if (data == null) return;
+          if (!'RUNNING'.equals((String) data.get('status'))) return;
+          if (doc['@timestamp'].size() == 0) return;
+          emit(doc['@timestamp'].value.toInstant().toEpochMilli());
+        } catch (Exception e) {
+          return;
+        }
+      `,
+      params: {
+        subType: GCP_COMPUTE_INSTANCE_SUB_TYPE,
+      },
+    },
+  },
+});
+
 export const getAssetAggQueryByCloudSecuritySolution = (
   cloudSecuritySolution: CloudSecuritySolutions
 ) => {
@@ -296,17 +354,37 @@ export const getAssetAggQueryByCloudSecuritySolution = (
   const aggs = getAggregationByCloudSecuritySolution(cloudSecuritySolution);
 
   if (cloudSecuritySolution === CSPM) {
-    const nowMillis = Date.now();
     return {
       index: METERING_CONFIGS[cloudSecuritySolution].index,
-      runtime_mappings: getGcpComputeDurationRuntimeMapping(nowMillis),
-      query: {
-        bool: {
-          must: [query, getGcpComputeDurationFilter()],
+      runtime_mappings: getGcpRunningScanTsRuntimeMapping(),
+      // SPIKE Option A: no eligibility filter — corroborated witnessed span replaces it.
+      query,
+      size: 0,
+      aggs: {
+        ...aggs,
+        gcp_confirmed: {
+          filter: { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          aggs: {
+            per_resource: {
+              terms: { field: 'resource.id', size: 65000 },
+              aggs: {
+                first_scan: { min: { field: '_kibana_cspm_gcp_running_scan_ts' } },
+                last_scan: { max: { field: '_kibana_cspm_gcp_running_scan_ts' } },
+                scan_count: { cardinality: { field: '_kibana_cspm_gcp_running_scan_ts' } },
+                confirmed_ms: {
+                  bucket_script: {
+                    buckets_path: { f: 'first_scan', l: 'last_scan', n: 'scan_count' },
+                    script: 'params.n >= 2 ? params.l - params.f : 0',
+                  },
+                },
+              },
+            },
+            total_confirmed_ms: {
+              sum_bucket: { buckets_path: 'per_resource>confirmed_ms' },
+            },
+          },
         },
       },
-      size: 0,
-      aggs,
     };
   }
 
