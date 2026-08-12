@@ -370,7 +370,7 @@ describe(
         });
       });
 
-      it('substitutes params in osquery launched from timeline alerts', () => {
+      it('substitutes params in osquery launched from timeline alerts', { tags: ['@skipInServerless'] }, () => {
         cy.getBySel('send-alert-to-timeline-button').first().click();
         cy.getBySel('docTableExpandToggleColumn').first().click();
         takeOsqueryActionWithParams();
