@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/enterprise-search-plugin",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   // TODO this is currently used from Observability too, must be refactored before solution-specific builds
   // see x-pack/platform/plugins/private/observability_ai_assistant_management/public/routes/components/search_connector_tab.tsx
   // cc sphilipse
