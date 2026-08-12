@@ -89,31 +89,35 @@ describe(
         closeToastIfVisible();
       });
 
-      it('runs a live query from the alert flyout and adds the action to Timeline', { tags: ['@skipInServerless'] }, () => {
-        const TIMELINE_NAME = 'Untitled Timeline';
-        cy.getBySel('expand-event').first().click();
-        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
-        cy.getBySel('osquery-action-item').click();
-        // Use only the alert's pre-selected host agent. Adding "All agents" pulls in
-        // other enrolled-but-offline agents in CI, which makes the response action
-        // wait indefinitely ("Some selected agents are offline or have unhealthy
-        // Osquery components and may not respond to queries").
-        cy.contains(/^1 agent selected/);
-        inputQueryInFlyout('select * from uptime;');
-        submitQuery();
-        checkResults();
-        cy.contains('Add to Timeline investigation');
-        cy.getBySel('add-to-timeline').first().click();
-        cy.getBySel('globalToastList').contains('Added');
-        closeToastIfVisible();
-        cy.contains('Cancel').click();
-        cy.getBySel('timeline-bottom-bar').within(() => {
-          cy.contains(TIMELINE_NAME).click();
-        });
-        cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
-        cy.visit('/app/osquery');
-        closeModalIfVisible();
-      });
+      it(
+        'runs a live query from the alert flyout and adds the action to Timeline',
+        { tags: ['@skipInServerless'] },
+        () => {
+          const TIMELINE_NAME = 'Untitled Timeline';
+          cy.getBySel('expand-event').first().click();
+          cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
+          cy.getBySel('osquery-action-item').click();
+          // Use only the alert's pre-selected host agent. Adding "All agents" pulls in
+          // other enrolled-but-offline agents in CI, which makes the response action
+          // wait indefinitely ("Some selected agents are offline or have unhealthy
+          // Osquery components and may not respond to queries").
+          cy.contains(/^1 agent selected/);
+          inputQueryInFlyout('select * from uptime;');
+          submitQuery();
+          checkResults();
+          cy.contains('Add to Timeline investigation');
+          cy.getBySel('add-to-timeline').first().click();
+          cy.getBySel('globalToastList').contains('Added');
+          closeToastIfVisible();
+          cy.contains('Cancel').click();
+          cy.getBySel('timeline-bottom-bar').within(() => {
+            cy.contains(TIMELINE_NAME).click();
+          });
+          cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
+          cy.visit('/app/osquery');
+          closeModalIfVisible();
+        }
+      );
     });
 
     // Pack response actions are the E2E-unique surface: the UI pack selection must
@@ -347,34 +351,42 @@ describe(
         cy.getBySel('flyout-body-osquery').contains('platform');
       });
 
-      it('runs a take-action query against all enrolled agents', { tags: ['@skipInServerless'] }, () => {
-        cy.getBySel('expand-event').first().click();
-        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should(
-          'not.contain',
-          'Loading...'
-        );
-        cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
-        cy.getBySel('osquery-action-item').click();
-        cy.getBySel('agentSelection').within(() => {
-          cy.getBySel('comboBoxClearButton').click();
-          cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
-          cy.contains('All agents');
-        });
-        inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
-          parseSpecialCharSequences: false,
-        });
-        submitQuery();
-        cy.getBySel('flyout-body-osquery').within(() => {
-          // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
-          cy.get('[data-grid-row-index]', { timeout: 180000 }).should('have.length.at.least', 2);
-        });
-      });
+      it(
+        'runs a take-action query against all enrolled agents',
+        { tags: ['@skipInServerless'] },
+        () => {
+          cy.getBySel('expand-event').first().click();
+          cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should(
+            'not.contain',
+            'Loading...'
+          );
+          cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
+          cy.getBySel('osquery-action-item').click();
+          cy.getBySel('agentSelection').within(() => {
+            cy.getBySel('comboBoxClearButton').click();
+            cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
+            cy.contains('All agents');
+          });
+          inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+            parseSpecialCharSequences: false,
+          });
+          submitQuery();
+          cy.getBySel('flyout-body-osquery').within(() => {
+            // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
+            cy.get('[data-grid-row-index]', { timeout: 180000 }).should('have.length.at.least', 2);
+          });
+        }
+      );
 
-      it('substitutes params in osquery launched from timeline alerts', { tags: ['@skipInServerless'] }, () => {
-        cy.getBySel('send-alert-to-timeline-button').first().click();
-        cy.getBySel('docTableExpandToggleColumn').first().click();
-        takeOsqueryActionWithParams();
-      });
+      it(
+        'substitutes params in osquery launched from timeline alerts',
+        { tags: ['@skipInServerless'] },
+        () => {
+          cy.getBySel('send-alert-to-timeline-button').first().click();
+          cy.getBySel('docTableExpandToggleColumn').first().click();
+          takeOsqueryActionWithParams();
+        }
+      );
     });
   }
 );
