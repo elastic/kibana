@@ -18,6 +18,10 @@ import { CreateAiIndexButton } from './components/create_ai_index_button';
 import { useAiIndexFindItems } from './hooks/use_list_ai_indices';
 import { useKibana } from './hooks/use_kibana';
 import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from './layout/context_engine_page_template';
+import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
   aiIndexOwnerFilter,
@@ -38,7 +42,7 @@ const ContextLandingPageContent = () => {
   const showHeaderCreateButton = !hasNoItems;
 
   return (
-    <KibanaPageTemplate data-test-subj="contextLandingPage">
+    <ContextEnginePageTemplate data-test-subj="contextLandingPage">
       <KibanaPageTemplate.Header
         pageTitle={i18n.translate('xpack.contextEngine.landing.title', {
           defaultMessage: 'Context',
@@ -47,6 +51,7 @@ const ContextLandingPageContent = () => {
           defaultMessage:
             'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
         })}
+        restrictWidth
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
           border-block-end: none;
@@ -55,7 +60,7 @@ const ContextLandingPageContent = () => {
           showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
         }
       />
-      <KibanaPageTemplate.Section>
+      <ContextEnginePageSection>
         {error ? (
           <AiIndexListError error={error} />
         ) : (
@@ -70,8 +75,8 @@ const ContextLandingPageContent = () => {
             <ContentListFooter data-test-subj="contextAiIndexListFooter" />
           </ContentList>
         )}
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+      </ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };
 

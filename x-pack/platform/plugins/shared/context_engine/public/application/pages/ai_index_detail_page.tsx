@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSkeletonTitle,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   AutomationsPanel,
@@ -31,121 +22,98 @@ import {
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from '../layout/context_engine_page_template';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 
-const backToListLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToListButton', {
-  defaultMessage: 'Back to AI indexes',
+const landingPageTitle = i18n.translate('xpack.contextEngine.landing.title', {
+  defaultMessage: 'Context',
+});
+
+const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
+  defaultMessage: 'Managed',
 });
 
 export const AiIndexDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { aiIndex, isLoading, error, refetch } = useAiIndex(id);
-  const { createContextEngineUrl } = useNavigation();
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const [isEditingSources, setIsEditingSources] = useState(false);
 
-  const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
   const isManaged = aiIndex !== undefined && aiIndex.managed;
   const hideEditControls = isLoading || isManaged;
+  const pageTitle = aiIndex?.id ?? id ?? '';
 
-  if (error) {
-    return (
-      <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
-        <KibanaPageTemplate.Section>
-          <EuiEmptyPrompt
-            iconType="error"
-            color="danger"
-            data-test-subj="contextAiIndexDetailError"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.contextEngine.aiIndexDetail.error.title"
-                  defaultMessage="Unable to load AI index"
-                />
-              </h2>
-            }
-            body={<p>{error.message}</p>}
-            actions={[
-              <EuiButton
-                key="back-to-list"
-                iconType="chevronSingleLeft"
-                href={landingUrl}
-                data-test-subj="contextAiIndexBackToListButton"
-              >
-                {backToListLabel}
-              </EuiButton>,
-            ]}
-          />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
-    );
-  }
-
-  const pageTitle = isLoading ? (
-    <EuiSkeletonTitle size="l" data-test-subj="contextAiIndexTitleLoading" />
-  ) : (
-    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{aiIndex?.id}</EuiFlexItem>
-      {isManaged && (
-        <EuiFlexItem grow={false}>
-          <EuiText
-            component="span"
-            size="s"
-            color="subdued"
-            data-test-subj="contextAiIndexDetailManagedBadge"
-          >
-            <EuiIcon type="lock" size="s" aria-hidden={true} />{' '}
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.managedBadge"
-              defaultMessage="Managed"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+  const back = useMemo<AppHeaderBack>(
+    () => ({
+      href: createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing),
+      label: landingPageTitle,
+      onClick: (event) => {
+        event.preventDefault();
+        navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
+      },
+    }),
+    [createContextEngineUrl, navigateToContextEngine]
   );
 
-  return (
-    <KibanaPageTemplate data-test-subj="contextAiIndexDetailPage">
-      <KibanaPageTemplate.Header
-        pageTitle={pageTitle}
-        rightSideItems={[
-          <EuiButtonEmpty
-            key="back-to-list"
-            iconType="chevronSingleLeft"
-            href={landingUrl}
-            data-test-subj="contextAiIndexBackToListButton"
-          >
-            {backToListLabel}
-          </EuiButtonEmpty>,
-        ]}
+  const badges = useMemo<AppHeaderBadge[] | undefined>(
+    () =>
+      isManaged
+        ? [
+            {
+              label: managedBadgeLabel,
+              color: 'hollow',
+              'data-test-subj': 'contextAiIndexDetailManagedBadge',
+            },
+          ]
+        : undefined,
+    [isManaged]
+  );
+
+  const pageContent = error ? (
+    <EuiEmptyPrompt
+      iconType="error"
+      color="danger"
+      data-test-subj="contextAiIndexDetailError"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.contextEngine.aiIndexDetail.error.title"
+            defaultMessage="Unable to load AI index"
+          />
+        </h2>
+      }
+      body={<p>{error.message}</p>}
+    />
+  ) : (
+    <>
+      <DescriptionPanel
+        isLoading={isLoading}
+        aiIndex={aiIndex}
+        onSaved={refetch}
+        isManaged={isManaged}
       />
-      <KibanaPageTemplate.Section>
-        <DescriptionPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
-        <EuiSpacer size="m" />
-        <SourcesPanel
-          isLoading={isLoading}
-          sources={aiIndex?.sources ?? []}
-          canEdit={aiIndex !== undefined}
-          onEditSources={() => setIsEditingSources(true)}
-          isManaged={hideEditControls}
-        />
-        <EuiSpacer size="m" />
-        <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
-        <EuiSpacer size="m" />
-        <AutomationsPanel
-          isLoading={isLoading}
-          aiIndex={aiIndex}
-          onSaved={refetch}
-          isManaged={isManaged}
-        />
-        <EuiSpacer size="m" />
-        <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
-      </KibanaPageTemplate.Section>
+      <EuiSpacer size="m" />
+      <SourcesPanel
+        isLoading={isLoading}
+        sources={aiIndex?.sources ?? []}
+        canEdit={aiIndex !== undefined}
+        onEditSources={() => setIsEditingSources(true)}
+        isManaged={hideEditControls}
+      />
+      <EuiSpacer size="m" />
+      <KnowledgeIndicatorsPanel isLoading={isLoading} aiIndex={aiIndex} />
+      <EuiSpacer size="m" />
+      <AutomationsPanel
+        isLoading={isLoading}
+        aiIndex={aiIndex}
+        onSaved={refetch}
+        isManaged={isManaged}
+      />
+      <EuiSpacer size="m" />
+      <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout
           aiIndex={aiIndex}
@@ -156,6 +124,18 @@ export const AiIndexDetailPage = () => {
           }}
         />
       )}
-    </KibanaPageTemplate>
+    </>
+  );
+
+  return (
+    <ContextEnginePageTemplate
+      data-test-subj="contextAiIndexDetailPage"
+      breadcrumbPageName={pageTitle || undefined}
+    >
+      <ContextEnginePageSection paddingSize="l">
+        <AppHeader spacing="flush" title={pageTitle} back={back} badges={badges} />
+      </ContextEnginePageSection>
+      <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };

@@ -16,7 +16,8 @@
     "optionalPlugins": [
       "serverless",
       "spaces",
-      "indexManagement"
+      "indexManagement",
+      "contextEngine"
     ],
     "requiredBundles": []
   }

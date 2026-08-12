@@ -27,6 +27,7 @@ import type {
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
 } from './types';
+import type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
 
 const APP_TITLE = i18n.translate('xpack.contextEngine.app.title', {
   defaultMessage: 'Context',
@@ -53,6 +54,7 @@ export class ContextEnginePlugin
    * after mount, rather than a value snapshotted once at mount time.
    */
   private chatOpener?: ChatOpener;
+  private searchNavigationAdapter: ContextEngineSearchNavigationAdapter | undefined;
 
   constructor(_context: PluginInitializerContext) {}
 
@@ -61,6 +63,7 @@ export class ContextEnginePlugin
     // Captured in a closure so `mount` (where `this` is the app config) can read the opener
     // registered on `start`.
     const getChatOpener = () => this.chatOpener;
+    const getSearchNavigationAdapter = () => this.searchNavigationAdapter;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -91,17 +94,24 @@ export class ContextEnginePlugin
         const { mountApp } = await import('./application');
         const [coreStart, pluginsStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(APP_TITLE);
+        const searchNavigation = getSearchNavigationAdapter();
+        await searchNavigation?.handleOnAppMount();
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
           getChatOpener,
+          searchNavigation,
         });
       },
     });
 
-    return {};
+    return {
+      registerSearchNavigationAdapter: (adapter: ContextEngineSearchNavigationAdapter) => {
+        this.searchNavigationAdapter = adapter;
+      },
+    };
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {

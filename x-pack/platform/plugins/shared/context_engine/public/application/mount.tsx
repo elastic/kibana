@@ -12,6 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ChatOpener, ContextEngineStartDependencies } from '../types';
+import type { ContextEngineSearchNavigationAdapter } from '../search_navigation_adapter';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { ContextEngineRoutes } from './routes';
 
@@ -27,12 +28,14 @@ export const mountApp = ({
   element,
   history,
   getChatOpener,
+  searchNavigation,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
   element: HTMLElement;
   history: ScopedHistory;
   getChatOpener?: () => ChatOpener | undefined;
+  searchNavigation?: ContextEngineSearchNavigationAdapter;
 }) => {
   const services: ContextEngineServices = {
     ...core,
@@ -42,6 +45,8 @@ export const mountApp = ({
     console: plugins.console,
     spaces: plugins.spaces,
     getChatOpener,
+    searchNavigation,
+    history,
   };
 
   ReactDOM.render(

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ChatOpener, ContextEngineStartDependencies } from '../../types';
+import type {
+  ChatOpener,
+  ContextEngineAppServices,
+  ContextEngineStartDependencies,
+} from '../../types';
 
-export interface ContextEngineServices extends CoreStart {
+export interface ContextEngineServices extends ContextEngineAppServices {
   data: ContextEngineStartDependencies['data'];
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];

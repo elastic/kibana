@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
+import type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -27,8 +29,11 @@ export interface AnalyzeAndImproveContext {
 /** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
 export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginSetup {}
+export type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
+
+export interface ContextEnginePluginSetup {
+  registerSearchNavigationAdapter: (adapter: ContextEngineSearchNavigationAdapter) => void;
+}
 
 export interface ContextEnginePluginStart {
   /**
@@ -48,3 +53,10 @@ export interface ContextEngineStartDependencies {
   console?: ConsolePluginStart;
   spaces?: SpacesPluginStart;
 }
+
+export interface ContextEngineServicesContextDeps {
+  history: AppMountParameters['history'];
+  searchNavigation?: ContextEngineSearchNavigationAdapter;
+}
+
+export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;
