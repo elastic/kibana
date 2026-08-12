@@ -235,10 +235,9 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 /**
  * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
- * Field Library definitions and values can legitimately occupy the full template/value payload,
- * and each of the 200 fields can contribute both values of a TOGGLE filter.
+ * Field Library values can legitimately occupy the full template/value payload, and each of the
+ * 200 fields can contribute both values of a TOGGLE filter.
  */
-export const MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH = MAX_TEMPLATE_DEFINITION_LENGTH;
 export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_BYTES;
 export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;

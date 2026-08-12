@@ -258,35 +258,43 @@ export const useFilterConfig = ({
     [globalInlineFields]
   );
 
-  const activeFieldFilterConfig = fieldFilterConfig.map((fieldFilter) => {
-    if (isFlattenCustomField(fieldFilter.key)) {
-      return {
-        ...fieldFilter,
-        isActive: Object.entries(filterOptions.customFields).find(
-          ([key, _]) => key === deflattenCustomFieldKey(fieldFilter.key)
-        )
-          ? true
-          : fieldFilter.isActive,
-      };
-    }
+  const activeFieldFilterConfig = useMemo(
+    () =>
+      fieldFilterConfig.map((fieldFilter) => {
+        if (isFlattenCustomField(fieldFilter.key)) {
+          return {
+            ...fieldFilter,
+            isActive: Object.entries(filterOptions.customFields).find(
+              ([key, _]) => key === deflattenCustomFieldKey(fieldFilter.key)
+            )
+              ? true
+              : fieldFilter.isActive,
+          };
+        }
 
-    if (isFlattenExtendedField(fieldFilter.key)) {
-      const hasValue = (filterOptions.extendedFieldFilters ?? []).some(
-        (entry) => entry.label.toLowerCase() === fieldFilter.label.toLowerCase()
-      );
-      return {
-        ...fieldFilter,
-        isActive: hasValue ? true : fieldFilter.isActive,
-      };
-    }
+        if (isFlattenExtendedField(fieldFilter.key)) {
+          const hasValue = (filterOptions.extendedFieldFilters ?? []).some(
+            (entry) => entry.label.toLowerCase() === fieldFilter.label.toLowerCase()
+          );
+          return {
+            ...fieldFilter,
+            isActive: hasValue ? true : fieldFilter.isActive,
+          };
+        }
 
-    return fieldFilter;
-  });
+        return fieldFilter;
+      }),
+    [fieldFilterConfig, filterOptions]
+  );
 
-  const filterConfigs = mergeSystemAndFieldConfigs({
-    systemFilterConfig,
-    fieldFilterConfig: activeFieldFilterConfig,
-  });
+  const filterConfigs = useMemo(
+    () =>
+      mergeSystemAndFieldConfigs({
+        systemFilterConfig,
+        fieldFilterConfig: activeFieldFilterConfig,
+      }),
+    [activeFieldFilterConfig, systemFilterConfig]
+  );
 
   const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({
     filterOptions,

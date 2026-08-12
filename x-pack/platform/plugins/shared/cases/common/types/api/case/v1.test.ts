@@ -19,9 +19,9 @@ import {
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
 } from '../../../constants';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { AttachmentType } from '../../domain/attachment/v1';
@@ -686,7 +686,7 @@ describe('CasesSearchRequestRt', () => {
 
   it('accepts extended field filters at the Field Library limits', () => {
     const extendedFieldFilters = Array.from({ length: MAX_EXTENDED_FIELD_FILTERS }, () => ({
-      label: 'l'.repeat(MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH),
+      label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH),
       value: 'v'.repeat(MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH),
     }));
     const request = { ...defaultRequest, extendedFieldFilters };
@@ -699,7 +699,7 @@ describe('CasesSearchRequestRt', () => {
     {
       field: 'label',
       extendedFieldFilters: [
-        { label: 'l'.repeat(MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH + 1), value: 'value' },
+        { label: 'l'.repeat(MAX_TEMPLATE_DEFINITION_LENGTH + 1), value: 'value' },
       ],
     },
     {

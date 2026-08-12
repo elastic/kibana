@@ -16,7 +16,6 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_CATEGORY_LENGTH,
   MAX_CUSTOM_FIELDS_PER_CASE,
-  MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
   MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
   MAX_EXTENDED_FIELD_FILTERS,
   MAX_DELETE_IDS_LENGTH,
@@ -25,6 +24,7 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
   MAX_TAGS_PER_CASE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import {
@@ -284,7 +284,7 @@ const ExtendedFieldFilterSchema = z.object({
   label: limitedStringSchema({
     fieldName: 'extendedFieldFilters.label',
     min: 1,
-    max: MAX_EXTENDED_FIELD_FILTER_LABEL_LENGTH,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
   }),
   value: limitedStringSchema({
     fieldName: 'extendedFieldFilters.value',
