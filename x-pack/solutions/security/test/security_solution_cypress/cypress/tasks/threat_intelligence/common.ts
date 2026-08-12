@@ -102,7 +102,11 @@ export const waitForViewToBeLoaded = () => {
             cy.get(REFRESH_BUTTON).click();
             cy.get(UPDATE_STATUS, { timeout: 30000 }).should('contain.text', 'Updated');
           } else {
+            cy.intercept('POST', '**/internal/search/threatIntelligenceSearchStrategy').as(
+              'tiReloadSearch'
+            );
             cy.reload();
+            cy.wait('@tiReloadSearch', { timeout: 90000 });
           }
         });
       }
