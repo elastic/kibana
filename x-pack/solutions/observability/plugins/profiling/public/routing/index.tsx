@@ -17,7 +17,6 @@ import {
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { SuppressChromeBackButton } from '@kbn/app-header';
 import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
@@ -103,19 +102,16 @@ const routes = {
         children: {
           '/stacktraces': {
             element: (
-              <>
-                <RouteBreadcrumb
-                  title={i18n.translate('xpack.profiling.breadcrumb.stacktraces', {
-                    defaultMessage: 'Stacktraces',
-                  })}
-                  href="/stacktraces"
-                >
-                  <StackTracesViewWrapper>
-                    <Outlet />
-                  </StackTracesViewWrapper>
-                </RouteBreadcrumb>
-                <SuppressChromeBackButton />
-              </>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.stacktraces', {
+                  defaultMessage: 'Stacktraces',
+                })}
+                href="/stacktraces"
+              >
+                <StackTracesViewWrapper>
+                  <Outlet />
+                </StackTracesViewWrapper>
+              </RouteBreadcrumb>
             ),
             children: {
               '/stacktraces/{topNType}': {
@@ -150,19 +146,16 @@ const routes = {
           },
           '/flamegraphs': {
             element: (
-              <>
-                <RouteBreadcrumb
-                  title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
-                    defaultMessage: 'Flamegraphs',
-                  })}
-                  href="/flamegraphs"
-                >
-                  <FlameGraphsView>
-                    <Outlet />
-                  </FlameGraphsView>
-                </RouteBreadcrumb>
-                <SuppressChromeBackButton />
-              </>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
+                  defaultMessage: 'Flamegraphs',
+                })}
+                href="/flamegraphs"
+              >
+                <FlameGraphsView>
+                  <Outlet />
+                </FlameGraphsView>
+              </RouteBreadcrumb>
             ),
             children: {
               '/flamegraphs/flamegraph': {
@@ -229,19 +222,16 @@ const routes = {
           },
           '/functions': {
             element: (
-              <>
-                <RouteBreadcrumb
-                  title={i18n.translate('xpack.profiling.breadcrumb.functions', {
-                    defaultMessage: 'Functions',
-                  })}
-                  href="/functions"
-                >
-                  <FunctionsView>
-                    <Outlet />
-                  </FunctionsView>
-                </RouteBreadcrumb>
-                <SuppressChromeBackButton />
-              </>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.functions', {
+                  defaultMessage: 'Functions',
+                })}
+                href="/functions"
+              >
+                <FunctionsView>
+                  <Outlet />
+                </FunctionsView>
+              </RouteBreadcrumb>
             ),
             params: t.type({
               query: t.type({
