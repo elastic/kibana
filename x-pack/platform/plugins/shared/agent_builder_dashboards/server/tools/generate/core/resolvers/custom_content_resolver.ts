@@ -10,6 +10,10 @@ import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { appendLimitToQuery } from '@kbn/esql-utils';
+import {
+  CUSTOM_CONTENT_SCRIPT_PATTERN,
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+} from '@kbn/custom-content-common';
 
 const SAMPLE_ROW_COUNT = 3;
 const MAX_SANITIZED_CELL_LENGTH = 500;
@@ -181,6 +185,17 @@ export const createCustomContentTemplateResolver = ({
       stream: false,
     });
 
-    return response.content;
+    const template = response.content;
+
+    if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
+      throw new Error('Generated template was rejected: contains a <script> tag.');
+    }
+    if (Buffer.byteLength(template, 'utf8') > CUSTOM_CONTENT_MAX_TEMPLATE_BYTES) {
+      throw new Error(
+        `Generated template was rejected: exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`
+      );
+    }
+
+    return template;
   };
 };
