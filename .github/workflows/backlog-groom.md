@@ -20,6 +20,8 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+imports:
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: "2.1.111"

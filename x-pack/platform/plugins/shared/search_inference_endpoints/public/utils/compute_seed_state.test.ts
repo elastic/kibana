@@ -33,14 +33,14 @@ describe('computeSeedState', () => {
       expect(result.isNewPolicy).toBe(true);
     });
 
-    it('pre-selects all available regions', () => {
+    it('leaves regionKeys empty so nothing is pre-selected', () => {
       const result = computeSeedState(null, availableRegions, availableGeos);
-      expect(result.regionKeys).toEqual(new Set(['aws::us-east-1', 'gcp::europe-west1']));
+      expect(result.regionKeys.size).toBe(0);
     });
 
-    it('pre-selects all available geos', () => {
+    it('leaves geos empty so nothing is pre-selected', () => {
       const result = computeSeedState(null, availableRegions, availableGeos);
-      expect(result.geos).toEqual(new Set(['eu', 'us']));
+      expect(result.geos.size).toBe(0);
     });
   });
 

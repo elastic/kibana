@@ -67,6 +67,7 @@ export {
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationNotFoundError,
+  isConversationWriteConflictError,
   isPluginNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
@@ -82,6 +83,7 @@ export {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createConversationNotFoundError,
+  createConversationWriteConflictError,
   createPluginNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
@@ -95,6 +97,7 @@ export {
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderAgentUnavailableError,
   type AgentBuilderConversationNotFoundError,
+  type AgentBuilderConversationWriteConflictError,
   type AgentBuilderPluginNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
@@ -112,6 +115,7 @@ export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
+  agentBuilderDefaultAiIndexId,
   AgentType,
   chatAgentTypeId,
   AgentAccessControlMode,
@@ -146,11 +150,15 @@ export {
 } from './agents';
 export {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,

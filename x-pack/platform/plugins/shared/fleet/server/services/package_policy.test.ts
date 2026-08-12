@@ -5929,6 +5929,47 @@ describe('Package policy service', () => {
         { force: true }
       );
     });
+
+    it('should forward asyncDeploy to the agent policy revision bump', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      mockAgentPolicyGet();
+      mockAgentPolicyService.bumpRevision.mockClear();
+
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], { asyncDeploy: true });
+
+      expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.any(String),
+        expect.objectContaining({ asyncDeploy: true })
+      );
+    });
+
     it('should allow to delete orphaned package policies from ES index', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -6277,6 +6318,114 @@ describe('Package policy service', () => {
         soClient,
         ids: ['regular-secret-1'],
       });
+    });
+
+    it('should call agentPolicyService.delete() for agentless agent policies when their package policies are deleted', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+      const agentPolicyId = packagePolicyMock.policy_ids[0];
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+      mockAgentPolicyService.delete.mockResolvedValue({ id: agentPolicyId } as any);
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(mockAgentPolicyService.delete).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        agentPolicyId,
+        expect.objectContaining({ force: undefined })
+      );
+    });
+
+    it('should NOT call agentPolicyService.delete() for agentless agent policies when skipUnassignFromAgentPolicies is true', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      mockAgentPolicyGet(undefined, { supports_agentless: true });
+      mockAgentPolicyService.delete.mockClear();
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], {
+        skipUnassignFromAgentPolicies: true,
+      });
+
+      expect(mockAgentPolicyService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should NOT call agentPolicyService.delete() for non-agentless agent policies', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const packagePolicyMock = createPackagePolicyMock();
+      const idToDelete = packagePolicyMock.id;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: idToDelete,
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            version: 'test',
+            attributes: packagePolicyMock,
+          },
+        ],
+      });
+
+      // Regular (non-agentless) agent policy
+      mockAgentPolicyGet();
+      mockAgentPolicyService.delete.mockClear();
+
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(mockAgentPolicyService.delete).not.toHaveBeenCalled();
     });
   });
 

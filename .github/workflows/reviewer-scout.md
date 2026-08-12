@@ -21,6 +21,7 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/scout-reviewer.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: '2.1.111'
@@ -37,6 +38,7 @@ engine:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
+# - Synchronize events for merge commits are ignored; only code pushes activate a new review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -93,7 +95,14 @@ network:
     - openrouter.ai
     - elastic.co
 jobs:
+  check_reviewable_commit:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/check-reviewable-commit.yml
+
   prefetch_pr_context:
+    needs: check_reviewable_commit
+    if: needs.check_reviewable_commit.outputs.should_review == 'true'
     permissions:
       contents: read
       issues: read

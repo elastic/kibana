@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { isEqual, uniqWith } from 'lodash';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import {
-  OAUTH_MAX_BULK_REVOKE_CONNECTIONS,
+  OAUTH_MAX_BULK_CONNECTIONS,
   OAUTH_MAX_STRING_FIELD_LENGTH,
 } from '../../../common/oauth/constants';
+import { UiamOAuth } from '../../authentication/oauth';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -54,7 +57,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
                 maxLength: OAUTH_MAX_STRING_FIELD_LENGTH,
               }),
             }),
-            { minSize: 1, maxSize: OAUTH_MAX_BULK_REVOKE_CONNECTIONS }
+            { minSize: 1, maxSize: OAUTH_MAX_BULK_CONNECTIONS }
           ),
           reason: schema.maybe(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })),
         }),
@@ -72,10 +75,15 @@ export function defineBulkRevokeOAuthConnectionsRoute({
           });
         }
 
+        // Fail the request up front rather than reporting a bad credential against every target.
+        UiamOAuth.getAccessToken(request);
+
         const { connections, reason } = request.body;
 
+        const targets = uniqWith(connections, isEqual);
+
         const settled = await Promise.allSettled(
-          connections.map(({ client_id: clientId, connection_id: connectionId }) =>
+          targets.map(({ client_id: clientId, connection_id: connectionId }) =>
             oauth.revokeConnection(request, clientId, connectionId, reason)
           )
         );
@@ -93,7 +101,7 @@ export function defineBulkRevokeOAuthConnectionsRoute({
 
         const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
           (settledResult, index) => {
-            const { client_id: clientId, connection_id: connectionId } = connections[index];
+            const { client_id: clientId, connection_id: connectionId } = targets[index];
 
             if (settledResult.status === 'fulfilled') {
               if (settledResult.value === null) {

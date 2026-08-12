@@ -30,6 +30,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -180,6 +181,35 @@ describe('RulesClient', () => {
       ).rejects.toThrow('schedule failed');
 
       expect(rulesSavedObjectService.delete).toHaveBeenCalledWith({ id: 'rule-id-3' });
+    });
+
+    it('logs RULE_CREATE_ROLLBACK_FAILED when the compensating delete also fails', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-orphan' });
+      ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
+      rulesSavedObjectService.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-orphan' },
+        })
+      ).rejects.toThrow('schedule failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to roll back rule creation after task scheduling failed',
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+            rule_id: 'rule-id-orphan',
+            space_id: 'space-1',
+          },
+          error: expect.objectContaining({
+            message: 'Failed to roll back rule creation after task scheduling failed',
+            stack_trace: expect.stringContaining('delete failed'),
+          }),
+        })
+      );
     });
 
     it('throws 409 conflict when id already exists', async () => {
@@ -403,12 +433,126 @@ describe('RulesClient', () => {
       ).resolves.not.toThrow();
     });
 
+    it('throws 400 when updating a signal rule query to composed format', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-composed',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal-composed',
+          data: {
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: 'WHERE error' },
+            },
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'kind "signal" requires query.format "standalone".',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when setting recovery_strategy or no_data_strategy on a signal rule', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-recovery',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal-recovery',
+          data: { recovery_strategy: 'no_breach' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('allows updating an alert rule query to composed format', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-alert-composed',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-alert-composed',
+          data: {
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: 'WHERE error' },
+            },
+          },
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('allows a metadata-only update on a signal rule (query omitted stays standalone)', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'signal',
+        recovery_strategy: undefined,
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-metadata',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal-metadata',
+          data: { metadata: { name: 'renamed signal' } },
+        })
+      ).resolves.not.toThrow();
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalled();
+    });
+
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'signal',
+        recovery_strategy: undefined,
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -461,7 +605,7 @@ describe('RulesClient', () => {
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
-        artifacts: [{ id: 'runbook-id', type: 'runbook', value: 'Persisted runbook' }],
+        artifacts: [{ id: 'runbook-id', type: 'runbook', data: { content: 'Persisted runbook' } }],
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -2226,6 +2370,34 @@ describe('RulesClient', () => {
         data: {
           code: 'INVALID_STATE_TRANSITION',
           details: { rule_id: 'rule-id-y', rule_kind: 'signal' },
+        },
+      });
+    });
+
+    it('attaches INVALID_SIGNAL_RULE code when a signal rule is updated to a composed query', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-z',
+        attributes: { ...baseSoAttrs, kind: 'signal' },
+        version: 'v1',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal-z',
+          data: {
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              breach: { segment: 'WHERE error' },
+            },
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_SIGNAL_RULE',
+          details: { rule_id: 'rule-id-signal-z', rule_kind: 'signal' },
         },
       });
     });
