@@ -43,3 +43,32 @@ export interface GetInvestigationResponse {
   conclusions?: string;
   error?: string;
 }
+
+export interface ListInvestigationsRequest {
+  statuses?: InvestigationStatus[];
+  started_after?: string;
+  started_before?: string;
+  finished_after?: string;
+  finished_before?: string;
+  /** Sort field. 'started_at' maps to the execution createdAt timestamp. */
+  sort_field?: 'started_at' | 'finished_at';
+  sort_order?: 'asc' | 'desc';
+  page?: number;
+  size?: number;
+}
+
+export interface ListInvestigationItem {
+  investigation_id: string;
+  status: InvestigationStatus;
+  started_at?: string;
+  completed_at?: string;
+  concurrency_key?: string;
+  executed_by?: string;
+}
+
+export interface ListInvestigationsResponse {
+  results: ListInvestigationItem[];
+  page: number;
+  size: number;
+  total: number;
+}

@@ -15,9 +15,32 @@ import type {
   GetInvestigationResponse,
   InvestigationStatus,
   InvestigationSubject,
+  ListInvestigationItem,
+  ListInvestigationsRequest,
+  ListInvestigationsResponse,
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
+
+function toExecutionStatuses(status: InvestigationStatus): ExecutionStatus[] {
+  switch (status) {
+    case 'pending':
+      return [ExecutionStatus.PENDING, ExecutionStatus.QUEUED];
+    case 'running':
+      return [
+        ExecutionStatus.RUNNING,
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
+      ];
+    case 'completed':
+      return [ExecutionStatus.COMPLETED];
+    case 'failed':
+      return [ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT];
+    case 'cancelled':
+      return [ExecutionStatus.CANCELLED, ExecutionStatus.SKIPPED];
+  }
+}
 
 function toInvestigationStatus(status: ExecutionStatus): InvestigationStatus {
   switch (status) {
@@ -159,5 +182,52 @@ export class NightshiftInvestigationsClient {
           ? (execution.error?.message ?? 'Investigation failed')
           : undefined,
     };
+  }
+
+  async list({
+    statuses,
+    started_after,
+    started_before,
+    finished_after,
+    finished_before,
+    sort_field,
+    sort_order,
+    page = 1,
+    size = 20,
+  }: ListInvestigationsRequest = {}): Promise<ListInvestigationsResponse> {
+    if (!this.workflowsManagement) {
+      throw new Error('workflowsManagement is not available');
+    }
+
+    const spaceId = this.getSpaceId();
+    const executionStatuses = statuses?.flatMap(toExecutionStatuses);
+
+    const result = await this.workflowsManagement.management.getWorkflowExecutions(
+      {
+        workflowId: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
+        omitStepRuns: true,
+        ...(executionStatuses?.length ? { statuses: executionStatuses } : {}),
+        startedAfter: started_after,
+        startedBefore: started_before,
+        finishedAfter: finished_after,
+        finishedBefore: finished_before,
+        sortField: sort_field === 'finished_at' ? 'finishedAt' : 'createdAt',
+        sortOrder: sort_order,
+        page,
+        size,
+      },
+      spaceId
+    );
+
+    const results: ListInvestigationItem[] = result.results.map((execution) => ({
+      investigation_id: execution.id,
+      status: toInvestigationStatus(execution.status),
+      started_at: execution.startedAt,
+      completed_at: execution.finishedAt,
+      concurrency_key: execution.concurrencyGroupKey,
+      executed_by: execution.executedBy,
+    }));
+
+    return { results, page: result.page, size: result.size, total: result.total };
   }
 }
