@@ -518,16 +518,13 @@ export class DataGrid {
   }
 
   async openGridDisplaySettings() {
-    // `dataGridDisplaySelectorPopover` is the popover's always-present outer wrapper, not
-    // its content, so it can't confirm the popover actually opened. `.euiDataGrid__displayPopoverPanel`
-    // is only mounted while the panel is open/closing, so wait on that instead, retrying the
-    // click if the panel doesn't appear (e.g. the click raced a re-render of the popover content).
+    const gridDisplayPanel = this.page.testSubj.locator('densityButtonGroup');
     await expect(async () => {
-      await this.page.testSubj.click('dataGridDisplaySelectorButton');
-      await this.page.locator('.euiDataGrid__displayPopoverPanel').waitFor({
-        state: 'visible',
-        timeout: 2_000,
-      });
+      const isGridDisplayPanelVisible = await gridDisplayPanel.isVisible();
+      if (!isGridDisplayPanelVisible) {
+        await this.page.testSubj.click('dataGridDisplaySelectorButton');
+      }
+      await gridDisplayPanel.waitFor({ state: 'visible', timeout: 2_000 });
     }).toPass();
   }
 
@@ -618,12 +615,6 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    // `data-render-complete` flips to 'false' on every fetch/re-render, so
-    // requiring it to *stay* 'true' for a fixed window is fragile: any
-    // legitimate re-render within that window (e.g. a dashboard panel
-    // re-fetch) resets the wait and can exhaust the whole test timeout even
-    // though the table already rendered correctly. Wait once for the signal
-    // instead. See https://github.com/elastic/kibana/issues/282360.
     await expect(table).toHaveAttribute('data-render-complete', 'true', {
       timeout: totalTimeoutMs,
     });
