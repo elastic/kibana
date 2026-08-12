@@ -199,7 +199,9 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const [managedReceivedCount, setManagedReceivedCount] = useState(0);
   // Step 3 (agent): policy + simulated enrollment, lifted so the Detect &
   // Review summary can read them and Next can gate on enrollment.
-  const [agentPolicyName, setAgentPolicyName] = useState('Agent policy 1');
+  // Policy naming was dropped from the agent flow's UI; the summary still
+  // reports the default policy the integration lands in.
+  const agentPolicyName = 'Agent policy 1';
   const [isAgentEnrolled, setIsAgentEnrolled] = useState(false);
   const [agentReceivedCount, setAgentReceivedCount] = useState(0);
 
@@ -455,8 +457,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onStackNameChange={setStackName}
           stackVersion={stackVersion}
           onStackVersionChange={setStackVersion}
-          agentPolicyName={agentPolicyName}
-          onAgentPolicyNameChange={setAgentPolicyName}
           isAgentEnrolled={isAgentEnrolled}
           onAgentEnrolled={onAgentEnrolled}
           isManagedDeployed={isManagedDeployed}
