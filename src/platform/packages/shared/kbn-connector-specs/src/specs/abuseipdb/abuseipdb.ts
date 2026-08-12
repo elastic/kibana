@@ -100,10 +100,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             .describe('Optional comment describing the observed abuse (max 1024 characters).'),
         })
       ),
-      handler: async (
-        ctx,
-        input: { ip: string; categories: number[]; comment?: string }
-      ) => {
+      handler: async (ctx, input: { ip: string; categories: number[]; comment?: string }) => {
         const response = await ctx.client.post(
           `${ABUSEIPDB_API}/report`,
           new URLSearchParams({
@@ -222,10 +219,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             ),
         })
       ),
-      handler: async (
-        ctx,
-        input: { confidenceMinimum?: number; limit?: number }
-      ) => {
+      handler: async (ctx, input: { confidenceMinimum?: number; limit?: number }) => {
         const response = await ctx.client.get(`${ABUSEIPDB_API}/blacklist`, {
           params: {
             confidenceMinimum: input.confidenceMinimum ?? 100,
