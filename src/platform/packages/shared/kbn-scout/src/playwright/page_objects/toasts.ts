@@ -14,7 +14,7 @@ import type { ScoutPage } from '../fixtures/scope/test';
 export class Toasts {
   private readonly toastList: EuiGlobalToastListObject;
   constructor(page: ScoutPage) {
-    this.toastList = new EuiGlobalToastListObject(page);
+    this.toastList = new EuiGlobalToastListObject(page, 'globalToastList');
   }
 
   /** Waits up to 10s for a toast to appear; throws when none does. */

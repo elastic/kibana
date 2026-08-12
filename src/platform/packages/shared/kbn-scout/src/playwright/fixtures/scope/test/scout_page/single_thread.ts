@@ -110,7 +110,7 @@ function extendPageWithComponents(page: Page): ScoutPage['components'] {
       new EuiDataGridObject(scope ?? page, testSubj),
     superSelect: (testSubj: string, scope?: ObjectScope) =>
       new EuiSuperSelectObject(scope ?? page, testSubj),
-    toast: (testSubj?: string, scope?: ObjectScope) =>
+    toast: (testSubj: string = 'globalToastList', scope?: ObjectScope) =>
       new EuiGlobalToastListObject(scope ?? page, testSubj),
   };
 }
