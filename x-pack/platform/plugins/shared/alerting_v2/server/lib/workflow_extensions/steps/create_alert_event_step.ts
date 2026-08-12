@@ -39,7 +39,7 @@ export function getCreateAlertEventStepDefinition(
         return { output: result };
       } catch (error) {
         if (error instanceof ExecutionError) throw error;
-        if (error instanceof Error && error.name === 'AbortError') throw error;
+        if (context.abortSignal.aborted) throw error;
         if (error instanceof Error && error.name === 'ZodError') {
           throw new ExecutionError({
             type: 'ValidationError',

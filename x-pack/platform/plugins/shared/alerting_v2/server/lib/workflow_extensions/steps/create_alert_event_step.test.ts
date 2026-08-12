@@ -96,16 +96,21 @@ describe('getCreateAlertEventStepDefinition', () => {
     expect(getAlertEventsClient).not.toHaveBeenCalled();
   });
 
-  it('propagates AbortError from createAlertEvent unchanged', async () => {
-    const abortError = Object.assign(new Error('Aborted'), { name: 'AbortError' });
+  it('re-throws without wrapping when the abort signal is aborted', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+    const cause = Object.assign(new Error('Request aborted'), { name: 'RequestAbortedError' });
     const getAlertEventsClient = jest
       .fn()
-      .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(abortError) });
+      .mockResolvedValue({ createAlertEvent: jest.fn().mockRejectedValue(cause) });
+
+    const context = createMockContext();
+    context.abortSignal = abortController.signal;
 
     const { handler } = getCreateAlertEventStepDefinition(getAlertEventsClient, allowedPrivilege);
-    const thrown = await handler(createMockContext()).catch((e) => e);
+    const thrown = await handler(context).catch((e) => e);
 
-    expect(thrown).toBe(abortError);
+    expect(thrown).toBe(cause);
     expect(thrown).not.toBeInstanceOf(ExecutionError);
   });
 
