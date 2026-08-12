@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   ChangeHistoryModal,
   ChangeHistoryProvider,
@@ -34,14 +34,6 @@ export const RuleChangeHistoryProvider = ({
   children,
   canRestore = false,
 }: RuleChangeHistoryProviderProps): JSX.Element => {
-  const features = useMemo(
-    () => ({
-      compare: true,
-      restore: canRestore,
-    }),
-    [canRestore]
-  );
-
   return (
     <ChangeHistoryProvider
       objectId={ruleId}
@@ -49,7 +41,10 @@ export const RuleChangeHistoryProvider = ({
       renderPreview={renderRuleChangeHistoryJsonPreview}
       labels={{ previewTitle: ruleName }}
       scope={RULE_CHANGE_HISTORY_SCOPE}
-      features={features}
+      features={{
+        compare: true,
+        restore: canRestore,
+      }}
       permissions={{ canRestore }}
     >
       {children}

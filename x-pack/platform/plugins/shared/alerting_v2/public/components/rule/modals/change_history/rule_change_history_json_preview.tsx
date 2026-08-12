@@ -10,7 +10,7 @@ import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
-import { diffJson } from 'diff';
+import { diffJson, type Change } from 'diff';
 
 const formatSnapshot = (snapshot: unknown): string => JSON.stringify(snapshot, null, 2);
 
@@ -23,14 +23,15 @@ const RuleChangeHistoryJsonPreview = ({
   const { euiTheme } = useEuiTheme();
   const targetSnapshot = compareSpec?.target.snapshot ?? change.snapshot;
   const baselineSnapshot = compareSpec?.baseline.snapshot;
-  const hasCompare = Boolean(compareSpec && baselineSnapshot !== undefined);
+  const hasCompare = Boolean(compareSpec !== undefined && baselineSnapshot !== undefined);
 
-  const diffParts = useMemo(() => {
-    if (!hasCompare || baselineSnapshot === undefined) {
+  const diffParts = useMemo<Change[] | undefined>(() => {
+    if (!hasCompare) {
       return undefined;
     }
 
-    return diffJson(baselineSnapshot, targetSnapshot);
+    // Snapshots are opaque (`unknown`); `diffJson` accepts `string | object`.
+    return diffJson(baselineSnapshot as object, targetSnapshot as object);
   }, [baselineSnapshot, hasCompare, targetSnapshot]);
 
   const hasChanges = useMemo(
