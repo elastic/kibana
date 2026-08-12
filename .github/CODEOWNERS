@@ -1049,6 +1049,7 @@ x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/search-kib
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
+x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/ml-ui
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
@@ -2615,6 +2616,10 @@ x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/oauth_cl
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.ts @elastic/response-ops @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/build_client_assertion.test.ts @elastic/response-ops @elastic/workchat-eng
 
+## API key query
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.ts @elastic/response-ops @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/api_key_query.test.ts @elastic/response-ops @elastic/workchat-eng
+
 ## EARS
 x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
@@ -2694,6 +2699,8 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/slack/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/snowflake/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/workday/** @elastic/workchat-eng
@@ -2767,13 +2774,11 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/functional/services/data_stream.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/watcher_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/upgrade_assistant_page.ts @elastic/kibana-management
-/x-pack/platform/test/functional/page_objects/snapshot_restore_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/ingest_pipelines_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/grok_debugger_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
-/x-pack/platform/test/functional/apps/snapshot_restore @elastic/kibana-management
 /x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/platform/test/serverless/functional/test_suites/spaces/spaces_management.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management

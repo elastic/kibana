@@ -8,6 +8,7 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
+import { DATE_NESTED_ES_ARCHIVE } from '../../../common/ui/fixtures/constants';
 
 globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) => {
   log.debug('[setup:logstash] loading logstash_functional ES data (only if it does not exist)...');
@@ -63,4 +64,10 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
     'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
   );
   log.debug('[setup:long_window_logstash] long_window_logstash ES data ready');
+
+  // Nested date index for the date_nested test. Loaded here rather than in the spec so the
+  // shared index is never deleted while another worker is still querying it.
+  log.debug('[setup:date_nested] loading date_nested ES data (only if it does not exist)...');
+  await esArchiver.loadIfNeeded(DATE_NESTED_ES_ARCHIVE);
+  log.debug('[setup:date_nested] date_nested ES data ready');
 });
