@@ -103,11 +103,9 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     },
     query: ruleQueryToApiQuery(values.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(values.kind === 'alert' && values.noDataStrategy
-      ? { no_data_strategy: values.noDataStrategy }
-      : {}),
+    ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
-    ...(st && { state_transition: st }),
+    ...(values.kind === 'alert' && st ? { state_transition: st } : {}),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
   };
 };
