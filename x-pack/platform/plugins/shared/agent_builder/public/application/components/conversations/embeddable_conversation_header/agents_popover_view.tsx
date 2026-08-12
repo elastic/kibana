@@ -60,7 +60,6 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
   const { agentId, setAgentId } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { agents } = useAgentBuilderAgents();
-  // useAgentOptions restricts the list to the space default for non-admins.
   const { agentOptions, renderAgentOption } = useAgentOptions({ agents, selectedAgentId: agentId });
 
   const agentListStyles = css`
