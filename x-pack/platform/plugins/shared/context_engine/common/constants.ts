@@ -45,3 +45,14 @@ export const MAX_AI_INDEX_AUTOMATION_LENGTH = 1024;
 export const MAX_AI_INDEX_SOURCE_VALUE_LENGTH = 10240;
 export const MAX_AI_INDEX_AUTOMATIONS = 100;
 export const MAX_AI_INDEX_SOURCES = 100;
+
+/** Advanced setting that gates the Context Engine feedback loop. */
+export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
+
+/** Task Manager type, id, and schedule for the global signal-generation task. */
+export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
+export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
+export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
+
+/** Agent id whose tool calls are left untagged. */
+export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
