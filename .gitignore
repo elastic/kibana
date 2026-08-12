@@ -151,15 +151,12 @@ report.asciidoc
 /tsconfig.refs.json
 *.type_check.json
 
-# pnpm content store (seeded from CI agent image cache)
-.pnpm-store
+# Yarn
+.yarn-local-mirror
 
-# Bazel | TODO: Remove later
-.ijwb
-/bazel
-/bazel-*
-.bazelrc.user
-.bazelrc.cache
+# PNPM
+.pnpm-store
+.pnpm
 
 elastic-agent-*
 fleet-server-*
