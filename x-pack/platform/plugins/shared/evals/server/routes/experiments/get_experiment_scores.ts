@@ -23,7 +23,7 @@ import { handleMaximumResponseSizeExceededError } from '../utils/handle_response
 // example.input, example.metadata, task.output, and evaluator.metadata are
 // unbounded (additionalProperties: true, no ingest-time size limit) and can
 // hold ~100KB+ of raw data per document
-const UNBOUNDED_SCORE_FIELDS = [
+export const UNBOUNDED_SCORE_FIELDS = [
   'task.output',
   'example.input',
   'example.metadata',
