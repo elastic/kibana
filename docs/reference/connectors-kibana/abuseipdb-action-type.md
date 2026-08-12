@@ -27,24 +27,29 @@ You can test connectors as you're creating or editing the connector in {{kib}}.
 The AbuseIPDB connector has the following actions:
 
 Check IP
-:   Get details about an IP address including abuse confidence score, usage type, ISP, and country code.  
-    - **IP Address** (required): The IPv4 address to check.  
+:   Get details about an IP address including abuse confidence score, total reports, and last reported date. Unknown or clean addresses return score `0` as data (the step does not fail).  
+    - **IP Address** (required): IPv4 or IPv6 address to check.  
     - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 90).
 
 Report IP
 :   Report an abusive IP address to AbuseIPDB.  
-    - **IP** (required): The IPv4 address to report.  
-    - **Categories** (required): Array of abuse category IDs.  
-    - **Comment** (optional): Additional details about the abuse.  
+    - **IP** (required): IPv4 or IPv6 address to report.  
+    - **Categories** (required): Array of abuse category IDs (1-30 entries).  
+    - **Comment** (optional): Additional details about the abuse (max 1024 characters).  
 
 Get IP Info
-:   Get detailed information about an IP address including geolocation and domain.  
-    - **IP Address** (required): The IPv4 address to lookup.  
+:   Get detailed (verbose) information about an IP address including geolocation, whitelist flag, and domain.  
+    - **IP Address** (required): IPv4 or IPv6 address to look up.  
 
 Bulk Check
 :   Check multiple IPs in a network range using CIDR notation.  
     - **Network** (required): Network in CIDR notation.  
     - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 30).  
+
+Get Blacklist
+:   Fetch the most-reported IPs from the AbuseIPDB blacklist feed for blocklist generation or enrichment. Prefer a high confidence minimum (75-100) for deny-list use.  
+    - **Confidence Minimum** (optional): Minimum abuse confidence score (25-100, default 100).  
+    - **Limit** (optional): Maximum number of IPs to return (1-10000, default 10). Defaults low so workflow execution outputs stay small; raise explicitly for larger feeds. AbuseIPDB may truncate further based on subscription tier.  
 
 ## Connector networking configuration [abuseipdb-connector-networking-configuration]
 
