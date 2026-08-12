@@ -688,7 +688,6 @@ export const GithubConnector: ConnectorSpec = {
         return {};
       });
     },
-    enabled: true,
   },
 
   skill: [
