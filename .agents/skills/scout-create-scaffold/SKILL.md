@@ -100,9 +100,7 @@ Pick **one** pattern and wire it after `node scripts/scout generate` completes:
 
 ## After Generating
 
-- After replacing the example specs or changing test files, run `node scripts/scout update-test-config-manifests`.
-  - Commit the generated `.meta` files so CI discovery and selective testing can find the configs.
-  - Treat `.meta` files as generated artifacts; never edit them by hand.
+There is no need to run `node scripts/scout update-test-config-manifests`. CI takes care of this for you.
 - Custom server config sets:
   - If you create/use `test/scout_<configSet>`, you typically also need a matching server config under `src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<configSet>`.
   - `start-server` requires `--serverConfigSet <configSet>` when using a custom server config set.
