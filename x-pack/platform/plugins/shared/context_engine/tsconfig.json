@@ -24,7 +24,9 @@
     "@kbn/core-http-server",
     "@kbn/features-plugin",
     "@kbn/storage-adapter",
+    "@kbn/task-manager-plugin",
     "@kbn/es-errors",
+    "@kbn/es-types",
     "@kbn/management-settings-ids",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-page-kibana-template",
@@ -45,6 +47,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/index-management-shared-types",
     "@kbn/code-editor",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/logging-mocks"
   ]
 }
