@@ -52,7 +52,10 @@ import type { ToolHandlerFn } from './handler';
  * See: https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations
  */
 export type McpToolAnnotations = Required<
-  Pick<ToolAnnotations, 'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'>
+  Pick<
+    ToolAnnotations,
+    'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'
+  >
 >;
 
 /**
