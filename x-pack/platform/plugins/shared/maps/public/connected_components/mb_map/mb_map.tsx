@@ -7,23 +7,17 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import {
-  getPreserveDrawingBuffer,
-  getUsageCollection,
-  isScreenshotMode,
-} from '../../kibana_services';
+import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
 import type { ILayer } from '../../classes/layers/layer';
 import type {
   CustomIcon,
@@ -34,7 +28,6 @@ import type {
 } from '../../../common/descriptor_types';
 import type { RawValue } from '../../../common/constants';
 import {
-  APP_ID,
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
   MAKI_ICON_SIZE,
@@ -148,7 +141,6 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
-    this._reportUsage();
     return new Promise((resolve) => {
       const glyphs = getGlyphs();
       const mbStyle = {
@@ -280,24 +272,6 @@ export class MbMap extends Component<Props, State> {
         throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
         this.props.clearMouseCoordinates();
       });
-    }
-  }
-
-  _reportUsage() {
-    const usageCollector = getUsageCollection();
-    if (!usageCollector) return;
-
-    const webglSupport = maplibreglSupported();
-
-    usageCollector.reportUiCounter(
-      APP_ID,
-      METRIC_TYPE.LOADED,
-      webglSupport ? 'gl_webglSupported' : 'gl_webglNotSupported'
-    );
-
-    // Report low system performance or no hardware GPU
-    if (webglSupport && !maplibreglSupported({ failIfMajorPerformanceCaveat: true })) {
-      usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
     }
   }
 

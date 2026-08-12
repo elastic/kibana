@@ -1457,17 +1457,6 @@
       "allowedVersions": "<2.0.0"
     },
     {
-      "groupName": "mapbox-gl-supported",
-      "description": "versions >=3 mark WebGL1 as incompatible, but maplibre-gl-js supports WebGL1 and WebGL2",
-      "matchDepNames": ["@mapbox/mapbox-gl-supported"],
-      "reviewers": ["team:kibana-presentation"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Presentation"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<3.0.0"
-    },
-    {
       "groupName": "mapbox and maplibre",
       "matchDepNames": [
         "@mapbox/geojson-rewind",
