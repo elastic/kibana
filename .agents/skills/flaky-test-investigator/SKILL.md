@@ -94,7 +94,7 @@ Work through all of these questions:
 
 Check the test against these best practices — the ones flaky tests most often violate. A violation you find is a lead worth investigating, not proof of the root cause:
 
-- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`): UI tests are notoriously more flaky than component, API, and Jest unit/integration tests — a test that doesn't need a browser shouldn't use one.
+- **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`): UI tests are notoriously more flaky than component, API, and Jest unit/integration tests — if the behavior can be verified without a browser, test it at that lower level.
 - **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
 - **Wait for UI updates after actions** (`docs/extend/testing/ui-best-practices#wait-for-ui-updates-when-the-next-action-requires-it`): confirm the action produced the expected result and the UI has rendered before continuing.
 - **Wait for complex UI to finish rendering** (`docs/extend/testing/ui-best-practices#wait-for-complex-components-to-fully-render`).
@@ -105,14 +105,14 @@ Scout and FTR tests should also follow the general best practices in `docs/exten
 
 ### Fix guardrails
 
-Any fix you recommend must stay within the shared fix guardrails at `.github/workflows/shared/flaky-test-fix-guardrails.md` — the single source of truth for fix anti-patterns, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation. In short: no retries or error tolerance anywhere (test, framework, or application code), no timeout bumps as the primary fix, no test-side async hooks masking a production-side race, no weakened assertions or stripped tags, and only documented public framework APIs.
+Any fix you recommend must stay within the shared fix guardrails at `.github/workflows/shared/flaky-test-fix-guardrails.md` — the single source of truth for fix anti-patterns, shared with the automated fixer and verifier workflows. Read that file before writing a fix recommendation.
 
 ### Investigation pitfalls
 
 Watch out for these pitfalls when investigating the failure:
 
-- **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere).
-- **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
+- **Ignoring the bigger picture**: gather a solid baseline of data about the test environment and related failures (in the same test file, test config or elsewhere) before concluding.
+- **Trusting flaky-test-runner alone**: a fully green run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
 - **Reading fault from the throwing stack frame**: a waiting-side timeout always throws from the waiter (FTR/Playwright service code), so the frame tells you who threw, not whose fault it is. It is not evidence against a product bug.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
