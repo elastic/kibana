@@ -174,6 +174,7 @@ describe('inferenceEndpointAdapter', () => {
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
           temperature: 0.4,
+          modelName: 'gpt-4o',
         })
         .subscribe(noop);
 
@@ -182,6 +183,164 @@ describe('inferenceEndpointAdapter', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             temperature: 0.4,
+          }),
+        })
+      );
+    });
+
+    it('omits temperature when model metadata is missing', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.4,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('omits the default temperature for an unrecognized Claude endpoint model', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'claude-sonnet-5',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('falls back to the request model when endpoint model metadata is missing', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'claude-sonnet-5',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('omits an explicit temperature for an unrecognized Claude endpoint model', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.4,
+          endpointModelId: 'claude-opus-4.8',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('omits temperature when unset for a supported Claude endpoint model', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
+          }),
+        })
+      );
+    });
+
+    it('keeps an explicit temperature for a supported Claude endpoint model', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0,
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            temperature: 0,
+          }),
+        })
+      );
+    });
+
+    it('omits temperature from simulated requests for unrecognized Claude endpoint models', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          functionCalling: 'simulated',
+          temperature: 0.4,
+          endpointModelId: 'claude-fable-5',
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            temperature: expect.anything(),
           }),
         })
       );
