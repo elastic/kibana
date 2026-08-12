@@ -112,8 +112,10 @@ describe(
             // switch to old timeline
             openTimelineFromSettings();
             openTimelineById(timelineId);
+            cy.intercept('POST', '**/_query').as('esqlQuery');
             goToEsqlTab();
             cy.get(LOADING_INDICATOR).should('not.exist');
+            cy.wait('@esqlQuery');
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
@@ -140,6 +142,10 @@ describe(
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then(() => {
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+              'have.text',
+              INITIAL_START_DATE
+            );
             // reload the page with the exact url
             cy.reload();
             verifyDiscoverEsqlQuery(esqlQuery);
