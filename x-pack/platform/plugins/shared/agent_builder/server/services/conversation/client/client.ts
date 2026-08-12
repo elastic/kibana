@@ -370,7 +370,6 @@ class ConversationClientImpl implements ConversationClient {
               submitted_at: new Date().toISOString(),
               connector_id: round.model_usage?.connector_id,
               model: round.model_usage?.model,
-              trace_id: Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id,
               ...(voteHistory?.length ? { vote_history: voteHistory } : {}),
             } satisfies ConversationRoundFeedback,
           };

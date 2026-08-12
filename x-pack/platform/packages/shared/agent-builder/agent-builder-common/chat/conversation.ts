@@ -403,11 +403,6 @@ export interface ConversationRoundFeedback {
    */
   model?: string;
   /**
-   * OpenTelemetry trace ID. Only set when Kibana-level tracing is enabled
-   * (`telemetry.tracing.enabled: true`). Absent in most deployments.
-   */
-  trace_id?: string;
-  /**
    * Prior vote values, oldest first. Each entry records the vote that was
    * overwritten and the `submitted_at` timestamp of that overwritten submission.
    * Empty (or absent) when the vote has never been changed.

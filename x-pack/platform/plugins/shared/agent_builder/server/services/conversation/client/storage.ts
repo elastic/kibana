@@ -43,7 +43,6 @@ const storageSettings = {
               submitted_at: types.date({}),
               connector_id: types.keyword({}),
               model: types.keyword({}),
-              trace_id: types.keyword({}),
               vote_history: types.object({
                 dynamic: false,
                 properties: {
