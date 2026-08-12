@@ -2159,7 +2159,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/solutions/**/test/serverless/**/test_suites/ml/ @elastic/search-ml-ux
 
 # Security Machine Learning
-x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
+x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/threat-research-and-detection-engineering
 
 # Additional plugins and packages maintained by the ML team.
 /src/platform/test/examples/response_stream/*.ts @elastic/search-ml-ux
