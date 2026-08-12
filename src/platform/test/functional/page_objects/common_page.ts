@@ -30,6 +30,14 @@ export class CommonPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  // cookieAuth / browserAuth are only registered in stateful functional configs.
+  // Use hasService guards so this page object remains safe in serverless configs too.
+  private readonly cookieAuth = this.ctx.hasService('cookieAuth')
+    ? this.ctx.getService('cookieAuth')
+    : undefined;
+  private readonly browserAuth = this.ctx.hasService('browserAuth')
+    ? this.ctx.getService('browserAuth')
+    : undefined;
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -83,24 +91,37 @@ export class CommonPageObject extends FtrService {
 
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
-      if (this.config.get('security.disableTestUser')) {
-        await this.loginPage.login(
-          this.config.get('servers.kibana.username'),
-          this.config.get('servers.kibana.password')
-        );
+      if (this.config.get('security.cookieLogin') && this.cookieAuth && this.browserAuth) {
+        // Cookie-login path: generate a session via the login API and inject the sid cookie
+        // directly, bypassing the Selenium form fill entirely.
+        // Pass appUrl as targetUrl so loginByCookie navigates there in one step.
+        const cookie = this.config.get('security.disableTestUser')
+          ? await this.cookieAuth.getCookieForKibanaUser()
+          : await this.cookieAuth.getCookieForTestUser();
+        await this.browserAuth.loginByCookie(cookie, {
+          expectUserMenuButton: false,
+          targetUrl: appUrl,
+        });
       } else {
-        await this.loginPage.login('test_user', 'changeme');
-      }
+        if (this.config.get('security.disableTestUser')) {
+          await this.loginPage.login(
+            this.config.get('servers.kibana.username'),
+            this.config.get('servers.kibana.password')
+          );
+        } else {
+          await this.loginPage.login('test_user', 'changeme');
+        }
 
-      if (appUrl.includes('/status')) {
-        await this.testSubjects.find('statusPageRoot');
-      } else {
-        await this.find.byCssSelector(
-          '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
-          6 * this.defaultFindTimeout
-        );
+        if (appUrl.includes('/status')) {
+          await this.testSubjects.find('statusPageRoot');
+        } else {
+          await this.find.byCssSelector(
+            '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',
+            6 * this.defaultFindTimeout
+          );
+        }
+        await this.browser.get(appUrl, insertTimestamp);
       }
-      await this.browser.get(appUrl, insertTimestamp);
       currentUrl = await this.browser.getCurrentUrl();
       this.log.debug(`Finished login process currentUrl = ${currentUrl}`);
     }
@@ -309,7 +330,8 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        await this.sleep(700);
+        // browser.get() waits for document.readyState==='complete' before returning,
+        // so no sleep is needed here; the refresh below starts from a fully loaded page.
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
         let currentUrl = shouldLoginIfPrompted
@@ -365,8 +387,10 @@ export class CommonPageObject extends FtrService {
       });
 
       if (!skipUrlValidation) {
+        // Poll until the URL stops changing. No upfront sleep: if the URL has
+        // already settled we return immediately; the retry service's built-in
+        // 502ms delay provides spacing between checks when it is still moving.
         await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-          await this.sleep(501);
           const currentUrl = await this.browser.getCurrentUrl();
           this.log.debug('in navigateTo url = ' + currentUrl);
           if (lastUrl !== currentUrl) {
@@ -511,10 +535,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
-    await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
-        throw new Error('save modal still open');
-      }
+    await this.testSubjects.missingOrFail('savedObjectSaveModal', {
+      timeout: this.testSubjects.TRY_TIME,
     });
   }
 

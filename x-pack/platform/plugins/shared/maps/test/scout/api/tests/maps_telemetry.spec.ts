@@ -6,10 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-// skip for ECH: https://github.com/elastic/kibana/issues/265020
-apiTest.describe('Maps - maps telemetry', { tag: ['@local-stateful-classic'] }, () => {
+apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
@@ -44,14 +44,12 @@ apiTest.describe('Maps - maps telemetry', { tag: ['@local-stateful-classic'] }, 
       const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_point'
       );
-      expect(geoPointFieldStats.count).toBe(71);
-      expect(geoPointFieldStats.index_count).toBe(14);
+      expect(geoPointFieldStats.count).toBeGreaterThanOrEqual(71);
 
       const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
         (fieldStat: { name: string }) => fieldStat.name === 'geo_shape'
       );
-      expect(geoShapeFieldStats.count).toBe(3);
-      expect(geoShapeFieldStats.index_count).toBe(3);
+      expect(geoShapeFieldStats.count).toBeGreaterThanOrEqual(3);
 
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;

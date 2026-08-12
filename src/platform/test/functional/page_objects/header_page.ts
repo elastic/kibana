@@ -84,13 +84,11 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    await this.retry.try(async () => {
-      const warning = await this.testSubjects.exists('confirmModalTitleText');
-      if (warning) {
-        await this.testSubjects.click(
-          ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-        );
-      }
-    });
+    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    if (warning) {
+      await this.testSubjects.click(
+        ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+      );
+    }
   }
 }

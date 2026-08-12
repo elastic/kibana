@@ -192,7 +192,7 @@ function getEmptyLayersSuggestionsForVisualizeCharts(
   contextLayers.forEach((layer) => {
     const indexPattern = indexPatterns[layer.indexPatternId];
     if (!indexPattern) return [];
-    const newLayer = createNewLayerWithMetricAggregationFromVizEditor(indexPattern, layer);
+    const newLayer = createNewLayerWithMetricAggregationFromVisEditor(indexPattern, layer);
     const suggestion = buildSuggestion({
       state,
       updatedLayer: newLayer,
@@ -306,7 +306,7 @@ function convertToColumnChange(columns: Column[], indexPattern: IndexPattern) {
   }, []);
 }
 
-function createNewLayerWithMetricAggregationFromVizEditor(
+function createNewLayerWithMetricAggregationFromVisEditor(
   indexPattern: IndexPattern,
   layer: NavigateToLensLayer
 ) {

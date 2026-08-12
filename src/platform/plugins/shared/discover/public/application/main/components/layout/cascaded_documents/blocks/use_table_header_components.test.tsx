@@ -12,8 +12,11 @@ import { renderHook, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen, waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
-import { useGetGroupBySelectorRenderer } from './use_table_header_components';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import {
+  useGetGroupBySelectorRenderer,
+  useEsqlDataCascadeHeaderComponent,
+} from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
   const mockCascadeGroupingChangeHandler = jest.fn();
@@ -125,9 +128,63 @@ describe('useTableHeaderComponents', () => {
 
     await user.hover(groupSelectionButton);
 
-    await waitForEuiToolTipVisible();
-
     expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
     expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
+  });
+});
+
+describe('useEsqlDataCascadeHeaderComponent', () => {
+  const mockCascadeGroupingChangeHandler = jest.fn();
+
+  // Renders the hit-counter-label props it receives so the test can assert on them,
+  // in place of the real hit-count toggle (which independently owns the total-hits number).
+  const ToggleProbe = ({
+    hitCounterLabel,
+    hitCounterPluralLabel,
+  }: {
+    hitCounterLabel?: string;
+    hitCounterPluralLabel?: string;
+  }) => (
+    <div data-test-subj="toggle-probe">
+      {hitCounterLabel}/{hitCounterPluralLabel}
+    </div>
+  );
+
+  const renderCustomHeader = (viewModeToggle: React.ReactElement | undefined) => {
+    const { result } = renderHook(() =>
+      useEsqlDataCascadeHeaderComponent({
+        viewModeToggle,
+        cascadeGroupingChangeHandler: mockCascadeGroupingChangeHandler,
+      })
+    );
+
+    const CustomHeader = () =>
+      result.current({
+        currentSelectedColumns: ['category'],
+        availableColumns: ['category'],
+        onGroupSelection: jest.fn(),
+        selectedRows: [],
+      });
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <CustomHeader />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+  };
+
+  it('clones the view mode toggle with "group"/"groups" hit counter labels, instead of the generic hit labels', () => {
+    renderCustomHeader(<ToggleProbe />);
+
+    expect(screen.getByTestId('toggle-probe')).toHaveTextContent('group/groups');
+  });
+
+  it('still renders the group-by selector when no view mode toggle is provided', () => {
+    renderCustomHeader(undefined);
+
+    expect(screen.queryByTestId('toggle-probe')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discoverEnableCascadeLayoutSwitch')).toBeInTheDocument();
   });
 });

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 import { AddToCaseButton } from './add_to_cases_button';
 import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kibana_services';
@@ -127,6 +128,37 @@ describe('AddToCaseButton', () => {
       expect(mockOpen).toHaveBeenCalledWith({
         getAttachments: expect.any(Function),
       });
+    });
+
+    it('should build a unified `osquery` attachment payload', () => {
+      render(
+        <TestProvidersWithServices>
+          <AddToCaseButton
+            actionId="test-action-id"
+            queryId="test-query"
+            agentIds={['agent-1']}
+            scheduleId="schedule-1"
+            executionCount={2}
+          />
+        </TestProvidersWithServices>
+      );
+
+      fireEvent.click(screen.getByText('Add to Case'));
+
+      const [{ getAttachments }] = mockOpen.mock.calls[0];
+      expect(getAttachments()).toEqual([
+        {
+          type: OSQUERY_ATTACHMENT_TYPE,
+          attachmentId: 'test-action-id',
+          metadata: {
+            agentIds: ['agent-1'],
+            actionId: 'test-action-id',
+            queryId: 'test-query',
+            scheduleId: 'schedule-1',
+            executionCount: 2,
+          },
+        },
+      ]);
     });
 
     it('should not open case modal on click when permissions are denied', () => {

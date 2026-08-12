@@ -10,8 +10,11 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
+import { isResponseActionCancelable } from '../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
+import { getActionDetailsById } from '../../action_details_by_id';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
+import type { CancelActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/cancel';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -61,6 +64,8 @@ import type {
   ResponseActionMemoryDumpParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionCancelOutputContent,
+  ResponseActionCancelParameters,
   EndpointScript,
   EndpointActionDataParameterTypes,
   ResponseActionScriptsApiResponse,
@@ -131,11 +136,23 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
+      const memDumpType = actionRequest.parameters.type;
+
+      // Memory Dump `raw` type is gated behind a feature flag
+      if (
+        memDumpType === 'raw' &&
+        !this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError('memory-dump `raw` type is not enabled', 400),
+        };
+      }
+
       const endpointMetadata = await this.options.endpointService
         .getEndpointMetadataService(this.options.spaceId)
         .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
 
-      const memDumpType = actionRequest.parameters.type;
       const unsupportedAgents: string[] = [];
 
       for (const endpointMeta of endpointMetadata) {
@@ -143,7 +160,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           (memDumpType === 'kernel' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
           (memDumpType === 'process' &&
-            !endpointMeta.Endpoint.capabilities?.includes('memdump_process'))
+            !endpointMeta.Endpoint.capabilities?.includes('memdump_process')) ||
+          (memDumpType === 'raw' && !endpointMeta.Endpoint.capabilities?.includes('memdump_raw'))
         ) {
           unsupportedAgents.push(
             `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`
@@ -155,7 +173,52 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(', ')}`
+            `The following agent IDs do not support memory dump: ${unsupportedAgents.join(' | ')}`
+          ),
+        };
+      }
+    }
+
+    // Kill Process: `kill_descendants` is gated by a feature flag and requires that the
+    // Endpoint supports it (via the `kill_process_descendents` capability).
+    if (
+      actionRequest.command === 'kill-process' &&
+      actionRequest.parameters?.kill_descendants === true
+    ) {
+      if (
+        !this.options.endpointService.experimentalFeatures
+          .responseActionsEndpointKillProcessDescendants
+      ) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            'kill-process `kill_descendants` parameter is not enabled',
+            400
+          ),
+        };
+      }
+
+      const endpointMetadata = await this.options.endpointService
+        .getEndpointMetadataService(this.options.spaceId)
+        .findHostMetadataForFleetAgents(actionRequest.endpoint_ids);
+
+      const unsupportedAgents = endpointMetadata
+        .filter(
+          (endpointMeta) =>
+            !endpointMeta.Endpoint.capabilities?.includes('kill_process_descendents')
+        )
+        .map(
+          (endpointMeta) =>
+            `${endpointMeta.agent.id} / ${endpointMeta.host.hostname} (Agent v.${endpointMeta.agent.version})`
+        );
+
+      if (unsupportedAgents.length > 0) {
+        return {
+          isValid: false,
+          error: new ResponseActionsClientError(
+            `The following agent IDs do not support killing process descendents: ${unsupportedAgents.join(
+              ', '
+            )}`
           ),
         };
       }
@@ -177,6 +240,65 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             `The script [${scriptDetails.name}] requires arguments to be specified.`
           ),
         };
+      }
+    }
+
+    if (actionRequest.command === 'cancel') {
+      try {
+        const actionToCancel = await getActionDetailsById(
+          this.options.endpointService,
+          this.options.spaceId,
+          actionRequest.parameters.id
+        );
+
+        if (actionToCancel.agentType !== 'endpoint') {
+          throw new ResponseActionsClientError(
+            `Action [${actionRequest.parameters.id} / ${actionToCancel.command} / ${actionToCancel.agentType}] agent type is not 'endpoint'`,
+            400
+          );
+        }
+
+        for (const endpointId of actionRequest.endpoint_ids) {
+          if (!actionToCancel.agents.includes(endpointId)) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointId}] is not associated with action [${actionToCancel.id}]`,
+              400
+            );
+          }
+
+          // Check to ensure that this endpoint's response is still pending
+          if (actionToCancel.agentState[endpointId].isCompleted) {
+            throw new ResponseActionsClientError(
+              `Action [${actionRequest.parameters.id}] is already completed for agent [${endpointId}] and cannot be canceled.`,
+              400
+            );
+          }
+        }
+
+        if (!isResponseActionCancelable(actionToCancel.command, this.agentType)) {
+          throw new ResponseActionsClientError(
+            `[${actionToCancel.command}] response action cannot be canceled.`,
+            400
+          );
+        }
+
+        // Ensure this endpoint supports `cancel`
+        const endpointDetails = await this.options.endpointService
+          .getEndpointMetadataService(this.options.spaceId)
+          .getMetadataForEndpoints(actionRequest.endpoint_ids);
+
+        for (const endpointMeta of endpointDetails) {
+          if (!endpointMeta.Endpoint.capabilities?.includes('cancel')) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointMeta.host.hostname || endpointMeta.host.name} / ${
+                endpointMeta.agent.id
+              }] running [v${endpointMeta.agent.version}] does not support cancel action.`,
+              400
+            );
+          }
+        }
+      } catch (error) {
+        return { isValid: false, error };
       }
     }
 
@@ -558,6 +680,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       MemoryDumpActionRequestBody,
       ActionDetails<ResponseActionMemoryDumpOutputContent, ResponseActionMemoryDumpParameters>
     >('memory-dump', actionRequest, options);
+  }
+
+  async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>> {
+    if (!this.options.endpointService.experimentalFeatures.responseActionsEndpointCancel) {
+      throw new ResponseActionsClientError('Elastic Defend cancel operation is not enabled', 400);
+    }
+
+    return this.handleResponseAction<
+      CancelActionRequestBody,
+      ActionDetails<ResponseActionCancelOutputContent, ResponseActionCancelParameters>
+    >('cancel', actionRequest, options);
   }
 
   async runscript(

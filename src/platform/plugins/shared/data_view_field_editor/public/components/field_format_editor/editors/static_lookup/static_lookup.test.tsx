@@ -7,57 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-import type { StaticLookupFormatEditorFormatParams } from './static_lookup';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
+import type { StaticLookupFormatEditorFormatParams } from './static_lookup';
+import React from 'react';
+import { formatId } from './constants';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { StaticLookupFormatEditor } from './static_lookup';
 
 const fieldType = 'string';
+
 const format = {
-  reactConvert: jest.fn(),
+  convertToReact: jest.fn(),
 };
+
 const formatParams = {
   lookupEntries: [{}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
   unknownKeyValue: '',
 };
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderEditor = (params: StaticLookupFormatEditorFormatParams = formatParams) =>
+  renderWithI18n(
+    <StaticLookupFormatEditor
+      fieldType={fieldType}
+      format={format as unknown as FieldFormat}
+      formatParams={params}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('StaticLookupFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(StaticLookupFormatEditor.formatId).toEqual('static_lookup');
+    expect(StaticLookupFormatEditor.formatId).toEqual(formatId);
   });
 
-  it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
-      <StaticLookupFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render normally', () => {
+    renderEditor();
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Key')).toBeVisible();
+    expect(screen.getByText('Value')).toBeVisible();
+    expect(screen.getByTestId('staticLookupEditorKey 0')).toHaveValue('');
+    expect(screen.getByTestId('staticLookupEditorValue 0')).toHaveValue('');
+    expect(screen.getByTestId('staticLookupEditorAddEntry')).toHaveTextContent('Add entry');
+    expect(screen.getByText('Value for unknown key')).toBeVisible();
+    expect(screen.getByTestId('staticLookupEditorUnknownValue')).toHaveValue('');
   });
 
-  it('should render multiple lookup entries and unknown key value', async () => {
-    const component = shallowWithI18nProvider(
-      <StaticLookupFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={{
-          lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
-          unknownKeyValue: 'test value',
-        }}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render multiple lookup entries and unknown key value', () => {
+    renderEditor({
+      lookupEntries: [{}, {}, {}] as StaticLookupFormatEditorFormatParams['lookupEntries'],
+      unknownKeyValue: 'test value',
+    });
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getAllByTestId(/^staticLookupEditorKey/)).toHaveLength(3);
+    expect(screen.getAllByTestId(/^staticLookupEditorValue/)).toHaveLength(3);
+    expect(screen.getByTestId('staticLookupEditorUnknownValue')).toHaveValue('test value');
   });
 });

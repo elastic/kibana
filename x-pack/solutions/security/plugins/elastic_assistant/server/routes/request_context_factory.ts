@@ -19,8 +19,7 @@ import type {
 } from '../types';
 import type { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
-
-let hasLoggedProfileUidError = false;
+import { resolveCurrentUser } from './resolve_current_user';
 
 export interface IRequestContextFactory {
   create(
@@ -66,42 +65,13 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_NAMESPACE_STRING;
 
-    const getCurrentUser = async () => {
-      let contextUser = coreContext.security.authc.getCurrentUser();
-
-      if (contextUser && !contextUser?.profile_uid) {
-        // In some serverless/versioned Elasticsearch environments, `with_profile_uid` is unsupported,
-        // and API-key authenticated users may not have roles/username in the same way as realm users.
-        // Use stable fallbacks to avoid hard failures and noisy logs.
-        if (contextUser.authentication_type === 'api_key' && contextUser.api_key?.id) {
-          return { ...contextUser, profile_uid: contextUser.api_key.id };
-        }
-
-        try {
-          const users = await coreContext.elasticsearch.client.asCurrentUser.security.getUser({
-            username: contextUser.username,
-            with_profile_uid: true,
-          });
-
-          if (users[contextUser.username].profile_uid) {
-            contextUser = { ...contextUser, profile_uid: users[contextUser.username].profile_uid };
-          }
-        } catch (e) {
-          if (!hasLoggedProfileUidError) {
-            hasLoggedProfileUidError = true;
-            this.logger.warn(
-              `Failed to get user profile_uid; continuing without it. This can occur on some Elasticsearch versions/serverless deployments. ${e}`
-            );
-          }
-        }
-
-        if (contextUser && !contextUser.profile_uid && contextUser.username) {
-          contextUser = { ...contextUser, profile_uid: contextUser.username };
-        }
-      }
-
-      return contextUser;
-    };
+    const getCurrentUser = () =>
+      resolveCurrentUser({
+        currentUser: coreContext.security.authc.getCurrentUser(),
+        logger: this.logger,
+        request,
+        security: startPlugins.security,
+      });
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
     const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
@@ -144,6 +114,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       inference: startPlugins.inference,
       searchInferenceEndpoints: startPlugins.searchInferenceEndpoints,
       savedObjectsClient,
+      security: startPlugins.security,
       telemetry: core.analytics,
 
       // Note: elserInferenceId is used here to enable setting up the KB using a different ELSER model, which
@@ -188,6 +159,10 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAttackDiscoverySchedulingDataClient: memoize(async () => {
         return this.assistantService.createAttackDiscoverySchedulingDataClient({
           actionsClient,
+          // The public (feature-flag-off) schedule API is the legacy view: it
+          // must only surface its own untagged schedules and exclude schedules
+          // owned by the internal (workflow) API, which tag their alerting rules.
+          filterTags: { excludeTags: ['attack-discovery-schedule', 'attack-discovery-workflow'] },
           logger: this.logger,
           rulesClient,
         });

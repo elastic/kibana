@@ -48,6 +48,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
     "@kbn/i18n",
@@ -76,6 +77,7 @@
     "@kbn/test",
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
+    "@kbn/apm-types",
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-server",
@@ -122,7 +124,7 @@
     "@kbn/core-di",
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/setup-node-env",
     "@kbn/react-query",
     "@kbn/fs",
@@ -137,6 +139,10 @@
     "@kbn/doc-links",
     "@kbn/yaml-loader",
     "@kbn/charts-theme",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/human-readable-id",
+    "@kbn/elastic-agent-condition-language",
+    "@kbn/app-header",
+    "@kbn/core-http-browser"
   ]
 }

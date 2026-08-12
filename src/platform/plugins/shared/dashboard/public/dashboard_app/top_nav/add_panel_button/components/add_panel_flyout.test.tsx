@@ -14,8 +14,16 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 import { EuiThemeProvider } from '@elastic/eui';
+import type { MenuItem } from '../types';
+import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 
-jest.mock('../get_menu_item_groups', () => ({}));
+jest.mock('../use_menu_item_groups', () => {
+  const actual = jest.requireActual('../use_menu_item_groups');
+  return { onAddPanelClick: actual.onAddPanelClick };
+});
+
+const mockHasAction = jest.fn();
+const mockExecuteAction = jest.fn();
 
 jest.mock('../../../../services/kibana_services', () => {
   return {
@@ -24,8 +32,23 @@ jest.mock('../../../../services/kibana_services', () => {
         .fn()
         .mockResolvedValue(() => <div data-test-subj="mockLibraryContent">Library content</div>),
     },
+    uiActionsService: {
+      hasAction: () => mockHasAction(),
+      getAction: () =>
+        Promise.resolve({
+          execute: (...args: unknown[]) => mockExecuteAction(...args),
+        }),
+    },
   };
 });
+
+const mockUseFeaturedItems = jest.fn((): { featuredItems: MenuItem[]; loading: boolean } => ({
+  featuredItems: [],
+  loading: false,
+}));
+jest.mock('../use_featured_items', () => ({
+  useFeaturedItems: () => mockUseFeaturedItems(),
+}));
 
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>
@@ -33,13 +56,25 @@ const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   </EuiThemeProvider>
 );
 
-const mockDashboardApi = {} as unknown as DashboardApi;
+const mockDashboardApi = {
+  clearOverlays: jest.fn(),
+} as unknown as DashboardApi;
 
 describe('AddPanelFlyout', () => {
+  beforeEach(() => {
+    mockUseFeaturedItems.mockReturnValue({
+      featuredItems: [],
+      loading: false,
+    });
+    mockHasAction.mockReturnValue(false);
+    mockExecuteAction.mockClear();
+    (mockDashboardApi.clearOverlays as jest.Mock).mockClear();
+  });
+
   describe('tabs', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
     test('renders "New" and "From library" tabs', async () => {
@@ -102,7 +137,7 @@ describe('AddPanelFlyout', () => {
   describe('header', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
     test('displays "Add to dashboard" heading', async () => {
@@ -115,15 +150,16 @@ describe('AddPanelFlyout', () => {
     });
   });
 
-  describe('getMenuItemGroups throws', () => {
+  describe('displays errors', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => {
-        throw new Error('simulated getMenuItemGroups error');
-      };
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+        loading: false,
+        error: new Error('simulated useMenuItemGroups error'),
+      });
     });
 
-    test('displays getMenuItemGroups error', async () => {
+    test('displays useMenuItemGroups error', async () => {
       render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
         wrapper: ContextWrapper,
       });
@@ -134,30 +170,35 @@ describe('AddPanelFlyout', () => {
     });
   });
 
-  describe('getMenuItemGroups returns results', () => {
+  describe('useMenuItemGroups returns results', () => {
     const onClickMock = jest.fn();
+    // define this outside mock so that the reference doesn't change between renders
+    const groups = [
+      {
+        id: 'panel1',
+        title: 'App 1',
+        items: [
+          {
+            icon: 'icon1',
+            id: 'mockFactory',
+            name: 'Factory 1',
+            description: 'Factory 1 description',
+            'data-test-subj': 'myItem',
+            onClick: onClickMock,
+            order: 0,
+          },
+        ],
+        order: 10,
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
+      },
+    ];
     beforeEach(() => {
       onClickMock.mockClear();
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../get_menu_item_groups').getMenuItemGroups = async () => [
-        {
-          id: 'panel1',
-          title: 'App 1',
-          items: [
-            {
-              icon: 'icon1',
-              id: 'mockFactory',
-              name: 'Factory 1',
-              description: 'Factory 1 description',
-              'data-test-subj': 'myItem',
-              onClick: onClickMock,
-              order: 0,
-            },
-          ],
-          order: 10,
-          'data-test-subj': 'dashboardEditorMenu-group1Group',
-        },
-      ];
+      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+        groups,
+        loading: false,
+      });
     });
 
     test('calls item onClick handler when item is clicked', async () => {
@@ -168,6 +209,33 @@ describe('AddPanelFlyout', () => {
       await waitFor(async () => {
         await userEvent.click(screen.getByTestId('myItem'));
         expect(onClickMock).toBeCalled();
+      });
+    });
+
+    test('renders and executes the Chat action with AiButton styling', async () => {
+      mockHasAction.mockReturnValue(true);
+      mockUseFeaturedItems.mockReturnValue({
+        featuredItems: [],
+        loading: false,
+      });
+
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
+
+      await waitFor(() => {
+        const button = screen.getByTestId('create-action-Create with chat');
+        expect(button.tagName).toBe('BUTTON');
+        expect(button).toHaveTextContent('Create with chat');
+      });
+
+      await userEvent.click(screen.getByTestId('create-action-Create with chat'));
+
+      expect(mockDashboardApi.clearOverlays).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockExecuteAction).toHaveBeenCalledWith({
+          trigger: { id: OPEN_DASHBOARD_CHAT_ACTION_ID },
+        });
       });
     });
 

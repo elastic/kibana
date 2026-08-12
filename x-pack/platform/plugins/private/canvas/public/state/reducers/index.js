@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineReducers } from 'redux';
+import { combineReducers } from 'redux-v4';
 import reduceReducers from 'reduce-reducers';
 import { get } from 'lodash';
 

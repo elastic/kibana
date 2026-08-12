@@ -14,6 +14,7 @@ export interface IndexAutocompleteItem {
   name: string;
   mode: 'lookup' | 'time_series' | string;
   aliases: string[];
+  isClosed?: boolean;
 }
 
 export interface ESQLSourceResult {
@@ -45,6 +46,9 @@ export interface ResolveIndexResponse {
 export interface EsqlView {
   name: string;
   query: string;
+  description?: string;
+  links?: Array<{ label: string; url: string }>;
+  type?: string;
 }
 
 export interface EsqlViewsResult {
@@ -52,9 +56,11 @@ export interface EsqlViewsResult {
 }
 
 export interface EsqlDataset {
-  dataset_id: string;
-  datasource: string;
+  name: string;
+  data_source: string;
   resource: string;
+  description?: string;
+  settings?: Record<string, unknown>;
 }
 
 export interface EsqlDatasetsResult {

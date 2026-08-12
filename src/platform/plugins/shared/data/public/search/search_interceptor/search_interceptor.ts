@@ -97,6 +97,7 @@ import {
   createRequestHashForBackgroundSearches,
   createRequestHashForClientCache,
 } from './create_request_hash';
+import { getFallbackPartialResponse } from './get_fallback_partial_response';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -208,11 +209,12 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId, projectRouting } = options;
+    const { sessionId, projectRouting, approximation } = options;
     const hashOptions = {
       ...request.params,
       sessionId,
       projectRouting,
+      approximation,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
@@ -311,6 +313,9 @@ export class SearchInterceptor {
     }
     if (combined.projectRouting !== undefined) {
       serializableOptions.projectRouting = combined.projectRouting;
+    }
+    if (combined.approximation !== undefined) {
+      serializableOptions.approximation = combined.approximation;
     }
 
     return serializableOptions;
@@ -486,6 +491,7 @@ export class SearchInterceptor {
               }
             )
           ).pipe(
+            catchError(() => of(getFallbackPartialResponse(id))),
             map((response) =>
               options.strategy === ENHANCED_ES_SEARCH_STRATEGY
                 ? toPartialResponseAfterTimeout(response)

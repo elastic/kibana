@@ -15,6 +15,7 @@ import {
   SCOUT_TEST_EVENTS_INDEX_PATTERN,
   ScoutTestTarget,
   ScoutTestTargetSchema,
+  testTargets,
 } from '@kbn/scout-info';
 
 export const ScoutTestConfigStatsEntrySchema = z.object({
@@ -87,11 +88,22 @@ export class ScoutTestConfigStats {
       };
     }
   ): Promise<ScoutTestConfigStats> {
+    const parsableModes: Set<String> = new Set(
+      testTargets.all.map((target) => `${target.arch}-${target.domain}`)
+    );
+
     // Build ES query filters
     const whereClauses = [
       `@timestamp >= NOW() - ${options.lookbackDays}day`,
       'event.action == "run-end"',
-      'test_run.target.mode != "unknown"',
+
+      // The remote could have records of domains that this branch has no idea about,
+      // and we need to make sure that those won't make it in the query results
+      `test_run.target.mode IN (${parsableModes
+        .values()
+        .map((mode) => `"${mode}"`)
+        .toArray()
+        .join(', ')})`,
     ];
 
     if (options.configPaths.length > 0) {

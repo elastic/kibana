@@ -47,7 +47,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     <MLOverviewCard
       layout="horizontal"
       iconType="chartTagCloud"
-      path="/data_drift_index_select"
+      path="/data_drift"
       title={
         <FormattedMessage
           id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
@@ -85,16 +85,16 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     <MLOverviewCard
       iconType="tableDensityHigh"
       layout="horizontal"
-      path="/datavisualizer_index_select"
+      path={`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`}
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
         defaultMessage: 'Data view',
       })}
       titleSize={cardTitleSize}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
+      description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewDescription', {
         defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
       })}
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {
-        defaultMessage: 'Select data view',
+        defaultMessage: 'Open data visualizer',
       })}
       cardDataTestSubj="mlDataVisualizerCardIndexData"
       buttonDataTestSubj="mlDataVisualizerSelectIndexButton"

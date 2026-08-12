@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { APP_ID } from '../../../../../common';
@@ -52,10 +52,12 @@ export const useAddToCaseActions = ({
     return ecsData?._id
       ? [
           {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: ecsData._id,
+            metadata: {
+              index: ecsData._index ?? '',
+              rule: casesUi.helpers.getRuleIdFromEvent({ ecs: ecsData, data: nonEcsData ?? [] }),
+            },
           },
         ]
       : [];
@@ -88,27 +90,22 @@ export const useAddToCaseActions = ({
   }, [onMenuItemClick, onCaseSuccess]);
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
-  const observables = useMemo(
-    () => casesUi.helpers.getObservablesFromEcs(nonEcsData ? [nonEcsData] : []),
-    [casesUi.helpers, nonEcsData]
-  );
+
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      observables,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments, observables]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     selectCaseModal.open({
       getAttachments: () => caseAttachments,
-      getObservables: observables ? () => observables : undefined,
     });
-  }, [caseAttachments, onMenuItemClick, observables, selectCaseModal]);
+  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (userCasesPermissions.createComment && userCasesPermissions.read) {
@@ -119,7 +116,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-existing-case-action',
           key: 'add-to-existing-case-action',
           onClick: handleAddToExistingCaseClick,
-          size: 's',
           name: ADD_TO_EXISTING_CASE,
         },
         // add to new case menu item
@@ -128,7 +124,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-new-case-action',
           key: 'add-to-new-case-action',
           onClick: handleAddToNewCaseClick,
-          size: 's',
           name: ADD_TO_NEW_CASE,
         },
       ];

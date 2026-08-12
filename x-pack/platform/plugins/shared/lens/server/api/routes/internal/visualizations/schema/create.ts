@@ -5,23 +5,15 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
-import { lensCMCreateOptionsSchema, lensItemDataSchemaV2 } from '../../../../../content_management';
-import { lensItemDataSchemaV0 } from '../../../../../content_management/v0';
-import { lensItemDataSchemaV1 } from '../../../../../content_management/v1';
-import { pickFromObjectSchema } from '../../../../../utils';
+import { lensItemDataSchemaV2 } from '../../../../../content_management/zod';
+import { lensItemDataSchemaV0 } from '../../../../../content_management/zod/v0';
+import { lensItemDataSchemaV1 } from '../../../../../content_management/zod/v1';
 import { lensResponseItemSchema } from './common';
 
-export const lensCreateRequestQuerySchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
-  },
-  { unknowns: 'forbid' }
-);
-
-export const lensCreateRequestBodySchema = schema.oneOf([
+export const lensCreateRequestBodySchema = z.union([
   lensApiConfigSchema,
   lensItemDataSchemaV2,
   lensItemDataSchemaV1,

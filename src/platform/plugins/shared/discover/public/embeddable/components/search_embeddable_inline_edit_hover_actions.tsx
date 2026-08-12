@@ -125,7 +125,7 @@ export const SearchEmbeddableInlineEditHoverActions = ({
             data-test-subj="discoverEmbeddableInlineEditSelectTabAction"
             disabled={tabs.length === 0}
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={() => setIsPopoverOpen((open) => !open)}
             size="s"
             css={[buttonStyles, { marginInlineEnd: euiTheme.size.xs }]}
@@ -145,7 +145,6 @@ export const SearchEmbeddableInlineEditHoverActions = ({
         <EuiContextMenuPanel
           data-test-subj="discoverEmbeddableInlineEditSelectTabPopover"
           items={items}
-          size="s"
           title={i18n.translate('discover.embeddable.inlineEdit.selectTabMenuTitle', {
             defaultMessage: 'Selected tab',
           })}

@@ -51,11 +51,21 @@ describe('name column builder', () => {
       expect(result).toMatchObject({ name: 'Dashboard Name' });
     });
 
-    it('applies custom layout props', () => {
+    it('applies the documented width/minWidth/maxWidth defaults', () => {
+      const result = buildNameColumn({}, defaultContext);
+
+      // `Column.Name` ships with `width: 64em` so the column locks at its
+      // preferred footprint instead of stretching to absorb table slack.
+      // `ContentListTable` adds a trailing spacer column that absorbs the
+      // leftover space; see `TRAILING_SPACER_COLUMN` in `content_list_table.tsx`.
+      expect(result).toMatchObject({ width: '64em', minWidth: '18em', maxWidth: '64em' });
+    });
+
+    it('lets consumer-supplied layout props win over defaults', () => {
       const props: NameColumnProps = {
         width: '32em',
         minWidth: '24em',
-        maxWidth: '64em',
+        maxWidth: '50em',
         truncateText: { lines: 4 },
       };
       const result = buildNameColumn(props, defaultContext);
@@ -63,14 +73,29 @@ describe('name column builder', () => {
       expect(result).toMatchObject({
         width: '32em',
         minWidth: '24em',
-        maxWidth: '64em',
+        maxWidth: '50em',
         truncateText: { lines: 4 },
       });
     });
 
-    it('does not include width when not specified', () => {
-      const result = buildNameColumn({}, defaultContext);
+    it('treats explicit `undefined` as an opt-out — clears each default and emits no layout prop', () => {
+      // `<Column.Name width={undefined} minWidth={undefined} maxWidth={undefined} />`
+      // should render unbounded, so the cell can grow or shrink freely with
+      // no constraint from the preset. Useful for consumers who want Name to
+      // absorb slack on a layout where the trailing spacer is undesirable.
+      // Distinct from omitting the props entirely (falls back to defaults).
+      const result = buildNameColumn(
+        {
+          width: undefined,
+          minWidth: undefined,
+          maxWidth: undefined,
+        } satisfies NameColumnProps,
+        defaultContext
+      );
+
       expect(result).not.toHaveProperty('width');
+      expect(result).not.toHaveProperty('minWidth');
+      expect(result).not.toHaveProperty('maxWidth');
     });
 
     it('respects sortable false', () => {

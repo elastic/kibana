@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { AuthStackByField } from '../../../../../common/api/search_strategy/users/authentications';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import { AuthenticationsHostTable } from '../../../components/authentication/authentications_host_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
@@ -18,28 +19,40 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   deleteQuery,
   endDate,
   filterQuery,
-  identityScopedFilterQuery,
   indexNames,
   skip,
   setQuery,
   startDate,
   type,
 }) => {
-  const effectiveFilterQuery = identityScopedFilterQuery ?? filterQuery;
-
+  const histogramFilterQuery = useMemo(() => {
+    const existsClause = {
+      exists: { field: AuthStackByField.userName },
+    };
+    if (!filterQuery) {
+      return JSON.stringify(existsClause);
+    }
+    try {
+      const parsed = typeof filterQuery === 'string' ? JSON.parse(filterQuery) : filterQuery;
+      return JSON.stringify({ bool: { filter: [parsed, existsClause] } });
+    } catch {
+      return JSON.stringify(existsClause);
+    }
+  }, [filterQuery]);
   return (
     <>
       <MatrixHistogram
         endDate={endDate}
-        filterQuery={effectiveFilterQuery}
+        filterQuery={histogramFilterQuery}
         id={HISTOGRAM_QUERY_ID}
         startDate={startDate}
         {...histogramConfigs}
+        applyPageAndTabsFilters={false}
       />
 
       <AuthenticationsHostTable
         endDate={endDate}
-        filterQuery={effectiveFilterQuery}
+        filterQuery={filterQuery}
         indexNames={indexNames}
         setQuery={setQuery}
         deleteQuery={deleteQuery}

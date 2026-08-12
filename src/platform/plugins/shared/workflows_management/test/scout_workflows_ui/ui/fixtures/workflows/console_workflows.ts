@@ -41,12 +41,27 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+steps:
+  - name: hello_world_step
+    type: console
+    with:
+      message: "Test run: {{ execution.isTestRun }}"
+`;
 
+/**
+ * Workflow with an event-driven trigger so the Run/Test modal shows the Event tab.
+ */
+export const getTestRunEventTabWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: false
+description: Workflow with workflows.failed trigger for Event tab scout test
+triggers:
+  - type: workflows.failed
 steps:
   - name: hello_world_step
     type: console
@@ -64,14 +79,12 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 consts:
   loop_items: [{"@timestamp": "now"}, {"@timestamp": "yesterday"}, {"@timestamp": "tomorrow"}, {"@timestamp": "next week"}]
-
-  inputs:
-  - name: message
-    type: string
-    default: "hello world"
 
 steps:
   - name: first_step
@@ -99,11 +112,10 @@ enabled: false
 description: This is a new workflow
 triggers:
   - type: manual
-
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 
 steps:
   - name: first_step
@@ -155,17 +167,71 @@ export const getDummyWorkflowYaml = (name: string) => `
 name: ${name}
 description: Dummy workflow description
 enabled: true
-inputs:
-  - name: message
-    type: string
-    default: "hello world"
+
 triggers:
   - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello world"
 steps:
   - name: hello_world_step
     type: console
     with:
       message: "{{ inputs.message }}"
+`;
+
+/**
+ * Workflow exercising several step types whose icons were previously broken in dark mode
+ * (bare EUI glyph names used in CSS url()). Each type appears as a decorated step so that
+ * the `type-inline-highlight type-<type>` CSS class is emitted by Monaco and can be inspected
+ * in scout tests.
+ *
+ * Types included: console, if, foreach, http, loop.continue, workflow.fail
+ */
+export const getMultiStepTypeWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step-type workflow for icon regression tests
+enabled: true
+
+triggers:
+  - type: manual
+    inputs:
+      - name: items
+        type: string
+        default: "a,b"
+steps:
+  - name: log_start
+    type: console
+    with:
+      message: "starting"
+  - name: check_condition
+    type: if
+    condition: "true"
+    steps:
+      - name: log_true
+        type: console
+        with:
+          message: "condition was true"
+  - name: loop_items
+    type: foreach
+    foreach: "[1, 2]"
+    steps:
+      - name: log_item
+        type: console
+        with:
+          message: "item"
+      - name: skip_item
+        type: loop.continue
+  - name: call_api
+    type: http
+    with:
+      url: "https://example.com"
+      method: GET
+  - name: stop_here
+    type: workflow.fail
+    with:
+      message: "boom"
 `;
 
 /**
@@ -254,17 +320,16 @@ enabled: false
 description: Multi-step workflow for scroll testing
 triggers:
   - type: manual
-
-inputs:
-  - name: param_a
-    type: string
-    default: "value_a"
-  - name: param_b
-    type: string
-    default: "value_b"
-  - name: param_c
-    type: string
-    default: "value_c"
+    inputs:
+      - name: param_a
+        type: string
+        default: "value_a"
+      - name: param_b
+        type: string
+        default: "value_b"
+      - name: param_c
+        type: string
+        default: "value_c"
 
 steps:
   - name: step_alpha
@@ -320,16 +385,99 @@ enabled: true
 # This comment references {{ steps.foo.output }}
 triggers:
   - type: manual
-inputs:
-  - name: message
-    type: string
-    default: "hello"
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
 steps:
   # {{ some_old_variable | json }}
   - name: hello_world_step
     type: console  # previously used {{ steps.old.output }}
     with:
       message: "{{ inputs.message }}"`;
+
+/**
+ * Multi-step workflow (5 console steps) used to verify graph view behaviour.
+ * Paired with `getBrokenGraphWorkflowYaml` which introduces a YAML syntax
+ * error that shows the "YAML has errors" callout.
+ */
+export const getMultiStepGraphWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step workflow for graph recovery test
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_1
+    type: console
+    with:
+      message: "Step 1 output"
+  - name: step_2
+    type: console
+    with:
+      message: "Step 2 output"
+  - name: step_3
+    type: console
+    with:
+      message: "Step 3 output"
+  - name: step_4
+    type: console
+    with:
+      message: "Step 4 output"
+  - name: step_5
+    type: console
+    with:
+      message: "Step 5 output"
+`;
+
+/**
+ * Broken variant of `getMultiStepGraphWorkflowYaml`: contains only step_1 in
+ * the steps array plus an unclosed flow sequence at the root level.
+ *
+ * The unclosed bracket (`broken_field: [unclosed bracket`) makes
+ * YAML.parseDocument report a parse error (isYamlSyntaxValid → false →
+ * warning callout shown). Note: an undefined YAML alias (*ref) does NOT
+ * produce errors in the yaml package — only doc.warnings — so it cannot be
+ * used here.
+ *
+ * This YAML should always be paired with getMultiStepGraphWorkflowYaml as the
+ * "before" and "after" states in the graph recovery regression test.
+ */
+export const getBrokenGraphWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step workflow for graph recovery test
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: step_1
+    type: console
+    with:
+      message: "Step 1 output"
+broken_field: [unclosed bracket
+`;
+
+export const getWorkflowWithEventInputYaml = (name: string) => `
+name: ${name}
+description: Workflow with event and inputs logging
+enabled: true
+triggers:
+  - type: manual
+    inputs:
+      - name: message
+        type: string
+        default: "hello"
+steps:
+  - name: log_event
+    type: console
+    with:
+      message: "{{event | json}}"
+
+  - name: log_inputs
+    type: console
+    with:
+      message: "{{inputs | json}}"
+      `;
 
 /**
  * Long-running workflow (console + two wait steps) for cancellation Scout tests.
@@ -362,4 +510,4 @@ steps:
     type: console
     with:
       message: Hello World
-`;
+  `;

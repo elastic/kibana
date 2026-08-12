@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test across multiple apps.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -27,12 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Save Discover session to dashboard', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -91,32 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.saveDashboard('New Dashboard With Session');
       });
 
-      it('can save a new session to an existing dashboard', async () => {
-        const existingDashboardName = 'Existing Target Dashboard';
-
-        await dashboard.navigateToApp();
-        await dashboard.gotoDashboardLandingPage();
-        await dashboard.clickNewDashboard();
-        await dashboard.saveDashboard(existingDashboardName);
-
-        await discover.navigateToApp();
-        await discover.clickNewSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
-
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-
-        await discover.saveSearchToDashboard('Session for Existing Dashboard', {
-          existing: existingDashboardName,
-        });
-
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
-      });
-
       it('can save a new session from an existing one to a dashboard without overriding the original', async () => {
         const existingDashboardName = 'Existing Target Dashboard 2';
         const originalSession = 'Original Session for Save As';
@@ -154,28 +125,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '4,633 documents',
           '13 documents',
         ]);
-      });
-
-      it('can save as a copy to a new dashboard via Save As menu', async () => {
-        await discover.navigateToApp();
-        await discover.clickNewSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
-
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-
-        await discover.saveSearch('Original Session for Copy');
-
-        await discover.saveSearchToDashboard('Copied Session for Dashboard', 'new', {
-          saveAsNew: true,
-        });
-
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
-        await dashboard.saveDashboard('New Dashboard With Copied Session');
       });
 
       it('can save as a copy to a new dashboard via "Save as new Discover session" toggle', async () => {
@@ -251,29 +200,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getSavedSearchDocumentCount()).to.be('13 documents');
-      });
 
-      it('can save as a copy from the embedded editor to a new dashboard', async () => {
-        await dashboardAddPanel.addSavedSearch('Rendering Test: saved search');
-        await header.waitUntilLoadingHasFinished();
-        await dashboard.waitForRenderComplete();
-
+        // saving as a copy adds a new session without touching the original, use a step when migrating to scout
         await discover.editEmbeddableInDiscover();
         expect(await discover.isOnDashboardsEditMode()).to.be(true);
 
-        await queryBar.setQuery('test');
+        await queryBar.setQuery('');
         await queryBar.submitQuery();
         await discover.waitUntilTabIsLoaded();
-
         await discover.saveSearchToDashboard('Copied Rendering Test', 'new', {
           saveAsNew: true,
         });
-
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
           '13 documents',
-          '13 documents',
+          '4,633 documents',
         ]);
       });
     });

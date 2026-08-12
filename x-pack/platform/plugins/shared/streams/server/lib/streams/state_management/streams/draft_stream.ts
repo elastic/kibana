@@ -27,7 +27,7 @@ export class DraftStream extends WiredStream {
   }
 
   protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
-    const routingCondition = this.getRoutingConditionFromParent(desiredState);
+    const { routingCondition, inheritedFields } = this.getRoutingInfoFromParent(desiredState);
     return [
       { type: 'upsert_dot_streams_document', request: this._definition },
       {
@@ -37,6 +37,7 @@ export class DraftStream extends WiredStream {
           query: await definitionToESQLQuery({
             definition: this._definition,
             routingCondition,
+            inheritedFields,
           }),
         },
       },
@@ -54,7 +55,7 @@ export class DraftStream extends WiredStream {
 
     const actions: ElasticsearchAction[] = [];
 
-    const routingCondition = this.getRoutingConditionFromParent(desiredState);
+    const { routingCondition, inheritedFields } = this.getRoutingInfoFromParent(desiredState);
     actions.push({
       type: 'upsert_esql_view',
       request: {
@@ -62,6 +63,7 @@ export class DraftStream extends WiredStream {
         query: await definitionToESQLQuery({
           definition: this._definition,
           routingCondition,
+          inheritedFields,
         }),
       },
     });
@@ -88,7 +90,7 @@ export class DraftStream extends WiredStream {
     ];
   }
 
-  private getRoutingConditionFromParent(desiredState: State) {
+  private getRoutingInfoFromParent(desiredState: State) {
     const parentId = getParentId(this._definition.name);
     if (!parentId) {
       throw new Error(`Draft stream "${this._definition.name}" must have a parent stream`);
@@ -103,7 +105,33 @@ export class DraftStream extends WiredStream {
     if (!routingEntry) {
       throw new Error(`No routing entry for "${this._definition.name}" in parent "${parentId}"`);
     }
-    return routingEntry.where;
+
+    // Inherited field casts are only needed when the parent is materialized
+    // (real data stream with potential partial mappings across backing indices).
+    // If the parent is also a draft, its view already casts its own fields.
+    const parentIsDraft = parent.definition.ingest.wired.draft === true;
+
+    let inheritedFields: Record<string, { type: string }> | undefined;
+    if (!parentIsDraft) {
+      inheritedFields = {};
+      const ancestorIds: string[] = [];
+      let currentId: string | undefined = parentId;
+      while (currentId) {
+        ancestorIds.push(currentId);
+        currentId = getParentId(currentId);
+      }
+      for (const id of ancestorIds.reverse()) {
+        const ancestor = desiredState.get(id);
+        if (ancestor && Streams.WiredStream.Definition.is(ancestor.definition)) {
+          Object.assign(inheritedFields, ancestor.definition.ingest.wired.fields);
+        }
+      }
+    }
+
+    return {
+      routingCondition: routingEntry.where,
+      inheritedFields,
+    };
   }
 
   static create(

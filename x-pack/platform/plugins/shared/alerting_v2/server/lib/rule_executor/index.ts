@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { RuleExecutorTaskDefinition, ALERTING_RULE_EXECUTOR_TASK_TYPE } from './task_definition';
+export { ALERTING_RULE_EXECUTOR_TASK_TYPE } from './constants';
+export { RuleExecutorTaskDefinition } from './task_definition';

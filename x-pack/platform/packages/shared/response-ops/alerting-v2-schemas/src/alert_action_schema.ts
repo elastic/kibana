@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { tagsSchema } from './common';
+import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 export enum ALERT_EPISODE_STATUS {
   INACTIVE = 'inactive',
@@ -30,54 +32,81 @@ export enum ALERT_EPISODE_ACTION_TYPE {
 export type AlertEpisodeActionType =
   (typeof ALERT_EPISODE_ACTION_TYPE)[keyof typeof ALERT_EPISODE_ACTION_TYPE];
 
-const ackActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
-  episode_id: z.string().describe('The episode identifier for the alert to acknowledge.'),
-});
+const ackActionSchema = z
+  .object({
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACK).describe('Acknowledges an alert.'),
+    episode_id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The episode identifier for the alert to acknowledge.'),
+  })
+  .strict();
 
-const unackActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
-    .describe('Removes acknowledgement from an alert.'),
-  episode_id: z.string().describe('The episode identifier for the alert to unacknowledge.'),
-});
+const unackActionSchema = z
+  .object({
+    action_type: z
+      .literal(ALERT_EPISODE_ACTION_TYPE.UNACK)
+      .describe('Removes acknowledgement from an alert.'),
+    episode_id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The episode identifier for the alert to unacknowledge.'),
+  })
+  .strict();
 
-const assignActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
-    .describe('Assigns an alerting episode to a user, or clears the assignee when null.'),
-  episode_id: z.string().describe('The episode identifier to assign.'),
-  assignee_uid: z
-    .string()
-    .nullable()
-    .describe('User profile UID of the assignee, or null to remove the assignee from the episode.'),
-});
+const assignActionSchema = z
+  .object({
+    action_type: z
+      .literal(ALERT_EPISODE_ACTION_TYPE.ASSIGN)
+      .describe('Assigns an alerting episode to a user, or clears the assignee when null.'),
+    episode_id: z.string().min(1).max(ID_MAX_LENGTH).describe('The episode identifier to assign.'),
+    assignee_uid: z
+      .string()
+      .max(256)
+      .nullable()
+      .describe(
+        'User profile UID of the assignee, or null to remove the assignee from the episode.'
+      ),
+  })
+  .strict();
 
-const tagActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe('Adds tags to an alert.'),
-  tags: z.array(z.string()).describe('List of tags to add to the alert.'),
-});
+const tagActionSchema = z
+  .object({
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe('Adds tags to an alert.'),
+    tags: tagsSchema.describe('List of tags to add to the alert.'),
+  })
+  .strict();
 
-const snoozeActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-  expiry: z.string().optional().describe('ISO datetime when snooze should expire.'),
-});
+const snoozeActionSchema = z
+  .object({
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
+    expiry: z.iso.datetime().optional().describe('ISO datetime when snooze should expire.'),
+  })
+  .strict();
 
-const unsnoozeActionSchema = z.object({
-  action_type: z
-    .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
-    .describe('Removes snooze from an alert.'),
-});
+const unsnoozeActionSchema = z
+  .object({
+    action_type: z
+      .literal(ALERT_EPISODE_ACTION_TYPE.UNSNOOZE)
+      .describe('Removes snooze from an alert.'),
+  })
+  .strict();
 
-const activateActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
-  reason: z.string().describe('Reason for activating the alert.'),
-});
+const activateActionSchema = z
+  .object({
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.ACTIVATE).describe('Activates an alert.'),
+    reason: z.string().min(1).max(1024).describe('Reason for activating the alert.'),
+  })
+  .strict();
 
-const deactivateActionSchema = z.object({
-  action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE).describe('Deactivates an alert.'),
-  reason: z.string().describe('Reason for deactivating the alert.'),
-});
+const deactivateActionSchema = z
+  .object({
+    action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.DEACTIVATE).describe('Deactivates an alert.'),
+    reason: z.string().min(1).max(1024).describe('Reason for deactivating the alert.'),
+  })
+  .strict();
 
 export const createAckAlertActionBodySchema = ackActionSchema.omit({ action_type: true }).strict();
 export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
@@ -136,7 +165,11 @@ export type CreateAlertActionBody = z.infer<typeof createAlertActionBodySchema>;
 
 export const createAlertActionParamsSchema = z
   .object({
-    group_hash: z.string().describe('Hash identifying the alert group to apply the action to.'),
+    group_hash: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('Hash identifying the alert group to apply the action to.'),
   })
   .describe('Path parameters for the create alert action endpoint.');
 
@@ -145,8 +178,13 @@ export type CreateAlertActionParams = z.infer<typeof createAlertActionParamsSche
 export const bulkCreateAlertActionItemBodySchema = createAlertActionBodySchema.and(
   z
     .object({
-      group_hash: z.string().describe('Hash identifying the alert group to apply the action to.'),
+      group_hash: z
+        .string()
+        .min(1)
+        .max(256)
+        .describe('Hash identifying the alert group to apply the action to.'),
     })
+    .strict()
     .describe('Alert action payload with group identifier for bulk requests.')
 );
 export type BulkCreateAlertActionItemBody = z.infer<typeof bulkCreateAlertActionItemBodySchema>;
@@ -154,8 +192,8 @@ export type BulkCreateAlertActionItemBody = z.infer<typeof bulkCreateAlertAction
 export const bulkCreateAlertActionBodySchema = z
   .array(bulkCreateAlertActionItemBodySchema)
   .min(1, 'At least one action must be provided')
-  .max(100, 'Cannot process more than 100 actions in a single request')
+  .max(MAX_BULK_ITEMS, `Cannot process more than ${MAX_BULK_ITEMS} actions in a single request`)
   .describe(
-    'Request body for bulk create alert actions. Array of 1 to 100 actions, each with group_hash and action payload.'
+    `Request body for bulk create alert actions. Array of 1 to ${MAX_BULK_ITEMS} actions, each with group_hash and action payload.`
   );
 export type BulkCreateAlertActionBody = z.infer<typeof bulkCreateAlertActionBodySchema>;

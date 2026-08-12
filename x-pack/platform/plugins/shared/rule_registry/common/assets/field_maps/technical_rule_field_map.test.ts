@@ -323,6 +323,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
+      "kibana.alert.snoozed": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.start": Object {
         "array": false,
         "required": false,
@@ -430,6 +435,16 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.cps_scope.expression": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
+      "kibana.cps_scope.linked_projects": Object {
+        "array": true,
+        "required": false,
+        "type": "flattened",
       },
       "kibana.space_ids": Object {
         "array": true,

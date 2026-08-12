@@ -56,6 +56,11 @@ dependsOn:
   - '@kbn/search-api-panels'
   - '@kbn/usage-collection-plugin'
   - '@kbn/analytics'
+  - '@kbn/datemath'
+  - '@kbn/core-http-browser'
+  - '@kbn/es-errors'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-browser-context-mocks'
 tags:
   - plugin
   - prod

@@ -8,9 +8,21 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { METRICS_INFO_EVENT_TYPE } from './constants';
+import { MAX_DIMENSIONS_REACHED_EVENT_TYPE, METRICS_INFO_EVENT_TYPE } from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
+  analytics.registerEventType({
+    eventType: MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+    schema: {
+      max_dimensions: {
+        type: 'integer',
+        _meta: {
+          description: 'Maximum number of dimensions allowed in the Metrics experience',
+        },
+      },
+    },
+  });
+
   analytics.registerEventType({
     eventType: METRICS_INFO_EVENT_TYPE,
     schema: {
@@ -40,10 +52,10 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
       },
       multi_value_counts: {
         properties: {
-          data_streams: {
+          index_names: {
             type: 'integer',
             _meta: {
-              description: 'Count of METRICS_INFO rows where data_stream had more than one value',
+              description: 'Count of METRICS_INFO rows where index_name had more than one value',
             },
           },
           field_types: {
@@ -56,6 +68,12 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
             type: 'integer',
             _meta: {
               description: 'Count of METRICS_INFO rows where metric_type had more than one value',
+            },
+          },
+          units: {
+            type: 'integer',
+            _meta: {
+              description: 'Count of METRICS_INFO rows where unit had more than one value',
             },
           },
         },

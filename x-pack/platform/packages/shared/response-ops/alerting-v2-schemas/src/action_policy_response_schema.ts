@@ -32,7 +32,11 @@ export const actionPolicyResponseSchema = z.object({
   throttle: z
     .object({
       strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
-      interval: durationSchema.optional().describe('The throttle interval duration (e.g. 5m, 1h).'),
+      interval: durationSchema
+        .nullable()
+        .describe(
+          'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+        ),
     })
     .nullable()
     .describe('The throttle configuration for notifications.'),
@@ -49,10 +53,8 @@ export const actionPolicyResponseSchema = z.object({
     })
     .describe('Authentication and ownership information.'),
   createdBy: z.string().nullable().describe('The user ID who created the action policy.'),
-  createdByUsername: z.string().nullable().describe('The username of the creator.'),
   createdAt: z.string().describe('The ISO datetime when the action policy was created.'),
   updatedBy: z.string().nullable().describe('The user ID who last updated the action policy.'),
-  updatedByUsername: z.string().nullable().describe('The username of the last updater.'),
   updatedAt: z.string().describe('The ISO datetime when the action policy was last updated.'),
 });
 
@@ -68,22 +70,3 @@ export const findActionPoliciesResponseSchema = z
   .describe('Paginated list of action policies.');
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;
-
-export const bulkActionActionPoliciesResponseSchema = z
-  .object({
-    processed: z.number().describe('The number of action policies processed.'),
-    total: z.number().describe('The total number of action policies targeted.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the action policy that failed.'),
-          message: z.string().describe('The error message.'),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-  })
-  .describe('Result of a bulk action policy operation.');
-
-export type BulkActionActionPoliciesResponse = z.infer<
-  typeof bulkActionActionPoliciesResponseSchema
->;

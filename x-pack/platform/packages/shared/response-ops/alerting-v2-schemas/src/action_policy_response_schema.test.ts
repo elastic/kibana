@@ -8,7 +8,6 @@
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
-  bulkActionActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 
 const validResponse = {
@@ -22,14 +21,12 @@ const validResponse = {
   groupBy: ['host.name'],
   tags: ['production'],
   groupingMode: 'per_episode' as const,
-  throttle: { strategy: 'on_status_change' as const },
+  throttle: { strategy: 'on_status_change' as const, interval: null },
   snoozedUntil: null,
   auth: { owner: 'user-1', createdByUser: true },
   createdBy: 'user-1',
-  createdByUsername: 'admin',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'user-1',
-  updatedByUsername: 'admin',
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
@@ -50,9 +47,7 @@ describe('actionPolicyResponseSchema', () => {
       throttle: null,
       snoozedUntil: null,
       createdBy: null,
-      createdByUsername: null,
       updatedBy: null,
-      updatedByUsername: null,
     });
     expect(result.matcher).toBeNull();
     expect(result.groupBy).toBeNull();
@@ -98,36 +93,6 @@ describe('findActionPoliciesResponseSchema', () => {
         items: [],
         page: 1,
         perPage: 10,
-      })
-    ).toThrow();
-  });
-});
-
-describe('bulkActionActionPoliciesResponseSchema', () => {
-  it('accepts a valid bulk response', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 5,
-      total: 6,
-      errors: [{ id: 'np-2', message: 'Not found' }],
-    });
-    expect(result.processed).toBe(5);
-    expect(result.errors).toHaveLength(1);
-  });
-
-  it('accepts empty errors', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 3,
-      total: 3,
-      errors: [],
-    });
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('rejects missing processed', () => {
-    expect(() =>
-      bulkActionActionPoliciesResponseSchema.parse({
-        total: 3,
-        errors: [],
       })
     ).toThrow();
   });

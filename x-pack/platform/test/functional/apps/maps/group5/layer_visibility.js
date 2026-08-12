@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Verify disabled layers do not fetch data
+ *
+ * Migration: Remove and migrate to unit tests.
+ */
 export default function ({ getPageObjects, getService }) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');

@@ -21,7 +21,6 @@ import type { RoutingStatus } from '@kbn/streams-schema';
 import {
   Streams,
   convertUpsertRequestIntoDefinition,
-  deriveQueryType,
   getAncestors,
   getParentId,
   LOGS_ROOT_STREAM_NAME,
@@ -29,8 +28,8 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
+import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamSummary } from '../../../common';
-import type { QueryClient } from './assets/query/query_client';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
   DefinitionNotFoundError,
@@ -44,7 +43,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
-import type { FeatureClient } from './feature';
+import { shouldIncludeFromStreamsList } from './data_streams/should_include_from_streams_list';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -58,6 +57,11 @@ export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 export type ForkStreamResponse = AcknowledgeResponse<'created'>;
 export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
 export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
+
+export interface BulkUpsertStreamsResponse {
+  acknowledged: true;
+  result: { created: string[]; updated: string[] };
+}
 
 /*
  * When calling into Elasticsearch, the stack trace is lost.
@@ -80,8 +84,7 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getQueryClient?: () => Promise<QueryClient>;
-      getFeatureClient?: () => Promise<FeatureClient>;
+      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
@@ -372,13 +375,8 @@ export class StreamsClient {
         }
       );
 
-      const { attachmentClient, getQueryClient, storageClient } = this.dependencies;
-      const cleanOps: Array<Promise<unknown>> = [attachmentClient.clean(), storageClient.clean()];
-      if (getQueryClient) {
-        const queryClient = await getQueryClient();
-        cleanOps.push(queryClient.clean());
-      }
-      await Promise.all(cleanOps);
+      const { attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([attachmentClient.clean(), storageClient.clean()]);
     }
 
     // Disable in Elasticsearch (parallel calls)
@@ -450,10 +448,13 @@ export class StreamsClient {
     };
   }
 
-  async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
-    const definitions = streams.map(({ name, request }) => {
-      return { request, definition: convertUpsertRequestIntoDefinition(name, request) };
-    });
+  async bulkUpsert(
+    streams: Array<{ name: string; request: Streams.all.UpsertRequest }>
+  ): Promise<BulkUpsertStreamsResponse> {
+    const definitions = streams.map(({ name, request }) => ({
+      request,
+      definition: convertUpsertRequestIntoDefinition(name, request),
+    }));
 
     const result = await State.attemptChanges(
       definitions.map(({ definition }) => ({
@@ -554,10 +555,12 @@ export class StreamsClient {
     name,
     query,
     field_descriptions,
+    description = '',
   }: {
     name: string;
     query: Streams.QueryStream.UpsertRequest['stream']['query'];
     field_descriptions?: Record<string, string>;
+    description?: string;
   }): Promise<UpsertStreamResponse> {
     await State.attemptChanges(
       [
@@ -566,7 +569,7 @@ export class StreamsClient {
           definition: {
             type: 'query',
             name,
-            description: '',
+            description,
             updated_at: new Date().toISOString(),
             query_streams: [],
             query,
@@ -738,44 +741,11 @@ export class StreamsClient {
       };
     }
 
+    const privileges = await this.checkIndexPrivileges(names);
+
     const isServerless = this.dependencies.isServerless;
-    const REQUIRED_MANAGE_PRIVILEGES = [
-      'manage_index_templates',
-      'manage_ingest_pipelines',
-      'manage_pipeline',
-      'read_pipeline',
-    ];
-
-    if (!isServerless) {
-      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
-    }
-
+    const REQUIRED_MANAGE_PRIVILEGES = this.getRequiredManagePrivileges();
     const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
-
-    const REQUIRED_INDEX_PRIVILEGES = [
-      'read',
-      'write',
-      'create',
-      'manage',
-      'monitor',
-      'view_index_metadata',
-      'manage_data_stream_lifecycle',
-      'read_failure_store',
-      'manage_failure_store',
-    ];
-    if (!isServerless) {
-      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
-    }
-
-    const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
-      index: [
-        {
-          names,
-          privileges: REQUIRED_INDEX_PRIVILEGES,
-        },
-      ],
-    });
 
     return {
       manage:
@@ -785,7 +755,6 @@ export class StreamsClient {
         ),
       monitor: names.every((name) => privileges.index[name].monitor),
       view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
-      // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
       lifecycle: isServerless
         ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
         : names.every(
@@ -795,7 +764,6 @@ export class StreamsClient {
           ),
       simulate:
         privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
-      // text structure is always available for the internal user, but not for the current user
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
       manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
@@ -808,7 +776,6 @@ export class StreamsClient {
     names: string[]
   ): Promise<Record<string, { read_failure_store: boolean }>> {
     if (!this.dependencies.isSecurityEnabled) {
-      // Security disabled - all streams have all privileges
       const result: Record<string, { read_failure_store: boolean }> = {};
       names.forEach((name) => {
         result[name] = { read_failure_store: true };
@@ -816,14 +783,7 @@ export class StreamsClient {
       return result;
     }
 
-    const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      index: [
-        {
-          names,
-          privileges: ['read_failure_store'],
-        },
-      ],
-    });
+    const privileges = await this.checkIndexPrivileges(names);
 
     const result: Record<string, { read_failure_store: boolean }> = {};
     names.forEach((name) => {
@@ -833,6 +793,48 @@ export class StreamsClient {
     });
 
     return result;
+  }
+
+  private getRequiredManagePrivileges(): string[] {
+    const privileges = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('monitor_text_structure');
+    }
+    return privileges;
+  }
+
+  private getRequiredIndexPrivileges(): string[] {
+    const privileges = [
+      'read',
+      'write',
+      'create',
+      'manage',
+      'monitor',
+      'view_index_metadata',
+      'manage_data_stream_lifecycle',
+      'read_failure_store',
+      'manage_failure_store',
+    ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('manage_ilm');
+    }
+    return privileges;
+  }
+
+  private async checkIndexPrivileges(names: string[]) {
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+    return this.dependencies.esClient.security.hasPrivileges({
+      cluster: [
+        ...this.getRequiredManagePrivileges(),
+        CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE,
+      ],
+      index: [{ names, privileges: this.getRequiredIndexPrivileges() }],
+    });
   }
 
   /**
@@ -902,6 +904,20 @@ export class StreamsClient {
     });
   }
 
+  /**
+   * Lists both managed and unmanaged classic streams
+   */
+  async listClassicStreams(): Promise<Streams.ClassicStream.Definition[]> {
+    const streams = await this.listStreamsWithDataStreamExistence();
+
+    return streams
+      .filter(
+        (data): data is { stream: Streams.ClassicStream.Definition; exists: boolean } =>
+          data.stream.type === 'classic'
+      )
+      .map(({ stream }) => stream);
+  }
+
   async listStreamsWithDataStreamExistence(): Promise<
     Array<{ stream: Streams.all.Definition; exists: boolean }>
   > {
@@ -915,11 +931,13 @@ export class StreamsClient {
     );
 
     unmanagedStreams.forEach((stream) => {
-      if (!allDefinitionsById.get(stream.name)) {
+      const definition = allDefinitionsById.get(stream.name);
+
+      if (!definition) {
         allDefinitionsById.set(stream.name, { stream, exists: true });
       } else {
         allDefinitionsById.set(stream.name, {
-          ...allDefinitionsById.get(stream.name)!,
+          ...definition,
           exists: true,
         });
       }
@@ -946,7 +964,7 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams.map((dataStream) => ({
+    return response.data_streams.filter(shouldIncludeFromStreamsList).map((dataStream) => ({
       type: 'classic' as const,
       name: dataStream.name,
       description: '',
@@ -1093,9 +1111,9 @@ export class StreamsClient {
   }
 
   private async syncAssets(definition: Streams.all.Definition, request: Streams.all.UpsertRequest) {
-    const { dashboards, queries, rules } = request;
+    const { dashboards, rules } = request;
 
-    const ops: Array<Promise<unknown>> = [
+    await Promise.all([
       this.dependencies.attachmentClient.syncAttachmentList(
         definition.name,
         dashboards.map((dashboard) => ({
@@ -1112,18 +1130,6 @@ export class StreamsClient {
         })),
         'rule'
       ),
-    ];
-
-    if (this.dependencies.getQueryClient) {
-      const queryClient = await this.dependencies.getQueryClient();
-      ops.push(
-        queryClient.syncQueries(
-          definition,
-          queries.map((q) => ({ ...q, type: deriveQueryType(q.esql.query) }))
-        )
-      );
-    }
-
-    await Promise.all(ops);
+    ]);
   }
 }

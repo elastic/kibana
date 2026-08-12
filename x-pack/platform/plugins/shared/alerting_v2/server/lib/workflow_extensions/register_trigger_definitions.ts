@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import type { WorkflowExtensionsServiceContract } from '../services/workflow_extensions_service/workflow_extensions_service';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { ALERT_ACTION_WORKFLOW_TRIGGERS } from '../events/alert_action_workflow_subscriber/triggers';
+import { RULE_WORKFLOW_TRIGGERS } from '../events/rule_workflow_subscriber/triggers';
+import { RULE_EXECUTOR_WORKFLOW_TRIGGERS } from '../events/rule_executor_workflow_subscriber/triggers';
 
 /**
  * Registers all alerting-v2 server-side workflow trigger definitions.
- * Call once during plugin setup with the resolved {@link WorkflowExtensionsService}.
+ *
+ * Alert-action, rule-lifecycle and rule-executor triggers are registered from
+ * their respective catalogs — the same catalogs the workflow subscribers walk
+ * at dispatch time.
+ *
+ * Call once during plugin setup.
  */
 export function registerTriggerDefinitions(
-  workflowExtensionsService: WorkflowExtensionsServiceContract
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void {
-  workflowExtensionsService.registerTriggerDefinitions([
-    // Add CommonTriggerDefinition-backed entries here (import from common when added).
-  ]);
+  for (const trigger of ALERT_ACTION_WORKFLOW_TRIGGERS) {
+    workflowsExtensions.registerTriggerDefinition(trigger.definition);
+  }
+
+  for (const trigger of RULE_WORKFLOW_TRIGGERS) {
+    workflowsExtensions.registerTriggerDefinition(trigger.definition);
+  }
+
+  for (const trigger of RULE_EXECUTOR_WORKFLOW_TRIGGERS) {
+    workflowsExtensions.registerTriggerDefinition(trigger.definition);
+  }
 }

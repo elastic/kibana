@@ -33,7 +33,7 @@ export const removeAllArtifacts = () => {
   }
 };
 
-export const removeAllArtifactsPromise = () =>
+export const removeAllArtifactsPromise = (): PromiseLike<number> =>
   Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
     (result) => result.filter(Boolean).length
   );
@@ -69,6 +69,8 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
   [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]:
     ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
   [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS,
+  [ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id]:
+    ExceptionListTypeEnum.ENDPOINT_CUSTOM_YARA_SIGNATURES,
 };
 
 export const createArtifactList = (listId: keyof typeof ENDPOINT_ARTIFACT_LIST_TYPES) => {
@@ -247,19 +249,19 @@ export const trustedDevicesFormSelectors = {
   },
 
   selectField: (field: 'Username' | 'Host' | 'Device ID' | 'Manufacturer' | 'Product ID') => {
-    cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').click();
     cy.get('[role="option"]').contains(field).click();
   },
 
   selectOperator: (operator: 'is' | 'matches') => {
-    cy.getByTestSubj('trustedDevices-form-operatorSelect').click();
+    cy.getByTestSubj('trustedDevices-form-entry0operatorSelect').click();
     cy.get('[role="option"]')
       .contains(operator === 'is' ? 'is' : 'matches')
       .click();
   },
 
   fillValue: (value: string) => {
-    cy.getByTestSubj('trustedDevices-form-valueField').within(() => {
+    cy.getByTestSubj('trustedDevices-form-entry0valueField').within(() => {
       cy.get('input[role="combobox"]').click();
       cy.get('input[role="combobox"]').should('be.focused');
       cy.get('input[role="combobox"]').type(`{selectall}{backspace}`);

@@ -329,6 +329,82 @@ describe('zod', () => {
       });
     });
 
+    test.each([
+      [
+        'schema > optional > meta',
+        z
+          .string()
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .optional(),
+      ],
+      [
+        'schema > default > meta',
+        z
+          .string()
+          .default('foo')
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo'),
+      ],
+      [
+        'schema > default > optional > meta',
+        z
+          .string()
+          .default('foo')
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo')
+          .optional(),
+      ],
+    ])('applies openapi availability x-state regardless of modifier order (%s)', (_name, tags) => {
+      const result = convertQuery(z.object({ tags }));
+      expect(result.query.at(0)?.schema).toHaveProperty(
+        'x-state',
+        'Generally available; added in 9.5.0'
+      );
+    });
+
+    test('omits availability since from query param x-state in serverless mode', () => {
+      const result = convertQuery(
+        z.object({
+          tags: z
+            .string()
+            .optional()
+            .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+        }),
+        { env: { serverless: true } }
+      );
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'tags',
+          required: false,
+          schema: {
+            type: 'string',
+            'x-state': 'Generally available',
+          },
+        },
+      ]);
+    });
+
     test('handles transform schemas (like dateFromString)', () => {
       const dateFromString = z.string().transform((input) => new Date(input));
       const schema = z.object({ from: dateFromString, to: dateFromString });
@@ -525,7 +601,7 @@ describe('zod', () => {
         id: 'TagWithAvailability',
         openapi: {
           availability: {
-            stability: 'beta',
+            stability: 'tech_preview',
             since: '9.4.0',
           },
         },
@@ -535,7 +611,7 @@ describe('zod', () => {
 
       expect(result.shared.TagWithAvailability).toMatchObject({
         type: 'object',
-        'x-state': 'Beta; added in 9.4.0',
+        'x-state': 'Technical Preview; added in 9.4.0',
       });
 
       const outputStr = JSON.stringify(result);

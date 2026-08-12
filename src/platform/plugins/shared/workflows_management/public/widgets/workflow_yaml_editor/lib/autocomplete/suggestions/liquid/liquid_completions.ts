@@ -194,6 +194,13 @@ export const LIQUID_FILTERS = [
       '{{ products | has_exp: "item", "item.price > 100" }} => true if any product has price > 100',
   },
   {
+    name: 'hmac_sha256',
+    description: 'Returns the HMAC-SHA256 hex digest of a string using the given secret key',
+    insertText: 'hmac_sha256: "${1:secret}"',
+    example:
+      '{{ "Polyjuice" | hmac_sha256: "Polina" }} => "8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20"',
+  },
+  {
     name: 'join',
     description: 'Combines the items in an array into a single string',
     insertText: 'join: "${1:separator}"',
@@ -253,6 +260,14 @@ export const LIQUID_FILTERS = [
     description: 'Counts the number of words in a string',
     insertText: 'number_of_words',
     example: '{{ "hello world" | number_of_words }} => 2',
+  },
+  {
+    name: 'pick',
+    description:
+      'Keeps only the given dotted-path fields of an object, preserving nested structure and value types',
+    insertText: 'pick: ${1:paths}',
+    example:
+      '{{ alert | pick: ["host.name", "event.action"] }} => { host: { name: ... }, event: { action: ... } }',
   },
   {
     name: 'plus',
@@ -346,6 +361,13 @@ export const LIQUID_FILTERS = [
     description: 'Removes all whitespace from the end of a string',
     insertText: 'rstrip',
     example: '{{ "hello   " | rstrip }} => "hello"',
+  },
+  {
+    name: 'sha256',
+    description: 'Returns the SHA-256 hex digest of a string',
+    insertText: 'sha256',
+    example:
+      '{{ "Polyjuice" | sha256 }} => "44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0"',
   },
   {
     name: 'shift',

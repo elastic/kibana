@@ -1,6 +1,7 @@
 # Kibana
 
 ## Setup
+- Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`).
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
@@ -16,7 +17,7 @@
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
@@ -34,6 +35,7 @@ Always run `node scripts/check_changes.ts` to validate your changes
 
 ### Scout (UI/API with Playwright)
 `node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+- When iterating, start the stack once with `node scripts/scout start-server --arch stateful --domain classic` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
@@ -43,6 +45,7 @@ Follow existing patterns in the target area first; below are common defaults.
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
   `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
+- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.
@@ -81,9 +84,15 @@ Follow existing patterns in the target area first; below are common defaults.
 - Avoid inline styles unless consistent with the file’s conventions.
 - Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
 
+### Schema validation
+- When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
+
 ## Internationalization (i18n)
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
+
+## CI
+- Use the `bk` CLI when interacting with Buildkite.
 
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
@@ -91,4 +100,4 @@ Follow existing patterns in the target area first; below are common defaults.
 - Make focused changes; avoid unrelated refactors.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
-- Always open PRs as draft.
+- Only comment exported functions with one concise sentence and non-trivial code paths.

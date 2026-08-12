@@ -156,7 +156,6 @@ const createFilterFromRawColumnsESQL = async (
   });
 
   // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
-  // (e.g. `column.name` is still the result column / display label in some cases).
   const sourceFieldName = column.meta?.sourceParams?.sourceField;
   const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
 
@@ -164,6 +163,16 @@ const createFilterFromRawColumnsESQL = async (
 
   // Field should be present in the data view and filterable
   if (!field || !field.filterable) {
+    return [];
+  }
+
+  // A computed column (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
+  // filterable field, so the check above isn't enough: fieldName would resolve to that
+  // unrelated field, but the value shown is the computed one, not the raw field's value.
+  if (
+    column.isComputedColumn === true &&
+    column.meta?.sourceParams?.isSourceFieldFilterable !== true
+  ) {
     return [];
   }
 

@@ -6,8 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
-
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 export interface GroupActionRow {
   group_hash: string;
   rule_id: string | null;
@@ -19,10 +18,11 @@ export interface GroupActionRow {
   last_deactivate_actor: string | null;
 }
 
-export const buildGroupActionsQuery = (groupHashes: string[]) => {
+export const buildGroupActionsQuery = (spaceId: string, groupHashes: string[]) => {
   const groupHashLiterals = groupHashes.map((h) => esql.str(h));
   // prettier-ignore
   return esql.from(ALERT_ACTIONS_DATA_STREAM)
+    .where`space_id == ${spaceId}`
     .where`group_hash IN (${groupHashLiterals})`
     .where`action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag")`
     .pipe`STATS

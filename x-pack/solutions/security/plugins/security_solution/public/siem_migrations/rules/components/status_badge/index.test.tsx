@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { StatusBadge } from '.';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { getRuleMigrationRuleMock } from '../../../../../common/siem_migrations/model/__mocks__';
@@ -86,7 +86,7 @@ describe('StatusBadge', () => {
     fireEvent.mouseOver(getByText('Installed'));
 
     await waitFor(() => {
-      expect(getByText('Installed')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Installed');
     });
   });
 
@@ -100,7 +100,7 @@ describe('StatusBadge', () => {
     fireEvent.mouseOver(getByText('Translated'));
 
     await waitFor(() => {
-      expect(getByText('Translated')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Translated');
     });
   });
 
@@ -114,7 +114,9 @@ describe('StatusBadge', () => {
     fireEvent.mouseOver(getByText('Partially translated'));
 
     await waitFor(() => {
-      expect(getByText('Partially translated')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
+        'Partially translated'
+      );
     });
   });
 
@@ -128,7 +130,7 @@ describe('StatusBadge', () => {
     fireEvent.mouseOver(getByText('Not translated'));
 
     await waitFor(() => {
-      expect(getByText('Not translated')).toBeInTheDocument();
+      expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent('Not translated');
     });
   });
 });

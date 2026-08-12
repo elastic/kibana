@@ -16,6 +16,7 @@ import type { CSSProperties } from 'react';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 export interface SavedSearchComponentDependencies {
   embeddable: EmbeddableStart;
@@ -56,4 +57,11 @@ export interface SavedSearchComponentProps extends SavedSearchTableConfig {
   height?: CSSProperties['height'];
   displayOptions?: NonPersistedDisplayOptions;
   onTableConfigChange?: (config: SavedSearchTableConfig) => void;
+  /**
+   * Called synchronously when the embeddable column state changes.
+   * Return column names to substitute Discover default/Summary columns; return
+   * undefined to keep the emitted columns.
+   */
+  resolveColumnsOnChange?: (columns: string[] | undefined) => string[] | undefined;
+  executionContext?: KibanaExecutionContext;
 }

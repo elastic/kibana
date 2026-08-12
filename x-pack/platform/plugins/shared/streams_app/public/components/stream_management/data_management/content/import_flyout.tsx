@@ -28,11 +28,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
 import { getFormattedError } from '../../../../util/errors';
@@ -50,10 +50,6 @@ export function ImportContentPackFlyout({
   const {
     core: { http, notifications },
   } = useKibana();
-
-  const {
-    features: { significantEvents },
-  } = useStreamsPrivileges();
 
   const modalTitleId = useGeneratedHtmlId();
 
@@ -99,8 +95,7 @@ export function ImportContentPackFlyout({
             initialPromptText={i18n.translate(
               'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
               {
-                defaultMessage:
-                  'You can drop your streams .zip content here and install them right away.',
+                defaultMessage: 'Drop a content pack .zip here to preview and import it.',
               }
             )}
             fullWidth
@@ -149,7 +144,7 @@ export function ImportContentPackFlyout({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="package" />
+                    <EuiIcon type="package" aria-hidden={true} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>
@@ -158,19 +153,29 @@ export function ImportContentPackFlyout({
                 </EuiFlexGroup>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.streams.importContentPackFlyout.closeIcon', {
                       defaultMessage: 'Close',
                     })}
-                    iconType="cross"
-                    color="danger"
-                    onClick={() => {
-                      setFile(undefined);
-                      setManifest(undefined);
-                      setContentPackObjects(undefined);
-                      setIncludedObjects({ objects: { all: {} } });
-                    }}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.streams.importContentPackFlyout.closeIcon',
+                        {
+                          defaultMessage: 'Close',
+                        }
+                      )}
+                      iconType="cross"
+                      color="danger"
+                      onClick={() => {
+                        setFile(undefined);
+                        setManifest(undefined);
+                        setContentPackObjects(undefined);
+                        setIncludedObjects({ objects: { all: {} } });
+                      }}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -180,7 +185,6 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.enabled ?? false}
             />
           </>
         ) : null}
@@ -223,7 +227,7 @@ export function ImportContentPackFlyout({
                   setContentPackObjects(undefined);
                   setFile(undefined);
                   notifications.toasts.addSuccess(
-                    i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
+                    i18n.translate('xpack.streams.importContentPackFlyout.importSuccess', {
                       defaultMessage: 'Content imported successfully',
                     })
                   );

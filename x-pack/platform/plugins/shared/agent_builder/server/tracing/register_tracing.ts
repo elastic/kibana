@@ -9,70 +9,104 @@ import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { LateBindingSpanProcessor, ElasticsearchOtlpExporter } from '@kbn/tracing';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { buildOtelResources } from '@kbn/telemetry';
+import {
+  ElasticsearchOtlpExporter,
+  LateBindingSpanProcessor,
+  EvalSpanProcessor,
+} from '@kbn/tracing';
+import {
+  initInferenceTracerProvider,
+  shutdownInferenceTracerProvider,
+  EXECUTION_ID_BAGGAGE_KEY,
+  EVAL_EXPERIMENT_ID_BAGGAGE_KEY,
+} from '@kbn/inference-tracing';
+import {
+  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
+  AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
+  AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
+  AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
+  AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
+  AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
+} from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { LRUCache } from 'lru-cache';
+import type { TracingPrivacySettings } from './agent_builder_span_processor';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import { GlobalBridgeProcessor } from './global_bridge_processor';
+import { OpikDistributedTracingSpanProcessor } from './opik_distributed_tracing';
+import { DATA_STREAM_NAMESPACE_ATTR, SPACE_ID_BAGGAGE_KEY } from './agent_builder_context';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
 /**
- * Returns a synchronous `isEnabled()` function backed by an LRU cache with
- * stale-while-revalidate semantics.
- * We need the cache to prevent calling the async uiSettings read on the hot path.
- *
- * The span processor hot-path requires also required synchronous check, but the underlying uiSettings read is async.
- * The cache with `allowStale: true` ensures `isEnabled()` always returns instantly
- * (stale or fresh) while a background fetch refreshes the value every {@link SETTING_CACHE_TTL_MS} ms.
+ * Returns a synchronous `getSettings()` function that polls all tracing privacy
+ * uiSettings on a fixed interval. The span processor hot-path requires synchronous
+ * access, so we refresh in the background every {@link SETTING_CACHE_TTL_MS} ms.
  */
-const createCachedIsEnabled = async (core: CoreStart, logger: Logger): Promise<() => boolean> => {
-  const cache = new LRUCache<string, boolean>({
-    max: 1,
-    ttl: SETTING_CACHE_TTL_MS,
-    allowStale: true,
-    noDeleteOnStaleGet: true,
-    noDeleteOnFetchRejection: true,
-    fetchMethod: async () => {
+const createCachedTracingSettings = async (
+  core: CoreStart,
+  logger: Logger
+): Promise<{ getSettings: () => TracingPrivacySettings; stopPolling: () => void }> => {
+  let settings: TracingPrivacySettings = {
+    enabled: false,
+    includeUserPrompts: false,
+    includeLlmResponses: false,
+    includeToolDetails: false,
+    includeSystemPrompt: false,
+    includeRealNames: false,
+    includeRealIds: false,
+    includeUserData: false,
+  };
+
+  const refresh = async () => {
+    try {
       const internalRepo = core.savedObjects.createInternalRepository();
       const internalClient = new SavedObjectsClient(internalRepo);
-      return core.uiSettings
-        .asScopedToClient(internalClient)
-        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-    },
-  });
-
-  // Eagerly populate the cache so the first synchronous isEnabled() call has a value
-  await cache.fetch('enabled').catch((error) => {
-    logger.error(`Failed to fetch tracing settings: ${error.message}`);
-  });
-
-  return () => {
-    // Stale-while-revalidate: trigger a background refresh when the entry is past TTL.
-    void cache.fetch('enabled').catch((error) => {
-      logger.error(`Failed to refresh tracing settings: ${error.message}`);
-    });
-    return cache.get('enabled') ?? false;
+      const client = core.uiSettings.asScopedToClient(internalClient);
+      const [
+        enabled,
+        includeUserPrompts,
+        includeLlmResponses,
+        includeToolDetails,
+        includeSystemPrompt,
+        includeRealNames,
+        includeRealIds,
+        includeUserData,
+      ] = await Promise.all([
+        client.get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID),
+        client.get<boolean>(AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID),
+      ]);
+      settings = {
+        enabled,
+        includeUserPrompts,
+        includeLlmResponses,
+        includeToolDetails,
+        includeSystemPrompt,
+        includeRealNames,
+        includeRealIds,
+        includeUserData,
+      };
+    } catch (error) {
+      logger.error(`Failed to fetch tracing settings: ${error.message}`);
+    }
   };
-};
 
-const buildExporters = (
-  core: CoreStart,
-  tracingConfig: AgentBuilderConfig['tracing']
-): tracing.SpanExporter[] => {
-  return [
-    ...(tracingConfig.send_to_self
-      ? [new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser)]
-      : []),
-    ...tracingConfig.exporters.map(
-      ({ url, headers }) =>
-        new OTLPTraceExporter({
-          url,
-          ...(headers ? { headers } : {}),
-        })
-    ),
-  ];
+  await refresh();
+  const intervalId = setInterval(refresh, SETTING_CACHE_TTL_MS);
+
+  return {
+    getSettings: () => settings,
+    stopPolling: () => clearInterval(intervalId),
+  };
 };
 
 export const registerTracingExporter = async ({
@@ -84,24 +118,56 @@ export const registerTracingExporter = async ({
   tracingConfig: AgentBuilderConfig['tracing'];
   logger: Logger;
 }): Promise<(() => Promise<void>) | undefined> => {
-  const exporters = buildExporters(core, tracingConfig);
+  const { getSettings, stopPolling } = await createCachedTracingSettings(core, logger);
 
-  if (exporters.length === 0) {
-    return undefined;
+  // Always include the ES exporter so that enabling the uiSetting takes effect
+  // within the next polling cycle, without requiring a server restart.
+  const allExporters: tracing.SpanExporter[] = [
+    new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),
+    ...tracingConfig.exporters.map(
+      ({ url, headers }) =>
+        new OTLPTraceExporter({
+          url,
+          ...(headers ? { headers } : {}),
+        })
+    ),
+  ];
+
+  const processors: tracing.SpanProcessor[] = [
+    ...(tracingConfig.opik_distributed_tracing ? [new OpikDistributedTracingSpanProcessor()] : []),
+    ...allExporters.map(
+      (exporter) =>
+        new AgentBuilderSpanProcessor({
+          exporter,
+          scheduledDelayMillis: tracingConfig.scheduledDelay,
+          getSettings,
+        })
+    ),
+  ];
+
+  processors.push(
+    new EvalSpanProcessor([
+      { baggageKey: EXECUTION_ID_BAGGAGE_KEY },
+      { baggageKey: EVAL_EXPERIMENT_ID_BAGGAGE_KEY },
+      { baggageKey: SPACE_ID_BAGGAGE_KEY, attributeKey: DATA_STREAM_NAMESPACE_ATTR },
+    ])
+  );
+
+  const lateBindingProcessor = LateBindingSpanProcessor.get();
+  if (lateBindingProcessor) {
+    processors.push(new GlobalBridgeProcessor(lateBindingProcessor));
   }
 
-  const isEnabled = await createCachedIsEnabled(core, logger);
+  const resource = buildOtelResources();
+  await resource.waitForAsyncAttributes?.();
 
-  const tearDowns = exporters.map((exporter) => {
-    const processor = new AgentBuilderSpanProcessor({
-      exporter,
-      scheduledDelayMillis: tracingConfig.scheduledDelay,
-      isEnabled,
-    });
-    return LateBindingSpanProcessor.register(processor);
+  initInferenceTracerProvider({
+    processors,
+    resource,
   });
 
   return async () => {
-    await Promise.all(tearDowns.map((teardown) => teardown()));
+    stopPolling();
+    await shutdownInferenceTracerProvider();
   };
 };

@@ -9,7 +9,6 @@
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiBasicTable,
   EuiSpacer,
   EuiScreenReaderOnly,
@@ -22,10 +21,13 @@ import {
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RemoveDataViewProps } from '../edit_index_pattern';
 import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
+import type { IndexPatternManagmentContext } from '../../types';
 
 const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {
   defaultMessage: 'all',
@@ -84,6 +86,8 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   reviewedItems,
   setReviewedItems,
 }) => {
+  const { http } = useKibana<IndexPatternManagmentContext>().services;
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -103,7 +107,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
           }),
           render: (meta: SavedObjectRelation['meta']) => {
             return meta.inAppUrl ? (
-              <EuiLink target="_blank" href={meta.inAppUrl.path}>
+              <EuiLink target="_blank" href={http.basePath.prepend(meta.inAppUrl.path)}>
                 {meta.title}
               </EuiLink>
             ) : (
@@ -205,6 +209,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                     type={
                       itemIdToExpandedRowMapValues[id] ? 'chevronSingleDown' : 'chevronSingleRight'
                     }
+                    aria-hidden={true}
                   />
                 </EuiFlexGroup>
               </EuiButtonEmpty>
@@ -231,20 +236,10 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     <div>
       {showRelationshipsCallout ? (
         <>
-          <EuiCallOut
-            announceOnMount={false}
-            color="danger"
-            iconType="warning"
-            title={relationshipCalloutText}
-          />
+          <KbnDangerCallout announceOnMount={false} title={relationshipCalloutText} />
         </>
       ) : (
-        <EuiCallOut
-          announceOnMount={false}
-          color="warning"
-          iconType="warning"
-          title={spacesWarningText}
-        />
+        <KbnWarningCallout announceOnMount={false} title={spacesWarningText} />
       )}
       <EuiSpacer size="m" />
       <div>

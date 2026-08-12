@@ -23,13 +23,14 @@ export const mapConvertResponseToResult = (
 
   for (let i = 0; i < convertResponse.results.length && i < apiKeysToConvert.length; i++) {
     const item = convertResponse.results[i];
-    const { ruleId, attributes, version } = apiKeysToConvert[i];
+    const { ruleId, attributes, version, namespace } = apiKeysToConvert[i];
     if (item.status === 'success') {
       rulesWithUiamApiKeys.set(ruleId, {
         ruleId,
         uiamApiKey: Buffer.from(`${item.id}:${item.key}`).toString('base64'),
         attributes,
         version,
+        namespace,
       });
     } else if (item.status === 'failed') {
       provisioningStatusForFailedConversions.push(

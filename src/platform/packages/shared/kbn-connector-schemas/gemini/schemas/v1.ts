@@ -42,13 +42,14 @@ export const SecretsSchema = lazySchema(() =>
 export const RunActionParamsSchema = lazySchema(() =>
   z
     .object({
-      body: z.any(),
+      body: z.any().optional(),
       model: z.string().optional(),
       signal: z.any().optional(),
       timeout: z.coerce.number().optional(),
       temperature: z.coerce.number().optional(),
       stopSequences: z.array(z.string()).optional(),
       raw: z.boolean().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()
@@ -85,7 +86,7 @@ export const InvokeAIActionParamsSchema = lazySchema(() =>
   z
     .object({
       maxOutputTokens: z.coerce.number().optional(),
-      messages: z.any(),
+      messages: z.any().optional(),
       systemInstruction: z.string().optional(),
       model: z.string().optional(),
       temperature: z.coerce.number().optional(),
@@ -100,6 +101,7 @@ export const InvokeAIActionParamsSchema = lazySchema(() =>
         })
         .strict()
         .optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()

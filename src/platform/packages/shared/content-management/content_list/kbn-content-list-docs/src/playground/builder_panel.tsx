@@ -245,32 +245,18 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getHref', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="getEditUrl">
-            <InlineCheckbox
-              id={`${idPrefix}-getEditUrl`}
-              checked={item.getEditUrl}
-              onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'getEditUrl', value: v })}
-            />
-          </JsxPropDisplay>
-          <JsxPropDisplay name="onEdit">
+          <JsxPropDisplay name="actions.edit">
             <InlineCheckbox
               id={`${idPrefix}-onEdit`}
               checked={item.onEdit}
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onEdit', value: v })}
             />
           </JsxPropDisplay>
-          <JsxPropDisplay name="onDelete">
+          <JsxPropDisplay name="actions.delete">
             <InlineCheckbox
               id={`${idPrefix}-onDelete`}
               checked={item.onDelete}
               onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onDelete', value: v })}
-            />
-          </JsxPropDisplay>
-          <JsxPropDisplay name="onInspect">
-            <InlineCheckbox
-              id={`${idPrefix}-onInspect`}
-              checked={item.onInspect}
-              onChange={(v) => dispatch({ type: 'SET_ITEM_PROP', key: 'onInspect', value: v })}
             />
           </JsxPropDisplay>
         </JsxPropBlock>
@@ -317,6 +303,13 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               id={`${idPrefix}-userProfiles`}
               checked={features.userProfiles}
               onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'userProfiles', value: v })}
+            />
+          </JsxPropDisplay>
+          <JsxPropDisplay name="contentEditor.open">
+            <InlineCheckbox
+              id={`${idPrefix}-contentEditor`}
+              checked={features.contentEditor}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'contentEditor', value: v })}
             />
           </JsxPropDisplay>
         </JsxPropBlock>
@@ -407,9 +400,11 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
                         col.type === 'actions' &&
                         !item.onEdit &&
                         !item.onDelete &&
-                        !item.onInspect &&
-                        !col.actions.some((a) => !['edit', 'delete', 'inspect'].includes(a.type))
-                          ? 'This column is hidden because no item actions (onEdit, onDelete, onInspect) are configured on the provider and no custom actions are present.'
+                        !features.contentEditor &&
+                        !col.actions.some(
+                          (a) => !['edit', 'delete', 'contentEditor'].includes(a.type)
+                        )
+                          ? 'This column is hidden because no row entry points are wired (actions.edit, actions.delete, features.contentEditor.open) and no custom actions are present.'
                           : undefined
                       }
                     />

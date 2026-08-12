@@ -49,6 +49,10 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
+if [[ "$MERGE_QUEUE_TARGET_BRANCH" ]]; then
+  set_merge_queue_git_info
+fi
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -70,8 +74,10 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
 
+export KBN_DISALLOW_CODE_GEN_FROM_STRINGS=true
+
 export ELASTIC_APM_ENVIRONMENT=ci
-export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01
 export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=false
 
 if is_pr; then
@@ -91,6 +97,10 @@ if is_pr; then
   # value for security genai prompts evals
   if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
     export IS_SECURITY_AI_PROMPT_TEST=true
+  fi
+
+  if is_pr_with_label "ci:ingest-test-logs"; then
+    export CI_STATS_INGEST_TEST_LOGS=true
   fi
   
   export BUILD_URL="$BUILDKITE_BUILD_URL"

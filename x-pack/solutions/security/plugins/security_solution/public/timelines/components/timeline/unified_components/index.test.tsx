@@ -12,7 +12,6 @@ import { UnifiedTimeline } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import {
   createSecuritySolutionStorageMock,
@@ -24,7 +23,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
@@ -44,11 +43,6 @@ jest.mock('../../../containers/details');
 
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../common/lib/kuery');
@@ -180,10 +174,6 @@ const useTimelineEventsMock = jest.fn(() => [
   },
 ]);
 
-const useSourcererDataViewMocked = jest.fn().mockReturnValue({
-  ...mockSourcererScope,
-});
-
 const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 describe('unified timeline', () => {
@@ -218,8 +208,6 @@ describe('unified timeline', () => {
     (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockImplementation(useSourcererDataViewMocked);
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
       useIsExperimentalFeatureEnabledMock

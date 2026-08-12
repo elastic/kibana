@@ -7,16 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../../flyout_v2/shared/components/expandable_section';
-import { GraphPreviewContainer } from '../../../../shared/components/graph_preview_container';
-import {
-  VISUALIZATION_SECTION_TEST_ID,
-  VISUALIZATION_SECTION_TITLE,
-} from '../../../../../flyout_v2/document/components/visualizations_section';
+import { VISUALIZATION_SECTION_TEST_ID } from '../../../../../flyout_v2/document/main/components/visualizations_section';
+import { VISUALIZATION_SECTION_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 import { EntityDetailsLeftPanelTab, type EntityDetailsPath } from '../left_panel/left_panel_header';
+import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 
 const KEY = 'visualizations';
 
@@ -29,11 +27,14 @@ export const VisualizationsSection = memo(
     isPreviewMode,
     scopeId,
     openDetailsPanel,
+    hideHeaderIcons = false,
   }: {
     entityId: string;
     isPreviewMode: boolean;
     scopeId: string;
     openDetailsPanel?: (path: EntityDetailsPath) => void;
+    /** When true, hides the chevron icon in the graph preview header. Used by the v2 flyout. */
+    hideHeaderIcons?: boolean;
   }) => {
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -56,12 +57,15 @@ export const VisualizationsSection = memo(
             sectionId={KEY}
             data-test-subj={VISUALIZATION_SECTION_TEST_ID}
           >
-            <GraphPreviewContainer
-              mode="entity"
+            <EntityGraphPreviewContainer
               entityId={entityId}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-              onExpandGraph={handleOpenGraphViewTab}
+              // header link + arrow only shown when navigation is wired up (onShowGraph set)
+              showIcon={!isPreviewMode && openDetailsPanel != null && !hideHeaderIcons}
+              onShowGraph={
+                isPreviewMode || scopeId === TableId.rulePreview
+                  ? undefined
+                  : handleOpenGraphViewTab
+              }
             />
           </ExpandableSection>
         )}

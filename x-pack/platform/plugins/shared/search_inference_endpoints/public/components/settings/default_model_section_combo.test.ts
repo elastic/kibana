@@ -7,7 +7,19 @@
 
 jest.mock('@kbn/i18n', () => ({
   i18n: {
-    translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    translate: (
+      _id: string,
+      {
+        defaultMessage,
+        values,
+      }: { defaultMessage: string; values?: Record<string, string | number> }
+    ) => {
+      if (!values) return defaultMessage;
+      return Object.entries(values).reduce(
+        (msg, [key, value]) => msg.replace(`{${key}}`, String(value)),
+        defaultMessage
+      );
+    },
   },
 }));
 
@@ -15,6 +27,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import {
+  connectorToGlobalModelComboOption,
   getGlobalModelComboOptions,
   getGlobalModelSelectedOptions,
 } from './default_model_section_combo';
@@ -89,6 +102,48 @@ describe('default_model_section_combo', () => {
     it('returns empty array when the value does not match any option', () => {
       const opts = getGlobalModelComboOptions(connectors, true);
       expect(getGlobalModelSelectedOptions('nonexistent-id', opts, true)).toEqual([]);
+    });
+  });
+
+  describe('connectorToGlobalModelComboOption', () => {
+    const baseConnector: InferenceConnector = {
+      ...baseMockConnector,
+      connectorId: 'ep-1',
+      name: 'My Model',
+      isPreconfigured: true,
+    };
+
+    it('returns the plain connector name when metadata is undefined', () => {
+      const option = connectorToGlobalModelComboOption(baseConnector);
+      expect(option).toEqual({ label: 'My Model', value: 'ep-1' });
+    });
+
+    it('returns the plain connector name for a GA model', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: { heuristics: { status: 'ga' } },
+      });
+      expect(option.label).toBe('My Model');
+    });
+
+    it('appends " - Deprecated" when the model is deprecated but not yet EOL', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' },
+        },
+      });
+      expect(option.label).toBe('My Model - Deprecated');
+    });
+
+    it('appends " - End of Life" when the EOL date is in the past', () => {
+      const option = connectorToGlobalModelComboOption({
+        ...baseConnector,
+        metadata: {
+          heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
+        },
+      });
+      expect(option.label).toBe('My Model - End of Life');
     });
   });
 });

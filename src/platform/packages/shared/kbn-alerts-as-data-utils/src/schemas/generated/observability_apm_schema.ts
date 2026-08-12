@@ -74,12 +74,14 @@ const ObservabilityApmAlertRequired = rt.type({
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
   'anomaly.detector_type': schemaString,
+  'anomaly.timestamp': schemaDate,
   'container.id': schemaString,
   'error.grouping_key': schemaString,
   'error.grouping_name': schemaString,
   'host.name': schemaString,
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
+  'kibana.alert.evaluation.time_range': schemaDateRange,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,
   'kibana.alert.group': rt.array(

@@ -111,7 +111,6 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
         aria-label={flyoutHistoryButtonTooltip}
       >
         <EuiContextMenuPanel
-          size="s"
           items={historyDropdownPanels}
           data-test-subj={FLYOUT_HISTORY_CONTEXT_PANEL_TEST_ID}
         />

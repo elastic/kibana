@@ -10,7 +10,7 @@ import type { GroupingMode, ThrottleStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import { useFetchDataFields } from '../../../../hooks/use_fetch_data_fields';
+import { useFetchRuleEventFields } from '../../../../hooks/use_fetch_rule_event_fields';
 import {
   AGGREGATE_STRATEGY_HELP_TEXT,
   AGGREGATE_STRATEGY_OPTIONS,
@@ -29,11 +29,11 @@ import { DurationInput } from './duration_input/duration_input';
 
 export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
-  const groupingMode = useWatch({ control, name: 'groupingMode' });
-  const groupBy = useWatch({ control, name: 'groupBy' });
-  const throttleStrategy = useWatch({ control, name: 'throttleStrategy' });
-  const throttleInterval = useWatch({ control, name: 'throttleInterval' });
-  const { data: dataFieldNames } = useFetchDataFields();
+  const [groupingMode, groupBy, throttleStrategy, throttleInterval, matcher] = useWatch({
+    control,
+    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
+  });
+  const { data: dataFieldNames } = useFetchRuleEventFields(matcher);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {

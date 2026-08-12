@@ -49,4 +49,19 @@ describe('PresentationPanelTitle', () => {
       expect(mark?.textContent?.toLowerCase()).toBe('cpu');
     });
   });
+
+  describe('title tooltip (no description)', () => {
+    it('wraps the title in a tooltip anchor when no panel description is provided', () => {
+      renderWithTheme(<PresentationPanelTitle {...defaultProps} panelTitle="CPU Usage" />);
+
+      expect(screen.getByTestId('embeddablePanelTitleTooltipAnchor')).toBeInTheDocument();
+      expect(screen.queryByTestId('embeddablePanelTitleDescriptionIcon')).not.toBeInTheDocument();
+    });
+
+    it('does not render a tooltip when panelTitle is empty', () => {
+      renderWithTheme(<PresentationPanelTitle {...defaultProps} panelTitle="" />);
+
+      expect(screen.queryByTestId('embeddablePanelTitleTooltipAnchor')).not.toBeInTheDocument();
+    });
+  });
 });

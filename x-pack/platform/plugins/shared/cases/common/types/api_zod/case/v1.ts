@@ -120,6 +120,15 @@ export const CaseRequestFieldsSchema = CaseBaseOptionalFieldsRequestSchema.exten
 });
 
 /**
+ * Template reference accepted on case CREATION — zod mirror of `CaseRequestTemplateRt`.
+ * `version` may be omitted: the server resolves and pins the template's latest version.
+ */
+export const CaseRequestTemplateSchema = z.object({
+  id: z.string(),
+  version: z.number().int().min(1).optional(),
+});
+
+/**
  * Create case
  */
 export const CasePostRequestSchema = z.object({
@@ -152,7 +161,7 @@ export const CasePostRequestSchema = z.object({
     ])
     .optional(),
   customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseTemplateSchema.nullable().optional(),
+  template: CaseRequestTemplateSchema.nullable().optional(),
   [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
 });
 
@@ -263,9 +272,15 @@ const CasesSearchRequestSearchFieldsValues = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ] as const;
 
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
+
+const ExtendedFieldFilterSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   customFields: z
@@ -274,6 +289,7 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
   searchFields: z
     .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
     .optional(),
+  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({
@@ -287,6 +303,20 @@ export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
   page: z.number(),
   per_page: z.number(),
   total: z.number(),
+});
+
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseSchema` so the public `_find`
+ * contract (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseSchema = CasesFindResponseSchema.extend({
+  /**
+   * The average resolve time in seconds of the cases matching the search, ignoring the
+   * status filter (like the status counts). Null when no matching case has been closed.
+   */
+  mttr: z.number().nullable().optional(),
 });
 
 export const CasesSimilarResponseSchema = z.object({
@@ -408,6 +438,7 @@ export type CasesDeleteRequest = z.infer<typeof CasesDeleteRequestSchema>;
 export type CasesByAlertIDRequest = z.infer<typeof CasesByAlertIDRequestSchema>;
 export type CasesFindRequest = z.infer<typeof CasesFindRequestSchema>;
 export type CasesFindResponse = z.infer<typeof CasesFindResponseSchema>;
+export type CasesSearchResponse = z.infer<typeof CasesSearchResponseSchema>;
 export type CasePatchRequest = z.infer<typeof CasePatchRequestSchema>;
 export type CasesPatchRequest = z.infer<typeof CasesPatchRequestSchema>;
 export type GetTagsResponse = z.infer<typeof GetTagsResponseSchema>;

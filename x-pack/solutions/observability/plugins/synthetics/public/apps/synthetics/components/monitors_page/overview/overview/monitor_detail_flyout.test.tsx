@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as reduxHooks from 'react-redux-v7';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
@@ -14,8 +15,9 @@ import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { getMonitorAction } from '../../../../state';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -28,6 +30,18 @@ useFetcherMock.mockReturnValue({
   data: { monitor: { tags: ['tag1', 'tag2'] } },
   status: 200,
   refetch: jest.fn(),
+});
+
+// `jest.mock('@kbn/observability-shared-plugin/public')` auto-mocks every export
+// with `() => undefined`. The flyout renders `MonitorStatusPanel`, which now
+// reaches `useExternalMonitor` via `useSelectedMonitor`; that hook destructures
+// `useEsSearch(...)`, so the mock must return a non-undefined result.
+const useEsSearchMock = useEsSearch as jest.Mock;
+
+useEsSearchMock.mockReturnValue({
+  data: undefined,
+  loading: false,
+  error: undefined,
 });
 
 describe('Monitor Detail Flyout', () => {
@@ -112,6 +126,57 @@ describe('Monitor Detail Flyout', () => {
     getByText(testErrorText, { exact: false });
   });
 
+  it('hides the fetch-error callout when overview heartbeat data is available (cross-space)', () => {
+    const testErrorText = 'This is a test error';
+
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        configId="cross-space-config-id"
+        id="cross-space-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+            syntheticsMonitorError: {
+              body: { statusCode: 404, error: 'Not Found', message: testErrorText },
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                'cross-space-config-id-us-east': {
+                  monitorQueryId: 'cross-space-id',
+                  configId: 'cross-space-config-id',
+                  name: 'Cross-space monitor',
+                  type: 'http',
+                  schedule: '1',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  spaces: ['team-a'],
+                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    expect(queryByText(testErrorText, { exact: false })).toBeNull();
+  });
+
   it('renders loading state while fetching', () => {
     const { getByRole, getByText } = render(
       <MonitorDetailFlyout
@@ -137,6 +202,49 @@ describe('Monitor Detail Flyout', () => {
     expect(getByText('Overview')).toBeInTheDocument();
     expect(getByText('Performance')).toBeInTheDocument();
     expect(getByText('Details')).toBeInTheDocument();
+  });
+
+  it('does not dispatch getMonitorAction before the active space resolves', () => {
+    // Simulate `useKibanaSpace` (which is the only `useFetcher` consumer in
+    // this component) still loading — `space` is undefined across renders.
+    // Previously the flyout would dispatch `getMonitorAction.get` without
+    // `spaceId`, hit the active space, and 404 for cross-space monitors.
+    // The retry that fires once `space` resolves was then silently dropped
+    // by the `takeLeading` saga while the first call was still in flight,
+    // leaving the 404 in Redux state forever.
+    const previousFetcherImpl = useFetcherMock.getMockImplementation();
+    useFetcherMock.mockReturnValue({
+      data: undefined,
+      loading: true,
+      refetch: jest.fn(),
+    });
+
+    const mockDispatch = jest.fn();
+    jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="cross-space-monitor"
+          id="cross-space-monitor"
+          location="US East"
+          locationId="us-east"
+          spaces={['team-a']}
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(0);
+    } finally {
+      if (previousFetcherImpl) {
+        useFetcherMock.mockImplementation(previousFetcherImpl);
+      }
+    }
   });
 
   it('renders details for fetch success', () => {
@@ -186,6 +294,313 @@ describe('Monitor Detail Flyout', () => {
     fireEvent.click(getByText('Details'));
     expect(getByText('Every 1 minute'));
     expect(getByText('test-id'));
+  });
+
+  describe('remote monitor flyout', () => {
+    it('renders remote monitor details panel instead of infinite spinner', () => {
+      const { getByText, queryByRole } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+              syntheticsMonitorLoading: false,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: ['production'],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    urls: 'https://medium.com/',
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                      kibanaUrl: 'https://remote-kibana.example.com',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      fireEvent.click(getByText('Details'));
+
+      // Should show the remote monitor details, not a loading spinner
+      expect(getByText('Monitor details')).toBeInTheDocument();
+      expect(getByText('remote-config-id')).toBeInTheDocument();
+      expect(getByText('Remote cluster')).toBeInTheDocument();
+      expect(getByText('remote-cluster-1')).toBeInTheDocument();
+      expect(queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+
+    it('renders both "View on remote cluster" and a CCS-aware "Go to monitor" button', () => {
+      const detailLinkSpy = jest
+        .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
+        .mockReturnValue(
+          '/app/synthetics/monitor/remote-config-id?locationId=europe-west3-a&remoteName=remote-cluster-1'
+        );
+
+      const { getByText, queryByText } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: [],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                      kibanaUrl: 'https://remote-kibana.example.com',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      expect(getByText('View on remote cluster')).toBeInTheDocument();
+      // The local monitor detail page is now CCS-aware, so the "Go to monitor"
+      // button is shown for remote monitors and links to the local detail page
+      // with the `remoteName` URL param.
+      expect(getByText('Go to monitor')).toBeInTheDocument();
+      expect(detailLinkSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ remoteName: 'remote-cluster-1' })
+      );
+      // Editing is still not supported for remote monitors.
+      expect(queryByText('Edit monitor')).not.toBeInTheDocument();
+    });
+
+    it('enables "View on remote cluster" using the latest ping kibanaUrl when overview metadata lacks it', () => {
+      // Overview-status metadata can omit `remote.kibanaUrl` (the `top_metrics`
+      // aggregation drops `text`-mapped fields), so the deep link must fall back
+      // to the `kibanaUrl` read straight from the latest ping's `_source`.
+      jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
+        data: {
+          docId: 'docId',
+          kibanaUrl: 'https://ping-kibana.example.com',
+          monitor: {
+            name: 'Remote HTTPS Monitor',
+            id: 'remote-monitor-id',
+            status: 'up',
+            type: 'http',
+          },
+          '@timestamp': '2013-03-01 12:54:23',
+        } as any,
+      });
+
+      const { getByTestId } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: [],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    // Note: no `kibanaUrl` on the overview metadata.
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      const viewRemoteButton = getByTestId('syntheticsMonitorDetailFlyoutViewRemoteButton');
+      expect(viewRemoteButton.getAttribute('href')).toContain('https://ping-kibana.example.com');
+    });
+  });
+
+  describe('heartbeat monitor flyout', () => {
+    const heartbeatState = {
+      monitorDetails: {
+        syntheticsMonitor: null,
+        syntheticsMonitorLoading: false,
+        // A leftover 404 from a previous local SO fetch must not surface for
+        // read-only heartbeat monitors.
+        syntheticsMonitorError: {
+          body: {
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Monitor id hb-config-id not found!',
+          },
+        },
+      },
+      overviewStatus: {
+        status: {
+          upConfigs: {},
+          downConfigs: {},
+          pendingConfigs: {},
+          // Heartbeat / autodiscovered monitors commonly land in the stale
+          // bucket; the flyout must still resolve them from there.
+          staleConfigs: {
+            'heartbeat-hb-config-id-us-east': {
+              monitorQueryId: 'hb-config-id',
+              configId: 'hb-config-id',
+              name: 'Autodiscovered monitor',
+              type: 'http',
+              schedule: '1',
+              tags: [],
+              isEnabled: true,
+              isStatusAlertEnabled: false,
+              overallStatus: 'stale',
+              origin: 'heartbeat' as const,
+              locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+            },
+          },
+          disabledConfigs: {},
+        },
+      },
+    };
+
+    it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no Go to monitor, no 404 callout)', () => {
+      jest
+        .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
+        .mockReturnValue('/app/synthetics/monitor/hb-config-id?locationId=us-east');
+
+      const { queryByText } = render(
+        <MonitorDetailFlyout
+          configId="hb-config-id"
+          id="hb-config-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        { state: heartbeatState }
+      );
+
+      // Editing is not offered, and the read-only detail page isn't available
+      // yet (coming in a follow-up), so "Go to monitor" is hidden too.
+      expect(queryByText('Go to monitor')).not.toBeInTheDocument();
+      expect(queryByText('Edit monitor')).not.toBeInTheDocument();
+      // Remote-only affordances must not appear for heartbeat monitors.
+      expect(queryByText('View on remote cluster')).not.toBeInTheDocument();
+      // The stale 404 must be suppressed since this monitor is read-only.
+      expect(queryByText('not found', { exact: false })).toBeNull();
+    });
+
+    it('does not dispatch the local saved-object fetch for heartbeat monitors', () => {
+      const mockDispatch = jest.fn();
+      jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+      render(
+        <MonitorDetailFlyout
+          configId="hb-config-id"
+          id="hb-config-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        { state: heartbeatState }
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(0);
+    });
+
+    it('renders the read-only details panel (no remote cluster row, no spinner) on the Details tab', () => {
+      const { getByText, queryByText, queryByRole } = render(
+        <MonitorDetailFlyout
+          configId="hb-config-id"
+          id="hb-config-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        { state: heartbeatState }
+      );
+
+      fireEvent.click(getByText('Details'));
+
+      // Heartbeat monitors have no local saved object, so the flyout must render
+      // the ping-derived panel rather than spinning forever waiting on it.
+      expect(getByText('Monitor details')).toBeInTheDocument();
+      expect(getByText('hb-config-id')).toBeInTheDocument();
+      expect(queryByRole('progressbar')).not.toBeInTheDocument();
+      // The remote-cluster row is remote-only and must not appear for heartbeat.
+      expect(queryByText('Remote cluster')).not.toBeInTheDocument();
+    });
   });
 
   describe('agent builder attachment', () => {

@@ -35,6 +35,15 @@ jest.mock('../../context/apm_index_settings/apm_index_settings_context', () => (
   ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// The embeddable builds an es-query from dashboard filters via this hook; mock it so the test
+// doesn't hit the real `/internal/apm/data_view/index_pattern` API (which returns undefined here).
+jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+    apmIndices: undefined,
+  }),
+}));
+
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
 >[0]['deps']['coreStart'];
@@ -146,7 +155,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when license is not platinum', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the license upgrade prompt', () => {
       const goldLicense = new License({
         signature: 'test',
         license: {
@@ -169,7 +178,8 @@ describe('ServiceMapEmbeddable', () => {
         </ApmEmbeddableContext>
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByTestId('apmLicensePromptStartTrialButton')).toBeInTheDocument();
+      expect(screen.getByText(/Platinum license/)).toBeInTheDocument();
     });
 
     it('calls onBlockingError with license error', () => {
@@ -201,7 +211,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when service map is not enabled', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the disabled prompt', () => {
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -219,7 +229,7 @@ describe('ServiceMapEmbeddable', () => {
         }
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByText('Service map is disabled')).toBeInTheDocument();
     });
 
     it('calls onBlockingError with disabled error', () => {
@@ -306,12 +316,22 @@ describe('ServiceMapEmbeddable', () => {
     it('renders the map with a link to view the full map', () => {
       renderEmbeddable();
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View in Service map/i })).toBeInTheDocument();
     });
 
-    it('hides the fit view button when embedded', () => {
+    it('seeds panel kuery into the View in Service map href', () => {
+      renderEmbeddable({ kuery: 'transaction.type: "request"' });
+
+      const fullMapLink = screen.getByRole('link', { name: /View in Service map/i });
+      expect(fullMapLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('kuery=transaction.type')
+      );
+    });
+
+    it('shows the fit view button when embedded', () => {
       renderEmbeddable();
-      expect(screen.queryByTestId('serviceMapFitViewButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('serviceMapFitViewButton')).toBeInTheDocument();
     });
 
     it('falls back to raw range values when date range is unresolved', () => {
@@ -324,6 +344,70 @@ describe('ServiceMapEmbeddable', () => {
           end: 'now-1h',
         })
       );
+    });
+  });
+
+  describe('onEmptyStateChange callback', () => {
+    it('does not fire while the topology query is loading', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.LOADING,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).not.toHaveBeenCalled();
+    });
+
+    it('does not fire on FAILURE — error state carries no signal about emptiness', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.FAILURE,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).not.toHaveBeenCalled();
+    });
+
+    it('fires with `true` on SUCCESS + zero nodes', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).toHaveBeenCalledWith(true);
+    });
+
+    it('fires with `false` on SUCCESS + non-zero nodes', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: {
+          nodes: [
+            {
+              id: 'node-1',
+              data: { id: 'node-1', label: 'service-a', isService: true as const },
+              position: { x: 0, y: 0 },
+              type: 'service',
+            },
+          ],
+          edges: [],
+          nodesCount: 1,
+          tracesCount: 10,
+        },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).toHaveBeenCalledWith(false);
+    });
+
+    it('suppresses the in-card EmptyPrompt when a host owns the empty UI (no flash before the host unmounts us)', () => {
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      const { container } = renderEmbeddable({ onEmptyStateChange: jest.fn() });
+      expect(screen.queryByText(/No services available/)).not.toBeInTheDocument();
+      expect(container.firstChild).toBeNull();
     });
   });
 });

@@ -14,7 +14,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { ActionExecutionContext, Trigger } from '@kbn/ui-actions-plugin/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { AddDiscoverSessionPanelAction } from './add_discover_session_panel_action';
 import { mockControlState } from '../../__mocks__/esql_controls';
 
@@ -25,6 +25,7 @@ jest.mock('uuid', () => ({
 const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
   uuid,
   type: ESQL_CONTROL,
+  anyStateChange$: of(),
   serializeState: () => state,
   applySerializedState: () => undefined,
 });

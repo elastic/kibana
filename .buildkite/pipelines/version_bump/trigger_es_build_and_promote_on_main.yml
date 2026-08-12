@@ -1,4 +1,31 @@
 steps:
+  - name: mock build es snapshot
+    key: mock-build-es-snapshot
+    if: build.env("DRY_RUN") == "true"
+    command: sleep 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+
+  - name: mock promote es snapshot
+    if: build.env("DRY_RUN") == "true"
+    depends_on: mock-build-es-snapshot
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    command: |
+
+      buildkite-agent pipeline upload << PIPELINE
+      steps:
+        - name: 'Mock Promote ES Snapshot trigger'
+          command: sleep 10
+
+      PIPELINE
+
   - key: build-es-snapshot
     label: Build ES Snapshot
     trigger: kibana-elasticsearch-snapshot-build

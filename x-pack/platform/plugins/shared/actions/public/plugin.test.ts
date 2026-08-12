@@ -94,23 +94,29 @@ describe('Actions Plugin', () => {
       expect(pluginSetup.isEarsEnabled).toBe(true);
     });
 
-    it('falls back to legacy ears.enabled when auth.ears.enabled is not set', async () => {
-      const context = coreMock.createPluginInitializerContext({
-        ears: { enabled: true },
-      });
+    it('returns isInboundEventsEnabled as false when not configured', async () => {
+      const context = coreMock.createPluginInitializerContext({});
       const plugin = new Plugin(context);
       const pluginSetup = plugin.setup();
-      expect(pluginSetup.isEarsEnabled).toBe(true);
+      expect(pluginSetup.isInboundEventsEnabled).toBe(false);
     });
 
-    it('auth.ears.enabled takes precedence over legacy ears.enabled', async () => {
+    it('returns isInboundEventsEnabled as false when inboundEvents.enabled is false', async () => {
       const context = coreMock.createPluginInitializerContext({
-        auth: { ears: { enabled: false } },
-        ears: { enabled: true },
+        inboundEvents: { enabled: false },
       });
       const plugin = new Plugin(context);
       const pluginSetup = plugin.setup();
-      expect(pluginSetup.isEarsEnabled).toBe(false);
+      expect(pluginSetup.isInboundEventsEnabled).toBe(false);
+    });
+
+    it('returns isInboundEventsEnabled as true when inboundEvents.enabled is true', async () => {
+      const context = coreMock.createPluginInitializerContext({
+        inboundEvents: { enabled: true },
+      });
+      const plugin = new Plugin(context);
+      const pluginSetup = plugin.setup();
+      expect(pluginSetup.isInboundEventsEnabled).toBe(true);
     });
   });
 });

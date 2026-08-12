@@ -43,6 +43,7 @@ export const PresentationPanelTitle = ({
   titleHighlight?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
 
   const onClick = useCallback(() => {
     openCustomizePanelFlyout({
@@ -72,7 +73,7 @@ export const PresentationPanelTitle = ({
         panelTitle
       );
 
-    if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
+    if (!isEditableTitle) {
       return (
         <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
           {titleContent}
@@ -94,19 +95,50 @@ export const PresentationPanelTitle = ({
         {titleContent}
       </EuiLink>
     );
-  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme, titleHighlight]);
+  }, [
+    onClick,
+    hideTitle,
+    panelTitle,
+    isEditableTitle,
+    euiTheme.font.weight.medium,
+    titleHighlight,
+  ]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
+    if (!panelTitleElement) return null;
 
     if (!panelDescription) {
-      return panelTitleElement;
+      if (!panelTitle) return panelTitleElement;
+
+      return (
+        <EuiToolTip
+          content={panelTitle}
+          position="top"
+          display="block"
+          anchorProps={{
+            'data-test-subj': 'embeddablePanelTitleTooltipAnchor',
+          }}
+        >
+          {/* A block container is required for text-overflow:ellipsis to fire (inline elements do not
+              produce ellipsis). In edit mode the EuiLink inside is focusable via <a> and its focus
+              events bubble to the tooltip anchor, so no tabIndex is needed on this wrapper. */}
+          <span
+            tabIndex={isEditableTitle ? undefined : 0}
+            css={css`
+              display: block;
+              ${euiTextTruncate()};
+            `}
+          >
+            {panelTitleElement}
+          </span>
+        </EuiToolTip>
+      );
     }
     return (
       <EuiToolTip
         title={panelTitle}
         content={panelDescription}
-        delay="regular"
         position="top"
         anchorProps={{
           'data-test-subj': 'embeddablePanelTooltipAnchor',
@@ -128,6 +160,10 @@ export const PresentationPanelTitle = ({
               // styles necessary for applying ellipsis and showing the info icon if description is present
               css={css`
                 overflow: hidden;
+                // The panel title is a heading, but rendered at the regular text size. Reset the
+                // heading's font and margin so a global h2 style cannot override the panel title size
+                font: inherit;
+                margin: 0;
               `}
             >
               <EuiScreenReaderOnly>
@@ -159,7 +195,15 @@ export const PresentationPanelTitle = ({
         </div>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, headerId, euiTheme.size.xs]);
+  }, [
+    hideTitle,
+    panelDescription,
+    panelTitle,
+    panelTitleElement,
+    isEditableTitle,
+    headerId,
+    euiTheme.size.xs,
+  ]);
 
   return describedPanelTitleElement;
 };

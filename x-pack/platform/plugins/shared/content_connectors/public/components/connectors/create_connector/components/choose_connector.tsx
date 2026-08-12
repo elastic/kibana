@@ -73,6 +73,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         <EuiFlexItem
           css={css`
             overflow: auto;
+            align-self: center;
           `}
           grow
         >
@@ -95,10 +96,10 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
     [connectorTypes]
   );
   const { selectedConnector } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { setSelectedConnector } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
 
   const getInitialOptions = () => {
@@ -135,7 +136,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
       }
       return {
         _append,
-        _prepend: <EuiIcon size="l" type={connector.iconPath} />,
+        _prepend: <EuiIcon size="l" type={connector.iconPath} aria-hidden={true} />,
         'aria-label': connector.name + _ariaLabelAppend,
         key: key.toString(),
         label: connector.name,

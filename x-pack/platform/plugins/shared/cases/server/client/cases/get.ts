@@ -10,6 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   AttachmentAttributes,
   AttachmentTotals,
@@ -37,15 +38,19 @@ import {
   GetTagsResponseRt,
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import {
   countAlertsForID,
   flattenCaseSavedObject,
   countUserAttachments,
   countEventsForID,
 } from '../../common/utils';
+import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
+import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { getOwnersFilter } from '../../authorization/utils';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type {
@@ -88,8 +93,11 @@ export const getCasesByAlertID = async (
   try {
     const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      authorizedOwners,
+    } = await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -97,11 +105,27 @@ export const getCasesByAlertID = async (
       Operations.getCaseIDsByAlertID.savedObjectType
     );
 
+    /**
+     * The authorization filter above is scoped to `cases-comments` (the operation's saved object
+     * type). We also query `cases-attachments`, so build an equivalent owner-scoped filter for
+     * that type using the same authorized owners.
+     */
+    const unifiedAuthorizationFilter =
+      authorizedOwners && authorizedOwners.length > 0
+        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+        : undefined;
+    const unifiedFilter = combineAuthorizedAndOwnerFilter(
+      queryParams.owner,
+      unifiedAuthorizationFilter,
+      CASE_ATTACHMENT_SAVED_OBJECT
+    );
+
     // This will likely only return one comment saved object, the response aggregation will contain
     // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
       alertId: alertID,
       filter,
+      unifiedFilter,
     });
 
     // make sure the comments returned have the right owner
@@ -130,7 +154,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => !isSOError(caseInfo)
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -171,6 +195,49 @@ const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentT
   } = stats.get(id) ?? defaults;
 
   return { alerts, events, userComments };
+};
+
+/**
+ * Populates `extended_fields_labels` on a single case, mirroring the enrichment the search/find
+ * path performs (see search.ts). Without this, the case-view activity feed (which loads the case
+ * via GET, not search) has no labels and falls back to startCase(name).
+ */
+const enrichCaseWithFieldLabels = async (
+  theCase: Case,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const {
+    services: { templatesService, fieldDefinitionsService },
+    config,
+    logger,
+  } = clientArgs;
+
+  if (!config.templates.enabled || theCase.extended_fields == null) {
+    return theCase;
+  }
+
+  try {
+    const owner = theCase.owner ? [theCase.owner] : undefined;
+    // Only the case's own template version is needed to label template-authored fields; global
+    // fields cover the rest. Fetching just that one version avoids the search-path scan of every
+    // owner template version, which is unnecessary when enriching a single case.
+    const [templateSO, globalFieldDefs] = await Promise.all([
+      theCase.template?.id != null
+        ? templatesService.getTemplate(theCase.template.id, String(theCase.template.version))
+        : undefined,
+      fieldDefinitionsService.getGlobalFieldDefinitionsForSearch({ owner }),
+    ]);
+
+    return enrichCasesWithFieldLabels(
+      [theCase],
+      templateSO != null ? [templateSO] : [],
+      parseFieldDefinitionsToInlineFields(globalFieldDefs)
+    )[0];
+  } catch (error) {
+    // Label enrichment is cosmetic; never fail the case GET/resolve because of it.
+    logger.warn(`Failed to enrich case id: ${theCase.id} with extended field labels: ${error}`);
+    return theCase;
+  }
 };
 
 /**
@@ -221,18 +288,17 @@ export const get = async (
       const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
       });
-      return decodeOrThrow(CaseRt)(
-        flattenCaseSavedObject({
-          savedObject: theCase,
-          ...(commentStats.has(theCase.id)
-            ? {
-                totalAlerts: commentStats.get(theCase.id)?.alerts,
-                totalComment: commentStats.get(theCase.id)?.userComments,
-                totalEvents: commentStats.get(theCase.id)?.events,
-              }
-            : {}),
-        })
-      );
+      const flattenedCase = flattenCaseSavedObject({
+        savedObject: theCase,
+        ...(commentStats.has(theCase.id)
+          ? {
+              totalAlerts: commentStats.get(theCase.id)?.alerts,
+              totalComment: commentStats.get(theCase.id)?.userComments,
+              totalEvents: commentStats.get(theCase.id)?.events,
+            }
+          : {}),
+      });
+      return decodeOrThrow(CaseRt)(await enrichCaseWithFieldLabels(flattenedCase, clientArgs));
     }
 
     const theComments = (await caseService.getAllCaseComments({
@@ -252,7 +318,7 @@ export const get = async (
       totalEvents: countEventsForID({ comments: theComments }),
     });
 
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrow(CaseRt)(await enrichCaseWithFieldLabels(res, clientArgs));
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
@@ -281,6 +347,10 @@ export const resolve = async (
       id,
     });
 
+    if (isSavedObjectErrorResult(resolvedSavedObject)) {
+      throw new Error(resolvedSavedObject.error.message);
+    }
+
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,
       entities: [
@@ -292,11 +362,10 @@ export const resolve = async (
     });
 
     if (!includeComments) {
+      const flattenedCase = flattenCaseSavedObject({ savedObject: resolvedSavedObject });
       return decodeOrThrow(CaseResolveResponseRt)({
         ...resolveData,
-        case: flattenCaseSavedObject({
-          savedObject: resolvedSavedObject,
-        }),
+        case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
       });
     }
 
@@ -309,15 +378,17 @@ export const resolve = async (
       mode,
     })) as SavedObjectsFindResponse<AttachmentAttributes>;
 
+    const flattenedCase = flattenCaseSavedObject({
+      savedObject: resolvedSavedObject,
+      comments: theComments.saved_objects,
+      totalComment: theComments.total,
+      totalEvents: countEventsForID({ comments: theComments }),
+      totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
+    });
+
     const res = {
       ...resolveData,
-      case: flattenCaseSavedObject({
-        savedObject: resolvedSavedObject,
-        comments: theComments.saved_objects,
-        totalComment: theComments.total,
-        totalEvents: countEventsForID({ comments: theComments }),
-        totalAlerts: countAlertsForID({ comments: theComments, id: resolvedSavedObject.id }),
-      }),
+      case: await enrichCaseWithFieldLabels(flattenedCase, clientArgs),
     };
 
     return decodeOrThrow(CaseResolveResponseRt)(res);

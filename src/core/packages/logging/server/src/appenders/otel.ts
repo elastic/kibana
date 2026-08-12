@@ -7,7 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Attributes } from '@opentelemetry/api';
+
 import type { LayoutConfigType } from '../layout';
+
+/**
+ * TLS / mTLS options for the OTLP log appender.
+ *
+ * Values may be **filesystem paths** to PEM files (recommended for production) or **inline PEM strings**
+ * (strings containing `-----BEGIN`).
+ *
+ * Maps to Node.js TLS options for `http` / `proto` (via `https.Agent`) and to `grpc.credentials.createSsl`
+ * for `grpc`.
+ *
+ * @public
+ */
+export interface OtelAppenderTlsConfig {
+  /**
+   * PEM-encoded certificate authority bundle(s) used to verify the OTLP endpoint.
+   * Use a single string, or an array when multiple CA files are required.
+   */
+  certificateAuthorities?: string | string[];
+  /** Client certificate for mutual TLS (requires {@link OtelAppenderTlsConfig.key}). */
+  certificate?: string;
+  /** Private key for the client certificate (requires {@link OtelAppenderTlsConfig.certificate}). */
+  key?: string;
+  /** Passphrase for {@link OtelAppenderTlsConfig.key} when the key is encrypted. */
+  keyPassphrase?: string;
+  /**
+   * How strictly to verify the server certificate (aligned with Elasticsearch client semantics).
+   * Defaults to `full`.
+   */
+  verificationMode: 'none' | 'certificate' | 'full';
+  /**
+   * Whether to allow partial trust chain verification.
+   * Defaults to `true`.
+   */
+  allowPartialTrustChain?: boolean;
+}
 
 /**
  * Configuration of an OpenTelemetry (OTLP) log appender.
@@ -31,7 +68,7 @@ export interface OtelAppenderConfig {
   type: 'otel';
   /**
    * The protocol to use for the OTLP exporter.
-   * Defaults to 'grpc'.
+   * Defaults to `proto`.
    */
   protocol: 'http' | 'proto' | 'grpc';
   /** OTLP HTTP endpoint URL, e.g. https://collector:4318/v1/logs */
@@ -65,6 +102,65 @@ export interface OtelAppenderConfig {
    * as `service.name`. Because Kibana expands dotted YAML keys into nested
    * objects, wrap dotted attribute names in `[brackets]`:
    * `"[service.name]": my-kibana`
+   *
+   * These attributes are merged into the resource; when {@link OtelAppenderConfig.includeResources}
+   * narrows the resource, they supply the values for the included keys (e.g. `service.name`).
    */
   attributes?: Record<string, string>;
+  /**
+   * Allowlist of resource-attribute keys to include in the OTLP resource. Defaults to `['*']`
+   * (include every auto-detected and configured attribute — the standard OTel resource).
+   *
+   * When set to an explicit list (anything not containing `'*'`), the resource is filtered to
+   * only those keys. Filtering is applied to the fully-resolved resource (auto-detected host/OS/
+   * process/env attributes plus {@link OtelAppenderConfig.attributes}), so
+   * `['service.name', 'service.type']` ships a deliberately minimal resource with the
+   * cloud/k8s/process/host fields excluded.
+   *
+   * An explicit allowlist fully governs the resource: a listed key is kept even if
+   * {@link OtelAppenderPluginConfig.dropResourceAttributes} also names it.
+   * `dropResourceAttributes` only shapes the resource in the default `['*']` case.
+   */
+  includeResources?: string[];
+  /**
+   * Resource-attribute keys to also emit as per-record log attributes. Each value is captured once
+   * (at appender construction) from the resolved resource — before {@link OtelAppenderConfig.includeResources}
+   * narrows it — and added to every log record's attributes. Use when a value that arrives as a
+   * resource attribute (e.g. `project.id`, promoted from an APM global label) belongs per-record;
+   * pair with `includeResources` to keep it out of the resource and only on records. Only
+   * synchronously-resolved values are promoted; async-detected ones (e.g. `host.id`) are skipped.
+   */
+  promoteResourceAttributes?: string[];
+  /**
+   * Optional TLS settings for HTTPS/gRPC to the OTLP endpoint, including mutual TLS (client certificates).
+   */
+  ssl?: OtelAppenderTlsConfig;
+}
+
+/**
+ * Maps a log record's fully-flattened per-record OTel attributes (including promoted resource
+ * attributes and, for pattern layout, flattened `log.meta`) to the attributes to emit.
+ *
+ * @public
+ */
+export type OtelAttributesTransform = (attributes: Attributes) => Attributes;
+
+/**
+ * Plugin-only extension of {@link OtelAppenderConfig}: options that cannot be expressed
+ * in YAML, accepted exclusively through {@link LoggingServiceSetup.configure}.
+ *
+ * @public
+ */
+export interface OtelAppenderPluginConfig extends OtelAppenderConfig {
+  /**
+   * Applied to the flattened attributes just before emit. Use for output-shaping too specific
+   * to belong in serializable config (e.g. audit log field mappings).
+   */
+  transformAttributes?: OtelAttributesTransform;
+  /**
+   * Resource-attribute keys removed at appender construction, only when
+   * {@link OtelAppenderConfig.includeResources} is the default `['*']` (an explicit allowlist
+   * takes precedence). Async-detected values (e.g. `host.id`) are preserved unless dropped here.
+   */
+  dropResourceAttributes?: string[];
 }

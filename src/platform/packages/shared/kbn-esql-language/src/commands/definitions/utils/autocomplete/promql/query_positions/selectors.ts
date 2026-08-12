@@ -6,11 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import type { PromQLFunctionDefinition } from '../../../../types';
 import { promqlLabelMatcherDefinitions } from '../../../../generated/promql_label_matchers';
 import { buildFunctionDocumentation } from '../../../documentation';
 import { techPreviewLabel } from '../../../shared';
+import { getControlSuggestionIfSupported } from '../../helpers';
 import { suggestOperators } from './operators';
 import type { PromqlDetailedPosition } from '../types';
 import {
@@ -54,8 +56,19 @@ export const suggestLabelMatchers = (): ISuggestionItem[] => {
     .map(buildPromqlLabelMatcherSuggestion);
 };
 
-/** Suggests placeholder values after a label matcher operator. */
-export const suggestLabelValues = (): ISuggestionItem[] => [valuePlaceholderConstant];
+/** Suggests placeholder values and control variables after a label matcher operator. */
+export const suggestLabelValues = (
+  variables?: ESQLControlVariable[],
+  supportsControls?: boolean
+): ISuggestionItem[] => [
+  valuePlaceholderConstant,
+  ...getControlSuggestionIfSupported(
+    Boolean(supportsControls),
+    ESQLVariableType.VALUES,
+    ControlTriggerSource.SMART_SUGGESTION,
+    variables
+  ),
+];
 
 /** Suggests PromQL duration snippets for range selector contexts. */
 export const suggestTimeDurations = (): ISuggestionItem[] => [promqlRangeSelectorItem];

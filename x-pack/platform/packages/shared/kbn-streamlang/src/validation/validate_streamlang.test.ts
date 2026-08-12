@@ -2330,6 +2330,62 @@ describe('validateStreamlang', () => {
       const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
       expect(placementErrors).toHaveLength(0);
     });
+
+    it('should reject user_agent with processor where when target equals source', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'ua.raw',
+            to: 'ua.raw',
+            where: { field: 'attributes.flag', eq: true },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+      expect(placementErrors[0].field).toBe('to');
+      expect(placementErrors[0].message).toContain('user_agent');
+    });
+
+    it('should reject user_agent with processor where when default to collides with from', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'user_agent',
+            where: { field: 'attributes.flag', eq: true },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors.some((e) => e.message.includes('user_agent'))).toBe(true);
+    });
+
+    it('should allow user_agent with always where when from equals default target name', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            action: 'user_agent',
+            from: 'user_agent',
+            where: { always: {} },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(0);
+    });
   });
 
   describe('else branch validation', () => {

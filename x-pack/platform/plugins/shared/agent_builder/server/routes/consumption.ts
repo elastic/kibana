@@ -41,7 +41,8 @@ export function registerConsumptionRoutes({
       description:
         'Returns paginated, per-conversation token consumption data for a given agent. ' +
         'Includes input/output token counts, round counts, LLM call counts, and warnings ' +
-        'for conversations with high token usage. Requires the manageAgents privilege.',
+        'for conversations with high token usage. Requires the manageAgents privilege. ' +
+        'To learn more about monitoring agent token usage, refer to the [monitor usage documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/monitor-usage).',
       options: {
         tags: ['consumption', 'oas-tag:agent builder'],
         availability: {

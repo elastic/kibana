@@ -15,6 +15,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -49,7 +50,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -135,7 +136,6 @@ export const bulkEnableRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -350,7 +350,6 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
-  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -366,12 +365,17 @@ const bulkEnableRulesWithOCC = async (
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToEnable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleEnable,
-      timestamp: bulkEnableTimestamp,
       metadata: { bulkCount: totalNumOfRules },
     },
   });
@@ -380,7 +384,7 @@ const bulkEnableRulesWithOCC = async (
   const ruleIdsFailedToEnable: Record<string, boolean> = {};
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error) {
+    if (isSavedObjectErrorResult(rule)) {
       ruleIdsFailedToEnable[rule.id] = true;
     }
   });
@@ -420,7 +424,7 @@ const bulkEnableRulesWithOCC = async (
   const taskIdsToEnable: string[] = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
       if (rule.attributes.scheduledTaskId) {
         taskIdsToEnable.push(rule.attributes.scheduledTaskId);
       }

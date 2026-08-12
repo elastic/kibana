@@ -11,6 +11,7 @@ import {
   type LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -21,6 +22,7 @@ import type {
 import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
 import type { LensSerializedState } from '../../public';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
+import { findInvalidDurationFormat } from './ga_schema_validator';
 
 /**
  * Transform from Lens API format to Lens Serialized State
@@ -30,7 +32,7 @@ export const getTransformIn = (
   transformDrilldownsIn: DrilldownTransforms['transformIn'],
   isDashboardAppRequest: boolean
 ): LensTransformIn => {
-  return function transformIn(config) {
+  return function transformIn(config, useGASchemas = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT) {
     const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
     if (isByRefLensConfig(storedConfig)) {
@@ -71,6 +73,13 @@ export const getTransformIn = (
     // should be filtered out my unmapped panel check
     if (!builder.isSupported(chartType)) {
       throw new Error(`Lens "${chartType}" chart type is not supported`);
+    }
+
+    if (isLensAPIFormat(lensConfig.attributes)) {
+      const durationError = findInvalidDurationFormat(config, useGASchemas);
+      if (durationError) {
+        throw new Error(durationError);
+      }
     }
 
     const attributes = isLensAPIFormat(lensConfig.attributes)

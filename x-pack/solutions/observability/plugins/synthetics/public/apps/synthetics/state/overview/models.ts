@@ -36,6 +36,10 @@ export interface MonitorOverviewState {
   groupBy: GroupByState;
   trendStats: TrendTable;
   view: OverviewView;
+  // When true, monitors demoted to `stale` by the live-window freshness guard
+  // are shown with their last-known up/down instead. Purely presentational (no
+  // refetch) — kept outside `pageState` so it never re-triggers the status fetch.
+  showLastRun: boolean;
 }
 
 export interface GroupByState {
@@ -45,6 +49,7 @@ export interface GroupByState {
     | ConfigKey.MONITOR_TYPE
     | 'locationId'
     | 'monitor'
+    | 'remoteName'
     | 'none';
   order: 'asc' | 'desc';
 }

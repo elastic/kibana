@@ -15,7 +15,7 @@ import {
 } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
-import { createDatasetQualityESClient } from '../../../utils';
+import { createDatasetQualityESClient, isFieldAggregatable } from '../../../utils';
 import { rangeQuery } from '../../../utils/queries';
 import { getFailedDocsPaginated } from '../failed_docs/get_failed_docs';
 import { getDataStreams } from '../get_data_streams';
@@ -104,8 +104,13 @@ export async function getDataStreamDetails({
       defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
     };
   } catch (e) {
-    // Respond with empty object if data stream does not exist
-    if (e.statusCode === 404 || e.body?.error?.type === 'index_closed_exception') {
+    // ES surfaces `index_not_found_exception` as a 500 when triggered
+    // mid-search (e.g. a missing backing index), so check the error type too.
+    if (
+      e.statusCode === 404 ||
+      e.body?.error?.type === 'index_closed_exception' ||
+      e.body?.error?.type === 'index_not_found_exception'
+    ) {
       return {};
     }
     throw e;
@@ -115,11 +120,6 @@ export async function getDataStreamDetails({
 type TermAggregation = Record<string, { terms: { field: string; size: number } }>;
 
 const MAX_HOSTS = MAX_HOSTS_METRIC_VALUE + 1; // Adding 1 so that we can show e.g. '50+'
-
-// Gather service.name terms
-const serviceNamesAgg: TermAggregation = {
-  ['service.name']: { terms: { field: 'service.name', size: MAX_HOSTS } },
-};
 
 const entityFields = [
   'host.name',
@@ -131,17 +131,11 @@ const entityFields = [
   'aws.sqs.queue.name',
 ];
 
-function isFieldAggregatable(
-  fieldCapsResponse: Awaited<ReturnType<ElasticsearchClient['fieldCaps']>>,
-  fieldName: string
-): boolean {
-  const fieldCaps = fieldCapsResponse.fields[fieldName];
-  if (!fieldCaps) {
-    return false;
-  }
-
-  return Object.values(fieldCaps).every((caps) => caps.aggregatable === true);
-}
+const buildTermsAgg = (fields: string[]): TermAggregation =>
+  fields.reduce(
+    (acc, field) => ({ ...acc, [field]: { terms: { field, size: MAX_HOSTS } } }),
+    {} as TermAggregation
+  );
 
 async function getDataStreamSummaryStats(
   esClient: ElasticsearchClient,
@@ -156,21 +150,25 @@ async function getDataStreamSummaryStats(
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const fieldCapsResponse = await esClient.fieldCaps({
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
     index: dataStream,
     fields: ['*'],
     include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
   });
 
-  const aggregatableFields = entityFields.filter((field) =>
+  const aggregatableHostFields = entityFields.filter((field) =>
     isFieldAggregatable(fieldCapsResponse, field)
   );
 
-  // Gather host terms like 'host', 'pod', 'container'
-  const hostsAgg = aggregatableFields.reduce(
-    (acc, idField) => ({ ...acc, [idField]: { terms: { field: idField, size: MAX_HOSTS } } }),
-    {} as TermAggregation
-  );
+  // service.name may be text-mapped without fielddata; guard the agg.
+  const serviceNamesAgg: TermAggregation = isFieldAggregatable(fieldCapsResponse, 'service.name')
+    ? buildTermsAgg(['service.name'])
+    : {};
+
+  const hostsAgg = buildTermsAgg(aggregatableHostFields);
 
   const response = await datasetQualityESClient.search({
     index: dataStream,
@@ -218,7 +216,20 @@ async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index
 }
 
 async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
-  const indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
+  // `indices.stats` does not support `ignore_unavailable`, so if any backing
+  // index of the data stream is missing (e.g. a `partial-` index from a
+  // partial snapshot restore, or a legacy time-based index deleted by ILM)
+  // it throws `index_not_found_exception`. Treat that as "no size info" so we
+  // do not lose the rest of the details payload.
+  let indexStats: Awaited<ReturnType<ElasticsearchClient['indices']['stats']>>;
+  try {
+    indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
+  } catch (e) {
+    if (e.body?.error?.type === 'index_not_found_exception' || e.statusCode === 404) {
+      return 0;
+    }
+    throw e;
+  }
   const docCount = indexStats._all.total?.docs?.count ?? 0;
   const sizeInBytes = indexStats._all.total?.store?.size_in_bytes ?? 0;
 

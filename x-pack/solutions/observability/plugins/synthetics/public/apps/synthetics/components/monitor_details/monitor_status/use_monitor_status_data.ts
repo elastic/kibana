@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useLocation } from 'react-router-dom';
 
@@ -33,6 +33,7 @@ type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
   monitorId?: string;
   locationLabel?: string;
+  remoteName?: string;
 };
 
 export const useMonitorStatusData = ({
@@ -41,6 +42,7 @@ export const useMonitorStatusData = ({
   initialSizeRef,
   monitorId: monitorIdOverride,
   locationLabel: locationLabelOverride,
+  remoteName,
 }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
@@ -87,6 +89,7 @@ export const useMonitorStatusData = ({
           from,
           to,
           interval: minsPerBin,
+          remoteName,
         })
       );
     }
@@ -97,6 +100,7 @@ export const useMonitorStatusData = ({
     minsPerBin,
     resolvedLocationLabel,
     resolvedMonitorId,
+    remoteName,
     lastRefresh,
     debouncedBinsCount,
   ]);

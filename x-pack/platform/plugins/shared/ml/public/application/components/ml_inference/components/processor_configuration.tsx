@@ -280,6 +280,10 @@ export const ProcessorConfiguration: FC<Props> = memo(
                     values={{
                       fieldsList: (
                         <EuiPopover
+                          aria-label={i18n.translate(
+                            'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.reviewFieldsPopoverAriaLabel',
+                            { defaultMessage: 'Review inference input fields' }
+                          )}
                           button={
                             <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
                               You can review them here.

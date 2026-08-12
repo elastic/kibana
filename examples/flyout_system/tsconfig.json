@@ -21,6 +21,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-mount-utils-browser",
     "@kbn/react-kibana-mount",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/shared-url-state"
   ]
 }

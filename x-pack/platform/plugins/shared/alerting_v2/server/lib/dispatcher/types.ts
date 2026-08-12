@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+} from '../../resources/datastreams/alert_events';
+import type { DispatchFailureReason } from './steps/constants';
+
 export type RuleId = string;
 export type ActionPolicyId = string;
 export type ActionGroupId = string;
@@ -17,15 +23,20 @@ export interface ActionPolicyDestination {
 
 export interface AlertEpisode {
   last_event_timestamp: string;
-  rule_id: RuleId;
+  rule_id: RuleId | null;
+  source: string;
+  space_id: string;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  episode_status: AlertEpisodeStatus;
+  severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
 
 export interface AlertEpisodeSuppression {
-  rule_id: RuleId;
+  rule_id: RuleId | null;
+  source: string | null;
+  space_id: string | null;
   group_hash: string;
   episode_id: string | null;
   should_suppress: boolean;
@@ -36,7 +47,7 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }
 
 export interface DispatcherExecutionResult {
@@ -50,13 +61,8 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
-  kind: 'alert' | 'signal';
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface ActionPolicy {
@@ -76,12 +82,11 @@ export interface ActionPolicy {
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
-    interval?: string; // e.g. '1h', '30m', '5m'
+    interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */
   destinations: ActionPolicyDestination[];
-
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
 }
@@ -98,13 +103,17 @@ export interface ActionGroup {
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
+
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {
@@ -116,6 +125,22 @@ export interface LastNotifiedRecord {
 export interface LastNotifiedInfo {
   lastNotified: Date;
   episodeStatus?: string;
+}
+
+/**
+ * A single failed attempt to dispatch one action group to one workflow
+ * destination. Carries everything the execution-history step needs to emit a
+ * `dispatch_failed` event: the parent policy, the failing group + workflow, the
+ * affected episodes, and a machine-readable + human-readable cause.
+ */
+export interface DispatchFailure {
+  policyId: ActionPolicyId;
+  spaceId: string;
+  actionGroupId: ActionGroupId;
+  workflowId: string;
+  episodes: AlertEpisode[];
+  reason: DispatchFailureReason;
+  message: string;
 }
 
 export interface DispatcherPipelineInput {
@@ -137,6 +162,7 @@ export interface DispatcherPipelineState {
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  readonly dispatchFailures?: DispatchFailure[];
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';

@@ -22,7 +22,9 @@ describe('Revoke OAuth Client route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
@@ -79,7 +81,6 @@ describe('Revoke OAuth Client route', () => {
 
     expect(response.status).toBe(404);
   });
-
   it('returns error from service', async () => {
     oauthMock.revokeClient.mockRejectedValue(Boom.badRequest('Already revoked'));
 

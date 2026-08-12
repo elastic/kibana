@@ -49,30 +49,21 @@ export const MicrosoftTeams: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'bearer',
-        defaults: {},
+        type: 'ears',
+        isRecommended: true,
         overrides: {
-          meta: {
-            token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.label',
-                { defaultMessage: 'Microsoft API token' }
-              ),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Microsoft Bearer token obtained via delegated OAuth flow (for example, a user access token).',
-                }
-              ),
-            },
-          },
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
         },
       },
       {
@@ -94,7 +85,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -109,7 +100,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -135,7 +126,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -144,16 +135,37 @@ export const MicrosoftTeams: ConnectorSpec = {
         },
       },
       {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
+        type: 'oauth_client_credentials_private_key_jwt',
         defaults: {
-          provider: 'microsoft',
-          scope:
-            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+          scope: 'https://graph.microsoft.com/.default',
+          algorithm: 'PS256',
+          certificateBinding: 'x5t#S256',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
         },
       },
+      // Hidden, but retained so existing connectors created with bearer (delegated)
+      // auth continue to pass schema validation. The runtime handler still supports
+      // bearer as a delegated auth mode; it is no longer offered in the picker.
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
   },
 
@@ -352,31 +364,18 @@ export const MicrosoftTeams: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Microsoft Teams test handler');
-
-      try {
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-        const url = isAppOnly
-          ? 'https://graph.microsoft.com/v1.0/teams'
-          : 'https://graph.microsoft.com/v1.0/me/joinedTeams'; // bearer and oauth_authorization_code use delegated /me path
-
-        const response = await ctx.client.get(url, {
-          params: { $select: 'id,displayName' },
-        });
-        if (!response?.data || !Array.isArray(response.data.value)) {
-          return {
-            ok: false,
-            message: 'Unexpected Graph API response: missing value array',
-          };
-        }
-        const numOfTeams = response.data.value.length;
-        return {
-          ok: true,
-          message: `Successfully connected to Microsoft Teams: found ${numOfTeams} teams`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
+      const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+      const url = isAppOnly
+        ? 'https://graph.microsoft.com/v1.0/teams'
+        : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+      const response = await ctx.client.get(url, {
+        params: { $select: 'id,displayName' },
+      });
+      if (!response?.data || !Array.isArray(response.data.value)) {
+        throw new Error('Unexpected Graph API response: missing value array');
       }
+      return {};
     },
+    enabled: true,
   },
 };

@@ -19,6 +19,8 @@ import {
 import React, { useCallback } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import type { InferenceUsageInfo } from '../../../../types';
 import { PIPELINE_URL } from '../../../../constants';
@@ -54,8 +56,15 @@ export const PipelineItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="navigateToPipelinePage" onClick={navigateToPipeline}>
-              <EuiIcon size="s" type="external" />
+            <EuiLink
+              data-test-subj="navigateToPipelinePage"
+              onClick={navigateToPipeline}
+              aria-label={i18n.translate(
+                'xpack.searchInferenceEndpoints.pipelineItem.openPipelineLink',
+                { defaultMessage: 'Open pipeline' }
+              )}
+            >
+              <EuiIcon size="s" type="external" aria-hidden={true} />
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

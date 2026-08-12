@@ -11,21 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * Builds the base bool filter for workflow queries scoped to a space.
- * By default excludes soft-deleted documents (deleted_at exists).
- */
-export const workflowSpaceFilter = (
-  spaceId: string,
-  opts?: { includeDeleted?: boolean }
-): { must: estypes.QueryDslQueryContainer[]; must_not: estypes.QueryDslQueryContainer[] } => {
-  const must: estypes.QueryDslQueryContainer[] = [{ term: { spaceId } }];
-  const mustNot: estypes.QueryDslQueryContainer[] = opts?.includeDeleted
-    ? []
-    : [{ exists: { field: 'deleted_at' } }];
-  return { must, must_not: mustNot };
-};
-
-/**
  * Builds `terms` filter clauses from optional arrays. Skips undefined or empty arrays.
  */
 export const buildConditionalTermsFilters = (

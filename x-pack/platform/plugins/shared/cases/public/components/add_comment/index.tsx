@@ -58,12 +58,21 @@ export interface AddCommentProps {
   onCommentPosted: (newCase: CaseUI) => void;
   showLoading?: boolean;
   statusActionButton: JSX.Element | null;
+  attachActionButton?: JSX.Element | null;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { id, caseId, onCommentPosted, onCommentSaving, showLoading = true, statusActionButton },
+      {
+        id,
+        caseId,
+        onCommentPosted,
+        onCommentSaving,
+        showLoading = true,
+        statusActionButton,
+        attachActionButton,
+      },
       ref
     ) => {
       const editorRef = useRef<MarkdownEditorRef>(null);
@@ -239,6 +248,9 @@ export const AddComment = React.memo(
                     <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
                       {statusActionButton && (
                         <EuiFlexItem grow={false}>{statusActionButton}</EuiFlexItem>
+                      )}
+                      {attachActionButton && (
+                        <EuiFlexItem grow={false}>{attachActionButton}</EuiFlexItem>
                       )}
                       <EuiFlexItem grow={false}>
                         <EuiButton

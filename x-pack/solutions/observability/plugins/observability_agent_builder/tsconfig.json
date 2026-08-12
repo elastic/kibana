@@ -7,6 +7,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-genai-utils",
     "@kbn/agent-builder-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/apm-sources-access-plugin",
@@ -54,6 +55,8 @@
     "@kbn/search-inference-endpoints",
     "@kbn/inference-connectors",
     "@kbn/react-query",
+    "@kbn/sse-utils",
+    "@kbn/cloud-plugin",
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,6 +14,7 @@ import { Chart } from '../../chart';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getLatencyChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
@@ -22,11 +23,11 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     services,
     fetchParams,
     discoverFetch$,
-    indexes,
     onBrushEnd,
     onFilter,
     actions,
     profileId,
+    breakdownField,
   } = useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
@@ -34,17 +35,17 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       metricName: 'duration_ms',
       metricTypes: ['histogram'],
       units: ['ms'],
-      dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [],
     },
     color,
     seriesType,
+    dimensions: breakdownField ? [{ name: breakdownField }] : [],
   });
 
   return (
     <Chart
       id="latency"
+      isSelected={false}
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -55,8 +56,8 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       onExploreInDiscoverTab={actions.openInNewTab}
       title={title}
       chartLayers={chartLayers}
+      legend={breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined}
       syncCursor
-      syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
     />
@@ -64,12 +65,13 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
 };
 
 export const LatencyChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!latencyChart) {

@@ -76,7 +76,7 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
     >
       <p>{contentText}</p>
       <MarkdownContainer>
-        <EuiListGroup gutterSize="none" showToolTips>
+        <EuiListGroup showToolTips>
           {references.map((r, index) => (
             <EuiListGroupItem key={`${index}-${r}`} label={r} />
           ))}

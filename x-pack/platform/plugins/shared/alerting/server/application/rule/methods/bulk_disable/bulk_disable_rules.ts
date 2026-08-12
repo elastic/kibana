@@ -7,6 +7,7 @@
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObjectsBulkUpdateObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
 import pMap from 'p-map';
@@ -41,7 +42,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -109,7 +110,6 @@ export const bulkDisableRules = async <Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );
@@ -238,7 +238,6 @@ const bulkDisableRulesWithOCC = async (
   // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
   // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
   // bulk_disable, bulk_enable, etc. to fix this cast
-  const bulkDisableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -249,12 +248,17 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: result.saved_objects,
+    encryptedFieldsMap: new Map(
+      rulesToDisable.map(({ id, attributes }) => [
+        id,
+        { apiKey: attributes.apiKey ?? null, uiamApiKey: attributes.uiamApiKey ?? null },
+      ])
+    ),
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleDisable,
-      timestamp: bulkDisableTimestamp,
       metadata: { bulkCount: totalNumOfRules },
     },
   });
@@ -265,7 +269,7 @@ const bulkDisableRulesWithOCC = async (
   const disabledRules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
 
   result.saved_objects.forEach((rule) => {
-    if (rule.error === undefined) {
+    if (!isSavedObjectErrorResult(rule)) {
       if (rule.attributes.scheduledTaskId) {
         if (rule.attributes.scheduledTaskId !== rule.id) {
           taskIdsToDelete.push(rule.attributes.scheduledTaskId);

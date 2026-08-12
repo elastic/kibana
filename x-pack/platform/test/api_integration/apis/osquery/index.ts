@@ -18,6 +18,9 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./live_queries'));
     loadTestFile(require.resolve('./history_tags'));
     loadTestFile(require.resolve('./unified_history'));
+    loadTestFile(require.resolve('./scheduled_results'));
+    loadTestFile(require.resolve('./scheduled_results_space_scoping'));
+    loadTestFile(require.resolve('./action_results_space_scoping'));
     loadTestFile(require.resolve('./export_results'));
   });
 }

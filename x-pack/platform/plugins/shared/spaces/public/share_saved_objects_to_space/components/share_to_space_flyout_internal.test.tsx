@@ -220,7 +220,8 @@ function changeSpaceSelection(selectedSpaces: string[]) {
 }
 
 async function clickButton(button: 'continue' | 'save' | 'copy') {
-  const buttonNode = screen.getByTestId(`sts-${button}-button`);
+  // getAllByTestId because EuiCallOut with announceOnMount duplicates children into a hidden aria-live region
+  const [buttonNode] = screen.getAllByTestId(`sts-${button}-button`);
   await act(async () => {
     buttonNode.click();
   });
@@ -286,7 +287,8 @@ describe('ShareToSpaceFlyout', () => {
       });
 
       expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
-      expect(screen.getByTestId('sts-copy-button')).toBeInTheDocument();
+      // getAllByTestId because EuiCallOut with announceOnMount duplicates children into a hidden aria-live region
+      expect(screen.getAllByTestId('sts-copy-button')[0]).toBeInTheDocument();
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });

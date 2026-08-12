@@ -7,14 +7,14 @@
 
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
+import { NotesRemoteCallout } from '../../../../flyout_v2/shared/tools/notes/components/notes_remote_callout';
 import type { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types';
-import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
-import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
+import { useTimelineConfig } from '../../../../flyout_v2/shared/tools/notes/hooks/use_timeline_config';
+import { NotesDetailsContent } from '../../../../flyout_v2/shared/tools/notes/components/notes_details_content';
 import { useDocumentDetailsContext } from '../../shared/context';
 
 /**

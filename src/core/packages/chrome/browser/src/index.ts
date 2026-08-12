@@ -12,7 +12,33 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeNext } from './chrome_next';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  ChromeAppHeaderConfig,
+  AppHeaderDescription,
+  AppHeaderEditableTitle,
+  AppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus,
+  AppHeaderShareAction,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
+  AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+  ChromeNext,
+  GlobalHeaderAiButton,
+} from './chrome_next';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -33,6 +59,10 @@ export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle
 
 export type {
   ChromeProjectNavigationNode,
+  RootNodePanelOpenerDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+  RootNodeDefinition,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -48,6 +78,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
@@ -59,3 +91,5 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
+
+export type { GlobalSearchConfig } from './chrome_next/global_search';

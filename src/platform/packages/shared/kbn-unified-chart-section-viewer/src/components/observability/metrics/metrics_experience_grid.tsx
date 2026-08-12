@@ -10,6 +10,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { keys } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 import { METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ } from '../../../common/constants';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -18,10 +20,17 @@ import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
-import { MetricsInfoError } from './metrics_info_error';
+import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
+import { GridSettingsFlyout } from '../../flyout';
 import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
-import { useDimensionsWipe, useDiscoverFieldForBreakdown, useMetricFieldsFilter } from './hooks';
-import { isSuppressedFetchError } from './utils/is_suppressed_fetch_error';
+import {
+  useDimensionsWipe,
+  useDiscoverFieldForBreakdown,
+  useMetricFieldsFilter,
+  useMetricsSort,
+  useResetPageOnDimensionsChange,
+} from './hooks';
+import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
 export const MetricsExperienceGrid = ({
   renderToggleActions,
@@ -34,6 +43,7 @@ export const MetricsExperienceGrid = ({
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
+  isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {
@@ -44,8 +54,14 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
+    onPageChange,
+    metricsSort,
+    profileId,
+    gridSettings,
+    onGridSettingsChange,
+    recentlyExploredMetrics,
   } = useMetricsExperienceState();
-
+  const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
   const {
     metricItems,
     allDimensions,
@@ -57,11 +73,20 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    profileId,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({
     metricItems,
     searchTerm,
+  });
+
+  const [sortBy, direction] = metricsSort;
+  const { sortedMetricItems } = useMetricsSort({
+    metricItems: filteredMetricItems,
+    sortBy,
+    direction,
+    recentlyExploredMetrics,
   });
 
   useDiscoverFieldForBreakdown(
@@ -70,6 +95,8 @@ export const MetricsExperienceGrid = ({
     selectedDimensions,
     onDimensionsChange
   );
+
+  useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {
@@ -117,6 +144,7 @@ export const MetricsExperienceGrid = ({
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,
+    onOpenGridSettings: toggleGridSettingsFlyout,
   });
 
   const onKeyDown = useCallback(
@@ -133,51 +161,68 @@ export const MetricsExperienceGrid = ({
     return <EmptyState isLoading={isDiscoverLoading} />;
   }
 
-  const showMetricsInfoError =
+  const showChartSectionSearchError =
     metricsInfoError != null && !isDiscoverLoading && !isSuppressedFetchError(metricsInfoError);
 
-  if (showMetricsInfoError) {
-    return <MetricsInfoError />;
+  if (showChartSectionSearchError) {
+    return (
+      <ChartSectionSearchError
+        error={metricsInfoError}
+        title={i18n.translate('metricsExperience.chartSectionError.title', {
+          defaultMessage: 'Unable to retrieve search results',
+        })}
+      />
+    );
   }
 
   return (
-    <ChartsGrid
-      id="metricsExperienceGrid"
-      toolbarCss={chartToolbarCss}
-      toolbar={{
-        toggleActions,
-        leftSide: leftSideActions,
-        rightSide: rightSideActions,
-        additionalControls: {
-          prependRight: (
-            <SearchButton
-              isFullscreen={isFullscreen}
-              value={searchTerm}
-              onSearchTermChange={onSearchTermChange}
-              onKeyDown={onKeyDown}
-              data-test-subj="metricsExperienceGridToolbarSearch"
-            />
-          ),
-        },
-      }}
-      toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
-      isComponentVisible={isComponentVisible}
-      isFullscreen={isFullscreen}
-      onKeyDown={onKeyDown}
-    >
-      <MetricsExperienceGridContent
-        metricItems={filteredMetricItems}
-        activeDimensions={activeDimensions}
-        services={services}
-        discoverFetch$={discoverFetch$}
-        fetchParams={fetchParams}
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        actions={actions}
-        histogramCss={histogramCss}
-        isDiscoverLoading={isDiscoverLoading}
-      />
-    </ChartsGrid>
+    <>
+      <ChartsGrid
+        id="metricsExperienceGrid"
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions,
+          leftSide: leftSideActions,
+          rightSide: rightSideActions,
+          additionalControls: {
+            prependRight: (
+              <SearchButton
+                isFullscreen={isFullscreen}
+                value={searchTerm}
+                onSearchTermChange={onSearchTermChange}
+                onKeyDown={onKeyDown}
+                data-test-subj="metricsExperienceGridToolbarSearch"
+              />
+            ),
+          },
+        }}
+        toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
+        isComponentVisible={isComponentVisible}
+        isFullscreen={isFullscreen}
+        onKeyDown={onKeyDown}
+      >
+        <MetricsExperienceGridContent
+          metricItems={sortedMetricItems}
+          activeDimensions={activeDimensions}
+          services={services}
+          discoverFetch$={discoverFetch$}
+          fetchParams={fetchParams}
+          onBrushEnd={onBrushEnd}
+          onFilter={onFilter}
+          actions={actions}
+          histogramCss={histogramCss}
+          isDiscoverLoading={isDiscoverLoading}
+          isTabSelected={isTabSelected}
+        />
+      </ChartsGrid>
+      {isGridSettingsFlyoutOpen && (
+        <GridSettingsFlyout
+          gridSettings={gridSettings}
+          onGridSettingsChange={onGridSettingsChange}
+          onClose={toggleGridSettingsFlyout}
+        />
+      )}
+    </>
   );
 };
 

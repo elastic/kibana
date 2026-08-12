@@ -26,10 +26,6 @@ jest.mock('../../../tools/builtin/attachments', () => {
   };
 });
 
-jest.mock('../../runner/store', () => ({
-  getStoreTools: jest.fn(() => []),
-}));
-
 const createExecutableTool = (id: string): ExecutableTool =>
   ({
     id,
@@ -85,13 +81,9 @@ describe('selectTools', () => {
         enable_elastic_capabilities: false,
       } as any,
       attachmentsService,
-      filestore: {} as any,
       spaceId: 'default',
       runner: {
         runInternalTool: jest.fn(),
-      } as any,
-      experimentalFeatures: {
-        filestore: false,
       } as any,
     });
 
@@ -150,12 +142,10 @@ describe('selectTools', () => {
       toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
       agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
       attachmentsService,
-      filestore: {} as any,
       spaceId: 'default',
       runner: {
         runInternalTool: jest.fn(),
       } as any,
-      experimentalFeatures: { filestore: false } as any,
     });
 
     // Attachment-scoped bounded tools are treated as inline because they are not registry entries.

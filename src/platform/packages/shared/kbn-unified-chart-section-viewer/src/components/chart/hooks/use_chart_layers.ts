@@ -8,8 +8,11 @@
  */
 
 import { useMemo } from 'react';
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import type { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
-import type { Dimension, ParsedMetricItem } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
+import type { Dimension, NullableMetricUnit } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
@@ -18,12 +21,25 @@ import {
   resolveMetricUnit,
 } from '../../../common/utils';
 
+/**
+ * Narrow input describing only the metric fields that `useChartLayers` actually reads.
+ * Decouples the hook from the wider `ParsedMetricItem` domain type so non-metrics-explorer
+ * call sites (e.g. trace charts) do not need to fabricate unrelated fields.
+ */
+interface ChartLayerMetricInput {
+  metricName: string;
+  readonly metricTypes: MappingTimeSeriesMetricType[];
+  readonly units: NullableMetricUnit[];
+  readonly fieldTypes: ES_FIELD_TYPES[];
+}
+
 interface UseChartLayersParams {
   dimensions?: Dimension[];
-  metricItem: ParsedMetricItem;
+  metricItem: ChartLayerMetricInput;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
+  gridSettings?: MetricsGridSettings;
 }
 
 /**
@@ -37,6 +53,7 @@ export const useChartLayers = ({
   color,
   seriesType,
   customFunction,
+  gridSettings,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
     const fieldTypes = metricItem.fieldTypes;
@@ -52,6 +69,7 @@ export const useChartLayers = ({
       instrument,
       metricName: metricItem.metricName,
       customFunction,
+      gridSettings,
     });
     const hasDimensions = dimensions.length > 0;
 
@@ -76,6 +94,7 @@ export const useChartLayers = ({
       },
     ];
   }, [
+    gridSettings,
     color,
     customFunction,
     dimensions,

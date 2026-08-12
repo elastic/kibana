@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import { RegistryError, RegistryConnectionError, RegistryResponseError } from '../../../errors';
 import { appContextService } from '../../app_context';
 
-import { fetchUrl, getResponse } from './requests';
+import { categorizeRegistryConnectionError, fetchUrl, getResponse } from './requests';
 jest.mock('node-fetch');
 jest.mock('../../app_context');
 
@@ -71,6 +71,35 @@ describe('Registry requests', () => {
           'User-Agent': 'Kibana/8.0.0 node-fetch',
         },
       });
+    });
+  });
+
+  describe('categorizeRegistryConnectionError', () => {
+    it.each([
+      ['ETIMEDOUT', 'timeout'],
+      ['ESOCKETTIMEDOUT', 'timeout'],
+      ['ECONNABORTED', 'timeout'],
+      ['ENOTFOUND', 'dns'],
+      ['EAI_AGAIN', 'dns'],
+      ['ECONNREFUSED', 'connection'],
+      ['ECONNRESET', 'connection'],
+      ['EHOSTUNREACH', 'connection'],
+      ['ENETUNREACH', 'connection'],
+      ['EPIPE', 'connection'],
+      ['EPROTO', 'connection'],
+      ['ESOMETHING', 'unknown'],
+    ])('maps code %s to type "%s"', (code, type) => {
+      const error = new FetchError('message', 'system', { code });
+      expect(categorizeRegistryConnectionError(error)).toEqual({ type, reason: code });
+    });
+
+    it('returns type "unknown" with no reason when there is no code', () => {
+      const error = new FetchError('message', 'system');
+      expect(categorizeRegistryConnectionError(error)).toEqual({ type: 'unknown' });
+    });
+
+    it('returns type "unknown" with no reason for a non-fetch error', () => {
+      expect(categorizeRegistryConnectionError(new Error('boom'))).toEqual({ type: 'unknown' });
     });
   });
 
@@ -148,6 +177,42 @@ describe('Registry requests', () => {
       });
     });
 
+    describe('RegistryConnectionError categorization', () => {
+      // Use retries=0 to avoid exponential backoff; a single system error is enough to
+      // exercise the categorization path.
+      it.each([
+        ['ENOTFOUND', 'dns'],
+        ['EAI_AGAIN', 'dns'],
+        ['ETIMEDOUT', 'timeout'],
+        ['ECONNREFUSED', 'connection'],
+        ['ECONNRESET', 'connection'],
+        ['EPROTO', 'connection'],
+        ['ESOMETHING', 'unknown'],
+      ])('categorizes %s as type "%s" and surfaces it in error attributes', async (code, type) => {
+        fetchMock.mockImplementationOnce(() => {
+          throw new FetchError(`message for ${code}`, 'system', { code });
+        });
+
+        const promise = getResponse('', 0);
+        await expect(promise).rejects.toThrow(RegistryConnectionError);
+        await expect(promise).rejects.toMatchObject({
+          attributes: { type, reason: code },
+        });
+      });
+
+      it('categorizes a system error without a code as "unknown" with no reason', async () => {
+        fetchMock.mockImplementationOnce(() => {
+          throw new FetchError('no code', 'system');
+        });
+
+        const promise = getResponse('', 0);
+        await expect(promise).rejects.toThrow(RegistryConnectionError);
+        await expect(promise).rejects.toMatchObject({
+          attributes: { type: 'unknown' },
+        });
+      });
+    });
+
     describe('4xx or 5xx from Registry become RegistryResponseError', () => {
       it('404', async () => {
         fetchMock.mockImplementationOnce(() => ({
@@ -162,6 +227,9 @@ describe('Registry requests', () => {
           `'404 Not Found' error response from package registry at https://example.com`
         );
         await expect(promise).rejects.toMatchObject({ status: 404 });
+        await expect(promise).rejects.toMatchObject({
+          attributes: { type: 'http', reason: '404' },
+        });
         expect(fetchMock).toHaveBeenCalledTimes(1);
       });
 

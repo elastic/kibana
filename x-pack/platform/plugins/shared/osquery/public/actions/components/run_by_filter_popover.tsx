@@ -34,6 +34,9 @@ const SEARCH_USERS_PLACEHOLDER = i18n.translate(
 
 const PANEL_PROPS = { 'data-test-subj': 'history-run-by-filter-popover' };
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
 
 interface RunByFilterPopoverProps {
   selectedUserIds: string[];
@@ -124,7 +127,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isLoading={isLoading}
       isSelected={isOpen}
@@ -160,6 +163,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
         noMatchesMessage={i18n.translate('xpack.osquery.historyFilters.noUsersMatch', {
           defaultMessage: 'No users match search',
         })}
+        listProps={LIST_PROPS}
       >
         {(list, search) => (
           <div css={POPOVER_CONTENT_STYLE}>

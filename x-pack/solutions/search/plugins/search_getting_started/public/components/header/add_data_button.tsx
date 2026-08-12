@@ -36,7 +36,7 @@ export const AddDataButton: React.FC = () => {
         application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' });
       }}
     >
-      {i18n.translate('xpack.search.gettingStarted.addDataButton.uploadFile', {
+      {i18n.translate('xpack.searchGettingStarted.addDataButton.uploadFile', {
         defaultMessage: 'Upload a file',
       })}
     </EuiContextMenuItem>,
@@ -49,7 +49,7 @@ export const AddDataButton: React.FC = () => {
         application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' });
       }}
     >
-      {i18n.translate('xpack.search.gettingStarted.addDataButton.browseSampleData', {
+      {i18n.translate('xpack.searchGettingStarted.addDataButton.browseSampleData', {
         defaultMessage: 'Browse sample datasets',
       })}
     </EuiContextMenuItem>,
@@ -66,7 +66,7 @@ export const AddDataButton: React.FC = () => {
               });
             }}
           >
-            {i18n.translate('xpack.search.gettingStarted.addDataButton.createEmptyIndex', {
+            {i18n.translate('xpack.searchGettingStarted.addDataButton.createEmptyIndex', {
               defaultMessage: 'Create an empty index',
             })}
           </EuiContextMenuItem>,
@@ -83,7 +83,7 @@ export const AddDataButton: React.FC = () => {
       onClick={onButtonClick}
       data-test-subj="gettingStartedAddDataButton"
     >
-      {i18n.translate('xpack.search.gettingStarted.addDataButton.label', {
+      {i18n.translate('xpack.searchGettingStarted.addDataButton.label', {
         defaultMessage: 'Add data',
       })}
     </EuiButton>
@@ -91,6 +91,9 @@ export const AddDataButton: React.FC = () => {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.searchGettingStarted.addDataButton.popover.ariaLabel', {
+        defaultMessage: 'Add data options',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

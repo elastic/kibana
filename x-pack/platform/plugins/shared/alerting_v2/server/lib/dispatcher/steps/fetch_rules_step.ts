@@ -29,7 +29,9 @@ export class FetchRulesStep implements DispatcherStep {
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
-    const uniqueRuleIds = Array.from(new Set(dispatchable.map((ep) => ep.rule_id)));
+    const uniqueRuleIds = Array.from(
+      new Set(dispatchable.map((ep) => ep.rule_id).filter((id): id is string => id !== null))
+    );
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: new Map() } };
     }
@@ -41,13 +43,8 @@ export class FetchRulesStep implements DispatcherStep {
       rules.set(doc.id, {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
-        kind: doc.attributes.kind,
         name: doc.attributes.metadata.name,
-        description: doc.attributes.metadata.owner ?? '',
         tags: doc.attributes.metadata.tags ?? [],
-        enabled: doc.attributes.enabled,
-        createdAt: doc.attributes.createdAt,
-        updatedAt: doc.attributes.updatedAt,
       });
     }
 

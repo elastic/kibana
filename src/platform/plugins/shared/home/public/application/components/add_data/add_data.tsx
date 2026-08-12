@@ -28,6 +28,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { MoveData } from '../move_data';
 import { SetupCloudConnect, CalloutSkeleton } from '../setup_cloud_connect';
 import { createAppNavigationHandler } from '../app_navigation_handler';
@@ -112,6 +113,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   href={addBasePath('/app/integrations/browse')}
                   iconType="plusCircle"
                   onClick={(event: MouseEvent) => {
+                    if (hasActiveModifierKey(event)) return;
                     trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                     createAppNavigationHandler('/app/integrations/browse')(event);
                   }}

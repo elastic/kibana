@@ -19,7 +19,13 @@ export class MetricsTab extends ServiceDetailsTab {
   public readonly noDashboardCallout: Locator;
   public readonly jvmMetricsTable: Locator;
   public readonly cpuUsageChart: Locator;
+  public readonly serverlessSummary: Locator;
   public readonly serverlessSummaryFeedbackLink: Locator;
+  public readonly noDataForRangeCallout: Locator;
+  public readonly mixedAgentTypesCallout: Locator;
+  public readonly mixedAgentTypesOverlapCallout: Locator;
+  public readonly currentTimeRangeLink: Locator;
+  public readonly previousTimeRangeLink: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
@@ -28,8 +34,18 @@ export class MetricsTab extends ServiceDetailsTab {
     this.noDashboardCallout = this.page.getByTestId('apmMetricsNoDashboardFound');
     this.jvmMetricsTable = this.page.getByTestId('apmJvmMetricsTable');
     this.cpuUsageChart = this.page.getByTestId('cpu_usage_chart');
+    this.serverlessSummary = this.page.getByTestId('apmServerlessSummary');
     this.serverlessSummaryFeedbackLink = this.page.getByTestId(
       'apmServerlessSummaryGiveFeedbackLink'
+    );
+    this.noDataForRangeCallout = this.page.getByTestId('apmMetricsNoDataForRange');
+    this.mixedAgentTypesCallout = this.page.getByTestId('apmMetricsMixedAgentTypes');
+    this.mixedAgentTypesOverlapCallout = this.page.getByTestId('apmMetricsMixedAgentTypesOverlap');
+    this.currentTimeRangeLink = this.page.locator(
+      '[data-test-subj="apmMetricsCurrentTimeRangeLink"]:not([role=status] *)'
+    );
+    this.previousTimeRangeLink = this.page.locator(
+      '[data-test-subj="apmMetricsPreviousTimeRangeLink"]:not([role=status] *)'
     );
   }
 
@@ -57,6 +73,26 @@ export class MetricsTab extends ServiceDetailsTab {
 
   getPanelsWithNoResults(): Locator {
     return this.panels.getPanelsWithNoResults();
+  }
+
+  getPanelByTitle(title: string): Locator {
+    return this.panels.getPanelByTitle(title);
+  }
+
+  async getPanelTitles(): Promise<string[]> {
+    return this.panels.getPanelTitles();
+  }
+
+  async getLegendLabels(panelTitle: string): Promise<string[]> {
+    return this.panels.getLegendLabels(panelTitle);
+  }
+
+  getUrlTimeRange(): { rangeFrom: string | null; rangeTo: string | null } {
+    const url = new URL(this.page.url());
+    return {
+      rangeFrom: url.searchParams.get('rangeFrom'),
+      rangeTo: url.searchParams.get('rangeTo'),
+    };
   }
 
   async waitForAllPanelsToRender(): Promise<void> {

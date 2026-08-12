@@ -37,6 +37,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import { normalizeUrl } from '../../connector_utils';
 import type {
   ExecuteStatementInput,
   RunQueryInput,
@@ -179,7 +180,7 @@ const submitStatement = async (
     };
   }
 
-  const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
+  const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
 
   const response = await ctx.client.post(url, body, {
     params: { async: true },
@@ -199,15 +200,55 @@ export const Snowflake: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
+        type: 'oauth_authorization_code',
+        defaults: {},
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://{account}.snowflakecomputing.com/oauth/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
+                {
+                  defaultMessage:
+                    "Snowflake OAuth authorization URL. Replace '{account}' with your Snowflake account identifier.",
+                  values: {
+                    accountPlaceholder: '{account}',
+                  },
+                }
+              ),
+            },
+            tokenUrl: {
+              placeholder: 'https://{account}.snowflakecomputing.com/oauth/token-request',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
+                  values: {
+                    accountPlaceholder: '{account}',
+                  },
+                }
+              ),
+            },
+            scope: {
+              hidden: true,
+            },
+          },
+        },
+      },
+      {
         type: 'bearer',
         defaults: {},
         overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.bearer.label', {
+            defaultMessage: 'Programmatic access token (PAT)',
+          }),
           meta: {
             token: {
               sensitive: true,
@@ -218,37 +259,6 @@ export const Snowflake: ConnectorSpec = {
                 defaultMessage:
                   'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
               }),
-            },
-          },
-        },
-      },
-      {
-        type: 'oauth_authorization_code',
-        defaults: {},
-        overrides: {
-          meta: {
-            authorizationUrl: {
-              placeholder: 'https://<account>.snowflakecomputing.com/oauth/authorize',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
-                {
-                  defaultMessage:
-                    'Snowflake OAuth authorization URL. Replace <account> with your Snowflake account identifier.',
-                }
-              ),
-            },
-            tokenUrl: {
-              placeholder: 'https://<account>.snowflakecomputing.com/oauth/token-request',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'Snowflake OAuth token endpoint. Replace <account> with your Snowflake account identifier.',
-                }
-              ),
-            },
-            scope: {
-              hidden: true,
             },
           },
         },
@@ -265,7 +275,6 @@ export const Snowflake: ConnectorSpec = {
     z.object({
       accountUrl: z
         .url()
-        .transform((val) => val.replace(/\/+$/, ''))
         .describe('Snowflake account URL')
         .meta({
           widget: 'text',
@@ -387,7 +396,7 @@ export const Snowflake: ConnectorSpec = {
         const params: Record<string, unknown> = {};
         if (input.partition !== undefined) params.partition = input.partition;
 
-        const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}`;
 
         const response = await ctx.client.get(url, {
           params,
@@ -406,7 +415,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: CancelStatementInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}/${input.statementHandle}/cancel`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}/${
+          input.statementHandle
+        }/cancel`;
 
         const response = await ctx.client.post(
           url,
@@ -430,7 +441,7 @@ export const Snowflake: ConnectorSpec = {
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases`;
+        const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_REST_API_V2}/databases`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -445,9 +456,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
-          input.database
-        )}/schemas`;
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(input.database)}/schemas`;
         const response = await ctx.client.get(url, { params });
         return response.data;
       },
@@ -463,7 +474,9 @@ export const Snowflake: ConnectorSpec = {
         const params = buildListParams(input);
         if (input.history !== undefined) params.history = input.history;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables`;
         const response = await ctx.client.get(url, { params });
@@ -480,7 +493,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views`;
         const response = await ctx.client.get(url, { params });
@@ -496,7 +511,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: DescribeTableInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/tables/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -512,7 +529,9 @@ export const Snowflake: ConnectorSpec = {
       handler: async (ctx, input: DescribeViewInput) => {
         const { accountUrl } = ctx.config as { accountUrl: string };
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/views/${encodeURIComponent(input.name)}`;
         const response = await ctx.client.get(url);
@@ -529,7 +548,9 @@ export const Snowflake: ConnectorSpec = {
         const { accountUrl } = ctx.config as { accountUrl: string };
         const params = buildListParams(input);
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services`;
         const response = await ctx.client.get(url, { params });
@@ -550,7 +571,9 @@ export const Snowflake: ConnectorSpec = {
         if (input.filter !== undefined) body.filter = input.filter;
         if (input.limit !== undefined) body.limit = input.limit;
 
-        const url = `${accountUrl}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
+        const url = `${normalizeUrl(
+          accountUrl
+        )}${SNOWFLAKE_REST_API_V2}/databases/${encodeURIComponent(
           input.database
         )}/schemas/${encodeURIComponent(input.schema)}/cortex-search-services/${encodeURIComponent(
           input.serviceName
@@ -568,30 +591,17 @@ export const Snowflake: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       const { accountUrl } = ctx.config as { accountUrl: string };
-      const url = `${accountUrl}${SNOWFLAKE_SQL_API_PATH}`;
-
-      const response = await ctx.client.post(
+      const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
+      await ctx.client.post(
         url,
         { statement: 'SELECT CURRENT_VERSION()' },
         {
           validateStatus: (status) => status === 200 || status === 202,
         }
       );
-
-      if (response.status === 200 && response.data?.data) {
-        return {
-          ok: true,
-          message: `Connected to Snowflake. Version: ${response.data.data[0]?.[0] ?? 'unknown'}`,
-        };
-      }
-
-      return {
-        ok: true,
-        message: `Connected to Snowflake. Statement submitted (handle: ${
-          response.data?.statementHandle ?? 'unknown'
-        }).`,
-      };
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

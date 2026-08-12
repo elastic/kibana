@@ -13,11 +13,13 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
+import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
+
+import type { LegacyDashboardSearchResponseBody } from '../../server/api/search/types';
 import type {
-  DashboardCreateRequestBody,
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
-  DashboardUpdateRequestBody,
+  DashboardState,
 } from '../../server';
 import {
   DASHBOARD_API_PATH,
@@ -54,7 +56,7 @@ const buildDashboardAppPath = (id: string) => buildPath(`${DASHBOARD_APP_API_PAT
 
 export const dashboardClient = {
   create: async (
-    dashboardState: DashboardCreateRequestBody,
+    dashboardState: DashboardState,
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
     return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
@@ -107,17 +109,35 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchParams: DashboardSearchRequestParams) => {
+  search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
-    return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
+
+    const response = await coreServices.http.get<
+      DashboardSearchResponseBody | LegacyDashboardSearchResponseBody
+    >(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
         ...(query ? { query: `${query}*` } : {}),
       },
     });
+
+    // Normalize the legacy response shape to the GA shape so callers always receive `{ data, meta }`,
+    // regardless of whether the server has the `asCode.useGASchemas` feature flag enabled.
+    if ('dashboards' in response) {
+      return {
+        data: response.dashboards,
+        meta: {
+          page: response.page,
+          per_page: params.per_page ?? PAGINATION_DEFAULT_PER_PAGE,
+          total: response.total,
+        },
+      };
+    }
+
+    return response;
   },
-  update: async (id: string, dashboardState: DashboardUpdateRequestBody) => {
+  update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       buildDashboardAppPath(id),
       {

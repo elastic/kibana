@@ -16,6 +16,7 @@ import {
   getDummyWorkflowYaml,
   getIncompleteStepTypeYaml,
   getInvalidWorkflowYaml,
+  getMultiStepTypeWorkflowYaml,
   getRootLevelAutocompleteYaml,
   getWorkflowWithCommentedVariablesYaml,
 } from '../fixtures/workflows';
@@ -92,6 +93,30 @@ test.describe(
       await expect(validationAccordion).toContainText('No validation errors');
     });
 
+    // Regression guard: these step types previously had bare EUI glyph names (e.g. 'commandLine',
+    // 'branch', 'refresh') used in CSS url(), rendering nothing in the Monaco editor.
+    // All six are monochrome glyphs, so correct styling routes the icon through mask-image
+    // (tintable), not background-image. Each test verifies the icon is:
+    //   (a) resolved to a valid image URL in the real webpack build (data URL or SVG asset URL), AND
+    //   (b) actually applied to the rendered ::after box with the correct CSS routing.
+    // Bare EUI icon-name strings (e.g. 'commandLine') would leave mask-image as 'none' and
+    // correctly fail this check.
+    for (const stepType of ['console', 'if', 'foreach', 'http', 'loop.continue', 'workflow.fail']) {
+      test(`should render "${stepType}" step type icon styled via mask-image`, async ({
+        pageObjects,
+      }) => {
+        await pageObjects.workflowEditor.gotoNewWorkflow();
+        await pageObjects.workflowEditor.setYamlEditorValue(
+          getMultiStepTypeWorkflowYaml('Step Type Icon Test')
+        );
+
+        const { maskImage } = await pageObjects.workflowEditor.waitForStepTypeIconStyled(stepType);
+        // All six are monochrome: the icon must land in mask-image, not background-image.
+        const hasValidImage = (s: string) => s.includes('data:image') || s.includes('.svg');
+        expect(hasValidImage(maskImage)).toBe(true);
+      });
+    }
+
     test('should show step type autocompletion suggestions', async ({ pageObjects, page }) => {
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Autocomplete Test';
@@ -148,7 +173,7 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
 
       await expect(suggestWidget.getByRole('option', { name: 'consts' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'inputs' })).toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: 'tags' })).toBeVisible();
       await expect(suggestWidget.getByRole('option', { name: 'outputs' })).toBeVisible();
     });
 

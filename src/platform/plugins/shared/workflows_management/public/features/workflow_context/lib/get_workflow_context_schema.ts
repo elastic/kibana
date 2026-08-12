@@ -9,27 +9,17 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import {
-  AlertEventPropsSchema,
-  BaseEventSchema,
-  DynamicWorkflowContextSchema,
-  EventTimestampSchema,
-  isTriggerType,
-} from '@kbn/workflows';
+import { DynamicWorkflowContextSchema, EventTimestampSchema, isTriggerType } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { triggerSchemas } from '../../../trigger_schemas';
-
-// Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
-export type WorkflowDefinitionForContext =
-  | WorkflowYaml
-  | (Omit<WorkflowYaml, 'inputs'> & {
-      inputs?:
-        | WorkflowYaml['inputs']
-        | Array<{ name: string; type: string; [key: string]: unknown }>;
-    });
 
 function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
   return schema instanceof z.ZodObject;
@@ -44,8 +34,7 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
   let eventSchema: z.ZodType = hasAlertTrigger
     ? z.object({
-        ...(BaseEventSchema as z.ZodObject<z.ZodRawShape>).shape,
-        ...(AlertEventPropsSchema as z.ZodObject<z.ZodRawShape>).shape,
+        ...(AlertEventSchema as z.ZodObject<z.ZodRawShape>).shape,
       })
     : BaseEventSchema;
   for (const trigger of triggers) {
@@ -90,16 +79,18 @@ function extractFieldFromYaml<T>(
 }
 
 export function getWorkflowContextSchema(
-  definition: WorkflowDefinitionForContext,
+  definition: WorkflowYaml,
   yamlDocument?: Document | null
 ): typeof DynamicWorkflowContextSchema {
-  const inputs = extractFieldFromYaml(definition.inputs, yamlDocument, 'inputs');
+  const triggers = extractFieldFromYaml(definition.triggers, yamlDocument, 'triggers');
+  const inputs = extractNormalizedInputsFromYaml(definition, yamlDocument);
+
   const outputs = extractFieldFromYaml(definition.outputs, yamlDocument, 'outputs');
 
   const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
   const normalizedOutputs = normalizeFieldsToJsonSchema(outputs);
 
-  const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
+  const eventSchema = buildEventSchemaFromTriggers(triggers ?? []);
 
   return DynamicWorkflowContextSchema.extend({
     inputs: buildFieldsZodValidator(normalizedInputs),

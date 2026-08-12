@@ -19,6 +19,9 @@ jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_permissions');
 jest.mock('../../../../hooks/use_fetch_slo_templates');
 jest.mock('../../../../hooks/use_fetch_slo_template_tags');
+jest.mock('../../../../hooks/use_composite_slo_enabled', () => ({
+  useCompositeSloEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const mockNavigateToUrl = jest.fn();
 const useKibanaMock = useKibana as jest.Mock;

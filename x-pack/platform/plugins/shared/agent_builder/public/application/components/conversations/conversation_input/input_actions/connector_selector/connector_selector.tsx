@@ -8,7 +8,7 @@
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButtonEmpty,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -19,6 +19,8 @@ import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useConnectorSelection } from '../../../../../hooks/chat/use_connector_selection';
@@ -100,6 +102,11 @@ const ConnectorPopoverButton: React.FC<{
       onClick={onClick}
       aria-label={getConnectorButtonAriaLabel(connectorDisplayName)}
       data-test-subj="agentBuilderConnectorSelectorButton"
+      ebtProps={getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_CONNECTOR_SELECTOR,
+        detail: 'connector',
+      })}
     >
       {connectorDisplayName}
     </InputPopoverButton>
@@ -135,23 +142,36 @@ const manageConnectorsAriaLabel = i18n.translate(
 const ConnectorListFooter: React.FC = () => {
   const { manageConnectorsUrl } = useNavigation();
   const { write: hasWritePrivilege } = useUiPrivileges();
+  const manageButtonProps = {
+    size: 's' as const,
+    iconType: 'gear',
+    color: 'text' as const,
+    'aria-label': manageConnectorsAriaLabel,
+    ...getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.MANAGE_CONNECTORS,
+      detail: 'connector',
+    }),
+  };
   return (
     <EuiPopoverFooter paddingSize="s">
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            color="text"
-            aria-label={manageConnectorsAriaLabel}
-            href={manageConnectorsUrl}
-            disabled={!hasWritePrivilege}
-          >
-            <FormattedMessage
-              id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
-              defaultMessage="Manage"
-            />
-          </EuiButtonEmpty>
+          {hasWritePrivilege ? (
+            <EuiButton {...manageButtonProps} href={manageConnectorsUrl}>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          ) : (
+            <EuiButton {...manageButtonProps} disabled>
+              <FormattedMessage
+                id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
+                defaultMessage="Manage"
+              />
+            </EuiButton>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverFooter>
@@ -319,6 +339,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   return (
     <EuiPopover
+      aria-label={selectableAriaLabel}
       panelProps={{ css: selectorPopoverPanelStyles }}
       button={
         <ConnectorPopoverButton
@@ -331,7 +352,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="upLeft"
     >
       <EuiSelectable
         id={connectorSelectId}
@@ -365,6 +386,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
           css: selectorListStyles,
           rowHeight: CONNECTOR_OPTION_ROW_HEIGHT,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list) => (

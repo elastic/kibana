@@ -70,6 +70,7 @@ describe('CPSManager', () => {
         get: jest.fn().mockReturnValue(''),
         serverBasePath: '',
       },
+      spaceId: 'default',
     } as unknown as jest.Mocked<HttpSetup>;
 
     mockApplication = {
@@ -204,14 +205,10 @@ describe('CPSManager', () => {
       it('should initialize with the current space name', async () => {
         const spaceProjectRoutingValue = '_alias:_origin';
 
-        // Mock basePath to return a space-specific path
         const customMockHttp = {
           ...mockHttp,
           get: jest.fn().mockResolvedValue(spaceProjectRoutingValue),
-          basePath: {
-            get: jest.fn().mockReturnValue('/s/test-space'),
-            serverBasePath: '',
-          },
+          spaceId: 'test-space',
         } as unknown as jest.Mocked<HttpSetup>;
 
         const manager = new CPSManager({

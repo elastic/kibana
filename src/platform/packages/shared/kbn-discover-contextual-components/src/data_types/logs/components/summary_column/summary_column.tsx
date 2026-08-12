@@ -9,7 +9,14 @@
 
 import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -169,7 +176,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   });
 
   // For formatted JSON values, render as JSON code block
-  // For plain text, use field formatter's reactConvert which handles search highlighting natively
+  // For plain text, use field formatter's convertToReact which handles search highlighting natively
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
@@ -187,15 +194,20 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
 
   return (
     <EuiFlexGroup direction="column" css={{ position: 'relative', width: 580 }}>
-      <EuiButtonIcon
-        aria-label={closeCellActionPopoverText}
-        data-test-subj="docTableClosePopover"
-        iconSize="s"
-        iconType="cross"
-        size="xs"
-        onClick={closePopover}
-        css={{ position: 'absolute', right: 0 }}
-      />
+      <EuiToolTip
+        content={closeCellActionPopoverText}
+        disableScreenReaderOutput
+        anchorProps={{ css: { position: 'absolute', right: 0 } }}
+      >
+        <EuiButtonIcon
+          aria-label={closeCellActionPopoverText}
+          data-test-subj="docTableClosePopover"
+          iconSize="s"
+          iconType="cross"
+          size="xs"
+          onClick={closePopover}
+        />
+      </EuiToolTip>
       {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">

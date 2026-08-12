@@ -12,25 +12,20 @@ import {
   getOutcomeAggregation,
   getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import type {
+  ServiceTransactionGroupDetailedStatisticsResponse,
+  ServiceTransactionGroupDetailedStat,
+} from '@kbn/apm-api-shared';
 import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
+import { nullifyEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import type { Coordinate } from '../../../typings/timeseries';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import type { RollupInterval } from '../../../common/rollup';
-
-interface ServiceTransactionGroupDetailedStat {
-  transactionName: string;
-  latency: Coordinate[];
-  throughput: Coordinate[];
-  errorRate: Coordinate[];
-  impact: number;
-}
 
 async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -130,7 +125,7 @@ async function getServiceTransactionGroupDetailedStatistics({
   const totalDuration = response.aggregations?.total_duration.value;
   return buckets.map((bucket) => {
     const transactionName = bucket.key as string;
-    const latency = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const latency = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,
@@ -140,14 +135,14 @@ async function getServiceTransactionGroupDetailedStatistics({
         }),
       }))
     );
-    const throughput = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const throughput = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,
         y: timeseriesBucket.doc_count,
       }))
     );
-    const errorRate = nullifyLeadingTrailingEmptyRedMetricPoints(
+    const errorRate = nullifyEmptyRedMetricPoints(
       bucket.timeseries.buckets.map((timeseriesBucket) => ({
         x: timeseriesBucket.key,
         docCount: timeseriesBucket.doc_count,
@@ -163,11 +158,6 @@ async function getServiceTransactionGroupDetailedStatistics({
       impact: totalDuration ? (transactionGroupTotalDuration * 100) / totalDuration : 0,
     };
   });
-}
-
-export interface ServiceTransactionGroupDetailedStatisticsResponse {
-  currentPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
-  previousPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
 }
 
 export async function getServiceTransactionGroupDetailedStatisticsPeriods({

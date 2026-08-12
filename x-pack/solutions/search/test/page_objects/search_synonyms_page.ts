@@ -23,10 +23,11 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        // check if exists, refresh and check again for 10 seconds
         await retry.tryForTime(10000, async () => {
-          await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 });
-          await browser.refresh();
+          if (!(await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 }))) {
+            await browser.refresh();
+            throw new Error(`${this.TEST_IDS.GET_STARTED_BUTTON} not visible`);
+          }
         });
       },
       async clickCreateSynonymsSetButton() {

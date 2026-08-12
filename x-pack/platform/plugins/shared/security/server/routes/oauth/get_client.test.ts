@@ -22,10 +22,14 @@ describe('Get OAuth Client route', () => {
   function getMockContext(
     licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
+
+  const PROJECT_ID = 'test-project-id';
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -35,6 +39,7 @@ describe('Get OAuth Client route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineGetOAuthClientRoute(mockRouteDefinitionParams);
 
@@ -72,7 +77,7 @@ describe('Get OAuth Client route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
-    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1');
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1', PROJECT_ID);
   });
 
   it('returns 404 when client is not found', async () => {
@@ -98,7 +103,6 @@ describe('Get OAuth Client route', () => {
 
     expect(response.status).toBe(404);
   });
-
   it('returns error from service', async () => {
     oauthMock.listClients.mockRejectedValue(Boom.forbidden('Forbidden'));
 

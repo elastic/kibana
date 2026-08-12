@@ -15,7 +15,7 @@ import {
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { waitFor, render, screen } from '@testing-library/react';
+import { waitFor, render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -445,5 +445,52 @@ describe('QueryStringInput', () => {
     await waitFor(() => {
       expect(mockCallback).toHaveBeenCalled();
     });
+  });
+
+  it('Stops Escape propagation while suggestions are visible so parent overlays do not close', async () => {
+    const onParentKeyDown = jest.fn();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    render(
+      <div onKeyDown={onParentKeyDown}>
+        {wrapQueryStringInputInContext({
+          query: { query: '', language: 'kuery' },
+          onSubmit: noop,
+          indexPatterns: [stubIndexPattern],
+          disableAutoFocus: true,
+        })}
+      </div>
+    );
+
+    const textarea = screen.getByRole('textbox');
+    // Typing flips `isSuggestionsVisible` to true synchronously via
+    // `onQueryStringChange`. The typed keydown also reaches the parent, so
+    // we clear the spy before exercising the Escape behavior we care about.
+    await user.type(textarea, 'r');
+    onParentKeyDown.mockClear();
+
+    fireEvent.keyDown(textarea, { key: 'Escape', keyCode: 27 });
+
+    expect(onParentKeyDown).not.toHaveBeenCalled();
+  });
+
+  it('Lets Escape propagate when no suggestions are visible so parent Esc-to-close still works', () => {
+    const onParentKeyDown = jest.fn();
+
+    render(
+      <div onKeyDown={onParentKeyDown}>
+        {wrapQueryStringInputInContext({
+          query: kqlQuery,
+          onSubmit: noop,
+          indexPatterns: [stubIndexPattern],
+          disableAutoFocus: true,
+        })}
+      </div>
+    );
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.keyDown(textarea, { key: 'Escape', keyCode: 27 });
+
+    expect(onParentKeyDown).toHaveBeenCalledTimes(1);
   });
 });
