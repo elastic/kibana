@@ -28,10 +28,6 @@ interface CountLabelValues {
   formattedHits: React.ReactNode;
 }
 
-// One entry per variant, each with its full and "at least this many" (partial) wording.
-// Keeping the two forms next to each other makes them easy to compare when adding a variant.
-// `values` is destructured (rather than passed through as one object) so the i18n extractor
-// can statically see the `hits`/`formattedHits` keys each FormattedMessage is called with.
 const COUNT_LABELS: Record<
   HitsCounterVariant,
   Record<'full' | 'partial', (values: CountLabelValues) => React.ReactNode>

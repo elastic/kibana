@@ -187,32 +187,7 @@ describe('Document view mode toggle component', () => {
   });
 
   it('should render a loading spinner for the pattern count until it is provided', async () => {
-    const services = createDiscoverServicesMock();
-    services.uiSettings.get = jest.fn().mockReturnValue(true);
-    services.aiops!.getPatternAnalysisAvailable = jest.fn().mockResolvedValue(jest.fn(() => true));
-
-    const dataView = buildDataViewMock({ name: 'logs-*' });
-    const toolkit = getDiscoverInternalStateMock({ services });
-    await toolkit.initializeTabs();
-    const { dataStateContainer } = await toolkit.initializeSingleTab({
-      tabId: toolkit.getCurrentTab().id,
-    });
-    dataStateContainer.data$.totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: 10 });
-
-    renderWithKibanaRenderContext(
-      <DiscoverToolkitTestProvider toolkit={toolkit}>
-        <DocumentViewModeToggle
-          viewMode={VIEW_MODE.PATTERN_LEVEL}
-          isEsqlMode={false}
-          setDiscoverViewMode={jest.fn()}
-          dataView={dataView}
-        />
-      </DiscoverToolkitTestProvider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('dscViewModeToggleButton')).toBeVisible();
-    });
+    await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
 
     expect(screen.queryByTestId('dscViewModePatternCount')).not.toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeVisible();

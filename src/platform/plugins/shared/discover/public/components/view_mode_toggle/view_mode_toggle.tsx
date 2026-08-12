@@ -126,22 +126,14 @@ export const DocumentViewModeToggle = ({
     padding: ${containerPadding} ${containerPadding} 0 ${containerPadding};
   `;
 
-  const documentsLabel = isEsqlMode
-    ? i18n.translate('discover.viewModes.esql.label', { defaultMessage: 'Results' })
-    : i18n.translate('discover.viewModes.document.label', { defaultMessage: 'Documents' });
-  const patternsLabel = i18n.translate('discover.viewModes.patternAnalysis.label', {
-    defaultMessage: 'Patterns',
-  });
-  const fieldStatisticsLabel = i18n.translate('discover.viewModes.fieldStatistics.label', {
-    defaultMessage: 'Field statistics',
-  });
-
   const options = useMemo<SelectableEntry[]>(() => {
     const entries: SelectableEntry[] = [
       {
         key: VIEW_MODE.DOCUMENT_LEVEL,
         value: VIEW_MODE.DOCUMENT_LEVEL,
-        label: documentsLabel,
+        label: isEsqlMode
+          ? i18n.translate('discover.viewModes.esql.label', { defaultMessage: 'Results' })
+          : i18n.translate('discover.viewModes.document.label', { defaultMessage: 'Documents' }),
         checked: viewMode === VIEW_MODE.DOCUMENT_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModeDocumentOption',
       },
@@ -151,7 +143,9 @@ export const DocumentViewModeToggle = ({
       entries.push({
         key: VIEW_MODE.PATTERN_LEVEL,
         value: VIEW_MODE.PATTERN_LEVEL,
-        label: patternsLabel,
+        label: i18n.translate('discover.viewModes.patternAnalysis.label', {
+          defaultMessage: 'Patterns',
+        }),
         checked: viewMode === VIEW_MODE.PATTERN_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModePatternAnalysisOption',
       });
@@ -161,7 +155,9 @@ export const DocumentViewModeToggle = ({
       entries.push({
         key: VIEW_MODE.AGGREGATED_LEVEL,
         value: VIEW_MODE.AGGREGATED_LEVEL,
-        label: fieldStatisticsLabel,
+        label: i18n.translate('discover.viewModes.fieldStatistics.label', {
+          defaultMessage: 'Field statistics',
+        }),
         disabled: isEsqlMode,
         checked: viewMode === VIEW_MODE.AGGREGATED_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModeFieldStatsOption',
@@ -169,15 +165,7 @@ export const DocumentViewModeToggle = ({
     }
 
     return entries;
-  }, [
-    documentsLabel,
-    patternsLabel,
-    fieldStatisticsLabel,
-    showPatternAnalysisTab,
-    showFieldStatisticsTab,
-    viewMode,
-    isEsqlMode,
-  ]);
+  }, [showPatternAnalysisTab, showFieldStatisticsTab, viewMode, isEsqlMode]);
 
   const onChange = useCallback(
     (chosen?: SelectableEntry) => {
@@ -194,7 +182,7 @@ export const DocumentViewModeToggle = ({
       return (
         <CountLabel
           label={
-            patternCount === undefined
+            isLoading
               ? i18n.translate('discover.viewModes.patternAnalysis.countLoadingLabel', {
                   defaultMessage: 'patterns',
                 })
@@ -214,7 +202,7 @@ export const DocumentViewModeToggle = ({
       return (
         <CountLabel
           label={
-            fieldsCount === undefined
+            isLoading
               ? i18n.translate('discover.viewModes.fieldStatistics.countLoadingLabel', {
                   defaultMessage: 'fields',
                 })
@@ -234,8 +222,7 @@ export const DocumentViewModeToggle = ({
 
   // if neither the pattern analysis nor field statistics view is available, there's only
   // one possible view (Documents/Results), so there's nothing to select between
-  const showOnlyDocumentsCounter =
-    showFieldStatisticsTab === false && showPatternAnalysisTab === false;
+  const showViewModeSelector = Boolean(showFieldStatisticsTab || showPatternAnalysisTab);
 
   return (
     <EuiFlexGroup
@@ -258,7 +245,7 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>{countDisplay}</EuiFlexItem>
-      {!showOnlyDocumentsCounter && (
+      {showViewModeSelector && (
         <>
           <EuiFlexItem grow={false}>
             <span
