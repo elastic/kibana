@@ -9,9 +9,27 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName } from '../common';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
 
 const createDataSetRow = ({
   name,
@@ -44,6 +62,7 @@ describe('DatasetsTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
@@ -60,6 +79,7 @@ describe('DatasetsTable', () => {
           onDelete={jest.fn()}
           onDeleteSelected={jest.fn()}
         />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -75,6 +95,7 @@ describe('DatasetsTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
@@ -91,6 +112,7 @@ describe('DatasetsTable', () => {
           onDelete={jest.fn()}
           onDeleteSelected={jest.fn()}
         />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -103,6 +125,7 @@ describe('DatasetsTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
         <DatasetsTable
           filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
           selectedItems={[]}
@@ -119,6 +142,7 @@ describe('DatasetsTable', () => {
           onDelete={jest.fn()}
           onDeleteSelected={jest.fn()}
         />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -133,6 +157,7 @@ describe('DatasetsTable', () => {
 
     const { getAllByTestId } = render(
       <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
         <DatasetsTable
           filteredItems={[
             createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
@@ -152,6 +177,7 @@ describe('DatasetsTable', () => {
           onDelete={onDelete}
           onDeleteSelected={jest.fn()}
         />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
@@ -175,6 +201,7 @@ describe('DatasetsTable', () => {
 
     const { getByTestId } = render(
       <EuiProvider>
+        <KibanaContextProvider services={{ docLinks: docLinksMock }}>
         <DatasetsTable
           filteredItems={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
           selectedItems={selectedItems}
@@ -191,6 +218,7 @@ describe('DatasetsTable', () => {
           onDelete={jest.fn()}
           onDeleteSelected={onDeleteSelected}
         />
+        </KibanaContextProvider>
       </EuiProvider>
     );
 
