@@ -26,6 +26,15 @@ A `ClientTypeSpec<TClient>` in `client_type_spec.ts`:
 
 `BuildContext` currently provides `logger`, connector `config`, `networkSettings`, and `credential.getAuthHeaders()`.
 
+### `networkSettings` is global / shared only
+
+`ConnectorNetworkSettings` mirrors cluster-wide Actions outbound policy (`xpack.actions.*`): allowlist, proxy, TLS / custom hosts, response timeout and max content length. It is the same bag the axios path uses.
+
+- **Do** read and apply those shared settings in `build(ctx)`.
+- **Do not** add client-specific settings to `ConnectorNetworkSettings` / `BuildContext.networkSettings`. Protocol options, product defaults, MCP session knobs, SQL pool sizes, etc. belong on connector `config` / secrets, or closed over in the client type (factory `deps`).
+
+Growing `networkSettings` for one client forces every other client to inherit an unrelated API.
+
 ## How to add one
 
 Default path — self-contained client, no Actions override:
@@ -79,6 +88,7 @@ The framework guarantees **reachability** of `xpack.actions.*` settings, not **a
 - [ ] Honor `getResponseSettings()` (`timeout`, `maxContentLength`) or an explicit, reviewed equivalent in the native client.
 - [ ] Set a User-Agent consistent with Actions (`buildUserAgent` in `get_axios_instance.ts`) when the transport is HTTP(S).
 - [ ] No parallel Actions `getXFetchFactory` unless multiple clients share that exact transport API.
+- [ ] No client-specific fields on `ConnectorNetworkSettings` — only global / shared Actions policy.
 
 Failing to apply the allowlist at the egress seam yields an unprotected connection.
 
