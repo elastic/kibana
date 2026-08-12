@@ -21,6 +21,7 @@ plugins:
     - dashboard
     - dashboard_markdown
     - data
+    - data_federation
     - data_view_editor
     - data_view_management
     - data_views
@@ -51,6 +52,7 @@ plugins:
     - kibana_overview
     - kql
     - lens
+    - license_management
     - links
     - logstash
     - management
@@ -64,6 +66,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - rollup
     - remote_clusters
     - reindex_service
     - saved_objects_management
@@ -123,3 +126,4 @@ excluded_configs:
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts
   - x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
