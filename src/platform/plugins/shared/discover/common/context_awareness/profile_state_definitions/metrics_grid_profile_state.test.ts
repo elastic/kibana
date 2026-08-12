@@ -33,8 +33,8 @@ describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
       counterAggregation: { type: ProfileStateType.Persistent },
       gaugeAggregation: { type: ProfileStateType.Persistent },
       histogramPercentile: { type: ProfileStateType.Persistent },
-      field: { type: ProfileStateType.Persistent },
-      direction: { type: ProfileStateType.Persistent },
+      sortField: { type: ProfileStateType.Persistent },
+      sortDirection: { type: ProfileStateType.Persistent },
     });
   });
 
@@ -42,12 +42,12 @@ describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
     const registry = createRegistry();
 
     const expanded = registry.pickStateByType({
-      profileStateMap: { [KEY]: { field: 'recency' } },
+      profileStateMap: { [KEY]: { sortField: 'recency' } },
       stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'expand',
     });
 
-    expect(expanded[KEY]).toMatchObject({ field: 'recency', direction: 'asc' });
+    expect(expanded[KEY]).toMatchObject({ sortField: 'recency', sortDirection: 'asc' });
   });
 
   it('strips an all-default sort on read so it falls back to the default', () => {
@@ -59,8 +59,8 @@ describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p95',
-          field: 'alphabetically',
-          direction: 'asc',
+          sortField: 'alphabetically',
+          sortDirection: 'asc',
         },
       },
       stateTypes: [ProfileStateType.Persistent],
@@ -74,11 +74,11 @@ describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
     const registry = createRegistry();
 
     const stripped = registry.pickStateByType({
-      profileStateMap: { [KEY]: { field: 'recency', direction: 'desc' } },
+      profileStateMap: { [KEY]: { sortField: 'recency', sortDirection: 'desc' } },
       stateTypes: [ProfileStateType.Persistent],
       defaultsHandling: 'strip',
     });
 
-    expect(stripped).toEqual({ [KEY]: { field: 'recency', direction: 'desc' } });
+    expect(stripped).toEqual({ [KEY]: { sortField: 'recency', sortDirection: 'desc' } });
   });
 });

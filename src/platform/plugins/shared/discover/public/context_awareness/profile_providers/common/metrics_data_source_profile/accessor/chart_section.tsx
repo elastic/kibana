@@ -73,14 +73,14 @@ const MetricsExperienceGridWrapper = (
   );
 
   const metricsSort = useMemo<MetricsSort>(
-    () => [metricsState.field, metricsState.direction],
-    [metricsState.field, metricsState.direction]
+    () => [metricsState.sortField, metricsState.sortDirection],
+    [metricsState.sortField, metricsState.sortDirection]
   );
 
   const onMetricsSortChange = useCallback(
     (next: MetricsSort) => {
-      const [field, direction] = next;
-      metricsStateAdapter.updateState({ field, direction });
+      const [sortField, sortDirection] = next;
+      metricsStateAdapter.updateState({ sortField, sortDirection });
     },
     [metricsStateAdapter]
   );

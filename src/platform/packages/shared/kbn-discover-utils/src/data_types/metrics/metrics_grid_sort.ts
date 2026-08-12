@@ -14,11 +14,11 @@ export type MetricsGridSortField = 'alphabetically' | 'recency';
 export type MetricsGridSortDirection = 'asc' | 'desc';
 
 export interface MetricsGridSort extends SerializableRecord {
-  field: MetricsGridSortField;
-  direction: MetricsGridSortDirection;
+  sortField: MetricsGridSortField;
+  sortDirection: MetricsGridSortDirection;
 }
 
 export const METRICS_GRID_SORT_DEFAULTS: MetricsGridSort = {
-  field: 'alphabetically',
-  direction: 'asc',
+  sortField: 'alphabetically',
+  sortDirection: 'asc',
 };

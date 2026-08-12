@@ -24,8 +24,8 @@ export const METRICS_GRID_SETTINGS_STATE_DEF: ProfileStateDefinition<MetricsGrid
     counterAggregation: { type: ProfileStateType.Persistent },
     gaugeAggregation: { type: ProfileStateType.Persistent },
     histogramPercentile: { type: ProfileStateType.Persistent },
-    field: { type: ProfileStateType.Persistent },
-    direction: { type: ProfileStateType.Persistent },
+    sortField: { type: ProfileStateType.Persistent },
+    sortDirection: { type: ProfileStateType.Persistent },
   },
   defaultState: { ...METRICS_GRID_SETTINGS_DEFAULTS, ...METRICS_GRID_SORT_DEFAULTS },
 };

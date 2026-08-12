@@ -279,8 +279,8 @@ describe('MetricsExperienceGridWrapper', () => {
     renderChartSection();
 
     expect(unifiedGridProps?.metricsSort).toEqual([
-      METRICS_GRID_SORT_DEFAULTS.field,
-      METRICS_GRID_SORT_DEFAULTS.direction,
+      METRICS_GRID_SORT_DEFAULTS.sortField,
+      METRICS_GRID_SORT_DEFAULTS.sortDirection,
     ]);
   });
 
@@ -292,8 +292,8 @@ describe('MetricsExperienceGridWrapper', () => {
     });
 
     expect(metricsStateAdapter.updateState).toHaveBeenCalledWith({
-      field: 'recency',
-      direction: 'desc',
+      sortField: 'recency',
+      sortDirection: 'desc',
     });
     expect(unifiedGridProps?.metricsSort).toEqual(['recency', 'desc']);
   });
