@@ -1,5 +1,5 @@
 {
-  "sha1": "73d8d50b48a6830a9080372a4e4adb6cb1659d36",
+  "sha1": "62a0452431b21f1e90100e19c9c2b129b17369a8",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1116,71 +1116,6 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/new_search_action.spec.ts",
         "line": 70,
         "column": 20
-      }
-    },
-    {
-      "id": "f501e176fe8675e-c89219305126537",
-      "title": "Discover panels toggle - data view mode panels can be toggled in a time-based data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_data_view.spec.ts",
-        "line": 35,
-        "column": 25
-      }
-    },
-    {
-      "id": "665d2b2cb718277-7417e33d6ca8583",
-      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with a histogram chart",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
-        "line": 41,
-        "column": 25
-      }
-    },
-    {
-      "id": "665d2b2cb718277-11a2688beae6a2d",
-      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with an aggs chart",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
-        "line": 88,
-        "column": 11
-      }
-    },
-    {
-      "id": "368c4713a048546-06d11166ed91f94",
-      "title": "Discover panels toggle - no time field only the sidebar can be toggled in a data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
-        "line": 37,
-        "column": 64
-      }
-    },
-    {
-      "id": "368c4713a048546-7bcaa5245c3fb17",
-      "title": "Discover panels toggle - no time field only the sidebar can be toggled in ES|QL mode",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
-        "line": 55,
-        "column": 9
       }
     },
     {
