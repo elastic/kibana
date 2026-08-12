@@ -67,8 +67,7 @@ describe('MainNavigation', () => {
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.getByText('Packs')).toBeInTheDocument();
     expect(screen.getByText('Queries')).toBeInTheDocument();
-    expect(screen.queryByText('Live queries')).not.toBeInTheDocument();
-    expect(screen.queryByText('Saved queries')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
   });
 
   it('should show "Run query" button', () => {
@@ -76,4 +75,22 @@ describe('MainNavigation', () => {
 
     expect(screen.getByText('Run query')).toBeInTheDocument();
   });
+
+  it('should hide the tab strip and title on a details page', () => {
+    // Only the exact list routes are "list views"; details pages render their own header.
+    renderNavigation('/history/abc-123');
+
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    expect(screen.queryByText('Osquery')).not.toBeInTheDocument();
+    expect(screen.queryByText('Run query')).not.toBeInTheDocument();
+  });
+
+  it.each(['/history', '/packs', '/saved_queries'])(
+    'should render the tab strip on the %s list route',
+    (path) => {
+      renderNavigation(path);
+
+      expect(screen.getAllByRole('tab')).toHaveLength(3);
+    }
+  );
 });

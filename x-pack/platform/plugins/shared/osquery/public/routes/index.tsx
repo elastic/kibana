@@ -17,16 +17,20 @@ import { Packs } from './packs';
 import { NewLiveQueryPage } from './live_queries/new';
 import { MissingPrivileges, NotFoundPage } from './components';
 
+const LIVE_QUERIES_PATH = '/live_queries';
+
 // Keeps pre-9.4 `/live_queries` bookmarks working: maps `/live_queries/new` to the
 // top-level `/new` page and any other subpath (e.g. `/live_queries/<actionId>`) onto
 // its `/history` equivalent, preserving the query string and hash.
 const LiveQueriesToHistoryRedirect = () => {
   const location = useLocation();
   const suffix = location.search + location.hash;
+  // The gating route matches case-insensitively and tolerates trailing slashes, so derive the
+  // remainder positionally rather than by string search to keep those variants on a real target.
+  const pathname = location.pathname.replace(/\/+$/, '');
+  const remainder = pathname.slice(LIVE_QUERIES_PATH.length);
   const newPath =
-    location.pathname === '/live_queries/new'
-      ? '/new' + suffix
-      : location.pathname.replace('/live_queries', '/history') + suffix;
+    remainder.toLowerCase() === '/new' ? '/new' + suffix : '/history' + remainder + suffix;
 
   return <Redirect to={newPath} />;
 };

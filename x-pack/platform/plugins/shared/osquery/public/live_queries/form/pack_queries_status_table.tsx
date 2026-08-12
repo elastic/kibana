@@ -406,11 +406,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     ]
   );
 
-  const renderActionsColumn = useCallback(
-    (row: PackQueryStatusItem) => renderResultActions(row),
-    [renderResultActions]
-  );
-
   const renderViewQueryColumn = useCallback(
     (row: PackQueryStatusItem) => (
       <EuiToolTip
@@ -546,7 +541,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'Actions',
         }),
         width: '80px',
-        render: renderActionsColumn,
+        render: renderResultActions,
       },
     ],
     [
@@ -560,7 +555,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       renderRunAtColumn,
       renderExecutionCountColumn,
       renderTagsColumn,
-      renderActionsColumn,
+      renderResultActions,
       startDate,
       scheduleId,
       executionCount,

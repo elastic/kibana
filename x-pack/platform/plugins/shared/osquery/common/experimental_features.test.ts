@@ -20,10 +20,21 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should enable a valid feature flag', () => {
-    const { features, invalid } = parseExperimentalConfigValue(['exportResults']);
+    // `crossProjectSearch` defaults to false, so this asserts a real state change.
+    const { features, invalid } = parseExperimentalConfigValue(['crossProjectSearch']);
 
-    expect(features.exportResults).toBe(true);
+    expect(features.crossProjectSearch).toBe(true);
     expect(invalid).toEqual([]);
+  });
+
+  it('should report a graduated feature flag as invalid', () => {
+    // Graduated flags must no longer be accepted in xpack.osquery.enableExperimental.
+    expect(parseExperimentalConfigValue(['queryHistoryRework']).invalid).toEqual([
+      'queryHistoryRework',
+    ]);
+    expect(parseExperimentalConfigValue(['unifiedDataTable']).invalid).toEqual([
+      'unifiedDataTable',
+    ]);
   });
 
   it('should track invalid feature flags', () => {
@@ -35,12 +46,12 @@ describe('parseExperimentalConfigValue', () => {
 
   it('should handle mix of valid and invalid feature flags', () => {
     const { features, invalid } = parseExperimentalConfigValue([
-      'exportResults',
+      'crossProjectSearch',
       'invalidFeature1',
       'invalidFeature2',
     ]);
 
-    expect(features.exportResults).toBe(true);
+    expect(features.crossProjectSearch).toBe(true);
     expect(invalid).toEqual(['invalidFeature1', 'invalidFeature2']);
   });
 
@@ -68,5 +79,25 @@ describe('getExperimentalAllowedValues', () => {
 
     expect(allowedValues).toEqual(Object.keys(allowedExperimentalValues));
     expect(allowedValues).toContain('exportResults');
+  });
+
+  it('should return exactly the currently supported flags', () => {
+    // Pinned literally: adding or graduating a flag must be an explicit change here,
+    // and in the docs/config that reference these names.
+    expect(getExperimentalAllowedValues()).toEqual([
+      'exportResults',
+      'rruleScheduling',
+      'crossProjectSearch',
+    ]);
+  });
+});
+
+describe('allowedExperimentalValues', () => {
+  it('should pin the default state of every flag', () => {
+    expect(allowedExperimentalValues).toEqual({
+      exportResults: true,
+      rruleScheduling: true,
+      crossProjectSearch: false,
+    });
   });
 });

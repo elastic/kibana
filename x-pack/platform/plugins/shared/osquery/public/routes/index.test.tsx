@@ -27,6 +27,7 @@ jest.mock('../common/lib/kibana', () => ({
         capabilities: {
           osquery: {
             writeLiveQueries: true,
+            readLiveQueries: true,
             runSavedQueries: true,
             readPacks: true,
             writePacks: true,
@@ -52,8 +53,15 @@ jest.mock('../common/hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
-// Mock lazy-loaded route components to avoid loading full component trees
-jest.mock('./history', () => ({ History: () => <div data-test-subj="history" /> }));
+// Mock the leaf pages rather than the `./history` sub-router, so that the real sub-router runs
+// and multi-hop redirects (e.g. `/live_queries/new` -> `/history/new` -> `/new`) are observed.
+jest.mock('./history/list', () => ({ HistoryPage: () => <div data-test-subj="history" /> }));
+jest.mock('./history/scheduled_execution_details', () => ({
+  ScheduledExecutionDetailsPage: () => <div data-test-subj="scheduled-execution-details" />,
+}));
+jest.mock('./live_queries/details', () => ({
+  LiveQueryDetailsPage: () => <div data-test-subj="live-query-details" />,
+}));
 jest.mock('./saved_queries', () => ({
   SavedQueries: () => <div data-test-subj="saved-queries" />,
 }));
@@ -122,24 +130,58 @@ describe('OsqueryAppRoutes', () => {
   describe('legacy /live_queries redirects', () => {
     it('maps /live_queries/new to the top-level /new page', () => {
       expect(resolveLocation('/live_queries/new')).toBe('/new');
+      expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
     });
 
     it('preserves the action id on a live query deep link', () => {
       expect(resolveLocation('/live_queries/abc-123')).toBe('/history/abc-123');
+      expect(screen.getByTestId('live-query-details')).toBeInTheDocument();
     });
 
     it('preserves the query string when redirecting', () => {
       expect(resolveLocation('/live_queries?kuery=foo')).toBe('/history?kuery=foo');
+      expect(screen.getByTestId('history')).toBeInTheDocument();
     });
 
     it('preserves the query string and hash on a deep link', () => {
       expect(resolveLocation('/live_queries/abc-123?tab=results#top')).toBe(
         '/history/abc-123?tab=results#top'
       );
+      expect(screen.getByTestId('live-query-details')).toBeInTheDocument();
     });
 
     it('preserves the query string when redirecting /live_queries/new', () => {
       expect(resolveLocation('/live_queries/new?packId=pack-1')).toBe('/new?packId=pack-1');
+      expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
+    });
+
+    it('maps a trailing-slash /live_queries/new/ to the top-level /new page', () => {
+      expect(resolveLocation('/live_queries/new/')).toBe('/new');
+      expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
+    });
+
+    it('preserves the query string and hash on a trailing-slash /live_queries/new/', () => {
+      expect(resolveLocation('/live_queries/new/?packId=pack-1#hash')).toBe(
+        '/new?packId=pack-1#hash'
+      );
+      expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
+    });
+
+    it('maps a trailing-slash /live_queries/ to the history page', () => {
+      expect(resolveLocation('/live_queries/')).toBe('/history');
+      expect(screen.getByTestId('history')).toBeInTheDocument();
+    });
+
+    it('maps a nested scheduled execution deep link', () => {
+      expect(resolveLocation('/live_queries/scheduled/schedule-1/2')).toBe(
+        '/history/scheduled/schedule-1/2'
+      );
+      expect(screen.getByTestId('scheduled-execution-details')).toBeInTheDocument();
+    });
+
+    it('maps a mixed-case legacy path onto its history equivalent', () => {
+      expect(resolveLocation('/LIVE_QUERIES/abc-123')).toBe('/history/abc-123');
+      expect(screen.getByTestId('live-query-details')).toBeInTheDocument();
     });
   });
 

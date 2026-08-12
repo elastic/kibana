@@ -74,9 +74,6 @@ jest.mock('./form', () => ({
 }));
 
 jest.mock('../../../components/layouts', () => ({
-  WithHeaderLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="with-header-layout">{children}</div>
-  ),
   fullWidthFormContentCss: {},
 }));
 

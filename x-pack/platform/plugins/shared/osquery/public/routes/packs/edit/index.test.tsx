@@ -69,9 +69,6 @@ jest.mock('../../../packs/use_copy_pack', () => ({
 }));
 
 jest.mock('../../../components/layouts', () => ({
-  WithHeaderLayout: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="with-header-layout">{children}</div>
-  ),
   fullWidthFormContentCss: {},
 }));
 

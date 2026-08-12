@@ -328,6 +328,28 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('SELECT * FROM uptime')).toBeInTheDocument();
   });
 
+  it('query column truncates SQL longer than 90 characters', () => {
+    const longQuery =
+      'SELECT very_long_column_name, another_column, yet_another FROM some_table WHERE condition = 1 AND more_stuff';
+    expect(longQuery.length).toBeGreaterThan(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: longQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(`${longQuery.substring(0, 90)}...`)).toBeInTheDocument();
+    expect(screen.queryByText(longQuery)).not.toBeInTheDocument();
+  });
+
+  it('query column shows SQL of exactly 90 characters untruncated', () => {
+    const exactQuery = `SELECT * FROM processes WHERE name = '${'a'.repeat(51)}'`;
+    expect(exactQuery).toHaveLength(90);
+    mockHistory({ data: [createMockLiveRow({ queryText: exactQuery })] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText(exactQuery)).toBeInTheDocument();
+  });
+
   it('query column shows pack name for pack query', () => {
     const row = createMockPackLiveRow();
     mockHistory({ data: [row] });

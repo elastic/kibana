@@ -40,24 +40,28 @@ describe('ResultsTable', () => {
   it('should render nothing when uiActions is unavailable', () => {
     mockServices({ unifiedSearch: mockUnifiedSearch });
 
-    render(<ResultsTable actionId="test-action" />);
+    const { container } = render(<ResultsTable actionId="test-action" />);
 
     expect(screen.queryByTestId('unifiedResultsTable')).not.toBeInTheDocument();
+    // Nothing at all: no fallback, error state or partial UI.
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render nothing when unifiedSearch is unavailable', () => {
     mockServices({ uiActions: mockUiActions });
 
-    render(<ResultsTable actionId="test-action" />);
+    const { container } = render(<ResultsTable actionId="test-action" />);
 
     expect(screen.queryByTestId('unifiedResultsTable')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should render nothing when both optional plugins are unavailable', () => {
     mockServices({});
 
-    render(<ResultsTable actionId="test-action" />);
+    const { container } = render(<ResultsTable actionId="test-action" />);
 
     expect(screen.queryByTestId('unifiedResultsTable')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });
