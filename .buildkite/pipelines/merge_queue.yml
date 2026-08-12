@@ -14,6 +14,27 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
+  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 105
+    timeout_in_minutes: 15
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_UNIT_MAX_MINUTES: '15.0'
+      LIMIT_CONFIG_TYPE: 'unit'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
@@ -132,26 +153,6 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
-  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      diskSizeGb: 105
-    timeout_in_minutes: 15
-    env:
-      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-      JEST_UNIT_MAX_MINUTES: '15.0'
-      LIMIT_CONFIG_TYPE: 'unit'
     retry:
       automatic:
         - exit_status: '*'
