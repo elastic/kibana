@@ -62,6 +62,7 @@ export function createStoreReducers() {
     _setStoreState(
       _state: ProjectPickerState,
       payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
+        excludedOverrides?: string[];
         filterExpressions?: FilterExpressionValue[];
       }
     ) {
@@ -75,7 +76,7 @@ export function createStoreReducers() {
             { expression, enabled: true },
           ])
         ),
-        excludedOverrides: [],
+        excludedOverrides: payload.excludedOverrides ?? [],
         // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
         filteringDimensions: [],
         filteredProjectIds: [],

@@ -25,8 +25,10 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import {
+  getDashboardId,
   mapArtifacts,
   partitionArtifactsByDashboardType,
+  resolveArtifactId,
   resolveDashboardsByIds,
   searchRelatedDashboard,
   type Dashboard,
@@ -119,7 +121,10 @@ export const ManageDashboardsPopover = ({
     }
 
     let ignore = false;
-    const attachedIds = existingDashboardArtifacts.map((artifact) => artifact.value);
+    const attachedIds = existingDashboardArtifacts.flatMap((artifact) => {
+      const dashboardId = getDashboardId(artifact);
+      return dashboardId ? [dashboardId] : [];
+    });
     setSelectedIds(new Set(attachedIds));
     setMissingDashboards([]);
     setLoadError(false);
@@ -226,12 +231,12 @@ export const ManageDashboardsPopover = ({
   const handleSave = useCallback(() => {
     const draftDashboardArtifacts: RuleArtifactPayload = [...selectedIds].map((dashboardId) => {
       const existingArtifact = existingDashboardArtifacts.find(
-        (artifact) => artifact.value === dashboardId
+        (artifact) => getDashboardId(artifact) === dashboardId
       );
       return {
-        id: existingArtifact?.id ?? '',
+        id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingArtifact?.id),
         type: DASHBOARD_ARTIFACT_TYPE,
-        value: dashboardId,
+        data: { dashboardId },
       };
     });
     const mappedDashboards = mapArtifacts(draftDashboardArtifacts) ?? [];

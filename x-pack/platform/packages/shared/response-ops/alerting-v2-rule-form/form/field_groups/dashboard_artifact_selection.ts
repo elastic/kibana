@@ -7,7 +7,8 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import type { RuleArtifactPayload } from '../utils/artifact_mappers';
+import { getDashboardId } from '../utils/artifact_data';
+import { resolveArtifactId, type RuleArtifactPayload } from '../utils/artifact_mappers';
 import type { MissingDashboard } from './search_related_dashboards';
 
 /**
@@ -24,23 +25,26 @@ export const buildDashboardArtifactsFromSelection = ({
   missingDashboards: MissingDashboard[];
 }): RuleArtifactPayload => {
   const missingIds = new Set(missingDashboards.map((entry) => entry.id));
-  const preservedMissingArtifacts = currentArtifacts.filter((artifact) =>
-    missingIds.has(artifact.value)
-  );
+  const preservedMissingArtifacts = currentArtifacts.filter((artifact) => {
+    const dashboardId = getDashboardId(artifact);
+    return dashboardId != null && missingIds.has(dashboardId);
+  });
 
   const selectedArtifacts = selectedOptions.flatMap((selectedOption) => {
-    const dashboardId = selectedOption.value;
+    const dashboardId = selectedOption.value?.trim();
     if (!dashboardId) {
       return [];
     }
 
-    const existingArtifact = currentArtifacts.find((artifact) => artifact.value === dashboardId);
+    const existingArtifact = currentArtifacts.find(
+      (artifact) => getDashboardId(artifact) === dashboardId
+    );
 
     return [
       {
-        id: existingArtifact?.id ?? '',
+        id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingArtifact?.id),
         type: DASHBOARD_ARTIFACT_TYPE,
-        value: dashboardId,
+        data: { dashboardId },
       },
     ];
   });

@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
+import { getDashboardId } from '../utils/artifact_data';
 import { buildDashboardArtifactsFromSelection } from './dashboard_artifact_selection';
 import { MissingDashboardsCallout } from './missing_dashboards_callout';
 import { RelatedDashboardsComboBox } from './related_dashboards_combo_box';
@@ -31,7 +32,11 @@ export const RelatedDashboardSelector: React.FC = () => {
   });
 
   const dashboardsFormData = useMemo(
-    () => dashboardArtifacts.map((artifact) => ({ id: artifact.value })),
+    () =>
+      dashboardArtifacts.flatMap((artifact) => {
+        const dashboardId = getDashboardId(artifact);
+        return dashboardId ? [{ id: dashboardId }] : [];
+      }),
     [dashboardArtifacts]
   );
 
@@ -50,7 +55,7 @@ export const RelatedDashboardSelector: React.FC = () => {
 
   const removeMissingArtifact = useCallback(
     (dashboardId: string) => {
-      onChange(dashboardArtifacts.filter((artifact) => artifact.value !== dashboardId));
+      onChange(dashboardArtifacts.filter((artifact) => getDashboardId(artifact) !== dashboardId));
     },
     [dashboardArtifacts, onChange]
   );

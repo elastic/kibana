@@ -113,6 +113,7 @@ export {
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
   significantEventInvestigationSchema,
   investigationStateSchema,
   MAX_ID_LENGTH,
