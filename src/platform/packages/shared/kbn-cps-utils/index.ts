@@ -12,6 +12,7 @@ export type {
   ProjectPickerContentProps,
   ProjectPickerControlsState,
 } from './components/project_picker_content';
+export type { ProjectPickerProps as ProjectScopePickerProps } from './components/project_picker_update/project_picker';
 export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,
@@ -22,10 +23,16 @@ export type {
 } from './types';
 export type { ProjectRoutingValue } from '@kbn/cps-common';
 export { ProjectPicker, DisabledProjectPicker } from './components/project_picker';
+export { ProjectPicker as ProjectScopePicker } from './components/project_picker_update/project_picker';
 export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
 export { useFetchProjects } from './components/use_fetch_projects';
 export { useCpsPickerAccess } from './components/use_cps_picker_access';
 export { useRouteBasedCpsPickerAccess } from './components/use_route_based_cps_picker_access';
+export type {
+  ProjectRoutingExpression,
+  ProjectRoutingStrategy,
+} from './components/project_picker_update/utils/project_routing_codec';
+export { projectRoutingCodec } from './components/project_picker_update/utils/project_routing_codec';
 export { PROJECT_ROUTING } from '@kbn/cps-common';
 export { ProjectRoutingAccess } from './types';
