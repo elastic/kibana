@@ -103,7 +103,7 @@ describe('createAgentGraph', () => {
     expect(result.errorCount).toBe(0);
   });
 
-  it('stops after two retries and surfaces emptyResponse for empty structured answers', async () => {
+  it('stops after two retries and surfaces schemaViolation for empty structured answers', async () => {
     const { graph, researchInvoke, structuredInvoke } = createTestGraph({
       structuredOutput: true,
     });
@@ -111,7 +111,7 @@ describe('createAgentGraph', () => {
     structuredInvoke.mockResolvedValue({});
 
     await expect(graph.invoke({ cycleLimit: 10 }, { recursionLimit: 20 })).rejects.toMatchObject({
-      meta: { errCode: AgentExecutionErrorCode.emptyResponse },
+      meta: { errCode: AgentExecutionErrorCode.schemaViolation },
     });
     expect(researchInvoke).toHaveBeenCalledTimes(1);
     expect(structuredInvoke).toHaveBeenCalledTimes(3);

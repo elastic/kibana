@@ -9,7 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createAnswerAgentStructured } from './answer_agent_structured';
-import { AgentActionType, type StructuredAnswerAction } from './actions';
+import { AgentActionType, type AgentErrorAction, type StructuredAnswerAction } from './actions';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { PromptFactory } from './prompts';
 import type { StateType } from './state';
 
@@ -109,5 +110,41 @@ describe('createAnswerAgentStructured', () => {
     expect(result.answerActions).toHaveLength(1);
     expect(result.answerActions[0].type).toBe(AgentActionType.StructuredAnswer);
     expect((result.answerActions[0] as StructuredAnswerAction).data).toEqual(response);
+  });
+
+  it('returns a schemaViolation error when the unwrapped response does not conform to the output schema', async () => {
+    const { agent } = createTestAgent({
+      invokeResponse: { response: 123 },
+      outputSchema: { type: 'string' },
+    });
+
+    const result = await agent(baseState);
+
+    expect(result.answerActions).toHaveLength(1);
+    expect(result.answerActions[0].type).toBe(AgentActionType.Error);
+    expect((result.answerActions[0] as AgentErrorAction).error.meta.errCode).toBe(
+      AgentExecutionErrorCode.schemaViolation
+    );
+    expect(result.errorCount).toBe(1);
+  });
+
+  it('returns a schemaViolation error when an object schema response does not conform to the output schema', async () => {
+    const { agent } = createTestAgent({
+      invokeResponse: { name: 123 },
+      outputSchema: {
+        type: 'object',
+        properties: { name: { type: 'string' } },
+        required: ['name'],
+      },
+    });
+
+    const result = await agent(baseState);
+
+    expect(result.answerActions).toHaveLength(1);
+    expect(result.answerActions[0].type).toBe(AgentActionType.Error);
+    expect((result.answerActions[0] as AgentErrorAction).error.meta.errCode).toBe(
+      AgentExecutionErrorCode.schemaViolation
+    );
+    expect(result.errorCount).toBe(1);
   });
 });
