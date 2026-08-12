@@ -17,8 +17,11 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
     description: 'Retrieves the current state of an investigation by ID.',
   },
   security: {
+    // agentBuilder:read mirrors the AB conversation read privilege. The investigation result is
+    // an Agent Builder conversation; a user who can read AB conversations should be able to poll
+    // investigation status. See start_investigation.ts for fuller reasoning.
     authz: {
-      requiredPrivileges: ['all'],
+      requiredPrivileges: ['agentBuilder:read'],
     },
   },
   params: z.object({
