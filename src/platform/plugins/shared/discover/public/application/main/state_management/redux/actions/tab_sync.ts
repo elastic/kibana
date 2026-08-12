@@ -82,7 +82,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
 
         const dataViewSupportsTracking =
           // Disable for ad hoc data views, since they can't be restored after a page refresh
-          dataView.isPersisted() ||
+          dataView?.isPersisted() ||
           // Unless it's a default profile data view, which can be restored on refresh
           getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
           // Or we're in ES|QL mode, in which case we don't care about the data view

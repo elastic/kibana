@@ -107,7 +107,7 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data } = services;
+  const { core, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -118,21 +118,17 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
-      const [hasESData, hasUserDataView, defaultDataViewExists, hasESQLDatasets] =
-        await Promise.all([
-          dataViews.hasData.hasESData().catch(() => false),
-          dataViews.hasData.hasUserDataView().catch(() => false),
-          dataViews.defaultDataViewExists().catch(() => false),
-          core.http
-            .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-            .then((res) => res.datasets.length > 0)
-            .catch(() => false),
-          dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-          initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-        ]);
+      const [] = await Promise.all([
+        core.http
+          .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+          .then((res) => res.datasets.length > 0)
+          .catch(() => false),
+        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
+        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
+      ]);
       const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData: hasESData || hasESQLDatasets,
-        hasUserDataView: (hasUserDataView && defaultDataViewExists) || hasESQLDatasets,
+        hasESData: true,
+        hasUserDataView: true,
       };
       const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 

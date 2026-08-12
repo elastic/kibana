@@ -206,12 +206,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     dispatch(setDataView({ tabId, dataView }));
 
-    if (!dataView.isPersisted()) {
+    if (dataView && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && dataView?.isTimeBased()
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
