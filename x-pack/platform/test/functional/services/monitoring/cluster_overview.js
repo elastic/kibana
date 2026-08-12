@@ -88,12 +88,14 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click('alerts-modal-remind-later-button');
     }
 
-    acceptAlertsModal() {
-      return testSubjects.click('alerts-modal-button');
+    async acceptAlertsModal() {
+      await testSubjects.click('alerts-modal-button');
+      await testSubjects.existOrFail('alerts-modal-create-button');
     }
 
-    confirmWatcherMigrationDone() {
-      return testSubjects.click('alerts-modal-create-button');
+    async confirmWatcherMigrationDone() {
+      await testSubjects.click('alerts-modal-create-button');
+      await testSubjects.waitForDeleted('alerts-modal-create-button');
     }
 
     async getPresentPanels() {
