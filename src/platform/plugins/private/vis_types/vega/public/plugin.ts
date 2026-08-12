@@ -47,8 +47,6 @@ import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settin
 import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
 
-const ACTION_ATTACHMENT_TRIGGERS = [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER] as const;
-
 /** @internal */
 export interface VegaVisualizationDependencies {
   core: CoreSetup;
@@ -160,7 +158,7 @@ export class VegaPlugin implements Plugin<void, void> {
           ? [ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID]
           : [ADD_VEGA_PANEL_ACTION_ID, ADD_VEGA_EMBEDDABLE_ACTION_ID];
 
-        for (const trigger of ACTION_ATTACHMENT_TRIGGERS) {
+        for (const trigger of [ADD_PANEL_TRIGGER, ADD_CANVAS_ELEMENT_TRIGGER]) {
           deps.uiActions.attachAction(trigger, actionToAttach);
           deps.uiActions.detachAction(trigger, actionToDetach);
         }

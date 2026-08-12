@@ -18,15 +18,13 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-const VEGA_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_APPLY_FILTER, ON_OPEN_PANEL_MENU];
-
 export const getVegaEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return (
     z
       .object({
         ...serializedTitlesSchema.shape,
         ...serializedTimeRangeSchema.shape,
-        ...getDrilldownsSchema(VEGA_SUPPORTED_DRILLDOWN_TRIGGERS).shape,
+        ...getDrilldownsSchema([ON_APPLY_FILTER, ON_OPEN_PANEL_MENU]).shape,
         spec: z
           .string()
           .min(1)

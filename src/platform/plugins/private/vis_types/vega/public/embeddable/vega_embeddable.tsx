@@ -64,14 +64,6 @@ const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
 
-const parseSpec = (specString: string) => {
-  try {
-    return parse(specString, { legacyRoot: false, keepWsc: true });
-  } catch {
-    return undefined;
-  }
-};
-
 /**
  * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
  * only change alongside a new `visData` identity. The component rebuilds its Vega view when
@@ -132,7 +124,13 @@ export const vegaEmbeddableFactory = (
     // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
-        map(parseSpec),
+        map((specString) => {
+          try {
+            return parse(specString, { legacyRoot: false, keepWsc: true });
+          } catch {
+            return undefined;
+          }
+        }),
         tap((spec) => {
           usesEsql$.next(spec ? specUsesEsql(spec) : false);
           projectRoutingOverrides$.next(spec ? extractProjectRoutingOverrides(spec) : undefined);
@@ -233,11 +231,6 @@ export const vegaEmbeddableFactory = (
       supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
     });
 
-    const getExecutionContext = () => ({
-      ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
-      child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
-    });
-
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
     // changes and re-renders whenever `renderComplete` changes.
     const fireEvent = (event: VegaEvent) => {
@@ -298,7 +291,10 @@ export const vegaEmbeddableFactory = (
               filters: data.filters,
               visParams: { spec },
               searchSessionId: data.searchSessionId,
-              executionContext: getExecutionContext(),
+              executionContext: {
+                ...(apiHasExecutionContext(parentApi) ? parentApi.executionContext : {}),
+                child: { type: VEGA_EMBEDDABLE_TYPE, name: 'Vega', id: uuid },
+              },
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
             });
