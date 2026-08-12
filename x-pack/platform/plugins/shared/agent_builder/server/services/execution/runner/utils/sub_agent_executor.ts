@@ -24,6 +24,11 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.standalone,
         interactive: false,
         request,
+        // Sub-agents are spawned from within a running parent execution — they
+        // must stay in the same process to inherit the request/user context
+        // (otherwise the TM handler's fake request can't access the parent
+        // conversation).
+        useTaskManager: false,
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
@@ -41,6 +46,7 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: false,
         request,
+        useTaskManager: false,
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
@@ -65,6 +71,7 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: false,
         request,
+        useTaskManager: false,
         params: {
           connectorId: params.connectorId,
           capabilities: params.capabilities,
