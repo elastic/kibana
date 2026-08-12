@@ -6,7 +6,7 @@
  */
 
 import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import { PbfReader } from 'pbf';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
@@ -75,7 +75,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(response.headers['content-type']).toBe('application/x-protobuf');
       expect(response.headers['cache-control']).toBe('public, max-age=3600');
 
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.hits;
       expect(layer).toHaveLength(2);
 
@@ -131,7 +131,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(response.headers['content-type']).toBe('application/x-protobuf');
       expect(response.headers['cache-control']).toBe('public, max-age=3600');
 
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.hits;
       expect(layer).toHaveLength(4);
 

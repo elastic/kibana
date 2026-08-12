@@ -1447,14 +1447,13 @@
       "allowedVersions": "<0.3.0"
     },
     {
-      "groupName": "mapbox-vector-tile (pinned until Kibana supports ESM)",
-      "matchDepNames": ["@mapbox/vector-tile", "@types/mapbox__vector-tile"],
+      "groupName": "mapbox-vector-tile",
+      "matchDepNames": ["@mapbox/vector-tile"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<2.0.0"
+      "enabled": true
     },
     {
       "groupName": "mapbox and maplibre",
@@ -1472,7 +1471,7 @@
     },
     {
       "groupName": "misc kibana-presentation dependencies",
-      "matchDepNames": ["jsts", "pbf", "@types/flot", "@types/pbf"],
+      "matchDepNames": ["jsts", "pbf", "@types/flot"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],

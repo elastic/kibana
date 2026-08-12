@@ -6,7 +6,7 @@
  */
 
 import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import { PbfReader } from 'pbf';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
@@ -91,7 +91,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       );
 
       expect(response).toHaveStatusCode(200);
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.aggs;
       expect(layer).toHaveLength(1);
 
@@ -121,7 +121,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       );
 
       expect(response).toHaveStatusCode(200);
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.aggs;
       expect(layer).toHaveLength(1);
 
@@ -151,7 +151,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       );
 
       expect(response).toHaveStatusCode(200);
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.aggs;
       expect(layer).toHaveLength(1);
 
@@ -189,7 +189,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       );
 
       expect(response).toHaveStatusCode(200);
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.aggs;
       expect(layer).toHaveLength(1);
 
@@ -233,7 +233,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       );
 
       expect(response).toHaveStatusCode(200);
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.aggs;
       expect(layer).toHaveLength(2);
 
@@ -264,7 +264,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
     );
 
     expect(response).toHaveStatusCode(200);
-    const jsonTile = new VectorTile(new Protobuf(response.body));
+    const jsonTile = new VectorTile(new PbfReader(response.body));
     const metaDataLayer = jsonTile.layers.meta;
     expect(metaDataLayer).toHaveLength(1);
 
