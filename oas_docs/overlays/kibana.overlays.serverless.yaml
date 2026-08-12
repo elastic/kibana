@@ -16,6 +16,17 @@ actions:
           kibana_url:
             default: <KIBANA_URL>
 # Add some tag descriptions that are specific to the Serverless APIs
+  - target: '$.tags[?(@.name=="cases")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Cases are used to open and track issues.
+        You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations.
+        You can also send cases to external incident management systems by configuring connectors.
+      externalDocs:
+        description: Cases documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
+      x-displayName: 'Cases'
   - target: '$.tags[?(@.name=="roles")]'
     description: Change displayName and description
     update:
