@@ -152,7 +152,9 @@ export const waitForMaintainerToSettle = async ({
     timeoutMs,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
-      const maintainer = response.body.maintainers.find((m) => m.id === maintainerId);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; taskStatus: string }) => m.id === maintainerId
+      );
       return isMaintainerStarted(maintainer);
     }
   );
@@ -166,10 +168,13 @@ export const waitForMaintainerToSettle = async ({
     timeoutMs,
     async () => {
       const response = await routes.getMaintainers(200, [maintainerId]);
-      const maintainer = response.body.maintainers.find((m) => m.id === maintainerId);
+      const maintainer = response.body.maintainers.find(
+        (m: { id: string; runs: number; nextRunAt?: string | null }) => m.id === maintainerId
+      );
       if (!maintainer) return false;
 
-      const { nextRunAt, runs } = maintainer;
+      const nextRunAt = (maintainer as { nextRunAt?: string | null }).nextRunAt;
+      const runs = maintainer.runs;
       const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
       if (isNextRunInFuture) {
         if (runs === lastSeenRuns) return true;
