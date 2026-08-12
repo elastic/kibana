@@ -350,14 +350,6 @@ class ConversationClientImpl implements ConversationClient {
     const round = rounds[roundIndex];
     const { feedback: _removed, ...roundWithoutFeedback } = round;
 
-    const existingFeedback = round.feedback;
-    const voteHistory: ConversationRoundFeedback['vote_history'] = existingFeedback?.vote
-      ? [
-          ...(existingFeedback.vote_history ?? []),
-          { vote: existingFeedback.vote, changed_at: existingFeedback.submitted_at },
-        ]
-      : existingFeedback?.vote_history;
-
     const updatedRound =
       userFeedback.vote === null
         ? roundWithoutFeedback
@@ -370,7 +362,6 @@ class ConversationClientImpl implements ConversationClient {
               submitted_at: new Date().toISOString(),
               connector_id: round.model_usage?.connector_id,
               model: round.model_usage?.model,
-              ...(voteHistory?.length ? { vote_history: voteHistory } : {}),
             } satisfies ConversationRoundFeedback,
           };
 

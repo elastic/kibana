@@ -376,9 +376,7 @@ export type FeedbackChipId =
 /**
  * User feedback submitted for a conversation round.
  *
- * Note: each new submission overwrites the previous one — there is no full
- * per-submission history. Prior vote values are tracked in `vote_history`
- * so you can detect whether the user changed their mind.
+ * Note: each new submission overwrites the previous one.
  */
 export interface ConversationRoundFeedback {
   /** Thumbs up or thumbs down */
@@ -402,12 +400,6 @@ export interface ConversationRoundFeedback {
    * in its response — many connectors omit it.
    */
   model?: string;
-  /**
-   * Prior vote values, oldest first. Each entry records the vote that was
-   * overwritten and the `submitted_at` timestamp of that overwritten submission.
-   * Empty (or absent) when the vote has never been changed.
-   */
-  vote_history?: Array<{ vote: 'up' | 'down'; changed_at: string }>;
 }
 
 /**
@@ -445,11 +437,7 @@ export interface ConversationRound {
   trace_id?: string | string[];
   /** Runtime configuration overrides that were applied to this round */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
-  /**
-   * User feedback for this round, if submitted.
-   * Only the most recent submission is stored; prior vote values are tracked
-   * in `feedback.vote_history`.
-   */
+  /** User feedback for this round, if submitted. */
   feedback?: ConversationRoundFeedback;
 }
 
