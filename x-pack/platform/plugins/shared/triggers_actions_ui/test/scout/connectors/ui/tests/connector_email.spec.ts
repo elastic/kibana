@@ -82,125 +82,96 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     );
   });
 
-  test('disables Run and shows recipients-required error when To/Cc/Bcc are all empty', async ({
+  test('validates the To/Cc/Bcc recipients field on the test tab', async ({
     page,
     kbnUrl,
     apiServices,
   }) => {
     const connectorName = `scout-email-${Date.now()}`;
     await createEmailConnector(apiServices, connectorName);
-
     await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
 
-    // Touch and blur the To combobox to surface the field-level error
-    await page.testSubj.locator('toEmailAddressInput').locator('input').click();
-    await page.testSubj.click('edit-connector-flyout-header');
+    const reopenTestTab = async () => {
+      await closeFlyoutIfOpen(page);
+      await openTestTab(page, connectorName);
+      await fillSubjectAndMessage(page);
+    };
 
-    await expect(
-      page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-    ).toContainText('At least one recipient is required.');
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
-  });
+    await test.step('disables Run and shows recipients-required error when To/Cc/Bcc are all empty', async () => {
+      await reopenTestTab();
 
-  test('disables Run when the only To entry is whitespace', async ({
-    page,
-    kbnUrl,
-    apiServices,
-  }) => {
-    const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+      // Touch and blur the To combobox to surface the field-level error
+      await page.testSubj.locator('toEmailAddressInput').locator('input').click();
+      await page.testSubj.click('edit-connector-flyout-header');
 
-    await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+      await expect(
+        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
+      ).toContainText('At least one recipient is required.');
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
 
-    const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
-    await toInput.fill('   ');
-    await toInput.press('Enter');
-    await page.testSubj.click('edit-connector-flyout-header');
+    await test.step('disables Run when the only To entry is whitespace', async () => {
+      await reopenTestTab();
 
-    await expect(
-      page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-    ).toContainText('At least one recipient is required.');
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
-  });
+      const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
+      await toInput.fill('   ');
+      await toInput.press('Enter');
+      await page.testSubj.click('edit-connector-flyout-header');
 
-  test('shows invalid email error for address with leading hyphen in local part', async ({
-    page,
-    kbnUrl,
-    apiServices,
-  }) => {
-    const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+      await expect(
+        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
+      ).toContainText('At least one recipient is required.');
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
 
-    await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+    await test.step('shows invalid email error for address with leading hyphen in local part', async () => {
+      await reopenTestTab();
 
-    const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
-    await toInput.fill('-user@example.com');
-    await toInput.press('Enter');
-    await page.testSubj.click('edit-connector-flyout-header');
+      const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
+      await toInput.fill('-user@example.com');
+      await toInput.press('Enter');
+      await page.testSubj.click('edit-connector-flyout-header');
 
-    await expect(
-      page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-    ).toContainText('is not valid');
-  });
+      await expect(
+        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
+      ).toContainText('is not valid');
+    });
 
-  test('shows invalid email error for address with leading hyphen in domain', async ({
-    page,
-    kbnUrl,
-    apiServices,
-  }) => {
-    const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+    await test.step('shows invalid email error for address with leading hyphen in domain', async () => {
+      await reopenTestTab();
 
-    await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+      const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
+      await toInput.fill('user@-example.com');
+      await toInput.press('Enter');
+      await page.testSubj.click('edit-connector-flyout-header');
 
-    const toInput = page.testSubj.locator('toEmailAddressInput').locator('input');
-    await toInput.fill('user@-example.com');
-    await toInput.press('Enter');
-    await page.testSubj.click('edit-connector-flyout-header');
+      await expect(
+        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
+      ).toContainText('is not valid');
+    });
 
-    await expect(
-      page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-    ).toContainText('is not valid');
-  });
+    await test.step('clears recipients-required error when only Cc has a valid recipient', async () => {
+      await reopenTestTab();
 
-  test('clears recipients-required error when only Cc has a valid recipient', async ({
-    page,
-    kbnUrl,
-    apiServices,
-  }) => {
-    const connectorName = `scout-email-${Date.now()}`;
-    await createEmailConnector(apiServices, connectorName);
+      // Trigger the recipients-required error
+      await page.testSubj.locator('toEmailAddressInput').locator('input').click();
+      await page.testSubj.click('edit-connector-flyout-header');
 
-    await navigateToConnectors(page, kbnUrl);
-    await openTestTab(page, connectorName);
-    await fillSubjectAndMessage(page);
+      await expect(
+        page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
+      ).toContainText('At least one recipient is required.');
 
-    // Trigger the recipients-required error
-    await page.testSubj.locator('toEmailAddressInput').locator('input').click();
-    await page.testSubj.click('edit-connector-flyout-header');
+      // Adding a valid Cc address must clear the error from all fields
+      await page.testSubj.click('emailAddCcButton');
+      const ccInput = page.testSubj.locator('ccEmailAddressInput').locator('input');
+      await ccInput.fill('cc@example.com');
+      await ccInput.press('Enter');
 
-    await expect(
-      page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
-    ).toContainText('At least one recipient is required.');
-
-    // Adding a valid Cc address must clear the error from all fields
-    await page.testSubj.click('emailAddCcButton');
-    const ccInput = page.testSubj.locator('ccEmailAddressInput').locator('input');
-    await ccInput.fill('cc@example.com');
-    await ccInput.press('Enter');
-
-    await expect(
-      page.testSubj
-        .locator('test-connector-form')
-        .locator('.euiFormErrorText', { hasText: 'At least one recipient is required.' })
-    ).toHaveCount(0);
+      await expect(
+        page.testSubj
+          .locator('test-connector-form')
+          .locator('.euiFormErrorText', { hasText: 'At least one recipient is required.' })
+      ).toHaveCount(0);
+    });
   });
 });

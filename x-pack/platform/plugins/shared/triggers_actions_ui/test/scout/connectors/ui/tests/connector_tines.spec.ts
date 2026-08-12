@@ -8,7 +8,12 @@
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../fixtures';
+import {
+  test,
+  CONNECTORS_APP_PATH,
+  CONNECTORS_LIST_SELECTORS,
+  closeFlyoutIfOpen,
+} from '../fixtures';
 
 const TINES_CONFIG = {
   url: 'https://test.tines.com',
@@ -173,232 +178,207 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     createdConnectorIds.push(id!);
   });
 
-  test('edits a Tines connector via the UI', async ({ page, apiServices, kbnUrl }) => {
-    const connectorName = `scout-tines-edit-${Date.now()}`;
-    const updatedConnectorName = `${connectorName}-updated`;
-
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.tines',
-      config: { url: TINES_CONFIG.url },
-      secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
-    });
-    createdConnectorIds.push(created.id);
-
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-    await searchBox.fill(connectorName);
-    await searchBox.press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-
-    const rows = page.testSubj.locator('connectors-row');
-    await expect(rows).toHaveCount(1);
-    await rows.getByTestId('connectorsTableCell-name').locator('button').click();
-
-    await fillTinesConnectorFields(page, { name: updatedConnectorName, url: TINES_CONFIG.url });
-
-    const editSaveButton = page.testSubj.locator('edit-connector-flyout-save-btn');
-    await expect(editSaveButton).toBeEnabled();
-    await editSaveButton.click();
-
-    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
-      `Updated '${updatedConnectorName}'`
-    );
-
-    // Close the flyout and verify the updated name appears in the list.
-    await page.testSubj.click('euiFlyoutCloseButton');
-    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeHidden();
-
-    await searchBox.fill(updatedConnectorName);
-    await searchBox.press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-
-    await expect(rows).toHaveCount(1);
-    await expect(rows.getByTestId('connectorsTableCell-name')).toContainText(updatedConnectorName);
-    await expect(rows.getByTestId('connectorsTableCell-actionType')).toContainText('Tines');
-  });
-
-  test('resets the connector form when an edit is canceled', async ({
+  test('edits, cancels, and disables run on existing connectors', async ({
     page,
     apiServices,
     kbnUrl,
   }) => {
-    const connectorName = `scout-tines-cancel-${Date.now()}`;
+    await test.step('edits a Tines connector via the UI', async () => {
+      const connectorName = `scout-tines-edit-${Date.now()}`;
+      const updatedConnectorName = `${connectorName}-updated`;
 
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.tines',
-      config: { url: TINES_CONFIG.url },
-      secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.tines',
+        config: { url: TINES_CONFIG.url },
+        secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
+      });
+      createdConnectorIds.push(created.id);
+
+      await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+      const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
+      await searchBox.fill(connectorName);
+      await searchBox.press('Enter');
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+
+      const rows = page.testSubj.locator('connectors-row');
+      await expect(rows).toHaveCount(1);
+      await rows.getByTestId('connectorsTableCell-name').locator('button').click();
+
+      await fillTinesConnectorFields(page, { name: updatedConnectorName, url: TINES_CONFIG.url });
+
+      const editSaveButton = page.testSubj.locator('edit-connector-flyout-save-btn');
+      await expect(editSaveButton).toBeEnabled();
+      await editSaveButton.click();
+
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Updated '${updatedConnectorName}'`
+      );
+
+      // Close the flyout and verify the updated name appears in the list.
+      await page.testSubj.click('euiFlyoutCloseButton');
+      await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeHidden();
+
+      await searchBox.fill(updatedConnectorName);
+      await searchBox.press('Enter');
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+
+      await expect(rows).toHaveCount(1);
+      await expect(rows.getByTestId('connectorsTableCell-name')).toContainText(
+        updatedConnectorName
+      );
+      await expect(rows.getByTestId('connectorsTableCell-actionType')).toContainText('Tines');
     });
-    createdConnectorIds.push(created.id);
 
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-    await searchBox.fill(connectorName);
-    await searchBox.press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+    await test.step('resets the connector form when an edit is canceled', async () => {
+      const connectorName = `scout-tines-cancel-${Date.now()}`;
 
-    const rows = page.testSubj.locator('connectors-row');
-    await rows.getByTestId('connectorsTableCell-name').locator('button').click();
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.tines',
+        config: { url: TINES_CONFIG.url },
+        secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
+      });
+      createdConnectorIds.push(created.id);
 
-    await page.testSubj.locator('nameInput').fill('some test name to cancel');
-    await page.testSubj.click('edit-connector-flyout-close-btn');
-    await page.testSubj.click('confirmModalConfirmButton');
+      await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+      const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
+      await searchBox.fill(connectorName);
+      await searchBox.press('Enter');
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 
-    await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeHidden();
+      const rows = page.testSubj.locator('connectors-row');
+      await rows.getByTestId('connectorsTableCell-name').locator('button').click();
 
-    await searchBox.fill(connectorName);
-    await searchBox.press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await rows.getByTestId('connectorsTableCell-name').locator('button').click();
+      await page.testSubj.locator('nameInput').fill('some test name to cancel');
+      await page.testSubj.click('edit-connector-flyout-close-btn');
+      await page.testSubj.click('confirmModalConfirmButton');
 
-    await expect(page.testSubj.locator('nameInput')).toHaveValue(connectorName);
-  });
+      await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeHidden();
 
-  test('disables the Run button when the test-connector fields are empty', async ({
-    page,
-    apiServices,
-    kbnUrl,
-  }) => {
-    const connectorName = `scout-tines-run-${Date.now()}`;
+      await searchBox.fill(connectorName);
+      await searchBox.press('Enter');
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+      await rows.getByTestId('connectorsTableCell-name').locator('button').click();
 
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.tines',
-      config: { url: TINES_CONFIG.url },
-      secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
+      await expect(page.testSubj.locator('nameInput')).toHaveValue(connectorName);
+      await page.testSubj.click('euiFlyoutCloseButton');
     });
-    createdConnectorIds.push(created.id);
 
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-    await searchBox.fill(connectorName);
-    await searchBox.press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+    await test.step('disables the Run button when the test-connector fields are empty', async () => {
+      const connectorName = `scout-tines-run-${Date.now()}`;
 
-    const rows = page.testSubj.locator('connectors-row');
-    await rows.getByTestId('connectorsTableCell-name').locator('button').click();
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.tines',
+        config: { url: TINES_CONFIG.url },
+        secrets: { email: TINES_CONFIG.email, token: TINES_CONFIG.token },
+      });
+      createdConnectorIds.push(created.id);
 
-    await page.testSubj.click('testConnectorTab');
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+      await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+      const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
+      await searchBox.fill(connectorName);
+      await searchBox.press('Enter');
+      await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+
+      const rows = page.testSubj.locator('connectors-row');
+      await rows.getByTestId('connectorsTableCell-name').locator('button').click();
+
+      await page.testSubj.click('testConnectorTab');
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
   });
 
   // ── Test-page tests (use page.route to mock the Tines API) ────────────────
 
-  test('shows the story/webhook selectors and JSON editor on the test tab', async ({
-    page,
-    kbnUrl,
-  }) => {
+  test('tab story/webhook selectors and execution', async ({ page, kbnUrl }) => {
     await setupTinesMocks(page, testPageConnectorId);
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
     await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeVisible();
-    await expect(page.testSubj.locator('tines-webhookSelector')).toBeVisible();
-    await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
-  });
+    const reopenTestTab = async () => {
+      await closeFlyoutIfOpen(page);
+      await page.testSubj.click(`edit${testPageConnectorId}`);
+      await page.testSubj.click('testConnectorTab');
+    };
 
-  test('enables the story selector once stories are loaded', async ({ page, kbnUrl }) => {
-    await setupTinesMocks(page, testPageConnectorId);
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
+    await test.step('shows the story/webhook selectors and JSON editor on the test tab', async () => {
+      await reopenTestTab();
+      await expect(page.testSubj.locator('tines-storySelector')).toBeVisible();
+      await expect(page.testSubj.locator('tines-webhookSelector')).toBeVisible();
+      await expect(page.testSubj.locator('kibanaCodeEditor')).toBeVisible();
+    });
 
-    // Story selector becomes enabled once the mocked /stories response lands.
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    // Webhook selector stays disabled until a story is selected. EuiComboBox
-    // renders as a <div>, so toBeDisabled() doesn't apply — assert the
-    // is-disabled class instead.
-    await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
-      /euiComboBox-isDisabled/
-    );
-  });
+    await test.step('enables the story selector once stories are loaded', async () => {
+      await reopenTestTab();
+      // Story selector becomes enabled once the mocked /stories response lands.
+      await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+      // Webhook selector stays disabled until a story is selected. EuiComboBox
+      // renders as a <div>, so toBeDisabled() doesn't apply — assert the
+      // is-disabled class instead.
+      await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
+        /euiComboBox-isDisabled/
+      );
+    });
 
-  test('enables the webhook selector after a story is selected', async ({ page, kbnUrl }) => {
-    await setupTinesMocks(page, testPageConnectorId);
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
+    await test.step('enables the webhook selector after a story is selected', async () => {
+      await reopenTestTab();
+      await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+      await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
+      await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
+    });
 
-    await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-  });
+    await test.step('clears and disables the webhook selector when the selected story is cleared', async () => {
+      await reopenTestTab();
+      const storyCombo = page.components.comboBox('tines-storySelector');
+      const webhookCombo = page.components.comboBox('tines-webhookSelector');
 
-  test('clears and disables the webhook selector when the selected story is cleared', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await setupTinesMocks(page, testPageConnectorId);
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
+      await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+      await storyCombo.setSelectedOptions([MOCK_STORY.name]);
+      await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
+      await webhookCombo.setSelectedOptions([MOCK_WEBHOOK.name]);
+      expect(await webhookCombo.getSelectedOptions()).toContain(MOCK_WEBHOOK.name);
 
-    const storyCombo = page.components.comboBox('tines-storySelector');
-    const webhookCombo = page.components.comboBox('tines-webhookSelector');
+      // Clear the story — the webhook selector should be disabled and emptied.
+      await storyCombo.clear();
+      await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
+        /euiComboBox-isDisabled/
+      );
+      expect(await webhookCombo.getSelectedOptions()).toStrictEqual([]);
+    });
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await storyCombo.setSelectedOptions([MOCK_STORY.name]);
-    await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await webhookCombo.setSelectedOptions([MOCK_WEBHOOK.name]);
-    expect(await webhookCombo.getSelectedOptions()).toContain(MOCK_WEBHOOK.name);
+    await test.step('keeps the Run button disabled when story+webhook are set but JSON is missing', async () => {
+      await reopenTestTab();
+      await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+      await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
+      await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
+      await page.components
+        .comboBox('tines-webhookSelector')
+        .setSelectedOptions([MOCK_WEBHOOK.name]);
 
-    // Clear the story — the webhook selector should be disabled and emptied.
-    await storyCombo.clear();
-    await expect(page.testSubj.locator('tines-webhookSelector')).toHaveClass(
-      /euiComboBox-isDisabled/
-    );
-    expect(await webhookCombo.getSelectedOptions()).toStrictEqual([]);
-  });
+      // Story + webhook are filled but JSON body is still empty.
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
 
-  test('keeps the Run button disabled when story+webhook are set but JSON is missing', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await setupTinesMocks(page, testPageConnectorId);
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
+    await test.step('enables the Run button and executes successfully with story, webhook, and JSON filled', async () => {
+      await reopenTestTab();
+      await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
+      await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
+      await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
+      await page.components
+        .comboBox('tines-webhookSelector')
+        .setSelectedOptions([MOCK_WEBHOOK.name]);
+      await setTinesJsonBody(page, { hello: 'tines' });
 
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
-    await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
+      await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
+      await page.testSubj.click('executeActionButton');
 
-    // Story + webhook are filled but JSON body is still empty.
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
-  });
-
-  test('enables the Run button and executes successfully with story, webhook, and JSON filled', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await setupTinesMocks(page, testPageConnectorId);
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-    await page.testSubj.click(`edit${testPageConnectorId}`);
-    await page.testSubj.click('testConnectorTab');
-
-    await expect(page.testSubj.locator('tines-storySelector')).toBeEnabled();
-    await page.components.comboBox('tines-storySelector').setSelectedOptions([MOCK_STORY.name]);
-    await expect(page.testSubj.locator('tines-webhookSelector')).toBeEnabled();
-    await page.components.comboBox('tines-webhookSelector').setSelectedOptions([MOCK_WEBHOOK.name]);
-    await setTinesJsonBody(page, { hello: 'tines' });
-
-    await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
-    await page.testSubj.click('executeActionButton');
-
-    await expect(page.testSubj.locator('executionSuccessfulResult')).toBeVisible();
+      await expect(page.testSubj.locator('executionSuccessfulResult')).toBeVisible();
+    });
   });
 });

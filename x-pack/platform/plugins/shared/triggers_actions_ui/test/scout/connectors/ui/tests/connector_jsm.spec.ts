@@ -132,259 +132,237 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     createdConnectorIds.push(created!.id);
   });
 
-  test('connector page - should edit the connector', async ({ page, kbnUrl, apiServices }) => {
-    const connectorName = `jsm-edit-${Date.now()}`;
-    const updatedName = `${connectorName}-updated`;
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.jira-service-management',
-      config: { apiUrl: 'https://test.atlassian.net' },
-      secrets: { apiKey: '1234' },
-    });
-    createdConnectorIds.push(created.id);
-    await navigateToConnectors(page, kbnUrl);
-
-    await searchConnectors(page, connectorName);
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-    await openConnectorFlyout(page);
-    await page.testSubj.locator('nameInput').fill(updatedName);
-    await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
-    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
-    await page.testSubj.click('edit-connector-flyout-save-btn');
-
-    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
-      `Updated '${updatedName}'`
-    );
-
-    await page.testSubj.click('euiFlyoutCloseButton');
-
-    await searchConnectors(page, updatedName);
-    const editedRow = page.testSubj.locator('connectors-row');
-    await expect(editedRow).toHaveCount(1);
-    await expect(editedRow.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
-    await expect(editedRow.getByTestId('connectorsTableCell-actionType')).toContainText(
-      'Jira Service Management'
-    );
-  });
-
-  test('connector page - should reset connector when canceling an edit', async ({
+  test('connector page - edits, cancels, and disables run on existing connectors', async ({
     page,
     kbnUrl,
     apiServices,
   }) => {
-    const connectorName = `jsm-cancel-${Date.now()}`;
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.jira-service-management',
-      config: { apiUrl: 'https://test.atlassian.net' },
-      secrets: { apiKey: '1234' },
+    await test.step('should edit the connector', async () => {
+      const connectorName = `jsm-edit-${Date.now()}`;
+      const updatedName = `${connectorName}-updated`;
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.jira-service-management',
+        config: { apiUrl: 'https://test.atlassian.net' },
+        secrets: { apiKey: '1234' },
+      });
+      createdConnectorIds.push(created.id);
+      await navigateToConnectors(page, kbnUrl);
+
+      await searchConnectors(page, connectorName);
+      await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+      await openConnectorFlyout(page);
+      await page.testSubj.locator('nameInput').fill(updatedName);
+      await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
+      await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
+      await page.testSubj.click('edit-connector-flyout-save-btn');
+
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Updated '${updatedName}'`
+      );
+
+      await page.testSubj.click('euiFlyoutCloseButton');
+
+      await searchConnectors(page, updatedName);
+      const editedRow = page.testSubj.locator('connectors-row');
+      await expect(editedRow).toHaveCount(1);
+      await expect(editedRow.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
+      await expect(editedRow.getByTestId('connectorsTableCell-actionType')).toContainText(
+        'Jira Service Management'
+      );
     });
-    createdConnectorIds.push(created.id);
-    await navigateToConnectors(page, kbnUrl);
 
-    await searchConnectors(page, connectorName);
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-    await openConnectorFlyout(page);
-    await page.testSubj.locator('nameInput').fill('some test name to cancel');
-    await page.testSubj.click('edit-connector-flyout-close-btn');
-    await page.testSubj.click('confirmModalConfirmButton');
-    await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeHidden();
+    await test.step('should reset connector when canceling an edit', async () => {
+      const connectorName = `jsm-cancel-${Date.now()}`;
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.jira-service-management',
+        config: { apiUrl: 'https://test.atlassian.net' },
+        secrets: { apiKey: '1234' },
+      });
+      createdConnectorIds.push(created.id);
+      await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
-    await expect(page.testSubj.locator('nameInput')).toHaveValue(connectorName);
-    await page.testSubj.click('euiFlyoutCloseButton');
-  });
+      await searchConnectors(page, connectorName);
+      await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+      await openConnectorFlyout(page);
+      await page.testSubj.locator('nameInput').fill('some test name to cancel');
+      await page.testSubj.click('edit-connector-flyout-close-btn');
+      await page.testSubj.click('confirmModalConfirmButton');
+      await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeHidden();
 
-  test('connector page - should disable the run button when the message field is not filled', async ({
-    page,
-    kbnUrl,
-    apiServices,
-  }) => {
-    const connectorName = `jsm-disable-run-${Date.now()}`;
-    const created = await apiServices.alerting.connectors.create({
-      name: connectorName,
-      connectorTypeId: '.jira-service-management',
-      config: { apiUrl: 'https://test.atlassian.net' },
-      secrets: { apiKey: '1234' },
+      await searchAndOpenConnector(page, connectorName);
+      await expect(page.testSubj.locator('nameInput')).toHaveValue(connectorName);
+      await page.testSubj.click('euiFlyoutCloseButton');
     });
-    createdConnectorIds.push(created.id);
-    await navigateToConnectors(page, kbnUrl);
 
-    await searchConnectors(page, connectorName);
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-    await openConnectorFlyout(page);
-    await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
-    await page.testSubj.click('testConnectorTab');
+    await test.step('should disable the run button when the message field is not filled', async () => {
+      const connectorName = `jsm-disable-run-${Date.now()}`;
+      const created = await apiServices.alerting.connectors.create({
+        name: connectorName,
+        connectorTypeId: '.jira-service-management',
+        config: { apiUrl: 'https://test.atlassian.net' },
+        secrets: { apiKey: '1234' },
+      });
+      createdConnectorIds.push(created.id);
+      await navigateToConnectors(page, kbnUrl);
 
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+      await searchConnectors(page, connectorName);
+      await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+      await openConnectorFlyout(page);
+      await page.testSubj.locator('nameInput').waitFor({ state: 'visible' });
+      await page.testSubj.click('testConnectorTab');
+
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
   });
 
   // ── test page ─────────────────────────────────────────────────────────────
 
-  test('page - should show the sub action selector when in test mode', async ({ page, kbnUrl }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
-    await expect(page.testSubj.locator('jsm-subActionSelect')).toBeVisible();
-  });
-
-  test('page - should preserve the alias when switching between create and close alert actions', async ({
+  test('page - sub action selector and alias/message switching behavior', async ({
     page,
     kbnUrl,
   }) => {
     await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
+    const reopenTestTab = async () => {
+      await closeFlyoutIfOpen(page);
+      await openJsmTestTab(page, testPageConnectorId);
+    };
 
-    await page.testSubj.locator('aliasInput').fill('new alias');
-    await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
+    await test.step('should show the sub action selector when in test mode', async () => {
+      await reopenTestTab();
+      await expect(page.testSubj.locator('jsm-subActionSelect')).toBeVisible();
+    });
 
-    await expect(page.testSubj.locator('jsm-subActionSelect')).toHaveValue('closeAlert');
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('new alias');
-  });
+    await test.step('should preserve the alias when switching between create and close alert actions', async () => {
+      await reopenTestTab();
+      await page.testSubj.locator('aliasInput').fill('new alias');
+      await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
 
-  test('page - should not preserve the message when switching to close alert and back to create alert', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
+      await expect(page.testSubj.locator('jsm-subActionSelect')).toHaveValue('closeAlert');
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('new alias');
+    });
 
-    await page.testSubj.locator('messageInput').fill('a message');
-    await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
-    await expect(page.testSubj.locator('messageInput')).toBeHidden();
+    await test.step('should not preserve the message when switching to close alert and back to create alert', async () => {
+      await reopenTestTab();
+      await page.testSubj.locator('messageInput').fill('a message');
+      await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
+      await expect(page.testSubj.locator('messageInput')).toBeHidden();
 
-    await page.testSubj.locator('jsm-subActionSelect').selectOption('createAlert');
-    await expect(page.testSubj.locator('messageInput')).toBeVisible();
-    await expect(page.testSubj.locator('messageInput')).toHaveValue('');
-  });
-
-  test('page - createAlert - should show the additional options when clicking more options', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
-
-    await page.testSubj.click('jsm-display-more-options');
-
-    await expect(page.testSubj.locator('entityInput')).toBeVisible();
-    await expect(page.testSubj.locator('sourceInput')).toBeVisible();
-    await expect(page.testSubj.locator('userInput')).toBeVisible();
-    await expect(page.testSubj.locator('noteTextArea')).toBeVisible();
-  });
-
-  test('page - createAlert - should show and then hide the additional form options when clicking the button twice', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
-
-    await page.testSubj.click('jsm-display-more-options');
-    await expect(page.testSubj.locator('entityInput')).toBeVisible();
-
-    await page.testSubj.click('jsm-display-more-options');
-    await expect(page.testSubj.locator('entityInput')).toBeHidden();
-  });
-
-  test('page - createAlert - should populate the json editor with message, description, and alias', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
-
-    await page.testSubj.locator('messageInput').fill('a message');
-    await page.testSubj.locator('descriptionTextArea').fill('a description');
-    await page.testSubj.locator('aliasInput').fill('an alias');
-    await page.testSubj.locator('jsm-prioritySelect').selectOption('P5');
-    await page.testSubj.locator('jsm-tags').locator('input').fill('a tag');
-    await page.testSubj.locator('jsm-tags').locator('input').press('Enter');
-
-    await page.testSubj.click('jsm-show-json-editor-toggle');
-
-    const raw = await getMonacoValue(page);
-    const parsed = JSON.parse(raw);
-    expect(parsed).toStrictEqual({
-      message: 'a message',
-      description: 'a description',
-      alias: 'an alias',
-      priority: 'P5',
-      tags: ['a tag'],
+      await page.testSubj.locator('jsm-subActionSelect').selectOption('createAlert');
+      await expect(page.testSubj.locator('messageInput')).toBeVisible();
+      await expect(page.testSubj.locator('messageInput')).toHaveValue('');
     });
   });
 
-  test('page - createAlert - should populate the form with values from the json editor', async ({
-    page,
-    kbnUrl,
-  }) => {
+  test('page - createAlert additional options and JSON editor', async ({ page, kbnUrl }) => {
     await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
+    const reopenTestTab = async () => {
+      await closeFlyoutIfOpen(page);
+      await openJsmTestTab(page, testPageConnectorId);
+    };
 
-    await page.testSubj.click('jsm-show-json-editor-toggle');
-    await setMonacoValue(
-      page,
-      JSON.stringify({
+    await test.step('should show the additional options when clicking more options', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-display-more-options');
+
+      await expect(page.testSubj.locator('entityInput')).toBeVisible();
+      await expect(page.testSubj.locator('sourceInput')).toBeVisible();
+      await expect(page.testSubj.locator('userInput')).toBeVisible();
+      await expect(page.testSubj.locator('noteTextArea')).toBeVisible();
+    });
+
+    await test.step('should show and then hide the additional form options when clicking the button twice', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-display-more-options');
+      await expect(page.testSubj.locator('entityInput')).toBeVisible();
+
+      await page.testSubj.click('jsm-display-more-options');
+      await expect(page.testSubj.locator('entityInput')).toBeHidden();
+    });
+
+    await test.step('should populate the json editor with message, description, and alias', async () => {
+      await reopenTestTab();
+      await page.testSubj.locator('messageInput').fill('a message');
+      await page.testSubj.locator('descriptionTextArea').fill('a description');
+      await page.testSubj.locator('aliasInput').fill('an alias');
+      await page.testSubj.locator('jsm-prioritySelect').selectOption('P5');
+      await page.testSubj.locator('jsm-tags').locator('input').fill('a tag');
+      await page.testSubj.locator('jsm-tags').locator('input').press('Enter');
+
+      await page.testSubj.click('jsm-show-json-editor-toggle');
+
+      const raw = await getMonacoValue(page);
+      const parsed = JSON.parse(raw);
+      expect(parsed).toStrictEqual({
         message: 'a message',
         description: 'a description',
         alias: 'an alias',
-        priority: 'P3',
-        tags: ['tag1'],
-      })
-    );
-    await page.testSubj.click('jsm-show-json-editor-toggle');
+        priority: 'P5',
+        tags: ['a tag'],
+      });
+    });
 
-    await expect(page.testSubj.locator('messageInput')).toHaveValue('a message');
-    await expect(page.testSubj.locator('descriptionTextArea')).toHaveValue('a description');
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('an alias');
-    await expect(page.testSubj.locator('jsm-prioritySelect')).toHaveValue('P3');
-    await expect(page.testSubj.locator('jsm-tags')).toContainText('tag1');
+    await test.step('should populate the form with values from the json editor', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-show-json-editor-toggle');
+      await setMonacoValue(
+        page,
+        JSON.stringify({
+          message: 'a message',
+          description: 'a description',
+          alias: 'an alias',
+          priority: 'P3',
+          tags: ['tag1'],
+        })
+      );
+      await page.testSubj.click('jsm-show-json-editor-toggle');
+
+      await expect(page.testSubj.locator('messageInput')).toHaveValue('a message');
+      await expect(page.testSubj.locator('descriptionTextArea')).toHaveValue('a description');
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('an alias');
+      await expect(page.testSubj.locator('jsm-prioritySelect')).toHaveValue('P3');
+      await expect(page.testSubj.locator('jsm-tags')).toContainText('tag1');
+    });
+
+    await test.step('should disable the run button when the json editor validation fails', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-show-json-editor-toggle');
+      await setMonacoValue(page, JSON.stringify({ message: '' }));
+
+      await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
+    });
   });
 
-  test('page - createAlert - should disable the run button when the json editor validation fails', async ({
-    page,
-    kbnUrl,
-  }) => {
+  test('page - closeAlert additional options', async ({ page, kbnUrl }) => {
     await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
+    const reopenTestTab = async () => {
+      await closeFlyoutIfOpen(page);
+      await openJsmTestTab(page, testPageConnectorId);
+      await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
+    };
 
-    await page.testSubj.click('jsm-show-json-editor-toggle');
-    await setMonacoValue(page, JSON.stringify({ message: '' }));
+    await test.step('should show the additional options for closing an alert when clicking more options', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-display-more-options');
 
-    await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
-  });
+      await expect(page.testSubj.locator('sourceInput')).toBeVisible();
+      await expect(page.testSubj.locator('userInput')).toBeVisible();
+    });
 
-  test('page - closeAlert - should show the additional options for closing an alert when clicking more options', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
+    await test.step('should show and then hide the additional options when clicking the button twice', async () => {
+      await reopenTestTab();
+      await page.testSubj.click('jsm-display-more-options');
+      await expect(page.testSubj.locator('sourceInput')).toBeVisible();
 
-    await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
-    await page.testSubj.click('jsm-display-more-options');
-
-    await expect(page.testSubj.locator('sourceInput')).toBeVisible();
-    await expect(page.testSubj.locator('userInput')).toBeVisible();
-  });
-
-  test('page - closeAlert - should show and then hide the additional options when clicking the button twice', async ({
-    page,
-    kbnUrl,
-  }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await openJsmTestTab(page, testPageConnectorId);
-
-    await page.testSubj.locator('jsm-subActionSelect').selectOption('closeAlert');
-    await page.testSubj.click('jsm-display-more-options');
-    await expect(page.testSubj.locator('sourceInput')).toBeVisible();
-
-    await page.testSubj.click('jsm-display-more-options');
-    await expect(page.testSubj.locator('sourceInput')).toBeHidden();
+      await page.testSubj.click('jsm-display-more-options');
+      await expect(page.testSubj.locator('sourceInput')).toBeHidden();
+    });
   });
 
   // ── alerts page ───────────────────────────────────────────────────────────
 
-  test('alerts page - should default to the create alert action', async ({ page }) => {
+  test('alerts page - action group defaults and switching', async ({ page }) => {
     await page.gotoApp('rules');
     await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`, THRESHOLD_INDEX);
 
@@ -396,96 +374,48 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
       .locator('button')
       .click();
 
-    await expect(page.testSubj.locator('messageInput')).toBeVisible();
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
-  });
+    await test.step('should default to the create alert action', async () => {
+      await expect(page.testSubj.locator('messageInput')).toBeVisible();
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
+    });
 
-  test('alerts page - should default to the close alert action when setting the run when to recovered', async ({
-    page,
-  }) => {
-    await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`, THRESHOLD_INDEX);
+    await test.step('should show the message is required error when clicking the save button', async () => {
+      await expect(page.testSubj.locator('rulePageFooterSaveButton')).toBeDisabled();
+    });
 
-    await page.testSubj.click('ruleActionsAddActionButton');
-    await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
-    await page.testSubj
-      .locator('ruleActionsConnectorsModalCard')
-      .filter({ hasText: alertsConnectorName })
-      .locator('button')
-      .click();
+    await test.step('should default to the close alert action when setting the run when to recovered', async () => {
+      await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
+      await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
 
-    await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
-    await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
+      await expect(page.testSubj.locator('noteTextArea')).toBeVisible();
+      await expect(page.testSubj.locator('messageInput')).toBeHidden();
+    });
 
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
-    await expect(page.testSubj.locator('noteTextArea')).toBeVisible();
-    await expect(page.testSubj.locator('messageInput')).toBeHidden();
-  });
+    await test.step('should not preserve the alias when switching run when to recover', async () => {
+      // Reset to the default group this scenario originally started from.
+      await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
+      await page.testSubj.click('addNewActionConnectorActionGroup-threshold met');
+      await expect(page.testSubj.locator('messageInput')).toBeVisible();
 
-  test('alerts page - should not preserve the alias when switching run when to recover', async ({
-    page,
-  }) => {
-    await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`, THRESHOLD_INDEX);
+      await page.testSubj.locator('aliasInput').fill('an alias');
 
-    await page.testSubj.click('ruleActionsAddActionButton');
-    await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
-    await page.testSubj
-      .locator('ruleActionsConnectorsModalCard')
-      .filter({ hasText: alertsConnectorName })
-      .locator('button')
-      .click();
+      await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
+      await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
 
-    await page.testSubj.locator('aliasInput').fill('an alias');
+      await expect(page.testSubj.locator('messageInput')).toBeHidden();
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
+    });
 
-    await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
-    await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
+    await test.step('should not preserve the alias when switching run when to threshold met', async () => {
+      await expect(page.testSubj.locator('messageInput')).toBeHidden();
+      await page.testSubj.locator('aliasInput').fill('an alias');
 
-    await expect(page.testSubj.locator('messageInput')).toBeHidden();
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
-  });
+      await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
+      await page.testSubj.click('addNewActionConnectorActionGroup-threshold met');
 
-  test('alerts page - should not preserve the alias when switching run when to threshold met', async ({
-    page,
-  }) => {
-    await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`, THRESHOLD_INDEX);
-
-    await page.testSubj.click('ruleActionsAddActionButton');
-    await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
-    await page.testSubj
-      .locator('ruleActionsConnectorsModalCard')
-      .filter({ hasText: alertsConnectorName })
-      .locator('button')
-      .click();
-
-    await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
-    await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
-
-    await expect(page.testSubj.locator('messageInput')).toBeHidden();
-    await page.testSubj.locator('aliasInput').fill('an alias');
-
-    await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
-    await page.testSubj.click('addNewActionConnectorActionGroup-threshold met');
-
-    await expect(page.testSubj.locator('messageInput')).toBeVisible();
-    await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
-  });
-
-  test('alerts page - should show the message is required error when clicking the save button', async ({
-    page,
-  }) => {
-    await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `jsm-alert-${Date.now()}`, THRESHOLD_INDEX);
-
-    await page.testSubj.click('ruleActionsAddActionButton');
-    await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
-    await page.testSubj
-      .locator('ruleActionsConnectorsModalCard')
-      .filter({ hasText: alertsConnectorName })
-      .locator('button')
-      .click();
-
-    await expect(page.testSubj.locator('rulePageFooterSaveButton')).toBeDisabled();
+      await expect(page.testSubj.locator('messageInput')).toBeVisible();
+      await expect(page.testSubj.locator('aliasInput')).toHaveValue('{{rule.id}}:{{alert.id}}');
+    });
   });
 });
