@@ -195,16 +195,6 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   const menu = useMemo<AppHeaderMenu>(
     () => ({
       items: [
-        {
-          id: 'apiReference',
-          label: i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
-            defaultMessage: 'API reference',
-          }),
-          iconType: 'documentation',
-          href: docLinks.queryRulesApi,
-          target: '_blank',
-          testId: 'queryRulesetDetailApiReferenceButton',
-        },
         ...(isConsoleAvailable
           ? [
               {
@@ -287,7 +277,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             label: PLUGIN_TITLE,
           }}
           menu={menu}
-          spacing="bleed"
+          docLink={docLinks.queryRulesApi}
         />
       )}
       {(!blockRender && !isFailsafeLoading && isError && createMode) ||
@@ -308,67 +298,71 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               setSearchFilter={setSearchFilter}
             />
 
-            <EuiTourStep
-              anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
-              content={<p>{tourStepsInfo[0].content}</p>}
-              isStepOpen={
-                isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
-              }
-              minWidth={tourState.tourPopoverWidth}
-              onFinish={finishTour}
-              step={1}
-              stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
-              title={
-                <EuiTitle size="xs">
-                  <h6>{tourStepsInfo[0].title}</h6>
-                </EuiTitle>
-              }
-              anchorPosition="downLeft"
-              zIndex={1}
-              footerAction={
-                <EuiFlexGroup direction="row">
-                  <EuiFlexItem>
-                    {(queryRuleset?.rules?.length ?? 0) > 1 ? (
-                      <EuiButtonEmpty
-                        data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
-                        size="s"
-                        color="text"
-                        onClick={finishTour}
-                      >
-                        {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
-                          defaultMessage: 'Close tour',
-                        })}
-                      </EuiButtonEmpty>
-                    ) : (
-                      <EuiButton
-                        data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
-                        size="s"
-                        color="success"
-                        onClick={finishTour}
-                      >
-                        {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
-                          defaultMessage: 'Close tour',
-                        })}
-                      </EuiButton>
-                    )}
-                  </EuiFlexItem>
-                  {(queryRuleset?.rules?.length ?? 0) > 1 && (
+            {/* TODO: tour step 1 does not appear after the AppHeader migration — the anchor
+                never resolves. Must be fixed before opening the PR. */}
+            {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
+              <EuiTourStep
+                anchor={() => tourStepsInfo[1]?.tourTargetRef?.current as HTMLElement}
+                content={<p>{tourStepsInfo[0].content}</p>}
+                isStepOpen={
+                  isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
+                }
+                minWidth={tourState.tourPopoverWidth}
+                onFinish={finishTour}
+                step={1}
+                stepsTotal={(queryRuleset?.rules?.length ?? 0) > 1 ? 2 : 1}
+                title={
+                  <EuiTitle size="xs">
+                    <h6>{tourStepsInfo[0].title}</h6>
+                  </EuiTitle>
+                }
+                anchorPosition="downLeft"
+                zIndex={1}
+                footerAction={
+                  <EuiFlexGroup direction="row">
                     <EuiFlexItem>
-                      <EuiButton
-                        data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
-                        color="success"
-                        size="s"
-                        onClick={incrementStep}
-                      >
-                        {i18n.translate('xpack.queryRules.queryRulesetDetail.nextTourButton', {
-                          defaultMessage: 'Next',
-                        })}
-                      </EuiButton>
+                      {(queryRuleset?.rules?.length ?? 0) > 1 ? (
+                        <EuiButtonEmpty
+                          data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                          size="s"
+                          color="text"
+                          onClick={finishTour}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                            defaultMessage: 'Close tour',
+                          })}
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiButton
+                          data-test-subj="searchQueryRulesQueryRulesetDetailCloseTourButton"
+                          size="s"
+                          color="success"
+                          onClick={finishTour}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.closeTourButton', {
+                            defaultMessage: 'Close tour',
+                          })}
+                        </EuiButton>
+                      )}
                     </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              }
-            />
+                    {(queryRuleset?.rules?.length ?? 0) > 1 && (
+                      <EuiFlexItem>
+                        <EuiButton
+                          data-test-subj="searchQueryRulesQueryRulesetDetailNextButton"
+                          color="success"
+                          size="s"
+                          onClick={incrementStep}
+                        >
+                          {i18n.translate('xpack.queryRules.queryRulesetDetail.nextTourButton', {
+                            defaultMessage: 'Next',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                }
+              />
+            )}
 
             {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
               <EuiTourStep

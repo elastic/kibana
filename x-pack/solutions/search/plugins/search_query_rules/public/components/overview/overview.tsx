@@ -39,18 +39,6 @@ export const QueryRulesOverview = () => {
 
   const menu = useMemo<AppHeaderMenu>(
     () => ({
-      items: [
-        {
-          id: 'apiReference',
-          label: i18n.translate('xpack.queryRules.queryRulesetDetail.apiReferenceButton', {
-            defaultMessage: 'API reference',
-          }),
-          iconType: 'documentation',
-          href: docLinks.queryRulesApi,
-          target: '_blank',
-          testId: 'queryRulesetDetailApiReferenceButton',
-        },
-      ],
       primaryActionItem: {
         id: 'createRuleset',
         label: i18n.translate('xpack.queryRules.queryRulesSetDetail.createButton', {
@@ -89,7 +77,7 @@ export const QueryRulesOverview = () => {
             defaultMessage: 'Create and manage query rules sets.',
           })}
           menu={menu}
-          spacing="bleed"
+          docLink={docLinks.queryRulesApi}
         />
       )}
       <KibanaPageTemplate.Section
