@@ -23,12 +23,7 @@ import type {
   SynthtraceGenerator,
 } from '@kbn/synthtrace-client';
 import { Readable } from 'stream';
-import {
-  HOST_NAME_WITH_SERVICES,
-  HOSTS,
-  SEMCONV_HOSTS,
-  SERVICE_PER_HOST_COUNT,
-} from './constants';
+import { HOST_NAME_WITH_SERVICES, HOSTS, SEMCONV_HOSTS, SERVICE_PER_HOST_COUNT } from './constants';
 import { generateAddServicesToExistingHost } from './synthtrace/add_services_to_existing_hosts';
 import { generateHostData } from './synthtrace/host_data';
 import { generateLogsDataForHostsOrContainers } from './synthtrace/logs_data_for_hosts_or_containers';
