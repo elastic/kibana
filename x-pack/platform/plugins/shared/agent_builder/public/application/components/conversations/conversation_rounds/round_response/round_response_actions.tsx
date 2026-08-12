@@ -91,23 +91,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     [traceId, rawRound?.model_usage?.connector_id, rawRound?.model_usage?.model]
   );
 
-  const {
-    vote,
-    chips,
-    comment,
-    modalOpen,
-    inviteVisible,
-    submitted,
-    submittedFading,
-    isSubmitting,
-    setVote,
-    toggleChip,
-    setComment,
-    openModal,
-    closeModal,
-    dismissInvite,
-    submit,
-  } = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);
+  const feedback = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);
 
   // `services.plugins.evals` is optional — the evals plugin isn't installed
   // in every Kibana deployment. When absent, the 'Add to Dataset' button hides.
@@ -220,31 +204,34 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
                 <EuiFlexItem grow={false}>
                   <ThumbButton
                     direction="up"
-                    isActive={vote === 'up'}
-                    isDisabled={isSubmitting}
-                    onClick={() => setVote('up')}
+                    isActive={feedback.vote === 'up'}
+                    isDisabled={feedback.isSubmitting}
+                    onClick={() => feedback.setVote('up')}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <ThumbButton
                     direction="down"
-                    isActive={vote === 'down'}
-                    isDisabled={isSubmitting}
-                    onClick={() => setVote('down')}
+                    isActive={feedback.vote === 'down'}
+                    isDisabled={feedback.isSubmitting}
+                    onClick={() => feedback.setVote('down')}
                   />
                 </EuiFlexItem>
-                {(submitted || (vote === 'up' && inviteVisible)) && (
+                {(feedback.submitted || (feedback.vote === 'up' && feedback.inviteVisible)) && (
                   <EuiFlexItem
                     grow={false}
                     css={css`
-                      opacity: ${submittedFading ? 0 : 1};
-                      transition: opacity ${submittedFading ? '0.5s' : '0s'} ease;
+                      opacity: ${feedback.submittedFading ? 0 : 1};
+                      transition: opacity ${feedback.submittedFading ? '0.5s' : '0s'} ease;
                     `}
                   >
-                    {submitted ? (
+                    {feedback.submitted ? (
                       <FeedbackSubmitted />
                     ) : (
-                      <UpInvite onTellUsMore={openModal} onDismiss={dismissInvite} />
+                      <UpInvite
+                        onTellUsMore={feedback.openModal}
+                        onDismiss={feedback.dismissInvite}
+                      />
                     )}
                   </EuiFlexItem>
                 )}
@@ -254,15 +241,15 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {showFeedback && vote !== null && modalOpen && (
+      {showFeedback && feedback.vote !== null && feedback.modalOpen && (
         <FeedbackModal
-          vote={vote}
-          chips={chips}
-          comment={comment}
-          onToggleChip={toggleChip}
-          onCommentChange={setComment}
-          onSubmit={submit}
-          onClose={closeModal}
+          vote={feedback.vote}
+          chips={feedback.chips}
+          comment={feedback.comment}
+          onToggleChip={feedback.toggleChip}
+          onCommentChange={feedback.setComment}
+          onSubmit={feedback.submit}
+          onClose={feedback.closeModal}
         />
       )}
     </EuiFlexGroup>

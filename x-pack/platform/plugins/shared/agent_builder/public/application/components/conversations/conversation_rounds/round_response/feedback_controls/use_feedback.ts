@@ -86,11 +86,9 @@ export const useFeedback = (
 
   const isSubmittingRef = useRef(false);
   const voteRef = useRef(vote);
-  const serverVoteRef = useRef(serverVote);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   voteRef.current = vote;
-  serverVoteRef.current = serverVote;
   isSubmittingRef.current = isSubmitting;
 
   const clearSubmittedTimers = useCallback(() => {
@@ -114,14 +112,6 @@ export const useFeedback = (
     },
     [clearSubmittedTimers]
   );
-
-  useEffect(() => {
-    resetTo(serverVoteRef.current);
-  }, [roundId, resetTo]);
-
-  useEffect(() => {
-    setVoteState(serverVote);
-  }, [serverVote]);
 
   const patchCache = useCallback(
     (feedback: ConversationRoundFeedback | undefined) => {
