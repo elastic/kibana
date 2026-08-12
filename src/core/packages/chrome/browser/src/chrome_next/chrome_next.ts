@@ -236,6 +236,21 @@ export interface AppHeaderFavoriteAction {
 }
 
 /**
+ * Share action for the app-header title-actions area.
+ * Apps own behavior and menu placement; App Header owns title presentation.
+ *
+ * @public
+ */
+export interface AppHeaderShareAction {
+  onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
+  isDisabled?: boolean;
+  tooltip?: {
+    content: string;
+    title?: string;
+  };
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  *
@@ -255,6 +270,7 @@ interface AppHeaderConfigBase {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
+  share?: AppHeaderShareAction;
   spacing?: AppHeaderSpacing;
 }
 
@@ -291,7 +307,12 @@ export type ChromeAppHeaderConfig = Omit<AppHeaderConfig, 'back'> & {
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome Next feature flag is enabled. */
+  /**
+   * Whether the Chrome Next feature flag is enabled.
+   *
+   * This does not indicate that the current layout renders Chrome Next. Before replacing or hiding
+   * fallback UI, also require `chrome.getChromeStyle() === 'project'`.
+   */
   readonly isEnabled: boolean;
   aiButton: {
     /**
