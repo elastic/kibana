@@ -11,11 +11,6 @@ import { useAgentBuilderAgents } from './agents/use_agents';
 import { useUiPrivileges } from './use_ui_privileges';
 import { queryKeys } from '../query_keys';
 
-/**
- * Reads the currently assigned default agent id (or `null` if the space is
- * unconfigured) for the active space. Returns react-query state so callers can
- * gate rendering on `isLoading` / `isFetched`.
- */
 export const useSpaceDefaultAgent = () => {
   const { spaceSettingsService } = useAgentBuilderServices();
 
@@ -32,26 +27,6 @@ export const useSpaceDefaultAgent = () => {
   };
 };
 
-/**
- * Resolves the space's *effective* default agent for the current user, and
- * whether that user is restricted to it.
- *
- * The stored assignment is only honored when the assigned agent is actually
- * present in the agents this user can see. A deleted, now-private, or otherwise
- * inaccessible assignment degrades to "unconfigured" (`null`) so a user is never
- * pinned to an unreachable agent. This client-side cross-check replaces the old
- * server read-time safety net now that the restriction is UI-only.
- *
- * `isRestricted` is `true` when the space has an effective default and the user
- * cannot manage agents: those users see only the default in the agent selector
- * and are redirected off any other agent. Admins (`manageAgents`) always see the
- * full agent list and can switch freely, while still defaulting to the space
- * agent as a consistent starting point.
- *
- * Callers that navigate based on the result should wait until `isReady` is
- * `true` (both the settings query and the agents list have settled) before
- * treating a `null` effective default as "unconfigured".
- */
 export const useEffectiveSpaceDefaultAgent = () => {
   const { defaultAgentId, isFetched: settingsFetched } = useSpaceDefaultAgent();
   const { agents, isFetched: agentsFetched } = useAgentBuilderAgents();
@@ -75,11 +50,6 @@ interface UseSetSpaceDefaultAgentOptions {
   onError?: (err: Error) => void;
 }
 
-/**
- * Sets or clears the space's assigned default agent. On success we invalidate
- * both the settings query and the agent list so the "Space default" badge and
- * the effective-default cross-check recompute against the latest data.
- */
 export const useSetSpaceDefaultAgent = ({
   onSuccess,
   onError,
