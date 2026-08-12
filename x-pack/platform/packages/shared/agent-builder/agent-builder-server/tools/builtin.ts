@@ -50,7 +50,6 @@ import type { ToolHandlerFn } from './handler';
  * - Read-only tools should always set idempotentHint: true.
  *
  * See: https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations
- * See: https://claude.com/docs/connectors/building/submission#submission-requirements
  */
 export type McpToolAnnotations = Required<
   Pick<ToolAnnotations, 'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'>
