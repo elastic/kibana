@@ -11,7 +11,7 @@ interface DateWindowParams {
   isScheduled: boolean;
   timestamp?: string;
   lastResultTime?: string[];
-  interval: number;
+  interval?: number;
 }
 
 interface DateWindowResult {
@@ -38,17 +38,29 @@ export const getPackViewDateWindow = ({
     };
   }
 
-  if (lastResultTime) {
+  const lastResult = lastResultTime?.[0];
+
+  if (timestamp) {
     return {
-      startDate: moment(lastResultTime[0]).subtract(interval, 'seconds').toISOString(),
-      endDate: moment(lastResultTime[0]).toISOString(),
+      startDate: moment(timestamp).toISOString(),
+      endDate: lastResult ? moment(lastResult).toISOString() : 'now',
       mode: 'absolute',
     };
   }
 
-  return {
-    startDate: `now-${interval}s`,
-    endDate: 'now',
-    mode: 'relative',
-  };
+  if (interval) {
+    return lastResult
+      ? {
+          startDate: moment(lastResult).subtract(interval, 'seconds').toISOString(),
+          endDate: moment(lastResult).toISOString(),
+          mode: 'absolute',
+        }
+      : {
+          startDate: `now-${interval}s`,
+          endDate: 'now',
+          mode: 'relative',
+        };
+  }
+
+  return { startDate: undefined, endDate: undefined, mode: undefined };
 };

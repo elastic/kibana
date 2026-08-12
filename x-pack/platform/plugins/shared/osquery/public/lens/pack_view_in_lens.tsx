@@ -13,10 +13,10 @@ import { getPackViewDateWindow } from '../common/pack_view_date_window';
 
 interface PackViewInActionProps {
   item: {
-    id: string;
-    interval: number;
+    id?: string;
+    interval?: number;
     action_id?: string;
-    agents: string[];
+    agents?: string[];
   };
   actionId?: string;
   scheduleId?: string;

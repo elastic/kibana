@@ -154,6 +154,7 @@ type PackQueryStatusItem = Partial<{
   id: string;
   query: string;
   agents: string[];
+  interval?: number;
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
@@ -309,24 +310,24 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInDiscoverAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => (
+    (item: PackQueryStatusItem) => (
       <PackViewInLensAction
         item={item}
         scheduleId={scheduleId}
         executionCount={executionCount}
-        timestamp={scheduleId ? startDate : undefined}
+        timestamp={startDate}
       />
     ),
     [scheduleId, executionCount, startDate]
