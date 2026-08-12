@@ -6,12 +6,8 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ARTIFACT_VALUE_LIMITS,
-  MAX_ARTIFACT_VALUE_LIMIT,
-  DEFAULT_TIME_FIELD,
-} from '@kbn/alerting-v2-constants';
+import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
 import {
@@ -27,6 +23,7 @@ import {
   MAX_BULK_ITEMS,
   ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
+  MAX_ARTIFACT_DATA_FIELDS,
 } from './constants';
 
 /** Primitives */
@@ -345,20 +342,79 @@ const artifactSchema = z
   .object({
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
-    value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
+    data: z
+      .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+      .describe('Structured artifact data.'),
   })
   .strict()
   .check((ctx) => {
-    const limit = ARTIFACT_VALUE_LIMITS[ctx.value.type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
-    if (ctx.value.value.length > limit) {
+    const fields = Object.entries(ctx.value.data);
+
+    if (fields.length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
-        path: ['value'],
-        message: `Artifact value must be at most ${limit} characters for type "${ctx.value.type}".`,
-        input: ctx.value.value,
+        path: ['data'],
+        message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
+        input: ctx.value.data,
       });
     }
+
+    const typeSchema = ARTIFACT_DATA_SCHEMAS[ctx.value.type];
+    const declared = typeSchema ? new Set(Object.keys(typeSchema.shape)) : undefined;
+    const typeResult = typeSchema?.safeParse(ctx.value.data);
+
+    if (typeResult && !typeResult.success) {
+      for (const issue of typeResult.error.issues) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data', ...issue.path],
+          message: issue.message,
+          input: issue.input,
+        });
+      }
+    }
+
+    // Fields declared by the type schema use that schema's own limits (e.g.
+    // runbook content at 50k). Everything else gets the generic default so
+    // unregistered types stay bounded without a framework change.
+    for (const [field, value] of fields) {
+      if (declared?.has(field)) {
+        continue;
+      }
+
+      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
+
+      if (typeof value === 'string') {
+        if (value.length > limit) {
+          ctx.issues.push({
+            code: 'custom',
+            path: ['data', field],
+            message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
+            input: value,
+          });
+        }
+        continue;
+      }
+
+      // Structured values are measured serialized, so nesting a payload in an
+      // object or an array cannot buy more room than a plain string field gets.
+      if ((JSON.stringify(value) ?? '').length > limit) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data', field],
+          message: `Artifact data field "${field}" must serialize to at most ${limit} characters for type "${ctx.value.type}".`,
+          input: value,
+        });
+      }
+    }
   });
+
+const artifactsSchema = z
+  .array(artifactSchema)
+  .max(100)
+  .describe(
+    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+  );
 
 /** Create rule API schema */
 
@@ -391,7 +447,7 @@ export const createRuleDataBaseSchema = z
       ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
-    artifacts: z.array(artifactSchema).max(100).optional(),
+    artifacts: artifactsSchema.optional(),
   })
   .strict();
 
@@ -540,7 +596,7 @@ export const updateRuleDataSchema = z
     no_data_strategy: noDataStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
-    artifacts: z.array(artifactSchema).max(100).optional().nullable(),
+    artifacts: artifactsSchema.optional().nullable(),
   })
   .strict()
   .check((ctx) => {
