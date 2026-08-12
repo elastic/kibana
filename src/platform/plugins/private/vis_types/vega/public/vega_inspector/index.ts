@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { VegaInspectorAdapters } from './vega_inspector';
-export { createInspectorAdapters, getVegaInspectorView } from './vega_inspector';
+export { getVegaInspectorView } from './vega_inspector';
+export type { VegaInspectorAdapters } from './vega_inspector_adapters';
+export { createInspectorAdapters } from './vega_inspector_adapters';
