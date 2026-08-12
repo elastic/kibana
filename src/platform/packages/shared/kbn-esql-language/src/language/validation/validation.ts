@@ -92,6 +92,8 @@ async function validateAst(
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
 
+  const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
+
   // Validate the header commands
   for (const command of headerCommands) {
     const references: ReferenceMaps = {
@@ -109,7 +111,7 @@ async function validateAst(
       command,
       references,
       rootCommands,
-      isTimeseriesSourceCommand(rootCommands),
+      isRootTimeseries,
       {
         ...callbacks,
         hasMinimumLicenseRequired,
