@@ -77,6 +77,16 @@ const configSchema = schema.object(
       { unknowns: 'allow' }
     ),
 
+    openrouter: schema.maybe(
+      schema.object(
+        {
+          baseUrl: schema.string({ minLength: 1 }),
+          apiKey: schema.string({ minLength: 1 }),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
+
     /**
      * Connector used for LLM-as-a-judge evaluators. Must match a connector ID present
      * in the generated `KIBANA_TESTING_AI_CONNECTORS` payload.
