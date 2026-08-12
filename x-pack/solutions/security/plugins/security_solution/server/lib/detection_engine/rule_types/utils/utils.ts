@@ -789,12 +789,15 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
+// stringified Java Long.MAX_VALUE, used as a sentinel sort value when Elasticsearch expects one
+const LONG_MAX_VALUE = '9223372036854775807';
+
 export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
     if (sortId == null || sortId === '' || Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
@@ -809,7 +812,7 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
 export const getSafeNanosSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     if (sortId != null && sortId !== '' && Number(sortId) >= Number.MAX_SAFE_INTEGER) {
-      return '9223372036854775807';
+      return LONG_MAX_VALUE;
     }
     return sortId;
   });
