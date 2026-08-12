@@ -8,13 +8,13 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
   ALERT_ANALYSIS_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
@@ -72,6 +72,35 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
  * single logical agent step: scan every agent-step record and return the first
  * `structured_output` payload we find.
  */
+
+/**
+ * Conversation ids for every `ai.agent` step. The agent opens its own root
+ * OTEL trace, so the workflow's `traceId` matches zero agent tool spans.
+ * Join key is step.output.conversation_id ↔ attributes.gen_ai.conversation.id.
+ * Multi-agent workflows produce one id per step — collect all of them.
+ */
+const extractAgentConversationIdsFromSteps = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): string[] => {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const step of stepExecutions) {
+    if (isAgentStep(step)) {
+      const conversationId = (step.output as { conversation_id?: unknown } | null | undefined)
+        ?.conversation_id;
+      if (
+        typeof conversationId === 'string' &&
+        conversationId.length > 0 &&
+        !seen.has(conversationId)
+      ) {
+        seen.add(conversationId);
+        ids.push(conversationId);
+      }
+    }
+  }
+  return ids;
+};
+
 const readAgentStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
 ): StructuredOutput | undefined => {
@@ -165,13 +194,12 @@ export const runAlertAnalysisWorkflow = async ({
     );
   }
 
-  const { toolCallIds, unavailable } = traceEsClient
-    ? await readWorkflowAgentToolCalls({
-        traceEsClient,
-        traceId: execution.traceId,
-        log,
-      })
-    : { toolCallIds: undefined, unavailable: true };
+  const conversationIds = extractAgentConversationIdsFromSteps(execution.stepExecutions);
+  const { toolCallIds, unavailable } = await readAgentToolCallsFromTraces({
+    traceEsClient,
+    conversationIds,
+    log,
+  });
 
   if (toolCallIds && toolCallIds.length > 0) {
     log.warning(
