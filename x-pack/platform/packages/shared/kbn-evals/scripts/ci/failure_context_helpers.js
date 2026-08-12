@@ -7,7 +7,7 @@
  */
 
 const { slugifyId } = require('./slugify_id');
-const { parseMaybeBase64Json, buildLitellmConnectorFromVault } = require('./ai_connectors');
+const { parseMaybeBase64Json, buildOpenrouterConnectorFromVault } = require('./ai_connectors');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
@@ -321,7 +321,7 @@ async function postLitellmChatRequest({ url, headers, body }) {
 }
 
 /**
- * Resolve the LiteLLM triage connector and its model id (shared by the text and
+ * Resolve the triage connector and its model id (shared by the text and
  * structured triage paths). Enforces the `litellm-` guard and falls back to the
  * vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
  */
@@ -333,10 +333,10 @@ function resolveTriageConnector() {
 
   const connector =
     parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '')[modelId] ??
-    buildLitellmConnectorFromVault(modelId);
+    buildOpenrouterConnectorFromVault(modelId);
   if (!connector) {
     throw new Error(
-      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
+      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or OpenRouter env/config)`
     );
   }
 

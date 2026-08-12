@@ -52,43 +52,62 @@ function parseVaultConfig() {
 }
 
 /**
- * Maps a LiteLLM connector id (e.g. litellm-llm-gateway-gpt-4o) to a LiteLLM model group name.
+ * Maps an OpenRouter connector id (e.g. openrouter-openai-gpt-4o) to an OpenRouter model id.
+ *
+ * Strips the `openrouter-` prefix and replaces the first `-` with `/` so
+ * `openrouter-openai-gpt-4o` → `openai/gpt-4o`. Matches OpenRouter's
+ * `provider/model` shape.
  */
-function connectorIdToLitellmModel(connectorId) {
-  const stripped = String(connectorId).replace(/^litellm-/, '');
-  const prefix = 'llm-gateway-';
-  if (stripped.startsWith(prefix)) {
-    return `llm-gateway/${stripped.slice(prefix.length)}`;
+function connectorIdToOpenrouterModel(connectorId) {
+  const raw = String(connectorId);
+  if (raw.includes('/') && !raw.startsWith('openrouter-')) {
+    return raw;
   }
-  return stripped;
+
+  const stripped = raw.replace(/^openrouter-/, '');
+  const dashIdx = stripped.indexOf('-');
+  if (dashIdx === -1) {
+    return stripped;
+  }
+  return `${stripped.slice(0, dashIdx)}/${stripped.slice(dashIdx + 1)}`;
 }
 
 /**
- * Build a minimal LiteLLM connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
+ * Build a minimal OpenRouter connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
  */
-function buildLitellmConnectorFromVault(modelConnectorId) {
+function buildOpenrouterConnectorFromVault(modelConnectorId) {
   const config = parseVaultConfig();
-  const litellm = config?.litellm;
-  const baseUrl =
-    process.env.LITELLM_BASE_URL ||
-    (litellm && typeof litellm === 'object' && typeof litellm.baseUrl === 'string'
-      ? litellm.baseUrl
-      : '');
+  const openrouter = config?.openrouter;
+  const baseUrl = (
+    process.env.OPENROUTER_BASE_URL ||
+    (openrouter && typeof openrouter === 'object' && typeof openrouter.baseUrl === 'string'
+      ? openrouter.baseUrl
+      : '')
+  ).replace(/\/+$/, '');
   const apiKey =
-    process.env.LITELLM_VIRTUAL_KEY ||
-    (litellm && typeof litellm === 'object' && typeof litellm.virtualKey === 'string'
-      ? litellm.virtualKey
+    process.env.OPENROUTER_API_KEY ||
+    (openrouter && typeof openrouter === 'object' && typeof openrouter.apiKey === 'string'
+      ? openrouter.apiKey
       : '');
   if (!baseUrl || !apiKey) {
     throw new Error(
-      'LiteLLM credentials are missing (set LITELLM_BASE_URL/LITELLM_VIRTUAL_KEY or KBN_EVALS_CONFIG_B64)'
+      'OpenRouter credentials are missing (set OPENROUTER_BASE_URL/OPENROUTER_API_KEY or KBN_EVALS_CONFIG_B64)'
+    );
+  }
+
+  const defaultModel =
+    process.env.EVAL_OPENROUTER_MODEL || connectorIdToOpenrouterModel(modelConnectorId);
+  if (!defaultModel || !defaultModel.includes('/')) {
+    throw new Error(
+      `Unable to resolve OpenRouter model id from connector "${modelConnectorId}". ` +
+        'Pass a native id (provider/model) or set EVAL_OPENROUTER_MODEL.'
     );
   }
 
   return {
     config: {
-      apiUrl: `${baseUrl.replace(/\/$/, '')}/v1/chat/completions`,
-      defaultModel: connectorIdToLitellmModel(modelConnectorId),
+      apiUrl: `${baseUrl}/chat/completions`,
+      defaultModel,
     },
     secrets: { apiKey },
   };
@@ -97,6 +116,6 @@ function buildLitellmConnectorFromVault(modelConnectorId) {
 module.exports = {
   parseMaybeBase64Json,
   parseVaultConfig,
-  connectorIdToLitellmModel,
-  buildLitellmConnectorFromVault,
+  connectorIdToOpenrouterModel,
+  buildOpenrouterConnectorFromVault,
 };
