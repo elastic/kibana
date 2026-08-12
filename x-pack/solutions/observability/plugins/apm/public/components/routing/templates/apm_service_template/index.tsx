@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
-import type { AppHeaderBadge } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +27,11 @@ import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomal
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
-import { ServiceIcons } from '../../../shared/service_icons';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ApmMainTemplate } from '../apm_main_template';
 import { useAnalyzeDataMenuItem } from './use_analyze_data_menu_item';
-import { useServiceHeaderBadges } from './service_header_badges';
+import { useServiceHeaderMetadata } from './service_header_badges';
+import { useServiceIconBadges } from './use_service_icon_badges';
 import type { TabKey } from './use_tabs';
 import { useTabs } from './use_tabs';
 
@@ -114,11 +113,19 @@ function TemplateWithContext({
 
   const serviceInventoryHref = router.link('/services', { query });
 
-  const statusBadges = useServiceHeaderBadges({
+  // Chrome suggestion: logos as individual AppHeader `badges`; status → `metadata`.
+  const headerMetadata = useServiceHeaderMetadata({
     start,
     end,
     onSloClick,
     alertsTabHref,
+  });
+
+  const headerBadges = useServiceIconBadges({
+    serviceName,
+    environment,
+    start,
+    end,
   });
 
   const analyzeDataMenuItem = useAnalyzeDataMenuItem();
@@ -129,45 +136,6 @@ function TemplateWithContext({
     }
     return { items: [analyzeDataMenuItem] };
   }, [analyzeDataMenuItem]);
-
-  // AppHeader collapses to 2 visible badges + "+N" when there are more than 3 entries.
-  // Bundle icons and status badges into at most 2 entries so alerts/SLO/anomaly stay visible.
-  const headerBadges = useMemo<AppHeaderBadge[]>(() => {
-    const badges: AppHeaderBadge[] = [
-      {
-        label: i18n.translate('xpack.apm.serviceDetails.serviceIconsBadgeLabel', {
-          defaultMessage: 'Service icons',
-        }),
-        renderCustomBadge: () => (
-          <ServiceIcons
-            serviceName={serviceName}
-            environment={environment}
-            start={start}
-            end={end}
-          />
-        ),
-      },
-    ];
-
-    if (statusBadges.length > 0) {
-      badges.push({
-        label: i18n.translate('xpack.apm.serviceDetails.serviceStatusBadgesLabel', {
-          defaultMessage: 'Service status',
-        }),
-        renderCustomBadge: () => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            {statusBadges.map((badge) => (
-              <EuiFlexItem key={badge.label} grow={false}>
-                {badge.renderCustomBadge?.({ badgeText: badge.label })}
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      });
-    }
-
-    return badges;
-  }, [end, environment, serviceName, start, statusBadges]);
 
   useBreadcrumb(
     () => ({
@@ -239,6 +207,7 @@ function TemplateWithContext({
             }),
           },
           badges: headerBadges,
+          metadata: headerMetadata,
           tabs,
           menu: pageMenu,
         }}
