@@ -16,7 +16,7 @@ import {
   EuiIconTip,
   EuiPopover,
 } from '@elastic/eui';
-import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -143,7 +143,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
                 size="xs"
                 iconType="pagesSelect"
                 onClick={onSelectAll}
-                isDisabled={totalItemCount > BULK_FILTER_MAX_RESOURCES}
+                isDisabled={totalItemCount > BULK_FILTER_MAX_RULES}
                 data-test-subj="selectAllRulesButton"
               >
                 <FormattedMessage
@@ -153,7 +153,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {totalItemCount > BULK_FILTER_MAX_RESOURCES ? (
+            {totalItemCount > BULK_FILTER_MAX_RULES ? (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   type="question"
@@ -169,7 +169,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
                       <FormattedMessage
                         id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
                         defaultMessage="Select all is available only when {maxRules, number} or fewer rules match. Narrow your filter to select every matching rule."
-                        values={{ maxRules: BULK_FILTER_MAX_RESOURCES }}
+                        values={{ maxRules: BULK_FILTER_MAX_RULES }}
                       />
                     </span>
                   }
