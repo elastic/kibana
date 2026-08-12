@@ -39,14 +39,23 @@ interface ProjectPickerContext {
   state: ProjectPickerState;
   actions: Omit<
     ActionsFromReducers<ReturnType<typeof createStoreReducers>>,
-    '_setStoreState' | '_setFilterSearchResult'
+    '_setStoreState' | '_setFilterSearchResult' | '_setControlsState'
   >;
   fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
 }
 
 export interface ProjectPickerStateProviderProps
-  extends Pick<ProjectPickerState, 'isReadOnly' | 'originProjectId'> {
+  extends Pick<ProjectPickerState, 'originProjectId'> {
   children: React.ReactNode;
+  /**
+   * Controls if the control button for toggling the project routing picker.
+   * @default 'enabled'
+   *
+   * - `enabled`: shown and interactive
+   * - `disabled`: shown but not interactive
+   * - `hidden`: not rendered, leaving a read-only project list
+   */
+  controlsState?: ProjectPickerState['controlsState'];
   availableProjects: CPSProject[];
   currentProjectRoutingGetter: () => ProjectRouting | undefined;
   defaultProjectRoutingGetter: () => ProjectRouting;
@@ -103,14 +112,14 @@ const createInitialPickerState = ({
   availableProjects,
   currentProjectRouting,
   defaultProjectRouting,
-  isReadOnly,
+  controlsState,
   originProjectId,
   projectRoutingStrategy,
 }: Pick<
   ProjectPickerState,
   | 'currentProjectRouting'
   | 'defaultProjectRouting'
-  | 'isReadOnly'
+  | 'controlsState'
   | 'originProjectId'
   | 'projectRoutingStrategy'
 > & { availableProjects: CPSProject[] }): ProjectPickerState => {
@@ -118,7 +127,7 @@ const createInitialPickerState = ({
   const parsed = parseDefaultProjectRouting(currentProjectRouting, availableProjectIds);
 
   return {
-    isReadOnly,
+    controlsState,
     originProjectId,
     defaultProjectRouting,
     projectRoutingStrategy,
@@ -130,7 +139,7 @@ const createInitialPickerState = ({
     isFilterSearchLoading: false,
     filterSearchError: null,
     visibleProjectIds: [],
-    selectedProjects: [],
+    selectedProjectIds: [],
     currentProjectRouting: '',
     isUsingSpaceDefaults: false,
   };
@@ -146,7 +155,7 @@ const getEnabledFiltersIdentity = (state: ProjectPickerState): string => {
 export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
-  isReadOnly,
+  controlsState = 'enabled' as const,
   originProjectId,
   onProjectRoutingChange,
   projectRoutingStrategy = 'dynamic',
@@ -165,7 +174,7 @@ export const ProjectPickerStateProvider = ({
       availableProjects,
       currentProjectRouting: currentProjectRoutingGetter() ?? defaultProjectRoutingGetter(),
       defaultProjectRouting: defaultProjectRoutingGetter(),
-      isReadOnly,
+      controlsState,
       originProjectId,
       projectRoutingStrategy,
     }),
@@ -182,19 +191,16 @@ export const ProjectPickerStateProvider = ({
     );
 
     store.actions._setStoreState({
-      isReadOnly,
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
       defaultProjectRouting,
       filterExpressions: parsed.filterExpressions,
       excludedOverrides: parsed.excludedOverrides,
     });
-  }, [
-    availableProjects,
-    currentProjectRoutingGetter,
-    defaultProjectRoutingGetter,
-    isReadOnly,
-    store.actions,
-  ]);
+  }, [availableProjects, currentProjectRoutingGetter, defaultProjectRoutingGetter, store.actions]);
+
+  useEffect(() => {
+    store.actions._setControlsState({ controlsState });
+  }, [controlsState, store.actions]);
 
   const enabledFiltersIdentity = getEnabledFiltersIdentity(store.state);
 
@@ -265,11 +271,8 @@ export const ProjectPickerStateProvider = ({
   }, [store.state.currentProjectRouting, onProjectRoutingChange, currentProjectRoutingGetter]);
 
   const contextValue = useMemo((): ProjectPickerContext => {
-    const {
-      _setStoreState: _omitSetStoreState,
-      _setFilterSearchResult: _omitSetFilterSearchResult,
-      ...publicActions
-    } = store.actions;
+    const { _setStoreState, _setFilterSearchResult, _setControlsState, ...publicActions } =
+      store.actions;
 
     return {
       state: store.state,

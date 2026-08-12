@@ -54,12 +54,13 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   isFilterSearchLoading: false,
   filterSearchError: null,
   visibleProjectIds: [],
-  selectedProjects: [],
+  selectedProjectIds: [],
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
   currentProjectRouting: '',
   isUsingSpaceDefaults: false,
+  controlsState: 'enabled',
   ...overrides,
   defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
   hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
@@ -98,22 +99,22 @@ describe('ProjectPickerFrameHeader', () => {
     excludedOverrides: ['p2'],
   };
 
-  describe('read-only mode', () => {
-    it('disables clear and revert menu items', async () => {
-      renderHeader({ ...stateWithFilters, isReadOnly: true });
+  describe('controlsState', () => {
+    it('disables clear and revert menu items when controlsState is `disabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'disabled' });
       await openGlobalActionsMenu();
 
       expect(screen.getByText('Clear project tag filters').closest('button')).toBeDisabled();
       expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
     });
-  });
 
-  it('enables clear and revert menu items when not read-only', async () => {
-    renderHeader({ ...stateWithFilters, isReadOnly: false });
-    await openGlobalActionsMenu();
+    it('enables clear and revert menu items when controlsState is `enabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'enabled' });
+      await openGlobalActionsMenu();
 
-    expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
-    expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+      expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
+      expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+    });
   });
 
   it('shows the space defaults badge when the state matches an origin default', async () => {

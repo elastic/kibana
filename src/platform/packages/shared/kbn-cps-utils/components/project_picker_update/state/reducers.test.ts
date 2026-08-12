@@ -8,7 +8,6 @@
  */
 
 import type { CPSProject } from '../../../types';
-import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { createStoreReducers, type FilterEntry, type ProjectPickerState } from './reducers';
 import {
   FilterOperator,
@@ -52,6 +51,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
 
   return {
+    controlsState: 'enabled',
     originProjectId: 'origin',
     defaultProjectRouting: '',
     projectRoutingStrategy: 'dynamic',
@@ -63,425 +63,433 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     isFilterSearchLoading: false,
     filterSearchError: null,
     visibleProjectIds: [],
-    selectedProjects: [],
+    selectedProjectIds: [],
     currentProjectRouting: '',
     isUsingSpaceDefaults: false,
     ...overrides,
-    defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-    hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-    originProjectId: overrides.originProjectId,
   };
 };
 
 describe('createStoreReducers', () => {
   const reducers = createStoreReducers();
 
-  it('updates override fields instead of selectedProjects', () => {
-    const state = createState({
-      availableProjects: new Map([['p1', createProject({ _id: 'p1' })]]),
-      excludedOverrides: ['p1'],
+  describe('#undoProjectExclusion', () => {
+    it('updates override fields instead of selectedProjectIds', () => {
+      const state = createState({
+        availableProjects: new Map([['p1', createProject({ _id: 'p1' })]]),
+        excludedOverrides: ['p1'],
+      });
+
+      const nextState = reducers.undoProjectExclusion(state, { projects: ['p1'] });
+
+      expect(nextState.excludedOverrides).toEqual([]);
     });
-
-    const nextState = reducers.undoProjectExclusion(state, { projects: ['p1'] });
-
-    expect(nextState.excludedOverrides).toEqual([]);
   });
 
-  it('clears stored tag filters without clearing project exclusions', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      excludedOverrides: ['p2'],
+  describe('#clearProjectFilters', () => {
+    it('clears stored tag filters without clearing project exclusions', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p2'],
+      });
+
+      const nextState = reducers.clearProjectFilters(state);
+
+      expect(nextState.filterExpressions).toEqual(new Map());
+      expect(nextState.excludedOverrides).toEqual(['p2']);
     });
 
-    const nextState = reducers.clearProjectFilters(state);
+    it('does not clear project exclusions when there are no filter expressions', () => {
+      const state = createState({
+        excludedOverrides: ['p2'],
+      });
 
-    expect(nextState.filterExpressions).toEqual(new Map());
-    expect(nextState.excludedOverrides).toEqual(['p2']);
+      const nextState = reducers.clearProjectFilters(state);
+
+      expect(nextState).toBe(state);
+    });
   });
 
-  it('resets filters and overrides when reverting to space defaults', () => {
-    const state = createState({
-      defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1' })],
-        ['p2', createProject({ _id: 'p2' })],
-      ]),
-      filterExpressions: createFilterExpressions([[regionUsEastExpression]]),
-      excludedOverrides: ['p1'],
-    });
+  describe('#revertToSpaceDefaults', () => {
+    it('resets filters and overrides when reverting to space defaults', () => {
+      const state = createState({
+        defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1' })],
+          ['p2', createProject({ _id: 'p2' })],
+        ]),
+        filterExpressions: createFilterExpressions([[regionUsEastExpression]]),
+        excludedOverrides: ['p1'],
+      });
 
-    const nextState = reducers.revertToSpaceDefaults(state);
+      const nextState = reducers.revertToSpaceDefaults(state);
 
-    expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
-      expression: typeSecurityExpression,
-      enabled: true,
+      expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+        expression: typeSecurityExpression,
+        enabled: true,
+      });
+      expect(nextState.excludedOverrides).toEqual(['p2']);
     });
-    expect(nextState.excludedOverrides).toEqual(['p2']);
   });
 
-  it('resets filters and overrides from origin space defaults', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1' })],
-        ['p2', createProject({ _id: 'p2' })],
-      ]),
-      defaultProjectRouting: PROJECT_ROUTING.ORIGIN,
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      originProjectId: 'p1',
-      excludedOverrides: [],
-    });
+  describe('#addFilterExpression', () => {
+    it('adds filter expressions without touching overrides', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p1'],
+      });
 
-    const nextState = reducers.revertToSpaceDefaults(state);
+      const nextState = reducers.addFilterExpression(state, {
+        expression: { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' },
+      });
 
-    expect(nextState.filterExpressions).toEqual(new Map());
-    expect(nextState.excludedOverrides).toEqual(['p2']);
-  });
-
-  it('adds filter expressions without touching overrides', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      excludedOverrides: ['p1'],
-    });
-
-    const nextState = reducers.addFilterExpression(state, {
-      expression: { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' },
-    });
-
-    expect(nextState.filterExpressions.size).toBe(2);
-    expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
-      expression: typeSecurityExpression,
-      enabled: true,
-    });
-    expect(
-      [...nextState.filterExpressions.values()].map((entry) => entry.expression)
-    ).toContainEqual({
-      operator: FilterOperator.EQUALS,
-      tagName: '_region',
-      tagValue: 'us-east-1',
-    });
-    expect(nextState.excludedOverrides).toEqual(['p1']);
-  });
-
-  it('does not add a duplicate filter expression', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
-
-    const nextState = reducers.addFilterExpression(state, {
-      expression: typeSecurityExpression,
-    });
-
-    expect(nextState).toBe(state);
-    expect(nextState.filterExpressions.size).toBe(1);
-  });
-
-  it('rejects _id filter expressions', () => {
-    const state = createState();
-
-    const nextState = reducers.addFilterExpression(state, {
-      expression: {
+      expect(nextState.filterExpressions.size).toBe(2);
+      expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+        expression: typeSecurityExpression,
+        enabled: true,
+      });
+      expect(
+        [...nextState.filterExpressions.values()].map((entry) => entry.expression)
+      ).toContainEqual({
         operator: FilterOperator.EQUALS,
-        tagName: PROJECT_SELECTION_DIMENSION,
-        tagValue: 'p1',
-      },
+        tagName: '_region',
+        tagValue: 'us-east-1',
+      });
+      expect(nextState.excludedOverrides).toEqual(['p1']);
     });
 
-    expect(nextState).toBe(state);
+    it('does not add a duplicate filter expression', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const nextState = reducers.addFilterExpression(state, {
+        expression: typeSecurityExpression,
+      });
+
+      expect(nextState).toBe(state);
+      expect(nextState.filterExpressions.size).toBe(1);
+    });
+
+    it('rejects filter expressions that target the project selection dimension', () => {
+      const state = createState();
+
+      const nextState = reducers.addFilterExpression(state, {
+        expression: {
+          operator: FilterOperator.EQUALS,
+          tagName: PROJECT_SELECTION_DIMENSION,
+          tagValue: 'p1',
+        },
+      });
+
+      expect(nextState).toBe(state);
+    });
   });
 
-  it('rejects updating a filter expression to PROJECT_SELECTION_DIMENSION', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+  describe('#updateFilterExpression', () => {
+    it('rejects updating a filter expression to target the project selection dimension', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const nextState = reducers.updateFilterExpression(state, {
+        id: typeSecurityKey,
+        expression: {
+          operator: FilterOperator.EQUALS,
+          tagName: PROJECT_SELECTION_DIMENSION,
+          tagValue: 'p1',
+        },
+      });
+
+      expect(nextState).toBe(state);
     });
 
-    const nextState = reducers.updateFilterExpression(state, {
-      id: typeSecurityKey,
-      expression: {
+    it('does not update when the new expression collides with another filter key', () => {
+      const observabilityExpression = {
         operator: FilterOperator.EQUALS,
-        tagName: PROJECT_SELECTION_DIMENSION,
-        tagValue: 'p1',
-      },
+        tagName: '_type',
+        tagValue: 'observability',
+      } as const;
+
+      const state = createState({
+        filterExpressions: createFilterExpressions([
+          [typeSecurityExpression],
+          [observabilityExpression],
+        ]),
+      });
+
+      const nextState = reducers.updateFilterExpression(state, {
+        id: typeSecurityKey,
+        expression: observabilityExpression,
+      });
+
+      expect(nextState).toBe(state);
     });
 
-    expect(nextState).toBe(state);
+    it('updates an existing filter expression and re-keys when the expression changes', () => {
+      const observabilityExpression = {
+        operator: FilterOperator.EQUALS,
+        tagName: '_type',
+        tagValue: 'observability',
+      } as const;
+
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const nextState = reducers.updateFilterExpression(state, {
+        id: typeSecurityKey,
+        expression: observabilityExpression,
+      });
+
+      expect(nextState.filterExpressions).toEqual(
+        createFilterExpressions([[observabilityExpression]])
+      );
+      expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
+      expect(nextState.filterExpressions.size).toBe(1);
+    });
+
+    it('does not change state when updating a missing filter id', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const nextState = reducers.updateFilterExpression(state, {
+        id: 'missing',
+        expression: {
+          operator: FilterOperator.EQUALS,
+          tagName: '_type',
+          tagValue: 'observability',
+        },
+      });
+
+      expect(nextState).toBe(state);
+    });
   });
 
-  it('does not update when the new expression collides with another filter key', () => {
-    const observabilityExpression = {
-      operator: FilterOperator.EQUALS,
-      tagName: '_type',
-      tagValue: 'observability',
-    } as const;
+  describe('#invertFilterExpressionOperator', () => {
+    it('re-keys when inverting a filter operator', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
 
-    const state = createState({
-      filterExpressions: createFilterExpressions([
-        [typeSecurityExpression],
-        [observabilityExpression],
-      ]),
+      const nextState = reducers.invertFilterExpressionOperator(state, {
+        filterId: typeSecurityKey,
+      });
+
+      const invertedExpression = {
+        operator: FilterOperator.NOT_EQUALS,
+        tagName: '_type',
+        tagValue: 'security',
+      } as const;
+      const invertedKey = getFilterExpressionLookupKey(invertedExpression);
+
+      expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
+      expect(nextState.filterExpressions.get(invertedKey)).toEqual({
+        expression: invertedExpression,
+        enabled: true,
+      });
     });
 
-    const nextState = reducers.updateFilterExpression(state, {
-      id: typeSecurityKey,
-      expression: observabilityExpression,
-    });
+    it('does not invert when the inverted filter key already exists', () => {
+      const invertedExpression = {
+        operator: FilterOperator.NOT_EQUALS,
+        tagName: '_type',
+        tagValue: 'security',
+      } as const;
 
-    expect(nextState).toBe(state);
+      const state = createState({
+        filterExpressions: createFilterExpressions([
+          [typeSecurityExpression],
+          [invertedExpression],
+        ]),
+      });
+
+      const nextState = reducers.invertFilterExpressionOperator(state, {
+        filterId: typeSecurityKey,
+      });
+
+      expect(nextState).toBe(state);
+    });
   });
 
-  it('re-keys when inverting a filter operator', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-    });
+  describe('#removeFilterExpression', () => {
+    it('removes a filter expression by id', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([
+          [typeSecurityExpression],
+          [regionUsEastExpression],
+        ]),
+      });
 
-    const nextState = reducers.invertFilterExpressionOperator(state, {
-      filterId: typeSecurityKey,
-    });
+      const nextState = reducers.removeFilterExpression(state, { filterId: typeSecurityKey });
 
-    const invertedExpression = {
-      operator: FilterOperator.NOT_EQUALS,
-      tagName: '_type',
-      tagValue: 'security',
-    } as const;
-    const invertedKey = getFilterExpressionLookupKey(invertedExpression);
-
-    expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
-    expect(nextState.filterExpressions.get(invertedKey)).toEqual({
-      expression: invertedExpression,
-      enabled: true,
+      expect(nextState.filterExpressions).toEqual(
+        createFilterExpressions([[regionUsEastExpression]])
+      );
     });
   });
 
-  it('does not invert when the inverted filter key already exists', () => {
-    const invertedExpression = {
-      operator: FilterOperator.NOT_EQUALS,
-      tagName: '_type',
-      tagValue: 'security',
-    } as const;
+  describe('#includeAllVisibleProjects', () => {
+    it('includes all visible project ids when filters are active', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1'],
+        visibleProjectIds: ['p1'],
+        excludedOverrides: ['p1'],
+      });
 
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression], [invertedExpression]]),
+      const nextState = reducers.includeAllVisibleProjects(state);
+
+      expect(nextState.excludedOverrides).toEqual([]);
     });
-
-    const nextState = reducers.invertFilterExpressionOperator(state, {
-      filterId: typeSecurityKey,
-    });
-
-    expect(nextState).toBe(state);
   });
 
-  it('updates an existing filter expression and re-keys when the expression changes', () => {
-    const observabilityExpression = {
-      operator: FilterOperator.EQUALS,
-      tagName: '_type',
-      tagValue: 'observability',
-    } as const;
+  describe('#includeOnlyProvidedProjectId', () => {
+    it('excludes all other visible projects when including only the anchor project', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        excludedOverrides: ['p3'],
+      });
 
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
+
+      expect(nextState.excludedOverrides).toEqual(['p3']);
     });
 
-    const nextState = reducers.updateFilterExpression(state, {
-      id: typeSecurityKey,
-      expression: observabilityExpression,
+    it('un-excludes the anchor and excludes other visible projects when anchor was excluded', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        excludedOverrides: ['p1', 'p3'],
+      });
+
+      const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
+
+      expect(nextState.excludedOverrides).toEqual(['p3']);
     });
 
-    expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([[observabilityExpression]])
-    );
-    expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
-    expect(nextState.filterExpressions.size).toBe(1);
+    it('does not change state when including only the anchor project is a no-op', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        excludedOverrides: ['p3'],
+      });
+
+      const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
+
+      expect(nextState).toBe(state);
+    });
   });
 
-  it('does not change state when updating a missing filter id', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+  describe('#excludeSelectedProjects', () => {
+    it('does not exclude the last included visible project', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1' })],
+          ['p2', createProject({ _id: 'p2' })],
+        ]),
+        visibleProjectIds: ['p1', 'p2'],
+        selectedProjectIds: ['p1'],
+        excludedOverrides: ['p2'],
+      });
+
+      const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
+
+      expect(nextState).toBe(state);
     });
 
-    const nextState = reducers.updateFilterExpression(state, {
-      id: 'missing',
-      expression: { operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' },
-    });
+    it('excludes a visible project when more than one visible project is included', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1' })],
+          ['p2', createProject({ _id: 'p2' })],
+        ]),
+        visibleProjectIds: ['p1', 'p2'],
+        selectedProjectIds: ['p1', 'p2'],
+      });
 
-    expect(nextState).toBe(state);
+      const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
+
+      expect(nextState.excludedOverrides).toEqual(['p1']);
+    });
   });
 
-  it('removes a filter expression by id', () => {
-    const state = createState({
-      filterExpressions: createFilterExpressions([
-        [typeSecurityExpression],
-        [regionUsEastExpression],
-      ]),
+  describe('#excludeOnlyProvidedProjectId', () => {
+    it('excludes the anchor project and includes all other visible projects', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        selectedProjectIds: ['p1', 'p3'],
+        excludedOverrides: [],
+      });
+
+      const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
+
+      expect(nextState.excludedOverrides).toEqual(['p1']);
     });
 
-    const nextState = reducers.removeFilterExpression(state, { filterId: typeSecurityKey });
+    it('includes other visible projects when the anchor project is already excluded', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        selectedProjectIds: ['p3'],
+        excludedOverrides: ['p1', 'p3'],
+      });
 
-    expect(nextState.filterExpressions).toEqual(
-      createFilterExpressions([[regionUsEastExpression]])
-    );
-  });
+      const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
 
-  it('includes all visible project ids when filters are active', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1'],
-      visibleProjectIds: ['p1'],
-      excludedOverrides: ['p1'],
+      expect(nextState.excludedOverrides).toEqual(['p1']);
     });
 
-    const nextState = reducers.includeAllVisibleProjects(state);
+    it('does not change state when excluding only the anchor project is a no-op', () => {
+      const state = createState({
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1', _type: 'security' })],
+          ['p3', createProject({ _id: 'p3', _type: 'security' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p3'],
+        visibleProjectIds: ['p1', 'p3'],
+        selectedProjectIds: ['p3'],
+        excludedOverrides: ['p1'],
+      });
 
-    expect(nextState.excludedOverrides).toEqual([]);
-  });
+      const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
 
-  it('excludes all other visible projects when including only the anchor project', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      excludedOverrides: ['p3'],
+      expect(nextState).toBe(state);
     });
-
-    const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState.excludedOverrides).toEqual(['p3']);
-  });
-
-  it('un-excludes the anchor and excludes other visible projects when anchor was excluded', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p2', createProject({ _id: 'p2', _type: 'observability' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      excludedOverrides: ['p1', 'p3'],
-    });
-
-    const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState.excludedOverrides).toEqual(['p3']);
-  });
-
-  it('does not change state when including only the anchor project is a no-op', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      excludedOverrides: ['p3'],
-    });
-
-    const nextState = reducers.includeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState).toBe(state);
-  });
-
-  it('does not clear project filters when there are no filter expressions', () => {
-    const state = createState({
-      excludedOverrides: ['p2'],
-    });
-
-    const nextState = reducers.clearProjectFilters(state);
-
-    expect(nextState).toBe(state);
-  });
-
-  it('does not exclude the last included visible project', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1' })],
-        ['p2', createProject({ _id: 'p2' })],
-      ]),
-      visibleProjectIds: ['p1', 'p2'],
-      selectedProjects: ['p1'],
-      excludedOverrides: ['p2'],
-    });
-
-    const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
-
-    expect(nextState).toBe(state);
-  });
-
-  it('excludes a visible project when more than one visible project is included', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1' })],
-        ['p2', createProject({ _id: 'p2' })],
-      ]),
-      visibleProjectIds: ['p1', 'p2'],
-      selectedProjects: ['p1', 'p2'],
-    });
-
-    const nextState = reducers.excludeSelectedProjects(state, { projects: ['p1'] });
-
-    expect(nextState.excludedOverrides).toEqual(['p1']);
-  });
-
-  it('excludes the anchor project and includes all other visible projects', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      selectedProjects: ['p1', 'p3'],
-      excludedOverrides: [],
-    });
-
-    const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState.excludedOverrides).toEqual(['p1']);
-  });
-
-  it('includes other visible projects when the anchor project is already excluded', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      selectedProjects: ['p3'],
-      excludedOverrides: ['p1', 'p3'],
-    });
-
-    const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState.excludedOverrides).toEqual(['p1']);
-  });
-
-  it('does not change state when excluding only the anchor project is a no-op', () => {
-    const state = createState({
-      availableProjects: new Map([
-        ['p1', createProject({ _id: 'p1', _type: 'security' })],
-        ['p3', createProject({ _id: 'p3', _type: 'security' })],
-      ]),
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      filteredProjectIds: ['p1', 'p3'],
-      visibleProjectIds: ['p1', 'p3'],
-      selectedProjects: ['p3'],
-      excludedOverrides: ['p1'],
-    });
-
-    const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
-
-    expect(nextState).toBe(state);
   });
 });

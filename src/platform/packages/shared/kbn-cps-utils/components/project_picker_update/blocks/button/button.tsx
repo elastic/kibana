@@ -62,7 +62,7 @@ export const ProjectPickerButton = ({
   }
 
   const { state } = context;
-  const filteredProjectsCount = state.selectedProjects.length;
+  const filteredProjectsCount = state.selectedProjectIds.length;
   const totalProjectsCount = state.availableProjects.size;
 
   const allProjectsSelected = filteredProjectsCount === totalProjectsCount;

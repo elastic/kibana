@@ -11,6 +11,7 @@ import React, { type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { faker } from '@faker-js/faker';
 import { action } from '@storybook/addon-actions';
+import type { CPSProject } from '../../../../types';
 import { ProjectPickerList } from './list';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 
@@ -19,11 +20,22 @@ export default {
   component: ProjectPickerList,
 } satisfies Meta<typeof ProjectPickerList>;
 
+const createProjects = (projectCount: number = 100): CPSProject[] => {
+  return Array.from({ length: projectCount }, () => ({
+    _id: faker.string.uuid(),
+    _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+    _alias: faker.company.name(),
+    _organisation: faker.company.name(),
+    _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+    _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+  }));
+};
+
 export const ProjectPickerListItemStory: StoryObj<
   Pick<
     ProjectPickerStateProviderProps,
     | 'availableProjects'
-    | 'isReadOnly'
+    | 'controlsState'
     | 'defaultProjectRoutingGetter'
     | 'currentProjectRoutingGetter'
     | 'onProjectRoutingChange'
@@ -32,23 +44,9 @@ export const ProjectPickerListItemStory: StoryObj<
     ComponentProps<typeof ProjectPickerList>
 > = {
   name: 'ProjectPickerListItem',
-  argTypes: {
-    isReadOnly: {
-      control: {
-        type: 'boolean',
-      },
-    },
-  },
   args: {
-    isReadOnly: false,
-    availableProjects: Array.from({ length: 10 }, () => ({
-      _id: faker.string.uuid(),
-      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
-      _alias: faker.company.name(),
-      _organisation: faker.company.name(),
-      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
-      _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
-    })),
+    controlsState: 'enabled',
+    availableProjects: createProjects(10),
     defaultProjectRoutingGetter: () => '_alias:origin',
     currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
@@ -58,7 +56,7 @@ export const ProjectPickerListItemStory: StoryObj<
   },
   render: ({
     availableProjects,
-    isReadOnly,
+    controlsState,
     defaultProjectRoutingGetter,
     currentProjectRoutingGetter,
     onProjectRoutingChange,
@@ -67,7 +65,56 @@ export const ProjectPickerListItemStory: StoryObj<
   }) => (
     <ProjectPickerStateProvider
       availableProjects={availableProjects}
-      isReadOnly={isReadOnly}
+      controlsState={controlsState}
+      originProjectId={originProjectId}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      onProjectRoutingChange={onProjectRoutingChange}
+      fetchProjectsByRouting={async () => ({
+        origin: availableProjects[0] ?? null,
+        linkedProjects: availableProjects.slice(1),
+      })}
+    >
+      <ProjectPickerList {...props} />
+    </ProjectPickerStateProvider>
+  ),
+};
+
+export const ProjectPickerListItemHiddenControlsStory: StoryObj<
+  Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'controlsState'
+    | 'defaultProjectRoutingGetter'
+    | 'currentProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'originProjectId'
+  > &
+    ComponentProps<typeof ProjectPickerList>
+> = {
+  name: 'ProjectPickerListItemHiddenControls',
+  args: {
+    controlsState: 'hidden',
+    availableProjects: createProjects(10),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
+  },
+  render: ({
+    availableProjects,
+    controlsState,
+    defaultProjectRoutingGetter,
+    currentProjectRoutingGetter,
+    onProjectRoutingChange,
+    originProjectId,
+    ...props
+  }) => (
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      controlsState={controlsState}
       originProjectId={originProjectId}
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       currentProjectRoutingGetter={currentProjectRoutingGetter}

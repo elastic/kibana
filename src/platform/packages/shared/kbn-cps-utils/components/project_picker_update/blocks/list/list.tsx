@@ -45,17 +45,21 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
   const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
 
   const selectedProjectIdsSet = useMemo(
-    () => new Set(state.selectedProjects),
-    [state.selectedProjects]
+    () => new Set(state.selectedProjectIds),
+    [state.selectedProjectIds]
   );
 
-  const visibleProjects = useMemo(
-    () =>
-      state.visibleProjectIds
-        .map((id) => state.availableProjects.get(id))
-        .filter((project): project is CPSProject => project != null),
-    [state.visibleProjectIds, state.availableProjects]
-  );
+  const projectsToRender = useMemo(() => {
+    // when controls are hidden, we want to show only the selected projects
+    return (state.controlsState === 'hidden' ? state.selectedProjectIds : state.visibleProjectIds)
+      .map((id) => state.availableProjects.get(id))
+      .filter((project): project is CPSProject => project != null);
+  }, [
+    state.controlsState,
+    state.selectedProjectIds,
+    state.visibleProjectIds,
+    state.availableProjects,
+  ]);
 
   const closePopover = useCallback(() => {
     buttonRef.current = null;
@@ -163,7 +167,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
       ) : null}
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
-          {visibleProjects.map((project) => {
+          {projectsToRender.map((project) => {
             const isSelected = selectedProjectIdsSet.has(project._id);
 
             return (
@@ -171,7 +175,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
                 <ProjectPickerListItem
                   isSelected={isSelected}
                   isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}
-                  isReadOnly={state.isReadOnly}
+                  controlsState={state.controlsState}
                   isOriginProject={state.originProjectId === project._id}
                   toggleDisabledMessage={toggleDisabledMessage}
                   project={project}

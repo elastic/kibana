@@ -36,9 +36,9 @@ export const computeVisibleProjectIds = (
 };
 
 export const getIncludedVisibleProjectIds = (
-  state: Pick<ProjectPickerState, 'visibleProjectIds' | 'selectedProjects'>
+  state: Pick<ProjectPickerState, 'visibleProjectIds' | 'selectedProjectIds'>
 ): string[] => {
-  const selected = new Set(state.selectedProjects);
+  const selected = new Set(state.selectedProjectIds);
   return state.visibleProjectIds.filter((id) => selected.has(id));
 };
 
@@ -67,7 +67,7 @@ export const projectPickerDerivatives = [
     compute: (state: ProjectPickerState) => computeVisibleProjectIds(state),
   },
   {
-    key: 'selectedProjects',
+    key: 'selectedProjectIds',
     compute: (state: ProjectPickerState) => computeSelectedProjects(state),
   },
   {
@@ -95,7 +95,7 @@ export const projectPickerDerivatives = [
           return acc;
         }, [] as FilterExpressionValue[]),
         excludedProjectIds: state.excludedOverrides,
-        selectedProjectIds: state.selectedProjects,
+        selectedProjectIds: state.selectedProjectIds,
         projectRoutingStrategy: state.projectRoutingStrategy,
       }),
   },

@@ -94,7 +94,7 @@ export function ProjectPickerListItemTagsPopover({
                     css={styles.projectTagsBadge}
                     isDisabled={isAlreadyAdded}
                     filter={filter}
-                    {...(state.isReadOnly
+                    {...(state.controlsState !== 'enabled'
                       ? {
                           iconType: 'empty',
                           color: 'default',

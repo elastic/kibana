@@ -44,6 +44,7 @@ const createFilterExpressions = (
   );
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
+  controlsState: 'enabled',
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
@@ -55,7 +56,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   isFilterSearchLoading: false,
   filterSearchError: null,
   visibleProjectIds: [],
-  selectedProjects: [],
+  selectedProjectIds: [],
   currentProjectRouting: '',
   isUsingSpaceDefaults: false,
   ...overrides,
@@ -102,7 +103,7 @@ describe('ProjectPickerFrameBody', () => {
     jest.clearAllMocks();
   });
 
-  describe('standard mode', () => {
+  describe('enabled controls state', () => {
     it('shows the add-filter control when filters are applied', () => {
       renderBody({
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
@@ -132,9 +133,9 @@ describe('ProjectPickerFrameBody', () => {
     });
   });
 
-  describe('read-only mode', () => {
+  describe('disabled controls state', () => {
     it('hides the filter box when there are no filter expressions', () => {
-      renderBody({ isReadOnly: true });
+      renderBody({ controlsState: 'disabled' });
 
       expect(screen.queryByTestId('projectPickerFilterDisplayContainer')).not.toBeInTheDocument();
       expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
@@ -143,12 +144,21 @@ describe('ProjectPickerFrameBody', () => {
 
     it('shows filter display but not the add-filter control when filters are applied', () => {
       renderBody({
-        isReadOnly: true,
+        controlsState: 'disabled',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       });
 
       expect(screen.getByTestId('projectPickerFilterDisplayContainer')).toBeInTheDocument();
       expect(screen.queryByTestId('projectPickerFilterDisplayAddFilterBtn')).toBeDisabled();
+      expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
+    });
+  });
+
+  describe('hidden controls state', () => {
+    it('hides the entire header when controls are hidden', () => {
+      renderBody({ controlsState: 'hidden' });
+
+      expect(screen.queryByTestId('projectPickerFrameBodyHeader')).not.toBeInTheDocument();
       expect(screen.getByTestId('bodyChild')).toBeInTheDocument();
     });
   });

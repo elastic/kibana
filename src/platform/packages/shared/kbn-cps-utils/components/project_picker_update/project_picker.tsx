@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef } from 'react';
+import React, { useRef, type ComponentProps } from 'react';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
 import {
   ProjectPickerStateProvider,
@@ -16,7 +16,7 @@ import {
 
 export function ProjectPicker({
   availableProjects,
-  isReadOnly,
+  controlsState,
   originProjectId,
   onProjectRoutingChange,
   defaultProjectRoutingGetter,
@@ -31,7 +31,7 @@ export function ProjectPicker({
       defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       currentProjectRoutingGetter={currentProjectRoutingGetter}
       availableProjects={availableProjects}
-      isReadOnly={isReadOnly}
+      controlsState={controlsState}
       originProjectId={originProjectId}
       onProjectRoutingChange={onProjectRoutingChange}
       fetchProjectsByRouting={fetchProjectsByRouting}
@@ -43,3 +43,5 @@ export function ProjectPicker({
     </ProjectPickerStateProvider>
   );
 }
+
+export type ProjectPickerProps = ComponentProps<typeof ProjectPicker>;

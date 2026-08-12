@@ -276,7 +276,8 @@ export function ProjectPickerFilterDisplay({
         <EuiFlexItem css={styles.filterBadgesContainer}>
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterEntries.map(([id, entry]) => {
-              const isNonInteractive = id === currentFilterInputId || state.isReadOnly;
+              const isNonInteractive =
+                id === currentFilterInputId || state.controlsState === 'disabled';
 
               return (
                 <EuiFlexItem key={id} grow={false}>

@@ -23,9 +23,10 @@ import { i18n } from '@kbn/i18n';
 import capitalize from 'lodash/capitalize';
 import type { CPSProject } from '../../../../../types';
 import { getProjectTags, getSolutionIcon } from '../../../../utils';
+import type { ProjectPickerStateProviderProps } from '../../../state';
 
 export interface ProjectPickerListItemProps {
-  isReadOnly?: boolean;
+  controlsState: NonNullable<ProjectPickerStateProviderProps['controlsState']>;
   isSelected: boolean;
   isToggleDisabled?: boolean;
   isOriginProject: boolean;
@@ -37,7 +38,7 @@ export interface ProjectPickerListItemProps {
 }
 
 export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
-  isReadOnly,
+  controlsState,
   isSelected,
   isToggleDisabled = false,
   isOriginProject,
@@ -55,7 +56,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   const switchControl = (
     <EuiSwitch
       checked={isSelected}
-      disabled={isToggleDisabled || isReadOnly}
+      disabled={isToggleDisabled || controlsState === 'disabled'}
       onChange={(evt) => onToggle(project, evt.target.checked)}
       label={i18n.translate('cpsUtils.projectPicker.listItem.toggleLabel', {
         defaultMessage: 'Include project {projectName}',
@@ -130,36 +131,38 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {isToggleDisabled ? (
-              <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
-                {switchControl}
+      {controlsState === 'hidden' ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {isToggleDisabled ? (
+                <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
+                  {switchControl}
+                </EuiToolTip>
+              ) : (
+                switchControl
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                id={contextMenuTooltipId}
+                content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
+                  defaultMessage: 'Show context menu',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="ellipsis"
+                  isDisabled={controlsState === 'disabled'}
+                  onClick={onContextMenu.bind(null, project)}
+                  aria-labelledby={contextMenuTooltipId}
+                  data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
+                  color="text"
+                />
               </EuiToolTip>
-            ) : (
-              switchControl
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              id={contextMenuTooltipId}
-              content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
-                defaultMessage: 'Show context menu',
-              })}
-            >
-              <EuiButtonIcon
-                iconType="ellipsis"
-                isDisabled={isReadOnly}
-                onClick={onContextMenu.bind(null, project)}
-                aria-labelledby={contextMenuTooltipId}
-                data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
-                color="text"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 });

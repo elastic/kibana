@@ -16,6 +16,7 @@ import {
   ProjectPickerFrameFooter,
 } from './partials';
 import { projectPickerFrameStyles } from './frame.styles';
+import { useProjectPickerState } from '../../state';
 
 interface ProjectPickerFrameProps {
   scrollContainerRef?: RefObject<HTMLDivElement>;
@@ -31,6 +32,7 @@ export function ProjectPickerFrame({
 }: PropsWithChildren<ProjectPickerFrameProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = projectPickerFrameStyles({ euiTheme });
+  const state = useProjectPickerState();
 
   return (
     <EuiSplitPanel.Outer>
@@ -42,9 +44,11 @@ export function ProjectPickerFrame({
           {children}
         </ProjectPickerFrameBody>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner color="subdued">
-        <ProjectPickerFrameFooter />
-      </EuiSplitPanel.Inner>
+      {state.controlsState !== 'hidden' && (
+        <EuiSplitPanel.Inner color="subdued">
+          <ProjectPickerFrameFooter />
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 }

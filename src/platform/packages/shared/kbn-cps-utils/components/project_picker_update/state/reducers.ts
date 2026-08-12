@@ -29,8 +29,10 @@ export interface FilterEntry {
   enabled: boolean;
 }
 
+export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
+
 export interface ProjectPickerStoredState {
-  isReadOnly?: boolean;
+  controlsState: ProjectPickerControlsState;
   originProjectId?: string;
   defaultProjectRouting: ProjectRouting;
   projectRoutingStrategy: ProjectRoutingStrategy;
@@ -64,7 +66,7 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
    * This is the list of projects that currently displayed in the list, it is a subset of {@link ProjectPickerState.visibleProjectIds},
    * considering if the user has made any overrides to exclude certain projects from the list.
    */
-  selectedProjects: string[];
+  selectedProjectIds: string[];
 }
 
 const addOverrides = (overrides: string[], projectIds: string[]): string[] => {
@@ -82,7 +84,7 @@ export function createStoreReducers() {
      */
     _setStoreState(
       _state: ProjectPickerState,
-      payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
+      payload: Pick<ProjectPickerState, 'availableProjects'> & {
         defaultProjectRouting?: ProjectRouting;
         filterExpressions?: FilterExpressionValue[];
         excludedOverrides?: string[];
@@ -102,7 +104,6 @@ export function createStoreReducers() {
 
       return {
         ..._state,
-        isReadOnly: payload.isReadOnly,
         availableProjects: payload.availableProjects,
         ...(payload.defaultProjectRouting !== undefined
           ? { defaultProjectRouting: payload.defaultProjectRouting }
@@ -114,10 +115,26 @@ export function createStoreReducers() {
         filteredProjectIds: [],
         isFilterSearchLoading: false,
         filterSearchError: null,
-        selectedProjects: [],
+        selectedProjectIds: [],
         visibleProjectIds: [],
         currentProjectRouting: '',
         isUsingSpaceDefaults: false,
+      };
+    },
+    /**
+     * Updates only the controls-state flag, without touching any filter/selection state.
+     */
+    _setControlsState(
+      state: ProjectPickerState,
+      payload: Pick<ProjectPickerState, 'controlsState'>
+    ) {
+      if (state.controlsState === payload.controlsState) {
+        return state;
+      }
+
+      return {
+        ...state,
+        controlsState: payload.controlsState,
       };
     },
     /**

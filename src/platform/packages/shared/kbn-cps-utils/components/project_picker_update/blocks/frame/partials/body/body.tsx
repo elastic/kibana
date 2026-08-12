@@ -39,6 +39,10 @@ export function ProjectPickerFrameBodyHeader() {
 
   const state = useProjectPickerState();
 
+  const isReadOnly = useMemo(() => {
+    return state.controlsState === 'disabled';
+  }, [state.controlsState]);
+
   const showNoMatchingProjectsWarningCallout = useMemo(() => {
     return getIncludedVisibleProjectIds(state).length === 0 && state.filterExpressions.size > 0;
   }, [state]);
@@ -58,8 +62,13 @@ export function ProjectPickerFrameBodyHeader() {
   }, []);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" css={styles.bodyContainer}>
-      {state.isReadOnly && (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={styles.bodyContainer}
+      data-test-subj="projectPickerFrameBodyHeader"
+    >
+      {isReadOnly && (
         <EuiFlexItem>
           <KbnInfoCallout
             announceOnMount={false}
@@ -102,7 +111,7 @@ export function ProjectPickerFrameBodyHeader() {
             css={styles.filterCreateButton}
             data-test-subj="projectPickerFilterDisplayAddFilterBtn"
             flush="both"
-            disabled={state.isReadOnly}
+            disabled={isReadOnly}
             onClick={handleFilterCreateClick}
           >
             <EuiText size="xs">
@@ -132,6 +141,7 @@ export function ProjectPickerFrameBody({
 }: PropsWithChildren<ProjectPickerFrameBodyProps>) {
   const { euiTheme } = useEuiTheme();
   const styles = bodyStyles({ euiTheme });
+  const state = useProjectPickerState();
 
   return (
     <EuiFlexGroup
@@ -140,9 +150,11 @@ export function ProjectPickerFrameBody({
       css={css([styles.bodyContainer, { maxHeight }])}
       ref={scrollContainerRef}
     >
-      <EuiFlexItem css={styles.filterBoxWrapper}>
-        <ProjectPickerFrameBodyHeader />
-      </EuiFlexItem>
+      {state.controlsState !== 'hidden' && (
+        <EuiFlexItem css={styles.filterBoxWrapper}>
+          <ProjectPickerFrameBodyHeader />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>
   );

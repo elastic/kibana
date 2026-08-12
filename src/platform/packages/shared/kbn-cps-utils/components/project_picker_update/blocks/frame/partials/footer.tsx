@@ -17,13 +17,13 @@ export function ProjectPickerFrameFooter() {
   const state = useProjectPickerState();
 
   const { includedCount, excludedCount } = useMemo(() => {
-    const selected = new Set(state.selectedProjects);
+    const selected = new Set(state.selectedProjectIds);
     const included = state.visibleProjectIds.filter((id) => selected.has(id)).length;
     return {
       includedCount: included,
       excludedCount: state.visibleProjectIds.length - included,
     };
-  }, [state.visibleProjectIds, state.selectedProjects]);
+  }, [state.visibleProjectIds, state.selectedProjectIds]);
 
   const includeAllVisibleProjects = useCallback(() => {
     actions.includeAllVisibleProjects();

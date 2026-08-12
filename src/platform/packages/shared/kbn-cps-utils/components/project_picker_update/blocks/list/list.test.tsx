@@ -87,7 +87,7 @@ const renderComponent = (
 };
 
 const ProjectPickerListWithScrollContainer = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>>
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'controlsState'>>
 ) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +101,7 @@ const ProjectPickerListWithScrollContainer = (
 };
 
 const renderComponentWithScrollContainer = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'controlsState'>> = {}
 ) => {
   return render(<ProjectPickerListWithScrollContainer {...props} />);
 };
@@ -397,32 +397,53 @@ describe('ProjectPickerList', () => {
     });
   });
 
-  describe('read-only mode', () => {
+  describe('controls state', () => {
     const taggedProjects = [
       createProject('project-a', { env: 'prod-a' }),
       createProject('project-b', { env: 'prod-b' }),
     ];
 
-    const renderReadOnlyList = () =>
-      renderComponent({ availableProjects: taggedProjects, isReadOnly: true });
+    describe('disabled controls state', () => {
+      it('renders inclusion switches and per-project context menus as disabled', () => {
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'disabled',
+        });
 
-    it('does not render inclusion switches or per-project context menus', () => {
-      renderReadOnlyList();
+        expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
+        expect(screen.queryByTestId('projectPickerListItemContextMenu-project-b')).toBeDisabled();
+      });
 
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
-      expect(screen.queryByTestId('projectPickerListItemContextMenu-project-b')).toBeDisabled();
+      it('still opens the tags popover when the tags badge is clicked', async () => {
+        const user = userEvent.setup();
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'disabled',
+        });
+
+        const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+        await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
+
+        await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
+      });
     });
 
-    it('still opens the tags popover when the tags badge is clicked', async () => {
-      const user = userEvent.setup();
-      renderReadOnlyList();
+    describe('hidden controls state', () => {
+      it('does not render the project inclusion switches', () => {
+        renderComponent({
+          availableProjects: taggedProjects,
+          controlsState: 'hidden',
+        });
 
-      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
-      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
-
-      await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('projectPickerListItemSwitch-project-a')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId('projectPickerListItemSwitch-project-b')
+        ).not.toBeInTheDocument();
+      });
     });
   });
 });

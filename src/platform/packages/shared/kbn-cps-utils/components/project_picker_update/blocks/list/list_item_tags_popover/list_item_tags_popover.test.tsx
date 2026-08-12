@@ -45,6 +45,7 @@ const envProdAExpression = {
 } as const;
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
+  controlsState: 'enabled',
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
@@ -56,7 +57,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   isFilterSearchLoading: false,
   filterSearchError: null,
   visibleProjectIds: [defaultProject._id],
-  selectedProjects: [defaultProject._id],
+  selectedProjectIds: [defaultProject._id],
   currentProjectRouting: '',
   isUsingSpaceDefaults: false,
   ...overrides,
@@ -181,9 +182,9 @@ describe('ProjectPickerListItemTagsPopover', () => {
     expect(within(popover).getByRole('button', { name: 'Add filter to project' })).toBeDisabled();
   });
 
-  it('does not render an add-filter button in read-only mode', () => {
+  it('does not render an add-filter button when controls state is disabled', () => {
     // Opening the popover from the list in read-only is covered in list.test.tsx.
-    renderTagsPopover({ isReadOnly: true });
+    renderTagsPopover({ controlsState: 'disabled' });
 
     const popover = screen.getByLabelText('Project tags');
     expect(within(popover).getByText('env:prod-a')).toBeInTheDocument();

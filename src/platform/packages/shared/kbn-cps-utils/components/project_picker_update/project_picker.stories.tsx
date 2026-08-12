@@ -11,9 +11,11 @@ import React, { type ComponentProps } from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { faker } from '@faker-js/faker';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
 
-const createProjects = (projectCount: number = 100) => {
+const createProjects = (projectCount: number = 100): CPSProject[] => {
   return Array.from({ length: projectCount }, () => {
     const tagKeys = ['configVersion', 'costCenter', 'environment'] as const;
     const tagsValueMap: Record<(typeof tagKeys)[number], string[]> = {
@@ -46,56 +48,67 @@ export default {
   title: 'Project Picker/Picker',
 } satisfies Meta<typeof ProjectPicker>;
 
+const projectPickerStoryProjects = createProjects();
+
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPicker',
   argTypes: {
-    isReadOnly: {
-      control: {
-        type: 'boolean',
-      },
-    },
     projectRoutingStrategy: {
       control: 'select',
       options: ['dynamic', 'snapshot'],
     },
   },
   args: {
-    isReadOnly: false,
     projectRoutingStrategy: 'dynamic',
-    availableProjects: createProjects(),
+    availableProjects: projectPickerStoryProjects,
     defaultProjectRoutingGetter: () => '_alias:origin',
     currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
-    fetchProjectsByRouting: async (routing) => {
+    fetchProjectsByRouting: async (routing: ProjectRouting) => {
       action('fetchProjectsByRouting')(routing);
-      return { origin: null, linkedProjects: [] };
+
+      return {
+        origin: faker.helpers.arrayElement([projectPickerStoryProjects[0], null]),
+        // TODO: attempt to filter from the actual routing value on the client
+        linkedProjects: faker.helpers.arrayElements(projectPickerStoryProjects, {
+          min: 10,
+          max: 50,
+        }),
+      };
     },
-    get originProjectId(): string {
-      return this.availableProjects![0]._id;
-    },
+    originProjectId: projectPickerStoryProjects[0]._id,
   },
   render: (props) => <ProjectPicker {...props} />,
 };
 
+const projectPickerReadOnlyStoryProjects = createProjects(50);
+
 export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPickerReadOnly',
   argTypes: {
-    isReadOnly: {
-      control: {
-        type: 'boolean',
-      },
+    controlsState: {
+      control: 'select',
+      options: ['disabled', 'enabled', 'hidden'],
     },
   },
   args: {
-    isReadOnly: true,
-    availableProjects: createProjects(100),
+    controlsState: 'disabled',
+    availableProjects: projectPickerReadOnlyStoryProjects,
     defaultProjectRoutingGetter: () => '_alias:origin',
     currentProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
-    fetchProjectsByRouting: async () => ({ origin: null, linkedProjects: [] }),
-    get originProjectId(): string {
-      return this.availableProjects![0]._id;
+    fetchProjectsByRouting: async (routing: ProjectRouting) => {
+      action('fetchProjectsByRouting')(routing);
+
+      return {
+        origin: faker.helpers.arrayElement([projectPickerReadOnlyStoryProjects[0], null]),
+        linkedProjects: faker.helpers.arrayElements(projectPickerReadOnlyStoryProjects, {
+          min: 5,
+          max: 35,
+        }),
+      };
     },
+    originProjectId: projectPickerReadOnlyStoryProjects[0]._id,
   },
   render: (props) => <ProjectPicker {...props} />,
 };

@@ -144,7 +144,7 @@ export const ProjectPicker = ({
       availableProjects={availableProjects}
       onProjectRoutingChange={onProjectRoutingChange}
       fetchProjectsByRouting={fetchProjectsByRouting}
-      isReadOnly={isReadonly}
+      controlsState={isReadonly ? 'disabled' : 'enabled'}
     >
       <EuiPopover
         button={projectPickerPopoverTriggerButton}
