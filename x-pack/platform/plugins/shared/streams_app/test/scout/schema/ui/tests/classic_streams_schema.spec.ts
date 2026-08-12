@@ -106,7 +106,7 @@ test.describe(
         { columnName: 'name', rowIndex: 0, value: sourceFieldName },
         { columnName: 'status', rowIndex: 0, value: 'Mapped' },
       ]) {
-        await pageObjects.streams.expectCellValueContains(exp);
+        await pageObjects.streams.expectSchemaEditorCellValueContains(exp);
       }
 
       // Verify copy_to parameter was saved by opening the view flyout
@@ -120,7 +120,7 @@ test.describe(
       }
 
       // Get the code block value and verify it contains copy_to
-      const codeValue = await pageObjects.streams.advancedSettingsCodeBlock.getCodeValue();
+      const codeValue = (await page.locator('code.euiCodeBlock__code').textContent())?.trim() ?? '';
       expect(codeValue).toContain('copy_to');
       expect(codeValue).toContain(targetFieldName);
     });
@@ -145,17 +145,17 @@ test.describe(
       await pageObjects.streams.expectSchemaEditorTableVisible();
 
       await pageObjects.streams.searchFields(fieldName);
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'name',
         rowIndex: 0,
         value: fieldName,
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'type',
         rowIndex: 0,
         value: 'geo_point',
       });
-      await pageObjects.streams.expectCellValueContains({
+      await pageObjects.streams.expectSchemaEditorCellValueContains({
         columnName: 'status',
         rowIndex: 0,
         value: 'Mapped',
