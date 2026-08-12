@@ -29,7 +29,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
     'enables share/export for a valid config and preserves filters in the shared URL',
     async ({ page, pageObjects, context, kbnUrl }) => {
       spaceTest.setTimeout(120_000);
-      const { lens, queryBar } = pageObjects;
+      const { lens, queryBar, filterBar, toasts } = pageObjects;
 
       await spaceTest.step('share disabled on empty visualization', async () => {
         await lens.waitForLensApp();
@@ -67,20 +67,8 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
 
       await spaceTest.step('preserve filter and query when sharing URL', async () => {
         // Dismiss save/share toasts first — they sit over the filter bar and intercept clicks.
-        for (const button of await page.testSubj.locator('toastCloseButton').all()) {
-          await button.click();
-        }
-        // Prefer EUI comboBox helpers over FilterBar.typeWithDelay: under parallel load the
-        // operator combo input is "stable" but click still times out (overlay / remount race).
-        await page.testSubj.click('addFilter');
-        await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
-        await page.components.comboBox('filterFieldSuggestionList').setSelectedOptions(['bytes']);
-        await page.components.comboBox('filterOperatorList').setSelectedOptions(['is']);
-        const valueInput = page.testSubj.locator('filterParams').locator('input');
-        await valueInput.fill('1');
-        await valueInput.press('Enter');
-        await page.testSubj.click('saveFilter');
-        await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
+        await toasts.dismissAll();
+        await filterBar.addFilter({ field: 'bytes', operator: 'is', value: '1' });
         await expect(page.testSubj.locator('~filter')).toHaveText(['bytes: 1']);
 
         await queryBar.setQuery('host.keyword www.elastic.co');

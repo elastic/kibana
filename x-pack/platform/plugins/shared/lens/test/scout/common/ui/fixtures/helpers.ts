@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { extendPlaywrightPage, KibanaCodeEditorWrapper, QueryBar } from '@kbn/scout';
+import {
+  extendPlaywrightPage,
+  KibanaCodeEditorWrapper,
+  QueryBar,
+  ContentListWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, ScoutPage } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
@@ -18,7 +24,6 @@ import {
 } from './constants';
 
 type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
-
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
@@ -174,7 +179,7 @@ export async function waitForLensCsvContent(
  */
 export async function openSharedLensUrl(options: {
   context: { newPage: () => Promise<PlaywrightPage> };
-  kbnUrl: Parameters<typeof extendPlaywrightPage>[0]['kbnUrl'];
+  kbnUrl: KibanaUrl;
   url: string;
   chartTestSubj?: string;
 }): Promise<{ page: ScoutPage; queryBar: QueryBar }> {

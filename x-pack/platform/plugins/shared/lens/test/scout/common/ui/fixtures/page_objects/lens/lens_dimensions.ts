@@ -30,6 +30,7 @@ export class LensDimensions {
   private readonly timeShift;
   private readonly timeShiftComboInput;
   private readonly timeShiftSearchInput;
+  private readonly timeShiftClearButton;
   /** Workspace error one-click fix (e.g. terms → filters for time shift). */
   readonly errorFixAction;
 
@@ -40,6 +41,7 @@ export class LensDimensions {
     this.timeShiftSearchInput = this.timeShift.locator(
       'input[data-test-subj="comboBoxSearchInput"]'
     );
+    this.timeShiftClearButton = this.timeShift.locator('[data-test-subj="comboBoxClearButton"]');
     this.errorFixAction = this.page.testSubj.locator('errorFixAction');
   }
 
@@ -367,16 +369,16 @@ export class LensDimensions {
     await this.timeShiftComboInput.click();
     // Prefer the EUI clear control — Backspace alone often leaves the humanized selection
     // ("6 hours ago (6h)") when the options list is open.
-    const clearButton = this.timeShift.locator('[data-test-subj="comboBoxClearButton"]');
-    await clearButton.waitFor({ state: 'visible' });
-    await clearButton.click();
+    await this.timeShiftClearButton.waitFor({ state: 'visible' });
+    await this.timeShiftClearButton.click();
     await this.page.waitForFunction(
       (testSubj) => {
         const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
         const inputEl = rootEl?.querySelector(
           'input[data-test-subj="comboBoxSearchInput"]'
         ) as HTMLInputElement | null;
-        return !inputEl?.value && !(rootEl?.textContent ?? '').match(/\d+\s*hours?\s*ago/i);
+        const text = rootEl?.textContent ?? '';
+        return !inputEl?.value && !/\d+\s*hours?\s*ago/i.test(text);
       },
       TIME_SHIFT_TEST_SUBJ,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }

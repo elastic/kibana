@@ -34,4 +34,12 @@ export class Toasts {
     await this.waitFor();
     await this.toast.closeAllToasts();
   }
+
+  /**
+   * Dismisses any visible toasts without waiting for one to appear.
+   * Use before clicks that toasts can intercept (e.g. top-nav Share).
+   */
+  async dismissAll() {
+    await this.toast.closeAllToasts();
+  }
 }

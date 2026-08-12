@@ -154,12 +154,13 @@ export class LensStyle {
     const dimensionLink = this.page.testSubj.locator(dimensionSelector);
     await dimensionLink.waitFor({ state: 'visible' });
     await dimensionLink.click();
+    // Color-mapping panel can lag after dimension open under parallel load.
     await this.closeDimensionEditorButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.openPalettePanelFlyout();
-    // Assignments prompt remounts with the palette panel; native click avoids stability flakes.
+    // Assignments prompt remounts with the palette panel; dispatchEvent avoids stability flakes.
     const addAll = this.page.testSubj.locator('lns-colorMapping-assignmentsPromptAddAll');
     await addAll.waitFor({ state: 'visible' });
-    await addAll.evaluate((el) => (el as HTMLElement).click());
+    await addAll.dispatchEvent('click');
     await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
     await this.page.testSubj.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
     await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
