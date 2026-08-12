@@ -41,6 +41,12 @@ export const createConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
+      // Persistent sub-agent creations: snapshot the parent's user + set the
+      // parent link. `parent_conversation_id` is the discriminator — the
+      // placeholder always has a `user` field set to an 'unknown' sentinel, so
+      // gating on that alone would incorrectly override the current user for
+      // regular conversation creations.
+      const isPersistentSubagentCreate = Boolean(conversation.parent_conversation_id);
       return conversationClient.create({
         id: conversation.id,
         title,
@@ -51,10 +57,8 @@ export const createConversation$ = ({
         status: roundCompletedEvent.data.round.status,
         read: false,
         rounds: [roundCompletedEvent.data.round],
-        // Snapshot parent's user + parent link when creating a child (persistent
-        // sub-agent). No-op for regular conversations (fields absent).
-        ...(conversation.user ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation_id
+        ...(isPersistentSubagentCreate && conversation.user ? { user: conversation.user } : {}),
+        ...(isPersistentSubagentCreate
           ? { parent_conversation_id: conversation.parent_conversation_id }
           : {}),
         ...(roundCompletedEvent.data.attachments
