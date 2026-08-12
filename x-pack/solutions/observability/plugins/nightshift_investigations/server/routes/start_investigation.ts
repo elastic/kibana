@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -17,8 +16,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     description: 'Triggers an investigation workflow for a given subject.',
   },
   security: {
+    // agentBuilder:write is required to start an investigation because the result is an Agent
+    // Builder conversation. A user without at least agentBuilder:read cannot interact with the
+    // resulting conversation, making the investigation useless to them. Requiring write (rather
+    // than read) reflects that starting an investigation creates a new conversation and consumes
+    // AI resources. When conversation templates land with their own privilege model, this should
+    // be revisited.
     authz: {
-      requiredPrivileges: ['all'],
+      requiredPrivileges: ['agentBuilder:write'],
     },
   },
   params: z.object({
