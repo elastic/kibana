@@ -66,15 +66,14 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             maxAgeInDays: input.maxAgeInDays ?? 90,
           },
         });
-        const data = response.data.data;
         return {
-          ipAddress: data.ipAddress,
-          abuseConfidenceScore: data.abuseConfidenceScore,
-          usageType: data.usageType,
-          isp: data.isp,
-          countryCode: data.countryCode,
-          totalReports: data.totalReports,
-          lastReportedAt: data.lastReportedAt ?? null,
+          ipAddress: response.data.data.ipAddress,
+          abuseConfidenceScore: response.data.data.abuseConfidenceScore,
+          usageType: response.data.data.usageType,
+          isp: response.data.data.isp,
+          countryCode: response.data.data.countryCode,
+          totalReports: response.data.data.totalReports,
+          lastReportedAt: response.data.data.lastReportedAt ?? null,
         };
       },
     },
@@ -137,19 +136,18 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             verbose: true,
           },
         });
-        const data = response.data.data;
         return {
-          ipAddress: data.ipAddress,
-          isPublic: data.isPublic,
-          ipVersion: data.ipVersion,
-          isWhitelisted: data.isWhitelisted,
-          abuseConfidenceScore: data.abuseConfidenceScore,
-          countryCode: data.countryCode,
-          usageType: data.usageType,
-          isp: data.isp,
-          domain: data.domain,
-          totalReports: data.totalReports,
-          lastReportedAt: data.lastReportedAt ?? null,
+          ipAddress: response.data.data.ipAddress,
+          isPublic: response.data.data.isPublic,
+          ipVersion: response.data.data.ipVersion,
+          isWhitelisted: response.data.data.isWhitelisted,
+          abuseConfidenceScore: response.data.data.abuseConfidenceScore,
+          countryCode: response.data.data.countryCode,
+          usageType: response.data.data.usageType,
+          isp: response.data.data.isp,
+          domain: response.data.data.domain,
+          totalReports: response.data.data.totalReports,
+          lastReportedAt: response.data.data.lastReportedAt ?? null,
         };
       },
     },
@@ -182,11 +180,10 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             maxAgeInDays: input.maxAgeInDays ?? 30,
           },
         });
-        const data = response.data.data;
         return {
-          networkAddress: data.networkAddress,
-          netmask: data.netmask,
-          reportedAddress: data.reportedAddress,
+          networkAddress: response.data.data.networkAddress,
+          netmask: response.data.data.netmask,
+          reportedAddress: response.data.data.reportedAddress,
         };
       },
     },
