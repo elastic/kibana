@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/cloud-chat-plugin",
+  "version": "9.6.0",
+  "private": true,
+  "license": "Elastic-2.0",
+  "kbnGenerated": true
+}
