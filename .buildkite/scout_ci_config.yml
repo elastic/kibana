@@ -65,6 +65,7 @@ plugins:
     - osquery
     - painless_lab
     - profiling
+    - rollup
     - remote_clusters
     - reindex_service
     - saved_objects_management

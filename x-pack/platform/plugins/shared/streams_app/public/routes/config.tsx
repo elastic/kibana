@@ -29,6 +29,11 @@ const timeRangeQueryParams = t.partial({
   rangeTo: t.string,
 });
 
+const flyoutParams = t.partial({
+  flyoutName: t.string,
+  flyoutTab: t.string,
+});
+
 /**
  * Extended query params for management routes that may include
  * additional feature-specific params (e.g., data quality page state).
@@ -122,9 +127,14 @@ const streamsAppRoutes = {
                   tab: t.string,
                 }),
               }),
-              t.partial({
-                query: timeRangeQueryParams,
-              }),
+              t.intersection([
+                t.partial({
+                  query: timeRangeQueryParams,
+                }),
+                t.partial({
+                  query: flyoutParams,
+                }),
+              ]),
             ]),
           },
         },
