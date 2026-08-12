@@ -44,7 +44,7 @@ describe('LeadIndexService', () => {
       expect(indexNames).toContain(scheduledIndex);
 
       const [{ options }] = mockCreateOrUpdateIndex.mock.calls[0];
-      expect(options.settings).toEqual({ hidden: true });
+      expect(options.settings).toEqual({ auto_expand_replicas: '0-1', hidden: true });
       expect(options.mappings.properties).toHaveProperty('id');
       expect(options.mappings.properties).toHaveProperty('observations');
     });
