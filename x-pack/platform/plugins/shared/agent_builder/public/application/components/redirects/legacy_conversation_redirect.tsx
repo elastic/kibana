@@ -16,13 +16,6 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
 import { RedirectLoading } from './redirect_loading';
 
-/**
- * Redirects legacy `/conversations/:conversationId` URLs to their agent-scoped
- * equivalent. We defer any fallback navigation that depends on
- * `useLastAgentId()` until the space-settings query has resolved so that
- * restricted users in a configured space are never routed to the plugin-wide
- * `elastic-ai-agent` fallback.
- */
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
   const navigate = useNavigate();
@@ -52,9 +45,6 @@ export const LegacyConversationRedirect: React.FC = () => {
         { replace: true }
       );
     } else if (isError && conversationId && isLastAgentIdReady) {
-      // Only fall back to the resolved "last agent" once we know whether the
-      // space has an assignment, otherwise a restricted user would briefly
-      // land on `elastic-ai-agent` and see the "Agent has been deleted" error.
       navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
         replace: true,
       });
