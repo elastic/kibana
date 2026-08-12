@@ -257,6 +257,11 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+
+  [
+    '.trello',
+    lazy(() => import(/* webpackChunkName: "connectorIcontrello" */ './specs/trello/icon')),
+  ],
   [
     '.workday',
     lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
@@ -351,5 +356,19 @@ export const ConnectorIconsMap: Map<
   [
     '.gcp_iam',
     lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
+  [
+    '.gcp_secret_manager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpSecretManager" */ './specs/gcp_secret_manager/icon'
+        )
+    ),
+  ],
+  ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
 ]);
