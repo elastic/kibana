@@ -101,6 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   // TODO: add a new service for loading archiver files similar to "getService('es')"
@@ -2962,23 +2963,29 @@ export default ({ getService }: FtrProviderContext) => {
           interval: '1h',
         };
 
-        const { previewId } = await previewRule({
-          supertest,
-          rule,
-        });
-        const previewAlerts = await getPreviewAlerts({
-          es,
-          previewId,
-          size: 10,
-        });
+        // The advanced setting write is durable, but a concurrent read can briefly
+        // repopulate the process-wide uiSettings cache with the pre-write (empty)
+        // value for up to its TTL, so the rule occasionally runs without the namespace
+        // filter. Retry the preview until the cache self-heals and the filter applies.
+        await retry.try(async () => {
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
 
-        // Should only get alerts from namespace1 and namespace2, not namespace3
-        expect(previewAlerts.length).toEqual(2);
-        // @ts-expect-error namespace does not exist
-        const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
-        expect(namespaces).toContain('namespace1');
-        expect(namespaces).toContain('namespace2');
-        expect(namespaces).not.toContain('namespace3');
+          // Should only get alerts from namespace1 and namespace2, not namespace3
+          expect(previewAlerts.length).toEqual(2);
+          // @ts-expect-error namespace does not exist
+          const namespaces = previewAlerts.map((alert) => alert._source?.data_stream?.namespace);
+          expect(namespaces).toContain('namespace1');
+          expect(namespaces).toContain('namespace2');
+          expect(namespaces).not.toContain('namespace3');
+        });
       });
 
       it('should include all documents when filter is not configured', async () => {
