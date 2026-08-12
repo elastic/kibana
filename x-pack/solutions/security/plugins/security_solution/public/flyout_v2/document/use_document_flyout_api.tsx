@@ -23,8 +23,8 @@ import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link'
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
@@ -152,8 +152,6 @@ export interface OpenDocumentCorrelationsParams {
   hit: DataTableRecord;
   /** Scope id for the document. */
   scopeId: string;
-  /** Whether the document is being displayed in a rule preview. */
-  isRulePreview: boolean;
   /** Callback to open one of the correlated alerts. */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
   /** Optional callback to open a correlated attack; when omitted the attack column is hidden. */
@@ -254,16 +252,13 @@ export interface DocumentFlyoutApi {
  * properties so call sites don't have to repeat them. `useOpenFlyout` also reports open/close
  * telemetry for every method below.
  *
- * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
- * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
- * legacy flyout when it is off.
- *
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -454,7 +449,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openSessionView = useCallback(
@@ -503,7 +498,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentEntities = useCallback(
@@ -538,25 +533,17 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentCorrelations = useCallback(
-    ({
-      hit,
-      scopeId,
-      isRulePreview,
-      onShowAlert,
-      onShowAttack,
-      origin,
-    }: OpenDocumentCorrelationsParams) => {
+    ({ hit, scopeId, onShowAlert, onShowAttack, origin }: OpenDocumentCorrelationsParams) => {
       const { documentId, indexName } = documentIdsFromHit(hit);
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentCorrelations,
         documentId,
         indexName,
         scopeId,
-        isRulePreview,
       });
       // A tool flyout opens with session:'start' — it is a root, not a child of the document, and
       // the document is not persisted alongside it. Closing the tool therefore clears the param
@@ -566,7 +553,6 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         <CorrelationsDetails
           hit={hit}
           scopeId={scopeId}
-          isRulePreview={isRulePreview}
           onShowAlert={onShowAlert}
           onShowAttack={onShowAttack}
         />,
@@ -587,7 +573,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentResponse = useCallback(
@@ -617,7 +603,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentThreatIntelligence = useCallback(
@@ -651,7 +637,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentPrevalence = useCallback(
@@ -707,7 +693,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose, isInSecurityApp, renderFlyoutLink]
+    [
+      open,
+      defaultToolsFlyoutProperties,
+      historyKey,
+      writeOnOpen,
+      buildOnClose,
+      isInSecurityApp,
+      renderFlyoutLink,
+    ]
   );
 
   const openDocumentInvestigationGuide = useCallback(
@@ -741,7 +735,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentGraph = useCallback(
@@ -780,7 +774,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

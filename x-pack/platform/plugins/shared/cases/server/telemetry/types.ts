@@ -96,15 +96,31 @@ export interface FileAttachmentAggsResult {
   topMimeTypes: Buckets<string>;
 }
 
-export interface CasesTelemetryWithAlertsAggsByOwnerResults {
-  by_owner: {
-    buckets: Array<
-      ReferencesAggregation & {
-        key: string;
-        doc_count: number;
-      }
-    >;
+export interface CasesWithAlertsAggs {
+  withAlerts: {
+    doc_count: number;
+    byOwner: { buckets: Array<{ key: string; doc_count: number }> };
   };
+}
+
+export interface CountsAndMaxAlertsAggRes {
+  by_owner: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      counts: AlertBuckets;
+      uniqueAlertCommentsCount: {
+        value: number;
+      };
+    }>;
+  };
+}
+
+export interface AlertCounts {
+  total: number;
+  daily: number;
+  weekly: number;
+  monthly: number;
 }
 
 export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
@@ -124,9 +140,8 @@ export interface AttachmentFrameworkAggsResult {
   persistableReferenceTypes: BucketsWithMaxOnCase;
 }
 
-export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> & {
-  participants: Cardinality;
-} & AttachmentFrameworkAggsResult;
+export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> &
+  AttachmentFrameworkAggsResult;
 
 export type CaseAggregationResult = Record<
   Owner,

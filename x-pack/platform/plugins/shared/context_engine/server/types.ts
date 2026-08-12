@@ -5,19 +5,30 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
+import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginStart {}
+export interface ContextEnginePluginStart {
+  /** The signals store. */
+  getSignalsService: () => SignalsServiceApi;
+}
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineStartDependencies {}
+export interface ContextEngineStartDependencies {
+  actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
+}

@@ -16,10 +16,12 @@ import type {
   BulkResponse,
   CreateRuleData,
   DryRunResponse,
+  FindRulesRequest,
   FindRulesResponse,
-  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
+  RuleTagsParams,
+  TagsResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 
@@ -33,37 +35,24 @@ const buildRulePath = (id: string): string =>
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
 
-export interface ListRulesParams {
-  page?: number;
-  perPage?: number;
-  filter?: string;
-  search?: string;
-  sortField?: FindRulesSortField;
-  sortOrder?: 'asc' | 'desc';
-}
-
 export type { BulkByIdsParams, BulkByQueryParams, BulkByQueryResult, BulkResponse, DryRunResponse };
 
 @injectable()
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listTags(params: { filter?: string } = {}) {
-    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`, {
-      query: { filter: params.filter },
+  public async listTags(params: RuleTagsParams = {}): Promise<TagsResponse> {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_RULE_API_PATH}/tags`, {
+      query: {
+        search: params.search || undefined,
+        kind: params.kind || undefined,
+      },
     });
   }
 
-  public async listRules(params: ListRulesParams) {
+  public async listRules(params: FindRulesRequest = {}) {
     return this.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
-      query: {
-        page: params.page,
-        perPage: params.perPage,
-        filter: params.filter,
-        search: params.search,
-        sortField: params.sortField,
-        sortOrder: params.sortOrder,
-      },
+      query: params,
     });
   }
 
