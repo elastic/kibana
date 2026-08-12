@@ -12,11 +12,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiPanel,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
 import { InfoPanel } from '../info_panel';
@@ -58,10 +55,18 @@ const EMPTY_VALUE = i18n.translate(
     defaultMessage: '—',
   }
 );
-
-const signalPanelCss = css`
-  margin-bottom: 4px;
-`;
+const SIGNAL_FALLBACK_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.signalFallbackTitle',
+  {
+    defaultMessage: 'Signal',
+  }
+);
+const SIGNALS_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.signalsTitle',
+  {
+    defaultMessage: 'Signals',
+  }
+);
 
 const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
   if (items.length === 0) {
@@ -141,46 +146,52 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
       </InfoPanel>
 
       {detectionSignals.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.signals', {
-                defaultMessage: 'Signals ({count})',
-                values: { count: detectionSignals.length },
-              })}
-            </h3>
-          </EuiTitle>
-          {detectionSignals.map((signal, idx) => (
-            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={signalPanelCss}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                {signal.metadata?.rule_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{signal.metadata.rule_name}</strong>
+        <InfoPanel
+          title={
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{SIGNALS_TITLE}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{detectionSignals.length}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          {detectionSignals.map((signal, index) => {
+            const title = signal.metadata?.rule_name || SIGNAL_FALLBACK_TITLE;
+
+            return (
+              <React.Fragment key={`${signal.stream_name ?? title}-${index}`}>
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        <strong>{title}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    {signal.stream_name && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="hollow">{signal.stream_name}</EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                    {signal.evidence?.result && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color={signal.evidence.result === 'empty' ? 'hollow' : 'warning'}>
+                          {signal.evidence.result}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                  {signal.description && (
+                    <EuiText size="s" color="subdued">
+                      {signal.description}
                     </EuiText>
-                  </EuiFlexItem>
-                )}
-                {signal.stream_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{signal.stream_name}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {signal.evidence?.result && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={signal.evidence.result === 'empty' ? 'hollow' : 'warning'}>
-                      {signal.evidence.result}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              {signal.description && (
-                <EuiText size="xs" color="subdued">
-                  {signal.description}
-                </EuiText>
-              )}
-            </EuiPanel>
-          ))}
-        </EuiFlexGroup>
+                  )}
+                </EuiFlexGroup>
+                {index < detectionSignals.length - 1 && <EuiHorizontalRule margin="m" />}
+              </React.Fragment>
+            );
+          })}
+        </InfoPanel>
       )}
     </EuiFlexGroup>
   );
