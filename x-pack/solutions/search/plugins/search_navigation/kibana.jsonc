@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-navigation",
-  "owner": "@elastic/search-ml-ux",
+  "owner": "@elastic/search-kibana",
   "group": "search",
   "visibility": "private",
   "plugin": {
@@ -16,8 +16,7 @@
     "optionalPlugins": [
       "serverless",
       "spaces",
-      "indexManagement",
-      "contextEngine"
+      "indexManagement"
     ],
     "requiredBundles": []
   }

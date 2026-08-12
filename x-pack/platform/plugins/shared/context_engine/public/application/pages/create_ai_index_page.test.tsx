@@ -6,17 +6,13 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
-import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { createSearchNavigationMock } from '../test_utils/search_navigation_mock';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
-import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -49,19 +45,11 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   return render(
     <I18nProvider>
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <KibanaContextProvider
-            services={{
-              ...services,
-              history: scopedHistoryMock.create(),
-              searchNavigation: createSearchNavigationMock(),
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <CreateAiIndexPage />
-            </QueryClientProvider>
-          </KibanaContextProvider>
-        </MockAppHeaderProvider>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient}>
+            <CreateAiIndexPage />
+          </QueryClientProvider>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
@@ -87,41 +75,6 @@ const VALID_ID = 'support-ticket-triage';
 describe('CreateAiIndexPage', () => {
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders a back button linking to the AI indexes landing page', () => {
-    const services = coreMock.createStart();
-    services.application.getUrlForApp.mockImplementation(
-      (appId, options) => `/app/${appId}${options?.path ?? ''}`
-    );
-
-    renderWithProviders(services);
-
-    expect(services.application.getUrlForApp).toHaveBeenCalledWith(
-      CONTEXT_ENGINE_APP_ID,
-      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
-    );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/context_engine/'
-    );
-  });
-
-  it('navigates to the landing page and prevents the anchor default navigation on back click', () => {
-    const services = coreMock.createStart();
-    services.application.getUrlForApp.mockImplementation(
-      (appId, options) => `/app/${appId}${options?.path ?? ''}`
-    );
-
-    renderWithProviders(services);
-
-    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
-    fireEvent.click(backButton);
-
-    expect(services.application.navigateToApp).toHaveBeenCalledWith(
-      CONTEXT_ENGINE_APP_ID,
-      expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
-    );
   });
 
   it('keeps the create button disabled until a valid id is provided, without requiring a source', () => {

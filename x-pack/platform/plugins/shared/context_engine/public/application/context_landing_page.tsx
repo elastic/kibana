@@ -5,63 +5,41 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { AiIndexList } from './components/ai_index_list';
+import { CreateAiIndexButton } from './components/create_ai_index_button';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
-import { useNavigation } from './hooks/use_navigation';
-import {
-  ContextEnginePageSection,
-  ContextEnginePageTemplate,
-} from './layout/context_engine_page_template';
-import { CONTEXT_ENGINE_PATHS } from './paths';
-
-const landingPageTitle = i18n.translate('xpack.contextEngine.landing.title', {
-  defaultMessage: 'Context',
-});
-
-const landingPageDescription = i18n.translate('xpack.contextEngine.landing.description', {
-  defaultMessage:
-    'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
-});
-
-const createAiIndexButtonLabel = i18n.translate('xpack.contextEngine.createAiIndexButton', {
-  defaultMessage: 'Create AI Index',
-});
 
 export const ContextLandingPage = () => {
-  const { navigateToContextEngine } = useNavigation();
+  const { euiTheme } = useEuiTheme();
   const { aiIndices, isLoading, error } = useListAiIndices();
   const showHeaderCreateButton = isLoading || error !== undefined || aiIndices.length > 0;
 
   return (
-    <ContextEnginePageTemplate data-test-subj="contextLandingPage">
+    <KibanaPageTemplate data-test-subj="contextLandingPage">
       <KibanaPageTemplate.Header
-        pageTitle={landingPageTitle}
-        restrictWidth
+        pageTitle={i18n.translate('xpack.contextEngine.landing.title', {
+          defaultMessage: 'Context',
+        })}
+        description={i18n.translate('xpack.contextEngine.landing.description', {
+          defaultMessage:
+            'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
+        })}
+        css={css`
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+          border-block-end: none;
+        `}
         rightSideItems={
-          showHeaderCreateButton
-            ? [
-                <EuiButton
-                  key="createAiIndex"
-                  fill
-                  iconType="plus"
-                  data-test-subj="contextCreateAiIndexButton"
-                  onClick={() => navigateToContextEngine(CONTEXT_ENGINE_PATHS.create)}
-                >
-                  {createAiIndexButtonLabel}
-                </EuiButton>,
-              ]
-            : undefined
+          showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
         }
-      >
-        <EuiText>{landingPageDescription}</EuiText>
-      </KibanaPageTemplate.Header>
-      <ContextEnginePageSection>
+      />
+      <KibanaPageTemplate.Section>
         <AiIndexList aiIndices={aiIndices} isLoading={isLoading} error={error} />
-      </ContextEnginePageSection>
-    </ContextEnginePageTemplate>
+      </KibanaPageTemplate.Section>
+    </KibanaPageTemplate>
   );
 };

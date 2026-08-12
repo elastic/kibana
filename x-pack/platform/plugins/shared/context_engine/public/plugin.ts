@@ -26,7 +26,6 @@ import type {
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
 } from './types';
-import type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
 
 const APP_TITLE = i18n.translate('xpack.contextEngine.app.title', {
   defaultMessage: 'Context',
@@ -47,15 +46,12 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  private searchNavigationAdapter: ContextEngineSearchNavigationAdapter | undefined;
-
   constructor(_context: PluginInitializerContext) {}
 
   setup(
     core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
   ): ContextEnginePluginSetup {
     const startServices = core.getStartServices();
-    const getSearchNavigationAdapter = () => this.searchNavigationAdapter;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -86,24 +82,17 @@ export class ContextEnginePlugin
         const { mountApp } = await import('./application');
         const [coreStart, pluginsStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(APP_TITLE);
-        const searchNavigation = getSearchNavigationAdapter();
-        await searchNavigation?.handleOnAppMount();
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           coreSetup: core,
           element: params.element,
           history: params.history,
-          searchNavigation,
         });
       },
     });
 
-    return {
-      registerSearchNavigationAdapter: (adapter: ContextEngineSearchNavigationAdapter) => {
-        this.searchNavigationAdapter = adapter;
-      },
-    };
+    return {};
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {
