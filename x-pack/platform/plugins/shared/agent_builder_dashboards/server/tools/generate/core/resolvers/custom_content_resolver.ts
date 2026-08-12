@@ -17,21 +17,20 @@ import {
 
 const SAMPLE_ROW_COUNT = 3;
 const MAX_SANITIZED_CELL_LENGTH = 500;
-
+const HTML_ANGLE_BRACKETS = /[<>]/g;
+const LINE_BREAKS = /[\r\n]+/g;
 // Liquid delimiters split so a cell value like `{{ secret }}` is not
 // interpreted as a template expression when injected into the LLM prompt.
-const LIQUID_OUTPUT_DELIMITER = '{{';
-const LIQUID_TAG_DELIMITER = '{%';
-const LIQUID_OUTPUT_DELIMITER_SAFE = '{ {';
-const LIQUID_TAG_DELIMITER_SAFE = '{ %';
+const LIQUID_OUTPUT_DELIMITER = /\{\{/g;
+const LIQUID_TAG_DELIMITER = /\{%/g;
 
 function sanitize(v: unknown): string {
-  const truncated = String(v ?? '').slice(0, MAX_SANITIZED_CELL_LENGTH);
-  return truncated
-    .replace(/[<>]/g, '')
-    .replace(/[\r\n]+/g, ' ')
-    .replaceAll(LIQUID_OUTPUT_DELIMITER, LIQUID_OUTPUT_DELIMITER_SAFE)
-    .replaceAll(LIQUID_TAG_DELIMITER, LIQUID_TAG_DELIMITER_SAFE);
+  return String(v ?? '')
+    .slice(0, MAX_SANITIZED_CELL_LENGTH)
+    .replace(HTML_ANGLE_BRACKETS, '')
+    .replace(LINE_BREAKS, ' ')
+    .replace(LIQUID_OUTPUT_DELIMITER, '{ {')
+    .replace(LIQUID_TAG_DELIMITER, '{ %');
 }
 
 function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]): string {
