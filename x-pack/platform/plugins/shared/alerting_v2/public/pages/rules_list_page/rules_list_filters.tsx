@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Query } from '@elastic/eui';
+import { EuiFieldSearch, EuiText } from '@elastic/eui';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
-import { filter } from '@kbn/content-list-toolbar';
+import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
+
+const TAG_SEARCH_DEBOUNCE_MS = 300;
+const MAX_TAGS_CAP = 20;
 
 const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
   defaultMessage: 'Status',
@@ -121,8 +126,27 @@ const TagsFilterComponent = ({
   query?: Query;
   onChange?: (query: Query) => void;
 }) => {
-  const { data: tagNames = [] } = useFetchRuleTags();
-  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
+  const [tagSearch, setTagSearch] = useState('');
+  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
+  const { selection } = useFieldQueryFilter({
+    fieldName: TAG_FILTER_ID,
+    query,
+    onChange,
+  });
+  const { data: tagNames = [], isLoading } = useFetchRuleTags({
+    search: debouncedTagSearch || undefined,
+  });
+
+  const options = useMemo(() => {
+    const apiTagSet = new Set(tagNames);
+    const orphans = Object.keys(selection)
+      .filter((tag) => !apiTagSet.has(tag))
+      .map((tag) => ({ key: tag, label: tag }));
+    return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
+  }, [tagNames, selection]);
+
+  const showCapGuidance = tagNames.length >= MAX_TAGS_CAP;
+
   return (
     <SelectableFilterPopover
       fieldName={TAG_FILTER_ID}
@@ -130,6 +154,29 @@ const TagsFilterComponent = ({
       query={query}
       onChange={onChange}
       options={options}
+      isLoading={isLoading}
+      hideSearch
+      headerContent={
+        <EuiFieldSearch
+          compressed
+          value={tagSearch}
+          onChange={(event) => setTagSearch(event.target.value)}
+          placeholder={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.searchPlaceholder', {
+            defaultMessage: 'Search tags',
+          })}
+          data-test-subj="rulesListTagsFilterSearch"
+        />
+      }
+      footerContent={
+        showCapGuidance ? (
+          <EuiText size="xs" color="subdued" data-test-subj="rulesListTagsFilterCapGuidance">
+            {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.capGuidance', {
+              defaultMessage: 'Showing first {cap} most-used — type to search',
+              values: { cap: MAX_TAGS_CAP },
+            })}
+          </EuiText>
+        ) : undefined
+      }
       renderOption={(option, { isActive }) => (
         <StandardFilterOption isActive={isActive}>
           <span data-test-subj={`rulesListTagsFilterOption-${option.key}`}>{option.label}</span>

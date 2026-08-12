@@ -1119,7 +1119,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
@@ -1637,7 +1637,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
