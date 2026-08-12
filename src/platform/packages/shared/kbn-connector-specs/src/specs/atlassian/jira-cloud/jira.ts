@@ -10,22 +10,32 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type {
+  AddAttachmentInput,
   AddCommentInput,
+  AssignIssueInput,
   CreateIssueInput,
+  GetCreateMetadataInput,
   GetIssueInput,
+  GetIssueTypesInput,
   GetProjectInput,
   GetProjectsInput,
+  GetTransitionsInput,
   SearchIssuesWithJqlInput,
   SearchUsersInput,
   TransitionIssueInput,
   UpdateIssueInput,
 } from './types';
 import {
+  AddAttachmentInputSchema,
   AddCommentInputSchema,
+  AssignIssueInputSchema,
   CreateIssueInputSchema,
+  GetCreateMetadataInputSchema,
   GetIssueInputSchema,
+  GetIssueTypesInputSchema,
   GetProjectInputSchema,
   GetProjectsInputSchema,
+  GetTransitionsInputSchema,
   SearchUsersInputSchema,
   SearchIssuesWithJqlInputSchema,
   TransitionIssueInputSchema,
@@ -338,6 +348,92 @@ export const JiraConnector: ConnectorSpec = {
           transition: { id: input.transitionId },
         });
         return { transitioned: true, issueId: input.issueId, transitionId: input.transitionId };
+      },
+    },
+
+    // =========================================================================
+    // Should-have actions
+    // =========================================================================
+
+    getTransitions: {
+      isTool: true,
+      description:
+        'List the workflow transitions available for a Jira issue. ' +
+        'Use before transitionIssue — Jira requires a transition ID, not a status name. ' +
+        'Returns transition IDs, names, and target status details.',
+      input: GetTransitionsInputSchema,
+      handler: async (ctx, input: GetTransitionsInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/3/issue/${input.issueId}/transitions`
+        );
+        return response.data;
+      },
+    },
+
+    getIssueTypes: {
+      isTool: true,
+      description:
+        'List the issue types available in a Jira project (e.g. Bug, Task, Story, Epic). ' +
+        'Use before createIssue to discover valid issue type names and IDs for the project.',
+      input: GetIssueTypesInputSchema,
+      handler: async (ctx, input: GetIssueTypesInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/3/issue/createmeta/${input.projectKey}/issuetypes`
+        );
+        return response.data;
+      },
+    },
+
+    getCreateMetadata: {
+      isTool: true,
+      description:
+        'Get the required and optional fields for creating a Jira issue of a specific type. ' +
+        'Use after getIssueTypes to build a valid createIssue payload, especially when the ' +
+        'project has required custom fields.',
+      input: GetCreateMetadataInputSchema,
+      handler: async (ctx, input: GetCreateMetadataInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/3/issue/createmeta/${input.projectKey}/issuetypes/${input.issueTypeId}`
+        );
+        return response.data;
+      },
+    },
+
+    assignIssue: {
+      isTool: true,
+      description:
+        'Assign a Jira issue to a user, set it to the default assignee, or unassign it. ' +
+        'Use searchUsers to resolve a name or email to an accountId before calling this.',
+      input: AssignIssueInputSchema,
+      handler: async (ctx, input: AssignIssueInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        await ctx.client.put(`${baseUrl}/rest/api/3/issue/${input.issueId}/assignee`, {
+          accountId: input.accountId,
+        });
+        return { assigned: true, issueId: input.issueId, accountId: input.accountId };
+      },
+    },
+
+    addAttachment: {
+      isTool: true,
+      description:
+        'Attach a file to a Jira issue. The file must be provided as a base64-encoded string. ' +
+        'Use when you need to upload a screenshot, log, or report to a ticket.',
+      input: AddAttachmentInputSchema,
+      handler: async (ctx, input: AddAttachmentInput) => {
+        const baseUrl = buildBaseUrl(ctx);
+        const buffer = Buffer.from(input.file, 'base64');
+        const formData = new FormData();
+        formData.append('file', new Blob([buffer]), input.filename);
+        const response = await ctx.client.post(
+          `${baseUrl}/rest/api/3/issue/${input.issueId}/attachments`,
+          formData,
+          { headers: { 'X-Atlassian-Token': 'no-check' } }
+        );
+        return response.data;
       },
     },
   },
