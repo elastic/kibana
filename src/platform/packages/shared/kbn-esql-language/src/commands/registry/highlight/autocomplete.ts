@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstHighlightCommand } from '@elastic/esql/types';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstHighlightCommand,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { Location } from '../types';
-import { getPosition, CaretPosition } from './utils';
+import { getPosition, CaretPosition, canSuggestPrefix } from './utils';
 import {
   onCompleteItem,
   withCompleteItem,
@@ -23,9 +27,12 @@ import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
+import { suggestForExpression } from '../../definitions/utils';
 
 export const QUERY_TEXT = 'The text to highlight' as const;
 export const QUERY_TEXT_SNIPPET = `"$\{0:${QUERY_TEXT}}"`;
+
+const PREFIX_MODIFIER_SNIPPET = `prefix = "$\{0:highlight_}"`;
 
 export async function autocomplete(
   query: string,
@@ -41,23 +48,81 @@ export async function autocomplete(
     return [];
   }
 
-  const position = getPosition(highlightCommand, cursorPosition);
+  const position = getPosition(query, highlightCommand, cursorPosition);
 
   switch (position) {
-    case CaretPosition.HIGHLIGHT_KEYWORD: {
+    case CaretPosition.PREFIX_VALUE: {
+      // Cursor is after `prefix = `: suggest a placeholder quoted string
       return [
         {
           ...buildConstantsDefinitions(
-            [QUERY_TEXT_SNIPPET],
+            [`"$\{0:highlight_}"`],
             '',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
           )[0],
-          label: QUERY_TEXT,
+          label: 'Custom prefix',
           asSnippet: true,
         },
       ];
+    }
+
+    case CaretPosition.QUERY_EXPRESSION: {
+      const expressionRoot = highlightCommand.queryExpression as ESQLSingleAstItem | undefined;
+
+      const { suggestions, computed } = await suggestForExpression({
+        query,
+        expressionRoot,
+        command,
+        cursorPosition,
+        location: Location.HIGHLIGHT_QUERY,
+        context,
+        callbacks,
+        options: {
+          preferredExpressionType: 'boolean',
+          // A bare column is not a valid query expression on its own: the query must be a
+          // string literal or a full-text function. Fields are still suggested inside
+          // function arguments, e.g. MATCH(<field>, "query").
+          suggestFields: false,
+        },
+      });
+
+      // Offer the optional `prefix = "..."` modifier when no prefix or query is typed yet
+      if (canSuggestPrefix(query, highlightCommand, cursorPosition)) {
+        suggestions.push({
+          label: 'prefix = "..."',
+          text: PREFIX_MODIFIER_SNIPPET,
+          kind: 'Keyword' as const,
+          detail: i18n.translate(
+            'kbn-esql-language.commands.highlight.autocomplete.prefixModifierDetail',
+            { defaultMessage: 'Custom column name prefix (default: highlight_)' }
+          ),
+          asSnippet: true,
+          category: SuggestionCategory.LANGUAGE_KEYWORD,
+        });
+      }
+
+      // The snippet stands for a whole query expression, so it makes no sense as a function
+      // argument (MATCH(<field>, ...)). It stays available after an operator, where a string
+      // literal is a valid operand (e.g. `"fox" AND `).
+      if (computed.position === 'in_function') {
+        return suggestions;
+      }
+
+      const stringSuggestion: ISuggestionItem = {
+        ...buildConstantsDefinitions(
+          [QUERY_TEXT_SNIPPET],
+          '',
+          undefined,
+          undefined,
+          SuggestionCategory.CONSTANT_VALUE
+        )[0],
+        label: QUERY_TEXT,
+        asSnippet: true,
+      };
+
+      return [stringSuggestion, ...suggestions];
     }
 
     case CaretPosition.ON_KEYWORD: {
@@ -87,6 +152,16 @@ export async function autocomplete(
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const availableParameters: MapParameters = {
+        analyzer: {
+          type: 'string',
+          description: i18n.translate(
+            'kbn-esql-language.commands.highlight.autocomplete.analyzerDescription',
+            {
+              defaultMessage: 'Analyzer used to re-analyze the ON fields before highlighting',
+            }
+          ),
+          suggestions: [],
+        },
         pre_tags: {
           type: 'string',
           description: i18n.translate(

@@ -26,6 +26,7 @@ import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '')[0].text;
 
 interface QueryComponents {
+  prefix?: string;
   query?: string;
   onClause?: string;
   withClause?: string;
@@ -33,6 +34,10 @@ interface QueryComponents {
 
 const buildHighlightQuery = (components: QueryComponents): string => {
   let query = 'from a | highlight';
+
+  if (components.prefix) {
+    query += ` ${components.prefix}`;
+  }
 
   if (components.query) {
     query += ` ${components.query}`;
@@ -92,14 +97,79 @@ describe('HIGHLIGHT Autocomplete', () => {
   });
 
   describe('Basic command structure', () => {
-    test('suggests query literal after HIGHLIGHT keyword', async () => {
-      await expectHighlightSuggestions('from a | highlight ', [QUERY_LITERAL], mockCallbacks);
+    test('suggests string query snippet and full-text functions after HIGHLIGHT keyword', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight ',
+        {
+          contains: [QUERY_LITERAL, 'MATCH($0)', 'QSTR("""$0""")', 'KQL("""$0""")'],
+        },
+        mockCallbacks
+      );
     });
 
-    test('suggests ON keyword after a complete query', async () => {
+    test('does not suggest bare fields in the query slot', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight ',
+        {
+          notContains: ['textField', 'keywordField', 'integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest bare fields in the query slot after a prefix', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight prefix = "hl_" ',
+        {
+          notContains: ['textField', 'keywordField', 'integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests fields but not the query snippet inside a full-text function argument', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight MATCH(',
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: [QUERY_LITERAL],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests prefix modifier alongside query suggestions when no query is typed', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight ',
+        {
+          contains: [`prefix = "\${0:highlight_}"`],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('does not suggest prefix modifier once a query expression is started', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight "fo',
+        {
+          notContains: [`prefix = "\${0:highlight_}"`],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests ON keyword after a complete string query', async () => {
       await expectHighlightSuggestions(
         buildHighlightQuery({ query: '"search query"' }) + ' ',
         [onCompleteItem.text],
+        mockCallbacks
+      );
+    });
+
+    test('suggests ON keyword after a complete MATCH() query', async () => {
+      await expectHighlightSuggestions(
+        buildHighlightQuery({ query: 'MATCH(textField, "ring")' }) + ' ',
+        { contains: [onCompleteItem.text] },
         mockCallbacks
       );
     });
@@ -144,6 +214,18 @@ describe('HIGHLIGHT Autocomplete', () => {
     });
   });
 
+  describe('Prefix modifier', () => {
+    test('suggests a quoted string value after prefix =', async () => {
+      await expectHighlightSuggestions(
+        'from a | highlight prefix = ',
+        {
+          contains: ['"${0:highlight_}"'],
+        },
+        mockCallbacks
+      );
+    });
+  });
+
   describe('WITH clause functionality', () => {
     test('suggests opening braces when WITH is already typed', async () => {
       await expectHighlightSuggestions(
@@ -153,11 +235,16 @@ describe('HIGHLIGHT Autocomplete', () => {
       );
     });
 
-    test('suggests parameter keys inside an empty WITH map', async () => {
+    test('suggests parameter keys inside an empty WITH map including analyzer', async () => {
       await expectHighlightSuggestions(
         buildHighlightQuery({ query: '"search query"', onClause: 'textField', withClause: '{ ' }),
         {
-          contains: ['"pre_tags": "$0"', '"encoder": "$0"', '"number_of_fragments": '],
+          contains: [
+            '"analyzer": "$0"',
+            '"pre_tags": "$0"',
+            '"encoder": "$0"',
+            '"number_of_fragments": ',
+          ],
         },
         mockCallbacks
       );
