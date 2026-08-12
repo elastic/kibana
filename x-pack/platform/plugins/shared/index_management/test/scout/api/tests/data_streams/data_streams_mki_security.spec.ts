@@ -16,7 +16,6 @@ import {
   expectedDataStream,
   testData,
 } from '../../fixtures';
-import { MKI_SECURITY_ONLY } from '../../tags';
 
 const { API_BASE_PATH, COMMON_HEADERS } = testData;
 
@@ -31,106 +30,110 @@ const expectedLifecycle = {
   retention_determined_by: 'default_global_retention',
 };
 
-apiTest.describe('Data streams API - Security MKI', { tag: MKI_SECURITY_ONLY }, () => {
-  let credentials: RoleApiCredentials;
-  let expectedStats: object;
+apiTest.describe(
+  'Data streams API - Security MKI',
+  { tag: ['@cloud-serverless-security_complete'] },
+  () => {
+    let credentials: RoleApiCredentials;
+    let expectedStats: object;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    credentials = await requestAuth.getApiKey('admin');
-    expectedStats = {
-      meteringDocsCount: 0,
-      meteringStorageSize: '0b',
-      meteringStorageSizeBytes: 0,
-    };
-  });
-
-  apiTest.beforeEach(async ({ esClient }) => {
-    await deleteDataStream(esClient, DATA_STREAM_NAME);
-    await createDataStream(esClient, DATA_STREAM_NAME);
-  });
-
-  apiTest.afterEach(async ({ esClient }) => {
-    await deleteDataStream(esClient, DATA_STREAM_NAME);
-  });
-
-  apiTest('lists the data streams', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      credentials = await requestAuth.getApiKey('admin');
+      expectedStats = {
+        meteringDocsCount: 0,
+        meteringStorageSize: '0b',
+        meteringStorageSizeBytes: 0,
+      };
     });
 
-    expect(response).toHaveStatusCode(200);
-    const dataStream = (response.body as DataStream[]).find(
-      ({ name }) => name === DATA_STREAM_NAME
-    );
-    expect(dataStream).toBeDefined();
-
-    const { name: indexName, uuid } = dataStream!.indices[0];
-    expect(dataStream).toStrictEqual(
-      expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: 'green',
-        lifecycle: expectedLifecycle,
-      })
-    );
-  });
-
-  apiTest('includes stats when asked for them', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams?includeStats=true`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
+    apiTest.beforeEach(async ({ esClient }) => {
+      await deleteDataStream(esClient, DATA_STREAM_NAME);
+      await createDataStream(esClient, DATA_STREAM_NAME);
     });
 
-    expect(response).toHaveStatusCode(200);
-    const dataStream = (response.body as DataStream[]).find(
-      ({ name }) => name === DATA_STREAM_NAME
-    );
-    expect(dataStream).toBeDefined();
-
-    const { storageSize, storageSizeBytes, ...rest } = dataStream!;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
-      storageSize: 'undefined',
-      storageSizeBytes: 'undefined',
+    apiTest.afterEach(async ({ esClient }) => {
+      await deleteDataStream(esClient, DATA_STREAM_NAME);
     });
 
-    const { name: indexName, uuid } = rest.indices[0];
-    expect(rest).toStrictEqual({
-      ...expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: 'green',
-        lifecycle: expectedLifecycle,
-      }),
-      ...expectedStats,
-    });
-  });
+    apiTest('lists the data streams', async ({ apiClient }) => {
+      const response = await apiClient.get(`${API_BASE_PATH}/data_streams`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
 
-  apiTest('returns a single data stream by name', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/data_streams/${DATA_STREAM_NAME}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
+      expect(response).toHaveStatusCode(200);
+      const dataStream = (response.body as DataStream[]).find(
+        ({ name }) => name === DATA_STREAM_NAME
+      );
+      expect(dataStream).toBeDefined();
 
-    expect(response).toHaveStatusCode(200);
-    const { storageSize, storageSizeBytes, ...rest } = response.body;
-    expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
-      storageSize: 'undefined',
-      storageSizeBytes: 'undefined',
+      const { name: indexName, uuid } = dataStream!.indices[0];
+      expect(dataStream).toStrictEqual(
+        expectedDataStream({
+          name: DATA_STREAM_NAME,
+          indexName,
+          uuid,
+          health: 'green',
+          lifecycle: expectedLifecycle,
+        })
+      );
     });
 
-    const { name: indexName, uuid } = rest.indices[0];
-    expect(rest).toStrictEqual({
-      ...expectedDataStream({
-        name: DATA_STREAM_NAME,
-        indexName,
-        uuid,
-        health: 'green',
-        lifecycle: expectedLifecycle,
-      }),
-      ...expectedStats,
+    apiTest('includes stats when asked for them', async ({ apiClient }) => {
+      const response = await apiClient.get(`${API_BASE_PATH}/data_streams?includeStats=true`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const dataStream = (response.body as DataStream[]).find(
+        ({ name }) => name === DATA_STREAM_NAME
+      );
+      expect(dataStream).toBeDefined();
+
+      const { storageSize, storageSizeBytes, ...rest } = dataStream!;
+      expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
+        storageSize: 'undefined',
+        storageSizeBytes: 'undefined',
+      });
+
+      const { name: indexName, uuid } = rest.indices[0];
+      expect(rest).toStrictEqual({
+        ...expectedDataStream({
+          name: DATA_STREAM_NAME,
+          indexName,
+          uuid,
+          health: 'green',
+          lifecycle: expectedLifecycle,
+        }),
+        ...expectedStats,
+      });
     });
-  });
-});
+
+    apiTest('returns a single data stream by name', async ({ apiClient }) => {
+      const response = await apiClient.get(`${API_BASE_PATH}/data_streams/${DATA_STREAM_NAME}`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const { storageSize, storageSizeBytes, ...rest } = response.body;
+      expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual({
+        storageSize: 'undefined',
+        storageSizeBytes: 'undefined',
+      });
+
+      const { name: indexName, uuid } = rest.indices[0];
+      expect(rest).toStrictEqual({
+        ...expectedDataStream({
+          name: DATA_STREAM_NAME,
+          indexName,
+          uuid,
+          health: 'green',
+          lifecycle: expectedLifecycle,
+        }),
+        ...expectedStats,
+      });
+    });
+  }
+);

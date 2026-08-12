@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 
 // All serverless except vectordb/workplaceai, which preset the `logs-*` index mode and so reject the
 // logsdb suites' data stream (duplicate `index.mode` from LogsdbIndexModeSettingsProvider).
@@ -20,11 +20,5 @@ export const SERVERLESS_LOGS_CAPABLE: string[] = [
 export const SERVERLESS_EXCEPT_MKI_SECURITY: string[] = [
   ...tags.serverless.search,
   ...tags.serverless.observability.complete,
-  ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+  '@local-serverless-security_complete',
 ];
-
-export const MKI_SECURITY_ONLY: string[] = getPlaywrightTagsFor(
-  'serverless',
-  'security_complete',
-  'cloud'
-);
