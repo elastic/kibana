@@ -96,6 +96,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.ensureLayerTabIsActive(1);
       await testSubjects.click('lnsLayerSettings');
+      // wait for the settings flyout to finish opening so the toggle click doesn't race the slide-in animation
+      await testSubjects.existOrFail('lnsDimensionContainerOpened');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
       // now close the panel and check the dataView picker has no icon

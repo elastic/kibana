@@ -111,6 +111,7 @@ export function FlyoutContainer({
           ref={panelContainerRef}
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
+          data-test-subj={focusTrapIsEnabled ? 'lnsDimensionContainerOpened' : undefined}
           css={[
             css`
               box-shadow: ${hideShadow ? 'none !important' : 'inherit'};
