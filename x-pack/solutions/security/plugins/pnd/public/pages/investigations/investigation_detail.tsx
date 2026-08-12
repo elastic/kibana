@@ -107,7 +107,7 @@ export const InvestigationDetailPage: React.FC = () => {
   if (isNotFound) {
     return (
       <PndPageSection>
-        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
+        <PndPageHeader isQueueEmpty={true} eventCount={0} />
         <EuiEmptyPrompt iconType="warning" title={<h2>{i18n.NOT_FOUND}</h2>} />
       </PndPageSection>
     );
@@ -116,7 +116,7 @@ export const InvestigationDetailPage: React.FC = () => {
   if (error || !data?.investigation) {
     return (
       <PndPageSection>
-        <PndPageHeader title={i18n.PAGE_TITLE} backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }} />
+        <PndPageHeader isQueueEmpty={true} eventCount={0} />
         <EuiEmptyPrompt
           iconType="error"
           color="danger"
@@ -206,11 +206,7 @@ export const InvestigationDetailPage: React.FC = () => {
 
   return (
     <PndPageSection>
-      <PndPageHeader
-        title={investigation.title}
-        subtitle={investigation.affectedSurface}
-        backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
-      />
+      <PndPageHeader isQueueEmpty={false} eventCount={investigation.events?.length ?? 0} />
       <EuiTabbedContent
         key={`${id}:${proposalId ?? 'overview'}`}
         tabs={tabs}

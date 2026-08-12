@@ -11,15 +11,6 @@ export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.pnd.queue.pageTitle', {
     defaultMessage: 'PND - Proposals queue',
   }),
-  greetingEmphasis: (count: number) =>
-    i18n.translate('xpack.pnd.queue.greetingEmphasis', {
-      defaultMessage:
-        '{count, plural, one {# investigation needs} other {# investigations need}} you.',
-      values: { count },
-    }),
-  greetingPrefix: i18n.translate('xpack.pnd.queue.greetingPrefix', {
-    defaultMessage: 'Good afternoon.',
-  }),
   autonomousSubline: (count: number) =>
     i18n.translate('xpack.pnd.queue.autonomousSubline', {
       defaultMessage:
