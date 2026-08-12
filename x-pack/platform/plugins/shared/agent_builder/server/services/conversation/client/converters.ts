@@ -19,6 +19,7 @@ import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ConversationParentRelation,
   ToolOrigin,
   ToolResultType,
   normalizeConversationAccessControl,
@@ -67,7 +68,15 @@ const convertBaseFromEs = (document: Document) => {
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
     ...(document._source.parent_conversation_id
-      ? { parent_conversation_id: document._source.parent_conversation_id }
+      ? {
+          parent_conversation_id: document._source.parent_conversation_id,
+          // Backfill: older sub-agent children may lack the relation field.
+          // The only relation that existed before this field was `subagent`,
+          // so default missing values to that.
+          parent_conversation_relation:
+            (document._source.parent_conversation_relation as ConversationParentRelation) ??
+            ConversationParentRelation.subagent,
+        }
       : {}),
   };
 };
@@ -248,7 +257,11 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     ...(conversation.parent_conversation_id
-      ? { parent_conversation_id: conversation.parent_conversation_id }
+      ? {
+          parent_conversation_id: conversation.parent_conversation_id,
+          parent_conversation_relation:
+            conversation.parent_conversation_relation ?? ConversationParentRelation.subagent,
+        }
       : {}),
   };
 };
@@ -306,7 +319,11 @@ export const createRequestToEs = ({
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     ...(conversation.parent_conversation_id
-      ? { parent_conversation_id: conversation.parent_conversation_id }
+      ? {
+          parent_conversation_id: conversation.parent_conversation_id,
+          parent_conversation_relation:
+            conversation.parent_conversation_relation ?? ConversationParentRelation.subagent,
+        }
       : {}),
   };
 };

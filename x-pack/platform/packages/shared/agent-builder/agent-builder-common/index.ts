@@ -200,6 +200,7 @@ export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
+  ConversationParentRelation,
   type ChatEventBase,
   type ChatEvent,
   type ConversationAction,

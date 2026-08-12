@@ -455,6 +455,16 @@ export enum ConversationOriginType {
   Slack = 'slack',
 }
 
+/**
+ * Type of parent/child relationship between two conversations. Set on the
+ * child alongside `parent_conversation_id`. Values are extensible for future
+ * relation kinds (e.g. context forks).
+ */
+export enum ConversationParentRelation {
+  /** Child conversation is a persistent sub-agent spawned from the parent. */
+  subagent = 'subagent',
+}
+
 export interface ConversationRoundOrigin {
   /** External system the round input came from. */
   type: ConversationOriginType;
@@ -531,8 +541,16 @@ export interface Conversation {
    * When this conversation was created as a child of another (persistent sub-agent),
    * the id of the parent conversation. Absent for top-level conversations.
    * Used by the UI nav filter to hide sub-agent conversations from the sidebar.
+   *
+   * Always paired with `parent_conversation_relation` — both should be set
+   * together, both absent otherwise.
    */
   parent_conversation_id?: string;
+  /**
+   * Kind of parent/child relationship this conversation has with its parent.
+   * Only meaningful when `parent_conversation_id` is set.
+   */
+  parent_conversation_relation?: ConversationParentRelation;
   /** Access mode for the conversation. Missing values are treated as private. */
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */

@@ -40,6 +40,7 @@ const storageSettings = {
       pinned: types.boolean({}),
       workspace_id: types.keyword({}),
       parent_conversation_id: types.keyword({}),
+      parent_conversation_relation: types.keyword({}),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -81,6 +82,7 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   parent_conversation_id?: string;
+  parent_conversation_relation?: string;
   origin?: ConversationOrigin;
   // legacy field
   rounds?: PersistentConversationRound[];

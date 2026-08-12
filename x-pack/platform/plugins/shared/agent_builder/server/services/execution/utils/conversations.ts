@@ -15,7 +15,10 @@ import type {
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
-import { normalizeConversationAccessControl } from '@kbn/agent-builder-common';
+import {
+  ConversationParentRelation,
+  normalizeConversationAccessControl,
+} from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -64,7 +67,10 @@ export const createConversation$ = ({
         rounds: [roundCompletedEvent.data.round],
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
         ...(isPersistentSubagentCreate
-          ? { parent_conversation_id: conversation.parent_conversation_id }
+          ? {
+              parent_conversation_id: conversation.parent_conversation_id,
+              parent_conversation_relation: ConversationParentRelation.subagent,
+            }
           : {}),
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
@@ -229,6 +235,7 @@ export const getConversation = async ({
         title: subagentSeed.subagentName,
         user: parent.user,
         parent_conversation_id: subagentSeed.parentConversationId,
+        parent_conversation_relation: ConversationParentRelation.subagent,
         operation: 'CREATE',
       };
     }
@@ -241,6 +248,7 @@ export const getConversation = async ({
       }),
       title: subagentSeed.subagentName,
       parent_conversation_id: subagentSeed.parentConversationId,
+      parent_conversation_relation: ConversationParentRelation.subagent,
       operation: 'CREATE',
     };
   }
