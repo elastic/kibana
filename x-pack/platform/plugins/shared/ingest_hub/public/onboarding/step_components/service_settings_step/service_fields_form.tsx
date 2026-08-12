@@ -7,17 +7,12 @@
 
 import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,12 +47,8 @@ export interface ServiceFieldsFormProps {
   service: AwsServiceMatrixEntry;
   draft: Record<string, string>;
   draftTransport: TransportType | null;
-  regionsRows: string[];
   onFieldChange: (fieldName: string, value: string) => void;
   onTransportChange: (transport: TransportType) => void;
-  onRegionRowChange: (index: number, value: string) => void;
-  onRegionRowAdd: () => void;
-  onRegionRowRemove: (index: number) => void;
   /** When true, show [S3] / [CloudWatch] prefixes on transport-specific field labels */
   showTransportPrefix?: boolean;
 }
@@ -66,12 +57,8 @@ export function ServiceFieldsForm({
   service,
   draft,
   draftTransport,
-  regionsRows,
   onFieldChange,
   onTransportChange,
-  onRegionRowChange,
-  onRegionRowAdd,
-  onRegionRowRemove,
   showTransportPrefix = false,
 }: ServiceFieldsFormProps) {
   const hasTransport = hasTransportChoice(service);
@@ -79,7 +66,7 @@ export function ServiceFieldsForm({
   const requiredTextFieldSet = new Set(requiredTextFields);
   const flyoutFields = getFlyoutFields(service, draftTransport);
   const otherFlyoutFields = flyoutFields.filter(
-    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f) && f !== 'regions'
   );
   const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
 
@@ -103,22 +90,17 @@ export function ServiceFieldsForm({
   return (
     <>
       {hasTransport && (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={i18n.translate(
-                'xpack.ingestHub.serviceSettingsStep.flyout.transport.legend',
-                { defaultMessage: 'Transport type' }
-              )}
-              options={TRANSPORT_OPTIONS}
-              idSelected={draftTransport ?? 'aws-s3'}
-              onChange={(id) => onTransportChange(id as TransportType)}
-              buttonSize="compressed"
-              color="primary"
-              data-test-subj="serviceSettingsFlyout-transportToggle"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonGroup
+          legend={i18n.translate('xpack.ingestHub.serviceSettingsStep.flyout.transport.legend', {
+            defaultMessage: 'Transport type',
+          })}
+          options={TRANSPORT_OPTIONS}
+          idSelected={draftTransport ?? 'aws-s3'}
+          onChange={(id) => onTransportChange(id as TransportType)}
+          buttonSize="compressed"
+          color="primary"
+          data-test-subj="serviceSettingsFlyout-transportToggle"
+        />
       )}
 
       {requiredTextFields.length > 0 && (
@@ -174,58 +156,6 @@ export function ServiceFieldsForm({
       {otherFlyoutFields.map((fieldName) => {
         const meta = FIELD_CONFIG[fieldName];
         if (!meta) return null;
-        if (fieldName === 'regions') {
-          return (
-            <EuiFormRow key="regions" label={meta.label} helpText={meta.helpText}>
-              <div>
-                {regionsRows.map((row, index) => (
-                  <EuiFlexGroup
-                    key={index}
-                    gutterSize="xs"
-                    alignItems="center"
-                    responsive={false}
-                    style={{ marginBottom: 4 }}
-                  >
-                    <EuiFlexItem>
-                      <EuiFieldText
-                        compressed
-                        value={row}
-                        onChange={(e) => onRegionRowChange(index, e.target.value)}
-                        placeholder={meta.placeholder}
-                      />
-                    </EuiFlexItem>
-                    {regionsRows.length > 1 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.ingestHub.serviceSettingsStep.flyout.regions.removeRow',
-                            { defaultMessage: 'Remove region' }
-                          )}
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            iconType="cross"
-                            onClick={() => onRegionRowRemove(index)}
-                            aria-label={i18n.translate(
-                              'xpack.ingestHub.serviceSettingsStep.flyout.regions.removeRow',
-                              { defaultMessage: 'Remove region' }
-                            )}
-                          />
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                ))}
-                <EuiButtonEmpty size="xs" iconType="plusCircle" onClick={onRegionRowAdd}>
-                  <FormattedMessage
-                    id="xpack.ingestHub.serviceSettingsStep.flyout.regions.addRow"
-                    defaultMessage="Add region"
-                  />
-                </EuiButtonEmpty>
-              </div>
-            </EuiFormRow>
-          );
-        }
         return (
           <EuiFormRow key={fieldName} label={meta.label} helpText={meta.helpText}>
             <EuiFieldText

@@ -56,33 +56,6 @@ export function DuplicateServiceModal({
   const [draft, setDraft] = useState<Record<string, string>>({ ...sourceConfig.vars });
   const [draftTransport, setDraftTransport] = useState<TransportType | null>(sourceConfig.trigger);
 
-  const [regionsRows, setRegionsRows] = useState<string[]>(() => {
-    const parts = (sourceConfig.vars.regions ?? '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-    return parts.length > 0 ? parts : [''];
-  });
-
-  const syncRegionsToDraft = (rows: string[]) => {
-    setDraft((prev) => ({ ...prev, regions: rows.filter(Boolean).join(',') }));
-  };
-
-  const handleRegionRowChange = (index: number, value: string) => {
-    const next = regionsRows.map((r, i) => (i === index ? value : r));
-    setRegionsRows(next);
-    syncRegionsToDraft(next);
-  };
-
-  const handleRegionRowAdd = () => setRegionsRows((prev) => [...prev, '']);
-
-  const handleRegionRowRemove = (index: number) => {
-    const next = regionsRows.filter((_, i) => i !== index);
-    const final = next.length > 0 ? next : [''];
-    setRegionsRows(final);
-    syncRegionsToDraft(final);
-  };
-
   const handleFieldChange = (fieldName: string, value: string) => {
     setDraft((prev) => ({ ...prev, [fieldName]: value }));
   };
@@ -169,12 +142,8 @@ export function DuplicateServiceModal({
           service={service}
           draft={draft}
           draftTransport={draftTransport}
-          regionsRows={regionsRows}
           onFieldChange={handleFieldChange}
           onTransportChange={setDraftTransport}
-          onRegionRowChange={handleRegionRowChange}
-          onRegionRowAdd={handleRegionRowAdd}
-          onRegionRowRemove={handleRegionRowRemove}
           showTransportPrefix
         />
       </EuiModalBody>

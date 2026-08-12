@@ -19,7 +19,6 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiInMemoryTable,
-  EuiLink,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -31,7 +30,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
-import { AWS_REGION_OPTIONS, getRegionFieldName } from './field_config';
+import {
+  AWS_REGION_OPTIONS,
+  getRegionFieldName,
+  hasConfigurableFlyoutFields,
+} from './field_config';
 import type { TransportType } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
@@ -152,42 +155,56 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.serviceName', {
           defaultMessage: 'Service Name',
         }),
-        render: (inst: ServiceInstance) => (
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.ingestHub.serviceSettingsStep.table.editAriaLabel', {
-                  defaultMessage: 'Edit {name}',
-                  values: { name: inst.name },
-                })}
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  iconType="maximize"
-                  size="xs"
-                  color="text"
-                  onClick={() => setActiveFlyoutInstanceId(inst.instanceId)}
-                  aria-label={i18n.translate(
-                    'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
-                    {
-                      defaultMessage: 'Edit {name}',
-                      values: { name: inst.name },
-                    }
-                  )}
-                  data-test-subj={`serviceSettingsStep-editButton-${inst.instanceId}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink
-                onClick={() => setActiveFlyoutInstanceId(inst.instanceId)}
-                data-test-subj={`serviceSettingsStep-serviceLink-${inst.instanceId}`}
-              >
-                {inst.name}
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        render: (inst: ServiceInstance) => {
+          const service = AWS_SERVICES_MAP.get(inst.serviceId);
+          const canConfigure = service ? hasConfigurableFlyoutFields(service) : false;
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {canConfigure && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
+                      { defaultMessage: 'Edit {name}', values: { name: inst.name } }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="maximize"
+                      size="xs"
+                      color="text"
+                      onClick={() => setActiveFlyoutInstanceId(inst.instanceId)}
+                      aria-label={i18n.translate(
+                        'xpack.ingestHub.serviceSettingsStep.table.editAriaLabel',
+                        { defaultMessage: 'Edit {name}', values: { name: inst.name } }
+                      )}
+                      data-test-subj={`serviceSettingsStep-editButton-${inst.instanceId}`}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                {canConfigure ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    flush="left"
+                    onClick={() => setActiveFlyoutInstanceId(inst.instanceId)}
+                    data-test-subj={`serviceSettingsStep-serviceLink-${inst.instanceId}`}
+                  >
+                    {inst.name}
+                  </EuiButtonEmpty>
+                ) : (
+                  <EuiText
+                    size="s"
+                    data-test-subj={`serviceSettingsStep-serviceLink-${inst.instanceId}`}
+                  >
+                    {inst.name}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
         sortable: (inst: ServiceInstance) => inst.name,
       },
       {
