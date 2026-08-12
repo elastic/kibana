@@ -27,7 +27,7 @@ const createAction = (
   overrides: Partial<EpisodeAction> & Pick<EpisodeAction, 'id' | 'order'>
 ): EpisodeAction => ({
   displayName: overrides.id,
-  iconType: 'starEmpty',
+  iconType: 'star',
   isCompatible: () => true,
   execute: jest.fn(async () => {}),
   ...overrides,
