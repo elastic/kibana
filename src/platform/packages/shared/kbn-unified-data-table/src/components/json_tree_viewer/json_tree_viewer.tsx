@@ -9,8 +9,7 @@
 
 import React, { memo, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
   buildNodes,
   buildRows,
@@ -56,7 +55,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   formatValue,
   extraHeaderContent,
 }: JsonTreeViewerProps) {
-  const styles = useMemoCss(treeStyles);
+  const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
