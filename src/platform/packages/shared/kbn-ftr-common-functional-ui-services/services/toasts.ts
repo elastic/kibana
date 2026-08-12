@@ -125,10 +125,10 @@ export class ToastsService extends FtrService {
 
   public async getTitleByIndex(index: number): Promise<string> {
     const resultToast = await this.getElementByIndex(index);
-    const titleElement = await this.testSubjects.findDescendant(
-      'euiToastHeader__title',
-      resultToast
-    );
+    const titleElement = await resultToast.findByTestSubject('euiToastHeader__title');
+    // The toast fades in, so its title is present but not yet displayed (opacity 0) the instant
+    // the toast mounts; wait for it to become visible before reading, rather than snapshotting.
+    await this.find.waitForElementVisible(titleElement);
     const title: string = await titleElement.getVisibleText();
     return title;
   }
