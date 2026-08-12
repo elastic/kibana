@@ -21,10 +21,12 @@ import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
+import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { SignalGroupRow } from './signal_group_row';
+import { SignalsErrorPrompt } from './signals_error_prompt';
 
 interface SignalsPanelProps {
   isLoading: boolean;
@@ -44,7 +46,16 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   // rather than being frozen to whatever existed at mount.
   const chatOpener = getChatOpener?.();
 
-  const { groups, isLoading: isLoadingGroups, error: groupsError } = useSignalGroups();
+  // Signals (generation + this panel) are gated on the global feedback-loop setting. Without this
+  // the panel would render a permanently-empty "No signals yet" surface whenever the loop is off.
+  const feedbackLoopEnabled = useFeedbackLoopEnabled();
+  const {
+    groups,
+    isLoading: isLoadingGroups,
+    error: groupsError,
+  } = useSignalGroups({
+    enabled: feedbackLoopEnabled,
+  });
   const [selectedGroup, setSelectedGroup] = useState<SignalGroup | undefined>();
 
   const loading = isLoading || isLoadingGroups;
@@ -54,6 +65,11 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
       analyzeAndImprove(getChatOpener, { aiIndex, tag: undefined });
     }
   };
+
+  // Feedback loop off → the whole feature is inert; render nothing rather than an empty panel.
+  if (!feedbackLoopEnabled) {
+    return null;
+  }
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
@@ -98,26 +114,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
       {loading ? (
         <EuiSkeletonText lines={3} data-test-subj="contextSignalsLoading" />
       ) : groupsError ? (
-        <EuiEmptyPrompt
-          color="danger"
-          iconType="error"
-          titleSize="xs"
-          data-test-subj="contextSignalsError"
-          title={
-            <h3>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorTitle', {
-                defaultMessage: 'Unable to load signals',
-              })}
-            </h3>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorBody', {
-                defaultMessage: 'Something went wrong while loading signals. Try again later.',
-              })}
-            </p>
-          }
-        />
+        <SignalsErrorPrompt />
       ) : groups.length === 0 ? (
         <EuiEmptyPrompt
           iconType="inspect"

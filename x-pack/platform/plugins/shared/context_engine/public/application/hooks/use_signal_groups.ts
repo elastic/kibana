@@ -22,7 +22,9 @@ interface UseSignalGroupsResult {
  * Fetches the preaggregated grouped-by-tag Signals list
  * (`GET /internal/context_engine/signals/groups`).
  */
-export const useSignalGroups = (): UseSignalGroupsResult => {
+export const useSignalGroups = ({
+  enabled = true,
+}: { enabled?: boolean } = {}): UseSignalGroupsResult => {
   const {
     services: { http },
   } = useKibana();
@@ -30,6 +32,7 @@ export const useSignalGroups = (): UseSignalGroupsResult => {
   const { data, isLoading, error, refetch } = useQuery<ListSignalGroupsResponse, Error>({
     queryKey: contextEngineQueryKeys.signals.groups(),
     queryFn: ({ signal }) => listSignalGroups(http, { signal }),
+    enabled,
   });
 
   return { groups: data?.groups ?? [], isLoading, error: error ?? undefined, refetch };

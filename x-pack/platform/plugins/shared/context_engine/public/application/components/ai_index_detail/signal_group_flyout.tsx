@@ -8,8 +8,8 @@
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { DEFAULT_SIGNALS_PAGE_SIZE, MAX_SIGNALS_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
@@ -31,6 +32,7 @@ import { useSignals } from '../../hooks/use_signals';
 import { humanizeTagType, tagDescription } from './signal_format';
 import { SignalDetailFlyout } from './signal_detail_flyout';
 import { SignalRow } from './signal_row';
+import { SignalsErrorPrompt } from './signals_error_prompt';
 
 interface SignalGroupFlyoutProps {
   group: SignalGroup;
@@ -50,8 +52,17 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
   } = useKibana();
   const chatOpener = getChatOpener?.();
 
-  const { signals, total, isLoading, error } = useSignals({ tag: group.tag });
+  // Load-more pagination: grow the page size on demand up to the server's per-request cap so the
+  // member list (and the stacked detail flyout's Prev/Next) can reach signals beyond the first page.
+  const [size, setSize] = useState(DEFAULT_SIGNALS_PAGE_SIZE);
+  const { signals, total, isLoading, error } = useSignals({ tag: group.tag, size });
   const [flyoutIndex, setFlyoutIndex] = useState<number | null>(null);
+
+  const hasMore = signals.length < total;
+  const canLoadMore = hasMore && size < MAX_SIGNALS_PAGE_SIZE;
+  const capReached = hasMore && size >= MAX_SIGNALS_PAGE_SIZE;
+  const loadMore = () =>
+    setSize((current) => Math.min(current + DEFAULT_SIGNALS_PAGE_SIZE, MAX_SIGNALS_PAGE_SIZE));
 
   return (
     <>
@@ -109,27 +120,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
             {isLoading ? (
               <EuiSkeletonText lines={3} data-test-subj="contextSignalsGroupLoading" />
             ) : error ? (
-              <EuiEmptyPrompt
-                color="danger"
-                iconType="error"
-                titleSize="xs"
-                data-test-subj="contextSignalsError"
-                title={
-                  <h3>
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorTitle', {
-                      defaultMessage: 'Unable to load signals',
-                    })}
-                  </h3>
-                }
-                body={
-                  <p>
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.errorBody', {
-                      defaultMessage:
-                        'Something went wrong while loading signals. Try again later.',
-                    })}
-                  </p>
-                }
-              />
+              <SignalsErrorPrompt />
             ) : signals.length === 0 ? (
               <EuiText size="s" color="subdued" data-test-subj="contextSignalsGroupEmpty">
                 <p>
@@ -140,7 +131,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
               </EuiText>
             ) : (
               <>
-                {total > signals.length && (
+                {hasMore && (
                   <>
                     <EuiText
                       size="xs"
@@ -149,7 +140,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                     >
                       <p>
                         {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.truncated', {
-                          defaultMessage: 'Showing first {shown} of {total}',
+                          defaultMessage: 'Showing {shown} of {total}',
                           values: { shown: signals.length, total },
                         })}
                       </p>
@@ -168,6 +159,45 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                     </div>
                   ))}
                 </div>
+                {canLoadMore && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiFlexGroup justifyContent="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          iconType="arrowDown"
+                          isLoading={isLoading}
+                          onClick={loadMore}
+                          data-test-subj="contextSignalsGroupLoadMore"
+                        >
+                          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.loadMore', {
+                            defaultMessage: 'Load more',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                )}
+                {capReached && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      textAlign="center"
+                      data-test-subj="contextSignalsGroupCapReached"
+                    >
+                      <p>
+                        {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.capReached', {
+                          defaultMessage:
+                            'Showing the first {max} signals. Narrow the time range to see the rest.',
+                          values: { max: MAX_SIGNALS_PAGE_SIZE },
+                        })}
+                      </p>
+                    </EuiText>
+                  </>
+                )}
               </>
             )}
           </div>

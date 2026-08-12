@@ -63,9 +63,12 @@ const resolveSpaceId = (spaces: SpacesPluginStart | undefined, request: KibanaRe
 export const registerSignalRoutes = ({
   router,
   getSpaces,
+  getFeedbackLoopEnabled,
 }: {
   router: IRouter;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
+  /** Reads the global `contextEngine:feedbackLoopEnabled` setting; routes 404 while it is off. */
+  getFeedbackLoopEnabled: () => Promise<boolean>;
 }) => {
   // Preaggregated grouped-by-tag list.
   router.versioned
@@ -80,6 +83,9 @@ export const registerSignalRoutes = ({
     .addVersion(
       { version: SIGNALS_INTERNAL_API_VERSION, validate: false },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        if (!(await getFeedbackLoopEnabled())) {
+          return response.notFound();
+        }
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         const body: ListSignalGroupsResponse = await getSignalGroups(esClient, {
@@ -106,6 +112,9 @@ export const registerSignalRoutes = ({
         validate: { request: { query: listSignalsQuerySchema } },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
+        if (!(await getFeedbackLoopEnabled())) {
+          return response.notFound();
+        }
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         const { tag, from, size } = request.query;

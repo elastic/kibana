@@ -115,6 +115,8 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
       },
+      // Reads the current value at request time (assigned in start(), after this setup() runs).
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
     return {

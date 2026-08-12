@@ -76,6 +76,32 @@ describe('SignalDetailFlyout', () => {
     expect(screen.getByTestId('contextSignalDetailNoTrace')).toBeInTheDocument();
   });
 
+  it('shows a loading placeholder (not "no trace") while the active space is still resolving', () => {
+    // A spaces plugin whose active space never resolves keeps `useSpaceId` in the resolving state.
+    const resolvingServices = {
+      ...services,
+      spaces: { getActiveSpace: () => new Promise(() => {}) },
+    };
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider services={resolvingServices}>
+            <SignalDetailFlyout
+              signals={signals}
+              total={signals.length}
+              index={0}
+              onNavigate={jest.fn()}
+              onClose={jest.fn()}
+            />
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('contextSignalDetailTraceLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalDetailNoTrace')).not.toBeInTheDocument();
+  });
+
   it('disables Previous on the first signal and navigates with Next', () => {
     const { onNavigate } = renderFlyout(signals, 0);
 

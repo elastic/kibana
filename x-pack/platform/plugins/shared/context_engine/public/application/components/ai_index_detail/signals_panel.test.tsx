@@ -13,11 +13,13 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { ChatOpener } from '../../../types';
+import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { useSignals } from '../../hooks/use_signals';
 import { SignalsPanel } from './signals_panel';
 import { buildSignal } from './signal_test_fixtures';
 
+jest.mock('../../hooks/use_feedback_loop_enabled', () => ({ useFeedbackLoopEnabled: jest.fn() }));
 jest.mock('../../hooks/use_signal_groups', () => ({ useSignalGroups: jest.fn() }));
 jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
 jest.mock('@kbn/llm-trace-waterfall', () => ({
@@ -26,6 +28,7 @@ jest.mock('@kbn/llm-trace-waterfall', () => ({
   useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
 }));
 
+const mockUseFeedbackLoopEnabled = jest.mocked(useFeedbackLoopEnabled);
 const mockUseSignalGroups = jest.mocked(useSignalGroups);
 const mockUseSignals = jest.mocked(useSignals);
 
@@ -78,8 +81,15 @@ const renderPanel = ({
 
 describe('SignalsPanel', () => {
   beforeEach(() => {
+    mockUseFeedbackLoopEnabled.mockReturnValue(true);
     mockUseSignalGroups.mockReturnValue(groupsResult());
     mockUseSignals.mockReturnValue(signalsResult());
+  });
+
+  it('renders nothing when the feedback loop is disabled', () => {
+    mockUseFeedbackLoopEnabled.mockReturnValue(false);
+    renderPanel();
+    expect(screen.queryByTestId('contextSignalsPanel')).not.toBeInTheDocument();
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -176,7 +186,7 @@ describe('SignalsPanel', () => {
     fireEvent.click(screen.getByTestId('contextSignalGroupRow'));
 
     expect(screen.getByTestId('contextSignalsGroupTruncated')).toHaveTextContent(
-      'Showing first 1 of 100'
+      'Showing 1 of 100'
     );
   });
 });

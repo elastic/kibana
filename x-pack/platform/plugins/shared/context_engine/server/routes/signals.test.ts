@@ -25,6 +25,7 @@ describe('signals routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
+  let feedbackLoopEnabled: boolean;
   let search: jest.Mock;
 
   const createContext = () =>
@@ -53,6 +54,7 @@ describe('signals routes', () => {
   beforeEach(() => {
     routes = {};
     featureFlagEnabled = true;
+    feedbackLoopEnabled = true;
     response = httpServerMock.createResponseFactory();
     search = jest.fn();
 
@@ -66,7 +68,11 @@ describe('signals routes', () => {
       versioned: { get: jest.fn(createVersionedRoute('GET')) },
     } as unknown as IRouter;
 
-    registerSignalRoutes({ router, getSpaces: async () => undefined });
+    registerSignalRoutes({
+      router,
+      getSpaces: async () => undefined,
+      getFeedbackLoopEnabled: async () => feedbackLoopEnabled,
+    });
   });
 
   it('registers both routes as internal read routes', () => {
@@ -82,6 +88,16 @@ describe('signals routes', () => {
 
   it('returns 404 on every route when the context engine is disabled', async () => {
     featureFlagEnabled = false;
+
+    await callRoute(signalGroupsPath, {});
+    await callRoute(signalsPath, { query: { tag: 'query_error', from: 0, size: 25 } });
+
+    expect(response.notFound).toHaveBeenCalledTimes(2);
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 on every route when the feedback loop is disabled', async () => {
+    feedbackLoopEnabled = false;
 
     await callRoute(signalGroupsPath, {});
     await callRoute(signalsPath, { query: { tag: 'query_error', from: 0, size: 25 } });

@@ -15,6 +15,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -63,7 +64,7 @@ export const SignalDetailFlyout = ({
   const {
     services: { data, spaces },
   } = useKibana();
-  const spaceId = useSpaceId(spaces);
+  const { spaceId, isResolving: isResolvingSpace } = useSpaceId(spaces);
 
   const signal = signals[index];
 
@@ -71,6 +72,9 @@ export const SignalDetailFlyout = ({
   const traceId = signal?.trace_ids?.[0];
   // Gate on the trace id, not on `data.search.search` (which is always defined).
   const canShowTrace = Boolean(tracesIndex && traceId);
+  // A signal with a trace id but no space yet is still *resolving* — don't flash the terminal
+  // "no trace" message before the active space (and thus the traces index) is known.
+  const isTraceResolving = Boolean(traceId) && !tracesIndex && isResolvingSpace;
 
   const fetchTrace = useMemo(
     () =>
@@ -247,6 +251,8 @@ export const SignalDetailFlyout = ({
               error={traceResult.error}
             />
           </div>
+        ) : isTraceResolving ? (
+          <EuiSkeletonText lines={3} data-test-subj="contextSignalDetailTraceLoading" />
         ) : (
           <EuiText size="s" color="subdued" data-test-subj="contextSignalDetailNoTrace">
             <p>
