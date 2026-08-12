@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { useGetCloudConnectors } from './use_get_cloud_connectors';
-export { useCloudConnectorTemplate } from './use_cloud_connector_template';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
