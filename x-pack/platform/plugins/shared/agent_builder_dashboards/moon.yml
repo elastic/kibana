@@ -38,7 +38,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
   - '@kbn/esql-utils'
-  - '@kbn/ui-theme'
   - '@kbn/inference-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
