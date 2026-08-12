@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 import { useChangeHistoryModal } from '@kbn/change-history-ui';
 
 /**
- * Storybook helper: opens the change-history modal once after the provider mounts.
- * Remount (via `key`) to open again for another rule.
+ * Opens the change-history modal once after the provider mounts. Remount (via
+ * `key`) to open again for another rule.
  */
 export const AutoOpenChangeHistoryModal = (): null => {
   const { openModal } = useChangeHistoryModal();
