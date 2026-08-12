@@ -40,7 +40,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Count');
 
-    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
+    const { bullet } = await lens.workspace.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.title).toBe('Count');
     expect(Math.round(debugData?.value ?? 0)).toBe(14004);
@@ -59,7 +59,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 100');
 
-    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
+    const { bullet } = await lens.workspace.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');
@@ -90,7 +90,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
     await expect(dimensions[1]).toHaveText('Static value: 0');
     await expect(dimensions[2]).toHaveText('Static value: 15000000000');
 
-    const { bullet } = await lens.getCurrentChartDebugState('gaugeChart');
+    const { bullet } = await lens.workspace.getCurrentChartDebugState('gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.subtype).toBe(BulletSubtype.twoThirdsCircle);
     expect(debugData?.title).toBe('Average machine.ram');
@@ -99,7 +99,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deployme
 
     await dimensions[0].click();
     await lens.openPalettePanelFlyout();
-    const colorStops = await lens.getPaletteColorStops();
+    const colorStops = await lens.style.getPaletteColorStops();
     expect(colorStops).toStrictEqual([
       { stop: '0', color: 'rgba(0, 104, 55, 1)' },
       { stop: '10000', color: 'rgba(183, 224, 117, 1)' },

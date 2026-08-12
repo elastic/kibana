@@ -34,10 +34,15 @@ const mockUseConversationTitle = jest.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
-const renderTitle = (permissions: ConversationPermissions) => {
+const renderTitle = (permissions: Partial<ConversationPermissions>) => {
   mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
   mockUseHasPersistedConversation.mockReturnValue(true);
-  mockUseConversationPermissions.mockReturnValue(permissions);
+  mockUseConversationPermissions.mockReturnValue({
+    rename: false,
+    delete: false,
+    update_access_control: false,
+    ...permissions,
+  });
 
   render(
     <IntlProvider locale="en">

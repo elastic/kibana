@@ -80,7 +80,6 @@ Keep example queries cheap: end with a small `| LIMIT n`.
 **ES|QL rules:** For detection KIs the full query is materialized, not parameterised, so these forms are allowed and expected:
 - `FROM <index> METADATA _id, _source` — carry document identity/source through the pipeline so detections can point back to the originating docs.
 - The full-text `field : "value"` (`: match`) operator — e.g. `WHERE message : "connection refused"` — for text-matching detection conditions in addition to `==`/`STATS`.
-
 **Connector sources — execute_connector_sub_action call:**
 ```
 Access patterns:
@@ -282,6 +281,7 @@ Ask yourself:
 - Is the output the expected structure?
 - are the access patterns correct?
 - would I, as an Agent, find this context useful?
+- If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding. Only do this query > improve description test once, and move on after.
 
 If not, repeat this step, adjusting the pilot workflow accordingly.
 Use `generate_workflow` with the existing `attachmentId` to edit.
@@ -335,7 +335,7 @@ The AI Index schema has these base fields (all required unless noted):
 |---|---|---|
 | `type` | keyword | The **KI kind** — the top-level discriminator agents and queries filter on. Set it to the kind of KI this doc represents, e.g. `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value (see the per-strategy mapping under "Workflow shapes for each strategy"). **Not** the same as `query_type` (`match`/`stats`, a detection attribute) or `subtype` (a feature's `entity`/`dependency`/… class). |
 | `title` | text + semantic | Short display name; primary semantic surface |
-| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
+| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins. When sibling KIs share a similar `title` (e.g. support tickets all categorized as "Billing inquiry"), the description **must** carry the differentiating signal: the sub-category, product name, or time window. `title` alone will not separate near-duplicates for the retriever. |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
 | `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
@@ -346,9 +346,9 @@ The AI Index schema has these base fields (all required unless noted):
 | Field (under `attributes`) | Type | Purpose |
 |---|---|---|
 | `attributes.confidence` | number 0–1 (keyword under `flattened`) | **Correctness** — how sure we are the KI's facts are right, calibrated to evidence strength (see the calibration bands under "Quality & grounding contract"). Distinct from `coverage`. |
-| `attributes.coverage` | number 0–1 (keyword under `flattened`) | **Completeness** — how fully the KI's access patterns cover the source's question-classes, emitted by the profiling step. Lets agents prefer better-covered KIs when routing. Optional; most meaningful for Index Metadata KIs. Because `flattened` indexes values as keywords, cast with `TO_DOUBLE(attributes.coverage)` before any numeric sort/range in ES\|QL. |
+| `attributes.coverage` | number 0–1 (keyword under `flattened`) | **Completeness** — how fully the KI's access patterns cover the source's question-classes, emitted by the profiling step. Lets agents prefer better-covered KIs when routing. Optional; most meaningful for Index Metadata KIs. Because `flattened` indexes values as keywords, cast with `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))` before any numeric sort/range in ES\|QL. |
 | `attributes.evidence` | string[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
-| `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(attributes.expires_at)` in ES\|QL. |
+| `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
 | `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
@@ -453,6 +453,7 @@ Before presenting any workflow to the user:
 - [ ] Detection KIs carry the complete runnable query (not a template) in `content`; `query_type` is derived from the ES|QL, not LLM-supplied; every threshold + `evidence[]` string quotes an observed distribution; sample-floor + precision-first guardrails applied
 - [ ] `attributes.expires_at` (~30 days) is written to expiring KIs and **omitted** for durable (immutable-fact) KIs
 - [ ] Expiry-based freshness guard is implemented when the workflow runs on a schedule
+- [ ] When titles are near-duplicates across the corpus, each `description` carries a differentiating discriminator (identifier, package, category)
 
 ## Workflow shapes for each strategy
 
@@ -480,6 +481,8 @@ key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` 
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
+
+**Signal to roll up:** if a Bottom-Up pass yields many near-identically-titled entries — e.g. support tickets all titled "Billing inquiry — subscription", "Billing inquiry — refund", "Billing inquiry — upgrade" — emit one KI per logical cluster (category, product area, or status class) and enumerate the individual entries inside that KI's `content`, rather than one KI per record. This is a variant of Bottom-Up at a coarser granularity — treat the category or cluster as the document unit rather than the individual record.
 
 **Selective / Outlier:**
 An `elasticsearch.esql.query` pulling candidate docs filtered to notable records
@@ -536,7 +539,7 @@ Detection guardrails (bake into the prompt):
 
 *Lifecycle and dedup:*
 - Set `attributes.expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale, so a detection whose condition no longer appears in the data simply ages out.
-- **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index — `attributes.expires_at` is a `flattened` (keyword) string, so compare it as `WHERE TO_DATETIME(attributes.expires_at) > NOW()`; if one exists, skip the profiling run entirely.
+- **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index — `attributes.expires_at` is a `flattened` (keyword) string, so compare it as `WHERE TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at")) > NOW()`; if one exists, skip the profiling run entirely.
 - Cross-run dedup: index with a stable `id = <index>/<normalized-slug>` so a re-run resolves to the same KI, and apply the fingerprint + merge rules from the grounding contract so near-duplicate detections/features (same condition, slightly different title) collapse into one rather than accumulating.
 
 ## Adapting the recipe

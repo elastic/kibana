@@ -63,19 +63,13 @@ export const hasWorkflowExecutePrivilege = (
     actions: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
   });
 
-/**
- * Verifies the caller holds the `workflowsManagement:create` privilege before a
- * workflow is persisted through Agent Builder.
- */
+
 export const hasWorkflowCreatePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>
   hasAllApiPrivileges({ ...params, actions: [WorkflowsManagementApiActions.create] });
 
-/**
- * Verifies the caller holds the `workflowsManagement:update` privilege before a
- * saved workflow is modified through Agent Builder.
- */
+
 export const hasWorkflowUpdatePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>

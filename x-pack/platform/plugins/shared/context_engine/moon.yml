@@ -28,7 +28,9 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/features-plugin'
   - '@kbn/storage-adapter'
+  - '@kbn/task-manager-plugin'
   - '@kbn/es-errors'
+  - '@kbn/es-types'
   - '@kbn/management-settings-ids'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-page-kibana-template'
@@ -57,6 +59,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/security-plugin'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
