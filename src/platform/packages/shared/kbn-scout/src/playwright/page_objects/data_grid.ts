@@ -657,4 +657,15 @@ export class DataGrid {
       timeout: 30_000,
     });
   }
+
+  /**
+   * Sorts a column via its header menu. The direction is carried entirely by
+   * `sortOption`, which is the menu entry's label and varies by field type:
+   * `Sort A-Z` / `Sort Z-A` for strings, `Sort Old-New` / `Sort New-Old` for
+   * dates, `Sort Low-High` / `Sort High-Low` for numbers.
+   */
+  async sortColumn(field: string, sortOption: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: sortOption }).click();
+  }
 }
