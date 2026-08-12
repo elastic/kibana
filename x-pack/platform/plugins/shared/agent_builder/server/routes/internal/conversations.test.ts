@@ -91,8 +91,10 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
   let applyTemplate: jest.Mock;
 
-  const createMockContext = () => ({
-    core: Promise.resolve({}),
+  const createMockContext = ({ featureFlagEnabled = true } = {}) => ({
+    core: Promise.resolve({
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(featureFlagEnabled) } },
+    }),
     licensing: Promise.resolve({
       license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
     }),
@@ -165,6 +167,17 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
 
     expect(response.status).toBe(500);
   });
+
+  it('returns 404 when the experimental features flag is disabled', async () => {
+    const response = await routeHandler(
+      createMockContext({ featureFlagEnabled: false }) as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(applyTemplate).not.toHaveBeenCalled();
+  });
 });
 
 const PATCH_METADATA_PATH = `${internalApiPath}/conversations/{conversation_id}/metadata`;
@@ -173,8 +186,10 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
   let routeHandler: (ctx: any, req: any, res: any) => Promise<any>;
   let patchMetadata: jest.Mock;
 
-  const createMockContext = () => ({
-    core: Promise.resolve({}),
+  const createMockContext = ({ featureFlagEnabled = true } = {}) => ({
+    core: Promise.resolve({
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(featureFlagEnabled) } },
+    }),
     licensing: Promise.resolve({
       license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
     }),
@@ -256,6 +271,17 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
     );
 
     expect(response.status).toBe(500);
+  });
+
+  it('returns 404 when the experimental features flag is disabled', async () => {
+    const response = await routeHandler(
+      createMockContext({ featureFlagEnabled: false }) as any,
+      createRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(patchMetadata).not.toHaveBeenCalled();
   });
 });
 

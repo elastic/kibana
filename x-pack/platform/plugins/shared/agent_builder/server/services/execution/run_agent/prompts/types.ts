@@ -35,10 +35,6 @@ export interface PromptFactoryParams {
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
-  /** Key/value pairs from the active conversation template, injected into the system prompt. */
-  conversationMetadata?: Record<string, string | string[]>;
-  /** ID of the active template, used to look up field schemas for the system prompt. */
-  conversationTemplateId?: string;
   /**
    * Effective on/off for context-aware skill filtering this run: the `relevantSkills` flag AND a
    * dedicated fast model being configured. Gates the SKILLS section (static pointer vs full list) and

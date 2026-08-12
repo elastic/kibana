@@ -180,6 +180,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
+    metadata: conversation?.metadata,
+    templateId: conversation?.template_id,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -318,8 +320,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     eventEmitter: events.emit,
   });
 
-  // Reassign to the (possibly compacted) conversation for prompt construction
-  processedConversation = compactionResult.processedConversation;
+  // Reassign to the (possibly compacted) conversation for prompt construction.
+  // Re-propagate conversation-level fields that compaction does not touch.
+  processedConversation = {
+    ...compactionResult.processedConversation,
+    metadata: conversation?.metadata,
+    template_id: conversation?.template_id,
+  };
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
   if (relevantSkillsEnabled) {
@@ -344,8 +351,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
-    conversationMetadata: conversation?.metadata,
-    conversationTemplateId: conversation?.template_id,
   });
 
   const agentGraph = createAgentGraph({

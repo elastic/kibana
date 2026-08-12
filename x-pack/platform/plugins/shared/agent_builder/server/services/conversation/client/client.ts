@@ -49,7 +49,7 @@ import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
-import { serializeMetadataValue } from '../templates/serialize';
+import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
@@ -61,6 +61,27 @@ import {
   type Document,
   type VersionedDocument,
 } from './converters';
+
+/**
+ * Applies `deserializeMetadata` to a conversation if it has both a `template_id`
+ * and a `metadata` field. The storage layer keeps values as `string | string[]`;
+ * this restores the richer JS types (boolean for TOGGLE, number for NUMBER, etc.)
+ * that consumers expect. Keys not declared in the current template pass through as-is.
+ */
+const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
+  conversation: T
+): T => {
+  if (!conversation.template_id || !conversation.metadata) return conversation;
+  const template = getTemplate(conversation.template_id);
+  if (!template) return conversation;
+  return {
+    ...conversation,
+    metadata: deserializeMetadata(
+      conversation.metadata as Record<string, string | string[]>,
+      template
+    ),
+  };
+};
 
 const buildMetadataFromTemplate = (
   template: ConversationTemplate
@@ -219,8 +240,10 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     try {
-      return fromEs(
-        await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
+      return withDeserializedMetadata(
+        fromEs(
+          await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
+        )
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
@@ -241,13 +264,18 @@ class ConversationClientImpl implements ConversationClient {
     let resolvedTemplateVersion: number | undefined;
     if (templateId) {
       const template = getTemplate(templateId);
-      if (template) {
-        validateTemplateDefaults(template);
-        const templateMetadata = buildMetadataFromTemplate(template);
-        resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
-        resolvedTemplateId = templateId;
-        resolvedTemplateVersion = template.version;
+      if (!template) {
+        throw createBadRequestError(`Template not found: ${templateId}`);
       }
+      validateTemplateDefaults(template);
+      // Validate any caller-supplied metadata against the template before merging.
+      if (resolvedMetadata && Object.keys(resolvedMetadata).length > 0) {
+        validateMetadataUpdate(template.id, template.fields, resolvedMetadata);
+      }
+      const templateMetadata = buildMetadataFromTemplate(template);
+      resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
+      resolvedTemplateId = templateId;
+      resolvedTemplateVersion = template.version;
     }
 
     const attributes = createRequestToEs({
@@ -288,12 +316,14 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, ...fields } = conversationUpdate;
     const { access, retryOnConflict = false } = options;
 
-    return this.writeConversation({
+    const result = await this.writeConversation({
       conversationId,
       access,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
       fields: () => fields,
     });
+
+    return withDeserializedMetadata(result);
   }
 
   async addAttachmentsToLastRound(
@@ -303,7 +333,7 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, refs, attachments } = request;
     const { access } = options;
 
-    return this.writeConversation({
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => {
@@ -324,6 +354,7 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
+    return withDeserializedMetadata(result);
   }
 
   async upsertRound(
@@ -333,7 +364,7 @@ class ConversationClientImpl implements ConversationClient {
     const { id: conversationId, round, replacesRoundId, state, attachments, workspaceId } = request;
     const { access } = options;
 
-    return this.writeConversation({
+    const result = await this.writeConversation({
       conversationId,
       access,
       fields: (current) => ({
@@ -353,6 +384,7 @@ class ConversationClientImpl implements ConversationClient {
         read: false,
       }),
     });
+    return withDeserializedMetadata(result);
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -378,54 +410,31 @@ class ConversationClientImpl implements ConversationClient {
       throw createBadRequestError(`Template not found: ${templateId}`);
     }
 
+    // Reject switching to a different template — one template per conversation.
+    // Re-applying the same template is the explicit version-migration action.
+    if (existing.template_id && existing.template_id !== templateId) {
+      throw createBadRequestError(
+        `Conversation already has template "${existing.template_id}". ` +
+          `Switching templates is not supported; re-apply the same template to migrate to a newer version.`
+      );
+    }
+
     validateTemplateDefaults(template);
     const newTemplateFieldNames = new Set(Object.keys(template.fields));
     const newTemplateMetadata = buildMetadataFromTemplate(template);
 
-    const isSameTemplate = existing.template_id === templateId;
-
-    if (isSameTemplate) {
-      // Version bump on the same template: preserve existing values for fields still
-      // declared in the new version, seed defaults for newly added fields, and drop
-      // everything else (fields the new version removed). Without the old schema we
-      // can't distinguish "removed template field" from "user-defined key", so all
-      // keys not in the new template are dropped — safe for MVP where metadata is
-      // entirely template-driven.
-      const preservedValues = Object.fromEntries(
-        Object.entries(existing.metadata ?? {}).filter(([key]) => newTemplateFieldNames.has(key))
-      );
-      const metadata: Record<string, string | string[]> = {
-        // Defaults fill any newly-added fields; existing values take precedence.
-        ...newTemplateMetadata,
-        ...preservedValues,
-      };
-      return this.update(
-        {
-          id: conversationId,
-          metadata,
-          template_id: templateId,
-          template_version: template.version,
-        },
-        { access: 'owner' }
-      );
-    }
-
-    // Different template: remove all keys owned by the previous template so orphan
-    // keys don't leak from the old template into the new one. User-defined keys survive.
-    const previousTemplateFieldNames = existing.template_id
-      ? new Set(Object.keys(getTemplate(existing.template_id)?.fields ?? {}))
-      : new Set<string>();
-
-    const cleanedExistingMetadata = Object.fromEntries(
-      Object.entries(existing.metadata ?? {}).filter(
-        ([key]) => !previousTemplateFieldNames.has(key)
-      )
+    // Version bump (or first apply): preserve existing values for fields still
+    // declared in the new version, seed defaults for newly added fields, and drop
+    // everything else (fields the new version removed).
+    // `existing.metadata` here comes from `fromEs` (raw storage, string | string[]).
+    const storedMetadata = (existing.metadata ?? {}) as Record<string, string | string[]>;
+    const preservedValues = Object.fromEntries(
+      Object.entries(storedMetadata).filter(([key]) => newTemplateFieldNames.has(key))
     );
-
-    // New template defaults always win for template-owned keys; user-defined keys survive.
     const metadata: Record<string, string | string[]> = {
-      ...cleanedExistingMetadata,
+      // Defaults fill any newly-added fields; existing values take precedence.
       ...newTemplateMetadata,
+      ...preservedValues,
     };
 
     return this.update(
@@ -467,8 +476,10 @@ class ConversationClientImpl implements ConversationClient {
       })
     );
 
+    // `existing.metadata` here comes from `fromEs` (raw storage, string | string[]).
+    // Cast to the storage type so the merge is correctly typed for the write path.
     const mergedMetadata: Record<string, string | string[]> = {
-      ...(existing.metadata ?? {}),
+      ...((existing.metadata ?? {}) as Record<string, string | string[]>),
       ...serialized,
     };
 
@@ -476,25 +487,25 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
-    return {
+    return withDeserializedMetadata({
       ...fromEs(document),
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
       }),
-    };
+    });
   }
 
   private toResponseConversationWithoutRounds(
     document: Document
   ): ConversationWithoutRoundsWithPermissions {
-    return {
+    return withDeserializedMetadata({
       ...fromEsWithoutRounds(document),
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
       }),
-    };
+    });
   }
 
   private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {

@@ -249,7 +249,12 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
-    ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
+    // Cast metadata to storage type — the flattened mapping requires string | string[].
+    // Deserialized domain values (boolean, number) only exist on read; writes always
+    // go through serializeMetadataValue before reaching this converter.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, string | string[]> }
+      : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
@@ -306,7 +311,10 @@ export const createRequestToEs = ({
     access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
-    ...(conversation.metadata ? { metadata: conversation.metadata } : {}),
+    // Cast metadata to storage type — see note in toEs.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, string | string[]> }
+      : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }

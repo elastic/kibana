@@ -114,9 +114,12 @@ const getAgentSystemMessage = async ({
   relevantSkillsEnabled,
   capabilities,
   renderers,
-  conversationMetadata,
-  conversationTemplateId,
+  processedConversation,
 }: ResearchAgentPromptParams): Promise<string> => {
+  const conversationTemplateId = processedConversation.template_id;
+  const conversationMetadata = processedConversation.metadata as
+    | Record<string, string | string[]>
+    | undefined;
   const visEnabled = capabilities.visualizations;
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.

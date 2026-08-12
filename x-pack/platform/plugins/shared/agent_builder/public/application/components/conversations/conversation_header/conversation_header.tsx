@@ -9,7 +9,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationTitle } from './conversation_title';
-import { TemplateSelector } from './template_selector';
 
 const headerGridStyles = css`
   display: grid;
@@ -32,10 +31,8 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
 }) => {
   return (
     <div css={headerGridStyles}>
-      {/* Left column — template selector */}
-      <div>
-        <TemplateSelector />
-      </div>
+      {/* Left column — reserved for future controls */}
+      <div />
 
       {/* Center column — always exactly centered */}
       <ConversationTitle ariaLabelledBy={ariaLabelledBy} />

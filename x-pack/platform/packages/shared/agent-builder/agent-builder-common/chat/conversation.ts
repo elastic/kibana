@@ -495,13 +495,15 @@ export interface Conversation {
   /**
    * Arbitrary key/value pairs seeded from a template or set by callers.
    *
-   * Stored in Elasticsearch as a `flattened` field. String leaves are keyword-indexed;
-   * string-array leaves are multi-value keyword-indexed. Numeric, boolean, and date
-   * values are serialized to strings on write and recovered via runtime fields (KQL)
-   * or type casting (ES|QL). Only `TEXT_ARRAY` template fields produce array values.
+   * Stored in Elasticsearch as a `flattened` field (all leaves keyword-indexed for
+   * filterability). On the write path, values are serialized to `string | string[]`
+   * (`NUMBER` / `TOGGLE` / `DATE` → string; `TEXT_ARRAY` → string[]). On read,
+   * `deserializeMetadata` recovers the richer types using the active template's field
+   * definitions, so `TOGGLE` → boolean, `NUMBER` → number, `TEXT_ARRAY` → string[].
+   * Keys not declared in the current template pass through as stored strings.
    */
-  metadata?: Record<string, string | string[]>;
-  /** ID of the template that was last applied to this conversation. */
+  metadata?: Record<string, string | string[] | number | boolean>;
+  /** ID of the template applied to this conversation. Each conversation supports exactly one template; re-applying the same template migrates to a newer version. */
   template_id?: string;
   /**
    * Version of the template as it was when it was last applied.

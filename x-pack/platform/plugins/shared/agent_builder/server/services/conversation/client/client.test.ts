@@ -1158,7 +1158,7 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('clears orphan keys from the previously-applied template when switching', async () => {
+    it('rejects switching to a different template (one template per conversation)', async () => {
       const templateA = makeTemplate('tmpl-a', {
         old_key: { input_type: 'TEXT', description: 'Old key', default_value: 'old_value' },
       });
@@ -1181,21 +1181,13 @@ describe('ConversationClient', () => {
         },
       });
 
-      await client.applyTemplate('conversation-1', 'tmpl-b');
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            // old_key must NOT appear; new_key must be seeded from template B
-            metadata: { new_key: 'new_value' },
-            template_id: 'tmpl-b',
-            template_version: 1,
-          }),
-        })
+      await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
+        'Conversation already has template "tmpl-a". Switching templates is not supported'
       );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('preserves non-template user-defined metadata keys when switching templates', async () => {
+    it('rejects applying a different template even when conversation has user-defined metadata keys', async () => {
       const templateA = makeTemplate('tmpl-a', {
         tmpl_a_key: { input_type: 'TEXT', description: 'Template A key' },
       });
@@ -1213,27 +1205,18 @@ describe('ConversationClient', () => {
             createConversationDocumentWithTemplate({
               templateId: 'tmpl-a',
               metadata: {
-                tmpl_a_key: 'set_by_user', // owned by template A — should be cleared
-                user_custom_key: 'stays', // NOT owned by any template — should survive
+                tmpl_a_key: 'set_by_user',
+                user_custom_key: 'stays',
               },
             }),
           ],
         },
       });
 
-      await client.applyTemplate('conversation-1', 'tmpl-b');
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.objectContaining({
-            metadata: {
-              user_custom_key: 'stays', // user key survives
-              tmpl_b_key: 'b_val', // new template default applied
-              // tmpl_a_key: absent — cleared because it belonged to template A
-            },
-          }),
-        })
+      await expect(client.applyTemplate('conversation-1', 'tmpl-b')).rejects.toThrow(
+        'Conversation already has template "tmpl-a". Switching templates is not supported'
       );
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('on same-template version bump: preserves existing field values, drops removed fields', async () => {
@@ -1438,22 +1421,20 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('does not set template_id or metadata when the template id is unknown', async () => {
+    it('throws a bad-request error when the template id is unknown', async () => {
       getTemplateMock.mockReturnValue(undefined);
 
-      await client.create({
-        id: 'conversation-1',
-        title: 'Conversation 1',
-        agent_id: 'agent-1',
-        rounds: [],
-        template_id: 'non-existent',
-      });
-
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: expect.not.objectContaining({ template_id: expect.anything() }),
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+          template_id: 'non-existent',
         })
-      );
+      ).rejects.toThrow('Template not found: non-existent');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('creates without a template when template_id is not provided', async () => {

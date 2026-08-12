@@ -7,5 +7,5 @@
 
 export interface PatchConversationMetadataResponse {
   id: string;
-  metadata: Record<string, string | string[]>;
+  metadata: Record<string, string | string[] | number | boolean>;
 }
