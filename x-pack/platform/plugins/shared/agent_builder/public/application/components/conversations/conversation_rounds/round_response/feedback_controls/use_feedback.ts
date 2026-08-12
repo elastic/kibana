@@ -164,6 +164,28 @@ export const useFeedback = (
         setVoteState('down');
         setModalOpen(true);
         setInviteVisible(false);
+        if (conversationId) {
+          isSubmittingRef.current = true;
+          setIsSubmitting(true);
+          conversationsService
+            .submitRoundFeedback({ conversationId, roundId, vote: 'down' })
+            .then(() =>
+              patchCache({
+                vote: 'down',
+                chips: [],
+                comment: '',
+                submitted_at: new Date().toISOString(),
+              })
+            )
+            .catch(() => {
+              addErrorToast({ title: labels.voteError });
+              resetTo();
+            })
+            .finally(() => {
+              isSubmittingRef.current = false;
+              setIsSubmitting(false);
+            });
+        }
       } else {
         setVoteState('up');
         setModalOpen(false);
