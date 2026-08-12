@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-anomaly-utils'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,14 +14,14 @@ project:
   title: '@kbn/ml-anomaly-utils'
   description: Moon project for @kbn/ml-anomaly-utils
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ml/anomaly_utils
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/ml-is-populated-object'
   - '@kbn/field-types'
   - '@kbn/utility-types'
-  - '@kbn/config-schema'
+  - '@kbn/zod'
   - '@kbn/es-query'
 tags:
   - shared-common

@@ -75,10 +75,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
-}));
-
 jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => ({
@@ -976,7 +972,7 @@ describe.skip('query tab with unified timeline', () => {
 
         expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
           'data-euiicon-type',
-          'expand'
+          'maximize'
         );
 
         // Open Flyout
@@ -1007,7 +1003,7 @@ describe.skip('query tab with unified timeline', () => {
           expect(mockCloseFlyout).toHaveBeenNthCalledWith(1);
           expect(screen.getByTestId('docTableExpandToggleColumn').firstChild).toHaveAttribute(
             'data-euiicon-type',
-            'expand'
+            'maximize'
           );
         });
       },
