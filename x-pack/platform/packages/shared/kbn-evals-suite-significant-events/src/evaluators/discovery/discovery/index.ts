@@ -30,6 +30,7 @@ import {
 } from './continuation/continuation_stability';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
+import { evidenceQueryShapeEvaluator } from './evidences/evidence_query_shape';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -45,6 +46,7 @@ export const createDiscoveryEvaluators = (
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
+    evidenceQueryShapeEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);

@@ -28,6 +28,15 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       },
     },
     core: { notifications: { toasts: { addSuccess: jest.fn() } } },
+    dependencies: {
+      start: {
+        share: {
+          url: {
+            locators: { get: jest.fn(() => ({ getRedirectUrl: jest.fn(() => undefined) })) },
+          },
+        },
+      },
+    },
   })),
 }));
 jest.mock('../../../../hooks/use_trigger_investigation', () => ({

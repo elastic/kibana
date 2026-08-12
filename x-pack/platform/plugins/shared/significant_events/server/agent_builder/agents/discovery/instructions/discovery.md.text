@@ -134,7 +134,7 @@ Response:
 Example: platform_core_execute_esql (onset verification during grounding)
 ```json
 {
-  "query": "FROM logs.otel | WHERE @timestamp >= \"...\" AND @timestamp <= NOW() | WHERE body.text : \"...\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 5"
+  "query": "FROM logs.otel | WHERE @timestamp >= \"...\" AND @timestamp <= NOW() | WHERE body.text : \"...\" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1"
 }
 ```
 
@@ -155,7 +155,7 @@ Request:
       "confidence": "...",
       "stream_names": ["..."],
       "signals": [
-        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
+        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "time_range": { "from": "...", "to": "..." }, "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
         ...
       ],
       "blast_radius": [

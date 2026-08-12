@@ -18,6 +18,22 @@ import {
 } from './significant_event_attachment';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: jest.fn(() => ({
+    core: {},
+    services: {},
+    dependencies: {
+      start: {
+        share: {
+          url: {
+            locators: { get: jest.fn(() => ({ getRedirectUrl: jest.fn(() => undefined) })) },
+          },
+        },
+      },
+    },
+  })),
+}));
+
 const attachment: SignificantEventAttachment = {
   id: 'attachment-1',
   type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,

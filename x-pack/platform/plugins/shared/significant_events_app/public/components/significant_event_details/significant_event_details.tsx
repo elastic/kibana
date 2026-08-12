@@ -5,81 +5,209 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
-  EuiDescriptionList,
+  EuiAccordion,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { InfoPanel } from '../info_panel';
+import type {
+  SignalEntry,
+  SignificantEvent,
+  SignificantEventResponse,
+} from '@kbn/significant-events-schema';
+import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
+import {
+  appendToESQLQuery,
+  formatESQLColumns,
+  getESQLAdHocDataview,
+  getESQLResults,
+} from '@kbn/esql-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { ESQLRow } from '@kbn/es-types';
 import { formatTimestamp } from '../../util/formatters';
+import { InfoPanel } from '../info_panel';
+import { useKibana } from '../../hooks/use_kibana';
 
 const DESCRIPTION_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.descriptionTitle',
-  {
-    defaultMessage: 'Description',
-  }
-);
-const GENERAL_INFORMATION_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.generalInformationTitle',
-  {
-    defaultMessage: 'General information',
-  }
-);
-const CREATED_AT_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.createdAtLabel',
-  {
-    defaultMessage: 'Created at',
-  }
-);
-const CAUSAL_FEATURES_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.causalFeatures',
-  {
-    defaultMessage: 'Causal features',
-  }
-);
-const STREAMS_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.streams',
-  {
-    defaultMessage: 'Streams',
-  }
-);
-const EMPTY_VALUE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.flyout.emptyValue',
-  {
-    defaultMessage: '—',
-  }
+  { defaultMessage: 'Description' }
 );
 
-const signalPanelCss = css`
-  margin-bottom: 4px;
-`;
+const LOAD_ERROR_TITLE = i18n.translate('xpack.significantEventsApp.signalEvidence.loadError', {
+  defaultMessage: 'Failed to load logs',
+});
+const ESQL_QUERY_TITLE = i18n.translate('xpack.significantEventsApp.signalEvidence.esqlTitle', {
+  defaultMessage: 'ES|QL query',
+});
 
-const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => {
-  if (items.length === 0) {
-    return (
-      <EuiText size="s" color="subdued">
-        {EMPTY_VALUE}
-      </EuiText>
-    );
-  }
+interface GridState {
+  rows: ESQLRow[];
+  columns: DatatableColumn[];
+  dataView: DataView;
+}
+
+interface DetectionSignalRowProps {
+  signal: Extract<SignalEntry, { type: 'detection' }>;
+}
+
+const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
+  const { core, dependencies } = useKibana();
+  const { data } = dependencies.start;
+  const { euiTheme } = useEuiTheme();
+  const accordionId = useGeneratedHtmlId({ prefix: 'sigEventSignal' });
+
+  const [grid, setGrid] = useState<GridState | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const hasFetchStarted = useRef(false);
+
+  const esqlQuery = signal.evidence?.esql_query;
+
+  const onToggle = useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen || hasFetchStarted.current || !esqlQuery) return;
+      hasFetchStarted.current = true;
+      setIsLoading(true);
+
+      const limitedQuery = appendToESQLQuery(esqlQuery, '| LIMIT 5');
+
+      Promise.all([
+        getESQLAdHocDataview({
+          dataViewsService: data.dataViews,
+          query: limitedQuery,
+          options: { skipFetchFields: true },
+          http: core.http,
+        }),
+        getESQLResults({ esqlQuery: limitedQuery, search: data.search.search }),
+      ])
+        .then(([dataView, results]) => {
+          setGrid({
+            rows: results.response.values as ESQLRow[],
+            columns: formatESQLColumns(results.response.columns),
+            dataView,
+          });
+        })
+        .catch((err) => {
+          setFetchError(err instanceof Error ? err.message : String(err));
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [esqlQuery, data, core.http]
+  );
+
+  // Header wraps in the accordion button so multiple signals don't overflow.
+  const buttonContent = (
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      {signal.metadata?.rule_name && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" textAlign="left">
+            <strong>{signal.metadata.rule_name}</strong>
+          </EuiText>
+          {signal.collected_at && (
+            <EuiText size="xs" color="subdued">
+              {formatTimestamp(signal.collected_at)}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+      )}
+
+      {signal.description && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {signal.description}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      {items.map((item, idx) => (
-        <EuiFlexItem grow={false} key={`${item}-${idx}`}>
-          <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
-        </EuiFlexItem>
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={buttonContent}
+      buttonProps={{ style: { padding: euiTheme.size.m } }}
+      onToggle={onToggle}
+      data-test-subj="sigEventSignalCard"
+    >
+      <div css={{ padding: `0 ${euiTheme.size.m} ${euiTheme.size.m}` }}>
+        {/* Log sample leads: raw data is the evidence — everything else supports it. */}
+        {isLoading && (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {fetchError && (
+          <KbnDangerCallout title={LOAD_ERROR_TITLE} size="s" announceOnMount>
+            {fetchError}
+          </KbnDangerCallout>
+        )}
+
+        <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          {esqlQuery && (
+            <EuiFlexGroup direction="column" responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <strong>{ESQL_QUERY_TITLE}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiCodeBlock
+                  language="esql"
+                  fontSize="s"
+                  paddingSize="s"
+                  isCopyable
+                  overflowHeight={120}
+                >
+                  {esqlQuery}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {grid && esqlQuery && (
+            <EuiFlexItem grow={false}>
+              <ESQLDataGrid
+                rows={grid.rows}
+                columns={grid.columns}
+                dataView={grid.dataView}
+                query={{ esql: esqlQuery }}
+                flyoutType="overlay"
+                initialRowHeight={0}
+              />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    </EuiAccordion>
+  );
+};
+
+const SignalListPanel = ({ children }: { children: React.ReactNode[] }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+      {React.Children.map(children, (child, index) => (
+        <div css={index < children.length - 1 ? { borderBottom: euiTheme.border.thin } : undefined}>
+          {child}
+        </div>
       ))}
-    </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
@@ -88,33 +216,8 @@ interface SignificantEventDetailsProps {
 }
 
 export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps) => {
-  const signals = event.signals ?? [];
-  const detectionSignals = signals.filter((s) => s.type === 'detection');
-  const createdAt = 'created_at' in event ? event.created_at : event['@timestamp'];
-
-  const generalInfoItems = useMemo(
-    () => [
-      {
-        title: CREATED_AT_LABEL,
-        description: <EuiText size="s">{formatTimestamp(createdAt)}</EuiText>,
-      },
-      {
-        title: STREAMS_LABEL,
-        description: <BadgeRow items={event.stream_names ?? []} color="hollow" />,
-      },
-      {
-        title: CAUSAL_FEATURES_LABEL,
-        description: (
-          <BadgeRow
-            items={(event.causal_features ?? []).map(
-              (f) => `${f.name || '-'}${f.stream_name ? ` (${f.stream_name})` : ''}`
-            )}
-          />
-        ),
-      },
-    ],
-    [createdAt, event.stream_names, event.causal_features]
-  );
+  const signals = useMemo(() => event.signals ?? [], [event.signals]);
+  const detectionSignals = useMemo(() => signals.filter((s) => s.type === 'detection'), [signals]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -126,20 +229,6 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
         </InfoPanel>
       )}
 
-      <InfoPanel title={GENERAL_INFORMATION_TITLE}>
-        {generalInfoItems.map((listItem, index) => (
-          <React.Fragment key={listItem.title}>
-            <EuiDescriptionList
-              type="column"
-              columnWidths={[1, 2]}
-              compressed
-              listItems={[listItem]}
-            />
-            {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
-          </React.Fragment>
-        ))}
-      </InfoPanel>
-
       {detectionSignals.length > 0 && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xs">
@@ -150,36 +239,11 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
               })}
             </h3>
           </EuiTitle>
-          {detectionSignals.map((signal, idx) => (
-            <EuiPanel key={idx} color="plain" hasBorder paddingSize="s" css={signalPanelCss}>
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                {signal.metadata?.rule_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{signal.metadata.rule_name}</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                )}
-                {signal.stream_name && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">{signal.stream_name}</EuiBadge>
-                  </EuiFlexItem>
-                )}
-                {signal.evidence?.result && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={signal.evidence.result === 'empty' ? 'hollow' : 'warning'}>
-                      {signal.evidence.result}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              {signal.description && (
-                <EuiText size="xs" color="subdued">
-                  {signal.description}
-                </EuiText>
-              )}
-            </EuiPanel>
-          ))}
+          <SignalListPanel>
+            {detectionSignals.map((signal, idx) => {
+              return <DetectionSignalRow key={idx} signal={signal} />;
+            })}
+          </SignalListPanel>
         </EuiFlexGroup>
       )}
     </EuiFlexGroup>

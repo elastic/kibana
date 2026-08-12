@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
-import { MAX_MEDIUM_STRING_LENGTH, MAX_SHORT_STRING_LENGTH, MAX_TEXT_LENGTH } from './constants';
+import {
+  MAX_MEDIUM_STRING_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TIMESTAMP_LENGTH,
+} from './constants';
 
 /**
  * Name of the `tool_ui` custom event emitted by the investigation agent's progress-report
@@ -24,8 +29,6 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  * the step execution with this `stepId` — keep it in sync with the step name in the YAML.
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
-
-const MAX_TIMESTAMP_LENGTH = 64;
 
 /**
  * A source file the agent read, recorded as parts rather than a URL so that consumers — not the

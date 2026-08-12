@@ -17,6 +17,7 @@ import {
   MAX_SIGNAL_DESCRIPTION_LENGTH,
   MAX_SUMMARY_LENGTH,
   MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_TIMESTAMP_LENGTH,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
@@ -117,16 +118,31 @@ export const causalFeatureSchema = z.object({
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
 
 /** Query-based verification attached to a signal when the agent ran an ES|QL check. */
-const signalEvidenceSchema = z.object({
+export const signalEvidenceSchema = z.object({
   esql_query: z
     .string()
     .max(MAX_TEXT_LENGTH)
-    .describe('The ES|QL query executed to verify this signal.'),
+    .refine((v) => !/\|\s*KEEP\s+@timestamp\b/i.test(v), {
+      message: 'esql_query must not contain the grounding projection tail (KEEP @timestamp ...)',
+    })
+    .refine((v) => !/\bNOW\s*\(\s*\)/i.test(v), {
+      message:
+        'esql_query must not contain NOW() — replace with an absolute ISO-8601 timestamp so Discover opens the same window the query ran over',
+    })
+    .describe(
+      'The ES|QL query a human can open in Discover: time-scoped with absolute timestamps; must not include the grounding `| KEEP @timestamp` projection tail or `NOW()`.'
+    ),
   result: z
     .enum(['found', 'empty', 'error'])
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
     ),
+  time_range: z
+    .object({
+      from: z.string().max(MAX_TIMESTAMP_LENGTH),
+      to: z.string().max(MAX_TIMESTAMP_LENGTH),
+    })
+    .optional(),
 });
 
 const signalBaseSchema = z.object({
