@@ -40,6 +40,8 @@ export enum ElasticGenAIAttributes {
   InferenceSpanKind = 'elastic.inference.span.kind',
   ToolChoice = 'elastic.llm.toolChoice',
   ConversationTitle = 'elastic.conversation.title',
+  CacheControlType = 'elastic.cacheControl.type',
+  CacheControlTTL = 'elastic.cacheControl.ttl',
 }
 
 export enum UserAttributes {

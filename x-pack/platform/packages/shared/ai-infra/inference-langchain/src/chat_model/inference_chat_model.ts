@@ -32,6 +32,7 @@ import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
+  ChatCompleteCacheControl,
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
@@ -75,6 +76,8 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   temperature?: number;
   model?: string;
   timeout?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -135,6 +138,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       'tool_choice',
       'temperature',
       'model',
+      'cacheControl',
+      'sessionId',
     ];
   }
 
@@ -208,6 +213,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       metadata: { connectorTelemetry: this.telemetryMetadata },
       timeout: options.timeout ?? this.timeout,
       maxContentLength: this.maxContentLength,
+      cacheControl: options.cacheControl,
+      sessionId: options.sessionId,
     };
   }
 

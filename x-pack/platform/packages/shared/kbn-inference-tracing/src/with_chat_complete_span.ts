@@ -7,6 +7,7 @@
 
 import type {
   AssistantMessage,
+  ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
   Message,
   Model,
@@ -171,6 +172,7 @@ interface InferenceGenerationOptions {
   messages: Message[];
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
+  cacheControl?: ChatCompleteCacheControl;
 }
 
 /**
@@ -187,7 +189,7 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, ...attributes } = options;
+  const { system, messages, model, toolChoice, tools, cacheControl, ...attributes } = options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
@@ -204,6 +206,15 @@ export function withChatCompleteSpan(
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
         [GenAISemanticConventions.GenAIToolDefinitions]: tools ? JSON.stringify(tools) : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+        ...(cacheControl
+          ? {
+              [ElasticGenAIAttributes.CacheControlType]: cacheControl
+                ? cacheControl.type
+                : undefined,
+              [ElasticGenAIAttributes.CacheControlTTL]:
+                cacheControl && cacheControl.ttl ? cacheControl.ttl : undefined,
+            }
+          : {}),
       },
     },
     (span) => {
