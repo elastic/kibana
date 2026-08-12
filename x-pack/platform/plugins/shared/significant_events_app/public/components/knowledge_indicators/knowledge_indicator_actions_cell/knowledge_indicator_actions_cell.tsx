@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { QUERY_TYPE_STATS, isExpirable } from '@kbn/significant-events-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { isComputedFeature } from '@kbn/significant-events-schema';
 import React, { useMemo, useState } from 'react';
 import {
@@ -23,9 +23,8 @@ import {
   EXCLUDE_LABEL,
   RESTORE_LABEL,
   PROMOTE_LABEL,
-  MAKE_DURABLE_LABEL,
-  MAKE_EXPIRING_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 
@@ -84,19 +83,15 @@ export function KnowledgeIndicatorActionsCell({
         );
       }
 
-      const currentlyDurable = !isExpirable(knowledgeIndicator.feature);
       items.push(
-        <EuiContextMenuItem
-          key="feature-durability"
-          icon={currentlyDurable ? 'clock' : 'pinFilled'}
-          disabled={isMutating}
-          onClick={() => {
+        durabilityMenuItem({
+          knowledgeIndicator,
+          disabled: isMutating,
+          onToggle: (durable) => {
             setIsActionsMenuOpen(false);
-            setDurability({ knowledgeIndicator, durable: !currentlyDurable });
-          }}
-        >
-          {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
-        </EuiContextMenuItem>
+            setDurability({ knowledgeIndicator, durable });
+          },
+        })
       );
     }
 
@@ -134,8 +129,6 @@ export function KnowledgeIndicatorActionsCell({
     const promoteTooltip =
       activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
 
-    const currentlyDurable = !isExpirable(knowledgeIndicator.query);
-
     return [
       <EuiContextMenuItem
         key="query-promote"
@@ -149,17 +142,14 @@ export function KnowledgeIndicatorActionsCell({
       >
         {PROMOTE_LABEL}
       </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        key="query-durability"
-        icon={currentlyDurable ? 'clock' : 'pinFilled'}
-        disabled={isMutating}
-        onClick={() => {
+      durabilityMenuItem({
+        knowledgeIndicator,
+        disabled: isMutating,
+        onToggle: (durable) => {
           setIsActionsMenuOpen(false);
-          setDurability({ knowledgeIndicator, durable: !currentlyDurable });
-        }}
-      >
-        {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
-      </EuiContextMenuItem>,
+          setDurability({ knowledgeIndicator, durable });
+        },
+      }),
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"

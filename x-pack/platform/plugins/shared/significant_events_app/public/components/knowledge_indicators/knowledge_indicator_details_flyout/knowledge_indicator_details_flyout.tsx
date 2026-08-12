@@ -28,7 +28,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type { Streams } from '@kbn/streams-schema';
-import { isComputedFeature, isExpirable, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
+import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -50,9 +50,8 @@ import {
   EXCLUDE_LABEL,
   RESTORE_LABEL,
   PROMOTE_LABEL,
-  MAKE_DURABLE_LABEL,
-  MAKE_EXPIRING_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
@@ -195,19 +194,15 @@ export function KnowledgeIndicatorDetailsFlyout({
         );
       }
 
-      const currentlyDurable = !isExpirable(knowledgeIndicator.feature);
       items.push(
-        <EuiContextMenuItem
-          key="feature-durability"
-          icon={currentlyDurable ? 'clock' : 'pinFilled'}
-          disabled={isMutating}
-          onClick={() => {
+        durabilityMenuItem({
+          knowledgeIndicator,
+          disabled: isMutating,
+          onToggle: (durable) => {
             setIsActionsMenuOpen(false);
-            setDurability({ knowledgeIndicator, durable: !currentlyDurable });
-          }}
-        >
-          {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
-        </EuiContextMenuItem>
+            setDurability({ knowledgeIndicator, durable });
+          },
+        })
       );
     }
 
@@ -238,8 +233,6 @@ export function KnowledgeIndicatorDetailsFlyout({
     const isPromoteDisabled = isMutating || blocksActivity || isStats;
     const promoteTooltip =
       activityBlockTooltip ?? (isStats ? STATS_PROMOTE_DISABLED_TOOLTIP : undefined);
-    const currentlyDurable = !isExpirable(knowledgeIndicator.query);
-
     return [
       ...(!knowledgeIndicator.rule.backed
         ? [
@@ -257,17 +250,14 @@ export function KnowledgeIndicatorDetailsFlyout({
             </EuiContextMenuItem>,
           ]
         : []),
-      <EuiContextMenuItem
-        key="query-durability"
-        icon={currentlyDurable ? 'clock' : 'pinFilled'}
-        disabled={isMutating}
-        onClick={() => {
+      durabilityMenuItem({
+        knowledgeIndicator,
+        disabled: isMutating,
+        onToggle: (durable) => {
           setIsActionsMenuOpen(false);
-          setDurability({ knowledgeIndicator, durable: !currentlyDurable });
-        }}
-      >
-        {currentlyDurable ? MAKE_EXPIRING_LABEL : MAKE_DURABLE_LABEL}
-      </EuiContextMenuItem>,
+          setDurability({ knowledgeIndicator, durable });
+        },
+      }),
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"

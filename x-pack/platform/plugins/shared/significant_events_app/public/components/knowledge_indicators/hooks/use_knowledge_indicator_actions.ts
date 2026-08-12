@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-  type SignificantEventsTuningConfig,
+  significantEventsTuningConfigSchema,
 } from '@kbn/significant-events-schema';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import { useCallback, useMemo } from 'react';
@@ -50,10 +50,10 @@ export function useKnowledgeIndicatorActions({
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
         DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
       );
-      const parsed = (
-        typeof raw === 'string' ? JSON.parse(raw) : raw
-      ) as Partial<SignificantEventsTuningConfig>;
-      return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsed }.feature_ttl_days;
+      const candidate = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const parsed = significantEventsTuningConfigSchema.partial().safeParse(candidate);
+      const config = parsed.success ? parsed.data : {};
+      return { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...config }.feature_ttl_days;
     } catch {
       return DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.feature_ttl_days;
     }
