@@ -19,6 +19,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { getOriginalAlertIds } from '../../../../../attack_discovery/helpers';
+import { FIELD_TOKEN_REGEX } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter/attack_discovery_markdown_parser/helpers';
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
@@ -47,17 +48,21 @@ export const UNKNOWN_USER_LABEL = i18n.translate(
  * Converts attack discovery field markdown (`{{ field.value }}`) to plain text for tooltips.
  */
 export const getSummaryPlainText = (markdown: string): string =>
-  markdown.replace(/\{\{\s*\S+\s+(.*?)\s*\}\}/g, '$1');
+  markdown.replace(FIELD_TOKEN_REGEX, '$2');
 
-const truncatedSummaryCss = css`
+/**
+ * Constrains the entity summary to a single truncated line.
+ * The gradient fade on the right edge prevents any chip from being hard-clipped.
+ */
+const summaryCss = css`
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
 
   .euiMarkdownFormat {
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
 
     > * {
@@ -190,7 +195,7 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
             data-test-subj="attack-subtitle-summary"
           >
             <EuiToolTip content={summaryPlainText} display="block" anchorClassName="eui-fullWidth">
-              <div css={truncatedSummaryCss} tabIndex={0}>
+              <div css={summaryCss} data-test-subj="attack-subtitle-summary-text" tabIndex={0}>
                 <AttackDiscoveryMarkdownFormatter
                   scopeId={TableId.alertsOnAttacksPage}
                   disableActions={showAnonymized}

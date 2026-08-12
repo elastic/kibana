@@ -18,6 +18,9 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
   - '@kbn/actions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
@@ -28,7 +31,9 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/features-plugin'
   - '@kbn/storage-adapter'
+  - '@kbn/task-manager-plugin'
   - '@kbn/es-errors'
+  - '@kbn/es-types'
   - '@kbn/management-settings-ids'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-page-kibana-template'
@@ -37,11 +42,20 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/es-query'
   - '@kbn/share-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/tooling-log'
+  - '@kbn/connector-specs'
   - '@kbn/console-plugin'
   - '@kbn/core-security-server'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
   - '@kbn/deeplinks-management'
+  - '@kbn/deeplinks-analytics'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/index-management-shared-types'
+  - '@kbn/code-editor'
+  - '@kbn/ui-callout'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
@@ -53,6 +67,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - test/scout/**/*
     - '!target/**/*'
   jest-config:
