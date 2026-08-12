@@ -122,14 +122,23 @@ export async function handleInboundRequest({
     }
 
     for (const event of result.events) {
-      await emitConnectorEvents({
-        eventId: event.eventId,
-        payload: event.payload,
-        spaceId,
-        connectorId,
-        connectorTypeId,
-        correlationKey: event.correlationKey,
-      });
+      try {
+        await emitConnectorEvents({
+          eventId: event.eventId,
+          payload: event.payload,
+          spaceId,
+          connectorId,
+          connectorTypeId,
+          correlationKey: event.correlationKey,
+        });
+      } catch (error) {
+        // Emitter failures must not fail the HTTP response (still 202).
+        logger.warn(
+          `Inbound connector ${connectorId} event emitter failed for ${event.eventId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
     }
 
     return response.accepted({ body: { ok: true } });

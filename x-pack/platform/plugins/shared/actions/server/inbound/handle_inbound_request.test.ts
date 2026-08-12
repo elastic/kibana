@@ -120,6 +120,36 @@ describe('handleInboundRequest', () => {
     expect(res.notFound).toHaveBeenCalled();
   });
 
+  it('returns 404 when the connector has no ingestTokenHash', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: connectorId,
+      type: 'action',
+      references: [],
+      attributes: {
+        actionTypeId: '.myConnector',
+        name: 'Test',
+        isMissingSecrets: false,
+        config: {},
+        secrets: {},
+      },
+    });
+    const res = await run();
+    expect(res.notFound).toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 when the token is missing', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+    );
+    const res = await run({ query: {} });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
   it('returns 404 for a bad token', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
@@ -127,6 +157,24 @@ describe('handleInboundRequest', () => {
     const res = await run({ query: { token: 'wrong' } });
     expect(res.notFound).toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('accepts Authorization Bearer when query token is absent', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const res = await run({
+      query: {},
+      headers: { authorization: `Bearer ${token}` },
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).toHaveBeenCalled();
   });
 
   it('returns 202 and emits on the happy path', async () => {
@@ -163,6 +211,23 @@ describe('handleInboundRequest', () => {
       connectorTypeId: '.myConnector',
       correlationKey: 'corr-1',
     });
+  });
+
+  it('returns 202 when the emitter throws', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    emitConnectorEvents.mockRejectedValueOnce(new Error('bridge down'));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const res = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bridge down'));
   });
 
   it('returns 500 when handleEvents throws', async () => {
