@@ -134,22 +134,23 @@ export const useMemoizedCaches = ({
 
   const minimalQueryRef = useRef(minimalQuery);
   minimalQueryRef.current = minimalQuery;
-  const joinIndicesAbortControllerRef = useRef(new AbortController());
+  const joinIndicesAbortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
-    joinIndicesAbortControllerRef.current = controller;
-
-    return () => controller.abort();
+    return () => joinIndicesAbortControllerRef.current?.abort();
   }, []);
 
   const getJoinIndicesCallback = useCallback<Required<ESQLCallbacks>['getJoinIndices']>(
     async (cacheOptions) => {
+      joinIndicesAbortControllerRef.current?.abort();
+      const controller = new AbortController();
+      joinIndicesAbortControllerRef.current = controller;
+
       const result = await getJoinIndices(
         minimalQueryRef.current,
         core.http,
         cacheOptions,
-        joinIndicesAbortControllerRef.current.signal
+        controller.signal
       );
       return result;
     },

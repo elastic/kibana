@@ -63,11 +63,9 @@ export class EsqlService {
       expand_wildcards: mode === 'lookup' ? ['open', 'closed'] : 'open',
       mode,
     } as Parameters<typeof client.indices.resolveIndex>[0];
-    const sources = (
-      signal
-        ? await client.indices.resolveIndex(resolveIndexParams, { signal })
-        : await client.indices.resolveIndex(resolveIndexParams)
-    ) as ResolveIndexResponse;
+    const sources = (await client.indices.resolveIndex(resolveIndexParams, {
+      signal,
+    })) as ResolveIndexResponse;
 
     const mappedMode = this.getIndexSourceType(mode);
 
@@ -123,9 +121,7 @@ export class EsqlService {
     // which are usually hidden
     const cpsParams = projectRouting ? { project_routing: projectRouting } : {};
     const resolveIndex = (params: Parameters<typeof client.indices.resolveIndex>[0]) =>
-      signal
-        ? client.indices.resolveIndex(params, { signal })
-        : client.indices.resolveIndex(params);
+      client.indices.resolveIndex(params, { signal });
     const [allSources, availableSources] = (await Promise.all([
       resolveIndex({
         name: namesToQuery,

@@ -40,7 +40,8 @@ describe('EsqlService.getAllIndices', () => {
       expect.objectContaining({
         expand_wildcards: 'all',
         filter_path: ['indices.name', 'indices.mode'],
-      })
+      }),
+      { signal: undefined }
     );
     expect(resolveIndex).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -52,7 +53,8 @@ describe('EsqlService.getAllIndices', () => {
           'data_streams.name',
           'data_streams.backing_indices',
         ],
-      })
+      }),
+      { signal: undefined }
     );
   });
 
@@ -91,11 +93,13 @@ describe('EsqlService.getAllIndices', () => {
 
     expect(resolveIndex).toHaveBeenCalledTimes(2);
     expect(resolveIndex).toHaveBeenCalledWith(
-      expect.objectContaining({ project_routing: 'my-project' })
+      expect.objectContaining({ project_routing: 'my-project' }),
+      { signal: undefined }
     );
     expect(resolveIndex).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ project_routing: 'my-project' })
+      expect.objectContaining({ project_routing: 'my-project' }),
+      { signal: undefined }
     );
   });
 
@@ -117,6 +121,8 @@ describe('EsqlService.getAllIndices', () => {
 
     await service.getAllIndices('all');
 
-    expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*', '*:*'] }));
+    expect(resolveIndex).toHaveBeenCalledWith(expect.objectContaining({ name: ['*', '*:*'] }), {
+      signal: undefined,
+    });
   });
 });
