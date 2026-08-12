@@ -19,6 +19,9 @@ import {
   LeadStatusEnum,
 } from '../../../../common/entity_analytics/lead_generation/types';
 import { computeContentHash, computeEntityIdentityKey } from './content_hash';
+import type { CursorPayload } from './change_cursor';
+import { encodeCursor, decodeCursor } from './change_cursor';
+import { createLeadIndexService } from './indices/lead_index_service';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -55,6 +58,17 @@ interface PersistLeadsParams {
   readonly versions: ReadonlyArray<{ readonly existingId: string; readonly lead: Lead }>;
 }
 
+interface FindLeadChangesParams {
+  readonly cursor?: string;
+  readonly perPage?: number;
+}
+
+interface FindLeadChangesResult {
+  readonly changed: Lead[];
+  readonly cursor: string | null;
+  readonly hasMore: boolean;
+}
+
 export interface FindLeadsParams {
   readonly page?: number;
   readonly perPage?: number;
@@ -76,6 +90,7 @@ export interface LeadDataClient {
   ): Promise<ReadonlyArray<LeadActionDecision<T>>>;
   persistLeads(params: PersistLeadsParams): Promise<number>;
   findLeads(params: FindLeadsParams): Promise<FindLeadsResult>;
+  findLeadChanges(params: FindLeadChangesParams): Promise<FindLeadChangesResult>;
   updateLead(id: string, updates: Partial<Pick<Lead, 'status'>>): Promise<boolean>;
   dismissLead(id: string): Promise<boolean>;
   bulkUpdateLeads(ids: readonly string[], updates: { status: LeadStatus }): Promise<number>;
@@ -405,6 +420,13 @@ export const createLeadDataClient = ({
     }
 
     try {
+      // Adhoc generate does not go through enable, so the first write must create
+      // the index with plugin mappings. Otherwise ES auto-creates without the correct mappings.
+      const indexService = createLeadIndexService({ esClient, logger, spaceId });
+      if (!(await indexService.doesIndexExist())) {
+        await indexService.createIndex();
+      }
+
       const bulkBody: object[] = [];
 
       for (const { existingId } of dedups) {
@@ -557,6 +579,82 @@ export const createLeadDataClient = ({
     }
   };
 
+  const CHANGE_FEED_DEFAULT_LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000;
+  /**
+   * Find leads that have changed since the cursor, or the last 7 days if no cursor.
+   */
+  const findLeadChanges = async ({
+    cursor: encodedCursor,
+    perPage = 100,
+  }: FindLeadChangesParams): Promise<FindLeadChangesResult> => {
+    const now = Date.now();
+
+    let cursorPayload: CursorPayload | undefined;
+    if (encodedCursor) {
+      cursorPayload = decodeCursor(encodedCursor);
+    }
+
+    const buildCursor = (hit: estypes.SearchHit): string => {
+      const sortVals = hit.sort;
+      const lastUpdatedAt =
+        sortVals?.[0] != null
+          ? Number(sortVals[0])
+          : new Date(
+              ((hit._source as Record<string, unknown>)?.updated_at as string) ??
+                new Date(now).toISOString()
+            ).getTime();
+      const lastDocId =
+        sortVals?.[1] != null
+          ? String(sortVals[1])
+          : ((hit._source as Record<string, unknown>)?.id as string) ?? hit._id ?? '';
+      return encodeCursor(lastUpdatedAt, lastDocId);
+    };
+
+    try {
+      // Without a cursor, returns leads updated in the last 7 days.
+      // With a cursor, returns all leads updated since the cursor, ignoring CHANGE_FEED_DEFAULT_LOOKBACK_MS.
+      const gteMs = cursorPayload ? cursorPayload.updatedAt : now - CHANGE_FEED_DEFAULT_LOOKBACK_MS;
+      const rangeFilter: Record<string, string> = {
+        gte: new Date(gteMs).toISOString(),
+        lte: new Date(now).toISOString(),
+      };
+
+      const searchReq: estypes.SearchRequest = {
+        index: indexName,
+        size: perPage + 1,
+        sort: [{ updated_at: { order: 'asc' } }, { id: { order: 'asc' } }],
+        query: { range: { updated_at: rangeFilter } },
+        ignore_unavailable: true,
+      };
+      if (cursorPayload) {
+        searchReq.search_after = [cursorPayload.updatedAt, cursorPayload.docId];
+      }
+
+      const resp = await esClient.search(searchReq);
+      const hits = resp.hits.hits;
+      const hasMore = hits.length > perPage;
+      const pageHits = hasMore ? hits.slice(0, perPage) : hits;
+
+      const changed = pageHits
+        .map((hit) => hit._source)
+        .filter((doc): doc is Record<string, unknown> => doc != null)
+        .map(esDocToLead);
+
+      const cursor = pageHits.length > 0 ? buildCursor(pageHits[pageHits.length - 1]) : null;
+
+      return { changed, cursor, hasMore };
+    } catch (e) {
+      if (isEsSecurityException(e)) throw e;
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (isEsIndexNotFoundException(e)) {
+        logger.debug(`[LeadGeneration] Lead changes index not available: ${errorMessage}`);
+        return { changed: [], cursor: null, hasMore: false };
+      }
+      logger.error(`[LeadGeneration] Unable to fetch lead changes: ${errorMessage}`);
+      throw e;
+    }
+  };
+
   // -----------------------------------------------------------------------
   // updateLead — partial update by doc id, bumps updated_at
   // -----------------------------------------------------------------------
@@ -689,6 +787,7 @@ export const createLeadDataClient = ({
     classifyLeadCandidates,
     persistLeads,
     findLeads,
+    findLeadChanges,
     updateLead,
     dismissLead,
     bulkUpdateLeads,

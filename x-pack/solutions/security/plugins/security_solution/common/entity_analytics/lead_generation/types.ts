@@ -130,6 +130,19 @@ export const findLeadsRequestSchema = z.object({
 
 export type FindLeadsRequest = z.infer<typeof findLeadsRequestSchema>;
 
+export const leadChangesRequestSchema = z.object({
+  cursor: z.string().max(2048).optional(),
+  perPage: z.coerce.number().int().min(1).max(1000).optional().default(100),
+});
+export type LeadChangesRequest = z.infer<typeof leadChangesRequestSchema>;
+
+export const leadChangesResponseSchema = z.object({
+  changed: z.array(leadSchema),
+  cursor: z.string().nullable(),
+  hasMore: z.boolean(),
+});
+export type LeadChangesResponse = z.infer<typeof leadChangesResponseSchema>;
+
 export const findLeadsResponseSchema = z.object({
   leads: z.array(leadSchema),
   total: z.number(),

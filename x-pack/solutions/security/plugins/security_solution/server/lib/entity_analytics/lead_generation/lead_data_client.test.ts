@@ -6,6 +6,15 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+
+jest.mock('./indices/lead_index_service', () => ({
+  createLeadIndexService: () => ({
+    createIndex: jest.fn().mockResolvedValue(undefined),
+    doesIndexExist: jest.fn().mockResolvedValue(true),
+    deleteIndex: jest.fn(),
+  }),
+}));
+
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadDataClient } from './lead_data_client';
 import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
