@@ -29,7 +29,7 @@ export function DurabilityBadge({ expiresAt, compact = false }: Props) {
     );
   }
 
-  const nearExpiry = moment(expiresAt).diff(moment(), 'days') <= NEAR_EXPIRY_DAYS;
+  const nearExpiry = moment(expiresAt).diff(moment(), 'days', true) <= NEAR_EXPIRY_DAYS;
   return (
     <EuiToolTip
       content={i18n.translate('xpack.significantEventsApp.durabilityBadge.expiringTooltip', {
