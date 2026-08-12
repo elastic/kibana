@@ -10,12 +10,16 @@
 import type { ReactElement } from 'react';
 import React, { useMemo, useEffect, useState, useCallback } from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +27,8 @@ import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { HitsCounter, type HitsCounterVariant } from '../hits_counter';
@@ -138,7 +143,6 @@ export const DocumentViewModeToggle = ({
         key: VIEW_MODE.DOCUMENT_LEVEL,
         value: VIEW_MODE.DOCUMENT_LEVEL,
         label: documentsLabel,
-        prepend: <EuiIcon type="table" aria-hidden={true} />,
         checked: viewMode === VIEW_MODE.DOCUMENT_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModeDocumentOption',
       },
@@ -149,7 +153,6 @@ export const DocumentViewModeToggle = ({
         key: VIEW_MODE.PATTERN_LEVEL,
         value: VIEW_MODE.PATTERN_LEVEL,
         label: patternsLabel,
-        prepend: <EuiIcon type="pattern" aria-hidden={true} />,
         checked: viewMode === VIEW_MODE.PATTERN_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModePatternAnalysisOption',
       });
@@ -160,7 +163,6 @@ export const DocumentViewModeToggle = ({
         key: VIEW_MODE.AGGREGATED_LEVEL,
         value: VIEW_MODE.AGGREGATED_LEVEL,
         label: fieldStatisticsLabel,
-        prepend: <EuiIcon type="stats" aria-hidden={true} />,
         disabled: isEsqlMode,
         checked: viewMode === VIEW_MODE.AGGREGATED_LEVEL ? 'on' : undefined,
         'data-test-subj': 'dscViewModeFieldStatsOption',
@@ -177,22 +179,6 @@ export const DocumentViewModeToggle = ({
     viewMode,
     isEsqlMode,
   ]);
-
-  const [buttonIcon, buttonText] =
-    viewMode === VIEW_MODE.PATTERN_LEVEL
-      ? ['pattern', patternsLabel]
-      : viewMode === VIEW_MODE.AGGREGATED_LEVEL
-      ? ['stats', fieldStatisticsLabel]
-      : ['tableDensityHigh', documentsLabel];
-
-  const buttonLabel = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={buttonIcon} aria-hidden={true} />
-      </EuiFlexItem>
-      <EuiFlexItem>{buttonText}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   const onChange = useCallback(
     (chosen?: SelectableEntry) => {
@@ -264,22 +250,112 @@ export const DocumentViewModeToggle = ({
           {prepend}
         </EuiFlexItem>
       )}
-      {!showOnlyDocumentsCounter && (
-        <EuiFlexItem grow={false}>
-          <ToolbarSelector
-            data-test-subj="dscViewModeToggle"
-            data-selected-value={viewMode}
-            searchable={false}
-            buttonLabel={buttonLabel}
-            popoverTitle={i18n.translate('discover.viewModes.popoverTitle', {
-              defaultMessage: 'Select view',
-            })}
-            options={options}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-      )}
       <EuiFlexItem grow={false}>{countDisplay}</EuiFlexItem>
+      {!showOnlyDocumentsCounter && (
+        <>
+          <EuiFlexItem grow={false}>
+            <span
+              aria-hidden="true"
+              css={{
+                height: 20,
+                width: euiTheme.border.width.thin,
+                backgroundColor: euiTheme.border.color,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ViewModeSelector
+              data-test-subj="dscViewModeToggle"
+              data-selected-value={viewMode}
+              options={options}
+              onChange={onChange}
+            />
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
+  );
+};
+
+const viewAsLabel = i18n.translate('discover.viewModes.viewAsLabel', {
+  defaultMessage: 'View as',
+});
+
+const selectViewLabel = i18n.translate('discover.viewModes.popoverTitle', {
+  defaultMessage: 'Select view',
+});
+
+const ViewModeSelector = ({
+  'data-test-subj': dataTestSubj,
+  'data-selected-value': dataSelectedValue,
+  options,
+  onChange,
+}: {
+  'data-test-subj': string;
+  'data-selected-value': string;
+  options: SelectableEntry[];
+  onChange: (chosen?: SelectableEntry) => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
+  const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const togglePopover = useCallback(() => setIsOpen((wasOpen) => !wasOpen), []);
+
+  const onSelectionChange = useCallback(
+    (newOptions: SelectableEntry[]) => {
+      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
+      onChange(chosenOption);
+      closePopover();
+    },
+    [closePopover, onChange]
+  );
+
+  // widen the panel to fit the longest option label, rather than truncating it
+  const panelWidth = useMemo(() => {
+    return calculateWidthFromEntries(options, ['label'], {
+      paddingsWidth: 2 * euiTheme.base,
+    });
+  }, [euiTheme.base, options]);
+
+  return (
+    <EuiPopover
+      id={dataTestSubj}
+      ownFocus
+      aria-labelledby={popoverTitleId}
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      panelProps={{ css: { width: panelWidth } }}
+      button={
+        <EuiButtonEmpty
+          size="s"
+          flush="both"
+          data-test-subj={`${dataTestSubj}Button`}
+          data-selected-value={dataSelectedValue}
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={togglePopover}
+        >
+          {viewAsLabel}
+        </EuiButtonEmpty>
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+    >
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+        {selectViewLabel}
+      </EuiPopoverTitle>
+      <EuiSelectable<SelectableEntry>
+        id={`${dataTestSubj}Selectable`}
+        singleSelection
+        aria-label={selectViewLabel}
+        data-test-subj={`${dataTestSubj}Selectable`}
+        options={options}
+        onChange={onSelectionChange}
+        listProps={{ showIcons: false, paddingSize: 's' }}
+      >
+        {(list) => list}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };

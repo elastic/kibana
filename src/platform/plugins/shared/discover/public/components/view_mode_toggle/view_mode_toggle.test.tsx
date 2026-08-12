@@ -80,7 +80,7 @@ describe('Document view mode toggle component', () => {
 
     expect(screen.getByTestId('dscViewModeToggleButton')).toBeVisible();
     expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
-    expect(screen.getByTestId('dscViewModeToggleButton')).toHaveTextContent('Documents');
+    expect(screen.getByTestId('dscViewModeToggleButton')).toHaveTextContent('View as');
     expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('10 documents');
 
     openSelector();

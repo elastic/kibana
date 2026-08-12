@@ -30,7 +30,7 @@ spaceTest.describe('Discover view mode toggle', { tag: '@local-stateful-classic'
     await expect(page.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
 
     const toggleButton = page.testSubj.locator('dscViewModeToggleButton');
-    await expect(toggleButton).toHaveText('Documents');
+    await expect(toggleButton).toHaveText('View as');
     await expect(toggleButton).toHaveAttribute('data-selected-value', 'documents');
   });
 
