@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.attacksPage.workflowsPromotionCallout.title',
   {
-    defaultMessage: 'A smarter way to run and schedule Attack Discovery',
+    defaultMessage: 'Get more from Attack Discovery with workflows',
   }
 );
 
@@ -18,7 +18,7 @@ export const CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.attacksPage.workflowsPromotionCallout.description',
   {
     defaultMessage:
-      'Every run is now vetted by the Attack Discovery skill: it investigates alerts across threat hunting, entity analytics, and alert analysis, surfaces related activity, and proposes rules for gaps in your detections. Follow each run step by step, or plug in your own retrieval and validation workflows.',
+      'Enabling Attack Discovery Workflows powers every run with the Attack Discovery skill: it investigates alerts across threat hunting, entity analytics, and alert analysis, surfaces related activity, and proposes rules for gaps in your detections. Follow each run step by step, or plug in your own retrieval and validation workflows.',
   }
 );
 
