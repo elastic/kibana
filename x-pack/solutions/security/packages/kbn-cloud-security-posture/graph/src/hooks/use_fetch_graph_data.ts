@@ -1251,37 +1251,200 @@ const SCENARIO_FUNCTIONS = [
   (id: string) => scenarioSimple(id),
 ];
 
-// Named overrides for specific entities — add your entity IDs here for fine control
-const ENTITY_SCENARIO_MAP: Record<string, (id: string) => GraphResponse> = {
-  'service:auth-service': (id) => scenarioLargeGraph(),
-  'service:payment-api': (id) => scenarioFanout(id),
-  'service:user-management': (id) => scenarioAttack(id),
-  'service:data-pipeline': (id) => scenarioRelationships(id),
-  'host:vpn-gateway': (id) => scenarioDense(),
-  'host:db-server-01': (id) => scenarioWarning(id),
-  'host:server-prod-01': (id) => scenarioAttack(id),
-  'host:workstation-001': (id) => scenarioRelationships(id),
-  'host:bastion-host': (id) => scenarioLargeGraph(),
-  'host:web-server-02': (id) => scenarioFanout(id),
-  'service:analytics-engine': (id) => scenarioSimple(id),
-  'service:notification-service': (id) => scenarioWarning(id),
-  'service:search-service': (id) => scenarioAttack(id),
-  'service:file-storage': (id) => scenarioRelationships(id),
-  'host:workstation-002': (id) => scenarioFanout(id),
-  'host:build-agent-01': (id) => scenarioSimple(id),
-  'host:laptop-eng-03': (id) => scenarioWarning(id),
-  'host:mail-server-01': (id) => scenarioDense(),
-  'host:api-server-03': (id) => scenarioLargeGraph(),
-  'host:monitoring-host': (id) => scenarioAttack(id),
-  [DEV_ORIGIN_ENTITY_ID]: () => scenarioComplexPreview(),
-  // Entity Analytics seeded hosts — all risk colors preview
-  'macbook-john-work': () => scenarioComplexPreview(),
-  'host:macbook-john-work': () => scenarioComplexPreview(),
-  'john-pc-home': () => scenarioComplexPreview(),
-  'host:john-pc-home': () => scenarioComplexPreview(),
-  'admin-pc': () => scenarioComplexPreview(),
-  'host:admin-pc': () => scenarioComplexPreview(),
+/**
+ * Seeded Entity Analytics samples (see scripts/seed-entity-analytics-sample.sh).
+ * Mock graphs for these IDs always use the colored complex preview so flyout
+ * preview + zoom-out keep risk colors after refresh / ES restart.
+ */
+type SampleEntityProfile = {
+  ids: string[];
+  label: string;
+  tag: 'Host' | 'User' | 'Service';
+  icon: string;
+  shape: 'hexagon' | 'ellipse' | 'rectangle';
+  riskScore: number;
 };
+
+const SAMPLE_ENTITY_PROFILES: SampleEntityProfile[] = [
+  {
+    ids: ['host:macbook-john-work', 'macbook-john-work'],
+    label: 'macbook-john-work',
+    tag: 'Host',
+    icon: 'storage',
+    shape: 'hexagon',
+    riskScore: 90.01,
+  },
+  {
+    ids: ['host:john-pc-home', 'john-pc-home'],
+    label: 'john-pc-home',
+    tag: 'Host',
+    icon: 'storage',
+    shape: 'hexagon',
+    riskScore: 55.0,
+  },
+  {
+    ids: ['host:admin-pc', 'admin-pc'],
+    label: 'admin-pc',
+    tag: 'Host',
+    icon: 'storage',
+    shape: 'hexagon',
+    riskScore: 75.0,
+  },
+  {
+    ids: ['host:low-risk-host', 'low-risk-host', 'entity-auth-target'],
+    label: 'low-risk-host',
+    tag: 'Host',
+    icon: 'storage',
+    shape: 'hexagon',
+    riskScore: 25.0,
+  },
+  {
+    ids: [
+      'host:9e4316b8589de4d3dd3cc8c4658f11dc',
+      'edge-sec-ubuntu-2004-obtc-estec-0',
+    ],
+    label: 'edge-sec-ubuntu-2004-obtc-estec-0',
+    tag: 'Host',
+    icon: 'storage',
+    shape: 'hexagon',
+    riskScore: 98.72,
+  },
+  {
+    ids: ['user:john.doe', 'john.doe', DEV_ORIGIN_ENTITY_ID],
+    label: 'john.doe',
+    tag: 'User',
+    icon: 'user',
+    shape: 'ellipse',
+    riskScore: 95.5,
+  },
+  {
+    ids: ['user:alice', 'alice'],
+    label: 'alice',
+    tag: 'User',
+    icon: 'user',
+    shape: 'ellipse',
+    riskScore: 42.0,
+  },
+  {
+    ids: ['service:auth-service', 'auth-service', 'entities-services'],
+    label: 'auth-service',
+    tag: 'Service',
+    icon: 'package',
+    shape: 'rectangle',
+    riskScore: 78.0,
+  },
+];
+
+const stripEntityIdPrefix = (id: string): string =>
+  id.replace(/^(user|host|service):/i, '');
+
+const ENTITY_NODE_SHAPES = new Set(['hexagon', 'ellipse', 'rectangle', 'diamond', 'pentagon']);
+
+const findSampleEntityProfile = (entityId: string): SampleEntityProfile | undefined => {
+  const needle = entityId.trim();
+  const bare = stripEntityIdPrefix(needle);
+  return SAMPLE_ENTITY_PROFILES.find((profile) =>
+    profile.ids.some((id) => id === needle || stripEntityIdPrefix(id) === bare)
+  );
+};
+
+/** Stable demo risk so refresh never drops to gray/unknown. */
+const DEMO_RISK_SCORES = [98.72, 95.5, 90.01, 78.0, 75.0, 55.0, 42.0, 25.0] as const;
+
+const hashEntityId = (entityId: string): number =>
+  entityId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
+/**
+ * Resolve a profile for any entity id — seeded samples first, otherwise infer
+ * type/icon/shape and a stable risk score from the id hash.
+ */
+const resolveEntityProfile = (entityId: string): SampleEntityProfile => {
+  const known = findSampleEntityProfile(entityId);
+  if (known) return known;
+
+  const bare = stripEntityIdPrefix(entityId.trim()) || entityId;
+  const lower = entityId.toLowerCase();
+  let tag: SampleEntityProfile['tag'] = 'Host';
+  let icon = 'storage';
+  let shape: SampleEntityProfile['shape'] = 'hexagon';
+  if (lower.startsWith('user:')) {
+    tag = 'User';
+    icon = 'user';
+    shape = 'ellipse';
+  } else if (lower.startsWith('service:')) {
+    tag = 'Service';
+    icon = 'package';
+    shape = 'rectangle';
+  }
+
+  return {
+    ids: [entityId, bare],
+    label: bare,
+    tag,
+    icon,
+    shape,
+    riskScore: DEMO_RISK_SCORES[hashEntityId(entityId) % DEMO_RISK_SCORES.length],
+  };
+};
+
+/**
+ * Complex colored preview centered on the requested entity.
+ * Always sets origin `id` + `riskScore` so flyout preview / zoom-out stay colored
+ * after refresh (never fall through to gray round-robin scenarios).
+ */
+const scenarioSampleEntityOrigin = (entityId: string): GraphResponse => {
+  const profile = resolveEntityProfile(entityId);
+  const base = scenarioComplexPreview();
+
+  const entityType = profile.tag.toLowerCase() as 'host' | 'user' | 'service';
+  const matchIdx = base.nodes.findIndex((node) => {
+    const id = node.id;
+    const label = 'label' in node ? String((node as { label?: string }).label ?? '') : '';
+    return (
+      profile.ids.includes(id) ||
+      profile.ids.includes(label) ||
+      stripEntityIdPrefix(id) === stripEntityIdPrefix(profile.label) ||
+      stripEntityIdPrefix(id) === stripEntityIdPrefix(entityId) ||
+      label === profile.label
+    );
+  });
+
+  const templateIdx =
+    matchIdx >= 0
+      ? matchIdx
+      : base.nodes.findIndex((node) =>
+          ENTITY_NODE_SHAPES.has(String((node as { shape?: string }).shape ?? ''))
+        );
+
+  if (templateIdx < 0) {
+    return base;
+  }
+
+  const oldId = base.nodes[templateIdx].id;
+  const originNode = {
+    ...base.nodes[templateIdx],
+    id: entityId,
+    label: profile.label,
+    tag: profile.tag,
+    icon: profile.icon,
+    shape: profile.shape,
+    color: 'primary' as const,
+    riskScore: profile.riskScore,
+    documentsData: mockEntityDocuments(entityId, entityType, profile.tag),
+  };
+
+  const nodes = base.nodes.map((node, index) => (index === templateIdx ? originNode : node));
+  const edges = base.edges.map((edge) => ({
+    ...edge,
+    source: edge.source === oldId ? entityId : edge.source,
+    target: edge.target === oldId ? entityId : edge.target,
+  }));
+
+  return { nodes, edges };
+};
+
+// Named overrides kept for event/dev maps below. Entity flyout always uses
+// scenarioSampleEntityOrigin so risk colors survive refresh.
 
 // Dev graph page (/app/security/dev-graph) — screenshot layout preview
 const DEV_PREVIEW_ENTITY_IDS = new Set([DEV_ORIGIN_ENTITY_ID]);
@@ -1303,7 +1466,8 @@ const isDevGraphPreviewRequest = (req: GraphRequest): boolean => {
 
 /**
  * Returns a mock graph for the given entity/event IDs.
- * Tries the named map first, then falls back to round-robin by hash.
+ * Entity Analytics flyout always gets a colored complex preview centered on the
+ * requested entity (with riskScore) — never gray round-robin fallbacks.
  */
 const getMockGraphForRequest = (req: GraphRequest): GraphResponse => {
   if (isDevGraphPreviewRequest(req)) {
@@ -1313,13 +1477,11 @@ const getMockGraphForRequest = (req: GraphRequest): GraphResponse => {
   const entityIds = req.query.entityIds;
   const originEventIds = req.query.originEventIds;
 
-  // Entity mode: use entity ID
+  // Entity mode: always center colored complex preview on the requested entity.
+  // Round-robin scenarios omit riskScore and make the flyout preview go gray.
   if (entityIds?.length) {
     const id = entityIds[0].id;
-    if (ENTITY_SCENARIO_MAP[id]) return ENTITY_SCENARIO_MAP[id](id);
-    // Round-robin fallback based on string hash
-    const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return SCENARIO_FUNCTIONS[hash % SCENARIO_FUNCTIONS.length](id);
+    return scenarioSampleEntityOrigin(id);
   }
 
   // Event/alert mode: use first event ID

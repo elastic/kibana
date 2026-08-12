@@ -6,6 +6,7 @@
  */
 import React, { memo, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -33,8 +34,9 @@ const ENTITY_SHAPES = new Set(['hexagon', 'pentagon', 'ellipse', 'rectangle', 'd
 /** Preview card radius — match entity card 2D (4px). */
 const NODE_PILL_BORDER_RADIUS = 4;
 const NODE_ICON_BORDER_RADIUS = 4;
-/** Match Figma preview entity card icon (24px glyph). */
+/** Match Figma preview entity card icon (24px glyph in 32px square). */
 const NODE_ICON_SIZE = 24;
+const NODE_ICON_BOX_SIZE = 32;
 /** Match Figma card padding (8px). */
 const NODE_PILL_PADDING = 8;
 /** Canvas inset — keep room for stacked group edge under the neighbor pill. */
@@ -43,11 +45,16 @@ const PREVIEW_CANVAS_PADDING_BOTTOM = 24;
 /** Minimum canvas height so title+subtitle cards are not clipped. */
 const PREVIEW_CANVAS_MIN_HEIGHT = 176;
 
-/** Padding + icon + gap around the label inside a preview pill. */
-const PREVIEW_PILL_CHROME_WIDTH = NODE_PILL_PADDING + NODE_ICON_SIZE + 8 + NODE_PILL_PADDING;
-/** Keep pills narrow enough for the entity flyout (~480px content). */
-const PREVIEW_PILL_WIDTH_MIN = 120;
-const PREVIEW_PILL_WIDTH_MAX = 148;
+/** Padding + icon + gap + risk badge chrome inside a preview pill. */
+const PREVIEW_PILL_CHROME_WIDTH =
+  NODE_PILL_PADDING + NODE_ICON_BOX_SIZE + 8 + 52 + NODE_PILL_PADDING;
+/** Keep pills readable in the entity flyout (~480px content). */
+const PREVIEW_PILL_WIDTH_MIN = 148;
+const PREVIEW_PILL_WIDTH_MAX = 200;
+
+const RISK_BADGE_BORDER_RADIUS = 999;
+const RISK_BADGE_HEIGHT = 20;
+const RISK_BADGE_PADDING_X = 8;
 
 type PreviewEntityNode = {
   id: string;
@@ -133,25 +140,56 @@ const getPreviewRiskTone = (
     backgroundLightWarning: string;
     backgroundLightNeutral: string;
     backgroundLightText: string;
+    backgroundFilledDanger: string;
+    backgroundFilledRisk: string;
+    backgroundFilledWarning: string;
+    backgroundFilledNeutral: string;
+    backgroundFilledText: string;
     textDanger: string;
     textRisk: string;
     textWarning: string;
     textNeutral: string;
     textParagraph: string;
+    textInverse: string;
   }
 ) => {
   switch (level) {
     case 'critical':
-      return { iconBg: colors.backgroundLightDanger, accent: colors.textDanger };
+      return {
+        iconBg: colors.backgroundLightDanger,
+        accent: colors.textDanger,
+        badgeBackground: colors.backgroundFilledDanger,
+        badgeText: colors.textInverse,
+      };
     case 'high':
-      return { iconBg: colors.backgroundLightRisk, accent: colors.textRisk };
+      return {
+        iconBg: colors.backgroundLightRisk,
+        accent: colors.textRisk,
+        badgeBackground: colors.backgroundFilledRisk,
+        badgeText: colors.textInverse,
+      };
     case 'moderate':
-      return { iconBg: colors.backgroundLightWarning, accent: colors.textWarning };
+      return {
+        iconBg: colors.backgroundLightWarning,
+        accent: colors.textWarning,
+        badgeBackground: colors.backgroundFilledWarning,
+        badgeText: colors.textInverse,
+      };
     case 'low':
-      return { iconBg: colors.backgroundLightNeutral, accent: colors.textNeutral };
+      return {
+        iconBg: colors.backgroundLightNeutral,
+        accent: colors.textNeutral,
+        badgeBackground: colors.backgroundFilledNeutral,
+        badgeText: colors.textInverse,
+      };
     case 'unknown':
     default:
-      return { iconBg: colors.backgroundLightText, accent: colors.textParagraph };
+      return {
+        iconBg: colors.backgroundLightText,
+        accent: colors.textParagraph,
+        badgeBackground: colors.backgroundFilledText,
+        badgeText: colors.textInverse,
+      };
   }
 };
 
@@ -231,7 +269,8 @@ interface NodePillProps {
 }
 
 /**
- * Entity preview card — variant 2D: plain card, risk-light icon, title + subtitle.
+ * Entity preview card — matches zoom-out CompactColoredCard:
+ * plain card, risk-light icon, title, type + filled risk badge.
  */
 const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: NodePillProps) => {
   const { euiTheme } = useEuiTheme();
@@ -270,7 +309,7 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
       <EuiFlexGroup
         direction="row"
         gutterSize="s"
-        alignItems="flexStart"
+        alignItems="center"
         responsive={false}
         css={css`
           position: relative;
@@ -290,8 +329,8 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
           <EuiFlexItem grow={false}>
             <div
               css={css`
-                width: ${NODE_ICON_SIZE + 8}px;
-                height: ${NODE_ICON_SIZE + 8}px;
+                width: ${NODE_ICON_BOX_SIZE}px;
+                height: ${NODE_ICON_BOX_SIZE}px;
                 border-radius: ${NODE_ICON_BORDER_RADIUS}px;
                 border: none;
                 background: ${tone.iconBg};
@@ -299,10 +338,20 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                padding: 4px;
               `}
             >
-              <EuiIcon type={icon} size="l" color={tone.accent} aria-hidden={true} />
+              <EuiIcon
+                type={icon}
+                size="l"
+                color={tone.accent}
+                aria-hidden={true}
+                css={css`
+                  svg {
+                    width: ${NODE_ICON_SIZE}px;
+                    height: ${NODE_ICON_SIZE}px;
+                  }
+                `}
+              />
             </div>
           </EuiFlexItem>
         )}
@@ -326,21 +375,53 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
           >
             {label ?? '—'}
           </EuiText>
-          {subtitle ? (
-            <EuiText
-              size="xs"
+          {(subtitle || riskScore !== undefined) && (
+            <div
               css={css`
-                font-weight: ${euiTheme.font.weight.regular};
-                color: ${euiTheme.colors.textSubdued};
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                line-height: ${euiTheme.size.base};
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 0;
               `}
             >
-              {subtitle}
-            </EuiText>
-          ) : null}
+              {subtitle ? (
+                <EuiText
+                  size="xs"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.regular};
+                    color: ${euiTheme.colors.textSubdued};
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: ${euiTheme.size.base};
+                  `}
+                >
+                  {subtitle}
+                </EuiText>
+              ) : null}
+              {riskScore !== undefined && (
+                <EuiBadge
+                  color="hollow"
+                  css={css`
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: ${RISK_BADGE_HEIGHT}px;
+                    padding: 0 ${RISK_BADGE_PADDING_X}px;
+                    background-color: ${tone.badgeBackground};
+                    color: ${tone.badgeText};
+                    border: none;
+                    border-radius: ${RISK_BADGE_BORDER_RADIUS}px;
+                    font-size: 12px;
+                    font-weight: ${euiTheme.font.weight.medium};
+                    line-height: ${euiTheme.size.base};
+                  `}
+                >
+                  {riskScore.toFixed(2)}
+                </EuiBadge>
+              )}
+            </div>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -471,7 +552,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
           ? i18n.translate(
               'xpack.securitySolution.flyout.right.visualizations.graphPreview.neighborTypes',
               {
-                defaultMessage: 'different types',
+                defaultMessage: 'Types',
               }
             )
           : neighborTag;

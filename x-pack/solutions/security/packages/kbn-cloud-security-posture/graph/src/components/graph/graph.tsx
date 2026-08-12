@@ -25,7 +25,7 @@ import type {
   ReactFlowInstance,
   FitView,
 } from '@xyflow/react';
-import { useGeneratedHtmlId, useEuiTheme } from '@elastic/eui';
+import { useGeneratedHtmlId, useEuiTheme, EuiLoadingSpinner } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SvgDefsMarker } from '../edge/markers';
@@ -182,6 +182,7 @@ export const Graph = memo<GraphProps>(
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
+    const layoutRevealTimeoutRef = useRef<number | null>(null);
     const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
     const applyFiltersToggleRef = useRef<(() => void) | null>(null);
     const searchPanelToggleRef = useRef<(() => void) | null>(null);
@@ -193,6 +194,8 @@ export const Graph = memo<GraphProps>(
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
+    /** Hide the canvas until dagre positions are applied and fitView has run (avoids the clump flash). */
+    const [isLayoutReady, setIsLayoutReady] = useState(() => nodes.length === 0);
     const prevHighlightOriginsOnlyRef = useRef(highlightOriginsOnly);
     const layoutPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
     const [useBundledEdgeRouting, setUseBundledEdgeRouting] = useState(true);
@@ -205,6 +208,66 @@ export const Graph = memo<GraphProps>(
       },
       [setNodes]
     );
+
+    const clearLayoutRevealTimeout = useCallback(() => {
+      if (layoutRevealTimeoutRef.current != null) {
+        window.clearTimeout(layoutRevealTimeoutRef.current);
+        layoutRevealTimeoutRef.current = null;
+      }
+    }, []);
+
+    /** Remount ReactFlow and hide it until positions + fitView settle. */
+    const beginLayoutRemount = useCallback(() => {
+      clearLayoutRevealTimeout();
+      setIsLayoutReady(false);
+      setReactFlowKey((prev) => prev + 1);
+    }, [clearLayoutRevealTimeout]);
+
+    /**
+     * Apply layouted nodes/edges after remount, fit the viewport instantly, then reveal.
+     * Instant fit (duration 0) avoids animating from a piled viewport into place.
+     */
+    const finishLayoutReveal = useCallback(
+      (
+        layoutedNodes: Array<Node<NodeViewModel>>,
+        layoutedEdges: Array<Edge<EdgeViewModel>>
+      ) => {
+        applyLayoutedNodes(layoutedNodes);
+        setEdges(layoutedEdges);
+
+        clearLayoutRevealTimeout();
+        layoutRevealTimeoutRef.current = window.setTimeout(() => {
+          const options: FitViewOptions<Node<NodeViewModel>> = {
+            ...(interactive ? fitViewOptions : nonInteractiveFitViewOptions),
+            duration: 0,
+          };
+
+          let attempts = 0;
+          const reveal = () => {
+            const fitView = fitViewRef.current;
+            if (!fitView && attempts < 30) {
+              // Remount's onInit hasn't set the ref yet — try again next frame.
+              attempts += 1;
+              layoutRevealTimeoutRef.current = window.setTimeout(reveal, 16);
+              return;
+            }
+            if (!fitView) {
+              // Give up waiting and show the graph rather than spin forever.
+              setIsLayoutReady(true);
+              return;
+            }
+            void Promise.resolve(fitView(options)).finally(() => {
+              setIsLayoutReady(true);
+            });
+          };
+
+          reveal();
+        }, 0);
+      },
+      [applyLayoutedNodes, clearLayoutRevealTimeout, interactive, setEdges]
+    );
+
+    useEffect(() => () => clearLayoutRevealTimeout(), [clearLayoutRevealTimeout]);
 
     const handleNodesChange = useCallback(
       (changes: NodeChange<Node<NodeViewModel>>[]) => {
@@ -248,17 +311,16 @@ export const Graph = memo<GraphProps>(
         );
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        setReactFlowKey((prev) => prev + 1);
+        beginLayoutRemount();
 
         setTimeout(() => {
-          applyLayoutedNodes(layoutedNodes);
-          setEdges(initialEdges);
+          finishLayoutReveal(layoutedNodes, initialEdges);
         }, 0);
       }
       // highlightOriginsOnly is applied via the nodes/edges effect below; this effect
       // only re-processes when interactive mode changes.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [applyLayoutedNodes, interactive, setEdges]);
+    }, [applyLayoutedNodes, beginLayoutRemount, finishLayoutReveal, interactive, setEdges]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -342,12 +404,11 @@ export const Graph = memo<GraphProps>(
       );
       const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
       // Force ReactFlow to remount by changing the key first
-      setReactFlowKey((prev) => prev + 1);
+      beginLayoutRemount();
 
       // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
       setTimeout(() => {
-        applyLayoutedNodes(layoutedNodes);
-        setEdges(initialEdges);
+        finishLayoutReveal(layoutedNodes, initialEdges);
       }, 0);
 
       currNodesRef.current = nodes;
@@ -420,6 +481,8 @@ export const Graph = memo<GraphProps>(
       setNodes,
       setEdges,
       applyLayoutedNodes,
+      beginLayoutRemount,
+      finishLayoutReveal,
       isGraphInteractive,
       highlightOriginsOnly,
       onCenterGraphAfterRefresh,
@@ -584,12 +647,42 @@ export const Graph = memo<GraphProps>(
             <GraphFullscreenContext.Provider value={fullscreenContextValue}>
               <div
                 ref={graphContainerRef}
-                css={[fullscreenContainerCss, containerCss]}
+                css={[
+                  fullscreenContainerCss,
+                  css`
+                    position: relative;
+                  `,
+                  containerCss,
+                ]}
                 {...rest}
                 tabIndex={interactive ? -1 : undefined}
                 onPointerDown={handleGraphPointerDown}
               >
                 <SvgDefsMarker />
+                {!isLayoutReady && (
+                  <div
+                    css={css`
+                      position: absolute;
+                      inset: 0;
+                      z-index: 2;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background: ${GRAPH_BACKGROUND_COLOR};
+                      pointer-events: none;
+                    `}
+                    data-test-subj="graphLayoutLoading"
+                  >
+                    <EuiLoadingSpinner size="xl" />
+                  </div>
+                )}
+                <div
+                  css={css`
+                    height: 100%;
+                    width: 100%;
+                    opacity: ${isLayoutReady ? 1 : 0};
+                  `}
+                >
                 <ReactFlow
                   key={reactFlowKey}
                   data-test-subj={GRAPH_ID}
@@ -666,6 +759,7 @@ export const Graph = memo<GraphProps>(
                     <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
                   )}
                 </ReactFlow>
+                </div>
                 <GlobalGraphStyles />
                 <div
                   ref={overlayContainerRef}

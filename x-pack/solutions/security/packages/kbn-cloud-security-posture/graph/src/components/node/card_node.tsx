@@ -129,10 +129,10 @@ const RISK_BADGE_BORDER_RADIUS = 999;
 const RISK_BADGE_HEIGHT = 20;
 const RISK_BADGE_PADDING_X = 8;
 const ICON_SIZE = 40;
-/** Zoom-out 2D (Figma 14379:4121): icon square matches full-card icon. */
-const COMPACT_COLORED_ICON_SIZE = 40;
+/** Zoom-out / preview-aligned compact card: horizontal icon + name + type/badge. */
+const COMPACT_COLORED_ICON_SIZE = 32;
 const COMPACT_COLORED_ICON_GLYPH = 24;
-const COMPACT_COLORED_PADDING = 12;
+const COMPACT_COLORED_PADDING = 8;
 const COMPACT_COLORED_GAP = 8;
 /** Simplified (zoomed-out default) entity icon square — 8px larger than the full-card icon box. */
 const SIMPLIFIED_ICON_SIZE = 48;
@@ -916,8 +916,8 @@ const SimplifiedCard = ({
 );
 
 /**
- * Entity Colors zoom-out (Figma 2D / 14379:4121):
- * plain white card, risk-light icon (40px), filled risk badge pill below.
+ * Zoom-out entity card — matches Graph preview NodePill:
+ * plain white card, risk-light icon, title, type + filled risk badge.
  */
 const CompactColoredCard = ({
   isGroup,
@@ -927,6 +927,7 @@ const CompactColoredCard = ({
   activeBorderColor,
   cardBg,
   iconBg,
+  iconEmphasizedBg,
   iconAccent,
   originOutlineColor,
   highlightAsOrigin = false,
@@ -935,6 +936,8 @@ const CompactColoredCard = ({
   interactive,
   nodeClick,
   nodeProps,
+  primaryText,
+  secondaryText,
   riskScore,
   showHoverActionsToolbar = false,
   getHoverActionItems,
@@ -950,6 +953,7 @@ const CompactColoredCard = ({
   activeBorderColor: string;
   cardBg: string;
   iconBg: string;
+  iconEmphasizedBg: string;
   iconAccent: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
@@ -958,6 +962,8 @@ const CompactColoredCard = ({
   interactive?: boolean;
   nodeClick?: EntityNodeViewModel['nodeClick'];
   nodeProps: NodeProps;
+  primaryText: string;
+  secondaryText?: string;
   riskScore?: number;
   showHoverActionsToolbar?: boolean;
   getHoverActionItems?: () => EntityActionItem[];
@@ -966,6 +972,27 @@ const CompactColoredCard = ({
   onActionsHoverLeave?: (e: React.MouseEvent<HTMLElement>) => void;
   hoverContainerRef?: React.RefObject<HTMLDivElement | null>;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const nameCss = css`
+    ${metadataTextCss}
+    font-weight: ${euiTheme.font.weight.semiBold};
+    color: ${euiTheme.colors.textParagraph};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: ${euiTheme.size.base};
+  `;
+  const typeCss = css`
+    ${metadataTextCss}
+    font-weight: ${euiTheme.font.weight.regular};
+    color: ${euiTheme.colors.textSubdued};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: ${euiTheme.size.base};
+  `;
+
   return (
     <CardWrapper
       ref={hoverContainerRef}
@@ -983,64 +1010,110 @@ const CompactColoredCard = ({
           borderRadius={ORIGIN_ENTITY_OUTLINE_BORDER_RADIUS}
         />
       )}
-      <CardShell
-        defaultBorderColor={defaultBorderColor}
-        activeBorderColor={activeBorderColor}
-        bgColor={cardBg}
-        $defaultShadow={defaultShadow}
-        $hoverShadow={hoverShadow}
+      <div
         css={css`
+          display: flex;
+          flex-direction: column;
           width: max-content;
+          /* Room for the stacked group edge under the card. */
+          margin-bottom: ${isGroup ? GROUP_STACK_HEIGHT - 2 : 0}px;
         `}
       >
-        <CardShellClip>
-          <div
-            data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
-            css={css`
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              gap: ${COMPACT_COLORED_GAP}px;
-              padding: ${COMPACT_COLORED_PADDING}px;
-            `}
-          >
+        <CardShell
+          defaultBorderColor={defaultBorderColor}
+          activeBorderColor={activeBorderColor}
+          bgColor={cardBg}
+          $defaultShadow={defaultShadow}
+          $hoverShadow={hoverShadow}
+          css={css`
+            width: max-content;
+          `}
+        >
+          <CardShellClip>
             <div
+              data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
               css={css`
-                position: relative;
-                width: ${COMPACT_COLORED_ICON_SIZE}px;
-                height: ${COMPACT_COLORED_ICON_SIZE}px;
-                border-radius: ${ICON_BORDER_RADIUS}px;
-                background: ${iconBg};
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                overflow: hidden;
+                gap: ${COMPACT_COLORED_GAP}px;
+                padding: ${COMPACT_COLORED_PADDING}px;
               `}
             >
-              {isGroup && count !== undefined && (
-                <IconCountBadge>
-                  <EntityGroupCountBadge count={count} />
-                </IconCountBadge>
-              )}
-              <EuiIcon
-                type={resolvedIcon}
-                size="l"
-                color={iconAccent}
-                aria-hidden={true}
+              <div
                 css={css`
-                  svg {
-                    width: ${COMPACT_COLORED_ICON_GLYPH}px;
-                    height: ${COMPACT_COLORED_ICON_GLYPH}px;
+                  position: relative;
+                  width: ${COMPACT_COLORED_ICON_SIZE}px;
+                  height: ${COMPACT_COLORED_ICON_SIZE}px;
+                  border-radius: ${ICON_BORDER_RADIUS}px;
+                  background: ${iconBg};
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  flex-shrink: 0;
+                  overflow: hidden;
+                  transition: background-color 0.15s ease;
+
+                  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+                    background: ${iconEmphasizedBg};
                   }
                 `}
-              />
+              >
+                {isGroup && count !== undefined && (
+                  <IconCountBadge>
+                    <EntityGroupCountBadge count={count} />
+                  </IconCountBadge>
+                )}
+                <EuiIcon
+                  type={resolvedIcon}
+                  size="l"
+                  color={iconAccent}
+                  aria-hidden={true}
+                  css={css`
+                    svg {
+                      width: ${COMPACT_COLORED_ICON_GLYPH}px;
+                      height: ${COMPACT_COLORED_ICON_GLYPH}px;
+                    }
+                  `}
+                />
+              </div>
+              <div
+                css={css`
+                  flex: 1;
+                  min-width: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                `}
+              >
+                <EuiText css={nameCss}>{primaryText}</EuiText>
+                {(secondaryText || riskScore !== undefined) && (
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                      min-width: 0;
+                    `}
+                  >
+                    {secondaryText ? <EuiText css={typeCss}>{secondaryText}</EuiText> : null}
+                    {riskScore !== undefined && <RiskScoreBadge score={riskScore} />}
+                  </div>
+                )}
+              </div>
             </div>
-            {riskScore !== undefined && <RiskScoreBadge score={riskScore} />}
-          </div>
-        </CardShellClip>
-      </CardShell>
+          </CardShellClip>
+        </CardShell>
+
+        {isGroup && (
+          <GroupStackWrapper>
+            <GroupStackTab
+              defaultBorderColor={defaultBorderColor}
+              activeBorderColor={activeBorderColor}
+              bgColor={cardBg}
+            />
+          </GroupStackWrapper>
+        )}
+      </div>
 
       {interactive && (
         <NodeButton
@@ -1265,11 +1338,29 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
     ? getEntityRiskTheme(getEntityRiskLevel(displayRiskScore), euiTheme.colors)
     : getEntityRiskTheme('unknown', euiTheme.colors);
   const headerBg = cardBg;
-  const iconBg = isColoredStyle ? riskTheme.iconBackground : euiTheme.colors.backgroundBasePlain;
-  const iconEmphasizedBg = iconBg;
+  const iconBg = isColoredStyle
+    ? riskTheme.iconBackground
+    : euiTheme.colors.backgroundLightText;
+  const iconEmphasizedBg = isColoredStyle
+    ? riskTheme.headerBackground
+    : euiTheme.colors.backgroundBaseFormsControlDisabled;
   const iconAccent = riskTheme.accent;
   const originOutlineColor = euiTheme.colors.borderBaseProminent;
   const resolvedIcon = resolveIcon(icon, tag);
+
+  const compactPrimaryText =
+    isGroup && count !== undefined
+      ? i18n.translate('securitySolutionPackages.csp.graph.node.card.groupEntityCount', {
+          defaultMessage: '{count} {count, plural, one {entity} other {entities}}',
+          values: { count },
+        })
+      : headerPrimaryText;
+  const compactSecondaryText = isGroup
+    ? entityTypeLabel ??
+      i18n.translate('securitySolutionPackages.csp.graph.node.card.groupTypesLabel', {
+        defaultMessage: 'Types',
+      })
+    : headerSecondaryText;
 
   const showIp = ips && ips.length > 0;
   const showGeo = countryCodes && countryCodes.length > 0;
@@ -1295,6 +1386,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         activeBorderColor={activeBorderColor}
         cardBg={cardBg}
         iconBg={iconBg}
+        iconEmphasizedBg={iconEmphasizedBg}
         iconAccent={iconAccent}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
@@ -1303,6 +1395,8 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         interactive={interactive}
         nodeClick={nodeClick}
         nodeProps={props}
+        primaryText={compactPrimaryText}
+        secondaryText={compactSecondaryText}
         riskScore={displayRiskScore}
         showHoverActionsToolbar={isHoverActionsMode && isHoverActionsVisible}
         getHoverActionItems={getEntityActionItems}
