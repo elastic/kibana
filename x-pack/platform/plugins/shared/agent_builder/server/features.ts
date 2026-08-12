@@ -37,10 +37,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           ApiPrivileges.manage('llm_product_doc'),
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
-        // Every Agent Builder user needs to read the space-settings singleton
-        // so the UI can resolve the space's assigned default agent (if any)
-        // before it decides which agent to land on. Writes are gated on the
-        // `manageAgents` sub-feature below.
+        // Read the space-settings singleton for UI resolution of default Agent
         savedObject: {
           all: [],
           read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
@@ -75,9 +72,6 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
                 ),
                 includeIn: 'all',
                 api: [apiPrivileges.manageAgents],
-                // Writing the per-space default-agent assignment is an
-                // administrative action, so it is bundled with the agent
-                // management privilege rather than the base read privilege.
                 savedObject: {
                   all: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
                   read: [],
