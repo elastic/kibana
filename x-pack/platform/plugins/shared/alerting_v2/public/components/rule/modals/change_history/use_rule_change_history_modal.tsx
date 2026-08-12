@@ -17,15 +17,16 @@ export interface RuleChangeHistoryTarget {
   name: string;
 }
 
-export interface RuleChangeHistoryModalContainerProps {
+export interface UseRuleChangeHistoryModalOptions {
   /** Enable restore affordances when the read API + permissions allow it. */
   canRestore?: boolean;
-  /**
-   * Renders the container's content, receiving an imperative opener. Wire it to
-   * the `onViewChangeHistory` entry points (rule details More menu / rules list
-   * row actions); each call selects that rule and opens the modal.
-   */
-  children: (openChangeHistory: (rule: RuleChangeHistoryTarget) => void) => React.ReactNode;
+}
+
+export interface UseRuleChangeHistoryModalResult {
+  /** Opens the modal for a rule; re-opening the same rule remounts and re-opens. */
+  openChangeHistory: (rule: RuleChangeHistoryTarget) => void;
+  /** Render this next to the host's content (like a flyout element). */
+  changeHistoryModal: React.ReactNode;
 }
 
 /** Combines rule id and open count into a remount key (see below). */
@@ -33,18 +34,17 @@ const toModalKey = ({ id }: RuleChangeHistoryTarget, openCount: number): string 
   `${id}:${openCount}`;
 
 /**
- * Shared container for the rule change-history modal, reused by rule details and
- * the rules list. Wires the adapter and analytics from DI, tracks the
- * selected rule, and exposes an imperative opener to its children.
+ * Shared hook for the rule change-history modal, reused by rule details and the
+ * rules list. Wires the adapter and analytics from DI, tracks the selected rule,
+ * and returns an imperative opener plus a renderable modal element.
  *
- * The provider is mounted only once a rule is selected and is keyed by rule id +
- * open count, so every open request mounts a fresh provider that auto-opens. This
+ * The provider mounts only once a rule is selected and is keyed by rule id + open
+ * count, so every open request mounts a fresh provider that auto-opens. This
  * sidesteps the provider's reset-on-`objectId` and re-opens even for the same rule.
  */
-export const RuleChangeHistoryModalContainer = ({
+export const useRuleChangeHistoryModal = ({
   canRestore = false,
-  children,
-}: RuleChangeHistoryModalContainerProps): JSX.Element => {
+}: UseRuleChangeHistoryModalOptions = {}): UseRuleChangeHistoryModalResult => {
   const api = useService(RuleChangeHistoryApi);
   const analytics = useService(CoreStart('analytics'));
   const adapter = createRuleChangeHistoryAdapter(api);
@@ -58,21 +58,18 @@ export const RuleChangeHistoryModalContainer = ({
     setOpenCount((count) => count + 1);
   }, []);
 
-  return (
-    <>
-      {children(openChangeHistory)}
-      {target && (
-        <RuleChangeHistoryProvider
-          key={toModalKey(target, openCount)}
-          ruleId={target.id}
-          ruleName={target.name}
-          adapter={adapter}
-          analytics={analytics}
-          canRestore={canRestore}
-        >
-          <AutoOpenChangeHistoryModal />
-        </RuleChangeHistoryProvider>
-      )}
-    </>
-  );
+  const changeHistoryModal = target ? (
+    <RuleChangeHistoryProvider
+      key={toModalKey(target, openCount)}
+      ruleId={target.id}
+      ruleName={target.name}
+      adapter={adapter}
+      analytics={analytics}
+      canRestore={canRestore}
+    >
+      <AutoOpenChangeHistoryModal />
+    </RuleChangeHistoryProvider>
+  ) : null;
+
+  return { openChangeHistory, changeHistoryModal };
 };

@@ -9,10 +9,11 @@ export { AutoOpenChangeHistoryModal } from './auto_open_change_history_modal';
 export { RULE_CHANGE_HISTORY_SCOPE, RULE_CHANGE_HISTORY_STORY_OBJECT_ID } from './constants';
 export { createRuleChangeHistoryAdapter } from './rule_change_history_adapter';
 export {
-  RuleChangeHistoryModalContainer,
-  type RuleChangeHistoryModalContainerProps,
+  useRuleChangeHistoryModal,
+  type UseRuleChangeHistoryModalOptions,
+  type UseRuleChangeHistoryModalResult,
   type RuleChangeHistoryTarget,
-} from './rule_change_history_modal_container';
+} from './use_rule_change_history_modal';
 export {
   createRuleApiResponseFromHistoryFixtures,
   createRuleChangeHistoryFixtures,

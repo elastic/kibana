@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
 
 const mockOpenModal = jest.fn();
 
@@ -39,49 +40,48 @@ jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
 }));
 
-import { RuleChangeHistoryModalContainer } from './rule_change_history_modal_container';
+const Harness = () => {
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
-const renderContainer = () =>
-  render(
-    <RuleChangeHistoryModalContainer>
-      {(open) => (
-        <>
-          <button data-test-subj="openA" onClick={() => open({ id: 'a', name: 'Rule A' })}>
-            a
-          </button>
-          <button data-test-subj="openB" onClick={() => open({ id: 'b', name: 'Rule B' })}>
-            b
-          </button>
-        </>
-      )}
-    </RuleChangeHistoryModalContainer>
+  return (
+    <>
+      <button data-test-subj="openA" onClick={() => openChangeHistory({ id: 'a', name: 'Rule A' })}>
+        a
+      </button>
+      <button data-test-subj="openB" onClick={() => openChangeHistory({ id: 'b', name: 'Rule B' })}>
+        b
+      </button>
+      {changeHistoryModal}
+    </>
   );
+};
 
 const lastProviderRender = () => mockProviderRenders[mockProviderRenders.length - 1];
 
-describe('RuleChangeHistoryModalContainer', () => {
+describe('useRuleChangeHistoryModal', () => {
   beforeEach(() => {
     mockOpenModal.mockClear();
     mockProviderRenders.length = 0;
   });
 
-  it('does not mount the provider or open the modal until a rule is requested', () => {
-    renderContainer();
+  it('renders no modal and does not open until a rule is requested', () => {
+    render(<Harness />);
 
+    expect(screen.queryByTestId('provider')).toBeNull();
     expect(mockProviderRenders).toHaveLength(0);
     expect(mockOpenModal).not.toHaveBeenCalled();
   });
 
   it('forwards analytics from DI to the provider', () => {
-    renderContainer();
+    render(<Harness />);
 
     fireEvent.click(screen.getByTestId('openA'));
 
     expect(lastProviderRender().analytics).toBe(mockAnalyticsStub);
   });
 
-  it('selects the rule and opens the modal when a target is requested', () => {
-    renderContainer();
+  it('mounts the modal for the selected rule and opens it', () => {
+    render(<Harness />);
 
     fireEvent.click(screen.getByTestId('openA'));
 
@@ -91,7 +91,7 @@ describe('RuleChangeHistoryModalContainer', () => {
   });
 
   it('switches the target and re-opens when a different rule is requested', () => {
-    renderContainer();
+    render(<Harness />);
 
     fireEvent.click(screen.getByTestId('openA'));
     fireEvent.click(screen.getByTestId('openB'));
@@ -102,7 +102,7 @@ describe('RuleChangeHistoryModalContainer', () => {
   });
 
   it('re-opens the modal for the same rule (remount key advances even when the rule is unchanged)', () => {
-    renderContainer();
+    render(<Harness />);
 
     fireEvent.click(screen.getByTestId('openA'));
     fireEvent.click(screen.getByTestId('openA'));

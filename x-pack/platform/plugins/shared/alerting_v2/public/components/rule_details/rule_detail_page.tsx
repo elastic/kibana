@@ -31,6 +31,7 @@ import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
 import { getRuleDetailMenu } from './get_rule_detail_menu';
 import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
@@ -79,6 +80,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
 
   const showDeleteConfirmationModal = React.useCallback(() => {
@@ -115,6 +117,11 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const handleRunRule = React.useCallback(() => {
     runRule({ id: rule.id });
   }, [runRule, rule.id]);
+
+  const onViewChangeHistory = React.useCallback(
+    () => openChangeHistory({ id: rule.id, name: rule.metadata.name }),
+    [openChangeHistory, rule.id, rule.metadata.name]
+  );
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
@@ -159,6 +166,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         onClone,
         onDelete: showDeleteConfirmationModal,
         onRun: handleRunRule,
+        onViewChangeHistory,
       }),
     [
       rule,
@@ -168,6 +176,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       onClone,
       showDeleteConfirmationModal,
       handleRunRule,
+      onViewChangeHistory,
     ]
   );
 
@@ -279,6 +288,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         />
       )}
       {flyout}
+      {changeHistoryModal}
     </KibanaPageTemplate>
   );
 };
