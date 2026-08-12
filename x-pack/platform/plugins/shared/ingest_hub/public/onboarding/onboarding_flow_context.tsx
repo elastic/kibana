@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useCallback, useRef, useState } from 'react';
+import React, { createContext, useContext, useCallback, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
@@ -165,11 +165,18 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     deployHandlerRef.current?.(instanceIds);
   }, []);
 
-  const servicesStep: ServicesStepState = {
-    selectedServiceIds: (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
-      (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
-    ),
-  };
+  const selectedServiceIds = useMemo(
+    () =>
+      (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
+        (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
+      ),
+    [persistedServices]
+  );
+
+  const servicesStep: ServicesStepState = useMemo(
+    () => ({ selectedServiceIds }),
+    [selectedServiceIds]
+  );
 
   const deploySettingsStep: DeploySettingsStepState = {
     connectorId: persistedDeploySettingsStep?.connectorId,
