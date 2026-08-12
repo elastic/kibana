@@ -7,6 +7,7 @@
 
 import type { ESSearchRequest } from '@kbn/es-types';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_SERVICE_NAME } from '../../../common/otel_rum';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
@@ -31,6 +32,12 @@ export function serviceNameQuery(
       services: {
         terms: {
           field: SERVICE_NAME,
+          size: 1000,
+        },
+      },
+      otelServices: {
+        terms: {
+          field: OTEL_SERVICE_NAME,
           size: 1000,
         },
       },

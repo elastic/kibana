@@ -8,9 +8,18 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSection,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
+import { useHistory, useLocation } from 'react-router-dom';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useHasRumData } from './hooks/use_has_rum_data';
@@ -22,12 +31,19 @@ import { useAppMenu } from '../../../hooks/use_app_menu';
 import { useUxPluginContext } from '../../../context/use_ux_plugin_context';
 
 import { RumOverview } from '.';
+import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
   defaultMessage: 'Dashboard',
 });
 
-export function RumHome() {
+const SESSIONS_LABEL = i18n.translate('xpack.ux.sessions.tab', {
+  defaultMessage: 'Sessions',
+});
+
+export type UxHomeTab = 'dashboard' | 'session-replay';
+
+export function RumHome({ tab }: { tab: UxHomeTab }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
     useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
@@ -90,6 +106,13 @@ export function RumHome() {
     });
   }, [hasData, observabilityAIAssistant?.service, screenDescription]);
 
+  const headerTitle =
+    tab === 'session-replay'
+      ? i18n.translate('xpack.ux.home.sessionsTitle', {
+          defaultMessage: 'Sessions',
+        })
+      : DASHBOARD_LABEL;
+
   return (
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
@@ -98,30 +121,34 @@ export function RumHome() {
         paddingSize: 'none',
       }}
     >
-      <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="standard" />
+      <AppHeader title={headerTitle} menu={appMenu} spacing="standard" />
 
       <EuiPageSection paddingSize="m" restrictWidth={false}>
-        <DashboardToolbar />
-        {isLoading && <EmptyStateLoading />}
-        <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
-          <RumOverview />
+        <DashboardToolbar tab={tab} />
+        {isLoading && tab === 'dashboard' && <EmptyStateLoading />}
+        <div style={{ visibility: isLoading && tab === 'dashboard' ? 'hidden' : 'initial' }}>
+          {tab === 'dashboard' ? <RumOverview /> : <SessionReplayPanel />}
         </div>
       </EuiPageSection>
     </PageTemplateComponent>
   );
 }
 
-function DashboardToolbar() {
+function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
+  const history = useHistory();
+  const location = useLocation();
+
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
         <EuiFlexItem>
           <WebApplicationSelect />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <UserPercentile />
-        </EuiFlexItem>
+        {tab === 'dashboard' && (
+          <EuiFlexItem>
+            <UserPercentile />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <UxEnvironmentFilter />
         </EuiFlexItem>
@@ -129,6 +156,44 @@ function DashboardToolbar() {
           <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiTabs>
+        <EuiTab
+          isSelected={tab === 'dashboard'}
+          href={history.createHref({ pathname: '/', search: location.search })}
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault();
+            history.push({ pathname: '/', search: location.search });
+          }}
+          data-test-subj="uxDashboardTab"
+        >
+          {DASHBOARD_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'session-replay'}
+          href={history.createHref({ pathname: '/session-replay', search: location.search })}
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault();
+            history.push({ pathname: '/session-replay', search: location.search });
+          }}
+          data-test-subj="uxSessionReplayTab"
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{SESSIONS_LABEL}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.ux.sessionReplay.experimentalBadge', {
+                  defaultMessage: 'Technical preview',
+                })}
+                tooltipContent={i18n.translate('xpack.ux.sessionReplay.experimentalTooltip', {
+                  defaultMessage:
+                    'Sessions and Session Replay are an experimental POC and may change or be removed.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTab>
+      </EuiTabs>
       <EuiSpacer size="m" />
     </>
   );

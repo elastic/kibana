@@ -7,11 +7,13 @@
 
 import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-repository';
 import { listSessionReplaySessionsRoute } from './session_replay/list_sessions';
+import { getSessionRoute } from './session_replay/get_session';
 import { getSessionReplayEventsRoute } from './session_replay/get_events';
 
 function getTypedUxServerRouteRepository() {
   return {
     ...listSessionReplaySessionsRoute,
+    ...getSessionRoute,
     ...getSessionReplayEventsRoute,
   };
 }

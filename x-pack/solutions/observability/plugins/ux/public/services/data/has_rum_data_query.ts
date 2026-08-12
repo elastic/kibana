@@ -9,13 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_SERVICE_NAME } from '../../../common/otel_rum';
 import { rangeQuery } from './range_query';
+import { rumPageLoadFilter } from './rum_otel_filters';
 
 export const HAS_RUM_DATA_TIERS: DataTier[] = ['data_hot', 'data_warm'];
 
@@ -40,10 +37,12 @@ export function formatHasRumResult<T>(
   indices?: string
 ) {
   if (!esResult) return esResult;
+  const classicBucket = esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key;
+  const otelBucket = esResult.aggregations?.otelServices?.mostTraffic?.buckets?.[0]?.key;
   return {
     indices,
     hasData: esResult.hits.total.value > 0,
-    serviceName: esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
+    serviceName: classicBucket ?? otelBucket,
   };
 }
 
@@ -53,8 +52,7 @@ function hasRumDataBaseQuery({ dataTiers, since }: HasRumDataQueryOptions = {}) 
     query: {
       bool: {
         filter: [
-          { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          rumPageLoadFilter(),
           ...(dataTiers?.length ? [{ terms: { _tier: dataTiers } }] : []),
           // Open ended, so documents timestamped ahead of the cluster clock still match.
           ...(since ? [{ range: { '@timestamp': { gte: since } } }] : []),
@@ -90,6 +88,17 @@ export function hasRumDataWithServiceNameQuery({
           mostTraffic: {
             terms: {
               field: SERVICE_NAME,
+              size: 1,
+            },
+          },
+        },
+      },
+      otelServices: {
+        filter: rangeQuery(start, end)[0],
+        aggs: {
+          mostTraffic: {
+            terms: {
+              field: OTEL_SERVICE_NAME,
               size: 1,
             },
           },

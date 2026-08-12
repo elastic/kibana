@@ -32,9 +32,16 @@ export function WebApplicationSelect() {
 
   interface ServicesAggregation {
     services?: { buckets?: Array<{ key: string }> };
+    otelServices?: { buckets?: Array<{ key: string }> };
   }
   const servicesAgg = (data?.aggregations as ServicesAggregation | undefined)?.services;
-  const rumServiceNames = servicesAgg?.buckets?.map((bucket: { key: string }) => bucket.key) ?? [];
+  const otelServicesAgg = (data?.aggregations as ServicesAggregation | undefined)?.otelServices;
+  const rumServiceNames = Array.from(
+    new Set([
+      ...(servicesAgg?.buckets?.map((bucket: { key: string }) => bucket.key) ?? []),
+      ...(otelServicesAgg?.buckets?.map((bucket: { key: string }) => bucket.key) ?? []),
+    ])
+  );
 
   return <ServiceNameFilter loading={loading ?? true} serviceNames={rumServiceNames} />;
 }

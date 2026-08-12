@@ -7,28 +7,91 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
+  RumSessionDetail,
+  SessionListResponse,
   SessionReplayEventsResponse,
-  SessionReplaySessionSummary,
+  SessionSortDirection,
+  SessionSortField,
 } from '../../../common/session_replay';
+
+export interface FetchSessionsParams {
+  http: HttpStart;
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  query?: string;
+  sortField?: SessionSortField;
+  sortDirection?: SessionSortDirection;
+  page?: number;
+  perPage?: number;
+  hasReplay?: boolean;
+  hasErrors?: boolean;
+  hasRage?: boolean;
+  browser?: string;
+  os?: string;
+  minDurationMs?: number;
+  maxDurationMs?: number;
+}
 
 export const fetchSessionReplaySessions = async ({
   http,
   rangeFrom,
   rangeTo,
-  size = 25,
+  serviceName,
+  query,
+  sortField,
+  sortDirection,
+  page,
+  perPage,
+  hasReplay,
+  hasErrors,
+  hasRage,
+  browser,
+  os,
+  minDurationMs,
+  maxDurationMs,
+}: FetchSessionsParams): Promise<SessionListResponse> => {
+  return http.get<SessionListResponse>('/internal/ux/session_replay/sessions', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      ...(serviceName ? { serviceName } : {}),
+      ...(query ? { query } : {}),
+      ...(sortField ? { sortField } : {}),
+      ...(sortDirection ? { sortDirection } : {}),
+      ...(page != null ? { page: String(page) } : {}),
+      ...(perPage != null ? { perPage: String(perPage) } : {}),
+      ...(hasReplay ? { hasReplay: 'true' } : {}),
+      ...(hasErrors ? { hasErrors: 'true' } : {}),
+      ...(hasRage ? { hasRage: 'true' } : {}),
+      ...(browser ? { browser } : {}),
+      ...(os ? { os } : {}),
+      ...(minDurationMs != null ? { minDurationMs: String(minDurationMs) } : {}),
+      ...(maxDurationMs != null ? { maxDurationMs: String(maxDurationMs) } : {}),
+    },
+  });
+};
+
+export const fetchSessionDetail = async ({
+  http,
+  sessionId,
+  rangeFrom,
+  rangeTo,
 }: {
   http: HttpStart;
-  rangeFrom: string;
-  rangeTo: string;
-  size?: number;
-}): Promise<SessionReplaySessionSummary[]> => {
-  const response = await http.get<{ sessions: SessionReplaySessionSummary[] }>(
-    '/internal/ux/session_replay/sessions',
+  sessionId: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}): Promise<RumSessionDetail> => {
+  return http.get<RumSessionDetail>(
+    `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}`,
     {
-      query: { rangeFrom, rangeTo, size: String(size) },
+      query: {
+        ...(rangeFrom ? { rangeFrom } : {}),
+        ...(rangeTo ? { rangeTo } : {}),
+      },
     }
   );
-  return response.sessions;
 };
 
 export const fetchSessionReplayEvents = async ({

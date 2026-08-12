@@ -1,0 +1,681 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiPopover,
+  EuiSelectable,
+  EuiSpacer,
+  EuiStat,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiSelectableOption,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import type {
+  RumSessionSummary,
+  SessionListFacets,
+  SessionListStats,
+  SessionSortDirection,
+  SessionSortField,
+} from '../../../common/session_replay';
+import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
+import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
+import {
+  JourneyTrail,
+  SignalBadges,
+  Sparkline,
+  UserCell,
+  formatDurationMs,
+  formatRelativeTime,
+  formatTime,
+} from './session_ui';
+
+const EMPTY_FACETS: SessionListFacets = {
+  browsers: [],
+  os: [],
+  hasReplay: 0,
+  hasErrors: 0,
+  hasRage: 0,
+};
+
+const EMPTY_STATS: SessionListStats = {
+  total: 0,
+  withReplay: 0,
+  withErrors: 0,
+  rageClicks: 0,
+  medianDurationMs: 0,
+};
+
+interface DurationOption {
+  key: string;
+  label: string;
+  min?: number;
+  max?: number;
+}
+
+const DURATION_OPTIONS: DurationOption[] = [
+  {
+    key: 'any',
+    label: i18n.translate('xpack.ux.sessions.duration.any', { defaultMessage: 'Any' }),
+  },
+  {
+    key: 'lt5',
+    label: i18n.translate('xpack.ux.sessions.duration.lt5', { defaultMessage: '< 5s' }),
+    max: 5000,
+  },
+  {
+    key: '5to30',
+    label: i18n.translate('xpack.ux.sessions.duration.5to30', { defaultMessage: '5 – 30s' }),
+    min: 5000,
+    max: 30000,
+  },
+  {
+    key: '30to60',
+    label: i18n.translate('xpack.ux.sessions.duration.30to60', { defaultMessage: '30 – 60s' }),
+    min: 30000,
+    max: 60000,
+  },
+  {
+    key: 'gt60',
+    label: i18n.translate('xpack.ux.sessions.duration.gt60', { defaultMessage: '> 60s' }),
+    min: 60000,
+  },
+];
+
+const HeaderWithTip = ({ label, tip }: { label: string; tip: string }) => (
+  <EuiToolTip content={tip}>
+    <span tabIndex={0}>
+      {label} <EuiIcon type="questionInCircle" size="s" color="subdued" aria-hidden={true} />
+    </span>
+  </EuiToolTip>
+);
+
+interface FacetOption {
+  key: string;
+  label?: string;
+  count?: number;
+}
+
+/** Single-select facet as a filter button + popover, optionally showing per-value counts. */
+const FacetSelect = ({
+  label,
+  options: facetOptions,
+  value,
+  onChange,
+  searchable = false,
+}: {
+  label: string;
+  options: FacetOption[];
+  value?: string;
+  onChange: (next?: string) => void;
+  searchable?: boolean;
+}) => {
+  const [open, setOpen] = useState(false);
+  const options: EuiSelectableOption[] = facetOptions.map((option) => ({
+    label: `${option.label ?? option.key}${option.count != null ? ` (${option.count})` : ''}`,
+    key: option.key,
+    checked: value === option.key ? 'on' : undefined,
+  }));
+  const selectedLabel = facetOptions.find((option) => option.key === value)?.label ?? value;
+
+  return (
+    <EuiPopover
+      aria-label={i18n.translate('xpack.ux.sessions.filter.facetAria', {
+        defaultMessage: 'Filter by {label}',
+        values: { label },
+      })}
+      panelPaddingSize="none"
+      isOpen={open}
+      closePopover={() => setOpen(false)}
+      button={
+        <EuiFilterButton
+          iconType="arrowDown"
+          isSelected={open}
+          onClick={() => setOpen((v) => !v)}
+          hasActiveFilters={Boolean(value)}
+          numActiveFilters={value ? 1 : undefined}
+          isDisabled={facetOptions.length === 0}
+          grow={false}
+        >
+          {selectedLabel ?? label}
+        </EuiFilterButton>
+      }
+    >
+      <EuiSelectable
+        singleSelection
+        searchable={searchable}
+        options={options}
+        onChange={(next) => {
+          const selected = next.find((option) => option.checked === 'on');
+          onChange(selected?.key);
+          setOpen(false);
+        }}
+      >
+        {(list, search) => (
+          <div style={{ width: 260 }}>
+            {search}
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
+  );
+};
+
+const KpiStrip = ({ stats }: { stats: SessionListStats }) => {
+  const replayPct = stats.total > 0 ? Math.round((stats.withReplay / stats.total) * 100) : 0;
+  const errorPct = stats.total > 0 ? Math.round((stats.withErrors / stats.total) * 100) : 0;
+
+  const items: Array<{ title: string; description: string }> = [
+    {
+      title: String(stats.total),
+      description: i18n.translate('xpack.ux.sessions.kpi.total', { defaultMessage: 'Sessions' }),
+    },
+    {
+      title: `${replayPct}%`,
+      description: i18n.translate('xpack.ux.sessions.kpi.replay', {
+        defaultMessage: 'With replay',
+      }),
+    },
+    {
+      title: `${errorPct}%`,
+      description: i18n.translate('xpack.ux.sessions.kpi.errors', {
+        defaultMessage: 'With errors',
+      }),
+    },
+    {
+      title: String(stats.rageClicks),
+      description: i18n.translate('xpack.ux.sessions.kpi.rage', {
+        defaultMessage: 'Rage clicks',
+      }),
+    },
+    {
+      title: formatDurationMs(stats.medianDurationMs),
+      description: i18n.translate('xpack.ux.sessions.kpi.median', {
+        defaultMessage: 'Median duration',
+      }),
+    },
+  ];
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m">
+      <EuiFlexGroup responsive={false} gutterSize="l" wrap>
+        {items.map((item) => (
+          <EuiFlexItem grow={false} key={item.description}>
+            <EuiStat
+              title={item.title}
+              description={item.description}
+              titleSize="s"
+              textAlign="left"
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+export function SessionReplayPanel() {
+  const { http } = useKibanaServices();
+  const history = useHistory();
+  const {
+    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName },
+  } = useLegacyUrlParams();
+
+  const [sessions, setSessions] = useState<RumSessionSummary[]>([]);
+  const [total, setTotal] = useState(0);
+  const [facets, setFacets] = useState<SessionListFacets>(EMPTY_FACETS);
+  const [stats, setStats] = useState<SessionListStats>(EMPTY_STATS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [sortField, setSortField] = useState<SessionSortField>('startTime');
+  const [sortDirection, setSortDirection] = useState<SessionSortDirection>('desc');
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+
+  const [onlyReplay, setOnlyReplay] = useState(false);
+  const [onlyErrors, setOnlyErrors] = useState(false);
+  const [onlyRage, setOnlyRage] = useState(false);
+  const [browser, setBrowser] = useState<string | undefined>();
+  const [os, setOs] = useState<string | undefined>();
+  const [durationKey, setDurationKey] = useState('any');
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPageIndex(0);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchInput]);
+
+  const duration = useMemo(
+    () => DURATION_OPTIONS.find((option) => option.key === durationKey) ?? DURATION_OPTIONS[0],
+    [durationKey]
+  );
+
+  const resetPage = useCallback((fn: () => void) => {
+    fn();
+    setPageIndex(0);
+  }, []);
+
+  const loadSessions = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await fetchSessionReplaySessions({
+        http,
+        rangeFrom,
+        rangeTo,
+        serviceName: typeof serviceName === 'string' ? serviceName : undefined,
+        query: search || undefined,
+        sortField,
+        sortDirection,
+        page: pageIndex,
+        perPage: pageSize,
+        hasReplay: onlyReplay || undefined,
+        hasErrors: onlyErrors || undefined,
+        hasRage: onlyRage || undefined,
+        browser,
+        os,
+        minDurationMs: duration.min,
+        maxDurationMs: duration.max,
+      });
+      setSessions(result.sessions);
+      setTotal(result.total);
+      setFacets(result.facets);
+      setStats(result.stats);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setSessions([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    http,
+    rangeFrom,
+    rangeTo,
+    serviceName,
+    search,
+    sortField,
+    sortDirection,
+    pageIndex,
+    pageSize,
+    onlyReplay,
+    onlyErrors,
+    onlyRage,
+    browser,
+    os,
+    duration,
+  ]);
+
+  useEffect(() => {
+    loadSessions();
+  }, [loadSessions]);
+
+  const openDetail = useCallback(
+    (sessionId: string) => {
+      history.push({
+        pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
+        search: history.location.search,
+      });
+    },
+    [history]
+  );
+
+  const openPlayer = useCallback(
+    (sessionId: string) => {
+      history.push({
+        pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
+        search: history.location.search,
+      });
+    },
+    [history]
+  );
+
+  const onTableChange = useCallback(
+    ({ page, sort }: CriteriaWithPagination<RumSessionSummary>) => {
+      if (sort && (sort.field !== sortField || sort.direction !== sortDirection)) {
+        setSortField(sort.field as SessionSortField);
+        setSortDirection(sort.direction);
+        setPageIndex(0);
+        return;
+      }
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
+      }
+    },
+    [sortField, sortDirection]
+  );
+
+  const columns: Array<EuiBasicTableColumn<RumSessionSummary>> = [
+    {
+      field: 'user',
+      name: i18n.translate('xpack.ux.sessions.table.user', { defaultMessage: 'User' }),
+      width: '210px',
+      render: (_: RumSessionSummary['user'], item) => (
+        <UserCell user={item.user} client={item.client} onOpen={() => openDetail(item.sessionId)} />
+      ),
+    },
+    {
+      field: 'pagePath',
+      name: i18n.translate('xpack.ux.sessions.table.journey', { defaultMessage: 'Journey' }),
+      render: (_: string[], item) => <JourneyTrail session={item} />,
+    },
+    {
+      field: 'sparkline',
+      name: (
+        <HeaderWithTip
+          label={i18n.translate('xpack.ux.sessions.table.activity', { defaultMessage: 'Activity' })}
+          tip={i18n.translate('xpack.ux.sessions.table.activityTip', {
+            defaultMessage:
+              'Events over the session timeline. Red bars mark buckets that contain errors.',
+          })}
+        />
+      ),
+      width: '120px',
+      render: (_: RumSessionSummary['sparkline'], item) => <Sparkline buckets={item.sparkline} />,
+    },
+    {
+      field: 'errorCount',
+      name: (
+        <HeaderWithTip
+          label={i18n.translate('xpack.ux.sessions.table.signals', { defaultMessage: 'Signals' })}
+          tip={i18n.translate('xpack.ux.sessions.table.signalsTip', {
+            defaultMessage: 'Quality signals: errors and rage clicks. Sort by error count.',
+          })}
+        />
+      ),
+      width: '130px',
+      sortable: (item) => item.errorCount,
+      render: (_: number, item) => <SignalBadges session={item} />,
+    },
+    {
+      field: 'startTime',
+      name: i18n.translate('xpack.ux.sessions.table.start', { defaultMessage: 'Start' }),
+      width: '130px',
+      sortable: true,
+      render: (startTime: string | null) => (
+        <EuiToolTip content={formatTime(startTime)}>
+          <EuiText size="s" tabIndex={0}>
+            {formatRelativeTime(startTime)}
+          </EuiText>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'durationMs',
+      name: i18n.translate('xpack.ux.sessions.table.duration', { defaultMessage: 'Duration' }),
+      width: '110px',
+      sortable: true,
+      render: (durationMs: number, item) => (
+        <EuiToolTip
+          content={i18n.translate('xpack.ux.sessions.table.activeTip', {
+            defaultMessage: 'Active {active} of {total}',
+            values: {
+              active: formatDurationMs(item.activeMs),
+              total: formatDurationMs(durationMs),
+            },
+          })}
+        >
+          <EuiText size="s" tabIndex={0}>
+            {formatDurationMs(durationMs)}
+          </EuiText>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'hasReplay',
+      name: i18n.translate('xpack.ux.sessions.table.replay', { defaultMessage: 'Replay' }),
+      width: '100px',
+      render: (hasReplay: boolean, item) =>
+        hasReplay ? (
+          <EuiToolTip
+            content={i18n.translate('xpack.ux.sessions.table.replayEventsTooltip', {
+              defaultMessage: '{count} replay events',
+              values: { count: item.replayEventCount },
+            })}
+          >
+            <EuiBadge color="success" iconType="playFilled" tabIndex={0}>
+              {i18n.translate('xpack.ux.sessions.table.hasReplay', {
+                defaultMessage: 'Available',
+              })}
+            </EuiBadge>
+          </EuiToolTip>
+        ) : (
+          <EuiText size="s" color="subdued">
+            {i18n.translate('xpack.ux.sessions.table.noReplay', { defaultMessage: 'None' })}
+          </EuiText>
+        ),
+    },
+    {
+      name: i18n.translate('xpack.ux.sessions.table.actions', { defaultMessage: 'Actions' }),
+      width: '110px',
+      actions: [
+        {
+          name: i18n.translate('xpack.ux.sessions.table.details', { defaultMessage: 'Details' }),
+          description: i18n.translate('xpack.ux.sessions.table.detailsDescription', {
+            defaultMessage: 'Open session details',
+          }),
+          icon: 'inspect',
+          type: 'icon',
+          onClick: (item) => openDetail(item.sessionId),
+        },
+        {
+          name: i18n.translate('xpack.ux.sessions.table.play', { defaultMessage: 'Play' }),
+          description: i18n.translate('xpack.ux.sessions.table.playDescription', {
+            defaultMessage: 'Open session replay player',
+          }),
+          icon: 'play',
+          type: 'icon',
+          available: (item) => item.hasReplay,
+          onClick: (item) => openPlayer(item.sessionId),
+        },
+      ],
+    },
+  ];
+
+  const anyFilterActive =
+    onlyReplay ||
+    onlyErrors ||
+    onlyRage ||
+    Boolean(browser) ||
+    Boolean(os) ||
+    durationKey !== 'any' ||
+    Boolean(search);
+
+  const clearFilters = useCallback(() => {
+    setOnlyReplay(false);
+    setOnlyErrors(false);
+    setOnlyRage(false);
+    setBrowser(undefined);
+    setOs(undefined);
+    setDurationKey('any');
+    setSearchInput('');
+    setSearch('');
+    setPageIndex(0);
+  }, []);
+
+  return (
+    <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
+      <KpiStrip stats={stats} />
+      <EuiSpacer size="m" />
+
+      <EuiText size="s" color="subdued">
+        <p>
+          {i18n.translate('xpack.ux.sessions.intro', {
+            defaultMessage:
+              'Each row is a browser visit. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change. Open Details for a per-page breakdown, or Play the replay when available.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            placeholder={i18n.translate('xpack.ux.sessions.searchPlaceholder', {
+              defaultMessage: 'Search by user, page, browser, or session id',
+            })}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            isClearable
+            data-test-subj="uxSessionSearch"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <EuiFilterButton
+              hasActiveFilters={onlyReplay}
+              onClick={() => resetPage(() => setOnlyReplay((v) => !v))}
+              numFilters={facets.hasReplay}
+              data-test-subj="uxSessionFilterReplay"
+            >
+              {i18n.translate('xpack.ux.sessions.filter.hasReplay', {
+                defaultMessage: 'Has replay',
+              })}
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={onlyErrors}
+              onClick={() => resetPage(() => setOnlyErrors((v) => !v))}
+              numFilters={facets.hasErrors}
+              data-test-subj="uxSessionFilterErrors"
+            >
+              {i18n.translate('xpack.ux.sessions.filter.hasErrors', {
+                defaultMessage: 'Has errors',
+              })}
+            </EuiFilterButton>
+            <EuiFilterButton
+              hasActiveFilters={onlyRage}
+              onClick={() => resetPage(() => setOnlyRage((v) => !v))}
+              numFilters={facets.hasRage}
+              data-test-subj="uxSessionFilterRage"
+            >
+              {i18n.translate('xpack.ux.sessions.filter.hasRage', {
+                defaultMessage: 'Rage clicks',
+              })}
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <FacetSelect
+              label={i18n.translate('xpack.ux.sessions.filter.browser', {
+                defaultMessage: 'Browser',
+              })}
+              options={facets.browsers.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
+              value={browser}
+              searchable
+              onChange={(next) => resetPage(() => setBrowser(next))}
+            />
+            <FacetSelect
+              label={i18n.translate('xpack.ux.sessions.filter.os', { defaultMessage: 'OS' })}
+              options={facets.os.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
+              value={os}
+              searchable
+              onChange={(next) => resetPage(() => setOs(next))}
+            />
+            <FacetSelect
+              label={i18n.translate('xpack.ux.sessions.filter.duration', {
+                defaultMessage: 'Duration',
+              })}
+              options={DURATION_OPTIONS.filter((option) => option.key !== 'any').map((option) => ({
+                key: option.key,
+                label: option.label,
+              }))}
+              value={durationKey === 'any' ? undefined : durationKey}
+              onChange={(next) => resetPage(() => setDurationKey(next ?? 'any'))}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+        {anyFilterActive && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="cross"
+              onClick={clearFilters}
+              data-test-subj="uxSessionClearFilters"
+            >
+              {i18n.translate('xpack.ux.sessions.filter.clear', { defaultMessage: 'Clear' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      {error ? (
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="error"
+          title={
+            <h2>
+              {i18n.translate('xpack.ux.sessions.loadErrorTitle', {
+                defaultMessage: 'Unable to load sessions',
+              })}
+            </h2>
+          }
+          body={<p>{error}</p>}
+          actions={
+            <EuiButtonEmpty data-test-subj="uxSessionListPageRetryButton" onClick={loadSessions}>
+              {i18n.translate('xpack.ux.sessions.retry', { defaultMessage: 'Retry' })}
+            </EuiButtonEmpty>
+          }
+        />
+      ) : (
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.ux.sessions.tableCaption', {
+            defaultMessage: 'User sessions',
+          })}
+          items={sessions}
+          columns={columns}
+          loading={loading}
+          sorting={{ sort: { field: sortField, direction: sortDirection } }}
+          pagination={{
+            pageIndex,
+            pageSize,
+            totalItemCount: total,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          onChange={onTableChange}
+          rowProps={(item) => ({
+            onClick: () => openDetail(item.sessionId),
+            style: { cursor: 'pointer' },
+          })}
+          noItemsMessage={i18n.translate('xpack.ux.sessions.empty', {
+            defaultMessage:
+              'No sessions found for this time range. Capture traffic with EDOT Browser (session.id on traces/logs), or enable Session Replay.',
+          })}
+          data-test-subj="uxSessionReplayTable"
+        />
+      )}
+    </EuiPanel>
+  );
+}

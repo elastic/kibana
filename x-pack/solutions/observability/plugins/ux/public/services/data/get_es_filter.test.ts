@@ -15,8 +15,24 @@ describe('getEsFilters', function () {
     });
 
     expect(result).toEqual([
-      { terms: { 'user_agent.name': ['Chrome'] } },
-      { term: { 'service.environment': 'production' } },
+      {
+        bool: {
+          should: [
+            { terms: { 'user_agent.name': ['Chrome'] } },
+            { terms: { 'resource.attributes.browser.name': ['Chrome'] } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      {
+        bool: {
+          should: [
+            { term: { 'service.environment': 'production' } },
+            { term: { 'resource.attributes.deployment.environment': 'production' } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ]);
   });
 

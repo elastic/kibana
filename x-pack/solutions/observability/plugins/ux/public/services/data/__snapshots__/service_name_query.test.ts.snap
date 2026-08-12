@@ -3,6 +3,12 @@
 exports[`serviceNameQuery fetches rum services 1`] = `
 Object {
   "aggs": Object {
+    "otelServices": Object {
+      "terms": Object {
+        "field": "resource.attributes.service.name",
+        "size": 1000,
+      },
+    },
     "services": Object {
       "terms": Object {
         "field": "service.name",
@@ -23,20 +29,48 @@ Object {
           },
         },
         Object {
-          "term": Object {
-            "transaction.type": "page-load",
-          },
-        },
-        Object {
-          "terms": Object {
-            "processor.event": Array [
-              "transaction",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "bool": Object {
+                  "filter": Array [
+                    Object {
+                      "term": Object {
+                        "transaction.type": "page-load",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "processor.event": "transaction",
+                      },
+                    },
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
             ],
           },
         },
         Object {
-          "exists": Object {
-            "field": "transaction.marks.navigationTiming.fetchStart",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "exists": Object {
+                  "field": "transaction.marks.navigationTiming.fetchStart",
+                },
+              },
+              Object {
+                "term": Object {
+                  "name": "documentLoad",
+                },
+              },
+            ],
           },
         },
       ],

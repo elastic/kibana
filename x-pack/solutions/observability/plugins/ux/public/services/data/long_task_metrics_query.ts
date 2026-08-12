@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { ESSearchRequest } from '@kbn/es-types';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import { OTEL_LONGTASK, OTEL_LONGTASK_DURATION, OTEL_SPAN_NAME } from '../../../common/otel_rum';
 import { PERCENTILE_DEFAULT } from './core_web_vitals_query';
 import { getRumPageLoadTransactionsProjection } from './projections';
+import { rangeQuery } from './range_query';
+import { getEsFilter } from './get_es_filter';
 
 const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
 const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
@@ -20,7 +24,7 @@ export function longTaskMetricsQuery(
   percentile: number = PERCENTILE_DEFAULT,
   urlQuery?: string,
   uiFilters?: UxUIFilters
-) {
+): Omit<ESSearchRequest, 'index'> {
   const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
@@ -29,8 +33,25 @@ export function longTaskMetricsQuery(
     end,
   });
 
-  const params = mergeProjection(projection, {
+  const otelLongtaskFilter = {
+    bool: {
+      filter: [
+        ...rangeQuery(start, end),
+        { term: { [OTEL_SPAN_NAME]: OTEL_LONGTASK } },
+        ...getEsFilter(uiFilters ?? {}),
+      ],
+    },
+  };
+
+  const params: ESSearchRequest = mergeProjection(projection, {
     size: 0,
+    query: {
+      bool: {
+        should: [{ bool: { filter: [...projection.query.bool.filter] } }, otelLongtaskFilter],
+        minimum_should_match: 1,
+        must_not: [...projection.query.bool.must_not],
+      },
+    },
     aggs: {
       longTaskSum: {
         percentiles: {
@@ -58,6 +79,18 @@ export function longTaskMetricsQuery(
             number_of_significant_value_digits: 3,
           },
         },
+      },
+      otelLongTaskDuration: {
+        percentiles: {
+          field: OTEL_LONGTASK_DURATION,
+          percents: [percentile],
+          hdr: {
+            number_of_significant_value_digits: 3,
+          },
+        },
+      },
+      otelLongTaskCount: {
+        filter: { term: { [OTEL_SPAN_NAME]: OTEL_LONGTASK } },
       },
     },
   });

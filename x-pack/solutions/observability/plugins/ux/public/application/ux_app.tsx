@@ -31,8 +31,8 @@ import { UrlParamsProvider } from '../context/url_params_context/url_params_cont
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { PluginContext } from '../context/plugin_context';
-import { SessionListPage } from '../components/session_replay/session_list_page';
 import { SessionPlayerPage } from '../components/session_replay/session_player_page';
+import { SessionDetailPage } from '../components/session_replay/session_detail_page';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -73,7 +73,24 @@ function UxDashboardPage() {
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome />
+      <RumHome tab="dashboard" />
+    </div>
+  );
+}
+
+function UxSessionReplayPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.sessionReplay', {
+        defaultMessage: 'Session Replay',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="session-replay" />
     </div>
   );
 }
@@ -83,9 +100,17 @@ const uxRouter = createRouter({
     element: <UxDashboardPage />,
   },
   '/session-replay': {
-    element: <SessionListPage />,
+    element: <UxSessionReplayPage />,
   },
   '/session-replay/{sessionId}': {
+    params: t.type({
+      path: t.type({
+        sessionId: t.string,
+      }),
+    }),
+    element: <SessionDetailPage />,
+  },
+  '/session-replay/{sessionId}/replay': {
     params: t.type({
       path: t.type({
         sessionId: t.string,

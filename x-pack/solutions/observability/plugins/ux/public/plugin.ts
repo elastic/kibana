@@ -158,18 +158,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
                     }),
                     app: OBLT_UX_APP_ID,
                     path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
-                  },
-                  {
-                    label: i18n.translate('xpack.ux.sessionReplay.nav', {
-                      defaultMessage: 'Session Replay',
-                    }),
-                    app: OBLT_UX_APP_ID,
-                    path: '/session-replay',
                     matchFullPath: false,
                     ignoreTrailingSlash: true,
-                    isTechnicalPreview: true,
                   },
                 ],
               },
