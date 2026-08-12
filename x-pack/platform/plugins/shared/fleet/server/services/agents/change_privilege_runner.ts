@@ -81,7 +81,7 @@ export async function bulkChangePrivilegeAgentsBatch(
           // Strip the version suffix: packagePolicyService.findAllForAgentPolicy matches on base policy id.
           (await packagePolicyService.findAllForAgentPolicy(
             soClient,
-            agent.policy_id ? removeVersionSuffixFromPolicyId(agent.policy_id) : ''
+            removeVersionSuffixFromPolicyId(agent.policy_id)
           )) || [];
         const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
         // Create error if agent contains an integration that requires root privilege.
