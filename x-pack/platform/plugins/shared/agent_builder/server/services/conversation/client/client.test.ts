@@ -1321,17 +1321,32 @@ describe('ConversationClient', () => {
       ]);
     });
 
-    it('drops an entry naming the owner and dedupes repeated ids', async () => {
+    it('drops an entry naming the owner', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument()] },
       });
 
       const result = await client.updateAccessControl('conversation-1', {
         access_mode: ConversationAccessControlMode.Private,
-        entries: [{ ...newMember, id: 'user-1' }, newMember, newMember],
+        entries: [{ ...newMember, id: 'user-1' }, newMember],
       });
 
       expect(result.entries).toEqual([{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }]);
+    });
+
+    it('rejects repeated ids with a bad request error', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [newMember, newMember],
+        })
+      ).rejects.toThrow('Duplicate ACL entry for user "user-2"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
     it('rejects an invalid role with a bad request error', async () => {

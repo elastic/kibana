@@ -59,6 +59,12 @@ responses:
               statusCode: 400
               error: "Bad Request"
               message: "ACL entries are not supported when access_mode is \"public\""
+          duplicateEntryResponseExample:
+            description: "Two entries name the same user id."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Duplicate ACL entry for user \"u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0\""
   404:
     description: "Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist."
     content:

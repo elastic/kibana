@@ -986,25 +986,32 @@ apiTest.describe(
           ).toHaveStatusCode(404);
         });
 
-        await apiTest.step(
-          'the owner entry is dropped, duplicates collapse, and added_at survives',
-          async () => {
-            const response = await setAccessControlAs(apiClient, alice, conversationId, {
-              access_mode: ConversationAccessControlMode.Private,
-              entries: [
-                { type: 'user', id: aliceId, role: ConversationAccessControlRole.Member },
-                { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
-                { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
-              ],
-            });
-            expect(response).toHaveStatusCode(200);
+        await apiTest.step('the owner entry is dropped and added_at survives', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              { type: 'user', id: aliceId, role: ConversationAccessControlRole.Member },
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+            ],
+          });
+          expect(response).toHaveStatusCode(200);
 
-            const accessControl = response.body as UpdateConversationAccessControlResponse;
-            expect(accessControl.entries).toHaveLength(1);
-            expect(accessControl.entries[0].id).toBe(bobId);
-            expect(accessControl.entries[0].added_at).toBe(sharedAt);
-          }
-        );
+          const accessControl = response.body as UpdateConversationAccessControlResponse;
+          expect(accessControl.entries).toHaveLength(1);
+          expect(accessControl.entries[0].id).toBe(bobId);
+          expect(accessControl.entries[0].added_at).toBe(sharedAt);
+        });
+
+        await apiTest.step('duplicate entries are rejected', async () => {
+          const response = await setAccessControlAs(apiClient, alice, conversationId, {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+              { type: 'user', id: bobId, role: ConversationAccessControlRole.Member },
+            ],
+          });
+          expect(response).toHaveStatusCode(400);
+        });
 
         await apiTest.step('more entries than the maximum are rejected', async () => {
           const response = await setAccessControlAs(apiClient, alice, conversationId, {

@@ -19,11 +19,6 @@ export type NormalizeAccessControlUpdateResult =
   | { error: string; entries?: undefined }
   | { error?: undefined; entries: ConversationAccessControlEntryInput[] };
 
-/**
- * Validates and normalizes the entries of an access-control update: malformed entries are
- * rejected, while duplicates and an entry naming the owner are dropped rather than refused,
- * since neither is a security boundary and the sharing UI can send either.
- */
 export const normalizeAccessControlUpdate = ({
   accessMode,
   entries,
@@ -33,12 +28,6 @@ export const normalizeAccessControlUpdate = ({
   entries: ConversationAccessControlEntryInput[];
   ownerId: string | undefined;
 }): NormalizeAccessControlUpdateResult => {
-  if (!Array.isArray(entries)) {
-    return { error: 'ACL entries must be an array' };
-  }
-
-  // Entries are additive to private mode; a public conversation is already open to everyone
-  // with agent access, so per-user grants would be meaningless and are rejected outright.
   if (accessMode === ConversationAccessControlMode.Public && entries.length > 0) {
     return { error: 'ACL entries are not supported when access_mode is "public"' };
   }
@@ -51,7 +40,6 @@ export const normalizeAccessControlUpdate = ({
   const normalized: ConversationAccessControlEntryInput[] = [];
 
   for (const entry of entries) {
-    // V1: only user-type entries are supported. Role-type grants are planned for V2.
     if (!entry || entry.type !== 'user') {
       return { error: 'Each ACL entry requires a type of "user"' };
     }
@@ -78,7 +66,7 @@ export const normalizeAccessControlUpdate = ({
     const key = `${entry.type}:${entry.id}`;
 
     if (seen.has(key)) {
-      continue;
+      return { error: `Duplicate ACL entry for ${entry.type} "${entry.id}"` };
     }
 
     seen.add(key);

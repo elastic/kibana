@@ -114,11 +114,11 @@ describe('normalizeAccessControlUpdate', () => {
     expect(normalize(entries, { ownerId: undefined })).toEqual({ entries });
   });
 
-  it('dedupes repeated ids, keeping the first occurrence', () => {
+  it('rejects repeated ids', () => {
     const entries = [memberEntry('alice'), memberEntry('bob'), memberEntry('alice')];
 
     expect(normalize(entries)).toEqual({
-      entries: [memberEntry('alice'), memberEntry('bob')],
+      error: 'Duplicate ACL entry for user "alice"',
     });
   });
 
