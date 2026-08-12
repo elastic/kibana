@@ -89,7 +89,7 @@ describe(
         closeToastIfVisible();
       });
 
-      it('runs a live query from the alert flyout and adds the action to Timeline', () => {
+      it('runs a live query from the alert flyout and adds the action to Timeline', { tags: ['@skipInServerless'] }, () => {
         const TIMELINE_NAME = 'Untitled Timeline';
         cy.getBySel('expand-event').first().click();
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
