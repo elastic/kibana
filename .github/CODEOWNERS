@@ -386,7 +386,6 @@ src/platform/packages/private/dashboard/dashboard-navigation-options-schema @ela
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-src/platform/packages/private/kbn-babel-transform @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
