@@ -106,8 +106,7 @@ export const isAttachmentTool = (toolName: string) =>
   Object.values(attachmentTools).includes(toolName);
 
 /**
- * Legacy filestore tool ids, used to classify these historical tool calls as `internal` and to
- * keep their results out of the filestore.
+ * Legacy filestore tool ids, used to classify these historical tool calls as `internal`.
  */
 const LEGACY_FILESTORE_TOOL_IDS = new Set([
   'filestore.read',
@@ -123,33 +122,16 @@ export const isInternalTool = (toolName: string) =>
   isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
 /**
- * Tools whose results are never written to the `/tool_calls` filestore.
- *
- * Two things put a tool here:
- * - It already reads the virtual filesystem (`read_file`, `list_files`, `bash`, the legacy
- *   `filestore.*` ids) or the attachments the round carries, so persisting its result would
- *   duplicate content the agent can reach on its own.
- * - Its result is control flow rather than data (`sleep`, `run_subagent`, `ask_user_question`,
- *   `write_todos`, the skill tools), so there is nothing worth recovering.
- *
- * A tool returning data the agent may need again after truncation must stay off this list:
- * exclusion is what turns an oversized result into an unrecoverable one.
+ * Internal tools whose results are still written to the `/tool_calls` filestore.
  */
-const filestoreExcludedToolIds = new Set<string>([
-  ...Object.values(attachmentTools),
-  ...LEGACY_FILESTORE_TOOL_IDS,
-  internalTools.readFile,
-  internalTools.listFiles,
-  internalTools.bash,
-  internalTools.sleep,
-  internalTools.runSubagent,
-  internalTools.askUserQuestion,
-  internalTools.writeTodos,
-  internalTools.loadSkill,
-  internalTools.searchRelevantSkills,
+const filestoreAllowedInternalToolIds = new Set<string>([
+  internalTools.discoverApis,
+  internalTools.describeApi,
+  internalTools.executeApi,
 ]);
 
-export const isExcludedFromFilestore = (toolName: string) => filestoreExcludedToolIds.has(toolName);
+export const isExcludedFromFilestore = (toolName: string) =>
+  isInternalTool(toolName) && !filestoreAllowedInternalToolIds.has(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.
