@@ -526,4 +526,144 @@ describe('stepInstallWorkflowAssets', () => {
 
     expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('forcing disabled'));
   });
+
+  it('preserves step-level enabled values when applying default_enabled', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: true },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowYaml),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yaml: expect.stringContaining('enabled: true'),
+      }),
+      spaceId,
+      expect.anything()
+    );
+  });
+
+  it('uses default_enabled false when no unresolved placeholders exist', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: false },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowYaml),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('forcing disabled'));
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ yaml: expect.stringContaining('enabled: false') }),
+      spaceId,
+      expect.anything()
+    );
+  });
+
+  it('uses default_enabled true when no unresolved placeholders exist', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: true },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowYaml),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('forcing disabled'));
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ yaml: expect.stringContaining('enabled: true') }),
+      spaceId,
+      expect.anything()
+    );
+  });
+
+  it('updates a managed workflow with the resolved enablement intent', async () => {
+    const logger = loggingSystemMock.createLogger();
+    workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
+      id: workflowId,
+      managed: true,
+      name: workflowId,
+      enabled: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      createdBy: 'test-user',
+      lastUpdatedAt: '2024-01-01T00:00:00Z',
+      lastUpdatedBy: 'test-user',
+      definition: null,
+      yaml: workflowYaml,
+      valid: true,
+    });
+
+    const context = createContext({
+      logger,
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: { default_enabled: false },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(workflowYaml),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(workflowsManagementSetupMock.management.updateWorkflow).toHaveBeenCalledWith(
+      workflowId,
+      expect.objectContaining({ yaml: expect.stringContaining('enabled: false') }),
+      spaceId,
+      expect.anything(),
+      { allowManagedWorkflowMutation: true }
+    );
+  });
 });
