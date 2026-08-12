@@ -137,7 +137,6 @@ describe('listTypesRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
-            "is_create_disabled": undefined,
             "is_deprecated": false,
             "is_experimental": undefined,
             "is_system_action_type": false,
