@@ -8,8 +8,6 @@
 const MAX_SANITIZED_CELL_LENGTH = 500;
 const HTML_ANGLE_BRACKETS = /[<>]/g;
 const LINE_BREAKS = /[\r\n]+/g;
-// Liquid delimiters split so a cell value like `{{ secret }}` is not
-// interpreted as a template expression when injected into the LLM prompt.
 const LIQUID_OUTPUT_DELIMITER = /\{\{/g;
 const LIQUID_TAG_DELIMITER = /\{%/g;
 
