@@ -160,7 +160,6 @@ const MinimapStepRow = React.memo(
       : MINIMAP_MAX_LABEL_W;
     return (
       <button
-        role="listitem"
         type="button"
         title={stepId}
         // `style` for the dynamic top position avoids creating a new Emotion css
