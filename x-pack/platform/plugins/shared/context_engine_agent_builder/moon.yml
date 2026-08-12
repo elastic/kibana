@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/agent-builder-tools-base'
   - '@kbn/core-http-server-mocks'
   - '@kbn/workflows'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
