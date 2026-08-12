@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
 
 /**
@@ -38,8 +39,9 @@ export interface ContextEnginePluginStart {
   registerChatOpener: (opener: ChatOpener) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEngineSetupDependencies {}
+export interface ContextEngineSetupDependencies {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface ContextEngineStartDependencies {
   data: DataPublicPluginStart;

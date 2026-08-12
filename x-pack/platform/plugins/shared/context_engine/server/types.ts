@@ -12,6 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { SignalsServiceApi } from './signals/service';
 
@@ -27,6 +28,7 @@ export interface ContextEnginePluginStart {
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface ContextEngineStartDependencies {

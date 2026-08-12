@@ -31,6 +31,8 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import { KiVerifierRegistry, pocVerifiers } from './ki_verification';
+import { registerStepDefinitions } from './step_types';
 
 export class ContextEnginePlugin
   implements
@@ -47,6 +49,7 @@ export class ContextEnginePlugin
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private readonly kiVerifierRegistry = new KiVerifierRegistry();
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -117,6 +120,13 @@ export class ContextEnginePlugin
       },
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    pocVerifiers.forEach((verifier) => this.kiVerifierRegistry.register(verifier));
+    registerStepDefinitions(setupDeps.workflowsExtensions, {
+      coreSetup,
+      registry: this.kiVerifierRegistry,
+      logger: this.logger.get('ki_verification'),
     });
 
     return {
