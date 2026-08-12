@@ -166,8 +166,8 @@ describe('useSubmitCase', () => {
 
       postCase.mockResolvedValue({
         id: sampleId,
-        owner: SECURITY_SOLUTION_OWNER,
         ...sampleDataWithoutTags,
+        owner: SECURITY_SOLUTION_OWNER,
       });
 
       const { result } = renderUseSubmitCase({ getAttachments });
@@ -191,8 +191,8 @@ describe('useSubmitCase', () => {
 
       postCase.mockResolvedValue({
         id: sampleId,
-        owner: SECURITY_SOLUTION_OWNER,
         ...sampleDataWithoutTags,
+        owner: SECURITY_SOLUTION_OWNER,
       });
 
       const { result } = renderUseSubmitCase({ getAttachments: () => [] });

@@ -6,8 +6,16 @@
  */
 
 import { LEGACY_ALERT_TYPE } from '../../constants/attachments';
-import type { AttachmentRequestV2 } from '../../types/api';
 import { toUnifiedAttachmentType } from './migration_utils';
+
+interface AlertCaseAttachmentWithoutOwner {
+  type: string;
+  attachmentId: string | string[];
+  metadata: {
+    index: string | string[];
+    rule: { id: string | null; name: string | null } | null;
+  };
+}
 
 /**
  * Builds a unified alert case attachment payload (without the `owner` field,
@@ -28,7 +36,7 @@ export const buildAlertCaseAttachment = (
     index: string | string[];
     rule?: { id: string | null; name: string | null } | null;
   }
-): Omit<Extract<AttachmentRequestV2, { attachmentId: string | string[] }>, 'owner'> => ({
+): AlertCaseAttachmentWithoutOwner => ({
   type: toUnifiedAttachmentType(LEGACY_ALERT_TYPE, owner),
   attachmentId: alertId,
   metadata: { index, rule },

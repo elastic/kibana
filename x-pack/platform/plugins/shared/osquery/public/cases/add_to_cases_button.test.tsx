@@ -146,7 +146,7 @@ describe('AddToCaseButton', () => {
       fireEvent.click(screen.getByText('Add to Case'));
 
       const [{ getAttachments }] = mockOpen.mock.calls[0];
-      expect(getAttachments()).toEqual([
+      expect(getAttachments({ theCase: { owner: 'securitySolution' } })).toEqual([
         {
           type: OSQUERY_ATTACHMENT_TYPE,
           attachmentId: 'test-action-id',
