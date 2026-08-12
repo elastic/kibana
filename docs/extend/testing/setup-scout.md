@@ -28,18 +28,6 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 
 ::::::::::
 
-::::::::::{step} Update test config manifests
-
-After adding or changing specs, generate the metadata used by CI discovery and selective testing:
-
-```bash
-node scripts/scout update-test-config-manifests
-```
-
-Commit the generated `.meta` files. They are generated artifacts and should not be edited by hand.
-
-::::::::::
-
 ::::::::::
 
 :::::::::::
