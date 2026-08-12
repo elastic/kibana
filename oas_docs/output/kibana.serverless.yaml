@@ -2150,6 +2150,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -2240,6 +2241,7 @@ paths:
           name: conversation_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
