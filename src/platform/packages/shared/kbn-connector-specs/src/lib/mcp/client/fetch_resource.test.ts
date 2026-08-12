@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Agent, ProxyAgent } from 'undici';
+import { Agent, ProxyAgent, fetch as undiciFetch } from 'undici';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorNetworkSettings } from '../../clients/client_type_spec';
 import { createFetchResource } from './fetch_resource';
+
+const undiciFetchMock = undiciFetch as unknown as jest.Mock;
 
 jest.mock('undici', () => {
   const MockAgent = jest.fn().mockImplementation(() => ({
@@ -22,6 +24,7 @@ jest.mock('undici', () => {
   return {
     Agent: MockAgent,
     ProxyAgent: MockProxyAgent,
+    fetch: jest.fn(),
   };
 });
 
@@ -31,7 +34,6 @@ describe('createFetchResource', () => {
   const allowedHosts = ['mcp-server.example.com', 'allowed.example.com'];
 
   let networkSettings: jest.Mocked<ConnectorNetworkSettings>;
-  let globalFetchSpy: jest.SpyInstance;
 
   const createResource = (opts: {
     targetUrl: string;
@@ -67,12 +69,6 @@ describe('createFetchResource', () => {
         timeout: 60_000,
       }),
     };
-
-    globalFetchSpy = jest.spyOn(globalThis, 'fetch');
-  });
-
-  afterEach(() => {
-    globalFetchSpy.mockRestore();
   });
 
   describe('initial URL validation', () => {
@@ -82,7 +78,7 @@ describe('createFetchResource', () => {
       ).toThrow(
         'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
       );
-      expect(globalFetchSpy).not.toHaveBeenCalled();
+      expect(undiciFetchMock).not.toHaveBeenCalled();
     });
 
     it('does not throw for an allowed target URL', () => {
@@ -95,7 +91,7 @@ describe('createFetchResource', () => {
       await expect(resource.fetch('https://evil.internal.example.com/steal')).rejects.toThrow(
         'target url "https://evil.internal.example.com/steal" is not added to the Kibana config xpack.actions.allowedHosts'
       );
-      expect(globalFetchSpy).not.toHaveBeenCalled();
+      expect(undiciFetchMock).not.toHaveBeenCalled();
     });
   });
 
@@ -105,7 +101,7 @@ describe('createFetchResource', () => {
 
       const redirectUrl = 'https://allowed.example.com/v1/mcp';
       const finalResponse = new Response('final', { status: 200 });
-      globalFetchSpy
+      undiciFetchMock
         .mockResolvedValueOnce(mockRedirectResponse(302, redirectUrl))
         .mockResolvedValueOnce(finalResponse);
 
@@ -117,7 +113,7 @@ describe('createFetchResource', () => {
     it('throws when a redirect URL is not on the allowlist', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValueOnce(
+      undiciFetchMock.mockResolvedValueOnce(
         mockRedirectResponse(302, 'https://evil.internal.example.com/steal')
       );
 
@@ -128,17 +124,15 @@ describe('createFetchResource', () => {
   });
 
   describe('dispatcher caching', () => {
-    it('creates one dispatcher per resource and reuses it', async () => {
+    it('reuses dispatchers within a request class and separates finite from persistent', async () => {
       const resource = createResource({ targetUrl });
-
-      const finalResponse = new Response('ok', { status: 200 });
-      globalFetchSpy.mockResolvedValue(finalResponse);
+      undiciFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
 
       await resource.fetch(targetUrl);
       await resource.fetch(targetUrl);
+      await resource.fetch(targetUrl, { method: 'POST' });
 
-      // Only one Agent should have been created (same policy key)
-      expect(Agent).toHaveBeenCalledTimes(1);
+      expect(Agent).toHaveBeenCalledTimes(2);
     });
 
     it('creates separate dispatchers for different destination policies', async () => {
@@ -155,7 +149,7 @@ describe('createFetchResource', () => {
 
       const redirectUrl = 'https://allowed.example.com/v1';
       const finalResponse = new Response('ok', { status: 200 });
-      globalFetchSpy
+      undiciFetchMock
         .mockResolvedValueOnce(mockRedirectResponse(302, redirectUrl))
         .mockResolvedValueOnce(finalResponse);
 
@@ -174,7 +168,7 @@ describe('createFetchResource', () => {
         proxyHeaders: {},
         proxySSLSettings: { verificationMode: 'full' },
       });
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
@@ -194,7 +188,7 @@ describe('createFetchResource', () => {
         allowPartialTrustChain: true,
       };
       networkSettings.getSslSettings.mockReturnValue(sslSettings);
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
@@ -211,7 +205,7 @@ describe('createFetchResource', () => {
           checkServerIdentity: expect.any(Function),
         }),
         headersTimeout: 60_000,
-        bodyTimeout: 60_000,
+        bodyTimeout: 0,
       });
     });
 
@@ -226,7 +220,7 @@ describe('createFetchResource', () => {
           verificationMode: 'full',
         },
       });
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
@@ -258,7 +252,7 @@ describe('createFetchResource', () => {
           ca: proxyCa,
         },
       });
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       const resource = createResource({ targetUrl });
       await resource.fetch(targetUrl);
@@ -275,155 +269,155 @@ describe('createFetchResource', () => {
           }),
           headers: { 'Proxy-Authorization': 'Basic token' },
           headersTimeout: 60_000,
-          bodyTimeout: 60_000,
+          bodyTimeout: 0,
         })
       );
     });
   });
 
   describe('redirect behaviour', () => {
-    it('changes method to GET and strips body for 301', async () => {
+    it.each([
+      [301, 'GET', undefined],
+      [302, 'GET', undefined],
+      [303, 'GET', undefined],
+      [307, 'POST', '{"data":true}'],
+      [308, 'POST', '{"data":true}'],
+    ])('handles redirect status %s', async (status, expectedMethod, expectedBody) => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(301, 'https://allowed.example.com/v1'))
+      undiciFetchMock
+        .mockResolvedValueOnce(mockRedirectResponse(status, 'https://allowed.example.com/v1'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
       await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
 
-      const { method, body } = globalFetchSpy.mock.calls[1][1];
-      expect(method).toBe('GET');
-      expect(body).toBeUndefined();
+      const { method, body } = undiciFetchMock.mock.calls[1][1];
+      expect(method).toBe(expectedMethod);
+      expect(body).toBe(expectedBody);
     });
 
-    it('changes method to GET and strips body for 302', async () => {
-      const resource = createResource({ targetUrl });
+    it('strips credential-derived headers and mcp-session-id on cross-origin redirect', async () => {
+      const resource = createFetchResource({
+        networkSettings,
+        logger,
+        targetUrl,
+        headers: { 'X-API-Key': 'secret-key', Authorization: 'Bearer secret' },
+        credentialHeaderNames: ['x-api-key'],
+      });
 
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1'))
-        .mockResolvedValueOnce(new Response('final', { status: 200 }));
-
-      await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
-
-      const { method, body } = globalFetchSpy.mock.calls[1][1];
-      expect(method).toBe('GET');
-      expect(body).toBeUndefined();
-    });
-
-    it('changes method to GET and strips body for 303', async () => {
-      const resource = createResource({ targetUrl });
-
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(303, 'https://allowed.example.com/v1'))
-        .mockResolvedValueOnce(new Response('final', { status: 200 }));
-
-      await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
-
-      const { method, body } = globalFetchSpy.mock.calls[1][1];
-      expect(method).toBe('GET');
-      expect(body).toBeUndefined();
-    });
-
-    it('preserves method and body for 307', async () => {
-      const resource = createResource({ targetUrl });
-
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
-        .mockResolvedValueOnce(new Response('final', { status: 200 }));
-
-      await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
-
-      const { method, body } = globalFetchSpy.mock.calls[1][1];
-      expect(method).toBe('POST');
-      expect(body).toBe('{"data":true}');
-    });
-
-    it('preserves method and body for 308', async () => {
-      const resource = createResource({ targetUrl });
-
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(308, 'https://allowed.example.com/v1'))
-        .mockResolvedValueOnce(new Response('final', { status: 200 }));
-
-      await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
-
-      const { method, body } = globalFetchSpy.mock.calls[1][1];
-      expect(method).toBe('POST');
-      expect(body).toBe('{"data":true}');
-    });
-
-    it('strips authorization header on cross-origin redirect', async () => {
-      const resource = createResource({ targetUrl });
-
-      globalFetchSpy
+      undiciFetchMock
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
       await resource.fetch(targetUrl, {
         method: 'POST',
-        headers: { Authorization: 'Bearer secret', 'Content-Type': 'application/json' },
+        headers: { 'mcp-session-id': 'session-1', 'X-API-Key': 'secret-key' },
       });
 
-      const redirectInit = globalFetchSpy.mock.calls[1][1];
-      const headers =
-        redirectInit.headers instanceof Headers
-          ? Object.fromEntries((redirectInit.headers as Headers).entries())
-          : redirectInit.headers;
-      expect(headers).not.toHaveProperty('authorization');
-      expect(headers).toHaveProperty('content-type', 'application/json');
+      const redirectHeaders = undiciFetchMock.mock.calls[1][1].headers as Headers;
+      expect(redirectHeaders.has('authorization')).toBe(false);
+      expect(redirectHeaders.has('x-api-key')).toBe(false);
+      expect(redirectHeaders.has('mcp-session-id')).toBe(false);
     });
 
-    it('does not restore default authorization on a cross-origin redirect', async () => {
-      const resource = createResource({
+    it('does not restore stripped credentials on a later redirect hop', async () => {
+      const resource = createFetchResource({
+        networkSettings,
+        logger,
         targetUrl,
-        headers: { Authorization: 'Bearer secret' },
+        headers: { Authorization: 'Bearer secret', 'X-API-Key': 'secret-key' },
+        credentialHeaderNames: ['X-API-Key'],
       });
 
-      globalFetchSpy
-        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
+      undiciFetchMock
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/hop-1'))
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/hop-2'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
-      await resource.fetch(targetUrl);
+      await resource.fetch(targetUrl, {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'session-1' },
+      });
 
-      const redirectHeaders = globalFetchSpy.mock.calls[1][1].headers as Headers;
-      expect(redirectHeaders.has('authorization')).toBe(false);
+      const secondHopHeaders = undiciFetchMock.mock.calls[2][1].headers as Headers;
+      expect(secondHopHeaders.has('authorization')).toBe(false);
+      expect(secondHopHeaders.has('x-api-key')).toBe(false);
+      expect(secondHopHeaders.has('mcp-session-id')).toBe(false);
     });
 
-    it('preserves authorization header on same-origin redirect', async () => {
-      const resource = createResource({ targetUrl });
+    it('preserves authorization and session headers on same-origin redirect', async () => {
+      const resource = createFetchResource({
+        networkSettings,
+        logger,
+        targetUrl,
+        credentialHeaderNames: ['X-API-Key'],
+      });
 
-      globalFetchSpy
+      undiciFetchMock
         .mockResolvedValueOnce(mockRedirectResponse(307, 'https://mcp-server.example.com/v2/mcp'))
         .mockResolvedValueOnce(new Response('final', { status: 200 }));
 
       await resource.fetch(targetUrl, {
         method: 'POST',
-        headers: { Authorization: 'Bearer secret', 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: 'Bearer secret',
+          'X-API-Key': 'secret-key',
+          'mcp-session-id': 'session-1',
+          'Content-Type': 'application/json',
+        },
       });
 
-      const redirectInit = globalFetchSpy.mock.calls[1][1];
+      const redirectInit = undiciFetchMock.mock.calls[1][1];
       const headers =
         redirectInit.headers instanceof Headers
           ? Object.fromEntries((redirectInit.headers as Headers).entries())
           : redirectInit.headers;
       expect(headers).toHaveProperty('authorization', 'Bearer secret');
+      expect(headers).toHaveProperty('x-api-key', 'secret-key');
+      expect(headers).toHaveProperty('mcp-session-id', 'session-1');
+    });
+
+    it('keeps a POST→GET redirect classified as finite', async () => {
+      const resource = createResource({ targetUrl });
+
+      undiciFetchMock
+        .mockResolvedValueOnce(mockRedirectResponse(302, 'https://allowed.example.com/v1'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await resource.fetch(targetUrl, { method: 'POST', body: '{"data":true}' });
+
+      expect(Agent).toHaveBeenCalledTimes(2);
+      expect(Agent).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          bodyTimeout: 60_000,
+          maxResponseSize: 1_000_000,
+        })
+      );
+      expect(Agent).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          bodyTimeout: 60_000,
+          maxResponseSize: 1_000_000,
+        })
+      );
     });
 
     it('throws when max redirects are exceeded', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValue(
+      undiciFetchMock.mockResolvedValue(
         mockRedirectResponse(302, 'https://allowed.example.com/loop')
       );
 
       await expect(resource.fetch(targetUrl)).rejects.toThrow('Max redirects (20) exceeded');
-      expect(globalFetchSpy).toHaveBeenCalledTimes(21);
+      expect(undiciFetchMock).toHaveBeenCalledTimes(21);
     });
 
     it('throws when a redirect is missing the Location header', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValueOnce(mockRedirectResponse(302, null));
+      undiciFetchMock.mockResolvedValueOnce(mockRedirectResponse(302, null));
 
       await expect(resource.fetch(targetUrl)).rejects.toThrow(
         'Redirect response 302 missing Location header'
@@ -432,65 +426,110 @@ describe('createFetchResource', () => {
   });
 
   describe('response settings', () => {
-    it('rejects a declared response larger than maxResponseContentLength', async () => {
+    it.each(['application/json', 'text/event-stream'])(
+      'applies the finite response policy to %s',
+      async (contentType) => {
+        networkSettings.getResponseSettings.mockReturnValue({
+          maxContentLength: 64,
+          timeout: 60_000,
+        });
+        undiciFetchMock.mockResolvedValueOnce(
+          new Response('data: hello\n\n', {
+            status: 200,
+            headers: { 'content-type': contentType },
+          })
+        );
+
+        const resource = createResource({ targetUrl });
+        await resource.fetch(targetUrl, { method: 'POST' });
+
+        expect(Agent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            maxResponseSize: 64,
+            bodyTimeout: 60_000,
+          })
+        );
+      }
+    );
+
+    it('does not set maxResponseSize or bodyTimeout for persistent GET', async () => {
       networkSettings.getResponseSettings.mockReturnValue({
         maxContentLength: 5,
-        timeout: 60_000,
-      });
-      globalFetchSpy.mockResolvedValueOnce(
-        new Response('too large', { headers: { 'content-length': '9' } })
-      );
-
-      const resource = createResource({ targetUrl });
-
-      await expect(resource.fetch(targetUrl)).rejects.toThrow(
-        'Response content length 9 exceeds limit of 5'
-      );
-    });
-
-    it('applies responseTimeout to headers and body inactivity', async () => {
-      networkSettings.getResponseSettings.mockReturnValue({
-        maxContentLength: 1_000_000,
         timeout: 12_345,
       });
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok'));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok'));
 
       const resource = createResource({ targetUrl });
-      await resource.fetch(targetUrl);
+      await resource.fetch(targetUrl, { method: 'GET' });
 
-      expect(Agent).toHaveBeenCalledWith(
+      const agentOptions = (Agent as unknown as jest.Mock).mock.calls[0][0];
+      expect(agentOptions).toEqual(
+        expect.objectContaining({
+          headersTimeout: 12_345,
+          bodyTimeout: 0,
+        })
+      );
+      expect(agentOptions).not.toHaveProperty('maxResponseSize');
+    });
+
+    it('applies the same finite policy to ProxyAgent', async () => {
+      networkSettings.getProxySettings.mockReturnValue({
+        proxyUrl: 'https://proxy.example.com:8080',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+        proxyHeaders: {},
+        proxySSLSettings: { verificationMode: 'full' as const },
+      });
+      networkSettings.getResponseSettings.mockReturnValue({
+        maxContentLength: 2_048,
+        timeout: 12_345,
+      });
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok'));
+
+      const resource = createResource({ targetUrl });
+      await resource.fetch(targetUrl, { method: 'POST' });
+
+      expect(ProxyAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           headersTimeout: 12_345,
           bodyTimeout: 12_345,
+          maxResponseSize: 2_048,
         })
       );
+    });
+
+    it('reuses one finite timeout signal across redirects without accumulating abort listeners', async () => {
+      const resource = createResource({ targetUrl });
+      const controller = new AbortController();
+      const addSpy = jest.spyOn(controller.signal, 'addEventListener');
+
+      undiciFetchMock
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/hop-1'))
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/hop-2'))
+        .mockResolvedValueOnce(new Response('final', { status: 200 }));
+
+      await resource.fetch(targetUrl, {
+        method: 'POST',
+        signal: controller.signal,
+      });
+
+      // Combined once for the logical request; redirect hops reuse that signal.
+      expect(addSpy.mock.calls.filter(([type]) => type === 'abort')).toHaveLength(1);
+      addSpy.mockRestore();
     });
   });
 
   describe('SSE passthrough', () => {
-    it('passes GET response body through as a stream', async () => {
-      const resource = createResource({ targetUrl });
-
-      const sseResponse = new Response('data: hello\n\n', {
-        status: 200,
-        headers: { 'content-type': 'text/event-stream' },
-      });
-      globalFetchSpy.mockResolvedValueOnce(sseResponse);
-
-      const result = await resource.fetch(targetUrl, { method: 'GET' });
-      expect(result).toBe(sseResponse);
-    });
-
-    it('passes POST response with text/event-stream content-type through as a stream', async () => {
+    it.each(['GET', 'POST'])('passes a %s SSE response through as a stream', async (method) => {
       const resource = createResource({ targetUrl });
 
       const sseResponse = new Response('data: hello\n\n', {
         status: 200,
         headers: { 'content-type': 'text/event-stream; charset=utf-8' },
       });
-      globalFetchSpy.mockResolvedValueOnce(sseResponse);
+      undiciFetchMock.mockResolvedValueOnce(sseResponse);
 
-      const result = await resource.fetch(targetUrl, { method: 'POST' });
+      const result = await resource.fetch(targetUrl, { method });
       expect(result).toBe(sseResponse);
     });
   });
@@ -502,11 +541,11 @@ describe('createFetchResource', () => {
         userAgent: 'kibana-mcp-client elastic (project:proj-abc)',
       });
 
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       await resource.fetch(targetUrl);
 
-      const requestInit = globalFetchSpy.mock.calls[0][1];
+      const requestInit = undiciFetchMock.mock.calls[0][1];
       const headers = requestInit.headers as Headers;
       const ua = headers.get('user-agent');
       expect(ua).toContain('elastic');
@@ -516,11 +555,11 @@ describe('createFetchResource', () => {
     it('applies the default User-Agent when none is provided', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
 
       await resource.fetch(targetUrl);
 
-      const requestInit = globalFetchSpy.mock.calls[0][1];
+      const requestInit = undiciFetchMock.mock.calls[0][1];
       const headers = requestInit.headers as Headers;
       expect(headers.get('user-agent')).toBe('kibana-mcp-client');
     });
@@ -530,7 +569,7 @@ describe('createFetchResource', () => {
     it('closes all cached dispatchers', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
       await resource.fetch(targetUrl);
 
       await resource.close();
@@ -542,7 +581,7 @@ describe('createFetchResource', () => {
     it('is idempotent: calling close() twice does not throw', async () => {
       const resource = createResource({ targetUrl });
 
-      globalFetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
       await resource.fetch(targetUrl);
 
       await expect(resource.close()).resolves.toBeUndefined();
@@ -558,7 +597,7 @@ describe('createFetchResource', () => {
       await resource.close();
 
       await expect(resource.fetch(targetUrl)).rejects.toThrow('MCP fetch resource is closed.');
-      expect(globalFetchSpy).not.toHaveBeenCalled();
+      expect(undiciFetchMock).not.toHaveBeenCalled();
     });
   });
 });

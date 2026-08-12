@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Agent, ProxyAgent, type Dispatcher } from 'undici';
+import {
+  Agent,
+  ProxyAgent,
+  fetch as undiciFetch,
+  type Dispatcher,
+  type RequestInit as UndiciRequestInit,
+} from 'undici';
 import type { Logger } from '@kbn/logging';
 import { getNodeSSLOptions, type CustomHostSettings, type SSLSettings } from '@kbn/actions-utils';
 import type { FetchLike } from '@kbn/mcp-client';
@@ -22,20 +28,23 @@ export interface McpFetchResource {
 const DEFAULT_USER_AGENT = 'kibana-mcp-client';
 const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
 const MAX_REDIRECTS = 20;
-const BLOCKED_CROSS_ORIGIN_HEADERS = ['authorization'];
+const MCP_SESSION_HEADER = 'mcp-session-id';
 const STRIPPED_METHOD_CHANGE_HEADERS = [
   'content-encoding',
   'content-language',
   'content-location',
   'content-type',
 ];
-const SSE_CONTENT_TYPE = 'text/event-stream';
+
+type RequestClass = 'finite' | 'persistent';
 
 export interface CreateFetchResourceOpts {
   networkSettings: ConnectorNetworkSettings;
   logger: Logger;
   targetUrl: string;
   headers?: Readonly<Record<string, string>>;
+  /** Header names from credential.getAuthHeaders(); stripped on cross-origin redirects. */
+  credentialHeaderNames?: readonly string[];
   userAgent?: string;
 }
 
@@ -88,17 +97,35 @@ function shouldUseProxy(
   return true;
 }
 
+function classifyRequest(method: string): RequestClass {
+  return method.toUpperCase() === 'GET' ? 'persistent' : 'finite';
+}
+
 function buildDispatcherForUrl(
   networkSettings: ConnectorNetworkSettings,
   logger: Logger,
-  targetUrl: string
+  targetUrl: string,
+  requestClass: RequestClass
 ): Dispatcher {
   const sslSettings = networkSettings.getSslSettings();
   const proxySettings = networkSettings.getProxySettings();
-  const { timeout } = networkSettings.getResponseSettings();
+  const { timeout, maxContentLength } = networkSettings.getResponseSettings();
   const customHostSettings = networkSettings.getCustomHostSettings(targetUrl);
   const tlsOptions = buildTlsConnectOptions(logger, sslSettings, customHostSettings);
-  const timeoutOptions = timeout > 0 ? { headersTimeout: timeout, bodyTimeout: timeout } : {};
+
+  const timeoutOptions =
+    timeout > 0
+      ? {
+          headersTimeout: timeout,
+          // Persistent GET SSE streams stay quiet between events; do not idle-timeout the body.
+          bodyTimeout: requestClass === 'persistent' ? 0 : timeout,
+        }
+      : requestClass === 'persistent'
+      ? { bodyTimeout: 0 }
+      : {};
+
+  const sizeOptions =
+    requestClass === 'finite' && maxContentLength > 0 ? { maxResponseSize: maxContentLength } : {};
 
   if (proxySettings && shouldUseProxy(logger, proxySettings, targetUrl)) {
     let proxyUrl: URL;
@@ -106,7 +133,7 @@ function buildDispatcherForUrl(
       proxyUrl = new URL(proxySettings.proxyUrl);
     } catch {
       logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored, using direct connection`);
-      return new Agent({ connect: tlsOptions, ...timeoutOptions });
+      return new Agent({ connect: tlsOptions, ...timeoutOptions, ...sizeOptions });
     }
 
     const proxyTls = getNodeSSLOptions(
@@ -121,13 +148,35 @@ function buildDispatcherForUrl(
       proxyTls,
       headers: proxySettings.proxyHeaders,
       ...timeoutOptions,
+      ...sizeOptions,
     });
   }
 
-  return new Agent({ connect: tlsOptions, ...timeoutOptions });
+  return new Agent({ connect: tlsOptions, ...timeoutOptions, ...sizeOptions });
 }
 
-function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
+function stripCrossOriginHeaders(
+  headers: Headers,
+  credentialHeaderNames: readonly string[]
+): Headers {
+  const sanitized = new Headers(headers);
+  sanitized.delete('authorization');
+  sanitized.delete(MCP_SESSION_HEADER);
+  for (const name of credentialHeaderNames) {
+    sanitized.delete(name);
+  }
+  return sanitized;
+}
+
+/**
+ * Prefer platform `AbortSignal.any` (Node 20+). Fall back for Jest/jsdom environments that
+ * lack it so unit tests can still exercise finite-request timeout composition.
+ */
+function combineAbortSignals(signals: AbortSignal[]): AbortSignal {
+  if (typeof AbortSignal.any === 'function') {
+    return AbortSignal.any(signals);
+  }
+
   const controller = new AbortController();
   for (const signal of signals) {
     if (signal.aborted) {
@@ -139,58 +188,6 @@ function mergeAbortSignals(signals: AbortSignal[]): AbortSignal {
   return controller.signal;
 }
 
-const enforceResponseContentLength = (response: Response, maxContentLength: number): Response => {
-  const contentType = response.headers.get('content-type') ?? '';
-  if (maxContentLength <= 0 || contentType.includes(SSE_CONTENT_TYPE)) {
-    return response;
-  }
-
-  const contentLengthHeader = response.headers.get('content-length');
-  if (contentLengthHeader !== null) {
-    const contentLength = Number.parseInt(contentLengthHeader, 10);
-    if (!Number.isNaN(contentLength) && contentLength > maxContentLength) {
-      void response.body?.cancel();
-      throw new Error(
-        `Response content length ${contentLength} exceeds limit of ${maxContentLength}`
-      );
-    }
-  }
-
-  if (!response.body) {
-    return response;
-  }
-
-  let receivedBytes = 0;
-  const limitedBody = response.body.pipeThrough(
-    new TransformStream<Uint8Array, Uint8Array>({
-      transform(chunk, controller) {
-        receivedBytes += chunk.byteLength;
-        if (receivedBytes > maxContentLength) {
-          controller.error(
-            new Error(
-              `Response content length ${receivedBytes} exceeds limit of ${maxContentLength}`
-            )
-          );
-          return;
-        }
-        controller.enqueue(chunk);
-      },
-    })
-  );
-
-  const limitedResponse = new Response(limitedBody, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  });
-  Object.defineProperties(limitedResponse, {
-    url: { value: response.url },
-    redirected: { value: response.redirected },
-    type: { value: response.type },
-  });
-  return limitedResponse;
-};
-
 /**
  * Builds a closable fetch resource for one MCP server URL using Actions network settings from
  * {@link BuildContext.networkSettings} (allowlist, TLS, proxy, timeout, body-size limits).
@@ -200,27 +197,30 @@ export function createFetchResource({
   logger,
   targetUrl,
   headers: defaultHeaders,
+  credentialHeaderNames = [],
   userAgent = DEFAULT_USER_AGENT,
 }: CreateFetchResourceOpts): McpFetchResource {
   networkSettings.ensureUriAllowed(targetUrl);
 
-  const { timeout, maxContentLength } = networkSettings.getResponseSettings();
+  const { timeout } = networkSettings.getResponseSettings();
   const dispatchers = new Map<string, Dispatcher>();
   let closed = false;
 
-  const getOrCreateDispatcher = (url: string): Dispatcher => {
+  const getOrCreateDispatcher = (url: string, requestClass: RequestClass): Dispatcher => {
     const origin = new URL(url).origin;
-    let dispatcher = dispatchers.get(origin);
+    const cacheKey = `${origin}|${requestClass}`;
+    let dispatcher = dispatchers.get(cacheKey);
     if (!dispatcher) {
-      dispatcher = buildDispatcherForUrl(networkSettings, logger, url);
-      dispatchers.set(origin, dispatcher);
+      dispatcher = buildDispatcherForUrl(networkSettings, logger, url, requestClass);
+      dispatchers.set(cacheKey, dispatcher);
     }
     return dispatcher;
   };
 
   const followRedirects = async (
     url: string | URL,
-    init?: RequestInit,
+    init: RequestInit | undefined,
+    requestClass: RequestClass,
     redirectCount = 0
   ): Promise<Response> => {
     if (closed) {
@@ -228,45 +228,24 @@ export function createFetchResource({
     }
 
     const urlStr = typeof url === 'string' ? url : url.toString();
-    const dispatcher = getOrCreateDispatcher(urlStr);
+    const dispatcher = getOrCreateDispatcher(urlStr, requestClass);
 
     const requestHeaders = new Headers(init?.headers);
     if (!requestHeaders.has('user-agent')) {
       requestHeaders.set('user-agent', userAgent);
     }
 
-    const signals: AbortSignal[] = [];
-    if (init?.signal) {
-      signals.push(init.signal as AbortSignal);
-    }
-    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-    if (timeout > 0) {
-      const controller = new AbortController();
-      timeoutHandle = setTimeout(() => {
-        controller.abort(new Error(`Request timed out after ${timeout}ms`));
-      }, timeout);
-      signals.push(controller.signal);
-    }
-
-    const mergedSignal = signals.length > 0 ? mergeAbortSignals(signals) : undefined;
-
-    let response: Response;
-    try {
-      response = await fetch(urlStr, {
-        ...init,
-        headers: requestHeaders,
-        redirect: 'manual',
-        ...(mergedSignal ? { signal: mergedSignal } : {}),
-        dispatcher,
-      } as RequestInit);
-    } finally {
-      if (timeoutHandle !== undefined) {
-        clearTimeout(timeoutHandle);
-      }
-    }
+    // Use undici's fetch (not the jsdom/whatwg polyfill) so dispatcher timeouts and
+    // maxResponseSize are honored in both Kibana server and Jest environments.
+    const response = (await undiciFetch(urlStr, {
+      ...init,
+      headers: requestHeaders,
+      redirect: 'manual',
+      dispatcher,
+    } as UndiciRequestInit)) as unknown as Response;
 
     if (!REDIRECT_STATUS_CODES.has(response.status)) {
-      return enforceResponseContentLength(response, maxContentLength);
+      return response;
     }
 
     if (redirectCount >= MAX_REDIRECTS) {
@@ -312,20 +291,50 @@ export function createFetchResource({
     const requestOrigin = new URL(urlStr).origin;
     const redirectOrigin = new URL(resolvedUrl).origin;
     if (requestOrigin !== redirectOrigin) {
-      const sanitizedHeaders = new Headers(redirectInit.headers);
-      BLOCKED_CROSS_ORIGIN_HEADERS.forEach((h) => sanitizedHeaders.delete(h));
-      redirectInit.headers = sanitizedHeaders;
+      redirectInit.headers = stripCrossOriginHeaders(
+        new Headers(redirectInit.headers),
+        credentialHeaderNames
+      );
     }
 
-    return followRedirects(resolvedUrl, redirectInit, redirectCount + 1);
+    return followRedirects(resolvedUrl, redirectInit, requestClass, redirectCount + 1);
   };
 
   const fetchFn: FetchLike = async (url, init) => {
     const urlString = typeof url === 'string' ? url : url.toString();
     networkSettings.ensureUriAllowed(urlString);
+    const method = (init?.method ?? 'GET').toUpperCase();
+    const requestClass = classifyRequest(method);
     const headers = new Headers(defaultHeaders);
     new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
-    return followRedirects(urlString, { ...init, headers });
+
+    const callerSignal = init?.signal as AbortSignal | undefined;
+    let finiteController: AbortController | undefined;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+    let signal = callerSignal;
+
+    if (requestClass === 'finite' && timeout > 0) {
+      // One timeout for the whole finite logical request, reused across every redirect hop.
+      finiteController = new AbortController();
+      timeoutHandle = setTimeout(() => {
+        finiteController?.abort(new Error(`Request timed out after ${timeout}ms`));
+      }, timeout);
+      signal = callerSignal
+        ? combineAbortSignals([callerSignal, finiteController.signal])
+        : finiteController.signal;
+    }
+
+    try {
+      return await followRedirects(
+        urlString,
+        { ...init, headers, ...(signal ? { signal } : {}) },
+        requestClass
+      );
+    } finally {
+      if (timeoutHandle !== undefined) {
+        clearTimeout(timeoutHandle);
+      }
+    }
   };
 
   return {
