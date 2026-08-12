@@ -28,7 +28,7 @@ export interface SignalEnvelope {
 }
 
 /** First concrete signal type; others follow the same envelope. */
-export interface ToolCallSignal extends SignalEnvelope {
+export interface EsqlToolCallSignal extends SignalEnvelope {
   signal_type: 'tool_call';
   data: {
     tool: string;
@@ -42,11 +42,35 @@ export interface ToolCallSignal extends SignalEnvelope {
     conversation_id?: string;
     agent: { id: string; name: string; class: 'user' | 'management' };
     query?: string;
-    returned: { columns: string[]; row_count: number };
+    // `columns` is optional because the paginated list read strips it from `_source`
+    // (`SIGNAL_SOURCE_EXCLUDES` in server/signals/read.ts) — only `row_count` is needed there.
+    // The write path (server/tasks/transform.ts) still populates a concrete array.
+    returned: { columns?: string[]; row_count: number };
     error?: string;
     duration_ms: number;
     round_signals: { esql_count: number; raw_query_count: number; ki_retrieval_count: number };
   };
 }
 
-export type Signal = ToolCallSignal;
+export type Signal = EsqlToolCallSignal;
+
+/** A single row of the preaggregated grouped-by-tag Signals list. */
+export interface SignalGroup {
+  /** The tag/classification label (a plain keyword such as `query_error`). */
+  tag: string;
+  /** Number of signals carrying this tag across the whole signals store. */
+  count: number;
+}
+
+/** Response of the grouped Signals list: a terms aggregation over the `tags` keyword field. */
+export interface ListSignalGroupsResponse {
+  groups: SignalGroup[];
+}
+
+/** Response of the per-group Signals fetch (paginated). */
+export interface ListSignalsResponse {
+  /** The individual signals carrying the requested tag. */
+  signals: Signal[];
+  /** Total number of signals carrying the tag (for pagination). */
+  total: number;
+}
