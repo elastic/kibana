@@ -327,15 +327,46 @@ export const makeActivityWriterMock = (): jest.Mocked<CasesActivityV2WriterContr
 
 export interface MockDvService {
   get: jest.Mock;
+  /**
+   * `create(spec, skipFetchFields)` — builds an (unsaved) data view from the
+   * spec. The production bootstrap uses `create` + `createSavedObject`
+   * instead of `createAndSave` specifically to avoid `createAndSave`'s
+   * unconditional `setDefault` side effect (which would hijack the space's
+   * default data view). The default implementation echoes the spec back as
+   * the "data view" so tests can assert on the spec passed to `create` and
+   * so the object handed to `createSavedObject` carries the same `id`.
+   */
+  create: jest.Mock;
+  createSavedObject: jest.Mock;
+  /**
+   * Present so tests can assert the bootstrap never calls it. `createAndSave`
+   * would call `setDefault` internally; the production code deliberately does
+   * not use it.
+   */
   createAndSave: jest.Mock;
+  /**
+   * Present so tests can assert the bootstrap never sets the default data
+   * view. Nothing in the analytics-v2 bootstrap should touch it.
+   */
+  setDefault: jest.Mock;
   updateSavedObject: jest.Mock;
 }
 
-export const makeMockDvService = (): MockDvService => ({
-  get: jest.fn(),
-  createAndSave: jest.fn(),
-  updateSavedObject: jest.fn(),
-});
+export const makeMockDvService = (): MockDvService => {
+  const service: MockDvService = {
+    get: jest.fn(),
+    create: jest.fn(),
+    createSavedObject: jest.fn(),
+    createAndSave: jest.fn(),
+    setDefault: jest.fn(),
+    updateSavedObject: jest.fn(),
+  };
+  // Echo the spec back as the created data view so `createSavedObject`
+  // receives an object with the same `id`/`runtimeFieldMap` and tests can
+  // read the spec off `create.mock.calls`.
+  service.create.mockImplementation((spec: DataViewSpec) => Promise.resolve(spec));
+  return service;
+};
 
 /**
  * Wrap a mock data views service into the plugin-start contract

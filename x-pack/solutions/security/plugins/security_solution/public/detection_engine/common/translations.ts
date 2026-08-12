@@ -1548,8 +1548,7 @@ export const RULES_BULK_EDIT_SUCCESS_DESCRIPTION = (
 export const RULES_BULK_EDIT_SUCCESS_DATA_VIEW_RULES_SKIPPED_DETAIL = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.successIndexEditToastDescription',
   {
-    defaultMessage:
-      'If you did not select to apply changes to rules using Kibana data views, those rules were not updated and will continue using data views.',
+    defaultMessage: 'Check the bulk update dialog for changes on rules containing data views.',
   }
 );
 
@@ -1684,6 +1683,13 @@ export const RULE_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleSettingsTitle',
   {
     defaultMessage: 'Settings',
+  }
+);
+
+export const UPGRADE_PREBUILT_RULES_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradePrebuiltRulesTableCaption',
+  {
+    defaultMessage: 'Prebuilt rules available for upgrade',
   }
 );
 

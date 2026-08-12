@@ -454,6 +454,12 @@ export const labels = {
             defaultMessage: '{selected} Selected',
             values: { selected },
           }),
+        selectionActionsAriaLabel: i18n.translate(
+          'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.selectionActionsAriaLabel',
+          {
+            defaultMessage: 'Tool selection actions',
+          }
+        ),
         clearSelection: i18n.translate(
           'xpack.agentBuilder.tools.bulkImportMcp.sourceSection.clearSelection',
           {
@@ -552,16 +558,6 @@ export const labels = {
       breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
         defaultMessage: 'MCP clients',
       }),
-      techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.mcpClients.techPreviewBadgeLabel', {
-        defaultMessage: 'Technical preview',
-      }),
-      techPreviewBadgeDescription: i18n.translate(
-        'xpack.agentBuilder.mcpClients.techPreviewBadgeDescription',
-        {
-          defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-        }
-      ),
       addMcpClientButtonLabel: i18n.translate(
         'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
         {
@@ -584,6 +580,12 @@ export const labels = {
         'xpack.agentBuilder.mcpClients.listMcpClientsErrorMessage',
         {
           defaultMessage: 'Failed to fetch MCP clients',
+        }
+      ),
+      loadMcpClientErrorMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.loadMcpClientErrorMessage',
+        {
+          defaultMessage: 'Failed to fetch MCP client',
         }
       ),
       noMcpClientsFoundMessage: i18n.translate(
@@ -639,6 +641,9 @@ export const labels = {
         revoke: i18n.translate('xpack.agentBuilder.mcpClients.actions.revoke', {
           defaultMessage: 'Revoke',
         }),
+        edit: i18n.translate('xpack.agentBuilder.mcpClients.actions.edit', {
+          defaultMessage: 'Edit',
+        }),
       },
       form: {
         pageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.pageTitle', {
@@ -653,6 +658,15 @@ export const labels = {
         }),
         createButton: i18n.translate('xpack.agentBuilder.mcpClients.form.createButton', {
           defaultMessage: 'Create client',
+        }),
+        editPageTitle: i18n.translate('xpack.agentBuilder.mcpClients.form.editPageTitle', {
+          defaultMessage: 'Edit MCP client (OAuth)',
+        }),
+        editBreadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.form.editBreadcrumb', {
+          defaultMessage: 'Edit MCP client',
+        }),
+        updateButton: i18n.translate('xpack.agentBuilder.mcpClients.form.updateButton', {
+          defaultMessage: 'Update',
         }),
         cancelButton: i18n.translate('xpack.agentBuilder.mcpClients.form.cancelButton', {
           defaultMessage: 'Cancel',
@@ -793,6 +807,14 @@ export const labels = {
           }),
         createErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.createErrorToast', {
           defaultMessage: 'Failed to create MCP client',
+        }),
+        updateSuccessToast: (name: string) =>
+          i18n.translate('xpack.agentBuilder.mcpClients.form.updateSuccessToast', {
+            defaultMessage: 'MCP client "{name}" updated successfully',
+            values: { name },
+          }),
+        updateErrorToast: i18n.translate('xpack.agentBuilder.mcpClients.form.updateErrorToast', {
+          defaultMessage: 'Failed to update MCP client',
         }),
       },
       revoke: {
@@ -2635,11 +2657,15 @@ export const labels = {
     createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
       defaultMessage: 'Elastic',
     }),
-    byAuthor: (author: string) =>
-      i18n.translate('xpack.agentBuilder.overview.byAuthor', {
-        defaultMessage: 'By {author}',
-        values: { author },
-      }),
+    createdBy: i18n.translate('xpack.agentBuilder.overview.createdBy', {
+      defaultMessage: 'Created by',
+    }),
+    updatedBy: i18n.translate('xpack.agentBuilder.overview.updatedBy', {
+      defaultMessage: 'Updated by',
+    }),
+    unknown: i18n.translate('xpack.agentBuilder.overview.unknown', {
+      defaultMessage: 'Unknown',
+    }),
     agentId: (id: string) =>
       i18n.translate('xpack.agentBuilder.overview.agentId', {
         defaultMessage: 'ID {id}',

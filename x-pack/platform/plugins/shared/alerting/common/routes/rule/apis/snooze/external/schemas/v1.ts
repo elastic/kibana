@@ -9,7 +9,7 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 
 export const snoozeRuleParamsExamples = () => path.join(__dirname, 'examples_snooze_rule.yaml');
-import { scheduleRequestSchemaV1 } from '../../../../../schedule';
+import { scheduleRequestSchemaV1 } from '@kbn/response-ops-schedule-schema';
 
 export const snoozeParamsSchema = schema.object({
   id: schema.string({

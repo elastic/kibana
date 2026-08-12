@@ -450,6 +450,37 @@ describe('Grouping', () => {
     });
   });
 
+  describe('groupSelector', () => {
+    it('renders when provided', () => {
+      const groupSelector = <div data-test-subj="group-selector">Group Selector</div>;
+
+      render(
+        <I18nProvider>
+          <Grouping {...testProps} groupSelector={groupSelector} />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('group-selector')).toBeInTheDocument();
+    });
+
+    it('does not render when null', () => {
+      const customControl = <button data-test-subj="inspect-button">Inspect</button>;
+
+      render(
+        <I18nProvider>
+          <Grouping
+            {...testProps}
+            additionalToolbarControls={[customControl]}
+            groupSelector={null}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('inspect-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('group-selector')).not.toBeInTheDocument();
+    });
+  });
+
   describe('emptyGroupingComponent', () => {
     const emptyData = {
       groupsCount: {

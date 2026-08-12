@@ -55,7 +55,7 @@ describe('http', () => {
     router = { post: jest.fn(), handleLegacyErrors: jest.fn() } as unknown as typeof router;
     http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
     container = injection.getContainer();
-    container.loadSync(new ContainerModule(loadHttp));
+    container.load(new ContainerModule(loadHttp));
     container.bind(CoreSetup('http')).toConstantValue(http);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(Route).toConstantValue(TestRoute);
@@ -83,7 +83,7 @@ describe('http', () => {
   });
 
   it('should not register a route if there are no corresponding bindings ', () => {
-    container.unbindSync(Route);
+    container.unbind(Route);
 
     expect(setup).not.toThrow();
     expect(router.post).not.toHaveBeenCalled();
@@ -100,7 +100,7 @@ describe('http', () => {
       ok: jest.fn(() => 'something'),
     } as unknown as jest.Mocked<KibanaResponseFactory>;
     const fork = injection.fork();
-    const unbindAllSpy = jest.spyOn(fork, 'unbindAll');
+    const unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
     await expect(handler({} as any, request, response)).resolves.toBe('something');
     expect(response.ok).toHaveBeenCalled();

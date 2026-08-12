@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/279684
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Alerting and reporting
+title: Add public API to discover applicable case extended fields
+description: Adds public Cases API routes that return the extended fields you can apply when creating or updating a case for a given owner and optional template, including the exact storage keys for the `extended_fields` map.

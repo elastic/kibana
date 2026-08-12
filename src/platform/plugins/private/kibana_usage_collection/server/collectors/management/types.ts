@@ -65,6 +65,7 @@ export interface UsageStats {
   'agentBuilder:tracing:includeRealNames': boolean;
   'agentBuilder:tracing:includeSystemPrompt': boolean;
   'agentBuilder:tracing:includeToolDetails': boolean;
+  'agentBuilder:tracing:includeUserData': boolean;
   'agentBuilder:tracing:includeUserPrompts': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
@@ -95,6 +96,7 @@ export interface UsageStats {
   'securitySolution:defaultValueReportRate': string;
   'securitySolution:defaultValueReportTitle': string;
   'securitySolution:enableAlertsAndAttacksAlignment': boolean;
+  'securitySolution:enableAttackDiscoveryWorkflows': boolean;
   'securitySolution:enableRuleChangesHistory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
@@ -112,6 +114,7 @@ export interface UsageStats {
   'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
+  'discover:defaultEsqlQuery': string;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -163,11 +166,6 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:linkColor': string;
   'banners:backgroundColor': string;
-  'labs:canvas:enable_ui': boolean;
-  'labs:canvas:byValueEmbeddable': boolean;
-  'labs:canvas:useDataService': boolean;
-  'labs:presentation:timeToPresent': boolean;
-  'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
@@ -210,11 +208,16 @@ export interface UsageStats {
   'observability:streamsSigEventsIndexPatterns': string;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryDetectionLookbackMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryTargetCoverageMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;
@@ -224,6 +227,7 @@ export interface UsageStats {
   'securitySolution:alertAnalysisWorkflowAgentId': string;
   'securitySolution:alertAnalysisWorkflowCreateConversation': boolean;
   'securitySolution:alertAnalysisWorkflowTagPrefix': string;
+  'cloudSecurityPosture:graphRuntimeEvaluationsEnabled': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { privilegesTypeSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -15,10 +15,12 @@ export interface CreateAgentKeyResponse {
 
 export const createAgentKeyRoute = defineRoute<CreateAgentKeyResponse>()({
   endpoint: 'POST /api/apm/agent_keys 2023-10-31',
-  params: z.object({
-    body: z.object({
-      name: z.string(),
-      privileges: privilegesTypeSchema,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        name: z.string(),
+        privileges: privilegesTypeSchema,
+      }),
+    })
+  ),
 });

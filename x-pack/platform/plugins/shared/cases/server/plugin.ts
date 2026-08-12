@@ -216,7 +216,13 @@ export class CasePlugin
         this.templatesMigrationTaskManager = new TemplatesMigrationTaskManager(
           plugins.taskManager,
           this.logger,
-          plugins.usageCollection
+          plugins.usageCollection,
+          // When the existing-case `extended_fields` backfill finishes, ask cases-analytics v2 to run
+          // a one-time full reconciliation. The backfill bumps only the SO-framework `updated_at`,
+          // which analytics-v2's incremental cursor (keyed on `attributes.updated_at`) never sees —
+          // so without this nudge the backfilled `extended_fields` would be permanently absent from
+          // `.cases`. The callback resolves the service at run time and no-ops when v2 is disabled.
+          () => this.casesAnalyticsV2Service?.triggerBackfillReconciliation()
         );
       }
     }
@@ -276,14 +282,23 @@ export class CasePlugin
       getCasesClient,
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
+      this.caseConfig.templates?.enabled === true,
       () => core.getStartServices()
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     if (plugins.agentBuilder) {
-      registerCasesAgentBuilderTools(plugins.agentBuilder, getCasesClient, core, {
-        analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
-      });
+      registerCasesAgentBuilderTools(
+        plugins.agentBuilder,
+        getCasesClient,
+        core,
+        this.unifiedAttachmentTypeRegistry,
+        {
+          analyticsV2Enabled: this.caseConfig.analyticsV2.enabled,
+          attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
+          templatesEnabled: this.caseConfig.templates?.enabled === true,
+        }
+      );
     }
 
     return {

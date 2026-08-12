@@ -184,7 +184,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ingestPipelines: `${ELASTIC_DOCS}solutions/search/search-pipelines`,
       knnSearch: `${ELASTIC_DOCS}solutions/search/vector/knn`,
       knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn#_combine_approximate_knn_with_other_features`,
-      knnSearchTuneForSpeedAccuracy: `${ELASTIC_DOCS}solutions/search/vector/knn#tune-approximate-knn-for-speed-accuracy`,
       languageAnalyzers: `${ELASTIC_DOCS}reference/text-analysis/analysis-lang-analyzer`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
@@ -201,12 +200,15 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchTemplates: `${ELASTIC_DOCS}solutions/search/search-templates`,
       semanticSearchGetStarted: `${ELASTIC_DOCS}solutions/search/get-started/semantic-search`,
       semanticTextField: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/semantic-text`,
+      semanticTextFieldSetupConfiguration: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/semantic-text-setup-configuration`,
+      semanticTextSearchRetrieval: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/semantic-text-search-retrieval`,
+      hybridSemanticText: `${ELASTIC_DOCS}solutions/search/hybrid-semantic-text`,
       esAsVectorDatabase: `${ELASTIC_DOCS}solutions/search#es-as-vector-database`,
       vectorSearch: `${ELASTIC_DOCS}solutions/search/vector`,
-      vectorSearchEmbeddingModels: `${ELASTIC_DOCS}solutions/search/vector#vector-embedding-models`,
+      vectorSearchDenseVector: `${ELASTIC_DOCS}solutions/search/vector/dense-vector`,
+      jinaEmbeddingModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-jina`,
       vectorSearchBringOwnVectors: `${ELASTIC_DOCS}solutions/search/vector/bring-own-vectors`,
-      vectorSearchStorageOptimization: `${ELASTIC_DOCS}solutions/search/vector#vector-storage-optimization`,
-      vectorSearchVectorsAndEmbeddings: `${ELASTIC_DOCS}solutions/search/vector#vectors-and-embeddings`,
+      vectorDatabaseGetStarted: `${ELASTIC_DOCS}solutions/vector-database/get-started`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-model-ref`,
       syncRules: `${ELASTIC_DOCS}reference/search-connectors/es-sync-rules`,
@@ -364,6 +366,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ilmFreeze: `${ELASTIC_WEBSITE_URL}blog/significantly-decrease-your-elasticsearch-heap-memory-usage`,
       ilmDelete: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-delete`,
       ilmPhaseTransitions: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/index-lifecycle#ilm-phase-transitions`,
+      ilmCustomizeBuiltInPolicies: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/tutorial-customize-built-in-policies`,
       ilmReadOnly: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-readonly`,
       ilmRollover: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-rollover`,
       ilmSearchableSnapshot: `${ELASTIC_DOCS}reference/elasticsearch/index-lifecycle-actions/ilm-searchable-snapshot`,
@@ -463,9 +466,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
-      // TODO(MITRE-v19 docs): swap to the published page covering how to update outdated
-      // MITRE ATT&CK mappings on detection rules once it ships.
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
+      remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },
     server: {
       protocol: `${ELASTIC_DOCS}reference/kibana/configuration-reference/general-settings#server-protocol`,
@@ -478,6 +480,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     securitySolution: {
       artifactControl: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-updates-for-protection-artifacts`,
       cloudSecurityPosture: `${ELASTIC_DOCS}solutions/security/cloud/cloud-security-posture-management`,
+      cspmGcpAgentless: `${ELASTIC_DOCS}solutions/security/cloud/get-started-with-cspm-for-gcp#cspm-gcp-agentless`,
       installElasticDefend: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/install-elastic-defend`,
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/third-party-response-actions`,
@@ -983,6 +986,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       elasticAgentStandaloneLoggingConfig: `${ELASTIC_DOCS}reference/fleet/elastic-agent-standalone-logging-config#elastic-agent-standalone-logging-settings`,
       agentPolicyLogLevel: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-level`,
       elasticAgentLogFileRetention: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-log-file-rotation-retention`,
+      elasticAgentDownloads: `${ELASTIC_WEBSITE_URL}downloads/past-releases/elastic-agent-`,
+      integrationsReference: `${ELASTIC_DOCS}reference/integrations`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
@@ -1111,6 +1116,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       a2aServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/a2a-server`,
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-agent-or-ai-assistant`,
+      aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
@@ -1143,6 +1149,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
       configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
+      manageCaseTemplates: `${ELASTIC_DOCS}explore-analyze/cases/manage-case-templates`,
     },
   });
 };

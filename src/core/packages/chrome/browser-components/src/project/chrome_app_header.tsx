@@ -9,7 +9,11 @@
 
 import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
 import { css } from '@emotion/react';
-import type { ChromeBreadcrumb, AppHeaderBack, AppHeaderConfig } from '@kbn/core-chrome-browser';
+import type {
+  ChromeBreadcrumb,
+  AppHeaderBack,
+  ChromeAppHeaderConfig,
+} from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 
@@ -36,10 +40,28 @@ function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   return undefined;
 }
 
+function isCurrentLocation(href: string): boolean {
+  try {
+    const currentUrl = new URL(window.location.href);
+    const targetUrl = new URL(href, currentUrl);
+    const normalizePath = (path: string) => path.replace(/\/+$/, '');
+
+    return (
+      targetUrl.origin === currentUrl.origin &&
+      normalizePath(targetUrl.pathname) === normalizePath(currentUrl.pathname) &&
+      targetUrl.search === currentUrl.search &&
+      normalizePath(targetUrl.hash) === normalizePath(currentUrl.hash)
+    );
+  } catch {
+    return false;
+  }
+}
+
 interface FallbackProps {
-  hasContent: boolean;
   back?: AppHeaderBack[];
   menu?: AppMenuConfig;
+  hasBadges: boolean;
+  hasLegacyActionMenu: boolean;
 }
 
 function useFallbackProps(): FallbackProps {
@@ -61,7 +83,7 @@ function useFallbackProps(): FallbackProps {
     const backTargets: AppHeaderBack[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
-      if (crumb.href) {
+      if (crumb.href && !isCurrentLocation(crumb.href)) {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,
@@ -72,40 +94,77 @@ function useFallbackProps(): FallbackProps {
 
     const hasBack = backTargets.length > 0;
     const hasMenu = !!appMenu?.items?.length;
-    const hasBadges = !!legacyBadge || breadcrumbsBadges.length > 0;
-    const hasContent = hasBack || hasMenu || hasBadges || hasLegacyActionMenu;
 
     return {
-      hasContent,
       back: hasBack ? backTargets : undefined,
       menu: hasMenu ? appMenu : undefined,
+      hasBadges: !!legacyBadge || breadcrumbsBadges.length > 0,
+      hasLegacyActionMenu,
     };
   }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu]);
 }
 
-function useAppHeaderConfig(): AppHeaderConfig | undefined {
+function useAppHeaderConfig(): ChromeAppHeaderConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 
-function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boolean {
+function hasConfiguredBack(back: ChromeAppHeaderConfig['back']): boolean {
+  return back !== undefined && back !== false;
+}
+
+function hasEffectiveBack(back: AppHeaderBack | AppHeaderBack[] | undefined): boolean {
+  if (back === undefined) return false;
+  return Array.isArray(back) ? back.length > 0 : true;
+}
+
+function resolveEffectiveBack(
+  config: ChromeAppHeaderConfig | undefined,
+  fallbackBack: AppHeaderBack[] | undefined
+): AppHeaderBack | AppHeaderBack[] | undefined {
+  if (config?.back === false) {
+    return undefined;
+  }
+  if (config?.back !== undefined) {
+    return config.back;
+  }
+  return fallbackBack;
+}
+
+function hasExplicitAppHeaderContent(config: ChromeAppHeaderConfig | undefined): boolean {
   if (!config) return false;
   return (
     config.title !== undefined ||
-    config.back !== undefined ||
+    hasConfiguredBack(config.back) ||
     !!config.tabs?.length ||
     !!config.badges?.length ||
     !!config.menu?.items?.length ||
     !!config.favorite ||
+    !!config.share ||
+    !!config.description ||
     !!config.metadata?.length
   );
 }
 
-export function useHasChromeAppHeaderContent(): boolean {
+function useResolvedChromeAppHeader() {
   const config = useAppHeaderConfig();
   const fallback = useFallbackProps();
-  return hasExplicitAppHeaderContent(config) || fallback.hasContent;
+
+  const back = resolveEffectiveBack(config, fallback.back);
+  const menu = config?.menu ?? fallback.menu;
+  const hasContent =
+    hasExplicitAppHeaderContent(config) ||
+    hasEffectiveBack(back) ||
+    !!menu?.items?.length ||
+    fallback.hasBadges ||
+    fallback.hasLegacyActionMenu;
+
+  return { config, back, menu, hasContent };
+}
+
+export function useHasChromeAppHeaderContent(): boolean {
+  return useResolvedChromeAppHeader().hasContent;
 }
 
 function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
@@ -130,10 +189,7 @@ function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
 }
 
 export const ChromeAppHeaderRenderer = React.memo(() => {
-  const config = useAppHeaderConfig();
-  const fallback = useFallbackProps();
-
-  const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
+  const { config, back, menu, hasContent } = useResolvedChromeAppHeader();
   const measureRef = useMeasuredAppHeaderHeight();
 
   if (!hasContent) return null;
@@ -144,13 +200,18 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
   const isSparse =
     config?.title === undefined &&
     !config?.tabs?.length &&
+    !config?.description &&
     !config?.metadata?.length &&
     !config?.badges?.length &&
-    !config?.favorite;
+    !config?.favorite &&
+    !config?.share;
   const reservedMinHeight =
     config?.spacing === 'compact' || isSparse
       ? RESERVED_COMPACT_MIN_HEIGHT_PX
       : RESERVED_STANDARD_MIN_HEIGHT_PX;
+  const secondaryContent = config?.description
+    ? { description: config.description }
+    : { metadata: config?.metadata };
 
   return (
     <div
@@ -162,12 +223,13 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
       <Suspense fallback={null}>
         <AppHeaderViewLazy
           title={config?.title}
-          back={config?.back ?? fallback.back}
+          back={back}
           tabs={config?.tabs}
           badges={config?.badges}
-          menu={config?.menu ?? fallback.menu}
+          menu={menu}
           favorite={config?.favorite}
-          metadata={config?.metadata}
+          share={config?.share}
+          {...secondaryContent}
           sticky={false}
           spacing={config?.spacing}
         />
