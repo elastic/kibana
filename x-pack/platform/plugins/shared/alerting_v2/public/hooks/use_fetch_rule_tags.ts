@@ -7,21 +7,23 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
 const TAGS_STALE_TIME = 30_000;
 
 export const useFetchRuleTags = ({
-  filter,
+  search,
+  kind,
   enabled = true,
-}: { filter?: string; enabled?: boolean } = {}) => {
+}: { search?: string; kind?: RuleKind; enabled?: boolean } = {}) => {
   const rulesApi = useService(RulesApi);
 
   return useQuery({
-    queryKey: ruleKeys.tags(filter),
+    queryKey: ruleKeys.tags(search, kind),
     queryFn: async () => {
-      const { tags } = await rulesApi.listTags({ filter });
+      const { tags } = await rulesApi.listTags({ search, kind });
       return tags;
     },
     enabled,
