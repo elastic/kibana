@@ -7,6 +7,7 @@
 
 import {
   expectDateRangeToBe,
+  setDateRange,
   setStartDate,
   updateDateRangeInLocalDatePickers,
   updateDates,
@@ -89,8 +90,7 @@ describe(
       // The datepicker is only active when a query exists.
       addDiscoverEsqlQuery(esqlQuery);
 
-      setStartDate('now-15m', DISCOVER_CONTAINER);
-      updateDates(DISCOVER_CONTAINER);
+      setDateRange('now-15m', 'now', DISCOVER_CONTAINER);
 
       setStartDate(NEW_START_DATE, DISCOVER_CONTAINER);
       updateDates(DISCOVER_CONTAINER);

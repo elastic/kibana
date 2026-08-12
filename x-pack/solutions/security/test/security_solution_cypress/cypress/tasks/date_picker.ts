@@ -135,6 +135,28 @@ export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CO
   );
 };
 
+export const setDateRange = (
+  start: string,
+  end: string,
+  container: string = GLOBAL_FILTERS_CONTAINER
+) => {
+  usingNewPicker(
+    container,
+    () => {
+      cy.get(`${container} ${NEW_PICKER_CONTROL}`).click();
+      cy.get(DATE_RANGE_PICKER_INPUT).clear();
+      cy.get(DATE_RANGE_PICKER_INPUT).type(`${toIsoIfDate(start)} to ${toIsoIfDate(end)}{enter}`);
+    },
+    () => {
+      setStartDate(start, container);
+      setEndDate(end, container);
+      // eslint-disable-next-line cypress/no-force
+      cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).click({ force: true });
+      cy.get(GET_DATE_PICKER_APPLY_BUTTON(container)).should('not.have.text', 'Updating');
+    }
+  );
+};
+
 export const updateDates = (container: string = GLOBAL_FILTERS_CONTAINER) => {
   // The new picker applies on Enter inside set{Start,End}Date{Now}, so this
   // step is a no-op there. The legacy picker still needs an explicit click.
