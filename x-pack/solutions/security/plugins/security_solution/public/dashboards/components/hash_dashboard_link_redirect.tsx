@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -33,6 +34,7 @@ const getLegacyDashboardIdFromHash = (hash: string): string | undefined => {
 export const HashDashboardLinkRedirect = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const { navigateTo } = useNavigateTo();
+  const history = useHistory();
 
   useEffect(() => {
     const redirectOnLegacyDashboardHash = () => {
@@ -41,8 +43,12 @@ export const HashDashboardLinkRedirect = () => {
         return;
       }
       // Clear the hash immediately so the broken URL doesn't linger in the address bar/history
-      // while we redirect to the correct, path-based Security dashboard URL.
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      // while we redirect to the correct, path-based Security dashboard URL. This must go
+      // through the same `history` instance the app's router listens to (rather than the raw
+      // `window.history` API) so the router's location stays in sync with the subsequent
+      // `navigateTo()` call below; otherwise the router misses the navigation and the dashboard
+      // never re-renders for the new id.
+      history.replace(window.location.pathname + window.location.search);
       navigateTo({
         url: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.dashboards,
@@ -56,7 +62,7 @@ export const HashDashboardLinkRedirect = () => {
     return () => {
       window.removeEventListener('hashchange', redirectOnLegacyDashboardHash);
     };
-  }, [getSecuritySolutionUrl, navigateTo]);
+  }, [getSecuritySolutionUrl, navigateTo, history]);
 
   return null;
 };

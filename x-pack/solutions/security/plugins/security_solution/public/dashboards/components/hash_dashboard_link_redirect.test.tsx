@@ -6,6 +6,7 @@
  */
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -27,8 +28,17 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useHistory: jest.fn(),
+  };
+});
+
 describe('HashDashboardLinkRedirect', () => {
   const mockNavigateTo = jest.fn();
+  const mockHistoryReplace = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,6 +47,7 @@ describe('HashDashboardLinkRedirect', () => {
       ({ path }: { path?: string }) => `/app/security/dashboards/${path}`
     );
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
+    (useHistory as jest.Mock).mockReturnValue({ replace: mockHistoryReplace });
   });
 
   afterEach(() => {
@@ -51,6 +62,7 @@ describe('HashDashboardLinkRedirect', () => {
   it('does not inject a hash when mounting with an empty hash', () => {
     render(<HashDashboardLinkRedirect />);
     expect(window.location.hash).toBe('');
+    expect(mockHistoryReplace).not.toHaveBeenCalled();
   });
 
   it.each([['#/dashboard/target-dashboard-id'], ['#/view/target-dashboard-id']])(
@@ -65,7 +77,10 @@ describe('HashDashboardLinkRedirect', () => {
           url: '/app/security/dashboards/target-dashboard-id',
         })
       );
-      expect(window.location.hash).not.toContain('target-dashboard-id');
+      // The hash must be cleared through the router's own `history` instance (not the raw
+      // `window.history` API) so the router's location stays in sync with the `navigateTo()`
+      // call above.
+      expect(mockHistoryReplace).toHaveBeenCalledWith('/app/security/dashboards/current-id');
     }
   );
 
