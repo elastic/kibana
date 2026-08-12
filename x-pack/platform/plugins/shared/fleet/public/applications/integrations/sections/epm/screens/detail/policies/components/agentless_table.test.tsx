@@ -232,7 +232,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     expect(await result.findByText('Healthy')).toBeInTheDocument();
@@ -244,7 +244,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     await act(async () => {
