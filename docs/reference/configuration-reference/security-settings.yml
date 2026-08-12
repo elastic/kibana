@@ -608,7 +608,7 @@ groups:
         description: |
           List of saved object types to exclude from diff generation. Excluded types still emit their normal audit events, but without the `kibana.diff` field. **Default:** `[]`
         datatype: string
-        default: []
+        default: "[]"
         applies_to:
           stack: preview
           self: preview
