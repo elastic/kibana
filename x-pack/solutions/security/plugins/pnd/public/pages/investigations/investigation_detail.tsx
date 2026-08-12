@@ -24,7 +24,6 @@ import { useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { Proposal } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
-import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigation, useInvestigationProposals } from '../../hooks/use_investigations_api';
 import * as i18n from './translations';
@@ -107,7 +106,6 @@ export const InvestigationDetailPage: React.FC = () => {
   if (isNotFound) {
     return (
       <PndPageSection>
-        <PndPageHeader isQueueEmpty={true} eventCount={0} />
         <EuiEmptyPrompt iconType="warning" title={<h2>{i18n.NOT_FOUND}</h2>} />
       </PndPageSection>
     );
@@ -116,7 +114,6 @@ export const InvestigationDetailPage: React.FC = () => {
   if (error || !data?.investigation) {
     return (
       <PndPageSection>
-        <PndPageHeader isQueueEmpty={true} eventCount={0} />
         <EuiEmptyPrompt
           iconType="error"
           color="danger"
@@ -206,7 +203,6 @@ export const InvestigationDetailPage: React.FC = () => {
 
   return (
     <PndPageSection>
-      <PndPageHeader isQueueEmpty={false} eventCount={investigation.events?.length ?? 0} />
       <EuiTabbedContent
         key={`${id}:${proposalId ?? 'overview'}`}
         tabs={tabs}
