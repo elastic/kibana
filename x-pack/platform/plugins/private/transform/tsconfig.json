@@ -93,7 +93,8 @@
     "@kbn/task-manager-plugin",
     "@kbn/cps-utils",
     "@kbn/core-notifications-browser",
-    "@kbn/cps-common"
+    "@kbn/cps-common",
+    "@kbn/mock-idp-utils"
   ],
   "exclude": ["target/**/*"]
 }

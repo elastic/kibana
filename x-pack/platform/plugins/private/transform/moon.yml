@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/core-notifications-browser'
   - '@kbn/cps-common'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod

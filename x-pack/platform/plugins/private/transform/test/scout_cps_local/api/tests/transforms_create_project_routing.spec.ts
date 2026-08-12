@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
 import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
 import {
@@ -24,7 +25,7 @@ import { COMMON_HEADERS } from '../../../scout/api/constants';
  * Linked project id matches `MOCK_IDP_UIAM_PROJECT_ID2` from `@kbn/mock-idp-utils`
  * (registered by the cps_local Scout stack).
  */
-const LINKED_PROJECT_ROUTING = '_id:fedcba65432109876543210987654321';
+const LINKED_PROJECT_ROUTING = `_id:${MOCK_IDP_UIAM_PROJECT_ID2}`;
 
 apiTest.describe(
   '/internal/transform/transforms/{transformId} create with project routing',
