@@ -219,11 +219,18 @@ export const isExcludedLoggingPath = (filePath: string): boolean => {
  * - a literal dot is written `[.]` (a bare `\.` is rejected by the ES|QL string
  *   literal parser).
  *
- * Recall boundary (Tier-1): convention-named loggers and standard stream calls
- * only. Misses custom-named wrapper instances (`audit = createLogger();
+ * Recall boundary (Tier-1): convention-named loggers, standard stream calls, and
+ * process-aborting emits that write their message to stderr (`panic`,
+ * `.expect`). Misses custom-named wrapper instances (`audit = createLogger();
  * audit.write(...)`) and non-severity SDK emit methods. Closing that tail
  * (per-language tree-sitter, as in elastic/semantic-code-search#168) is a later
  * refinement.
+ *
+ * Deliberately NOT covered: value-returning error constructors such as Go
+ * `fmt.Errorf("...")`. They are not log emissions — the returned error is
+ * recomposed by whatever logs it upstream, so the source literal does not appear
+ * verbatim in the logs (measured on the OTel Demo corpus: predicted phrases
+ * traced to `fmt.Errorf`/`throw`/span `addEvent` did not match ingested logs).
  */
 export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   // logger.info(...) / Logger.Error(...) / logging.warning(...) — go/java/py method calls.
@@ -250,69 +257,14 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   '.*[lL]og(ger)?[.]Log(Trace|Debug|Information|Warning|Error|Critical).*',
   // System.out.println(...) / System.err.print(...) — Java standard streams.
   '.*System[.](out|err)[.]print(ln)?.*',
-] as const;
-
-/**
- * Log-message phrase lexicon (Stage 3 recall lift). Matched ONLY inside a string
- * literal, so it catches production log/diagnostic messages emitted through
- * idioms the Tier-1 set misses — Go `fmt.Errorf("...")`, `eprintln!`, `.expect`,
- * `Console.WriteLine`, PHP `echo`, structured event tables — language-agnostic.
- *
- * Precision is intentionally traded for recall here: a downstream classifier
- * (see `classify_logging_sites.ts`) decides keep/drop + level, so this layer only
- * needs to surface candidates. Bare (unanchored) phrase matching is ~7%
- * precision; string-literal anchoring is the load-bearing constraint.
- *
- * Lucene RLIKE gotcha: `"` is a special (literal-quoting) char in Lucene regexp,
- * so a literal double-quote must be escaped as `\\"` and `[^\\"]` used for
- * "not a double-quote"; single quotes are ordinary. See `anchoredPhrasePatterns`.
- */
-export const LOGGER_PHRASE_LEXICON: readonly string[] = [
-  '[sS]tarting',
-  '[sS]tarted',
-  '[sS]hutting [dD]own',
-  '[sS]hutdown',
-  '[lL]istening on',
-  '[cC]onnecting to',
-  '[cC]onnected to',
-  '[cC]onnection refused',
-  '[cC]onnection reset',
-  '[tT]imed out',
-  '[tT]imeout',
-  '[rR]etry',
-  '[rR]etrying',
-  '[fF]ailed to',
-  '[uU]nable to',
-  '[cC]ould not',
-  '[iI]nitializ',
-  '[iI]nitialis',
-  '[hH]ealth check',
-  '[dD]eprecat',
-  '[rR]eceived',
-  '[pP]rocessing',
-  '[pP]rocessed',
-  '[sS]ending',
-  '[eE]rror',
-  '[wW]arning',
-  '[eE]xception',
-] as const;
-
-/** Builds string-literal-anchored RLIKE patterns for one phrase body. */
-export const anchoredPhrasePatterns = (phrase: string): string[] => [
-  `.*\\"[^\\"]*${phrase}[^\\"]*\\".*`,
-  `.*'[^']*${phrase}[^']*'.*`,
-  `.*\`[^\`]*${phrase}[^\`]*\`.*`,
-];
-
-/**
- * Shape-based recall for human-readable sentence literals not covered by the
- * phrase lexicon. One pattern per quote style; content must start with a letter
- * and contain at least 3 space-separated words.
- */
-export const SENTENCE_LITERAL_PATTERNS: readonly string[] = [
-  '.*\\"[A-Za-z][^\\" ]* [^\\" ]+ [^\\"]+\\".*',
-  ".*'[A-Za-z][^' ]* [^' ]+ [^']+'.*",
-  '.*`[A-Za-z][^` ]* [^` ]+ [^`]+`.*',
+  // panic("...") — Go abort; the message is written to stderr.
+  '.*panic[(].*',
+  // panic!("...") — Rust abort macro.
+  '.*panic![(].*',
+  // eprintln!(...) — Rust stderr print.
+  '.*eprintln![(].*',
+  // .expect("...") — Rust unwrap-with-message; aborts and prints the message.
+  '.*[.]expect[(].*',
 ] as const;
 
 /**

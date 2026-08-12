@@ -97,11 +97,11 @@ describe('extractLogSignatures', () => {
     expect(extractLogSignatures({ content: 'const x = compute(1, 2);' })).toHaveLength(0);
   });
 
-  it('synthesizes a signature from a Stage-3 classified (level, message)', () => {
-    // A phrase-only line the idiom regex cannot parse; the classifier supplied
-    // the level + static message.
+  it('synthesizes a signature from a classifier-supplied (level, message)', () => {
+    // A line the idiom regex cannot parse (no severity token); the classifier
+    // supplied the level + static message.
     const signatures = extractLogSignatures({
-      content: 'return nil, fmt.Errorf("failed to charge card: %+v", err)',
+      content: 'panic(fmt.Sprintf("failed to charge card: %+v", err))',
       location: 'main.go:355',
       classified: { level: 'error', message: 'failed to charge card' },
     });

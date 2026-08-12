@@ -8,15 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import {
-  anchoredPhrasePatterns,
-  isExcludedLoggingPath,
-  LOGGER_IDIOM_PATTERNS,
-  LOGGER_PHRASE_LEXICON,
-  SENTENCE_LITERAL_PATTERNS,
-  SOURCERER_LINES_INDEX,
-} from './constants';
-import type { LoggingCandidate, LoggingCandidateVia } from './types';
+import { isExcludedLoggingPath, LOGGER_IDIOM_PATTERNS, SOURCERER_LINES_INDEX } from './constants';
+import type { LoggingCandidate } from './types';
 
 /** One matched source line returned by {@link codeGrep}. */
 export interface GrepLine {
@@ -210,13 +203,16 @@ export interface DiscoverLoggingSitesOptions {
 
 /**
  * Deterministically discovers candidate logging call sites for one service by
- * grepping the indexed source with the union of (a) high-confidence logger
- * idioms and (b) the string-anchored phrase lexicon (Stage-3 recall lift). Each
- * candidate carries a +/-1 line window (so multi-line logger calls keep their
- * `logger.x(` context) and a `via` tag (`idiom` = high confidence, `phrase` =
- * needs the classifier to judge). Deduplicated by `path:line`; idiom wins the tag
- * when both match. The classifier ({@link classifyLoggingSites}) then decides
- * keep/drop + level, and kept candidates become {@link LoggingChunk}s.
+ * grepping the indexed source with the logger idiom patterns. Each candidate
+ * carries a +/-1 line window, so multi-line logger calls keep their `logger.x(`
+ * context. Deduplicated by `path:line`. The classifier
+ * ({@link classifyLoggingSites}) then decides keep/drop + level, and kept
+ * candidates become {@link LoggingChunk}s.
+ *
+ * Idioms are the whole recall surface on purpose: a string-literal phrase
+ * lexicon was measured to surface mostly non-log constructs (error values,
+ * throws, span events) whose text never reaches the logs, so it was removed
+ * rather than left for the classifier to filter.
  */
 export async function discoverLoggingSites({
   esClient,
@@ -232,13 +228,11 @@ export async function discoverLoggingSites({
   const root = serviceRoot.replace(/\/+$/, '');
   const filePath = root ? `${root}/**` : '**';
 
-  // Grep the union; record provenance. Idiom patterns are high-confidence log
-  // sites; phrase patterns are recall candidates the classifier will judge.
-  const via = new Map<string, LoggingCandidateVia>();
+  const locations = new Set<string>();
   let patternErrors = 0;
   let excludedPaths = 0;
 
-  const runGrep = async (regex: string, tag: LoggingCandidateVia) => {
+  const runGrep = async (regex: string) => {
     try {
       const lines = await codeGrep({
         esClient,
@@ -264,11 +258,7 @@ export async function discoverLoggingSites({
           excludedPaths += 1;
           continue;
         }
-        const location = `${path}:${lineNumber}`;
-        // idiom wins the tag; don't downgrade an idiom hit to phrase.
-        if (tag === 'idiom' || !via.has(location)) {
-          via.set(location, tag);
-        }
+        locations.add(`${path}:${lineNumber}`);
       }
     } catch (error) {
       patternErrors += 1;
@@ -281,20 +271,12 @@ export async function discoverLoggingSites({
   };
 
   for (const regex of LOGGER_IDIOM_PATTERNS) {
-    await runGrep(regex, 'idiom');
-  }
-  for (const phrase of LOGGER_PHRASE_LEXICON) {
-    for (const regex of anchoredPhrasePatterns(phrase)) {
-      await runGrep(regex, 'phrase');
-    }
-  }
-  for (const regex of SENTENCE_LITERAL_PATTERNS) {
-    await runGrep(regex, 'phrase');
+    await runGrep(regex);
   }
 
   // Fetch +/-1 windows for all hits (batched per file).
   const hitsByFile = new Map<string, Set<number>>();
-  for (const location of via.keys()) {
+  for (const location of locations) {
     const idx = location.lastIndexOf(':');
     const path = location.slice(0, idx);
     const lineNumber = Number(location.slice(idx + 1));
@@ -312,7 +294,7 @@ export async function discoverLoggingSites({
   });
 
   const candidates: LoggingCandidate[] = [];
-  for (const [location, tag] of via) {
+  for (const location of locations) {
     const idx = location.lastIndexOf(':');
     const path = location.slice(0, idx);
     const lineNumber = Number(location.slice(idx + 1));
@@ -324,15 +306,12 @@ export async function discoverLoggingSites({
     candidates.push({
       location,
       content: (window || '').slice(0, 400),
-      via: tag,
       language,
     });
   }
 
-  const idiomCount = candidates.filter((c) => c.via === 'idiom').length;
   logger.debug(
-    `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}" ` +
-      `(idiom=${idiomCount} phrase=${candidates.length - idiomCount})` +
+    `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}"` +
       (excludedPaths > 0 ? ` (${excludedPaths} test/build path hit(s) excluded)` : '') +
       (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
   );

@@ -13,7 +13,6 @@ import type { LoggingCandidate } from './types';
 const candidate = (over: Partial<LoggingCandidate> = {}): LoggingCandidate => ({
   location: 'src/ad/Main.java:42',
   content: 'logger.info("hi");',
-  via: 'idiom',
   language: 'Java',
   ...over,
 });
@@ -45,8 +44,8 @@ describe('classifyLoggingSites', () => {
 
   it('keeps candidates the classifier marks keep and drops the rest', async () => {
     const candidates = [
-      candidate({ location: 'a:1', content: 'logger.error("boom")', via: 'idiom' }),
-      candidate({ location: 'b:2', content: 'EventName = "x"', via: 'phrase' }),
+      candidate({ location: 'a:1', content: 'logger.error("boom")' }),
+      candidate({ location: 'b:2', content: 'log.Printf("%s", eventNameConst)' }),
     ];
     const inferenceClient = mockInference([
       { id: 0, keep: true, level: 'error', message: 'boom' },
@@ -62,7 +61,7 @@ describe('classifyLoggingSites', () => {
 
     expect(chunks).toHaveLength(1);
     expect(chunks[0].location).toBe('a:1');
-    // Option 2: valid level+message attaches a classified signature source.
+    // A valid level+message attaches a classified signature source.
     expect(chunks[0].classified).toEqual({ level: 'error', message: 'boom' });
   });
 
@@ -72,7 +71,6 @@ describe('classifyLoggingSites', () => {
         location: 'o11y/Makefile:62',
         language: 'Make',
         content: 'echo "Error: No resources specified. USAGE: make taint ..."',
-        via: 'phrase',
       }),
     ];
     const output = jest.fn(async (_request: { input: string; system: string }) => ({
@@ -96,16 +94,15 @@ describe('classifyLoggingSites', () => {
     expect(system).toContain('BUILD / TOOLING / CI output');
   });
 
-  it('attaches classified level+message for phrase-only lines (the recall lift)', async () => {
+  it('attaches classified level+message for lines the regex cannot parse', async () => {
     const candidates = [
       candidate({
         location: 'main.go:355',
-        content: 'fmt.Errorf("failed to charge card: %+v", err)',
-        via: 'phrase',
+        content: 'panic("failed to charge card")',
       }),
     ];
     const inferenceClient = mockInference([
-      { id: 0, keep: true, level: 'error', message: 'failed to charge card' },
+      { id: 0, keep: true, level: 'fatal', message: 'failed to charge card' },
     ]);
 
     const [chunk] = await classifyLoggingSites({
@@ -115,11 +112,28 @@ describe('classifyLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(chunk.classified).toEqual({ level: 'error', message: 'failed to charge card' });
+    expect(chunk.classified).toEqual({ level: 'fatal', message: 'failed to charge card' });
+  });
+
+  it('instructs the classifier to drop value-returning error constructors', async () => {
+    const output = jest.fn(async (_request: { system: string }) => ({
+      id: 'classify_logging_sites',
+      output: { results: [{ id: 0, keep: false }] },
+      content: '',
+    }));
+
+    await classifyLoggingSites({
+      inferenceClient: { output } as unknown as InferenceClient,
+      connectorId: 'c',
+      candidates: [candidate({ content: 'return fmt.Errorf("failed to charge card: %+v", err)' })],
+      logger: loggerMock.create(),
+    });
+
+    expect(output.mock.calls[0][0].system).toContain('VALUE-RETURNING error constructors');
   });
 
   it('keeps a kept line without classified when level/message are missing or invalid', async () => {
-    const candidates = [candidate({ location: 'a:1', via: 'idiom' })];
+    const candidates = [candidate({ location: 'a:1' })];
     const inferenceClient = mockInference([{ id: 0, keep: true, level: 'bogus', message: '' }]);
 
     const [chunk] = await classifyLoggingSites({
@@ -160,10 +174,7 @@ describe('classifyLoggingSites', () => {
 
   it('degrades only a failed batch and classifies the other batches', async () => {
     const candidates = Array.from({ length: 450 }, (_, index) =>
-      candidate({
-        location: `src/main.ts:${index}`,
-        via: index === 201 ? 'idiom' : index === 202 ? 'phrase' : 'idiom',
-      })
+      candidate({ location: `src/main.ts:${index}` })
     );
     let call = 0;
     const output = jest.fn(async (request: { input: string }) => {
@@ -187,16 +198,14 @@ describe('classifyLoggingSites', () => {
     });
 
     expect(output).toHaveBeenCalledTimes(3);
+    // The failed batch's candidates survive unjudged (they matched a logger idiom).
     expect(chunks.some(({ location }) => location === 'src/main.ts:201')).toBe(true);
-    expect(chunks.some(({ location }) => location === 'src/main.ts:202')).toBe(false);
+    expect(chunks.some(({ location }) => location === 'src/main.ts:202')).toBe(true);
     expect(chunks.some(({ location }) => location === 'src/main.ts:449')).toBe(true);
   });
 
-  it('falls back to idiom-only when inference throws (drops phrase candidates)', async () => {
-    const candidates = [
-      candidate({ location: 'a:1', via: 'idiom' }),
-      candidate({ location: 'b:2', via: 'phrase' }),
-    ];
+  it('keeps every candidate unjudged when inference throws', async () => {
+    const candidates = [candidate({ location: 'a:1' }), candidate({ location: 'b:2' })];
     const inferenceClient = mockInference(new Error('connector down'));
 
     const chunks = await classifyLoggingSites({
@@ -206,15 +215,12 @@ describe('classifyLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(chunks.map((c) => c.location)).toEqual(['a:1']);
+    expect(chunks.map((c) => c.location)).toEqual(['a:1', 'b:2']);
     expect(chunks[0].classified).toBeUndefined();
   });
 
-  it('keeps unjudged idiom candidates but drops unjudged phrase candidates when ids are missing', async () => {
-    const candidates = [
-      candidate({ location: 'a:1', via: 'idiom' }),
-      candidate({ location: 'b:2', via: 'phrase' }),
-    ];
+  it('keeps unjudged candidates when the model omits their ids', async () => {
+    const candidates = [candidate({ location: 'a:1' }), candidate({ location: 'b:2' })];
     // Model returns an empty result set (no ids).
     const inferenceClient = mockInference([]);
 
@@ -225,6 +231,6 @@ describe('classifyLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(chunks.map((c) => c.location)).toEqual(['a:1']);
+    expect(chunks.map((c) => c.location)).toEqual(['a:1', 'b:2']);
   });
 });

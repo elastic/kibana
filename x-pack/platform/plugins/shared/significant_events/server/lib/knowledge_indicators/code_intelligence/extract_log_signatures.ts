@@ -67,10 +67,10 @@ export function staticPrefixOf(message: string): string {
  * Extracts log signatures (level + message + static prefix) from a logging
  * chunk's source. Deterministic regex over the code — no LLM.
  *
- * When the chunk carries a Stage-3 `classified` `(level, message)` (a phrase-only
- * match the idiom regex cannot parse — e.g. `fmt.Errorf("...")`), that is used to
- * synthesise the signature directly, so the recall lift still produces a query.
- * Otherwise the regex parses `(level, message)` from `content` as before.
+ * When the chunk carries a classifier-supplied `(level, message)` (a line the
+ * idiom regex cannot parse — e.g. `panic("...")`, which carries no severity
+ * token), that is used to synthesise the signature directly. Otherwise the regex
+ * parses `(level, message)` from `content` as before.
  * De-duplicates by `(level, message)` within a chunk.
  */
 export function extractLogSignatures(chunk: LoggingChunk): LogSignature[] {

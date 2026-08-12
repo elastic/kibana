@@ -106,7 +106,6 @@ export type {
   LanguageCount,
   LoggingChunk,
   LoggingCandidate,
-  LoggingCandidateVia,
   LogSignature,
   IacSignal,
   IacKind,

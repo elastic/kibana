@@ -102,17 +102,14 @@ export interface LoggingChunk {
   /** Best-effort repository-relative file and line location. */
   location?: string;
   /**
-   * Stage-3 pre-classified signature. When the deterministic regex in
+   * Pre-classified signature. When the deterministic regex in
    * {@link extractLogSignatures} cannot parse a `(level, message)` from `content`
-   * (a phrase-only match with no logger idiom, e.g. `fmt.Errorf("...")`), the
-   * classifier supplies the level + static message so the recall still yields a
-   * signature. Idiom chunks leave this unset and are parsed by regex as before.
+   * (e.g. a `panic("...")` with no severity token), the classifier supplies the
+   * level + static message so the candidate still yields a signature. Chunks the
+   * regex can parse leave this unset.
    */
   classified?: { level: string; message: string };
 }
-
-/** How a candidate logging line was surfaced by grep. */
-export type LoggingCandidateVia = 'idiom' | 'phrase';
 
 /**
  * A candidate logging line found by deterministic grep, before the classifier
@@ -123,8 +120,6 @@ export interface LoggingCandidate {
   location: string;
   /** The +/-1 line source window. */
   content: string;
-  /** Whether a logger idiom matched (high confidence) or only a phrase (needs judging). */
-  via: LoggingCandidateVia;
   language?: string;
 }
 

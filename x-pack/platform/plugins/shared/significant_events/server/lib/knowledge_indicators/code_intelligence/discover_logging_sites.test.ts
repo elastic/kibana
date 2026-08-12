@@ -7,13 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  anchoredPhrasePatterns,
-  isExcludedLoggingPath,
-  LOGGER_IDIOM_PATTERNS,
-  LOGGER_PHRASE_LEXICON,
-  SENTENCE_LITERAL_PATTERNS,
-} from './constants';
+import { isExcludedLoggingPath, LOGGER_IDIOM_PATTERNS } from './constants';
 import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
 
 const COLUMNS = [
@@ -30,12 +24,8 @@ const WINDOW_COLUMNS = [
   { name: 'line.content', type: 'keyword' },
 ];
 
-// grep calls issued when there are zero hits (no window fetch): one per idiom,
-// three quote variants per phrase, and one per sentence-literal quote style.
-const GREP_CALLS =
-  LOGGER_IDIOM_PATTERNS.length +
-  LOGGER_PHRASE_LEXICON.length * 3 +
-  SENTENCE_LITERAL_PATTERNS.length;
+// grep calls issued when there are zero hits (no window fetch): one per idiom.
+const GREP_CALLS = LOGGER_IDIOM_PATTERNS.length;
 
 // The window fetch is the only query that filters on an exact file.path (==) and
 // a line.number range; grep patterns use RLIKE. Distinguish by the range clause.
@@ -51,9 +41,11 @@ const row = (path: string, line: number, content: string) => [
 ];
 
 describe('logging-site patterns', () => {
-  it('matches the added logger idioms without matching unrelated properties', () => {
-    const [uppercaseLogger, microsoftLogger, javaStreams] = LOGGER_IDIOM_PATTERNS.slice(-3).map(
-      (pattern) => new RegExp(`^${pattern}$`)
+  const matcher = (pattern: string) => new RegExp(`^${pattern}$`);
+
+  it('matches the logger idioms without matching unrelated properties', () => {
+    const [uppercaseLogger, microsoftLogger, javaStreams] = LOGGER_IDIOM_PATTERNS.slice(-7, -4).map(
+      matcher
     );
     expect(uppercaseLogger.test('LOG.error("boom");')).toBe(true);
     expect(uppercaseLogger.test('catalog.info = parse(x);')).toBe(false);
@@ -62,22 +54,22 @@ describe('logging-site patterns', () => {
     expect(javaStreams.test('System.out.println("hi");')).toBe(true);
   });
 
-  it('anchors phrases inside all 3 quote styles', () => {
-    const patterns = anchoredPhrasePatterns('[fF]ailed to');
-    expect(patterns).toHaveLength(3);
-    const backtick = new RegExp(`^${patterns[2]}$`);
-    expect(backtick.test('const m = `Failed to load ${x}`;')).toBe(true);
-    expect(backtick.test('const m = "unrelated";')).toBe(false);
+  it('matches process-aborting emits that print their own message', () => {
+    const [goPanic, rustPanic, rustEprintln, rustExpect] =
+      LOGGER_IDIOM_PATTERNS.slice(-4).map(matcher);
+    expect(goPanic.test('panic("unable to start server")')).toBe(true);
+    expect(rustPanic.test('panic!("error when parsing uuid");')).toBe(true);
+    expect(rustEprintln.test('eprintln!("failed to bind: {}", err);')).toBe(true);
+    expect(rustExpect.test('let cfg = load().expect("config is required");')).toBe(true);
+    expect(rustExpect.test('expect(result).toBe(true);')).toBe(false);
   });
 
-  it('matches sentence-shaped double-quoted literals only', () => {
-    const doubleQuoted = new RegExp(`^${SENTENCE_LITERAL_PATTERNS[0]}$`);
-    expect(doubleQuoted.test('return errors.New("failed connecting to database backend")')).toBe(
-      true
-    );
-    expect(doubleQuoted.test('log("order shipped to customer")')).toBe(true);
-    expect(doubleQuoted.test('x := "singleword"')).toBe(false);
-    expect(doubleQuoted.test('key = "a.b.c_d"')).toBe(false);
+  it('does not match value-returning error constructors', () => {
+    const matchesAnyIdiom = (line: string): boolean =>
+      LOGGER_IDIOM_PATTERNS.some((pattern) => matcher(pattern).test(line));
+    expect(matchesAnyIdiom('return fmt.Errorf("failed to charge card: %+v", err)')).toBe(false);
+    expect(matchesAnyIdiom('return errors.New("failed connecting to database")')).toBe(false);
+    expect(matchesAnyIdiom('throw new RpcException("Can\'t access cart storage.")')).toBe(false);
   });
 });
 
@@ -206,7 +198,7 @@ describe('codeGrep', () => {
 });
 
 describe('discoverLoggingSites', () => {
-  it('greps every idiom + anchored-phrase pattern, scoped to <serviceRoot>/**', async () => {
+  it('greps every idiom pattern, scoped to <serviceRoot>/**', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
 
@@ -225,15 +217,13 @@ describe('discoverLoggingSites', () => {
       expect(params).toContainEqual({ file_path: 'src/ad/**' });
       expect(params).toContainEqual({ git_commit: 'abc123' });
     }
-    // an anchored double-quote phrase pattern is present.
-    const [dq] = anchoredPhrasePatterns('[sS]tarted');
     const regexes = esClient.esql.query.mock.calls.flatMap(([{ params }]) =>
       (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
     );
-    expect(regexes).toContain(dq);
+    expect(regexes).toEqual([...LOGGER_IDIOM_PATTERNS]);
   });
 
-  it('returns windowed candidates tagged by provenance, deduped by path:line', async () => {
+  it('returns windowed candidates, deduped by path:line', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockImplementation((async (req: { query: string }) => {
       if (isWindowQuery(req.query)) {
@@ -263,7 +253,6 @@ describe('discoverLoggingSites', () => {
       {
         location: 'src/ad/Main.java:42',
         content: 'logger.info(\n"hi");\nnext();',
-        via: 'idiom',
         language: 'Java',
       },
     ]);
@@ -298,38 +287,6 @@ describe('discoverLoggingSites', () => {
 
     // Only the production-source hit survives; test/shell/Makefile are excluded.
     expect(candidates.map((c) => c.location)).toEqual(['src/ad/Main.java:42']);
-  });
-
-  it('tags sentence-literal-only hits as phrase candidates', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockImplementation((async (req: {
-      query: string;
-      params?: Array<Record<string, unknown>>;
-    }) => {
-      if (isWindowQuery(req.query)) {
-        return { columns: WINDOW_COLUMNS, values: [[7, 'log("order shipped to customer")']] };
-      }
-      const regex = req.params?.find((param) => 'regex' in param)?.regex;
-      if (regex === SENTENCE_LITERAL_PATTERNS[0]) {
-        return {
-          columns: COLUMNS,
-          values: [row('src/orders/main.go', 7, 'log("order shipped to customer")')],
-        };
-      }
-      return { columns: COLUMNS, values: [] };
-    }) as unknown as typeof esClient.esql.query);
-
-    const candidates = await discoverLoggingSites({
-      esClient,
-      repository: 'open-telemetry/opentelemetry-demo',
-      gitSha: 'abc123',
-      serviceRoot: 'src/orders',
-      logger: loggerMock.create(),
-    });
-
-    expect(candidates).toEqual([
-      expect.objectContaining({ location: 'src/orders/main.go:7', via: 'phrase' }),
-    ]);
   });
 
   it('warns at the per-pattern limit but not below it', async () => {
@@ -399,7 +356,6 @@ describe('discoverLoggingSites', () => {
       {
         location: 'src/ad/Main.java:7',
         content: 'console.error("boom");',
-        via: 'idiom',
         language: undefined,
       },
     ]);

@@ -14,13 +14,12 @@ import {
 import type { LoggingCandidate, LoggingChunk } from './types';
 
 /**
- * Stage 3: judge the deterministically-grepped candidate logging lines with a
- * single batched LLM call. Grep is exhaustive but imprecise (string-anchored
- * phrases match attribute keys, config, i18n as well as real logs) and cannot
- * infer a severity level for a bare `fmt.Errorf("...")`. The classifier does
- * both — keep/drop + level + the static message — in sequential batches of at
- * most 200 candidates. The task is a per-line judgment, so batching is
- * order-independent.
+ * Judge the deterministically-grepped candidate logging lines with batched LLM
+ * calls. The idiom grep matches log-shaped lines but cannot tell a real emission
+ * from a test assertion, a build script, or a commented-out call, and cannot
+ * infer a severity level for a bare `panic("...")`. The classifier does both —
+ * keep/drop + level + the static message — in sequential batches of at most 200
+ * candidates. The task is a per-line judgment, so batching is order-independent.
  *
  * Bounded, tool-less, temperature 0: the cheapest inference tier handles it.
  * The connector is the KI-extraction inference feature's mapped connector, so
@@ -30,13 +29,14 @@ import type { LoggingCandidate, LoggingChunk } from './types';
 const CLASSIFY_SYSTEM = `You classify source-code excerpts as production log statements emitted by a running service. Each candidate is given as: id, the source FILE PATH it came from, the LANGUAGE, then a small excerpt window (the matched line and +/-1 neighbour lines, joined by newlines).
 
 For each id decide:
-- keep: true ONLY if the excerpt emits a runtime log/diagnostic MESSAGE that a RUNNING SERVICE writes to its logs. This includes logger calls (logger.info/error/warn/...), application print/eprintln/println/Console.WriteLine to standard streams from service code, error-wrapping with a human message (fmt.Errorf("..."), .expect("..."), panic("...")), and structured/source-generated logging (e.g. [LoggerMessage(... Message="...")]).
+- keep: true ONLY if the excerpt emits a runtime log/diagnostic MESSAGE that a RUNNING SERVICE writes to its logs. This includes logger calls (logger.info/error/warn/...), application print/eprintln/println to standard streams from service code, process-aborting emits that print their own message (panic("..."), .expect("...")), and structured/source-generated logging (e.g. [LoggerMessage(... Message="...")]).
+- keep: false for VALUE-RETURNING error constructors such as fmt.Errorf("..."), errors.New("..."), or throw new SomeError("..."). The returned error is recomposed by whatever logs it upstream, so this literal does not appear verbatim in the logs.
 - keep: false for metric or span attribute names/keys, config values, i18n/UI strings, code comments, test assertions, enum/const string values, and raw JSON payloads.
 - keep: false for BUILD / TOOLING / CI output. If the FILE PATH is a build or automation file — Makefile or *.mk, shell scripts (*.sh, *.bash), Dockerfile, CI config (.github/, .gitlab-ci, .buildkite/, *.yml pipelines), or package-manager scripts — the excerpt is developer/CLI output, NOT a running-service log. Set keep=false even when it contains words like "Error:" or prints to stdout (e.g. a shell \`echo "Error: ..."\` in a Makefile recipe).
 - keep: false for CLI USAGE / HELP text: strings describing how to invoke a command ("USAGE:", "Usage:", option/argument descriptions, --help output), even if prefixed with "Error:".
 - keep: false for USAGE TEMPLATES with placeholder enumerations (e.g. "resource1 resource2 ..."): the literal text never appears verbatim in real logs, so it cannot match.
 - level: if keep, exactly one of fatal|error|warn|info|debug. Infer from the message: failures/exceptions/panic => error (fatal if it aborts the process); could-not/deprecated/retry => warn; started/listening/received/connected/processing => info.
-- message: if keep, the STATIC human-readable text of the log message with interpolation/format placeholders removed (e.g. fmt.Errorf("failed to charge card: %+v", err) => "failed to charge card"). Empty string when keep is false.
+- message: if keep, the STATIC human-readable text of the log message with interpolation/format placeholders removed (e.g. panic(fmt.Sprintf("failed to charge card: %+v", err)) => "failed to charge card"). Empty string when keep is false.
 
 Return one result per id. Be strict: when unsure whether an excerpt is a real running-service log emission, set keep=false.`;
 
@@ -80,9 +80,9 @@ export interface ClassifyLoggingSitesOptions {
 
 /**
  * Classifies candidate logging lines and returns kept ones as {@link LoggingChunk}s.
- * Idiom-sourced candidates are kept even if the model is unavailable (they are
- * high-confidence log sites and the regex extractor can parse them); only
- * phrase-sourced candidates strictly depend on the classifier's judgement.
+ * Candidates are kept when the model is unavailable or omits an id: they matched
+ * a logger idiom, so they are high-confidence log sites the regex extractor can
+ * parse on its own.
  */
 export async function classifyLoggingSites({
   inferenceClient,
@@ -139,11 +139,11 @@ export async function classifyLoggingSites({
       }
     } catch (error) {
       // Degrade only this batch: the missing-decision fallback below keeps its
-      // idiom candidates and drops its phrase candidates.
+      // candidates unjudged rather than dropping them.
       logger.warn(
         `classify_logging_sites: inference failed for batch ${
           Math.floor(start / CLASSIFY_BATCH_SIZE) + 1
-        }/${batchCount}, falling back to idiom-only for this batch (${
+        }/${batchCount}, keeping its idiom candidates unjudged (${
           error instanceof Error ? error.message : String(error)
         })`
       );
@@ -154,16 +154,14 @@ export async function classifyLoggingSites({
   let keptWithClassification = 0;
   for (const [id, candidate] of byId) {
     const decision = decisions.get(id);
-    // If the model omitted an id, keep idiom candidates (safe default) and drop
-    // unjudged phrase candidates.
+    // If the model omitted an id, keep the candidate: every candidate matched a
+    // logger idiom, so the regex extractor can still parse a signature from it.
     if (!decision) {
-      if (candidate.via === 'idiom') {
-        chunks.push({
-          content: candidate.content,
-          language: candidate.language,
-          location: candidate.location,
-        });
-      }
+      chunks.push({
+        content: candidate.content,
+        language: candidate.language,
+        location: candidate.location,
+      });
       continue;
     }
     if (!decision.keep) {
@@ -175,10 +173,10 @@ export async function classifyLoggingSites({
       language: candidate.language,
       location: candidate.location,
     };
-    // Option 2: when the classifier supplied a usable level + message, attach it
-    // so a phrase-only line with no logger idiom still yields a signature. Idiom
-    // lines can still be parsed by the regex extractor, but a valid classification
-    // is preferred (it strips interpolation and normalises the level).
+    // When the classifier supplied a usable level + message, attach it so a line
+    // the regex cannot parse (e.g. `panic("...")`) still yields a signature. A
+    // valid classification is preferred even for parseable lines: it strips
+    // interpolation and normalises the level.
     const level = decision.level?.trim().toLowerCase();
     const message = decision.message?.trim();
     if (level && VALID_LEVELS.has(level) && message) {
