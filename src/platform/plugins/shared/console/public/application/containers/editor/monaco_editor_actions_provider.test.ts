@@ -62,6 +62,58 @@ import { _test as kbTest } from '../../../lib/kb';
 describe('Editor actions provider', () => {
   let editorActionsProvider: MonacoEditorActionsProvider;
   let editor: jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
+
+  // A model mock backed by real line content, implementing the offset/range
+  // methods with faithful semantics so code under test can navigate the text.
+  const createModel = (lines: string[]) => {
+    const getPositionAt = jest.fn((offset: number) => {
+      let remainingOffset = offset;
+      for (const [index, line] of lines.entries()) {
+        if (remainingOffset <= line.length) {
+          return { lineNumber: index + 1, column: remainingOffset + 1 };
+        }
+        remainingOffset -= line.length + 1;
+      }
+      return { lineNumber: lines.length, column: lines.at(-1)?.length ?? 1 };
+    });
+    const getOffsetAt = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
+      const precedingLinesLength = lines
+        .slice(0, lineNumber - 1)
+        .reduce((length, line) => length + line.length + 1, 0);
+      return precedingLinesLength + column - 1;
+    });
+    const getValueInRange = jest.fn(
+      ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
+        if (startLineNumber === endLineNumber) {
+          return (lines[startLineNumber - 1] ?? '').slice(startColumn - 1, endColumn - 1);
+        }
+
+        const selectedLines = lines.slice(startLineNumber - 1, endLineNumber);
+        selectedLines[0] = selectedLines[0].slice(startColumn - 1);
+        selectedLines[selectedLines.length - 1] = selectedLines[selectedLines.length - 1].slice(
+          0,
+          endColumn - 1
+        );
+        return selectedLines.join('\n');
+      }
+    );
+    const getWordUntilPosition = jest.fn(({ column }: monaco.IPosition) => ({
+      word: '',
+      startColumn: column,
+      endColumn: column,
+    }));
+    return {
+      getVersionId: jest.fn(() => 1),
+      getLineCount: () => lines.length,
+      getLineContent: (lineNumber: number) => lines[lineNumber - 1] ?? '',
+      getLineMaxColumn: (lineNumber: number) => (lines[lineNumber - 1] ?? '').length + 1,
+      getOffsetAt,
+      getPositionAt,
+      getValueInRange,
+      getWordUntilPosition,
+    } as unknown as jest.Mocked<monaco.editor.ITextModel>;
+  };
+
   beforeEach(() => {
     editor = {
       getModel: jest.fn(),
@@ -125,10 +177,7 @@ describe('Editor actions provider', () => {
 
     it('SHOULD trigger autocomplete after the debounce period', async () => {
       mockGetParsedRequests.mockResolvedValue([]);
-      editor.getModel.mockReturnValue({
-        getLineContent: () => '{',
-        getValueInRange: () => '{',
-      } as unknown as monaco.editor.ITextModel);
+      editor.getModel.mockReturnValue(createModel(['{']));
       editor.getPosition.mockReturnValue({ lineNumber: 1, column: 2 } as monaco.Position);
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
@@ -144,10 +193,7 @@ describe('Editor actions provider', () => {
 
     it('SHOULD ignore other keys', async () => {
       mockGetParsedRequests.mockResolvedValue([]);
-      editor.getModel.mockReturnValue({
-        getLineContent: () => ' "a',
-        getValueInRange: () => ' "a',
-      } as unknown as monaco.editor.ITextModel);
+      editor.getModel.mockReturnValue(createModel([' "a']));
       editor.getPosition.mockReturnValue({ lineNumber: 1, column: 4 } as monaco.Position);
 
       const onKeyUp = editor.onKeyUp.mock.calls[0][0];
@@ -509,54 +555,6 @@ describe('Editor actions provider', () => {
      * `isPositionInsideTripleQuotesAndQuery` reported `insideTripleQuotes: false` and
      * suggestions were triggered inside a non-query string.
      */
-    const createModel = (lines: string[]) => {
-      const getPositionAt = jest.fn((offset: number) => {
-        let remainingOffset = offset;
-        for (const [index, line] of lines.entries()) {
-          if (remainingOffset <= line.length) {
-            return { lineNumber: index + 1, column: remainingOffset + 1 };
-          }
-          remainingOffset -= line.length + 1;
-        }
-        return { lineNumber: lines.length, column: lines.at(-1)?.length ?? 1 };
-      });
-      const getOffsetAt = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
-        const precedingLinesLength = lines
-          .slice(0, lineNumber - 1)
-          .reduce((length, line) => length + line.length + 1, 0);
-        return precedingLinesLength + column - 1;
-      });
-      const getValueInRange = jest.fn(
-        ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
-          if (startLineNumber === endLineNumber) {
-            return (lines[startLineNumber - 1] ?? '').slice(startColumn - 1, endColumn - 1);
-          }
-
-          const selectedLines = lines.slice(startLineNumber - 1, endLineNumber);
-          selectedLines[0] = selectedLines[0].slice(startColumn - 1);
-          selectedLines[selectedLines.length - 1] = selectedLines[selectedLines.length - 1].slice(
-            0,
-            endColumn - 1
-          );
-          return selectedLines.join('\n');
-        }
-      );
-      const getWordUntilPosition = jest.fn(({ column }: monaco.IPosition) => ({
-        word: '',
-        startColumn: column,
-        endColumn: column,
-      }));
-      return {
-        getVersionId: jest.fn(() => 1),
-        getLineCount: () => lines.length,
-        getLineContent: (lineNumber: number) => lines[lineNumber - 1] ?? '',
-        getOffsetAt,
-        getPositionAt,
-        getValueInRange,
-        getWordUntilPosition,
-      } as unknown as jest.Mocked<monaco.editor.ITextModel>;
-    };
-
     const triggerSuggestions = async () => {
       (
         editorActionsProvider as unknown as {
