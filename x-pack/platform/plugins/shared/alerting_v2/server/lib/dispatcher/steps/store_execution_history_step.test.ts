@@ -507,7 +507,7 @@ describe('StoreExecutionHistoryStep', () => {
       createDispatcherPipelineState({
         input: createDispatcherPipelineInput({
           startedAt: new Date('2027-06-01T12:34:56.789Z'),
-          previousStartedAt: new Date('2027-06-01T12:00:00.000Z'),
+          eventWatermark: new Date('2027-06-01T12:00:00.000Z'),
         }),
         dispatchable: [episode],
         rules: new Map<RuleId, Rule>([[rule.id, rule]]),

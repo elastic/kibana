@@ -316,6 +316,12 @@ export const ALERTING_LOG_CODES = {
    * remaining policies still dispatch.
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
+  /**
+   * The dispatcher has no persisted event watermark (cold start or wiped task
+   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
+   * Rule events older than that will not be dispatched.
+   */
+  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

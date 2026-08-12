@@ -135,7 +135,7 @@ function buildDispatcherService(deps: {
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
-  return new DispatcherService(pipeline);
+  return new DispatcherService(pipeline, loggerService);
 }
 
 describe('DispatcherService', () => {
@@ -243,15 +243,15 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      const previousStartedAt = new Date('2026-01-22T07:30:00.000Z');
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
       const result = await dispatcherService.run({
-        previousStartedAt,
+        eventWatermark,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
 
-      const expectedLookback = moment(previousStartedAt)
+      const expectedLookback = moment(eventWatermark)
         .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
@@ -367,7 +367,7 @@ describe('DispatcherService', () => {
       } as BulkResponse);
 
       const result = await dispatcherService.run({
-        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -407,7 +407,7 @@ describe('DispatcherService', () => {
       queryEsClient.esql.query.mockResolvedValue(createDispatchableAlertEventsResponse([]));
 
       const result = await dispatcherService.run({
-        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -611,7 +611,7 @@ describe('DispatcherService', () => {
       } as BulkResponse);
 
       const result = await dispatcherService.run({
-        previousStartedAt: new Date('2026-01-25T00:00:00.000Z'),
+        eventWatermark: new Date('2026-01-25T00:00:00.000Z'),
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -769,7 +769,7 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+      await dispatcherService.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
@@ -854,7 +854,7 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+      await dispatcherService.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
@@ -879,8 +879,9 @@ describe('DispatcherService', () => {
           finalState: {
             input: {
               startedAt: new Date(),
-              previousStartedAt: new Date(),
+              eventWatermark: new Date(),
               executionUuid: 'unused-in-result',
+              signal: new AbortController().signal,
             },
           },
         }),
@@ -888,10 +889,11 @@ describe('DispatcherService', () => {
     }
 
     it('passes a UUID v4 to the pipeline on each run', async () => {
+      const { loggerService } = createLoggerService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline);
+      const service = new DispatcherService(mockPipeline, loggerService);
 
-      await service.run({ previousStartedAt: new Date() });
+      await service.run({ eventWatermark: new Date() });
 
       expect(mockPipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -903,15 +905,42 @@ describe('DispatcherService', () => {
     });
 
     it('generates a fresh UUID on every run', async () => {
+      const { loggerService } = createLoggerService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline);
+      const service = new DispatcherService(mockPipeline, loggerService);
 
-      await service.run({ previousStartedAt: new Date() });
-      await service.run({ previousStartedAt: new Date() });
+      await service.run({ eventWatermark: new Date() });
+      await service.run({ eventWatermark: new Date() });
 
       const [firstCall] = mockPipeline.execute.mock.calls[0];
       const [secondCall] = mockPipeline.execute.mock.calls[1];
       expect(firstCall.executionUuid).not.toBe(secondCall.executionUuid);
+    });
+
+    it('logs DISPATCHER_COLD_START when no watermark is provided', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      await service.run({});
+
+      // LoggerService.warn forwards (message, { labels: { code } }) to the raw logger
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_COLD_START' }),
+        })
+      );
+    });
+
+    it('does not log cold start when a watermark is provided', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      await service.run({ eventWatermark: new Date() });
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

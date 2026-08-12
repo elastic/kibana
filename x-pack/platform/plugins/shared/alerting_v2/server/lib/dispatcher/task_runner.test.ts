@@ -25,7 +25,7 @@ describe('DispatcherTaskRunner', () => {
     id: 'task-1',
     params: {},
     state: {
-      previousStartedAt: '2026-01-22T07:30:00.000Z',
+      eventWatermark: '2026-01-22T07:30:00.000Z',
     },
     scheduledAt: new Date('2026-01-22T07:30:00.000Z'),
     startedAt: new Date('2026-01-22T07:30:00.000Z'),
@@ -45,6 +45,7 @@ describe('DispatcherTaskRunner', () => {
     it('maps task state to dispatcher params', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
         pipelineResult: createMockPipelineResult(),
       });
 
@@ -52,12 +53,13 @@ describe('DispatcherTaskRunner', () => {
 
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.signal).toBe(signal);
-      expect(params.previousStartedAt?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.eventWatermark?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
     });
 
-    it('returns updated previousStartedAt in state', async () => {
+    it('returns updated eventWatermark in state', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
         pipelineResult: createMockPipelineResult(),
       });
 
@@ -65,9 +67,31 @@ describe('DispatcherTaskRunner', () => {
 
       expect(result).toEqual({
         state: {
-          previousStartedAt: '2026-01-22T07:45:00.000Z',
+          eventWatermark: '2026-01-22T07:45:00.000Z',
         },
       });
+    });
+
+    it('passes undefined eventWatermark when task state has no watermark (cold start)', async () => {
+      dispatcherService.run.mockResolvedValue({
+        startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        pipelineResult: createMockPipelineResult(),
+      });
+
+      // @ts-expect-error: not all fields are required for these tests
+      const emptyStateInstance: ConcreteTaskInstance = {
+        id: 'task-1',
+        params: {},
+        state: {},
+        scheduledAt: new Date('2026-01-22T07:30:00.000Z'),
+        startedAt: new Date('2026-01-22T07:30:00.000Z'),
+      };
+
+      await runner.run({ taskInstance: emptyStateInstance, signal });
+
+      const [params] = dispatcherService.run.mock.calls[0];
+      expect(params.eventWatermark).toBeUndefined();
     });
   });
 });

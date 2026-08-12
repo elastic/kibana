@@ -46,17 +46,18 @@ export interface AlertEpisodeSuppression {
 }
 
 export interface DispatcherExecutionParams {
-  previousStartedAt?: Date;
+  eventWatermark?: Date;
   signal?: AbortSignal;
 }
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  nextWatermark: Date;
   pipelineResult: DispatcherPipelineResult;
 }
 
 export interface DispatcherTaskState {
-  previousStartedAt?: string;
+  eventWatermark?: string;
 }
 
 export interface DispatcherPipelineResult {
@@ -152,7 +153,7 @@ export interface DispatchFailure {
 
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
-  readonly previousStartedAt: Date;
+  readonly eventWatermark: Date;
   readonly executionUuid: string;
   readonly signal: AbortSignal;
 }

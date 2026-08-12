@@ -42,9 +42,9 @@ export class FetchEpisodesStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { previousStartedAt, signal } = state.input;
+    const { eventWatermark, signal } = state.input;
 
-    const lookback = moment(previousStartedAt)
+    const lookback = moment(eventWatermark)
       .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
       .toISOString();
 
