@@ -143,6 +143,24 @@ export class DispatcherService implements DispatcherServiceContract {
       const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
 
+      // Per-tick observability. All fields are lazy so the string is never built
+      // at production log levels where debug is off.
+      this.logger.debug({
+        message: () => {
+          const watermarkLagMs = startedAt.getTime() - nextWatermark.getTime();
+          const windowSpanMs = windowEnd.getTime() - windowStart.getTime();
+          return [
+            'Dispatcher tick:',
+            `halt_reason=${pipelineResult.haltReason ?? 'completed'}`,
+            `watermark_lag_ms=${watermarkLagMs}`,
+            `window_span_ms=${windowSpanMs}`,
+            `truncated=${pipelineResult.finalState.truncated ?? false}`,
+            `episode_count=${pipelineResult.finalState.episodes?.length ?? 0}`,
+            `stuck_ticks=${nextStuckTicks}`,
+          ].join(' ');
+        },
+      });
+
       if (nextStuckTicks >= STUCK_TICK_LIMIT) {
         // The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
         // A permanent stall is worse than silent loss: force-record the blocking
