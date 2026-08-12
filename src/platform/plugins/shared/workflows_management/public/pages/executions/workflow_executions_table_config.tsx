@@ -24,16 +24,15 @@ export type WorkflowExecutionsTableColumnId =
 
 /**
  * Fixed widths for predictable columns so Workflow can absorb leftover space.
- * Sized tightly so trailing Actions (control column) still fits without horizontal scroll.
- * Values sized for typical content (e.g. "13 minutes ago", "Schedule", duration).
+ * Restored to the pre-tightening 250px spacing for a roomier table layout.
  */
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS = 240;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 120;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 160;
-export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 100;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_TAGS = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_TRIGGER = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_STARTED = 250;
+export const EXECUTIONS_TABLE_COLUMN_WIDTH_DURATION = 250;
 
 /** Floor width so fixed columns + Actions + a usable Workflow column (~200px) still fit; below this we scroll. */
-export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 920;
+export const EXECUTIONS_TABLE_MIN_WIDTH_PX = 1300;
 
 export interface WorkflowExecutionsGridColumnSettings {
   display: string;
