@@ -26,7 +26,7 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES } from './constants';
+import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES, TICK_DEADLINE_MS } from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import { createAlertEpisode } from './fixtures/test_utils';
@@ -1035,6 +1035,115 @@ describe('DispatcherService', () => {
         new Date(tick1LastEpisodeTs).getTime()
       );
       expect(tick2Input.eventWatermark.toISOString()).toBe(tick1LastEpisodeTs);
+    });
+  });
+
+  // ── Phase 4: soft deadline ───────────────────────────────────────────────────
+  describe('soft deadline (TICK_DEADLINE_MS)', () => {
+    function buildNeverResolvingPipeline(): jest.Mocked<DispatcherPipelineContract> {
+      return {
+        // Pipeline that fires the deadline by returning an aborted result after
+        // the fake-timer advance triggers the deadline controller's timeout.
+        execute: jest.fn().mockImplementation(({ signal }: { signal: AbortSignal }) => {
+          return new Promise((resolve) => {
+            signal.addEventListener('abort', () => {
+              resolve({
+                completed: false,
+                haltReason: 'aborted',
+                finalState: {
+                  input: {
+                    startedAt: new Date(),
+                    eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
+                    windowStart: new Date('2026-01-22T07:20:00.000Z'),
+                    windowEnd: new Date('2026-01-22T07:35:00.000Z'),
+                    executionUuid: 'test',
+                    signal,
+                  },
+                  // recordedEpisodes undefined — aborted before StoreActionsStep
+                },
+              });
+            });
+          });
+        }),
+      };
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('run() resolves after TICK_DEADLINE_MS even when the pipeline never completes', async () => {
+      const { loggerService } = createLoggerService();
+      const mockPipeline = buildNeverResolvingPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      const resultPromise = service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
+
+      // Advance fake timers past the deadline
+      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+
+      const result = await resultPromise;
+
+      expect(result).toHaveProperty('startedAt');
+      expect(result).toHaveProperty('nextWatermark');
+      expect(result.pipelineResult.haltReason).toBe('aborted');
+    });
+
+    it('watermark does not advance when deadline fires before StoreActionsStep', async () => {
+      const { loggerService } = createLoggerService();
+      const mockPipeline = buildNeverResolvingPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const resultPromise = service.run({ eventWatermark });
+
+      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+
+      const result = await resultPromise;
+
+      // Aborted before StoreActionsStep → no advance
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+    });
+
+    it('logs DISPATCHER_TICK_DEADLINE_EXCEEDED on deadline abort', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const mockPipeline = buildNeverResolvingPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      const resultPromise = service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
+      jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
+      await resultPromise;
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_TICK_DEADLINE_EXCEEDED' }),
+        })
+      );
+    });
+
+    it('TM signal aborting also halts the pipeline', async () => {
+      const { loggerService } = createLoggerService();
+      const mockPipeline = buildNeverResolvingPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      const tmController = new AbortController();
+      const resultPromise = service.run({
+        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
+        signal: tmController.signal,
+      });
+
+      // Abort via TM signal before the deadline fires
+      tmController.abort();
+
+      const result = await resultPromise;
+
+      expect(result.pipelineResult.haltReason).toBe('aborted');
+      // Deadline did not fire — only TM signal aborted
     });
   });
 });

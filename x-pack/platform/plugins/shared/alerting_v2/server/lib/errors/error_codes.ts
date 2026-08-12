@@ -322,6 +322,12 @@ export const ALERTING_LOG_CODES = {
    * Rule events older than that will not be dispatched.
    */
   DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
+  /**
+   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark is
+   * safe. This is expected under sustained high load — it is not an error.
+   */
+  DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

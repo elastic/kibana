@@ -10,7 +10,12 @@ import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
-import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES, SETTLE_BUFFER_SECONDS } from './constants';
+import {
+  OVERLAP_WINDOW_MINUTES,
+  MAX_WINDOW_MINUTES,
+  SETTLE_BUFFER_SECONDS,
+  TICK_DEADLINE_MS,
+} from './constants';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -83,20 +88,59 @@ export class DispatcherService implements DispatcherServiceContract {
 
     const executionUuid = uuidV4();
 
-    const input = {
-      startedAt,
-      eventWatermark: resolvedWatermark,
-      windowStart,
-      windowEnd,
-      executionUuid,
-      signal,
-    };
-    const pipelineResult = await this.pipeline.execute(input);
+    // Combine the TM-provided signal with a self-imposed deadline so the
+    // pipeline always stops well before TM marks the task expired. Past
+    // `isExpired`, the returned state is discarded — the watermark would freeze.
+    // Uses explicit AbortController + setTimeout rather than AbortSignal.timeout /
+    // AbortSignal.any because those static methods are absent in the jsdom test env.
+    const deadlineController = new AbortController();
+    const deadlineTimer = setTimeout(() => deadlineController.abort(), TICK_DEADLINE_MS);
 
-    return {
-      startedAt,
-      nextWatermark: computeNextWatermark({ input, result: pipelineResult }),
-      pipelineResult,
-    };
+    const tickController = new AbortController();
+    const abortTick = () => tickController.abort();
+    if (signal.aborted) {
+      abortTick();
+    } else {
+      signal.addEventListener('abort', abortTick, { once: true });
+      deadlineController.signal.addEventListener('abort', abortTick, { once: true });
+    }
+
+    let pipelineResult;
+    try {
+      const input = {
+        startedAt,
+        eventWatermark: resolvedWatermark,
+        windowStart,
+        windowEnd,
+        executionUuid,
+        signal: tickController.signal,
+      };
+      pipelineResult = await this.pipeline.execute(input);
+
+      if (pipelineResult.haltReason === 'aborted') {
+        if (deadlineController.signal.aborted) {
+          this.logger.warn({
+            code: ALERTING_LOG_CODES.DISPATCHER_TICK_DEADLINE_EXCEEDED,
+            message: () =>
+              `Dispatcher: tick deadline (${TICK_DEADLINE_MS}ms) exceeded; pipeline stopped early. ` +
+              `Watermark is safe.`,
+          });
+        } else {
+          this.logger.debug({
+            message: () => `Dispatcher: pipeline aborted by Task Manager signal.`,
+          });
+        }
+      }
+
+      return {
+        startedAt,
+        nextWatermark: computeNextWatermark({ input, result: pipelineResult }),
+        pipelineResult,
+      };
+    } finally {
+      clearTimeout(deadlineTimer);
+      signal.removeEventListener('abort', abortTick);
+      deadlineController.signal.removeEventListener('abort', abortTick);
+    }
   }
 }

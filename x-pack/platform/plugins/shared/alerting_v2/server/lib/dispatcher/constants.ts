@@ -25,6 +25,18 @@ export const MAX_WINDOW_MINUTES = 15;
 /** Excludes the most recent slice so in-flight indexing is not scanned mid-write. */
 export const SETTLE_BUFFER_SECONDS = 5;
 
+/** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
+export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
+
+/**
+ * Self-imposed stop at ~70 % of DISPATCHER_TASK_TIMEOUT (60 000 ms). The margin
+ * is load-bearing: past the TM timeout `isExpired` is already true and the
+ * returned state is discarded (task_manager task_runner.ts:764), so the
+ * watermark would freeze. A safe margin must account for the time the current
+ * step takes to yield after the signal fires.
+ */
+export const TICK_DEADLINE_MS = 42_000;
+
 /**
  * Task manager task type and singleton task id used to schedule dispatcher
  * ticks.

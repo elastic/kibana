@@ -5,12 +5,26 @@
  * 2.0.
  */
 
-import { MAX_WINDOW_MINUTES, OVERLAP_WINDOW_MINUTES } from './constants';
+import { MAX_WINDOW_MINUTES, OVERLAP_WINDOW_MINUTES, TICK_DEADLINE_MS } from './constants';
 import { EPISODE_QUERY_LIMIT } from './queries';
+
+/** Parses a TM timeout string like '1m' or '30s' to milliseconds. */
+const parseTimeoutMs = (timeout: string): number => {
+  const match = timeout.match(/^(\d+)(m|s)$/);
+  if (!match) throw new Error(`Unknown timeout format: ${timeout}`);
+  const [, value, unit] = match;
+  return Number(value) * (unit === 'm' ? 60_000 : 1_000);
+};
 
 describe('dispatcher constants invariants', () => {
   it('MAX_WINDOW_MINUTES is strictly greater than OVERLAP_WINDOW_MINUTES (forward-progress guarantee)', () => {
     expect(MAX_WINDOW_MINUTES).toBeGreaterThan(OVERLAP_WINDOW_MINUTES);
+  });
+
+  it('TICK_DEADLINE_MS is strictly below the task timeout so the watermark is always persisted', async () => {
+    const { DISPATCHER_TASK_TIMEOUT } = await import('./constants');
+    const taskTimeoutMs = parseTimeoutMs(DISPATCHER_TASK_TIMEOUT);
+    expect(TICK_DEADLINE_MS).toBeLessThan(taskTimeoutMs);
   });
 
   it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {
