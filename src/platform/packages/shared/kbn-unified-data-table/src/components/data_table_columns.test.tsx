@@ -28,6 +28,7 @@ describe('Data table columns', function () {
   describe('getEuiGridColumns', () => {
     it('returns eui grid columns showing default columns', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -52,6 +53,7 @@ describe('Data table columns', function () {
 
     it('returns eui grid columns with time column', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: columnsWithTimeCol,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -76,6 +78,7 @@ describe('Data table columns', function () {
 
     it('returns eui grid with in memory sorting', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: columnsWithTimeCol,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -107,6 +110,7 @@ describe('Data table columns', function () {
       it('should replace cell actions', async () => {
         const cellAction = jest.fn();
         const actual = getEuiGridColumns({
+          sourceDisplayMode: 'summary',
           columns: columnsWithTimeCol,
           settings: {},
           dataView: dataViewWithTimefieldMock,
@@ -138,6 +142,7 @@ describe('Data table columns', function () {
       it('should append cell actions', async () => {
         const cellAction = jest.fn();
         const actual = getEuiGridColumns({
+          sourceDisplayMode: 'summary',
           columns: columnsWithTimeCol,
           settings: {},
           dataView: dataViewWithTimefieldMock,
@@ -177,6 +182,7 @@ describe('Data table columns', function () {
   describe('column tokens', () => {
     it('returns eui grid columns with tokens', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         showColumnTokens: true,
         columns: columnsWithTimeCol,
         settings: {},
@@ -202,6 +208,7 @@ describe('Data table columns', function () {
 
     it('returns eui grid columns with tokens for custom column types', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         showColumnTokens: true,
         columnsMeta: {
           extension: { type: 'string' },
@@ -238,6 +245,7 @@ describe('Data table columns', function () {
         true
       ) as string[];
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: columnsNotInDataview,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -266,6 +274,7 @@ describe('Data table columns', function () {
 
     it('should not allow sorting on json columns', async () => {
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: ['geo.coordinates'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -294,6 +303,7 @@ describe('Data table columns', function () {
 
     it('should allow sorting on version columns', async () => {
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: ['stack_version'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -322,6 +332,7 @@ describe('Data table columns', function () {
 
     it('should allow sorting on ip columns', async () => {
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: ['ip_address'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -355,6 +366,7 @@ describe('Data table columns', function () {
         true
       ) as string[];
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: columnsNotInDataview,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -383,6 +395,7 @@ describe('Data table columns', function () {
 
     it('returns columns in correct format when column customisation is provided', async () => {
       const gridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -414,6 +427,7 @@ describe('Data table columns', function () {
       };
 
       const customizedGridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -446,6 +460,7 @@ describe('Data table columns', function () {
   describe('Summary column', () => {
     it('returns eui grid columns with summary column', async () => {
       const actual = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: ['_source'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -487,6 +502,7 @@ describe('Data table columns', function () {
         test_column_3: { display: 'test_column_three' },
       } as const;
       const customizedGridColumns = getEuiGridColumns({
+        sourceDisplayMode: 'summary',
         columns: ['test_column_1', 'test_column_2', 'test_column_4'],
         settings: { columns: mockColumnHeaders },
         dataView: dataViewWithTimefieldMock,

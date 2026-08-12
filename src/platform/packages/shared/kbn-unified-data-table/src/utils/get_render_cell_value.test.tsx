@@ -132,6 +132,7 @@ const getCustomEsqlDataTableCellValue = () => {
   ];
 
   return getRenderCellValueFn({
+    sourceDisplayMode: 'summary',
     closePopover: jest.fn(),
     columnsMeta: {
       // custom ES|QL var
@@ -170,6 +171,7 @@ const getUnmappedFieldDataTableCellValue = () => {
   ];
 
   return getRenderCellValueFn({
+    sourceDisplayMode: 'summary',
     closePopover: jest.fn(),
     columnsMeta: undefined,
     dataView: dataViewMock,
@@ -188,6 +190,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders bytes column correctly', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -217,6 +220,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders bytes column correctly using _source when details is true', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -244,6 +248,7 @@ describe('Unified data table cell rendering', () => {
     const user = userEvent.setup();
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: closePopoverMockFn,
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -276,6 +281,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsSource.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -340,6 +346,7 @@ describe('Unified data table cell rendering', () => {
     ];
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewWithoutSource,
@@ -377,6 +384,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders _source column correctly when isDetails is set to true', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -404,6 +412,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsSourceWithEmptyValues.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -454,6 +463,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsFields.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -504,6 +514,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsFields.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -549,6 +560,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -577,6 +589,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsFieldsWithTopLevelObject.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -625,6 +638,7 @@ describe('Unified data table cell rendering', () => {
     const rows = rowsFieldsWithTopLevelObject.map(build);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -670,6 +684,7 @@ describe('Unified data table cell rendering', () => {
     const closePopoverMockFn = jest.fn();
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: closePopoverMockFn,
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -697,6 +712,7 @@ describe('Unified data table cell rendering', () => {
     const user = userEvent.setup();
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: closePopoverMockFn,
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -730,6 +746,7 @@ describe('Unified data table cell rendering', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -758,6 +775,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders correctly when invalid row is given', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -786,6 +804,7 @@ describe('Unified data table cell rendering', () => {
 
   it('renders correctly when invalid column is given', () => {
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -865,6 +884,7 @@ describe('Unified data table cell rendering', () => {
     ];
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -903,6 +923,7 @@ describe('Unified data table cell rendering', () => {
     ];
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -941,6 +962,7 @@ describe('Unified data table cell rendering', () => {
     ];
 
     const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'summary',
       closePopover: jest.fn(),
       columnsMeta: undefined,
       dataView: dataViewMock,
@@ -1071,6 +1093,7 @@ describe('Unified data table cell rendering', () => {
       ];
 
       const DataTableCellValue = getRenderCellValueFn({
+        sourceDisplayMode: 'summary',
         closePopover: jest.fn(),
         columnsMeta: undefined,
         dataView: testDataView,
@@ -1119,6 +1142,7 @@ describe('Unified data table cell rendering', () => {
       ];
 
       const DataTableCellValue = getRenderCellValueFn({
+        sourceDisplayMode: 'summary',
         closePopover: jest.fn(),
         columnsMeta: columnsMetaOverridingBytesType,
         dataView: testDataView,
@@ -1186,6 +1210,7 @@ describe('Unified data table cell rendering', () => {
       rows: DataTableRecord[] = highlightedRows
     ) =>
       getRenderCellValueFn({
+        sourceDisplayMode: 'summary',
         closePopover: jest.fn(),
         columnsMeta: undefined,
         dataView: dataViewMock,
