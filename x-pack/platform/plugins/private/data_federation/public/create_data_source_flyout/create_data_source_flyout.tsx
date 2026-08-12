@@ -207,7 +207,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
 
-  const FlyoutTypeSettings = DATA_SOURCES_DEFINITIONS[dataSourceType]?.dataSourceConfigComponent;
+  const FlyoutTypeSettings =
+    DATA_SOURCES_DEFINITIONS[dataSourceType]?.dataSourceRequiredSettingsComponent;
 
   return (
     <EuiFlyout
@@ -291,6 +292,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           />
 
           <EuiHorizontalRule margin="m" />
+
+          {/** authentication settings for the data source type */}
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}

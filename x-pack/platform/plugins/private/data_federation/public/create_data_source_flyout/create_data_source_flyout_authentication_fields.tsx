@@ -26,7 +26,7 @@ import {
 import {
   CreateDataSourceFlyoutTypeSettingsS3Credentials,
   CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity,
-} from './data_sources/s3/create_data_source_flyout_type_settings_s3';
+} from './data_sources/s3/s3_data_source_required_settings';
 
 export function CreateDataSourceFlyoutAuthenticationFields({
   authenticationMode,

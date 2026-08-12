@@ -18,7 +18,7 @@ import {
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { CreateDataSourceFlyoutFormValues } from './types';
+import type { CreateDataSourceFlyoutFormValues } from '../../types';
 
 export function CreateDataSourceFlyoutTypeSettingsGcs({
   control,

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
+import { S3DataSourceRequiredSettings } from './s3_data_source_required_settings';
 import type { DataSourceType } from '../../../../common';
+import { S3DataSourceAdvancedSettings } from './s3_data_source_advanced_settings';
 
 export const s3DataSourceDefinition = {
   id: 's3' as DataSourceType,
@@ -14,5 +15,6 @@ export const s3DataSourceDefinition = {
   description:
     'Amazon S3 is a object storage service that offers industry-leading scalability, data availability, security, and performance.',
   icon: 'logoAWS',
-  dataSourceConfigComponent: CreateDataSourceFlyoutTypeSettingsS3Region,
+  dataSourceRequiredSettingsComponent: S3DataSourceRequiredSettings,
+  dataSourceAdvancedSettingsComponent: S3DataSourceAdvancedSettings,
 };

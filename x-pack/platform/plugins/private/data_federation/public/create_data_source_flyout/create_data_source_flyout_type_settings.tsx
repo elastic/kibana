@@ -12,11 +12,9 @@ import { EuiButtonEmpty, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
-import { CreateDataSourceFlyoutTypeSettingsAzure } from './data_sources/azure/create_data_source_flyout_type_settings_azure';
-import { CreateDataSourceFlyoutTypeSettingsGcs } from './data_sources/gcs/create_data_source_flyout_type_settings_gcs';
-import { CreateDataSourceFlyoutTypeSettingsS3 } from './data_sources/s3/create_data_source_flyout_type_settings_s3';
+import { DATA_SOURCES_DEFINITIONS } from './data_sources';
 
-export function CreateDataSourceFlyoutTypeSettings({
+export function DataSourceAdvancedSettings({
   dataSourceType,
   control,
   unregister,
@@ -25,18 +23,9 @@ export function CreateDataSourceFlyoutTypeSettings({
   control: Control<CreateDataSourceFlyoutFormValues, any>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
-  if (dataSourceType === 's3') {
-    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
-  }
-
-  if (dataSourceType === 'gcs') {
-    return <CreateDataSourceFlyoutTypeSettingsGcs control={control} unregister={unregister} />;
-  }
-
-  if (dataSourceType === 'azure') {
-    return <CreateDataSourceFlyoutTypeSettingsAzure control={control} unregister={unregister} />;
-  }
-  return null;
+  const DataSourceAdvancedSettingsComponent =
+    DATA_SOURCES_DEFINITIONS[dataSourceType].dataSourceAdvancedSettingsComponent;
+  return <DataSourceAdvancedSettingsComponent control={control} unregister={unregister} />;
 }
 
 /**
@@ -72,7 +61,7 @@ export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
       </EuiButtonEmpty>
       <div id={contentId} hidden={!isOpen}>
         <EuiSpacer size="s" />
-        <CreateDataSourceFlyoutTypeSettings {...props} />
+        <DataSourceAdvancedSettings {...props} />
       </div>
     </>
   );
