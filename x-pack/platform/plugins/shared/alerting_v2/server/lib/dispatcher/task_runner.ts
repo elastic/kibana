@@ -40,11 +40,17 @@ export class DispatcherTaskRunner {
 
     return {
       eventWatermark: state.eventWatermark ? new Date(state.eventWatermark) : undefined,
+      stuckTicks: state.stuckTicks ?? 0,
       signal,
     };
   }
 
   private buildRunResult(result: DispatcherExecutionResult): RunResult {
-    return { state: { eventWatermark: result.nextWatermark.toISOString() } };
+    return {
+      state: {
+        eventWatermark: result.nextWatermark.toISOString(),
+        stuckTicks: result.nextStuckTicks,
+      },
+    };
   }
 }

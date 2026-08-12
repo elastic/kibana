@@ -8,19 +8,24 @@
 import moment from 'moment';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
+import type { AlertAction } from '../../resources/datastreams/alert_actions';
 import {
   OVERLAP_WINDOW_MINUTES,
   MAX_WINDOW_MINUTES,
   SETTLE_BUFFER_SECONDS,
   TICK_DEADLINE_MS,
+  STUCK_TICK_LIMIT,
 } from './constants';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import type { StorageServiceContract } from '../services/storage_service/storage_service';
+import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { computeNextWatermark } from './watermark';
 
 export interface DispatcherServiceContract {
@@ -31,11 +36,13 @@ export interface DispatcherServiceContract {
 export class DispatcherService implements DispatcherServiceContract {
   constructor(
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
   public async run({
     eventWatermark,
+    stuckTicks = 0,
     signal = new AbortController().signal,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
@@ -70,6 +77,7 @@ export class DispatcherService implements DispatcherServiceContract {
       return {
         startedAt,
         nextWatermark: resolvedWatermark,
+        nextStuckTicks: 0,
         pipelineResult: {
           completed: true,
           finalState: {
@@ -105,7 +113,6 @@ export class DispatcherService implements DispatcherServiceContract {
       deadlineController.signal.addEventListener('abort', abortTick, { once: true });
     }
 
-    let pipelineResult;
     try {
       const input = {
         startedAt,
@@ -115,7 +122,7 @@ export class DispatcherService implements DispatcherServiceContract {
         executionUuid,
         signal: tickController.signal,
       };
-      pipelineResult = await this.pipeline.execute(input);
+      const pipelineResult = await this.pipeline.execute(input);
 
       if (pipelineResult.haltReason === 'aborted') {
         if (deadlineController.signal.aborted) {
@@ -132,9 +139,57 @@ export class DispatcherService implements DispatcherServiceContract {
         }
       }
 
+      const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
+      const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
+      const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
+
+      if (nextStuckTicks >= STUCK_TICK_LIMIT) {
+        // The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
+        // A permanent stall is worse than silent loss: force-record the blocking
+        // episodes as `unmatched` so the `.alert-actions` dedup mark moves past
+        // them, then advance the watermark to windowEnd.
+        const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
+        const lagMs = startedAt.getTime() - resolvedWatermark.getTime();
+
+        this.logger.error({
+          code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
+          message: () =>
+            `Dispatcher: watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
+            `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}). ` +
+            `Force-recording as unmatched and advancing to ${input.windowEnd.toISOString()}.`,
+          error: new Error(`Watermark stuck at ${resolvedWatermark.toISOString()}`),
+        });
+
+        if (blockingEpisodes.length > 0) {
+          const escapeNow = new Date();
+          await this.storageService.bulkIndexDocs<AlertAction>({
+            index: ALERT_ACTIONS_DATA_STREAM,
+            docs: blockingEpisodes.map((episode) => ({
+              '@timestamp': escapeNow.toISOString(),
+              group_hash: episode.group_hash,
+              last_series_event_timestamp: episode.last_event_timestamp,
+              actor: 'system',
+              action_type: 'unmatched',
+              rule_id: episode.rule_id,
+              source: episode.source,
+              reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
+              space_id: episode.space_id,
+            })),
+          });
+        }
+
+        return {
+          startedAt,
+          nextWatermark: input.windowEnd,
+          nextStuckTicks: 0,
+          pipelineResult,
+        };
+      }
+
       return {
         startedAt,
-        nextWatermark: computeNextWatermark({ input, result: pipelineResult }),
+        nextWatermark,
+        nextStuckTicks,
         pipelineResult,
       };
     } finally {

@@ -328,6 +328,12 @@ export const ALERTING_LOG_CODES = {
    * safe. This is expected under sustained high load — it is not an error.
    */
   DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
+  /**
+   * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
+   * The dispatcher will write terminal `unmatched` records for the blocking
+   * episodes (which will NOT be dispatched) and force-advance the watermark.
+   */
+  DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

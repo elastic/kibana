@@ -26,7 +26,12 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES, TICK_DEADLINE_MS } from './constants';
+import {
+  OVERLAP_WINDOW_MINUTES,
+  MAX_WINDOW_MINUTES,
+  STUCK_TICK_LIMIT,
+  TICK_DEADLINE_MS,
+} from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import { createAlertEpisode } from './fixtures/test_utils';
@@ -136,7 +141,7 @@ function buildDispatcherService(deps: {
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
-  return new DispatcherService(pipeline, loggerService);
+  return new DispatcherService(pipeline, loggerService, deps.storageService);
 }
 
 describe('DispatcherService', () => {
@@ -899,8 +904,9 @@ describe('DispatcherService', () => {
 
     it('passes a UUID v4 to the pipeline on each run', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       await service.run({ eventWatermark: new Date() });
 
@@ -915,8 +921,9 @@ describe('DispatcherService', () => {
 
     it('generates a fresh UUID on every run', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       await service.run({ eventWatermark: new Date() });
       await service.run({ eventWatermark: new Date() });
@@ -928,8 +935,9 @@ describe('DispatcherService', () => {
 
     it('logs DISPATCHER_COLD_START when no watermark is provided', async () => {
       const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       await service.run({});
 
@@ -944,8 +952,9 @@ describe('DispatcherService', () => {
 
     it('does not log cold start when a watermark is provided', async () => {
       const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       await service.run({ eventWatermark: new Date() });
 
@@ -983,9 +992,10 @@ describe('DispatcherService', () => {
 
     it('tick 1 truncated: nextWatermark is the last episode ts, not startedAt', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const lastEpisodeTs = '2026-01-22T07:33:00.000Z';
       const mockPipeline = buildMockTruncatedPipeline(lastEpisodeTs);
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       const result = await service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
 
@@ -996,11 +1006,12 @@ describe('DispatcherService', () => {
 
     it('tick 2 starts from the truncation edge and covers the deferred tail', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const tick1LastEpisodeTs = '2026-01-22T07:33:00.000Z';
 
       // Tick 1: truncated — watermark advances to 07:33
       const pipeline1 = buildMockTruncatedPipeline(tick1LastEpisodeTs);
-      const service = new DispatcherService(pipeline1, loggerService);
+      const service = new DispatcherService(pipeline1, loggerService, noopStorage);
       const tick1 = await service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
 
       expect(tick1.nextWatermark.toISOString()).toBe(tick1LastEpisodeTs);
@@ -1027,7 +1038,7 @@ describe('DispatcherService', () => {
           finalState: { input: tick2MockInput, episodes: [], recordedEpisodes: 0 },
         }),
       };
-      const service2 = new DispatcherService(pipeline2, loggerService);
+      const service2 = new DispatcherService(pipeline2, loggerService, noopStorage);
       await service2.run({ eventWatermark: tick1.nextWatermark });
 
       const [[tick2Input]] = pipeline2.execute.mock.calls;
@@ -1078,8 +1089,9 @@ describe('DispatcherService', () => {
 
     it('run() resolves after TICK_DEADLINE_MS even when the pipeline never completes', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       const resultPromise = service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
 
@@ -1095,8 +1107,9 @@ describe('DispatcherService', () => {
 
     it('watermark does not advance when deadline fires before StoreActionsStep', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
       const resultPromise = service.run({ eventWatermark });
@@ -1111,8 +1124,9 @@ describe('DispatcherService', () => {
 
     it('logs DISPATCHER_TICK_DEADLINE_EXCEEDED on deadline abort', async () => {
       const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       const resultPromise = service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
       jest.advanceTimersByTime(TICK_DEADLINE_MS + 1);
@@ -1128,8 +1142,9 @@ describe('DispatcherService', () => {
 
     it('TM signal aborting also halts the pipeline', async () => {
       const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildNeverResolvingPipeline();
-      const service = new DispatcherService(mockPipeline, loggerService);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
 
       const tmController = new AbortController();
       const resultPromise = service.run({
@@ -1144,6 +1159,175 @@ describe('DispatcherService', () => {
 
       expect(result.pipelineResult.haltReason).toBe('aborted');
       // Deadline did not fire — only TM signal aborted
+    });
+  });
+
+  // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
+  describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
+    // Returns a pipeline whose watermark stays pinned. `haltReason: 'aborted'` with
+    // no `recordedEpisodes` is the only path through computeNextWatermark that
+    // returns `input.eventWatermark` unchanged — simulating a tick where the pipeline
+    // was interrupted before StoreActionsStep wrote any records.
+    function buildStuckPipeline(episodes: AlertEpisode[]): jest.Mocked<DispatcherPipelineContract> {
+      return {
+        execute: jest
+          .fn()
+          .mockImplementation(
+            ({ signal, eventWatermark, windowStart, windowEnd, startedAt, executionUuid }) => {
+              const input = {
+                startedAt,
+                eventWatermark,
+                windowStart,
+                windowEnd,
+                executionUuid,
+                signal,
+              };
+              return Promise.resolve({
+                completed: false,
+                haltReason: 'aborted',
+                finalState: {
+                  input,
+                  episodes,
+                  // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
+                },
+              });
+            }
+          ),
+      };
+    }
+
+    it('nextStuckTicks increments on stuck ticks and resets to 0 on advance', async () => {
+      const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+      // Stuck pipeline — episodes present but no recordedEpisodes → watermark won't advance
+      const mockPipeline = buildStuckPipeline([
+        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+      ]);
+      const service = new DispatcherService(mockPipeline, loggerService, noopStorage);
+
+      const result = await service.run({ eventWatermark, stuckTicks: 4 });
+
+      // Watermark did not advance → stuckTicks was 4 → nextStuckTicks = 5
+      expect(result.nextStuckTicks).toBe(5);
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+    });
+
+    it('nextStuckTicks resets to 0 when watermark advances', async () => {
+      const { loggerService } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+      // Pipeline that advances the watermark (no_episodes → windowEnd > eventWatermark)
+      const advancingPipeline: jest.Mocked<DispatcherPipelineContract> = {
+        execute: jest
+          .fn()
+          .mockImplementation(
+            ({ signal, eventWatermark: ew, windowStart, windowEnd, startedAt, executionUuid }) => {
+              return Promise.resolve({
+                completed: true,
+                haltReason: 'no_episodes',
+                finalState: {
+                  input: {
+                    startedAt,
+                    eventWatermark: ew,
+                    windowStart,
+                    windowEnd,
+                    executionUuid,
+                    signal,
+                  },
+                },
+              });
+            }
+          ),
+      };
+      const service = new DispatcherService(advancingPipeline, loggerService, noopStorage);
+
+      // Had 5 stuck ticks before, but this tick advances → reset
+      const result = await service.run({ eventWatermark, stuckTicks: 5 });
+
+      expect(result.nextStuckTicks).toBe(0);
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
+    });
+
+    it('fires escape hatch after STUCK_TICK_LIMIT ticks: advances watermark and resets counter', async () => {
+      const { loggerService } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      const blockingEpisode = createAlertEpisode({
+        episode_id: 'blocked-e1',
+        last_event_timestamp: '2026-01-22T07:31:00.000Z',
+        space_id: 'default',
+      });
+
+      const mockPipeline = buildStuckPipeline([blockingEpisode]);
+      const service = new DispatcherService(mockPipeline, loggerService, escapeStorage);
+
+      // Pass stuckTicks = STUCK_TICK_LIMIT - 1 so this tick pushes over the limit
+      const result = await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1 });
+
+      // Watermark must advance to windowEnd
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
+      // Counter must reset
+      expect(result.nextStuckTicks).toBe(0);
+      // Terminal unmatched records must have been bulk-indexed
+      expect(escapeMockEsClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operations: expect.arrayContaining([
+            expect.objectContaining({ create: expect.any(Object) }),
+            expect.objectContaining({
+              group_hash: blockingEpisode.group_hash,
+              action_type: 'unmatched',
+              actor: 'system',
+              rule_id: blockingEpisode.rule_id,
+              reason: expect.stringContaining('escape hatch'),
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('logs DISPATCHER_WATERMARK_STUCK at error level when escape hatch fires', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
+
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+      const mockPipeline = buildStuckPipeline([
+        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
+      ]);
+      const service = new DispatcherService(mockPipeline, loggerService, escapeStorage);
+
+      await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1 });
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_WATERMARK_STUCK' }),
+        })
+      );
+    });
+
+    it('does not write terminal records when there are no blocking episodes', async () => {
+      const { loggerService } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+
+      // Episodes is empty → no docs to write
+      const mockPipeline = buildStuckPipeline([]);
+      const service = new DispatcherService(mockPipeline, loggerService, escapeStorage);
+
+      const result = await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1 });
+
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 });

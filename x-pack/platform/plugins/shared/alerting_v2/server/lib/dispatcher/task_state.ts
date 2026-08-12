@@ -21,7 +21,20 @@ export const stateSchemaByVersion = {
       eventWatermark: schema.maybe(schema.string({ maxLength: 64 })),
     }),
   },
+  2: {
+    // Adds stuckTicks: counts consecutive ticks in which nextWatermark did not
+    // advance. After STUCK_TICK_LIMIT ticks, the dispatcher force-records terminal
+    // `unmatched` docs for the blocking episodes and advances.
+    up: (state: Record<string, unknown>) => ({
+      eventWatermark: typeof state.eventWatermark === 'string' ? state.eventWatermark : undefined,
+      stuckTicks: typeof state.stuckTicks === 'number' ? state.stuckTicks : 0,
+    }),
+    schema: schema.object({
+      eventWatermark: schema.maybe(schema.string({ maxLength: 64 })),
+      stuckTicks: schema.number({ defaultValue: 0, min: 0 }),
+    }),
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;

@@ -42,24 +42,46 @@ describe('DispatcherTaskRunner', () => {
   });
 
   describe('run', () => {
-    it('maps task state to dispatcher params', async () => {
+    it('maps task state to dispatcher params (eventWatermark + stuckTicks)', async () => {
+      const instanceWithStuckTicks: ConcreteTaskInstance = {
+        ...taskInstance,
+        state: { eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 3 },
+      };
+
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
         nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
+        pipelineResult: createMockPipelineResult(),
+      });
+
+      await runner.run({ taskInstance: instanceWithStuckTicks, signal });
+
+      const [params] = dispatcherService.run.mock.calls[0];
+      expect(params.signal).toBe(signal);
+      expect(params.eventWatermark?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.stuckTicks).toBe(3);
+    });
+
+    it('defaults stuckTicks to 0 when absent from task state', async () => {
+      dispatcherService.run.mockResolvedValue({
+        startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
         pipelineResult: createMockPipelineResult(),
       });
 
       await runner.run({ taskInstance, signal });
 
       const [params] = dispatcherService.run.mock.calls[0];
-      expect(params.signal).toBe(signal);
-      expect(params.eventWatermark?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.stuckTicks).toBe(0);
     });
 
-    it('returns updated eventWatermark in state', async () => {
+    it('returns updated eventWatermark and stuckTicks in state', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
         nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 2,
         pipelineResult: createMockPipelineResult(),
       });
 
@@ -68,6 +90,7 @@ describe('DispatcherTaskRunner', () => {
       expect(result).toEqual({
         state: {
           eventWatermark: '2026-01-22T07:45:00.000Z',
+          stuckTicks: 2,
         },
       });
     });
@@ -76,6 +99,7 @@ describe('DispatcherTaskRunner', () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
         nextWatermark: new Date('2026-01-22T07:45:00.000Z'),
+        nextStuckTicks: 0,
         pipelineResult: createMockPipelineResult(),
       });
 
@@ -92,6 +116,7 @@ describe('DispatcherTaskRunner', () => {
 
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.eventWatermark).toBeUndefined();
+      expect(params.stuckTicks).toBe(0);
     });
   });
 });

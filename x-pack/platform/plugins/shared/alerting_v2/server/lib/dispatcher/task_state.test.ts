@@ -7,9 +7,12 @@
 
 import { stateSchemaByVersion } from './task_state';
 
-const { up, schema } = stateSchemaByVersion[1];
+const v1 = stateSchemaByVersion[1];
+const v2 = stateSchemaByVersion[2];
 
 describe('stateSchemaByVersion[1]', () => {
+  const { up, schema } = v1;
+
   describe('up()', () => {
     it('maps previousStartedAt string to eventWatermark', () => {
       const result = up({ previousStartedAt: '2026-01-22T07:30:00.000Z' });
@@ -59,6 +62,78 @@ describe('stateSchemaByVersion[1]', () => {
       const migrated = up({ previousStartedAt: '2026-01-22T07:30:00.000Z' });
       const result = schema.validate(migrated);
       expect(result.eventWatermark).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+});
+
+describe('stateSchemaByVersion[2]', () => {
+  const { up, schema } = v2;
+
+  describe('up()', () => {
+    it('preserves eventWatermark and defaults stuckTicks to 0 when absent', () => {
+      const result = up({ eventWatermark: '2026-01-22T07:30:00.000Z' });
+      expect(result).toEqual({ eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 0 });
+    });
+
+    it('preserves a numeric stuckTicks value', () => {
+      const result = up({ eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 5 });
+      expect(result).toEqual({ eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 5 });
+    });
+
+    it('defaults stuckTicks to 0 when value is not a number', () => {
+      const result = up({ eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 'bad' });
+      expect(result).toEqual({ eventWatermark: '2026-01-22T07:30:00.000Z', stuckTicks: 0 });
+    });
+
+    it('returns undefined eventWatermark and stuckTicks 0 for empty state', () => {
+      const result = up({});
+      expect(result).toEqual({ eventWatermark: undefined, stuckTicks: 0 });
+    });
+
+    it('returns undefined eventWatermark when eventWatermark is not a string', () => {
+      const result = up({ eventWatermark: 42 });
+      expect(result).toEqual({ eventWatermark: undefined, stuckTicks: 0 });
+    });
+  });
+
+  describe('schema', () => {
+    it('validates a full state object', () => {
+      const result = schema.validate({
+        eventWatermark: '2026-01-22T07:30:00.000Z',
+        stuckTicks: 3,
+      });
+      expect(result.eventWatermark).toBe('2026-01-22T07:30:00.000Z');
+      expect(result.stuckTicks).toBe(3);
+    });
+
+    it('defaults stuckTicks to 0 when absent', () => {
+      const result = schema.validate({ eventWatermark: '2026-01-22T07:30:00.000Z' });
+      expect(result.stuckTicks).toBe(0);
+    });
+
+    it('rejects a negative stuckTicks', () => {
+      expect(() => schema.validate({ stuckTicks: -1 })).toThrow();
+    });
+
+    it('rejects an eventWatermark longer than 64 characters', () => {
+      const longString = 'a'.repeat(65);
+      expect(() => schema.validate({ eventWatermark: longString })).toThrow();
+    });
+
+    it('validates after up() from a blank state (v1 → v2)', () => {
+      const v1Migrated = v1.up({});
+      const v2Migrated = up(v1Migrated);
+      const result = schema.validate(v2Migrated);
+      expect(result.eventWatermark).toBeUndefined();
+      expect(result.stuckTicks).toBe(0);
+    });
+
+    it('validates after up() from a previousStartedAt state (v1 → v2)', () => {
+      const v1Migrated = v1.up({ previousStartedAt: '2026-01-22T07:30:00.000Z' });
+      const v2Migrated = up(v1Migrated);
+      const result = schema.validate(v2Migrated);
+      expect(result.eventWatermark).toBe('2026-01-22T07:30:00.000Z');
+      expect(result.stuckTicks).toBe(0);
     });
   });
 });

@@ -47,17 +47,22 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   eventWatermark?: Date;
+  /** Current count of consecutive ticks in which the watermark did not advance. */
+  stuckTicks?: number;
   signal?: AbortSignal;
 }
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
   nextWatermark: Date;
+  /** Updated stuck-tick counter (reset to 0 on advance, incremented otherwise). */
+  nextStuckTicks: number;
   pipelineResult: DispatcherPipelineResult;
 }
 
 export interface DispatcherTaskState {
   eventWatermark?: string;
+  stuckTicks?: number;
 }
 
 export interface DispatcherPipelineResult {
