@@ -53,7 +53,7 @@ const runScenario = async (
 
   const incompatibleAverageCount =
     await test.step('check counter field compatibility', async () => {
-      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.workspace.openFullEditor();
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -75,7 +75,7 @@ const runScenario = async (
 
   const bars = await test.step('visualize count data before and after the downgrade', async () => {
     // Each step needs an empty editor, so reload Lens to clear prior dimensions.
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
@@ -94,7 +94,7 @@ const runScenario = async (
     });
 
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await pageObjects.lens.getCurrentChartDebugState('xyVisChart');
+    const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
     const chartBars = chartData.bars?.[0]?.bars ?? [];
     expect(chartBars.length).toBeGreaterThan(0);
     return chartBars;
@@ -103,7 +103,7 @@ const runScenario = async (
   const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
     await test.step('visualize data on both sides of the downgrade boundary', async () => {
       // Reload Lens for a clean editor before narrowing the time window.
-      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.workspace.openFullEditor();
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
         to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
@@ -120,7 +120,8 @@ const runScenario = async (
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsBeforeDowngrade =
-        (await pageObjects.lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
+        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+          ?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
@@ -128,7 +129,8 @@ const runScenario = async (
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsAfterDowngrade =
-        (await pageObjects.lens.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ?? [];
+        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+          ?.bars ?? [];
 
       return {
         hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
