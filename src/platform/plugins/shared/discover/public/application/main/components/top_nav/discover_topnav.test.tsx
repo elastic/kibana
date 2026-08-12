@@ -11,6 +11,7 @@ import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
@@ -35,11 +36,13 @@ type AggregateQueryTopNavMenuProps = ComponentProps<
 const MockAggregateQueryTopNavMenu = ({
   dataViewPickerComponentProps,
   dataViewPickerOverride,
+  isDisabled,
 }: AggregateQueryTopNavMenuProps) => (
   <div
     data-test-subj="aggregate-query-top-nav-menu"
     data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
     data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
+    data-is-disabled={String(Boolean(isDisabled))}
   >
     {dataViewPickerOverride}
   </div>
@@ -77,8 +80,10 @@ const mockDefaultCapabilities = {
 async function setup(
   {
     capabilities,
+    hasDataView = true,
   }: {
     capabilities?: Partial<typeof mockDiscoverService.capabilities>;
+    hasDataView?: boolean;
   } = { capabilities: mockDefaultCapabilities }
 ) {
   mockDiscoverService = createDiscoverServicesMock();
@@ -87,20 +92,27 @@ async function setup(
   }
   mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu = MockAggregateQueryTopNavMenu;
 
+  if (!hasDataView) {
+    // Simulate a space without any data view
+    mockDiscoverService.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+  }
+
   const toolkit = getDiscoverInternalStateMock({
     services: mockDiscoverService,
-    persistedDataViews: [dataViewMock],
+    persistedDataViews: hasDataView ? [dataViewMock] : [],
   });
 
   await toolkit.initializeTabs();
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
 
-  toolkit.internalState.dispatch(
-    internalStateActions.setDataView({
-      tabId: toolkit.getCurrentTab().id,
-      dataView: dataViewMock,
-    })
-  );
+  if (hasDataView) {
+    toolkit.internalState.dispatch(
+      internalStateActions.setDataView({
+        tabId: toolkit.getCurrentTab().id,
+        dataView: dataViewMock,
+      })
+    );
+  }
 
   const props: DiscoverTopNavProps = {
     savedQuery: '',
@@ -188,6 +200,38 @@ describe('Discover topnav component', () => {
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
     expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
+  });
+
+  describe('data view picker', () => {
+    it('should render the picker when a data view is available', async () => {
+      const { toolkit, props } = await setup();
+      renderTestComponent({ toolkit, props });
+
+      const topNav = screen.getByTestId('aggregate-query-top-nav-menu');
+
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-component-props', 'true');
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-override', 'false');
+      expect(topNav).toHaveAttribute('data-is-disabled', 'false');
+      expect(screen.queryByTestId('discoverCreateDataViewButton')).not.toBeInTheDocument();
+    });
+
+    it('should offer creating a data view and disable the search bar when there is none to pick', async () => {
+      const { toolkit, props } = await setup({ hasDataView: false });
+      renderTestComponent({ toolkit, props });
+
+      const createDataViewButton = await screen.findByTestId('discoverCreateDataViewButton');
+
+      expect(screen.getByTestId('aggregate-query-top-nav-menu')).toHaveAttribute(
+        'data-is-disabled',
+        'true'
+      );
+
+      await userEvent.click(createDataViewButton);
+
+      expect(mockDiscoverService.dataViewEditor.openEditor).toHaveBeenCalledWith(
+        expect.objectContaining({ allowAdHocDataView: true })
+      );
+    });
   });
 
   describe('search bar customization', () => {

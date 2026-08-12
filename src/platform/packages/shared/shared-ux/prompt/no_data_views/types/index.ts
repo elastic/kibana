@@ -89,6 +89,12 @@ export interface NoDataViewsPromptComponentProps {
   canCreateNewDataView: boolean;
   /** Link to documentation on data views. */
   dataViewsDocLink?: string;
+  /** Link to add data, e.g. to the integrations app. Renders an additional card when set. */
+  addDataHref?: string;
+  /** Link to documentation on adding data. */
+  addDataDocLink?: string;
+  /** False to omit the card for creating a data view, e.g. when it's offered elsewhere; defaults to true. */
+  showCreateDataView?: boolean;
   /** The background color of the prompt; defaults to `plain`. */
   emptyPromptColor?: EuiEmptyPromptProps['color'];
   /** Click handler for create button. **/
@@ -103,6 +109,12 @@ export interface NoDataViewsPromptComponentProps {
 export interface NoDataViewsPromptProps {
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** Link to add data, e.g. to the integrations app. Renders an additional card when set. */
+  addDataHref?: string;
+  /** Link to documentation on adding data. */
+  addDataDocLink?: string;
+  /** False to omit the card for creating a data view, e.g. when it's offered elsewhere; defaults to true. */
+  showCreateDataView?: boolean;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
   /** If the cluster has data, this handler allows the user to try ES|QL */

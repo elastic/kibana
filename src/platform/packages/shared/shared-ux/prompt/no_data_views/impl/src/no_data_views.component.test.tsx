@@ -37,6 +37,40 @@ describe('<NoDataViewsPromptComponent />', () => {
     expect(screen.getByTestId('docLinkEsql')).toBeInTheDocument();
   });
 
+  test('renders the add data card only when a link to add data is given', () => {
+    const { rerender } = render(<NoDataViewsPrompt canCreateNewDataView={true} />);
+
+    expect(screen.queryByTestId('noDataViewsPromptAddData')).not.toBeInTheDocument();
+
+    rerender(
+      <NoDataViewsPrompt
+        canCreateNewDataView={true}
+        addDataHref="/app/integrations/browse"
+        addDataDocLink="doc-link-add-data"
+      />
+    );
+
+    expect(screen.getByTestId('noDataViewsPromptAddData')).toBeInTheDocument();
+    expect(screen.getByTestId('browseIntegrationsLink')).toHaveAttribute(
+      'href',
+      '/app/integrations/browse'
+    );
+    expect(screen.getByTestId('docLinkAddData')).toBeInTheDocument();
+  });
+
+  test('omits the create data view card if showCreateDataView is false', () => {
+    render(
+      <NoDataViewsPrompt
+        canCreateNewDataView={true}
+        onTryESQL={jest.fn()}
+        showCreateDataView={false}
+      />
+    );
+
+    expect(screen.queryByTestId('noDataViewsPromptCreateDataView')).not.toBeInTheDocument();
+    expect(screen.getByTestId('noDataViewsTryESQL')).toBeInTheDocument();
+  });
+
   test('disables "Create data view" button if canCreateNewDataViews is false', () => {
     render(<NoDataViewsPrompt canCreateNewDataView={false} />);
 
