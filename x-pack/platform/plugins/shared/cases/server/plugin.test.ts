@@ -338,6 +338,16 @@ describe('Cases Plugin', () => {
         .spyOn(CasesClientFactory.prototype, 'create')
         .mockResolvedValue(createCasesClientMock());
 
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({
+          incrementalId: {
+            enabled: false,
+            taskIntervalMinutes: 10,
+            taskStartDelayMinutes: 10,
+          },
+        })
+      );
+      plugin = new CasePlugin(context);
       pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
 
       coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
