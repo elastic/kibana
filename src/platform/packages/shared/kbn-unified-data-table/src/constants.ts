@@ -14,14 +14,6 @@ export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
 export const SCORE_COLUMN_NAME = '_score';
 
-/**
- * Evaluation toggle for the Summary (`_source`) in-grid cell: render it with the current
- * field-summary view (`'summary'`) or with the JSON tree viewer (`'jsonTreeViewer'`). Flip
- * this to preview the viewer live in the grid. Temporary — the production path is a
- * profile-registered cell renderer.
- */
-export const SOURCE_CELL_RENDERER: 'summary' | 'jsonTreeViewer' = 'jsonTreeViewer';
-
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
