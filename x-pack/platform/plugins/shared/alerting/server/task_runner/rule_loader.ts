@@ -199,7 +199,7 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
           {
-            labels: { ruleId, spaceId },
+            labels: { ...(ruleId && { ruleId }), spaceId },
             tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
@@ -208,7 +208,7 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided because the Elasticsearch API key creator is likely a non-Cloud user, falling back to regular API key.',
           {
-            labels: { ruleId, spaceId },
+            labels: { ...(ruleId && { ruleId }), spaceId },
             tags: UIAM_LOGS_USAGE_TAGS,
           }
         );
@@ -222,7 +222,7 @@ export function getFakeKibanaRequest(
         context.logger.debug(
           'UIAM API key is not provided to create a fake request, falling back to regular API key.',
           {
-            labels: { ruleId, spaceId },
+            labels: { ...(ruleId && { ruleId }), spaceId },
             tags: UIAM_LOGS_USAGE_TAGS,
           }
         );

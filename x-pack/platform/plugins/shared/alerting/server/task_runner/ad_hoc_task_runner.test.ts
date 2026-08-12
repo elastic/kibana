@@ -1612,11 +1612,8 @@ describe('Ad Hoc Task Runner', () => {
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
           labels: {
-            executionId: UUID,
             ruleId: RULE_ID,
             ruleType: 'siem.queryRule',
-            taskInstanceId: '',
-            spaceId: 'default',
           },
         }
       );
@@ -1750,11 +1747,8 @@ describe('Ad Hoc Task Runner', () => {
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`,
         {
           labels: {
-            spaceId: 'default',
-            executionId: UUID,
             ruleId: RULE_ID,
             ruleType: 'siem.queryRule',
-            taskInstanceId: '',
           },
         }
       );

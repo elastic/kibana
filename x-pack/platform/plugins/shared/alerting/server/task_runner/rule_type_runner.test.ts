@@ -261,7 +261,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -376,7 +376,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -494,7 +494,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -606,7 +606,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -760,7 +760,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -769,11 +769,8 @@ describe('RuleTypeRunner', () => {
         `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
         {
           labels: {
-            executionId: 'abc',
             ruleId: '1',
             ruleType: 'test',
-            spaceId: 'default',
-            taskInstanceId: '',
           },
         }
       );
@@ -892,7 +889,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -901,11 +898,8 @@ describe('RuleTypeRunner', () => {
         `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
         {
           labels: {
-            executionId: 'abc',
             ruleId: '1',
             ruleType: 'test',
-            spaceId: 'default',
-            taskInstanceId: '',
           },
         }
       );
@@ -1024,7 +1018,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -1134,7 +1128,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });
@@ -1247,7 +1241,7 @@ describe('RuleTypeRunner', () => {
           snoozeSchedule: mockedRule.snoozeSchedule,
           alertDelay: mockedRule.alertDelay,
         },
-        logger: expect.objectContaining({ opts: expect.objectContaining({ logger }) }),
+        logger,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: expect.any(Function),
       });

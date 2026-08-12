@@ -38,7 +38,7 @@ import type {
   RuleTypeRunnerContext,
   TaskRunnerContext,
 } from './types';
-import { createTaskRunnerLogger, withAlertingSpan } from './lib';
+import { withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
@@ -259,15 +259,6 @@ export class RuleTypeRunner<
           };
 
           const cpsData = context.isServerless ? await executorServices.getCpsData() : undefined;
-
-          context.logger = createTaskRunnerLogger({
-            logger: context.logger,
-            labels: {
-              executionId,
-              spaceId: context.spaceId,
-              taskInstanceId: this.options.task.id,
-            },
-          });
 
           executorResult = await withAlertingSpan('rule-type-executor', () =>
             this.options.context.executionContext.withContext(ctx, () =>

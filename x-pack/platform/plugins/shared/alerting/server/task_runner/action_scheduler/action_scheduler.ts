@@ -117,19 +117,19 @@ export class ActionScheduler<
     }
 
     const actionsToNotLog: string[] = [];
+    const logger = createTaskRunnerLogger({
+      logger: this.context.logger,
+      labels: {
+        ruleId: this.context.rule.id,
+        ruleType: this.context.rule.alertTypeId,
+        spaceId: this.context.taskInstance.params.spaceId,
+        executionId: this.context.executionId,
+        taskInstanceId: this.context.taskInstance.id,
+      },
+    });
+
     if (bulkScheduleResponse.length) {
       for (const r of bulkScheduleResponse) {
-        const logger = createTaskRunnerLogger({
-          logger: this.context.logger,
-          labels: {
-            ruleId: this.context.rule.id,
-            ruleType: this.context.rule.alertTypeId,
-            spaceId: this.context.taskInstance.params.spaceId,
-            executionId: this.context.executionId,
-            taskInstanceId: this.context.taskInstance.id,
-          },
-        });
-
         if (r.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR) {
           this.context.ruleRunMetricsStore.setHasReachedQueuedActionsLimit(true);
           this.context.ruleRunMetricsStore.decrementNumberOfTriggeredActions();

@@ -170,7 +170,7 @@ export class AdHocTaskRunner implements CancellableTask {
     } catch (err) {
       this.logger.error(`error updating ad hoc run ${adHocRunParamsId} ${err.message}`, {
         labels: {
-          spaceId: namespace,
+          spaceId: this.taskInstance.params.spaceId,
           executionId: this.executionId,
           ruleId: this.ruleId,
           ruleType: this.ruleTypeId,
@@ -570,8 +570,8 @@ export class AdHocTaskRunner implements CancellableTask {
           labels: {
             spaceId,
             executionId: this.executionId,
-            ruleId: this.ruleId,
-            ruleType: this.ruleTypeId,
+            ...(this.ruleId.length > 0 && { ruleId: this.ruleId }),
+            ...(this.ruleTypeId.length > 0 && { ruleType: this.ruleTypeId }),
             taskInstanceId: this.taskInstance.id,
           },
           tags: [adHocRunParamsId, 'rule-ad-hoc-run-failed'],
