@@ -10,6 +10,7 @@ import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
+  RULE_KIND_LABELS,
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
@@ -41,7 +42,7 @@ An action policy is a **space-scoped saved object** that controls how alert epis
 Key characteristics:
 - **Not embedded in a rule.** One policy can match episodes from many rules.
 - **Matcher**: optional KQL query evaluated against episode context. An empty matcher is a catch-all that matches all episodes in the space.
-- **Only processes \`kind: alert\` episodes.** Signal events are excluded from the dispatcher pipeline — they never reach action policy evaluation.
+- **Only processes \`kind: alert\` (${RULE_KIND_LABELS.alert}) episodes.** \`type: 'signal'\` (${RULE_KIND_LABELS.signal}) events are excluded from the dispatcher pipeline — they never reach action policy evaluation.
 
 ### Matcher Context Fields
 
@@ -103,7 +104,7 @@ The end-to-end notification path:
 7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via \`scheduleWorkflow\`.
 8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).
 
-Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
+${RULE_KIND_LABELS.signal} rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query only selects \`type == 'alert'\` events.`,
       },
       {
         name: 'action-policy-schema',
@@ -197,9 +198,9 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 
 # Part 2: Default Notification Setup
 
-When setting up notifications for a complete **alert** rule (has name, query, schedule, and \`kind: alert\`) — either after the user agreed to the rule-management skill's notification offer, or when the user directly asks for notifications — follow these two steps in order.
+When setting up notifications for a complete **${RULE_KIND_LABELS.alert}** rule (has name, query, schedule, and \`kind: alert\`) — either after the user agreed to the rule-management skill's notification offer, or when the user directly asks for notifications — follow these two steps in order.
 
-Action policies only process alert episodes. If the rule is \`kind: signal\`, do not proceed: ask the user (or the rule-management skill) to convert or recreate the rule as \`kind: alert\` first.
+Action policies only process alert episodes. If the rule is \`kind: signal\` (${RULE_KIND_LABELS.signal}), do not proceed: ask the user (or the rule-management skill) to convert or recreate the rule as \`kind: alert\` (${RULE_KIND_LABELS.alert}) first.
 
 ## Step 1 — Create a Default Workflow
 
