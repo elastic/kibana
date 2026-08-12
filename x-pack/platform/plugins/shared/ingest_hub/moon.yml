@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
   - '@kbn/i18n-react'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

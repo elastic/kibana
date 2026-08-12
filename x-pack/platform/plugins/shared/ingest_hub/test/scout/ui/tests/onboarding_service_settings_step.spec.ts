@@ -335,7 +335,9 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
     for (const id of ['cloudtrail', 'ec2_metrics']) {
       await page.testSubj.locator(`serviceSettingsStep-actionsButton-${id}`).click();
-      await expect(page.testSubj.locator(`serviceSettingsStep-duplicateAction-${id}`)).toBeVisible();
+      await expect(
+        page.testSubj.locator(`serviceSettingsStep-duplicateAction-${id}`)
+      ).toBeVisible();
       // Close popover before opening the next
       await page.keyboard.press('Escape');
     }
@@ -357,10 +359,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByText('AWS CloudTrail')).toBeVisible();
   });
 
-  test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['cloudtrail'],
     });
@@ -417,10 +416,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByText('AWS CloudTrail [Duplicate]')).toBeVisible();
   });
 
-  test("duplicate row's config is independent from the original", async ({
-    browserAuth,
-    page,
-  }) => {
+  test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['cloudtrail'],
       serviceVars: {
@@ -457,7 +453,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
         [dupInstanceId]: { trigger: 'aws-s3', vars: {} }, // bucket_arn missing
       },
       instances: [
-        { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'AWS CloudTrail', isDuplicate: false },
+        {
+          instanceId: 'cloudtrail',
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail',
+          isDuplicate: false,
+        },
         {
           instanceId: dupInstanceId,
           serviceId: 'cloudtrail',
@@ -502,7 +503,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
         },
       },
       instances: [
-        { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'AWS CloudTrail', isDuplicate: false },
+        {
+          instanceId: 'cloudtrail',
+          serviceId: 'cloudtrail',
+          name: 'AWS CloudTrail',
+          isDuplicate: false,
+        },
         {
           instanceId: dupInstanceId,
           serviceId: 'cloudtrail',
@@ -514,9 +520,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
     // Original row has no Remove action
     await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-removeAction-cloudtrail')
-    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-removeAction-cloudtrail')).toBeHidden();
     await page.keyboard.press('Escape');
 
     // Duplicate row has a Remove action — clicking it removes the row

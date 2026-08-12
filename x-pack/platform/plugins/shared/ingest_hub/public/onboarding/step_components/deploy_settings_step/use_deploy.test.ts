@@ -336,7 +336,9 @@ function setupMocks({
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
   deployAndDetectStep = {} as Record<string, unknown>,
-  instances = undefined as Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }> | undefined,
+  instances = undefined as
+    | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
+    | undefined,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
@@ -570,8 +572,18 @@ describe('useDeploy', () => {
     // Two instances of the same service (ec2_metrics is agentless in the real matrix) —
     // each must get its own policy call.
     const instances = [
-      { instanceId: 'ec2_metrics', serviceId: 'ec2_metrics', name: 'Amazon EC2 Metrics', isDuplicate: false },
-      { instanceId: 'ec2_metrics__dup-1', serviceId: 'ec2_metrics', name: 'Amazon EC2 Metrics [Duplicate]', isDuplicate: true },
+      {
+        instanceId: 'ec2_metrics',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics',
+        isDuplicate: false,
+      },
+      {
+        instanceId: 'ec2_metrics__dup-1',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics [Duplicate]',
+        isDuplicate: true,
+      },
     ];
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
