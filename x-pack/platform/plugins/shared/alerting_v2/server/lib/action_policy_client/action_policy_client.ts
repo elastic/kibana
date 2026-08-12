@@ -428,15 +428,11 @@ export class ActionPolicyClient {
       let isMatch = false;
       try {
         isMatch = evaluateKql(actionPolicy.matcher, context);
-      } catch (err) {
+      } catch {
         this.logger.warn({
-          message: () =>
-            `Failed to evaluate KQL matcher for action policy "${
-              actionPolicy.id
-            }" during pre-matching: ${
-              err instanceof Error ? err.message : String(err)
-            }. Treating as no-match.`,
+          message: 'Policy matcher failed to evaluate; treating as no-match',
           code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+          labels: { policy_id: actionPolicy.id },
         });
         continue;
       }
