@@ -29,7 +29,10 @@ interface LogsDBScenarioConfig {
   type: LogsDBScenarioType;
 }
 
-type SetupFixtures = Pick<LensUiWorkerFixtures, 'apiServices' | 'uiSettings' | 'tsdbHelper'>;
+type SetupFixtures = Pick<
+  LensUiWorkerFixtures,
+  'apiServices' | 'kbnClient' | 'uiSettings' | 'tsdbHelper'
+>;
 type LensFixtures = Pick<LensUiTestFixtures, 'page' | 'pageObjects'>;
 
 const getScenarioIndexes = (
@@ -83,8 +86,16 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
   const includesDowngradedStream = indexes.some(({ index }) => index === baseStream);
   let cleanup: (() => Promise<void>) | undefined;
 
-  const setup = async ({ apiServices, tsdbHelper, uiSettings }: SetupFixtures): Promise<void> => {
-    const cleanupActions: Array<() => Promise<void>> = [];
+  const setup = async ({
+    apiServices,
+    kbnClient,
+    tsdbHelper,
+    uiSettings,
+  }: SetupFixtures): Promise<void> => {
+    // Registered first so reverse-order cleanup runs the catch-all last.
+    const cleanupActions: Array<() => Promise<void>> = [
+      async () => kbnClient.savedObjects.cleanStandardList(),
+    ];
     cleanup = async () => {
       const actions = [...cleanupActions].reverse();
       cleanupActions.length = 0;

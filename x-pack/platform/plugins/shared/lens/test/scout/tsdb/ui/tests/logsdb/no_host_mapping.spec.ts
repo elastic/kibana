@@ -17,8 +17,8 @@ test.describe(
   'Lens LogsDB stream without a predefined host.name mapping',
   { tag: logsDBDeploymentTags },
   () => {
-    test.beforeAll(async ({ apiServices, tsdbHelper, uiSettings }) => {
-      await scenario.setup({ apiServices, tsdbHelper, uiSettings });
+    test.beforeAll(async ({ apiServices, kbnClient, tsdbHelper, uiSettings }) => {
+      await scenario.setup({ apiServices, kbnClient, tsdbHelper, uiSettings });
     });
 
     test.beforeEach(async ({ browserAuth, context }) => {
@@ -42,6 +42,7 @@ test.describe(
       await test.step('configure the chart and annotation layer', async () => {
         await scenario.configureAnnotationLayer({ page, pageObjects });
       });
+
       await test.step('configure the timestamp annotation and verify rendering', async () => {
         await scenario.assertTimestampAnnotation({ page, pageObjects });
       });
@@ -51,6 +52,7 @@ test.describe(
       await test.step('configure the chart and annotation layer', async () => {
         await scenario.configureAnnotationLayer({ page, pageObjects });
       });
+
       await test.step('configure the alternate-time-field annotation and verify rendering', async () => {
         await scenario.assertAlternateTimeFieldAnnotation({ page, pageObjects });
       });
