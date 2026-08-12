@@ -408,19 +408,10 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // No APM transaction. Under EDOT-only instrumentation (the Scout eval stack, and any
-      // deployment that has migrated off the deprecated `elastic-apm-node` agent) this is the
-      // NORMAL path, not an error: spans are being produced and exported by OTEL, there is
-      // simply no APM agent to read them from.
-      //
-      // Previously this branch persisted no `traceId` at all, so every workflow execution was
-      // unlinkable to its own trace. Measured 2026-08-11: 7/7 executions had `traceId: undefined`
-      // while EDOT exported spans normally, which silently degraded trace-based eval evaluators
-      // to N/A (and N/A is not a failure, so suites still reported a pass).
-      //
-      // Read the trace id from the active OTEL span context instead, mirroring the
-      // `apm ?? trace.getActiveSpan()` precedent in core (`http_server.ts`, `logger.ts`,
-      // `analytics_service.ts`).
+      // No APM transaction. Under EDOT-only instrumentation this is the normal path rather
+      // than an error: spans are exported by OTEL, there is just no APM agent to read them
+      // from. Read the trace id from the active OTEL span context so the execution stays
+      // linkable to its own trace.
       const otelTraceId = getActiveOtelTraceId();
 
       if (otelTraceId) {

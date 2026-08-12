@@ -14,17 +14,9 @@ import {
 } from './agent_conversation_ids';
 
 /**
- * `conversation_id` is the join key that makes per-agent-step traces measurable:
- * the agent invocation opens its own root trace, so the workflow's `traceId`
- * matches zero agent spans, while every agent span carries `gen_ai.conversation.id`.
- *
- * Multi-`ai.agent` workflows (draft → review → rewrite) produce one conversation
- * id per agent step. Taking only the first silently drops every later step's
- * tool-routing / trajectory evidence.
- *
- * Also pins the wrapper trap: `draft_creation` appears TWICE — first as the
- * `step_level_timeout` wrapper whose `output` is null, then as the real
- * `ai.agent` step. Selecting by stepId alone picks the wrapper.
+ * Covers the multi-agent case (one conversation id per `ai.agent` step) and the
+ * `step_level_timeout` wrapper, which reuses the agent step's `stepId` with a
+ * null output.
  */
 const step = (over: Partial<WorkflowStepExecutionDto>): WorkflowStepExecutionDto =>
   ({ stepId: 'draft_creation', ...over } as WorkflowStepExecutionDto);
@@ -49,9 +41,7 @@ describe('extractAgentConversationIds', () => {
   });
 
   it('returns every ai.agent conversation id in a multi-step workflow', () => {
-    // A realistic multi-agent Watch: draft → review → rewrite. Each agent
-    // opens its own conversation; dropping any of them makes that step's
-    // tool spans unreachable via gen_ai.conversation.id.
+    // draft → review → rewrite: each agent step opens its own conversation.
     const steps = [
       step({
         stepId: 'draft_creation',
@@ -99,8 +89,7 @@ describe('extractAgentConversationIds', () => {
         stepType: 'ai.agent',
         output: { conversation_id: 'conv-shared' },
       }),
-      // A retry of the same agent step reuses the conversation id — do not
-      // emit a duplicate join key that would double-count tool spans.
+      // A retried step reuses the conversation id; it must not be emitted twice.
       step({
         stepId: 'draft_creation',
         stepType: 'ai.agent',

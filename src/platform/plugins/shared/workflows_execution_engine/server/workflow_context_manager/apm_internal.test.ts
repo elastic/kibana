@@ -13,9 +13,8 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import type agent from 'elastic-apm-node';
 import { getTraceId } from './apm_internal';
 
-// A minimal non-recording span carrying a real trace id. Built from `@opentelemetry/api`
-// primitives rather than pulling in an SDK tracer provider, which is not a declared dependency
-// of this plugin.
+// Minimal non-recording span carrying a real trace id, built from `@opentelemetry/api`
+// primitives so the test does not depend on an SDK tracer provider.
 const spanWithTraceId = (traceId: string): Span => {
   const spanContext: SpanContext = {
     traceId,
@@ -27,9 +26,8 @@ const spanWithTraceId = (traceId: string): Span => {
 
 const OTEL_TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 
-// `context.with()` is a no-op unless a context manager is registered — without this the active
-// span is never visible to `trace.getActiveSpan()` and the OTEL assertions fail for harness
-// reasons rather than code reasons.
+// `context.with()` is a no-op unless a context manager is registered, otherwise the active
+// span is never visible to `trace.getActiveSpan()`.
 const contextManager = new AsyncLocalStorageContextManager();
 
 beforeAll(() => {
@@ -42,8 +40,7 @@ afterAll(() => {
   context.disable();
 });
 
-// A transaction with no APM-shaped trace id — what `elastic-apm-node` yields when the deprecated
-// agent is inactive, which is the case on any EDOT-only stack (e.g. the Scout eval stack).
+// A transaction with no APM-shaped trace id, as produced when the APM agent is inactive.
 const apmlessTransaction = { ids: {} } as unknown as agent.Transaction;
 
 describe('getTraceId', () => {
@@ -75,11 +72,8 @@ describe('getTraceId', () => {
   });
 
   describe('EDOT / OTEL-only (no APM agent)', () => {
-    // Regression test for the measured gap: `elastic-apm-node` is deprecated in favour of the EDOT
-    // collector. Under EDOT-only instrumentation every APM lookup returns undefined, so the engine
-    // persisted `traceId: undefined` on 7/7 workflow executions even though EDOT was exporting the
-    // spans. That silently degraded the rule-creation suite's trace-based routing evaluator to N/A
-    // on every example while the suite still reported a pass.
+    // Under EDOT-only instrumentation every APM lookup returns undefined, so without this
+    // fallback the engine persists no trace id even though spans are exported normally.
     it('falls back to the active OTEL span context', async () => {
       const span = spanWithTraceId(OTEL_TRACE_ID);
 

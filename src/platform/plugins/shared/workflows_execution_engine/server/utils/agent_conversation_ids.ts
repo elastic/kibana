@@ -12,12 +12,9 @@ import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 /**
  * One `ai.agent` step's conversation join key, keyed by the step that produced it.
  *
- * The agent invocation opens its own root OTEL/APM trace, so the workflow's
- * `traceId` matches zero agent spans. The join that actually works is:
- *   step.output.conversation_id  ↔  attributes.gen_ai.conversation.id
- * on every agent tool span. When a workflow has multiple `ai.agent` steps,
- * each step has its own conversation id — callers must iterate these, not
- * assume a single id covers the whole run.
+ * The agent invocation opens its own root trace, so the workflow's `traceId`
+ * matches no agent spans. Agent tool spans are instead joined via
+ * `step.output.conversation_id` ↔ `attributes.gen_ai.conversation.id`.
  */
 export interface AgentConversationId {
   /** Stable step id from the workflow definition (e.g. `draft_creation`). */
@@ -31,16 +28,11 @@ export interface AgentConversationId {
 /**
  * Collects every non-empty `conversation_id` from workflow step executions.
  *
- * Why this exists as a platform helper rather than a suite-local helper:
- * - Multi-`ai.agent` workflows (e.g. draft → review → rewrite) produce one
- *   conversation id per agent step. Taking the first match silently drops
- *   every subsequent agent step's traces.
- * - `step_level_timeout` wrappers share the agent step's `stepId` but have
- *   `output: null`. Filtering on `stepId` alone therefore picks the wrapper
- *   and yields `undefined` with no error. Keying off the output shape avoids
- *   that trap.
- * - Dedupes by `conversationId` while preserving first-seen order, so a
- *   retry of the same agent step does not produce duplicate join keys.
+ * A workflow may contain multiple `ai.agent` steps, each with its own
+ * conversation id, so all of them are returned. Selection keys off the output
+ * shape rather than `stepId`, because `step_level_timeout` wrappers reuse the
+ * agent step's id with a null output. Results are deduped by `conversationId`
+ * in first-seen order so a retried step yields one join key.
  */
 export function extractAgentConversationIds(
   steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>
@@ -70,9 +62,8 @@ export function extractAgentConversationIds(
 
 /**
  * Convenience for the single-agent-step case. Prefer
- * {@link extractAgentConversationIds} whenever the workflow may contain more
- * than one `ai.agent` step — this returns only the first match and will
- * silently miss later agent steps.
+ * {@link extractAgentConversationIds} when a workflow may contain more than one
+ * `ai.agent` step; this returns only the first match.
  */
 export function extractFirstAgentConversationId(
   steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>

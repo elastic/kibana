@@ -14,21 +14,12 @@ import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-ho
 import { getActiveOtelTraceId } from './apm_internal';
 
 /**
- * Regression coverage for the EDOT trace-linkage gap.
+ * Regression coverage for the EDOT trace-linkage path.
  *
- * `WorkflowExecutionRuntimeManager.start()` opens with:
- *
- *     const existingTransaction = agent.currentTransaction;
- *     if (existingTransaction) { ...capture trace id... } else { ...no tracing... }
- *
- * Under EDOT-only instrumentation there is NO APM agent, so `currentTransaction` is null and the
- * entire APM branch — including `getTraceId()` — is unreachable. A fallback added *inside*
- * `getTraceId()` therefore never runs in production, even though a unit test calling
- * `getTraceId()` directly passes. That is exactly the false-green this file guards against:
- * the fallback must live on the `else` branch, reachable WITHOUT an `agent.Transaction`.
- *
- * These tests pin `getActiveOtelTraceId()` — the helper that branch calls — since it is the
- * only trace-id source available when no APM transaction exists.
+ * When no APM agent is present, `WorkflowExecutionRuntimeManager.start()` takes
+ * its `else` branch and `getTraceId()` is never reached, so the fallback has to
+ * be resolvable without an `agent.Transaction`. These tests pin
+ * `getActiveOtelTraceId()`, the only trace-id source available on that branch.
  */
 describe('getActiveOtelTraceId (EDOT / no-APM path)', () => {
   const contextManager = new AsyncLocalStorageContextManager();
@@ -67,8 +58,7 @@ describe('getActiveOtelTraceId (EDOT / no-APM path)', () => {
   });
 
   it('rejects the all-zero INVALID_TRACEID rather than persisting it', async () => {
-    // An unsampled/never-recorded context surfaces the all-zero trace id. Persisting it would
-    // produce workflow executions carrying a trace id that matches no span in the trace store.
+    // An unsampled context surfaces the all-zero trace id, which matches no span.
     const span = spanWithTraceId('00000000000000000000000000000000');
 
     await context.with(trace.setSpan(context.active(), span), async () => {
