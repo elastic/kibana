@@ -106,3 +106,234 @@ export const SearchUsersInputSchema = lazySchema(() =>
   })
 );
 export type SearchUsersInput = z.infer<typeof SearchUsersInputSchema>;
+
+// =============================================================================
+// Write action input schemas
+// =============================================================================
+
+export const CreateIssueInputSchema = lazySchema(() =>
+  z.object({
+    projectKey: z.string().describe('Project key (e.g. PROJ). Use getProjects to discover keys.'),
+    summary: z.string().describe('Issue title / summary line.'),
+    issueType: z
+      .string()
+      .optional()
+      .describe(
+        'Issue type name (e.g. Bug, Task, Story) or numeric ID. ' +
+          'Use getIssueTypes to list available types for the project. ' +
+          'Defaults to the first available issue type when omitted.'
+      ),
+    description: z
+      .string()
+      .optional()
+      .describe('Issue body in plain text. Newlines become separate paragraphs in Jira.'),
+    priority: z
+      .string()
+      .optional()
+      .describe('Priority name (e.g. Highest, High, Medium, Low, Lowest).'),
+    labels: z
+      .array(z.string())
+      .optional()
+      .describe('Labels to apply. Labels cannot contain spaces.'),
+    assigneeAccountId: z
+      .string()
+      .optional()
+      .describe(
+        'Atlassian account ID of the assignee. Use searchUsers to resolve a name or email to an accountId.'
+      ),
+    parent: z
+      .string()
+      .optional()
+      .describe('Parent issue key (e.g. PROJ-10). Required when creating a subtask.'),
+  })
+);
+export type CreateIssueInput = z.infer<typeof CreateIssueInputSchema>;
+
+export const UpdateIssueInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z.string().describe('Issue key (e.g. PROJ-123) or numeric issue ID to update.'),
+    summary: z.string().optional().describe('New summary / title for the issue.'),
+    description: z
+      .string()
+      .optional()
+      .describe('New description in plain text. Replaces the existing description entirely.'),
+    issueType: z.string().optional().describe('New issue type name or numeric ID.'),
+    priority: z.string().optional().describe('New priority name (e.g. High, Medium, Low).'),
+    labels: z
+      .array(z.string())
+      .optional()
+      .describe('Replacement label set. Replaces all existing labels.'),
+    assigneeAccountId: z
+      .string()
+      .nullable()
+      .optional()
+      .describe(
+        'Atlassian account ID to assign the issue to, or null to unassign. ' +
+          'Use searchUsers to resolve a name or email to an accountId.'
+      ),
+    parent: z.string().optional().describe('New parent issue key. Pass to re-parent a subtask.'),
+  })
+);
+export type UpdateIssueInput = z.infer<typeof UpdateIssueInputSchema>;
+
+export const AddCommentInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z.string().describe('Issue key (e.g. PROJ-123) or numeric issue ID to comment on.'),
+    body: z.string().describe('Comment text in plain text. Newlines become separate paragraphs.'),
+  })
+);
+export type AddCommentInput = z.infer<typeof AddCommentInputSchema>;
+
+export const TransitionIssueInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z.string().describe('Issue key (e.g. PROJ-123) or numeric issue ID to transition.'),
+    transitionId: z
+      .string()
+      .describe(
+        'Transition ID (not a status name). Use getTransitions to list valid transition IDs for the issue.'
+      ),
+  })
+);
+export type TransitionIssueInput = z.infer<typeof TransitionIssueInputSchema>;
+
+// =============================================================================
+// Should-have action input schemas
+// =============================================================================
+
+export const GetTransitionsInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z
+      .string()
+      .describe(
+        'Issue key (e.g. PROJ-123) or numeric issue ID. ' +
+          'Returns the transition IDs and target status names available for this issue. ' +
+          'Call this before transitionIssue — Jira requires a transition ID, not a status name.'
+      ),
+  })
+);
+export type GetTransitionsInput = z.infer<typeof GetTransitionsInputSchema>;
+
+export const GetIssueTypesInputSchema = lazySchema(() =>
+  z.object({
+    projectKey: z
+      .string()
+      .describe(
+        'Project key (e.g. PROJ). Returns the issue types available in this project, ' +
+          'including their IDs and names. Use the ID or name in createIssue.issueType.'
+      ),
+  })
+);
+export type GetIssueTypesInput = z.infer<typeof GetIssueTypesInputSchema>;
+
+export const GetCreateMetadataInputSchema = lazySchema(() =>
+  z.object({
+    projectKey: z.string().describe('Project key (e.g. PROJ).'),
+    issueTypeId: z
+      .string()
+      .describe(
+        'Issue type ID (numeric). Use getIssueTypes to get the ID for a given issue type name. ' +
+          'Returns the required and optional fields for creating an issue of this type, ' +
+          'so a valid createIssue payload can be built.'
+      ),
+  })
+);
+export type GetCreateMetadataInput = z.infer<typeof GetCreateMetadataInputSchema>;
+
+export const AssignIssueInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z.string().describe('Issue key (e.g. PROJ-123) or numeric issue ID to assign.'),
+    accountId: z
+      .string()
+      .nullable()
+      .describe(
+        'Atlassian account ID of the new assignee. ' +
+          'Use searchUsers to resolve a name or email to an accountId. ' +
+          'Pass "-1" to assign to the project default assignee. ' +
+          'Pass null to unassign.'
+      ),
+  })
+);
+export type AssignIssueInput = z.infer<typeof AssignIssueInputSchema>;
+
+export const AddAttachmentInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z
+      .string()
+      .describe('Issue key (e.g. PROJ-123) or numeric issue ID to attach the file to.'),
+    file: z.string().describe('Base64-encoded file content.'),
+    filename: z.string().describe('Filename including extension (e.g. screenshot.png).'),
+  })
+);
+export type AddAttachmentInput = z.infer<typeof AddAttachmentInputSchema>;
+
+// =============================================================================
+// Nice-to-have action input schemas
+// =============================================================================
+
+export const GetAttachmentInputSchema = lazySchema(() =>
+  z.object({
+    attachmentId: z
+      .string()
+      .describe(
+        'Attachment ID (numeric string). Found in the attachments array of a getIssue response. ' +
+          'Returns the file content as a base64-encoded string.'
+      ),
+  })
+);
+export type GetAttachmentInput = z.infer<typeof GetAttachmentInputSchema>;
+
+export const LinkIssuesInputSchema = lazySchema(() =>
+  z.object({
+    inwardIssueKey: z.string().describe('Key of the inward issue (e.g. PROJ-10).'),
+    outwardIssueKey: z.string().describe('Key of the outward issue (e.g. PROJ-20).'),
+    linkType: z
+      .string()
+      .describe(
+        'Link type name as it appears in Jira (e.g. "relates to", "blocks", "is blocked by", "duplicates", "clones"). ' +
+          'The exact available names depend on the Jira instance configuration.'
+      ),
+    comment: z.string().optional().describe('Optional comment to add to the link in plain text.'),
+  })
+);
+export type LinkIssuesInput = z.infer<typeof LinkIssuesInputSchema>;
+
+export const DeleteIssueInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z
+      .string()
+      .describe('Issue key (e.g. PROJ-123) or numeric issue ID to delete. This is irreversible.'),
+    deleteSubtasks: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true to also delete all subtasks of this issue. ' +
+          'Required when the issue has subtasks; Jira returns a 400 otherwise.'
+      ),
+  })
+);
+export type DeleteIssueInput = z.infer<typeof DeleteIssueInputSchema>;
+
+export const AddWatcherInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z
+      .string()
+      .describe('Issue key (e.g. PROJ-123) or numeric issue ID to add a watcher to.'),
+    accountId: z
+      .string()
+      .describe(
+        'Atlassian account ID of the user to add as a watcher. ' +
+          'Use searchUsers to resolve a name or email to an accountId.'
+      ),
+  })
+);
+export type AddWatcherInput = z.infer<typeof AddWatcherInputSchema>;
+
+export const RemoveWatcherInputSchema = lazySchema(() =>
+  z.object({
+    issueId: z
+      .string()
+      .describe('Issue key (e.g. PROJ-123) or numeric issue ID to remove a watcher from.'),
+    accountId: z.string().describe('Atlassian account ID of the watcher to remove.'),
+  })
+);
+export type RemoveWatcherInput = z.infer<typeof RemoveWatcherInputSchema>;
