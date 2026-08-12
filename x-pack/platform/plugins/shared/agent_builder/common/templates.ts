@@ -10,14 +10,16 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 /**
  * Code-registered system templates.
  *
- * These are Elastic-managed baseline templates provided out of the box for POC use.
- * User-authored templates (stored per-space in a dedicated index) are a separate registry
- * that will be added in the template CRUD milestone.
+ * These are engine fixtures for prototyping and UI development — NOT the shipping catalog.
+ * The real catalog will be supplied by template-owning plugins via the template registry
+ * (follow-up milestone). Templates from @melissaburpo (Security) and O11y will land there.
  *
  * Insertion order of each template's `fields` object is significant — the UI must render
  * fields in declaration order (RFC success criteria).
  *
- * Both templates exercise every input_type and constraint supported by the engine:
+ * The three templates here are intentionally varied in shape so the UI can prototype against
+ * a large form (~10 fields, SELECT-heavy), a large form (mixed types), and a minimal form
+ * (3 fields). Together they exercise every input_type the engine supports:
  *   SELECT (with options), TEXT (with max_length + regex), NUMBER (with min/max),
  *   DATE, TOGGLE, TEXT_ARRAY (with max_length), USER.
  */
@@ -139,6 +141,32 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
         description: 'CVSS score for the finding.',
         min: 0,
         max: 10,
+      },
+    },
+  },
+  {
+    // Deliberately minimal — 3 fields — so the UI has a small/simple case alongside the
+    // two larger security templates. USER + TOGGLE + TEXT covers three input_types without
+    // overlapping SELECT or NUMBER constraints exercised above.
+    id: 'quick-note',
+    version: 1,
+    name: 'Quick Note',
+    description: 'Lightweight template for informal notes and follow-ups.',
+    fields: {
+      owner: {
+        input_type: 'USER',
+        description: 'Person responsible for following up on this note.',
+      },
+      resolved: {
+        input_type: 'TOGGLE',
+        description: 'Whether this note has been actioned.',
+        default_value: false,
+      },
+      summary: {
+        input_type: 'TEXT',
+        description: 'One-sentence summary of the note.',
+        max_length: 500,
+        required: true,
       },
     },
   },

@@ -42,14 +42,14 @@ describe('createSetConversationMetadataTool', () => {
     });
   });
 
-  const callHandler = (updates: Record<string, unknown>) => {
+  const callHandler = (metadata: Record<string, unknown>) => {
     const tool = createSetConversationMetadataTool({ updateConversationMetadata, template });
-    return (tool.handler as Function)({ updates });
+    return (tool.handler as Function)({ metadata });
   };
 
-  it('calls updateConversationMetadata with serialized updates', async () => {
-    const updates = { severity: 'high', affected_user: 'alice' };
-    await callHandler(updates);
+  it('calls updateConversationMetadata with serialized metadata', async () => {
+    const metadata = { severity: 'high', affected_user: 'alice' };
+    await callHandler(metadata);
     expect(updateConversationMetadata).toHaveBeenCalledWith({
       severity: 'high',
       affected_user: 'alice',
@@ -101,8 +101,8 @@ describe('createSetConversationMetadataTool', () => {
   });
 
   it('allows updating multiple fields in a single call', async () => {
-    const updates = { severity: 'medium', affected_user: 'bob', is_confirmed: false };
-    const result = await callHandler(updates);
+    const metadata = { severity: 'medium', affected_user: 'bob', is_confirmed: false };
+    const result = await callHandler(metadata);
     expect(updateConversationMetadata).toHaveBeenCalledWith({
       severity: 'medium',
       affected_user: 'bob',

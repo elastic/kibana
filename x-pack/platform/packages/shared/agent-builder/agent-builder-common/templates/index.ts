@@ -60,6 +60,13 @@ export interface ConversationTemplateFieldDefinition {
  * `fields` is a plain object — insertion order is significant and is preserved
  * by both the JS runtime and Elasticsearch `_source` round-trips. The UI must
  * render fields in the order they appear here (RFC success criteria).
+ *
+ * Design note: field *definitions* (schema, validation rules, data types) live here
+ * on the template. There is deliberately no separate "conversation type" concept — the
+ * template is the single owner of field definitions, and a conversation references exactly
+ * one template via its `template_id` field. Framework-level conversation fields that apply
+ * regardless of template (e.g. a future `parent_conv_id` for forking) stay as top-level
+ * `Conversation` properties, not inside `metadata`.
  */
 export interface ConversationTemplate {
   id: string;

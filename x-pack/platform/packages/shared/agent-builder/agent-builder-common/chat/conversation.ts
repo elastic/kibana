@@ -495,6 +495,11 @@ export interface Conversation {
   /**
    * Arbitrary key/value pairs seeded from a template or set by callers.
    *
+   * This is the single structured bag on a conversation — there is exactly one `metadata`
+   * record per conversation and no parallel field store. Framework-level fields that apply
+   * regardless of template (e.g. a future `parent_conv_id` for conversation forking) stay
+   * as top-level `Conversation` properties rather than going inside this bag.
+   *
    * Stored in Elasticsearch as a `flattened` field (all leaves keyword-indexed for
    * filterability). On the write path, values are serialized to `string | string[]`
    * (`NUMBER` / `TOGGLE` / `DATE` → string; `TEXT_ARRAY` → string[]). On read,

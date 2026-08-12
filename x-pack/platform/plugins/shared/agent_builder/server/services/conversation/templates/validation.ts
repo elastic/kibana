@@ -273,8 +273,8 @@ export const validateTemplateDefaults = (template: ConversationTemplate): void =
 // ---------------------------------------------------------------------------
 
 /**
- * Validates the template definition itself — ensures every field's metadata
- * is internally consistent so the template will always compile to a usable validator.
+ * Validates the template definition itself — ensures every field's constraints
+ * are internally consistent so the template will always compile to a usable validator.
  *
  * Returns an array of error strings (empty = valid template).
  */

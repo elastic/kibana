@@ -73,7 +73,7 @@ const renderFieldValue = (value: string | string[] | undefined): string => {
   return `**${value}**`;
 };
 
-const getConversationContextSection = (
+const getConversationMetadataSection = (
   templateId: string | undefined,
   metadata: Record<string, string | string[]> | undefined
 ): string => {
@@ -96,11 +96,11 @@ const getConversationContextSection = (
 
   const templateDesc = template.description ? `\n\n${template.description}` : '';
 
-  return `## CONVERSATION CONTEXT
+  return `## CONVERSATION METADATA
 
 This conversation uses the **${template.name}** template.${templateDesc}
 
-The table below lists the structured fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
+The list below shows the metadata fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
 
 ${fieldLines}
 `;
@@ -186,7 +186,7 @@ ${
     : ''
 }
 
-${getConversationContextSection(conversationTemplateId, conversationMetadata)}
+${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
 ## INSTRUCTIONS
 
 ${customInstructions}

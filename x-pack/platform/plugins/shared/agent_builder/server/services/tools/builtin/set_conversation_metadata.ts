@@ -20,7 +20,7 @@ const MAX_ARRAY_ITEMS = 100;
 const MAX_ARRAY_ITEM_LENGTH = 2_000;
 
 const setConversationMetadataSchema = z.object({
-  updates: z
+  metadata: z
     .record(
       z.string(),
       z.union([
@@ -43,17 +43,17 @@ const setConversationMetadataSchema = z.object({
 
 const toolDescription = `Update conversation metadata fields defined by the active template.
 
-The \`## CONVERSATION CONTEXT\` section of your system prompt lists all fields for this conversation (their names, types, descriptions, and current values). Use this tool to write back a field value once you have gathered or inferred it from the conversation.
+The \`## CONVERSATION METADATA\` section of your system prompt lists all fields for this conversation (their names, types, descriptions, and current values). Use this tool to write back a field value once you have gathered or inferred it from the conversation.
 
 ## When to use it
 
-- As soon as the user provides or confirms a value for a field shown as _not yet set_ in ## CONVERSATION CONTEXT.
+- As soon as the user provides or confirms a value for a field shown as _not yet set_ in ## CONVERSATION METADATA.
 - When you can confidently infer a field value from the conversation without asking.
 - When a previously set value needs correction based on new information.
 
 ## Rules
 
-- Only set keys that appear in the ## CONVERSATION CONTEXT field list.
+- Only set keys that appear in the ## CONVERSATION METADATA field list.
 - For SELECT fields, only use values from the listed options.
 - For TEXT_ARRAY fields, provide an array of strings (even if there is only one value).
 - Do not hallucinate or assume values — only write a field when you have reliable information.
@@ -73,20 +73,20 @@ export const createSetConversationMetadataTool = ({
   description: toolDescription,
   schema: setConversationMetadataSchema,
   tags: ['internal'],
-  handler: async ({ updates }) => {
+  handler: async ({ metadata }) => {
     // Reject unknown keys first.
-    for (const key of Object.keys(updates)) {
+    for (const key of Object.keys(metadata)) {
       if (!template.fields[key]) {
         throw createBadRequestError(`Template "${template.id}" has no field "${key}"`);
       }
     }
 
     // Validate all values in one pass — throws with accumulated per-field errors.
-    validateMetadataUpdate(template.id, template.fields, updates);
+    validateMetadataUpdate(template.id, template.fields, metadata);
 
     // Serialize each value to the storage representation.
     const serialized = Object.fromEntries(
-      Object.entries(updates).map(([k, v]) => {
+      Object.entries(metadata).map(([k, v]) => {
         const def = template.fields[k];
         return [k, serializeMetadataValue(v, def.input_type)];
       })
@@ -99,7 +99,7 @@ export const createSetConversationMetadataTool = ({
         {
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
-          data: { acknowledged: true, updated_keys: Object.keys(updates) },
+          data: { acknowledged: true, updated_keys: Object.keys(metadata) },
         },
       ],
     };
