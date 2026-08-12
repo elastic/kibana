@@ -62,7 +62,10 @@ export const EntityDetailsHighlightsResponse = lazySchema(() =>
       riskScore: z.array(z.object({}).catchall(z.unknown())).optional(),
       vulnerabilities: z.array(z.object({}).catchall(z.unknown())).optional(),
       vulnerabilitiesTotal: z.object({}).catchall(z.number()).optional(),
-      anomalies: z.array(z.object({}).catchall(z.unknown())).optional(),
+      /**
+       * ML anomaly findings. Null when there are none.
+       */
+      anomalies: z.array(z.object({}).catchall(z.unknown())).nullable().optional(),
     }),
     replacements: Replacements,
     /**

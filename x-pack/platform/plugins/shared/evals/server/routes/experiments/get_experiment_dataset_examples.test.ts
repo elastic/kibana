@@ -14,6 +14,7 @@ import {
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   API_VERSIONS,
   SCORES_SORT_ORDER,
+  buildSpaceFilter,
 } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -76,6 +77,7 @@ describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/ex
             must: [
               { term: { 'example.dataset.id': 'dataset-123' } },
               { term: { experiment_id: 'experiment-123' } },
+              buildSpaceFilter('default'),
             ],
           },
         },

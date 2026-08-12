@@ -10,11 +10,14 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { AiIndexList } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
-import { AiIndexCards } from './components/ai_index_cards';
+import { useListAiIndices } from './hooks/use_list_ai_indices';
 
 export const ContextLandingPage = () => {
   const { euiTheme } = useEuiTheme();
+  const { aiIndices, isLoading, error } = useListAiIndices();
+  const showHeaderCreateButton = isLoading || error !== undefined || aiIndices.length > 0;
 
   return (
     <KibanaPageTemplate data-test-subj="contextLandingPage">
@@ -30,10 +33,12 @@ export const ContextLandingPage = () => {
           background-color: ${euiTheme.colors.backgroundBasePlain};
           border-block-end: none;
         `}
-        rightSideItems={[<CreateAiIndexButton key="create-ai-index-button" />]}
+        rightSideItems={
+          showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
+        }
       />
       <KibanaPageTemplate.Section>
-        <AiIndexCards />
+        <AiIndexList aiIndices={aiIndices} isLoading={isLoading} error={error} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
