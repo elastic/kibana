@@ -12757,15 +12757,7 @@
     "@types/node" ">=18.0.0"
     axios "^1.11.0"
 
-"@smithy/core@^3.29.4", "@smithy/core@^3.29.5", "@smithy/core@^3.31.1":
-  version "3.31.1"
-  resolved "https://registry.yarnpkg.com/@smithy/core/-/core-3.31.1.tgz#a57090db8997917d2f99eeb39db50b6283e60d3c"
-  integrity sha512-CyogUINxvi7C7LDsh8Syo6hVJOT9ckz4rG8dRZfTJ8r91HkMY59PnNooaj7WcHyxEkxPfBAmbgztZU+xTo76lg==
-  dependencies:
-    "@smithy/types" "^4.16.1"
-    tslib "^2.6.2"
-
-"@smithy/core@^3.31.0":
+"@smithy/core@^3.29.4", "@smithy/core@^3.29.5", "@smithy/core@^3.31.0", "@smithy/core@^3.31.1":
   version "3.32.0"
   resolved "https://registry.yarnpkg.com/@smithy/core/-/core-3.32.0.tgz#5a2dddb8fa7fdbc92faac1a9255a392f27b23afb"
   integrity sha512-NAiCSC78fzbNIEWoheoF74Ob5ZorLijCHpMY26Fqvqg/+9LuyIqMfHDg2p8Yk1rqOyowtiL3y7WX0AW+teL6zw==
@@ -12833,14 +12825,14 @@
     "@smithy/types" "^4.16.1"
     tslib "^2.6.2"
 
-"@smithy/types@4.16.1", "@smithy/types@^4.16.1":
+"@smithy/types@4.16.1":
   version "4.16.1"
   resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.16.1.tgz#19e199c234829a51c085caf63f0bb17bb80187e4"
   integrity sha512-0JFs3V2y2M9tKW5na/qxe69Zv+uxLMO7QBbhxF/FHu/Gp2NFZAAL9tWl9PU02xxo07pb3G9FTyjNc6D5uZrJIg==
   dependencies:
     tslib "^2.6.2"
 
-"@smithy/types@^4.17.0":
+"@smithy/types@^4.16.1", "@smithy/types@^4.17.0":
   version "4.17.0"
   resolved "https://registry.yarnpkg.com/@smithy/types/-/types-4.17.0.tgz#038b1522f69201ae6b616697b16074ac50989b7f"
   integrity sha512-Aw4joiM0ZdErpo39lCj8phT2lxoiKZV+KZzBxnnQhWVtU2Is/WffQSL04uUWRcXUse9Ln8vXZK6V/FwqRVnQpg==
@@ -20998,15 +20990,10 @@ events@^3.0.0, events@^3.2.0, events@^3.3.0:
   resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
   integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
 
-eventsource-parser@3.1.0:
+eventsource-parser@3.1.0, eventsource-parser@^3.0.0, eventsource-parser@^3.0.6:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/eventsource-parser/-/eventsource-parser-3.1.0.tgz#4e198eb91cd333d0a8ddcc036502b3618a25f449"
   integrity sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==
-
-eventsource-parser@^3.0.0, eventsource-parser@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/eventsource-parser/-/eventsource-parser-3.0.6.tgz#292e165e34cacbc936c3c92719ef326d4aeb4e90"
-  integrity sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==
 
 eventsource@^3.0.2:
   version "3.0.5"
@@ -26516,12 +26503,12 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
 
-mime-db@1.53.0, mime-db@^1.52.0:
+mime-db@1.53.0:
   version "1.53.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.53.0.tgz#3cb63cd820fc29896d9d4e8c32ab4fcd74ccb447"
   integrity sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==
 
-"mime-db@>= 1.43.0 < 2", mime-db@^1.54.0:
+"mime-db@>= 1.43.0 < 2", mime-db@^1.52.0, mime-db@^1.54.0:
   version "1.54.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.54.0.tgz#cddb3ee4f9c64530dff640236661d42cb6a314f5"
   integrity sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
