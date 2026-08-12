@@ -60,6 +60,14 @@ describe('Slack', () => {
     expect(Slack.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
+  it('uses Slack escaping for action parameter templates', () => {
+    expect(Slack.transformations?.templates).toEqual({
+      enabled: true,
+      format: 'mustache',
+      escaping: 'slack',
+    });
+  });
+
   it('should support expected auth types', () => {
     expect(Slack.auth).toBeDefined();
     expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);

@@ -295,6 +295,14 @@ export const Slack: ConnectorSpec = {
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
 
+  transformations: {
+    templates: {
+      enabled: true,
+      format: 'mustache',
+      escaping: 'slack',
+    },
+  },
+
   auth: {
     types: [
       {

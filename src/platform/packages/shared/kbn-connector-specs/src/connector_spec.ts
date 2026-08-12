@@ -264,7 +264,7 @@ export interface ActionContext {
 export interface TemplateRendering {
   enabled: boolean;
   format?: 'mustache' | 'handlebars' | 'custom';
-  escaping?: 'html' | 'json' | 'markdown' | 'none';
+  escaping?: 'html' | 'json' | 'markdown' | 'slack' | 'none';
 }
 
 export interface Transformations {
