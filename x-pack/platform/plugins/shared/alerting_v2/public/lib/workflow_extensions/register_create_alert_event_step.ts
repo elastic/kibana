@@ -11,7 +11,7 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
  * Registers all alerting-v2 public workflow step definitions (UI metadata).
  * Call once during plugin setup with the `workflowsExtensions` setup contract.
  */
-export function registerStepDefinitions(
+export function registerCreateAlertEventStep(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
   workflowsExtensions.registerStepDefinition(() =>

@@ -35,7 +35,7 @@ import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
-import { registerStepDefinitions } from './lib/workflow_extensions/register_step_definitions';
+import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
@@ -74,7 +74,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
     ) as WorkflowsExtensionsPublicPluginSetup;
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup);
+    registerCreateAlertEventStep(workflowsExtensionsSetup);
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingSection = management.sections.register({
