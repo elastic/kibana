@@ -386,7 +386,6 @@ src/platform/packages/private/dashboard/dashboard-navigation-options-schema @ela
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
-src/platform/packages/private/kbn-babel-transform @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
@@ -1272,8 +1271,8 @@ x-pack/platform/plugins/shared/slo_shared @elastic/actionable-obs-team
 x-pack/platform/plugins/shared/spaces @elastic/kibana-security
 x-pack/platform/plugins/shared/stack_alerts @elastic/response-ops
 x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
-x-pack/platform/plugins/shared/streams @elastic/streams-ui @elastic/obs-sig-events-team
-x-pack/platform/plugins/shared/streams_app @elastic/streams-ui @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams @elastic/streams-ui
+x-pack/platform/plugins/shared/streams_app @elastic/streams-ui
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
@@ -2076,10 +2075,8 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout @elastic/streams-ui
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/data_lifecycle_helpers.ts @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/pin_failure_store.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
 /x-pack/performance/configs/streams_* @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/performance/journeys_e2e/streams_* @elastic/obs-sig-events-team @elastic/streams-ui
@@ -2702,6 +2699,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/sublime_security/** @
 src/platform/packages/shared/kbn-connector-specs/src/specs/tavily/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/trello/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/unifi/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/urlscan_io/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/urlvoid/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/virustotal/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/workday/** @elastic/workchat-eng
