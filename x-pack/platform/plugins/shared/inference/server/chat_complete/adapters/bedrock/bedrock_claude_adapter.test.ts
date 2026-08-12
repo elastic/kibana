@@ -587,13 +587,13 @@ Human:`,
             {
               image: {
                 format: 'png',
-                source: { bytes: new Uint8Array(Buffer.from('aaaaaa', 'utf-8')) },
+                source: { bytes: Buffer.from('aaaaaa', 'base64') },
               },
             },
             {
               image: {
                 format: 'png',
-                source: { bytes: new Uint8Array(Buffer.from('bbbbbb', 'utf-8')) },
+                source: { bytes: Buffer.from('bbbbbb', 'base64') },
               },
             },
           ],
