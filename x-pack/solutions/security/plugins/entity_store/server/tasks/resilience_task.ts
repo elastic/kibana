@@ -81,13 +81,7 @@ export function registerResilienceTask({
         title: config.title,
         timeout: config.timeout,
         maxAttempts: 1,
-        createTaskRunner: ({
-          taskInstance,
-          fakeRequest,
-          signal,
-          executionUuid,
-          setCustomTaskRunEventFields,
-        }: RunContext) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.resilience.run',
@@ -100,8 +94,6 @@ export function registerResilienceTask({
                   taskInstance,
                   fakeRequest,
                   signal,
-                  executionUuid,
-                  setCustomTaskRunEventFields,
                   logger: logger.get(taskInstance.id),
                   core,
                 }),
