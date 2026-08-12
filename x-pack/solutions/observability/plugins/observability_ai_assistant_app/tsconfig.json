@@ -68,7 +68,6 @@
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
-    "@kbn/observability-utils-common",
     "@kbn/spaces-plugin",
     "@kbn/data-service",
     "@kbn/inference-common",
