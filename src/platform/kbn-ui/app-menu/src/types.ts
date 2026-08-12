@@ -79,6 +79,27 @@ export type AppMenuSplitButtonProps =
   | AppMenuSecondarySplitButton
   | AppMenuSecondarySplitButtonWithPopover;
 
+/**
+ * Optional Event-Based Telemetry (EBT) click attributes for an app menu control.
+ * Rendered as `data-ebt-*` DOM attributes so core click tracking can collect them.
+ *
+ * `data-ebt-element` is always set to `appMenu` by the renderer — plugins only supply
+ * `action` (and optional `detail`).
+ *
+ * Prefer action values from `@kbn/ebt-click` (`EBT_CLICK_ACTIONS` / plugin-local constants).
+ * Shape intentionally omits a hard dependency on that package (this package is Kibana-agnostic).
+ */
+export interface AppMenuEbtAttrs {
+  /**
+   * User intent for the click. Maps to `data-ebt-action` / `click.action`.
+   */
+  action: string;
+  /**
+   * Optional extra context. Maps to `data-ebt-detail` / `click.detail`.
+   */
+  detail?: string;
+}
+
 interface AppMenuItemBase {
   /**
    * A unique, internal identifier for the item.
@@ -100,6 +121,11 @@ interface AppMenuItemBase {
    * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
    */
   testId?: string;
+  /**
+   * Optional EBT click attributes. Mapped to `data-ebt-action` and optionally
+   * `data-ebt-detail` on the rendered control. `data-ebt-element` is always `appMenu`.
+   */
+  ebt?: AppMenuEbtAttrs;
   /**
    * Disables the button if set to `true` or a function that returns `true`.
    */

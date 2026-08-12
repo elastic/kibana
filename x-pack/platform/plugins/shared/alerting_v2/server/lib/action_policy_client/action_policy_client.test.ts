@@ -3115,12 +3115,24 @@ describe('ActionPolicyClient', () => {
       );
 
       (evaluateKql as jest.Mock).mockImplementation(() => {
-        throw new Error('KQL parse error');
+        throw new Error('KQL parse error: invalid kql !!!');
       });
 
       const result = await client.matchActionPoliciesForRule({ ruleId: 'rule-1' });
 
       expect(result.items).toHaveLength(0);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Policy matcher failed to evaluate; treating as no-match',
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            policy_id: 'ap-err',
+            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+          }),
+        })
+      );
+      const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
+      expect(warnMessage).not.toContain('invalid kql !!!');
+      expect(warnMessage).not.toContain('KQL parse error');
     });
 
     it('uses provided ruleName and ruleTags to evaluate matchers without fetching from DB', async () => {

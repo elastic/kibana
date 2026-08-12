@@ -28,7 +28,7 @@ export interface SignalEnvelope {
 }
 
 /** First concrete signal type; others follow the same envelope. */
-export interface ToolCallSignal extends SignalEnvelope {
+export interface EsqlToolCallSignal extends SignalEnvelope {
   signal_type: 'tool_call';
   data: {
     tool: string;
@@ -49,4 +49,4 @@ export interface ToolCallSignal extends SignalEnvelope {
   };
 }
 
-export type Signal = ToolCallSignal;
+export type Signal = EsqlToolCallSignal;

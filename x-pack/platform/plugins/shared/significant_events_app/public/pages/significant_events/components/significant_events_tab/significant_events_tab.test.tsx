@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
-import { significantEventTableColumns } from '.';
+import { getSignificantEventTableColumns } from '.';
 import { SignificantEventFlyout } from './significant_event_flyout';
 
 jest.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => ({
@@ -73,7 +73,10 @@ const event: SignificantEventResponse = {
 
 describe('Significant Events timestamp rendering', () => {
   it('sorts the Timestamp column by the lineage creation timestamp', () => {
-    expect(significantEventTableColumns[0]).toEqual(
+    const columns = getSignificantEventTableColumns({
+      onToggleEvent: jest.fn(),
+    });
+    expect(columns.find((column) => 'field' in column && column.field === 'created_at')).toEqual(
       expect.objectContaining({ field: 'created_at' })
     );
   });
