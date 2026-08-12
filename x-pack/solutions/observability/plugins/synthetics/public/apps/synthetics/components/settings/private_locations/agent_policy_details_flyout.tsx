@@ -68,6 +68,7 @@ export const AgentPolicyDetailsFlyout = ({
   ];
 
   const agents = locationStats?.agents ?? [];
+  const totalMonitors = agents.reduce((sum, a) => sum + a.monitors, 0);
   const healthyAgents = agents.filter((a) => a.healthy).length;
 
   return (
@@ -107,11 +108,11 @@ export const AgentPolicyDetailsFlyout = ({
           listItems={overviewItems}
         />
 
-        {locationStats && agents.length > 0 && (
+        {locationStats && (
           <>
             <EuiSpacer size="l" />
             <EuiTitle size="xxs">
-              <h3>{HEALTH_SECTION}</h3>
+              <h3>{SHARDING_SECTION}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiDescriptionList
@@ -119,9 +120,14 @@ export const AgentPolicyDetailsFlyout = ({
               columnWidths={[1, 2]}
               compressed
               listItems={[
+                { title: TOTAL_MONITORS_LABEL, description: `${totalMonitors}` },
                 {
                   title: HEALTHY_AGENTS_LABEL,
                   description: `${healthyAgents}/${agents.length}`,
+                },
+                {
+                  title: UNASSIGNED_LABEL,
+                  description: `${locationStats.unassignedMonitors}`,
                 },
               ]}
             />
@@ -165,8 +171,8 @@ const AGENT_POLICY_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
   }
 );
 
-const HEALTH_SECTION = i18n.translate('xpack.synthetics.policyFlyout.healthSection', {
-  defaultMessage: 'Agent health',
+const SHARDING_SECTION = i18n.translate('xpack.synthetics.policyFlyout.shardingSection', {
+  defaultMessage: 'Sharding',
 });
 
 const STATUS_LABEL = i18n.translate('xpack.synthetics.policyFlyout.status', {
@@ -193,8 +199,16 @@ const POLICY_ID_LABEL = i18n.translate('xpack.synthetics.policyFlyout.policyId',
   defaultMessage: 'Policy ID',
 });
 
+const TOTAL_MONITORS_LABEL = i18n.translate('xpack.synthetics.policyFlyout.totalMonitors', {
+  defaultMessage: 'Monitors',
+});
+
 const HEALTHY_AGENTS_LABEL = i18n.translate('xpack.synthetics.policyFlyout.healthyAgents', {
   defaultMessage: 'Healthy agents',
+});
+
+const UNASSIGNED_LABEL = i18n.translate('xpack.synthetics.policyFlyout.unassigned', {
+  defaultMessage: 'Unassigned monitors',
 });
 
 const CLOSE_LABEL = i18n.translate('xpack.synthetics.policyFlyout.close', {

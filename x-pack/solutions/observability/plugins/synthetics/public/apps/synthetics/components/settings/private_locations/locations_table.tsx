@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -17,10 +17,9 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
 import { useDispatch } from 'react-redux-v7';
 import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -36,7 +35,6 @@ import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { useAgentStats } from './hooks/use_agent_stats';
 import { LocationAgentDetails } from './location_agent_details';
-import { RelativeTimestamp } from './relative_timestamp';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -79,7 +77,7 @@ export const PrivateLocationsTable = ({
   const { byLocation: agentStatsByLocation, loading: agentStatsLoading } = useAgentStats();
   const { refreshApp, lastRefresh } = useSyntheticsRefreshContext();
 
-  // Expanded rows: per-agent health/capacity breakdown for a location's agents.
+  // Expanded rows: per-agent stats breakdown for condition-sharded locations.
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const toggleRow = (id: string) =>
     setExpandedIds((prev) => {
@@ -91,6 +89,13 @@ export const PrivateLocationsTable = ({
       }
       return next;
     });
+
+  // Re-render periodically so the "Updated … ago" caption stays current between refreshes.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNowTick(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 
@@ -114,25 +119,24 @@ export const PrivateLocationsTable = ({
         </EuiScreenReaderOnly>
       ),
       render: (item: ListItem) => {
+        if (!item.agentConditionSharding) {
+          return null;
+        }
         const isExpanded = expandedIds.has(item.id);
-        const label = isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL;
         return (
-          <EuiToolTip content={label} disableScreenReaderOutput>
-            <EuiButtonIcon
-              data-test-subj="syntheticsExpandLocationAgents"
-              size="xs"
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-              aria-label={label}
-              onClick={() => toggleRow(item.id)}
-            />
-          </EuiToolTip>
+          <EuiButtonIcon
+            data-test-subj="syntheticsExpandLocationAgents"
+            size="xs"
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            aria-label={isExpanded ? COLLAPSE_ROW_LABEL : EXPAND_ROW_LABEL}
+            onClick={() => toggleRow(item.id)}
+          />
         );
       },
     },
     {
       field: 'label',
       name: LOCATION_NAME_LABEL,
-      width: '20%',
       render: (label: string) => <CopyName text={label} />,
     },
     {
@@ -152,14 +156,32 @@ export const PrivateLocationsTable = ({
     {
       field: 'agentPolicyId',
       name: AGENT_POLICY_LABEL,
-      render: (agentPolicyId: string, item: ListItem) => (
-        <PolicyName
-          agentPolicyId={agentPolicyId}
-          locationStats={agentStatsByLocation.get(item.id)}
-          // The expanded panel already shows the agent count, so drop the badge there.
-          hideAgentCount={expandedIds.has(item.id)}
-        />
-      ),
+      render: (agentPolicyId: string, item: ListItem) => {
+        if (item.agentConditionSharding) {
+          const agentCount = agentStatsByLocation.get(item.id)?.agents.length ?? 0;
+          return (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiBadge color="primary" iconType="cluster">
+                    {agentCount > 0
+                      ? CONDITION_SHARDED_WITH_COUNT_LABEL(agentCount)
+                      : CONDITION_SHARDED_LABEL}
+                  </EuiBadge>
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                <PolicyName
+                  agentPolicyId={agentPolicyId}
+                  locationStats={agentStatsByLocation.get(item.id)}
+                  hideAgentCount
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        return <PolicyName agentPolicyId={agentPolicyId} />;
+      },
     },
     {
       name: TAGS_LABEL,
@@ -267,7 +289,7 @@ export const PrivateLocationsTable = ({
   }));
 
   const itemIdToExpandedRowMap = items.reduce<Record<string, React.ReactNode>>((acc, item) => {
-    if (expandedIds.has(item.id)) {
+    if (item.agentConditionSharding && expandedIds.has(item.id)) {
       acc[item.id] = (
         <LocationAgentDetails
           stats={agentStatsByLocation.get(item.id)}
@@ -322,11 +344,7 @@ export const PrivateLocationsTable = ({
       <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            <FormattedMessage
-              id="xpack.synthetics.monitorManagement.lastUpdated"
-              defaultMessage="Updated {time}"
-              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
-            />
+            {LAST_UPDATED_LABEL(moment(lastRefresh).from(nowTick))}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -413,17 +431,36 @@ export const AGENT_POLICY_LABEL = i18n.translate('xpack.synthetics.monitorManage
   defaultMessage: 'Agent Policy',
 });
 
+const CONDITION_SHARDED_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.conditionSharded',
+  {
+    defaultMessage: 'Scalable · condition',
+  }
+);
+
+const CONDITION_SHARDED_WITH_COUNT_LABEL = (count: number) =>
+  i18n.translate('xpack.synthetics.monitorManagement.conditionShardedWithCount', {
+    defaultMessage: 'Scalable · {count, plural, one {# agent} other {# agents}}',
+    values: { count },
+  });
+
 const EXPAND_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.expandRow', {
-  defaultMessage: 'Expand per-agent details',
+  defaultMessage: 'Expand per-agent stats',
 });
 
 const COLLAPSE_ROW_LABEL = i18n.translate('xpack.synthetics.monitorManagement.collapseRow', {
-  defaultMessage: 'Collapse per-agent details',
+  defaultMessage: 'Collapse per-agent stats',
 });
 
 const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorManagement.refresh', {
   defaultMessage: 'Refresh',
 });
+
+const LAST_UPDATED_LABEL = (time: string) =>
+  i18n.translate('xpack.synthetics.monitorManagement.lastUpdated', {
+    defaultMessage: 'Updated {time}',
+    values: { time },
+  });
 
 const DELETE_LOCATION = i18n.translate(
   'xpack.synthetics.settingsRoute.privateLocations.deleteLabel',

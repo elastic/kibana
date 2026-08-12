@@ -676,6 +676,70 @@ describe('MonitorIntegrationHealthApi', () => {
     });
   });
 
+  describe('scalable (condition-sharded) locations', () => {
+    const conditionLocation = (id: string, agentPolicyId: string): PrivateLocationAttributes => ({
+      id,
+      label: `Scalable ${id}`,
+      agentPolicyId,
+      agentConditionSharding: true,
+      isServiceManaged: false,
+    });
+
+    it('judges health against the location single agent policy', async () => {
+      const privateLoc = conditionLocation('priv-loc-1', 'ap1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      // Monitor is pinned to the single policy (ap1), gated to one agent by a host
+      // condition; the agent policy has no online agents → UnhealthyAgent.
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['ap1']);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest.fn(async () => ({
+        all: 1,
+        active: 1,
+        online: 0,
+      }));
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const locStatus = (await api.getHealth(['mon-1'])).monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.UnhealthyAgent);
+      expect(locStatus.agentPolicyId).toBe('ap1');
+    });
+
+    it('reports healthy when the agent policy has an online agent', async () => {
+      const privateLoc = conditionLocation('priv-loc-1', 'ap1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+      mockedGetPrivateLocationsForNamespaces.mockResolvedValue([privateLoc]);
+
+      const packagePolicy = createPackagePolicy('mon-1-priv-loc-1', ['ap1']);
+      const packagePolicyServiceGetByIds = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest.fn(async () => ({
+        all: 2,
+        active: 2,
+        online: 2,
+      }));
+
+      const api = buildApi({
+        monitorConfigRepository: { getAcrossSpaces: jest.fn().mockResolvedValue(so) },
+        packagePolicyServiceGetByIds,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const locStatus = (await api.getHealth(['mon-1'])).monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.Healthy);
+      expect(locStatus.agentPolicyId).toBe('ap1');
+    });
+  });
+
   describe('missing agents', () => {
     it('returns MissingAgents when no agents are enrolled in the agent policy', async () => {
       const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');

@@ -14,6 +14,10 @@ export const PrivateLocationCodec = t.intersection([
     agentPolicyId: t.string,
   }),
   t.partial({
+    // Scalable private location: one agent policy + many agents, sharded via a
+    // per-monitor Elastic Agent `condition` on host.name (see
+    // assign_by_condition.ts) for at-most-once execution.
+    agentConditionSharding: t.boolean,
     isServiceManaged: t.boolean,
     isInvalid: t.boolean,
     tags: t.array(t.string),

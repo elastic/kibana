@@ -13,6 +13,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import { runRebalanceShardsTaskSoon } from '../../../tasks/rebalance_private_location_shards_task';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
@@ -30,15 +31,18 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
+  agentPolicyId: schema.maybe(schema.string({ maxLength: 1024 })),
+  // Scalable private location: single agent policy + many agents, sharded via a
+  // per-monitor host.name condition for at-most-once execution.
+  agentConditionSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
   locationId: schema.string(),
 });
 
-export type EditPrivateLocationAttributes = Pick<
-  PrivateLocationAttributes,
-  keyof TypeOf<typeof EditPrivateLocationSchema>
+export type EditPrivateLocationAttributes = Partial<
+  Pick<PrivateLocationAttributes, keyof TypeOf<typeof EditPrivateLocationSchema>>
 >;
 
 const isPrivateLocationLabelChanged = (oldLabel: string, newLabel?: string): newLabel is string => {
@@ -116,7 +120,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
-    const { label: newLocationLabel, tags: newTags } = request.body;
+    const {
+      label: newLocationLabel,
+      tags: newTags,
+      agentConditionSharding: newConditionSharding,
+    } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -132,35 +140,65 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         }),
       ]);
 
+      // Toggling condition sharding changes how monitors bind to agents (adds or
+      // removes the per-monitor host.name condition), so it must re-sync monitors.
+      const isConditionShardingChanged =
+        newConditionSharding !== undefined &&
+        newConditionSharding !== Boolean(existingLocation.attributes.agentConditionSharding);
+
+      const labelChanged = isPrivateLocationLabelChanged(
+        existingLocation.attributes.label,
+        newLocationLabel
+      );
+
       let newLocation: Awaited<ReturnType<typeof repo.editPrivateLocation>> | undefined;
 
       if (
-        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
+        isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body }) ||
+        isConditionShardingChanged
       ) {
-        // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (
-          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
-          monitorsInLocation.length
-        ) {
-          await checkPrivileges({
-            routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
-          });
+        // A label or condition-sharding change rewrites the monitors in this
+        // location (label denormalization / (un)stamping host conditions), so
+        // require monitor bulk-update rights in every affected space.
+        if ((labelChanged || isConditionShardingChanged) && monitorsInLocation.length) {
+          // A monitor can live in several spaces, so require bulk-update rights in
+          // *every* space any affected monitor belongs to — not just its first
+          // namespace — before rewriting them.
+          const monitorsSpaces = [
+            ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+          ];
+          if (monitorsSpaces.length) {
+            const forbidden = await checkPrivileges({ routeContext, monitorsSpaces });
+            if (forbidden) {
+              return forbidden;
+            }
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
+          ...(isConditionShardingChanged ? { agentConditionSharding: newConditionSharding } : {}),
         });
 
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
+        // Re-sync monitors when the label OR condition sharding changed: the
+        // label is denormalized onto each monitor, and a condition-mode change
+        // re-binds the monitors' package policies.
+        if (labelChanged || isConditionShardingChanged) {
           await updatePrivateLocationMonitors({
             locationId,
-            newLocationLabel,
+            newLocationLabel: newLocationLabel || existingLocation.attributes.label,
             allPrivateLocations: await getPrivateLocations(savedObjectsClient),
             routeContext,
             monitorsInLocation,
           });
+        }
+
+        // Enabling condition sharding assigns monitors to agents via rendezvous,
+        // so one may land on a currently-offline agent; kick the rebalance task
+        // now so it moves onto a healthy agent promptly. Fire-and-forget.
+        if (isConditionShardingChanged && newConditionSharding) {
+          void runRebalanceShardsTaskSoon({ server: routeContext.server });
         }
       }
 

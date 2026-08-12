@@ -69,10 +69,19 @@ export const ManagePrivateLocations = () => {
     if (privateLocationToEdit) {
       const isLabelChanged = formData.label !== privateLocationToEdit.label;
       const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
-      if (!isLabelChanged && !areTagsChanged) {
+      const isConditionShardingChanged =
+        Boolean(formData.agentConditionSharding) !==
+        Boolean(privateLocationToEdit.agentConditionSharding);
+      if (!isLabelChanged && !areTagsChanged && !isConditionShardingChanged) {
         onCloseFlyout();
       } else {
-        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label, tags: formData.tags });
+        onEditLocationAPI(privateLocationToEdit.id, {
+          label: formData.label,
+          tags: formData.tags,
+          ...(isConditionShardingChanged
+            ? { agentConditionSharding: Boolean(formData.agentConditionSharding) }
+            : {}),
+        });
       }
     } else {
       onCreateLocationAPI(formData);

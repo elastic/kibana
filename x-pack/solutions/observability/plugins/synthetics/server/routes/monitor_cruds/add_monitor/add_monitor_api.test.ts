@@ -9,6 +9,11 @@ import { AddEditMonitorAPI } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+
+jest.mock('../../../synthetics_service/private_location/package_policy_service');
+
+const bulkDeletePackagePoliciesMock = jest.fn();
 
 describe('AddNewMonitorsPublicAPI', () => {
   it('should normalize schedule', async function () {
@@ -393,6 +398,49 @@ describe('AddNewMonitorsPublicAPI', () => {
 
       const result = await api.validateUniqueMonitorName('test-monitor', 'monitor-id');
       expect(result).toBe('Monitor name must be unique, "test-monitor" already exists.');
+    });
+  });
+
+  describe('revertMonitorIfCreated', () => {
+    beforeEach(() => {
+      (PackagePolicyService as unknown as jest.Mock).mockImplementation(() => ({
+        bulkDelete: bulkDeletePackagePoliciesMock,
+      }));
+      bulkDeletePackagePoliciesMock.mockReset().mockResolvedValue([]);
+    });
+
+    const buildApi = (get: jest.Mock) =>
+      new AddEditMonitorAPI({
+        server: { logger: { error: jest.fn() } },
+        spaceId: 'default',
+        monitorConfigRepository: { get },
+      } as any);
+
+    it('does not delete package policies when a pre-existing monitor owns the id (version_conflict)', async () => {
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'm1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'm1',
+        packagePolicyIds: ['m1-loc1'],
+        soCreated: false,
+      });
+
+      expect(bulkDeletePackagePoliciesMock).not.toHaveBeenCalled();
+    });
+
+    it('force-deletes orphaned package policies when no monitor owns the id', async () => {
+      const api = buildApi(jest.fn().mockResolvedValue(null));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'm1',
+        packagePolicyIds: ['m1-loc1'],
+        soCreated: false,
+      });
+
+      expect(bulkDeletePackagePoliciesMock).toHaveBeenCalledWith({
+        policyIdsToDelete: ['m1-loc1'],
+        spaceId: 'default',
+      });
     });
   });
 });

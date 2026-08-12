@@ -6,6 +6,8 @@
  */
 
 import type { EditPrivateLocationAttributes } from '../../../../../server/routes/settings/private_locations/edit_private_location';
+import type { LocationAgentStats } from '../../../../../common/types';
+import type { MonitorAgentAssignment } from '../../../../../server/routes/settings/private_locations/get_monitor_agent_assignment';
 import type { NewLocation } from '../../components/settings/private_locations/add_or_edit_location_flyout';
 import type { AgentPolicyInfo } from '../../../../../common/types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
@@ -48,6 +50,18 @@ export const getSyntheticsPrivateLocations = async (): Promise<SyntheticsPrivate
   return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS, {
     version: INITIAL_REST_VERSION,
   });
+};
+
+export const getPrivateLocationAgentStats = async (): Promise<LocationAgentStats[]> => {
+  return await apiService.get(SYNTHETICS_API_URLS.PRIVATE_LOCATION_AGENT_STATS);
+};
+
+export const getMonitorAgentAssignments = async (
+  monitorId: string
+): Promise<MonitorAgentAssignment[]> => {
+  return await apiService.get(
+    SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT.replace('{monitorId}', monitorId)
+  );
 };
 
 export const deleteSyntheticsPrivateLocation = async (

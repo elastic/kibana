@@ -44,8 +44,8 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
       ).toBeHidden();
-      await page.click('[aria-label="Select agent policy"]');
-      await page.click('button[role="option"]:has-text("Test fleet policyAgents: 0")');
+      await page.testSubj.click('syntheticsAgentPolicySelect');
+      await page.getByRole('option', { name: FLEET_POLICY_NAME }).click();
       await expect(
         page.locator('[data-test-subj="euiComboBoxPill"]:has-text("Default")')
       ).toBeVisible();

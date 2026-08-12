@@ -88,6 +88,9 @@ export class MonitorIntegrationHealthApi {
       allPrivateLocations.map((loc) => [loc.id, loc])
     );
 
+    // Each private location is backed by a single agent policy (scalable
+    // locations run many agents under that one policy), so health is judged
+    // against the location's agentPolicyId.
     const referencedAgentPolicyIds = [
       ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
     ];
@@ -130,16 +133,6 @@ export class MonitorIntegrationHealthApi {
           );
         }
 
-        if (!existingAgentPoliciesMap.has(existingPrivateLocation.agentPolicyId)) {
-          return MonitorIntegrationHealthApi.buildLocationStatus(
-            loc.id,
-            existingPrivateLocation.label,
-            PrivateLocationHealthStatusValue.MissingAgentPolicy,
-            newFormatPolicyId,
-            existingPrivateLocation.agentPolicyId
-          );
-        }
-
         const { hasNewFormatPolicyId, hasAnyLegacyPolicyId, legacyPolicyIds } =
           privateLocationAPI.getPolicyIdFormatInfo(
             { id: monitorPolicyId },
@@ -148,18 +141,31 @@ export class MonitorIntegrationHealthApi {
             allSpaces
           );
 
+        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
+        // Every monitor runs on the location's single agent policy; a scalable
+        // location just gates it to one enrolled agent via a host condition
+        // (same policy), so health is judged against that agent policy.
+        const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
+
+        if (!existingAgentPoliciesMap.has(expectedAgentPolicyId)) {
+          return MonitorIntegrationHealthApi.buildLocationStatus(
+            loc.id,
+            existingPrivateLocation.label,
+            PrivateLocationHealthStatusValue.MissingAgentPolicy,
+            newFormatPolicyId,
+            expectedAgentPolicyId
+          );
+        }
+
         if (!hasNewFormatPolicyId && !hasAnyLegacyPolicyId) {
           return MonitorIntegrationHealthApi.buildLocationStatus(
             loc.id,
             existingPrivateLocation.label,
             PrivateLocationHealthStatusValue.MissingPackagePolicy,
             newFormatPolicyId,
-            existingPrivateLocation.agentPolicyId
+            expectedAgentPolicyId
           );
         }
-
-        const resolvedPolicyId = hasNewFormatPolicyId ? newFormatPolicyId : legacyPolicyIds[0];
-        const expectedAgentPolicyId = existingPrivateLocation.agentPolicyId;
 
         const agentStatus = agentStatusMap.get(expectedAgentPolicyId);
         if (agentStatus !== undefined) {

@@ -71,11 +71,16 @@ export const LocationAgentDetails = ({
   }
 
   const agents = stats?.agents ?? [];
+  const unassignedMonitors = stats?.unassignedMonitors ?? 0;
+  // Sum of per-agent package-policy conditions. Normally equals the location's
+  // monitor count; a mismatch means orphaned/pending assignments (surfaced below).
+  const totalAssignments = agents.reduce((sum, agent) => sum + agent.monitors, 0);
   const healthyAgents = agents.filter((agent) => agent.healthy).length;
-  const unhealthyAgents = agents.filter((agent) => !agent.healthy);
+  const staleAgents = agents.filter((agent) => !agent.healthy);
   const pressuredAgents = agents.filter(
     (agent) => agent.usedMemoryPct != null && agent.usedMemoryPct >= MEMORY_PRESSURE_PCT
   );
+  const assignmentDelta = totalAssignments - locationMonitorCount;
 
   // Cluster-wide memory across agents that report it (System integration / host.memory).
   const agentsWithTotal = agents.filter((agent) => agent.totalMemoryMib != null);
@@ -83,13 +88,19 @@ export const LocationAgentDetails = ({
   const clusterUsedMib = agents.reduce((sum, a) => sum + (a.usedMemoryMib ?? 0), 0);
 
   const warnings: React.ReactNode[] = [];
-  if (unhealthyAgents.length > 0) {
-    warnings.push(UNHEALTHY_AGENTS_WARNING(unhealthyAgents.length));
+  if (staleAgents.length > 0) {
+    warnings.push(STALE_AGENTS_WARNING(staleAgents.length));
   }
   if (pressuredAgents.length > 0) {
     warnings.push(MEMORY_PRESSURE_WARNING(pressuredAgents.length));
   }
-  const calloutColor = unhealthyAgents.length > 0 ? 'danger' : 'warning';
+  if (unassignedMonitors > 0) {
+    warnings.push(UNASSIGNED_WARNING(unassignedMonitors));
+  }
+  if (assignmentDelta > 0) {
+    warnings.push(ASSIGNMENT_MISMATCH_WARNING(assignmentDelta));
+  }
+  const calloutColor = staleAgents.length > 0 ? 'danger' : 'warning';
 
   const columns: Array<EuiBasicTableColumn<AgentStat>> = [
     {
@@ -100,65 +111,68 @@ export const LocationAgentDetails = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type="vectorTriangle" size="s" aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+          <EuiFlexItem grow={false}>
             <EuiLink
               data-test-subj="syntheticsAgentDetailsLink"
               onClick={() => setFlyoutAgent(agent)}
               title={VIEW_AGENT_DETAILS}
             >
-              <strong>{host || agent.agentId || '—'}</strong>
+              <strong>{host}</strong>
             </EuiLink>
-            {agent.agentId && (
-              <EuiText size="xs" color="subdued" className="eui-textTruncate" title={agent.agentId}>
-                {agent.agentId}
-              </EuiText>
-            )}
           </EuiFlexItem>
+          {!agent.enrolled && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip type="warning" color="warning" content={UNENROLLED_HELP} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
     },
     {
+      field: 'monitors',
       name: MONITORS_LABEL,
       width: '90px',
       align: 'right',
-      // Every enrolled agent runs all of the location's monitors today.
-      render: (agent: AgentStat) =>
-        locationMonitorCount > 0 ? (
+      render: (monitors: number) =>
+        monitors > 0 ? (
           <EuiLink
             data-test-subj="syntheticsAgentMonitorsLink"
             href={locationMonitorsHref}
             title={VIEW_LOCATION_MONITORS}
             className="eui-textNoWrap"
           >
-            <strong>{locationMonitorCount}</strong>
+            <strong>{monitors}</strong>
           </EuiLink>
         ) : (
           <EuiText size="s" color="subdued" className="eui-textNoWrap">
-            {locationMonitorCount}
+            {monitors}
           </EuiText>
         ),
     },
     {
+      field: 'monitors',
       name: DISTRIBUTION_COLUMN,
       width: '200px',
-      // In the single-agent model each agent runs the full set (100%).
-      render: (agent: AgentStat) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiProgress
-              value={locationMonitorCount > 0 ? 1 : 0}
-              max={1}
-              size="s"
-              color={agent.healthy ? 'success' : 'danger'}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-              {locationMonitorCount > 0 ? '100%' : '—'}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (monitors: number, agent: AgentStat) => {
+        const pct = totalAssignments > 0 ? Math.round((monitors / totalAssignments) * 100) : 0;
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiProgress
+                value={monitors}
+                max={totalAssignments || 1}
+                size="s"
+                color={agent.healthy ? 'success' : 'danger'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+                {`${pct}%`}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'usedMemoryPct',
@@ -229,7 +243,7 @@ export const LocationAgentDetails = ({
       width: '120px',
       render: (healthy: boolean) => (
         <EuiHealth color={healthy ? 'success' : 'danger'}>
-          {healthy ? HEALTHY_LABEL : UNHEALTHY_LABEL}
+          {healthy ? HEALTHY_LABEL : STALE_LABEL}
         </EuiHealth>
       ),
     },
@@ -260,8 +274,8 @@ export const LocationAgentDetails = ({
                 <EuiIcon
                   type="cluster"
                   size="m"
-                  css={{ marginInlineEnd: 6, verticalAlign: 'text-bottom' }}
                   aria-hidden={true}
+                  css={{ marginInlineEnd: 6, verticalAlign: 'text-bottom' }}
                 />
                 {OVERVIEW_TITLE}
               </h4>
@@ -340,6 +354,17 @@ export const LocationAgentDetails = ({
                 />
               </EuiFlexItem>
             )}
+            {unassignedMonitors > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiStat
+                  title={`${unassignedMonitors}`}
+                  description={UNASSIGNED_LABEL}
+                  titleSize="m"
+                  titleColor="warning"
+                  reverse
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
 
@@ -384,7 +409,7 @@ export const LocationAgentDetails = ({
         <AgentDetailsFlyout
           agent={flyoutAgent}
           agentPolicyId={agentPolicyId}
-          monitorsRun={locationMonitorCount}
+          totalMonitors={totalAssignments}
           onClose={() => setFlyoutAgent(null)}
         />
       )}
@@ -450,14 +475,15 @@ const CPU_UNAVAILABLE_HELP = i18n.translate(
 const CLUSTER_MEMORY_LABEL = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.clusterMemory',
   {
-    defaultMessage: 'Total memory',
+    defaultMessage: 'Cluster memory',
   }
 );
 
 const CLUSTER_MEMORY_HELP = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.clusterMemoryHelp',
   {
-    defaultMessage: 'Total RAM used and available across the agents that report memory.',
+    defaultMessage:
+      'Total RAM used and available across agents that report memory. This is the capacity the rebalancer weights each agent by.',
   }
 );
 
@@ -475,10 +501,10 @@ const ATTENTION_TITLE = i18n.translate(
   }
 );
 
-const UNHEALTHY_AGENTS_WARNING = (count: number) =>
-  i18n.translate('xpack.synthetics.privateLocation.agentDetails.unhealthyAgentsWarning', {
+const STALE_AGENTS_WARNING = (count: number) =>
+  i18n.translate('xpack.synthetics.privateLocation.agentDetails.staleAgentsWarning', {
     defaultMessage:
-      '{count, plural, one {# agent is} other {# agents are}} not reporting as online. Monitors assigned to this location may not run until the {count, plural, one {agent} other {agents}} recover.',
+      '{count, plural, one {# agent is} other {# agents are}} stale — their monitors move to healthy agents on the next rebalance.',
     values: { count },
   });
 
@@ -486,6 +512,20 @@ const MEMORY_PRESSURE_WARNING = (count: number) =>
   i18n.translate('xpack.synthetics.privateLocation.agentDetails.memoryPressureWarning', {
     defaultMessage:
       '{count, plural, one {# agent is} other {# agents are}} memory-constrained (≥85% used). Consider adding an agent to spread the load.',
+    values: { count },
+  });
+
+const UNASSIGNED_WARNING = (count: number) =>
+  i18n.translate('xpack.synthetics.privateLocation.agentDetails.unassignedWarning', {
+    defaultMessage:
+      '{count, plural, one {# monitor is} other {# monitors are}} not yet pinned to an agent and run on every agent until the next rebalance.',
+    values: { count },
+  });
+
+const ASSIGNMENT_MISMATCH_WARNING = (count: number) =>
+  i18n.translate('xpack.synthetics.privateLocation.agentDetails.assignmentMismatchWarning', {
+    defaultMessage:
+      '{count, plural, one {# extra assignment} other {# extra assignments}} across agents vs. the location monitor count — likely orphaned package policies.',
     values: { count },
   });
 
@@ -500,12 +540,12 @@ const RAM_UNAVAILABLE_HELP = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.ramUnavailableHelp',
   {
     defaultMessage:
-      'Host memory is unavailable for this agent. Enable the System integration on its agent policy to report total RAM.',
+      'Host memory is unavailable for this agent. Enable the System integration on its agent policy to report total RAM, which lets sharding weight this agent by capacity.',
   }
 );
 
 const OVERVIEW_TITLE = i18n.translate('xpack.synthetics.privateLocation.agentDetails.overview', {
-  defaultMessage: 'Agents overview',
+  defaultMessage: 'Sharding overview',
 });
 
 const VIEW_POLICY_LABEL = i18n.translate(
@@ -536,7 +576,7 @@ const AGENT_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetail
 const DISTRIBUTION_COLUMN = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.distributionColumn',
   {
-    defaultMessage: 'Monitors run',
+    defaultMessage: 'Distribution',
   }
 );
 
@@ -552,8 +592,8 @@ const HEALTHY_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDeta
   defaultMessage: 'Healthy',
 });
 
-const UNHEALTHY_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.unhealthy', {
-  defaultMessage: 'Unhealthy',
+const STALE_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.stale', {
+  defaultMessage: 'Stale',
 });
 
 const LAST_CHECKIN_LABEL = i18n.translate(
@@ -578,10 +618,25 @@ const HEALTHY_AGENTS_LABEL = i18n.translate(
   }
 );
 
+const UNASSIGNED_LABEL = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.unassigned',
+  {
+    defaultMessage: 'Unassigned',
+  }
+);
+
+const UNENROLLED_HELP = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.unenrolledHelp',
+  {
+    defaultMessage:
+      'This host still has monitors pinned to it but is no longer an enrolled agent. Its monitors move to a healthy agent on the next rebalance.',
+  }
+);
+
 const DISTRIBUTION_TITLE = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.distributionTitle',
   {
-    defaultMessage: 'Monitors per agent',
+    defaultMessage: 'Monitor distribution per agent',
   }
 );
 
@@ -589,7 +644,7 @@ const DISTRIBUTION_HELP = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.distributionHelp',
   {
     defaultMessage:
-      "Every enrolled agent on this location's agent policy currently runs all of the location's monitors.",
+      'Each monitor is pinned to exactly one agent (by a host condition) for at-most-once execution. Monitors are distributed by memory cost — a browser journey weighs far more than a lightweight check. If an agent goes stale, its monitors move to healthy agents.',
   }
 );
 
@@ -600,6 +655,6 @@ const NO_AGENTS_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDe
 const AGENTS_TABLE_CAPTION = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.tableCaption',
   {
-    defaultMessage: 'Per-agent health and capacity for this private location.',
+    defaultMessage: 'Per-agent monitor distribution and health for this private location.',
   }
 );

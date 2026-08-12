@@ -7,24 +7,26 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import {
+  hostFromCondition,
+  isConditionShardedLocation,
+} from '../../../synthetics_service/private_location/assign_by_condition';
+import { STALE_CHECKIN_MS } from '../../../tasks/rebalance_private_location_shards_task';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
 
+export type { AgentStat, LocationAgentStats };
+
 const BYTES_PER_MIB = 1024 * 1024;
 
-interface EnrolledAgentMeta {
-  /** Fleet agent id (unique). Map key. */
-  agentId: string;
-  /**
-   * Original-case `host.name` (or hostname) for display and metrics join.
-   * Empty when the agent reports no host metadata.
-   */
-  host: string;
+interface AgentHostMeta {
   lastCheckin: number | null;
-  /** Total host RAM (MiB) from agent metadata, or null when not reported. */
+  /** Total host RAM (MiB) from agent metadata, or null when the agent doesn't report it. */
   memoryMib: number | null;
+  agentId: string | null;
   agentVersion: string | null;
   agentStatus: string | null;
   policyRevision: number | null;
@@ -40,69 +42,74 @@ interface AgentLocalMetadata {
 }
 
 /**
- * One entry per enrolled Fleet agent (`agent.id`) on the location's policy.
- * Host memory from agent metadata is optional; `metrics-system.*` fills gaps.
+ * Per enrolled agent host (keyed by lowercased `host.name`): freshest
+ * `last_checkin`, total host RAM, and the identity/metadata of the freshest
+ * agent (id, version, status, policy revision, platform, tags) for the flyout.
+ *
+ * `host.memory` is reported by every agent that ships elastic/elastic-agent#15708
+ * (host total RAM in agent metadata) — no System integration required. Older
+ * agents omit it (null here), and the route then falls back to
+ * `metrics-system.memory-*`. When several agents share a host name we keep the
+ * freshest check-in (and its identity) and the largest reported memory.
  */
-const getEnrolledAgents = async (
+const getEnrolledAgentHosts = async (
   server: SyntheticsServerSetup,
   agentPolicyId: string
-): Promise<Map<string, EnrolledAgentMeta>> => {
-  const byId = new Map<string, EnrolledAgentMeta>();
+): Promise<Map<string, AgentHostMeta>> => {
+  const byHost = new Map<string, AgentHostMeta>();
 
   const perPage = 1000;
-  // Bound pagination on Fleet's `total`, with a hard page cap so a misbehaving
-  // paginator can't spin forever. Stays within ES's default 10k `from + size`.
-  const MAX_PAGES = 10;
   let page = 1;
-  let total = Infinity;
-  let fetched = 0;
-
-  while (fetched < total && page <= MAX_PAGES) {
-    const { agents, total: totalAgents } =
-      await server.fleet.agentService.asInternalUser.listAgents({
-        showInactive: true,
-        perPage,
-        page,
-        kuery: `policy_id:"${agentPolicyId}"`,
-      });
-    total = totalAgents ?? agents.length;
+  let hasMore = true;
+  // Paginate: a location's single agent policy can hold more than one page of
+  // agents, and dropping the overflow would make the UI's per-agent stats,
+  // counts and health disagree with the rebalancer at scale.
+  while (hasMore) {
+    const { agents } = await server.fleet.agentService.asInternalUser.listAgents({
+      showInactive: false,
+      perPage,
+      page,
+      kuery: `policy_id:"${agentPolicyId}"`,
+    });
 
     for (const agent of agents) {
-      if (!agent.id) {
+      const meta = agent.local_metadata as AgentLocalMetadata | undefined;
+      const host = meta?.host;
+      const name = (host?.name ?? host?.hostname)?.toLowerCase();
+      if (!name) {
         continue;
       }
-      const meta = agent.local_metadata as AgentLocalMetadata | undefined;
-      const hostMeta = meta?.host;
-      const host = hostMeta?.name ?? hostMeta?.hostname ?? '';
       const last = agent.last_checkin ? Date.parse(agent.last_checkin) : NaN;
       const lastCheckin = Number.isNaN(last) ? null : last;
       const memoryMib =
-        typeof hostMeta?.memory === 'number' && hostMeta.memory > 0
-          ? Math.round(hostMeta.memory / BYTES_PER_MIB)
+        typeof host?.memory === 'number' && host.memory > 0
+          ? Math.round(host.memory / BYTES_PER_MIB)
           : null;
-
-      byId.set(agent.id, {
-        agentId: agent.id,
-        host,
-        lastCheckin,
-        memoryMib,
-        agentVersion: meta?.elastic?.agent?.version ?? null,
-        agentStatus: agent.status ?? null,
-        policyRevision: agent.policy_revision ?? null,
-        lastCheckinMessage: agent.last_checkin_message ?? null,
-        platform: meta?.os?.platform ?? meta?.os?.name ?? null,
-        tags: agent.tags ?? [],
+      const prev = byHost.get(name);
+      // Keep the freshest agent's identity when several share a host name.
+      const isFresher = (lastCheckin ?? 0) >= (prev?.lastCheckin ?? -1);
+      byHost.set(name, {
+        lastCheckin: Math.max(prev?.lastCheckin ?? 0, lastCheckin ?? 0) || lastCheckin,
+        memoryMib: Math.max(prev?.memoryMib ?? 0, memoryMib ?? 0) || null,
+        agentId: isFresher ? agent.id : prev?.agentId ?? null,
+        agentVersion: isFresher
+          ? meta?.elastic?.agent?.version ?? null
+          : prev?.agentVersion ?? null,
+        agentStatus: isFresher ? agent.status ?? null : prev?.agentStatus ?? null,
+        policyRevision: isFresher ? agent.policy_revision ?? null : prev?.policyRevision ?? null,
+        lastCheckinMessage: isFresher
+          ? agent.last_checkin_message ?? null
+          : prev?.lastCheckinMessage ?? null,
+        platform: isFresher ? meta?.os?.platform ?? meta?.os?.name ?? null : prev?.platform ?? null,
+        tags: isFresher ? agent.tags ?? [] : prev?.tags ?? [],
       });
     }
 
-    fetched += agents.length;
-    if (agents.length === 0) {
-      break;
-    }
+    hasMore = agents.length === perPage;
     page += 1;
   }
 
-  return byId;
+  return byHost;
 };
 
 interface HostMetrics {
@@ -113,8 +120,16 @@ interface HostMetrics {
 }
 
 /**
- * Host memory/CPU from `metrics-system.*`, keyed by lowercased `host.name`.
- * Query uses original-case names (keyword is case-sensitive).
+ * Host memory (total + used) and CPU per agent host from `metrics-system.memory-*`
+ * and `metrics-system.cpu-*` (System integration), keyed by (lowercased)
+ * `host.name`. `total` is a fallback for the agent-metadata `host.memory`;
+ * `used`/`usedPct`/`cpuPct` are only available here. Values are averaged over a
+ * short recent window to smooth per-sample jitter (per-field averages ignore docs
+ * from the other metricset, which lack that field). Absent hosts stay "unknown"
+ * ("N/A" in the UI) rather than zero.
+ *
+ * `esClient` must read those data streams; `kibana_system` has no `read` on them,
+ * so the route passes the *request user's* client.
  */
 const getHostMetricsFromSystem = async (
   esClient: ElasticsearchClient,
@@ -140,6 +155,7 @@ const getHostMetricsFromSystem = async (
     }
   >({
     index: 'metrics-system.memory-*,metrics-system.cpu-*',
+    // The data streams may not exist (System integration disabled) — don't error.
     ignore_unavailable: true,
     allow_no_indices: true,
     size: 0,
@@ -182,9 +198,12 @@ const getHostMetricsFromSystem = async (
 };
 
 /**
- * Per-agent health and host metrics for every private location's agent policy —
- * one row per Fleet `agent.id`. Identity/health from Fleet; RAM/CPU from System
- * integration when available (else "N/A").
+ * Per-agent monitor counts and health for scalable (condition-sharded) private
+ * locations, powering the expandable rows in the private locations table. Reads
+ * the same signals the rebalance task uses — enrolled-agent check-ins
+ * (`getAgentHostInfo`, same stale window) and each package policy's
+ * `${host.name}` condition ({@link hostFromCondition}) — so the UI reflects what
+ * the rebalancer sees.
  */
 export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
   LocationAgentStats[]
@@ -197,56 +216,71 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
       savedObjectsClient,
       syntheticsMonitorClient
     );
-    const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
 
+    const policyNameById = new Map(agentPolicies.map((p) => [p.id, p.name]));
+    const scalableLocations = locations.filter(isConditionShardedLocation);
+    const packagePolicyService = new PackagePolicyService(server);
+    // Host RAM lives in `metrics-system.memory-*`, which the internal user can't
+    // read — query it as the request user so admins see real values (others "N/A").
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
+    const now = Date.now();
 
     return Promise.all(
-      locations.map(async (location): Promise<LocationAgentStats> => {
-        const enrolled = await getEnrolledAgents(server, location.agentPolicyId).catch(
-          () => new Map<string, EnrolledAgentMeta>()
-        );
-
-        // Unique original-case host names for the metrics terms query.
-        const metricHostNames = [
-          ...new Set(
-            [...enrolled.values()].map((meta) => meta.host).filter((name): name is string => !!name)
+      scalableLocations.map(async (location): Promise<LocationAgentStats> => {
+        const [enrolledHosts, packagePolicies] = await Promise.all([
+          getEnrolledAgentHosts(server, location.agentPolicyId).catch(
+            () => new Map<string, AgentHostMeta>()
           ),
-        ];
-        const metrics = await getHostMetricsFromSystem(esClient, metricHostNames).catch(
+          packagePolicyService.listByLocation({ locationId: location.id }).catch(() => []),
+        ]);
+
+        const monitorsByHost = new Map<string, number>();
+        let unassignedMonitors = 0;
+        for (const packagePolicy of packagePolicies) {
+          const host = hostFromCondition(packagePolicy.condition);
+          if (host) {
+            monitorsByHost.set(host, (monitorsByHost.get(host) ?? 0) + 1);
+          } else {
+            unassignedMonitors += 1;
+          }
+        }
+
+        // Union enrolled hosts with hosts referenced by conditions, so a
+        // still-pinned but no-longer-enrolled agent shows up as unhealthy.
+        const hosts = [...new Set<string>([...enrolledHosts.keys(), ...monitorsByHost.keys()])];
+
+        // Memory usage/CPU (and a total-RAM fallback) come from the System
+        // integration. Total RAM prefers agent metadata (host.memory, elastic-agent#15708).
+        const metrics = await getHostMetricsFromSystem(esClient, hosts).catch(
           () => new Map<string, HostMetrics>()
         );
 
-        const agents = [...enrolled.values()]
-          .map((meta): AgentStat => {
-            const hostMetrics = meta.host ? metrics.get(meta.host.toLowerCase()) : undefined;
-            const totalMemoryMib = meta.memoryMib ?? hostMetrics?.totalMib ?? null;
-            const usedMemoryMib =
-              hostMetrics?.usedMib != null && totalMemoryMib != null
-                ? Math.min(hostMetrics.usedMib, totalMemoryMib)
-                : hostMetrics?.usedMib ?? null;
+        const agents = hosts
+          .map((host): AgentStat => {
+            const meta = enrolledHosts.get(host);
+            const hostMetrics = metrics.get(host);
+            const lastCheckin = meta?.lastCheckin ?? null;
             return {
-              host: meta.host,
-              lastCheckin: meta.lastCheckin,
-              healthy: meta.agentStatus === 'online',
-              totalMemoryMib,
-              usedMemoryMib,
+              host,
+              monitors: monitorsByHost.get(host) ?? 0,
+              lastCheckin,
+              healthy: lastCheckin !== null && now - lastCheckin <= STALE_CHECKIN_MS,
+              enrolled: enrolledHosts.has(host),
+              totalMemoryMib: meta?.memoryMib ?? hostMetrics?.totalMib ?? null,
+              usedMemoryMib: hostMetrics?.usedMib ?? null,
               usedMemoryPct: hostMetrics?.usedPct ?? null,
               cpuPct: hostMetrics?.cpuPct ?? null,
-              agentId: meta.agentId,
-              agentVersion: meta.agentVersion,
-              agentStatus: meta.agentStatus,
-              policyRevision: meta.policyRevision,
-              lastCheckinMessage: meta.lastCheckinMessage,
-              platform: meta.platform,
-              tags: meta.tags,
+              agentId: meta?.agentId ?? null,
+              agentVersion: meta?.agentVersion ?? null,
+              agentStatus: meta?.agentStatus ?? null,
+              policyRevision: meta?.policyRevision ?? null,
+              lastCheckinMessage: meta?.lastCheckinMessage ?? null,
+              platform: meta?.platform ?? null,
+              tags: meta?.tags ?? [],
             };
           })
-          .sort((a, b) => {
-            const hostCmp = a.host.localeCompare(b.host);
-            return hostCmp !== 0 ? hostCmp : (a.agentId ?? '').localeCompare(b.agentId ?? '');
-          });
+          .sort((a, b) => a.host.localeCompare(b.host));
 
         return {
           locationId: location.id,
@@ -254,6 +288,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           agentPolicyId: location.agentPolicyId,
           agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
           agents,
+          unassignedMonitors,
         };
       })
     );

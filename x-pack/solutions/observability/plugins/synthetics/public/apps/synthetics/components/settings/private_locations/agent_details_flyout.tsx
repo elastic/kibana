@@ -52,35 +52,36 @@ const statusColor = (status: string | null): string => {
 export const AgentDetailsFlyout = ({
   agent,
   agentPolicyId,
-  monitorsRun,
+  totalMonitors,
   onClose,
 }: {
   agent: AgentStat;
   agentPolicyId: string;
-  /** Monitors this agent runs (all of the location's monitors in the single-agent model). */
-  monitorsRun: number;
+  totalMonitors: number;
   onClose: () => void;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgents } = useFleetPermissions();
 
-  // Prefer agent id for Fleet deep-links (exact match).
-  const fleetAgentHref = agent.agentId
-    ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
-    : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(`policy_id:"${agentPolicyId}"`)}`;
+  const fleetAgentHref = `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
+    `local_metadata.host.hostname:"${agent.host}" and policy_id:"${agentPolicyId}"`
+  )}`;
 
-  const capacityItems: EuiDescriptionListProps['listItems'] = [
+  const distributionPct =
+    totalMonitors > 0 ? Math.round((agent.monitors / totalMonitors) * 100) : 0;
+
+  const shardingItems: EuiDescriptionListProps['listItems'] = [
     {
-      title: HEALTH_LABEL,
+      title: SHARDING_HEALTH_LABEL,
       description: (
         <EuiHealth color={agent.healthy ? 'success' : 'danger'}>
-          {agent.healthy ? HEALTHY_LABEL : UNHEALTHY_LABEL}
+          {agent.healthy ? HEALTHY_LABEL : STALE_LABEL}
         </EuiHealth>
       ),
     },
     {
       title: MONITORS_LABEL,
-      description: `${monitorsRun}`,
+      description: MONITORS_VALUE(agent.monitors, distributionPct),
     },
     {
       title: TOTAL_RAM_LABEL,
@@ -148,24 +149,27 @@ export const AgentDetailsFlyout = ({
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>{agent.host || agent.agentId || '—'}</h2>
+          <h2>{agent.host}</h2>
         </EuiTitle>
-        {agent.host && agent.agentId && (
-          <EuiText size="s" color="subdued">
-            {agent.agentId}
-          </EuiText>
+        {!agent.enrolled && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="warning">
+              {UNENROLLED_HELP}
+            </EuiText>
+          </>
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiTitle size="xxs">
-          <h3>{CAPACITY_SECTION}</h3>
+          <h3>{SHARDING_SECTION}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiDescriptionList
           type="column"
           columnWidths={[1, 2]}
           compressed
-          listItems={capacityItems}
+          listItems={shardingItems}
         />
 
         <EuiSpacer size="l" />
@@ -202,8 +206,8 @@ export const AgentDetailsFlyout = ({
   );
 };
 
-const CAPACITY_SECTION = i18n.translate('xpack.synthetics.agentFlyout.capacitySection', {
-  defaultMessage: 'Health & capacity',
+const SHARDING_SECTION = i18n.translate('xpack.synthetics.agentFlyout.shardingSection', {
+  defaultMessage: 'Sharding',
 });
 
 const AGENT_DETAILS_FLYOUT_ARIA_LABEL = i18n.translate(
@@ -217,13 +221,19 @@ const AGENT_SECTION = i18n.translate('xpack.synthetics.agentFlyout.agentSection'
   defaultMessage: 'Agent',
 });
 
-const HEALTH_LABEL = i18n.translate('xpack.synthetics.agentFlyout.health', {
-  defaultMessage: 'Health',
+const SHARDING_HEALTH_LABEL = i18n.translate('xpack.synthetics.agentFlyout.shardingHealth', {
+  defaultMessage: 'Sharding health',
 });
 
 const MONITORS_LABEL = i18n.translate('xpack.synthetics.agentFlyout.monitors', {
-  defaultMessage: 'Monitors run',
+  defaultMessage: 'Monitors assigned',
 });
+
+const MONITORS_VALUE = (count: number, pct: number) =>
+  i18n.translate('xpack.synthetics.agentFlyout.monitorsValue', {
+    defaultMessage: '{count} ({pct}% of location)',
+    values: { count, pct },
+  });
 
 const TOTAL_RAM_LABEL = i18n.translate('xpack.synthetics.agentFlyout.totalRam', {
   defaultMessage: 'Total host RAM',
@@ -271,8 +281,8 @@ const HEALTHY_LABEL = i18n.translate('xpack.synthetics.agentFlyout.healthy', {
   defaultMessage: 'Healthy',
 });
 
-const UNHEALTHY_LABEL = i18n.translate('xpack.synthetics.agentFlyout.unhealthy', {
-  defaultMessage: 'Unhealthy',
+const STALE_LABEL = i18n.translate('xpack.synthetics.agentFlyout.stale', {
+  defaultMessage: 'Stale',
 });
 
 const NEVER_LABEL = i18n.translate('xpack.synthetics.agentFlyout.never', {
@@ -289,4 +299,9 @@ const CLOSE_LABEL = i18n.translate('xpack.synthetics.agentFlyout.close', {
 
 const VIEW_IN_FLEET_LABEL = i18n.translate('xpack.synthetics.agentFlyout.viewInFleet', {
   defaultMessage: 'View full details in Fleet',
+});
+
+const UNENROLLED_HELP = i18n.translate('xpack.synthetics.agentFlyout.unenrolledHelp', {
+  defaultMessage:
+    'This host still has monitors pinned to it but is no longer an enrolled agent. Its monitors move to a healthy agent on the next rebalance.',
 });

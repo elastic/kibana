@@ -53,6 +53,7 @@ export const AddOrEditLocationFlyout = ({
     defaultValues: privateLocationToEdit || {
       label: '',
       agentPolicyId: '',
+      agentConditionSharding: false,
       geo: {
         lat: 0,
         lon: 0,

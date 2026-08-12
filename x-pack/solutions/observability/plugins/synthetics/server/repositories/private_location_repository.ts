@@ -94,6 +94,9 @@ export class PrivateLocationRepository {
       spaces: loc.attributes.spaces || loc.namespaces,
     }));
 
+    // A scalable (condition-sharded) location still uses a single agent policy
+    // with many agents, so the "one agent policy per location" uniqueness check
+    // applies here too.
     const locWithAgentPolicyId = locations.find(
       (loc) => loc.agentPolicyId === location.agentPolicyId
     );
@@ -123,8 +126,8 @@ export class PrivateLocationRepository {
       );
     }
 
-    const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
-    if (!agentPolicy) {
+    // Validate the location's agent policy exists.
+    if (!agentPolicies?.some((policy) => policy.id === location.agentPolicyId)) {
       errorMessages = `Agent policy with id ${location.agentPolicyId} does not exist`;
     }
     if (errorMessages) {

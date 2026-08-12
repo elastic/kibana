@@ -17,102 +17,65 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
-import { useAgentStats } from '../../settings/private_locations/hooks/use_agent_stats';
-import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
+import { useMonitorAgentAssignments } from '../hooks/use_monitor_agent_assignments';
 
 /**
- * "Location agents" rows for the monitor details panel: for each private
- * location the monitor runs at, the location's agent policy and the enrolled
- * agent hosts that run it (every enrolled agent runs the monitor today).
- * Renders nothing when the monitor uses no private location, so it's safe to
- * always mount.
+ * "Assigned agent" rows for the monitor details panel: for each scalable
+ * (condition-sharded) private location the monitor runs at, the specific agent
+ * host it's pinned to and that location's agent policy. Renders nothing when the
+ * monitor uses no condition-sharded location, so it's safe to always mount.
  */
-export const MonitorAssignedAgents = ({
-  monitorLocations,
-}: {
-  monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
-}) => {
-  const { byLocation } = useAgentStats();
+export const MonitorAssignedAgents = ({ configId }: { configId: string }) => {
+  const { assignments } = useMonitorAgentAssignments(configId);
   const { basePath } = useSyntheticsSettingsContext();
-  const { canReadAgents, canReadAgentPolicies } = useFleetPermissions();
+  const { canReadAgents } = useFleetPermissions();
 
-  const privateLocations = (monitorLocations ?? []).filter((loc) => !loc.isServiceManaged);
-  const entries = privateLocations
-    .map((loc) => byLocation.get(loc.id))
-    .filter(
-      (stats): stats is NonNullable<typeof stats> => stats != null && stats.agents.length > 0
-    );
-
-  if (entries.length === 0) {
+  if (assignments.length === 0) {
     return null;
   }
 
-  const showLocationLabel = entries.length > 1;
+  const showLocationLabel = assignments.length > 1;
 
   return (
     <>
       <EuiDescriptionListTitle>
-        {LOCATION_AGENTS_LABEL}{' '}
-        <EuiIconTip content={LOCATION_AGENTS_HELP} position="right" type="question" />
+        {ASSIGNED_AGENT_LABEL}{' '}
+        <EuiIconTip content={ASSIGNED_AGENT_HELP} position="right" type="question" />
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
-        {entries.map((stats) => {
-          const policyName = stats.agentPolicyName;
-          const policyHref = `${basePath}/app/fleet/policies/${stats.agentPolicyId}`;
+        {assignments.map((assignment) => {
+          const hostHref = `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
+            `local_metadata.host.hostname:"${assignment.host}" and policy_id:"${assignment.agentPolicyId}"`
+          )}`;
           return (
-            <div key={stats.locationId} css={{ marginBottom: 8 }}>
+            <div key={assignment.locationId} css={{ marginBottom: 4 }}>
               {showLocationLabel && (
                 <EuiText size="xs" color="subdued">
-                  {stats.locationLabel}
+                  {assignment.locationLabel}
                 </EuiText>
               )}
-              {stats.agents.map((agent) => {
-                const hostHref = agent.agentId
-                  ? `${basePath}/app/fleet/agents/${encodeURIComponent(agent.agentId)}`
-                  : `${basePath}/app/fleet/agents?kuery=${encodeURIComponent(
-                      `policy_id:"${stats.agentPolicyId}"`
-                    )}`;
-                const label = agent.host || agent.agentId || '—';
-                return (
-                  <EuiHealth
-                    key={agent.agentId ?? agent.host}
-                    color={agent.healthy ? 'success' : 'danger'}
-                  >
-                    {canReadAgents ? (
-                      <EuiLink
-                        data-test-subj="syntheticsAssignedAgentLink"
-                        href={hostHref}
-                        target="_blank"
-                        external
-                        title={agent.agentId ?? label}
-                      >
-                        {label}
-                      </EuiLink>
-                    ) : (
-                      label
-                    )}
-                    {agent.host && agent.agentId && (
-                      <EuiText size="xs" color="subdued" component="span">
-                        {' '}
-                        ({agent.agentId})
-                      </EuiText>
-                    )}
-                  </EuiHealth>
-                );
-              })}
+              {assignment.host ? (
+                <EuiHealth color={assignment.healthy ? 'success' : 'danger'}>
+                  {canReadAgents ? (
+                    <EuiLink
+                      data-test-subj="syntheticsAssignedAgentLink"
+                      href={hostHref}
+                      target="_blank"
+                      external
+                    >
+                      {assignment.host}
+                    </EuiLink>
+                  ) : (
+                    assignment.host
+                  )}
+                </EuiHealth>
+              ) : (
+                <EuiText size="s" color="subdued">
+                  {PENDING_ASSIGNMENT_LABEL}
+                </EuiText>
+              )}
               <EuiText size="xs" color="subdued">
-                {canReadAgentPolicies ? (
-                  <EuiLink
-                    data-test-subj="syntheticsAssignedAgentPolicyLink"
-                    href={policyHref}
-                    target="_blank"
-                    external
-                  >
-                    {POLICY_CAPTION(policyName)}
-                  </EuiLink>
-                ) : (
-                  POLICY_CAPTION(policyName)
-                )}
+                {POLICY_CAPTION(assignment.agentPolicyName)}
               </EuiText>
             </div>
           );
@@ -122,14 +85,21 @@ export const MonitorAssignedAgents = ({
   );
 };
 
-const LOCATION_AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorDetails.locationAgents', {
-  defaultMessage: 'Location agents',
+const ASSIGNED_AGENT_LABEL = i18n.translate('xpack.synthetics.monitorDetails.assignedAgent', {
+  defaultMessage: 'Assigned agent',
 });
 
-const LOCATION_AGENTS_HELP = i18n.translate('xpack.synthetics.monitorDetails.locationAgentsHelp', {
+const ASSIGNED_AGENT_HELP = i18n.translate('xpack.synthetics.monitorDetails.assignedAgentHelp', {
   defaultMessage:
-    "On a private location this monitor runs on every enrolled agent of the location's agent policy.",
+    'On a scalable private location this monitor is pinned to one agent (by a host condition) for at-most-once execution. If that agent goes stale, the monitor moves to a healthy agent on the next rebalance.',
 });
+
+const PENDING_ASSIGNMENT_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.pendingAssignment',
+  {
+    defaultMessage: 'Pending — not running until the next rebalance assigns an agent',
+  }
+);
 
 const POLICY_CAPTION = (policyName: string) =>
   i18n.translate('xpack.synthetics.monitorDetails.assignedAgentPolicy', {

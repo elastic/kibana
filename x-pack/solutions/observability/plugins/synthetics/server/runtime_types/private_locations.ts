@@ -15,6 +15,11 @@ export const PrivateLocationAttributesCodec = t.intersection([
     isServiceManaged: t.boolean,
   }),
   t.partial({
+    // Scalable private location: a single agent policy backs many enrolled
+    // agents, and monitors are sharded across them via a per-monitor Elastic
+    // Agent `condition` on host.name (see assign_by_condition.ts) for
+    // at-most-once execution.
+    agentConditionSharding: t.boolean,
     tags: t.array(t.string),
     geo: t.interface({
       lat: t.number,

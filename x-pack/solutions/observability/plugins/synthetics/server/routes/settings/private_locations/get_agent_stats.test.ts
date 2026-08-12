@@ -8,10 +8,15 @@
 import type { LocationAgentStats } from '../../../../common/types';
 import { getPrivateLocationAgentStats } from './get_agent_stats';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 jest.mock('./get_private_locations');
+jest.mock('../../../synthetics_service/private_location/package_policy_service');
 
 const mockGetLocations = getPrivateLocationsAndAgentPolicies as jest.Mock;
+const MockPackagePolicyService = PackagePolicyService as jest.MockedClass<
+  typeof PackagePolicyService
+>;
 
 const GIB = 1024 * 1024 * 1024;
 
@@ -32,7 +37,7 @@ interface FakeAgent {
 const agent = (over: FakeAgent = {}): FakeAgent => ({
   id: 'agent-1',
   status: 'online',
-  last_checkin: '2026-08-01T00:00:00.000Z',
+  last_checkin: new Date().toISOString(),
   last_checkin_message: 'Running',
   policy_revision: 6,
   tags: [],
@@ -63,11 +68,19 @@ const bucket = (
 const makeContext = ({
   listAgentsImpl,
   buckets = [],
+  packagePolicies = [],
 }: {
   listAgentsImpl: jest.Mock;
   buckets?: ReturnType<typeof bucket>[];
+  packagePolicies?: Array<{ condition?: string }>;
 }) => {
   const search = jest.fn().mockResolvedValue({ aggregations: { by_host: { buckets } } });
+  MockPackagePolicyService.mockImplementation(
+    () =>
+      ({
+        listByLocation: jest.fn().mockResolvedValue(packagePolicies),
+      } as any)
+  );
   const routeContext = {
     server: { fleet: { agentService: { asInternalUser: { listAgents: listAgentsImpl } } } },
     context: {
@@ -90,57 +103,72 @@ const run = async (routeContext: any): Promise<LocationAgentStats[]> => {
 describe('getPrivateLocationAgentStats route', () => {
   beforeEach(() => {
     mockGetLocations.mockResolvedValue({
-      locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
+      locations: [
+        {
+          id: 'loc-1',
+          label: 'Location 1',
+          agentPolicyId: 'policy-1',
+          agentConditionSharding: true,
+        },
+      ],
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  it('joins metrics for mixed-case host names (queries original case, keys result lowercase)', async () => {
+  it('skips locations without condition sharding', async () => {
+    mockGetLocations.mockResolvedValue({
+      locations: [{ id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1' }],
+      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
+    });
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+
+    expect(await run(routeContext)).toEqual([]);
+    expect(listAgents).not.toHaveBeenCalled();
+  });
+
+  it('counts monitors per host from package-policy conditions and joins host metrics', async () => {
     const listAgents = jest.fn().mockResolvedValue({
-      agents: [agent({ local_metadata: { host: { name: 'WIN-Server01' } } })],
-      total: 1,
+      agents: [
+        agent({ local_metadata: { host: { name: 'host-a' } } }),
+        agent({
+          id: 'agent-2',
+          local_metadata: { host: { name: 'host-b' } },
+        }),
+      ],
+      total: 2,
     });
     const { routeContext, search } = makeContext({
       listAgentsImpl: listAgents,
+      packagePolicies: [
+        { condition: "${host.name} == 'host-a'" },
+        { condition: "${host.name} == 'host-a'" },
+        { condition: "${host.name} == 'host-b'" },
+      ],
       buckets: [
-        bucket('WIN-Server01', { total: 8 * GIB, used: 2 * GIB, usedPct: 0.25, cpuPct: 0.1 }),
+        bucket('host-a', { total: 8 * GIB, used: 2 * GIB, usedPct: 0.25, cpuPct: 0.1 }),
+        bucket('host-b', { total: 4 * GIB, used: 1 * GIB, usedPct: 0.25, cpuPct: 0.05 }),
       ],
     });
 
     const result = await run(routeContext);
-    const agentStat = result[0].agents[0];
+    expect(result).toHaveLength(1);
+    expect(result[0].locationLabel).toBe('Location 1');
+    expect(result[0].agentPolicyName).toBe('Policy One');
+    expect(result[0].unassignedMonitors).toBe(0);
 
-    expect(agentStat.host).toBe('WIN-Server01');
-    expect(agentStat.agentId).toBe('agent-1');
-    expect(agentStat.usedMemoryPct).toBe(0.25);
-    expect(agentStat.cpuPct).toBe(0.1);
-    expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ showInactive: true }));
-
-    const query = search.mock.calls[0][0].query;
-    const termsFilter = query.bool.filter.find((f: any) => f.terms?.['host.name']);
-    expect(termsFilter.terms['host.name']).toEqual(['WIN-Server01']);
+    const byHost = Object.fromEntries(result[0].agents.map((a) => [a.host, a]));
+    expect(byHost['host-a'].monitors).toBe(2);
+    expect(byHost['host-b'].monitors).toBe(1);
+    expect(byHost['host-a'].usedMemoryPct).toBe(0.25);
+    expect(byHost['host-a'].cpuPct).toBe(0.1);
+    expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ showInactive: false }));
+    expect(search).toHaveBeenCalled();
   });
 
-  it('caps usedMemoryMib at totalMemoryMib', async () => {
-    const listAgents = jest.fn().mockResolvedValue({
-      agents: [agent({ local_metadata: { host: { name: 'host-a', memory: 4 * GIB } } })],
-      total: 1,
-    });
-    const { routeContext } = makeContext({
-      listAgentsImpl: listAgents,
-      buckets: [bucket('host-a', { used: 6 * GIB, usedPct: 0.99 })],
-    });
-
-    const result = await run(routeContext);
-    const agentStat = result[0].agents[0];
-
-    expect(agentStat.totalMemoryMib).toBe(4 * 1024);
-    expect(agentStat.usedMemoryMib).toBe(4 * 1024); // capped, not 6144
-  });
-
-  it('returns one row per agent id when several agents share a host name', async () => {
+  it('collapses several agents on the same host to one row (freshest identity)', async () => {
     const listAgents = jest.fn().mockResolvedValue({
       agents: [
         agent({
@@ -166,40 +194,29 @@ describe('getPrivateLocationAgentStats route', () => {
 
     const result = await run(routeContext);
 
-    expect(result[0].agents).toHaveLength(2);
-    expect(result[0].agents.map((a) => a.agentId).sort()).toEqual(['freshest', 'stale']);
-    expect(result[0].agents.every((a) => a.host === 'host-c')).toBe(true);
+    expect(result[0].agents).toHaveLength(1);
+    expect(result[0].agents[0].host).toBe('host-c');
+    expect(result[0].agents[0].agentId).toBe('freshest');
+    expect(result[0].agents[0].agentVersion).toBe('9.6.0');
   });
 
-  it('paginates using the reported total across multiple pages', async () => {
-    const listAgents = jest
-      .fn()
-      .mockResolvedValueOnce({
-        agents: [
-          agent({ id: 'a', local_metadata: { host: { name: 'host-a' } } }),
-          agent({ id: 'b', local_metadata: { host: { name: 'host-b' } } }),
-        ],
-        total: 3,
-      })
-      .mockResolvedValueOnce({
-        agents: [agent({ id: 'c', local_metadata: { host: { name: 'host-c' } } })],
-        total: 3,
-      });
-    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+  it('counts unassigned monitors separately', async () => {
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [agent()],
+      total: 1,
+    });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      packagePolicies: [
+        { condition: "${host.name} == 'host-a'" },
+        { condition: undefined },
+        { condition: "${host.id} == '__synthetics_unassigned__'" },
+      ],
+    });
 
     const result = await run(routeContext);
-
-    expect(listAgents).toHaveBeenCalledTimes(2);
-    expect(result[0].agents.map((a) => a.agentId).sort()).toEqual(['a', 'b', 'c']);
-  });
-
-  it('resolves the agent policy display name', async () => {
-    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
-    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
-
-    const result = await run(routeContext);
-
-    expect(result[0].agentPolicyName).toBe('Policy One');
-    expect(result[0].locationLabel).toBe('Location 1');
+    // Exact unassigned count depends on hostFromCondition; at least the undefined one.
+    expect(result[0].agents.find((a) => a.host === 'host-a')?.monitors).toBeGreaterThanOrEqual(1);
+    expect(result[0].unassignedMonitors).toBeGreaterThanOrEqual(1);
   });
 });

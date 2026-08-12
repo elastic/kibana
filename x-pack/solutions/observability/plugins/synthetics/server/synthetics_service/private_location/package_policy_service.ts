@@ -6,7 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -81,6 +81,41 @@ export class PackagePolicyService {
       )
     );
     return uniqBy(ids.flat(), 'id');
+  }
+
+  /**
+   * Lists all synthetics package policies (across spaces) whose id belongs to the
+   * given private location. Matches both the current space-agnostic id
+   * (`${configId}-${locationId}`) and the legacy space-suffixed id
+   * (`${configId}-${locationId}-${spaceId}`) — otherwise legacy monitors would be
+   * invisible to the rebalancer and stay permanently fanned out.
+   * Used by the rebalance task to diff current host-condition assignments without
+   * decrypting or regenerating monitor configs.
+   */
+  async listByLocation({ locationId }: { locationId: string }): Promise<PackagePolicy[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const items: PackagePolicy[] = [];
+    let page = 1;
+    const perPage = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
+        kuery: 'ingest-package-policies.package.name:synthetics',
+        spaceId: ALL_SPACES_ID,
+        page,
+        perPage,
+      });
+      items.push(...pageItems);
+      hasMore = pageItems.length === perPage;
+      page += 1;
+    }
+
+    // New format ends with `-${locationId}`; legacy format has it as an infix
+    // (`...-${locationId}-${spaceId}`).
+    const newSuffix = `-${locationId}`;
+    const legacyInfix = `-${locationId}-`;
+    return items.filter((pp) => pp.id.endsWith(newSuffix) || pp.id.includes(legacyInfix));
   }
 
   async bulkCreate({

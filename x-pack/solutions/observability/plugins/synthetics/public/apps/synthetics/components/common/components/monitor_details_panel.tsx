@@ -183,7 +183,7 @@ export const MonitorDetailsPanel = ({
           </>
         )}
 
-        {!hideLocations && <MonitorAssignedAgents monitorLocations={monitor.locations} />}
+        {!hideLocations && <MonitorAssignedAgents configId={configId} />}
 
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

@@ -6,16 +6,20 @@
  */
 
 /**
- * Per-agent health and host capacity for a private location's agent policy,
- * returned by the `private_locations/agent_stats` route and consumed by the
- * private locations table and the monitor "Location agents" section.
+ * Per-agent health, capacity and (for condition-sharded locations) assignment
+ * counts for a private location's agent policy. Returned by the
+ * `private_locations/agent_stats` route.
  */
 export interface AgentStat {
-  /** Agent `host.name` in original case (empty when the agent reports none). */
+  /** Agent `host.name` (condition shard key); lowercased for sharded locations. */
   host: string;
+  /** Monitors currently pinned to this host via package-policy `condition`. */
+  monitors: number;
   lastCheckin: number | null;
-  /** Whether Fleet reports the agent as online. */
+  /** Whether Fleet reports the agent as online within the stale window. */
   healthy: boolean;
+  /** Whether the host is still an enrolled agent on the location's policy. */
+  enrolled: boolean;
   /**
    * Total host RAM (MiB), from agent metadata (`host.memory`) or, as a fallback,
    * `system.memory.total` in `metrics-system.memory-*`. Null when neither source
@@ -33,7 +37,7 @@ export interface AgentStat {
    * `metrics-system.cpu-*` (System integration only). Null when unavailable.
    */
   cpuPct: number | null;
-  /** Fleet agent id — unique row key for this stats payload. */
+  /** Fleet agent id — freshest enrolled agent on this host when several share it. */
   agentId: string | null;
   agentVersion: string | null;
   agentStatus: string | null;
@@ -50,4 +54,9 @@ export interface LocationAgentStats {
   /** Agent policy display name, or the id when the policy can't be resolved. */
   agentPolicyName: string;
   agents: AgentStat[];
+  /**
+   * Monitors not pinned to a specific enrolled host (UNASSIGNED sentinel
+   * condition) — run on no agent until the next rebalance.
+   */
+  unassignedMonitors: number;
 }
