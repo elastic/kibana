@@ -58,13 +58,14 @@ export const SHARED_NOTICE_TITLE = i18n.translate('xpack.evals.datasetSpaces.sha
 
 export const getSpaceCountScope = (count: number) =>
   i18n.translate('xpack.evals.datasetSpaces.spaceCountScope', {
-    defaultMessage: 'all {count, plural, one {# space} other {# spaces}} it belongs to',
+    defaultMessage:
+      '{count, plural, one {the # space} other {the # spaces}} this dataset is shared with',
     values: { count },
   });
 
 export const getEditDatasetNotice = (scope: string) =>
   i18n.translate('xpack.evals.datasetSpaces.editDatasetNotice', {
-    defaultMessage: 'Changes to this dataset apply in {scope}.',
+    defaultMessage: 'Changes here apply in {scope}.',
     values: { scope },
   });
 
@@ -128,16 +129,3 @@ export const CONFIRM_CANCEL_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
-
-export const getOtherSpacesSentence = (spaceNames: string[]) =>
-  i18n.translate('xpack.evals.datasetSpaces.otherSpacesSentence', {
-    defaultMessage: 'It is also in {spaceNames}.',
-    values: { spaceNames: spaceNames.join(', ') },
-  });
-
-export const getHiddenSpacesSentence = (count: number) =>
-  i18n.translate('xpack.evals.datasetSpaces.hiddenSpacesSentence', {
-    defaultMessage:
-      'It is also in {count, plural, one {# space} other {# spaces}} you do not have access to.',
-    values: { count },
-  });

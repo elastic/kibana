@@ -178,9 +178,10 @@ describe('resolveTargetSpaces', () => {
 });
 
 describe('redactSpaceIds', () => {
-  it('replaces spaces the caller cannot see with a single placeholder', () => {
+  it('replaces each space the caller cannot see with a placeholder', () => {
     expect(redactSpaceIds(['sales', 'finance', 'legal'], [DEFAULT_SPACE_ID, 'sales'])).toEqual([
       'sales',
+      UNKNOWN_SPACE,
       UNKNOWN_SPACE,
     ]);
   });

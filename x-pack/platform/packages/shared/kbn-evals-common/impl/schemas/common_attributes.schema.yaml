@@ -51,8 +51,8 @@ components:
         type: string
         maxLength: 256
       description: >-
-        Spaces the dataset is assigned to, with ids the caller cannot access
-        replaced by a single `?` entry.
+        Spaces the dataset is assigned to, with each id the caller cannot access
+        replaced by `?`, so the entries still count the spaces.
 
     DatasetFacetBucket:
       type: object

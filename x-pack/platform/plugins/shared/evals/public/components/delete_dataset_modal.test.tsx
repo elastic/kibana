@@ -100,7 +100,9 @@ describe('DeleteDatasetModal', () => {
     renderModal(['default', 'marketing']);
 
     expect(screen.getByText('Remove "Golden set" from this space?')).toBeInTheDocument();
-    expect(screen.getByText(/stays in Marketing/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/available in the 1 other space it is shared with/)
+    ).toBeInTheDocument();
     // Nothing is lost, so the name does not have to be typed out.
     expect(screen.queryByTestId('deleteDatasetConfirmInput')).not.toBeInTheDocument();
 
@@ -164,9 +166,11 @@ describe('DeleteDatasetModal', () => {
     expect(screen.getByText(new RegExp(sentence))).toBeInTheDocument();
   });
 
-  it('says a dataset stays in spaces it cannot name', () => {
+  it('counts a space it cannot name among the ones the dataset stays in', () => {
     renderModal(['default', UNKNOWN_SPACE]);
 
-    expect(screen.getByText(/stays in 1 space you do not have access to/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/available in the 1 other space it is shared with/)
+    ).toBeInTheDocument();
   });
 });

@@ -88,25 +88,23 @@ describe('DatasetSharedNotice', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('names the other spaces an edit reaches', () => {
+  it('counts how far an edit reaches', () => {
     render(<DatasetSharedNotice spaceIds={['default', 'marketing']} action="edit-example" />, {
       wrapper: Wrapper,
     });
 
-    const notice = screen.getByTestId('datasetSharedNotice');
-    expect(notice).toHaveTextContent(
-      'Changes to this example apply in all 2 spaces it belongs to.'
+    expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent(
+      'Changes to this example apply in the 2 spaces this dataset is shared with.'
     );
-    expect(notice).toHaveTextContent('It is also in Marketing.');
   });
 
-  it('reports spaces the reader has no access to without naming them', () => {
+  it('counts spaces the reader has no access to along with the rest', () => {
     render(<DatasetSharedNotice spaceIds={['default', UNKNOWN_SPACE]} action="delete-example" />, {
       wrapper: Wrapper,
     });
 
     expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent(
-      'It is also in 1 space you do not have access to.'
+      'This example will be deleted from the 2 spaces this dataset is shared with.'
     );
   });
 });
@@ -142,18 +140,19 @@ describe('DatasetSpacesPicker', () => {
     ]);
   });
 
-  it('keeps spaces the caller cannot see attached to the dataset', async () => {
+  it('keeps spaces the caller cannot see attached to the dataset, and counted', async () => {
     const onChange = jest.fn();
-    render(<DatasetSpacesPicker value={['default', UNKNOWN_SPACE]} onChange={onChange} />, {
-      wrapper: Wrapper,
-    });
+    render(
+      <DatasetSpacesPicker value={['default', UNKNOWN_SPACE, UNKNOWN_SPACE]} onChange={onChange} />,
+      { wrapper: Wrapper }
+    );
 
-    expect(screen.getByText(/also in 1 space you cannot see/i)).toBeInTheDocument();
+    expect(screen.getByText(/also in 2 spaces you cannot see/i)).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
     await userEvent.click(screen.getByRole('option', { name: 'Marketing' }));
 
-    expect(onChange).toHaveBeenCalledWith(['default', 'marketing', UNKNOWN_SPACE]);
+    expect(onChange).toHaveBeenCalledWith(['default', 'marketing', UNKNOWN_SPACE, UNKNOWN_SPACE]);
   });
 });
 
@@ -188,24 +187,26 @@ describe('SharedChangeConfirmModal', () => {
     );
   });
 
-  it('describes the spaces a narrowed dataset is left in, not the ones it loses', () => {
+  it('counts the spaces a narrowed dataset is left in, not the ones it loses', () => {
     renderModal({
       spaceIds: ['default', 'marketing', 'sales'],
       removedSpaceIds: ['sales'],
       nextSpaceIds: ['default', 'marketing'],
     });
 
-    // Saying the edit reaches Sales would contradict the callout that just
-    // said the dataset is leaving it.
-    const notice = screen.getByTestId('datasetSharedNotice');
-    expect(notice).toHaveTextContent('Marketing');
-    expect(notice).not.toHaveTextContent('Sales');
+    // Saying the edit reaches all three would contradict the callout that just
+    // said the dataset is leaving one of them.
+    expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent(
+      'the 2 spaces this dataset is shared with'
+    );
   });
 
   it('asks plainly about an edit that takes no space away', () => {
     renderModal({ spaceIds: ['default', 'marketing'], nextSpaceIds: ['default', 'marketing'] });
 
     expect(screen.queryByTestId('datasetRemovedSpacesNotice')).not.toBeInTheDocument();
-    expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent('Marketing');
+    expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent(
+      'the 2 spaces this dataset is shared with'
+    );
   });
 });

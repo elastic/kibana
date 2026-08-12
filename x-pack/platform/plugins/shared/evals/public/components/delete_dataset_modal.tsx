@@ -101,7 +101,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
   // dataset's spaces moved on after they were read.
   const [correction, setCorrection] = useState<DatasetDeleteIntent | null>(null);
   const deleteDataset = useDeleteDataset();
-  const { isShared, spaceCount, otherSpaceNames, hiddenSpaceCount } = useDatasetSharing(spaceIds);
+  const { isShared, spaceCount } = useDatasetSharing(spaceIds);
 
   // Only mounted while the modal is open, so this lazily fetches the usage count.
   const { data: usageData, isLoading: isUsageLoading } = useEvaluationExperiments({
@@ -157,29 +157,11 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
             ) : (
               <FormattedMessage
                 id="xpack.evals.deleteDatasetModal.unshareWarning"
-                defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
+                defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the {remainingCount, plural, one {# other space} other {# other spaces}} it is shared with."
                 values={{ examplesCount, remainingCount: spaceCount - 1 }}
               />
             )}
           </p>
-          {!correction && otherSpaceNames.length > 0 ? (
-            <p>
-              <FormattedMessage
-                id="xpack.evals.deleteDatasetModal.remainingSpaces"
-                defaultMessage="It stays in {spaceNames}."
-                values={{ spaceNames: otherSpaceNames.join(', ') }}
-              />
-            </p>
-          ) : null}
-          {!correction && hiddenSpaceCount > 0 ? (
-            <p>
-              <FormattedMessage
-                id="xpack.evals.deleteDatasetModal.remainingHiddenSpaces"
-                defaultMessage="It stays in {hiddenSpaceCount, plural, one {# space} other {# spaces}} you do not have access to."
-                values={{ hiddenSpaceCount }}
-              />
-            </p>
-          ) : null}
         </>
       ) : (
         <p>

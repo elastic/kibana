@@ -12,7 +12,6 @@ import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import * as i18n from './translations';
 
 interface DatasetSpacesPickerProps {
-  /** The assignment as read from the API, placeholder included. */
   value: string[];
   onChange: (spaceIds: string[]) => void;
   isDisabled?: boolean;
@@ -41,9 +40,10 @@ export const DatasetSpacesPicker: React.FC<DatasetSpacesPickerProps> = ({
     return null;
   }
 
-  // Hidden spaces arrive as a placeholder with nothing to pick. Holding it out
-  // of the combo box and re-attaching it on change keeps them assigned.
-  const hiddenSpaceCount = value.filter((spaceId) => spaceId === UNKNOWN_SPACE).length;
+  // Hidden spaces arrive as placeholders with nothing to pick. Holding them out
+  // of the combo box and re-attaching them on change keeps them assigned, and
+  // keeps the count of them right.
+  const hiddenSpaceIds = value.filter((spaceId) => spaceId === UNKNOWN_SPACE);
   const selectedIds = value.filter((spaceId) => spaceId !== UNKNOWN_SPACE);
   const selectedOptions = selectedIds.map(
     (spaceId) =>
@@ -53,15 +53,15 @@ export const DatasetSpacesPicker: React.FC<DatasetSpacesPickerProps> = ({
   const onSelectionChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
     const nextSpaceIds = selected.map((option) => option.value as string);
 
-    onChange(hiddenSpaceCount === 0 ? nextSpaceIds : [...nextSpaceIds, UNKNOWN_SPACE]);
+    onChange([...nextSpaceIds, ...hiddenSpaceIds]);
   };
 
   return (
     <EuiFormRow
       label={i18n.SPACES_LABEL}
       helpText={
-        hiddenSpaceCount > 0
-          ? i18n.getHiddenSpacesHelpText(hiddenSpaceCount)
+        hiddenSpaceIds.length > 0
+          ? i18n.getHiddenSpacesHelpText(hiddenSpaceIds.length)
           : i18n.SPACES_HELP_TEXT
       }
       isInvalid={Boolean(error)}

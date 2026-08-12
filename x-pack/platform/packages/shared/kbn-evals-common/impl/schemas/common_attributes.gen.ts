@@ -47,7 +47,7 @@ export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min
 export type SpaceIds = z.infer<typeof SpaceIds>;
 
 /**
- * Spaces the dataset is assigned to, with ids the caller cannot access replaced by a single `?` entry.
+ * Spaces the dataset is assigned to, with each id the caller cannot access replaced by `?`, so the entries still count the spaces.
  */
 export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
 export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;

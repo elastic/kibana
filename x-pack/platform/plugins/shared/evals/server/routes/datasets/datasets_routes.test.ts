@@ -1488,9 +1488,8 @@ describe('dataset routes', () => {
       const response = await handler(context as any, request, kibanaResponseFactory);
 
       expect(response.status).toBe(200);
-      // Two hidden spaces collapse into one placeholder: shared elsewhere,
-      // without saying where.
-      expect(response.payload.space_ids).toEqual(['sales', UNKNOWN_SPACE]);
+      // Two hidden spaces, two placeholders: how many, without saying where.
+      expect(response.payload.space_ids).toEqual(['sales', UNKNOWN_SPACE, UNKNOWN_SPACE]);
     });
 
     it('leaves the space assignment alone when an update does not mention it', async () => {

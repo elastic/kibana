@@ -35,8 +35,7 @@ const getMessage = (action: SharedDatasetAction, scope: string): string => {
 };
 
 /**
- * How far an edit to a shared dataset reaches, from the assignment alone. Split
- * out for callers that can't name the spaces, having no access to them.
+ * How far an edit to a shared dataset reaches.
  */
 export const getSharedNoticeCopy = (
   spaceIds: string[] | undefined,
@@ -51,7 +50,7 @@ export const getSharedNoticeCopy = (
  * nothing for a dataset that only lives here.
  */
 export const DatasetSharedNotice: React.FC<DatasetSharedNoticeProps> = ({ spaceIds, action }) => {
-  const { isEnabled, isShared, otherSpaceNames, hiddenSpaceCount } = useDatasetSharing(spaceIds);
+  const { isEnabled, isShared } = useDatasetSharing(spaceIds);
   const { title, message } = getSharedNoticeCopy(spaceIds, action);
 
   if (!isEnabled || !isShared) {
@@ -59,19 +58,6 @@ export const DatasetSharedNotice: React.FC<DatasetSharedNoticeProps> = ({ spaceI
   }
 
   return (
-    <KbnWarningCallout
-      size="s"
-      title={title}
-      data-test-subj="datasetSharedNotice"
-      text={
-        <>
-          <p>{message}</p>
-          {otherSpaceNames.length > 0 ? (
-            <p>{i18n.getOtherSpacesSentence(otherSpaceNames)}</p>
-          ) : null}
-          {hiddenSpaceCount > 0 ? <p>{i18n.getHiddenSpacesSentence(hiddenSpaceCount)}</p> : null}
-        </>
-      }
-    />
+    <KbnWarningCallout size="s" title={title} data-test-subj="datasetSharedNotice" text={message} />
   );
 };

@@ -61,8 +61,8 @@ export const resolveTargetSpaces = async ({
     };
   }
 
-  // Reads redact hidden spaces down to a single `?`. Expanding it back lets the
-  // caller save what they were shown without unsharing spaces they never saw.
+  // Reads replace hidden spaces with `?`. Expanding those back lets the caller
+  // save what they were shown without unsharing spaces they never saw.
   const named = requested.filter((spaceId) => spaceId !== UNKNOWN_SPACE);
   if (named.length !== requested.length) {
     const hiddenSpaceIds = await findUnknownSpaces({
@@ -220,11 +220,11 @@ export const redactSpaceIds = (
   }
 
   const accessible = new Set(accessibleSpaceIds);
-  const redacted = spaceIds.map((spaceId) => (accessible.has(spaceId) ? spaceId : UNKNOWN_SPACE));
 
-  // One placeholder is enough to say "and somewhere you can't see"; a row of
-  // identical ones would only count spaces the caller was denied the names of.
-  return dedupe(redacted).sort(sortRedactedLast);
+  // One placeholder per hidden space
+  return spaceIds
+    .map((spaceId) => (accessible.has(spaceId) ? spaceId : UNKNOWN_SPACE))
+    .sort(sortRedactedLast);
 };
 
 const sortRedactedLast = (a: string, b: string): number => {
