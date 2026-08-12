@@ -147,7 +147,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   );
 
   return response.hits.hits.flatMap((hit) =>
-    hit._source ? [mapClassicAlertToEpisode(hit._source as ClassicAlertSource)] : []
+    hit._source ? [mapClassicAlertToEpisode(hit._source as unknown as ClassicAlertSource)] : []
   );
 };
 
@@ -221,7 +221,12 @@ export const fetchV1AlertsHistogram = async ({
 
   return response.hits.hits.flatMap((hit) =>
     hit._source
-      ? [mapClassicAlertToHistogramRow(hit._source as ClassicAlertSource, breakdownField)]
+      ? [
+          mapClassicAlertToHistogramRow(
+            hit._source as unknown as ClassicAlertSource,
+            breakdownField
+          ),
+        ]
       : []
   );
 };
