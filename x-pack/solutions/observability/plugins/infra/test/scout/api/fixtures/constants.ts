@@ -74,14 +74,18 @@ export const DATES = {
 /** `to` timestamp used by the metrics process list archive tests. */
 export const PROCESS_LIST_TO = 1680027660000;
 
+const RECENT_TIMERANGE_ANCHOR = Date.now();
+
 /**
- * Near-now window for synthtrace seeding: fixed historical dates are rejected
- * by TSDS once the Fleet system package is installed.
+ * Returns an offset near-now window because TSDS rejects fixed historical dates.
  */
-export const getRecentTimerange = (minutes: number): { from: string; to: string } => {
-  const to = Date.now();
+export const getRecentTimerange = (
+  durationMinutes: number,
+  endOffsetMinutes: number
+): { from: string; to: string } => {
+  const to = RECENT_TIMERANGE_ANCHOR - endOffsetMinutes * 60 * 1000;
   return {
-    from: new Date(to - minutes * 60 * 1000).toISOString(),
+    from: new Date(to - durationMinutes * 60 * 1000).toISOString(),
     to: new Date(to).toISOString(),
   };
 };
