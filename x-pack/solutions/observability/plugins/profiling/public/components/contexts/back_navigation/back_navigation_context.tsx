@@ -10,9 +10,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { ProfilingRoutes } from '../../../routing';
 
-// Routes that render a back button in AppHeader. Every other route is a content route and is
-// eligible to be recorded as the back target.
-//
+// Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
 // this provider renders above RedirectWithDefaultDateRange. Calling matchRoutes() at this level
 // throws a plain Error when rangeFrom/rangeTo are absent from the URL (they have no defaults in
@@ -23,8 +21,20 @@ export const ROUTES_WITH_BACK_NAVIGATION = [
   '/add-data-instructions',
 ] as const satisfies ReadonlyArray<PathsOf<ProfilingRoutes>>;
 
+// Utility routes. They deliberately stay out of
+// ROUTES_WITH_BACK_NAVIGATION so they render no back button, and they are never recorded as a back
+// target either: sending a user back to one is a dead end.
+export const ROUTES_EXCLUDED_FROM_BACK_TARGET = [
+  '/delete_data_instructions',
+  '/profiling-not-enabled',
+] as const satisfies ReadonlyArray<PathsOf<ProfilingRoutes>>;
+
 export const hasBackNavigation = (pathname: string): boolean =>
   (ROUTES_WITH_BACK_NAVIGATION as readonly string[]).includes(pathname);
+
+/** True when the route must never be recorded as the last-visited back target. */
+export const isExcludedFromBackTarget = (pathname: string): boolean =>
+  (ROUTES_EXCLUDED_FROM_BACK_TARGET as readonly string[]).includes(pathname);
 
 export interface BackNavigationApi {
   /**
@@ -45,10 +55,10 @@ export function BackNavigationContextProvider({ children }: { children: React.Re
   const [lastVisitedRoute, setLastVisitedRoute] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // Back-target routes are not recorded. The rule is a denylist (skip iff the pathname is a
-    // back-target route), not an allowlist. New content routes become recordable automatically
-    // without touching this file.
-    if (hasBackNavigation(pathname)) {
+    // Denylist: back-target routes and utility dead ends are both skipped. Everything else is
+    // a content route — new content routes become recordable automatically without touching this
+    // file.
+    if (hasBackNavigation(pathname) || isExcludedFromBackTarget(pathname)) {
       return;
     }
     setLastVisitedRoute(pathname + search);

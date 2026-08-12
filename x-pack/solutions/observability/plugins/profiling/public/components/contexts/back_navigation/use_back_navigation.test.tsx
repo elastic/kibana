@@ -17,6 +17,8 @@ import { ProfilingSetupStatusContext } from '../profiling_setup_status/profiling
 import {
   BackNavigationContextProvider,
   hasBackNavigation,
+  isExcludedFromBackTarget,
+  ROUTES_EXCLUDED_FROM_BACK_TARGET,
   ROUTES_WITH_BACK_NAVIGATION,
 } from './back_navigation_context';
 import { useBackNavigation } from './use_back_navigation';
@@ -112,13 +114,26 @@ describe('hasBackNavigation', () => {
       expect(hasBackNavigation(route)).toBe(false);
     }
   );
+});
 
-  it('returns false for a trailing-slash variant and a sub-path of a back-target route', () => {
-    // These fall through to the content-route branch and are eligible to be recorded as back
-    // targets, so hasBackNavigation must NOT match them.
-    expect(hasBackNavigation('/settings/')).toBe(false);
-    expect(hasBackNavigation('/storage-explorer/foo')).toBe(false);
+describe('isExcludedFromBackTarget', () => {
+  it.each(ROUTES_EXCLUDED_FROM_BACK_TARGET)('returns true for %s', (route) => {
+    expect(isExcludedFromBackTarget(route)).toBe(true);
   });
+
+  it.each(ROUTES_WITH_BACK_NAVIGATION)(
+    'returns false for the back-button route %s — the two lists are disjoint',
+    (route) => {
+      expect(isExcludedFromBackTarget(route)).toBe(false);
+    }
+  );
+
+  it.each(['/stacktraces/threads', '/flamegraphs/flamegraph', '/'])(
+    'returns false for the content route %s',
+    (route) => {
+      expect(isExcludedFromBackTarget(route)).toBe(false);
+    }
+  );
 });
 
 describe('useBackNavigation', () => {
@@ -219,6 +234,40 @@ describe('useBackNavigation', () => {
       // (the cold-deep-link fallback).
       expect(renders[i]).toBe('/base/app/profiling/');
       expect(renders.slice(i)).toEqual(['/base/app/profiling/']);
+    });
+  });
+
+  describe('excluded routes — never recorded as the back target', () => {
+    it.each(ROUTES_EXCLUDED_FROM_BACK_TARGET)('returns undefined on %s', (route) => {
+      const { result } = renderBackNavigation({
+        initialEntry: route,
+        // Provide resolved status so an undefined result cannot be attributed to a pending setup
+        // fetch (which also suppresses the button on /add-data-instructions).
+        initialStatus: makeStatus({ has_data: true }),
+      });
+      expect(result.current.back).toBeUndefined();
+    });
+
+    it.each(ROUTES_EXCLUDED_FROM_BACK_TARGET)(
+      'records nothing on a cold deep link to %s, so /settings falls back to the plugin root',
+      (route) => {
+        // Pre-change this test fails: the back href would be e.g. /base/app/profiling/delete_data_instructions.
+        const { result } = renderBackNavigation({ initialEntry: route });
+
+        act(() => result.current.history.push('/settings'));
+
+        expect(result.current.back).toBe('/base/app/profiling');
+      }
+    );
+
+    it('does not overwrite the recorded content route', () => {
+      const { result } = renderBackNavigation({ initialEntry: '/functions/topn?x=1' });
+
+      act(() => result.current.history.push('/delete_data_instructions'));
+      act(() => result.current.history.push('/profiling-not-enabled'));
+      act(() => result.current.history.push('/settings'));
+
+      expect(result.current.back).toBe('/base/app/profiling/functions/topn?x=1');
     });
   });
 
