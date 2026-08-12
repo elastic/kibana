@@ -13,8 +13,8 @@ import type { z } from '@kbn/zod/v4';
 /**
  * Context passed to ConnectorSpecEvents.handleEvents after hub verification.
  *
- * Signed webhook verification is hub-orchestrated (fail closed before this
- * handler runs).
+ * Ingress auth (ingest token, provider signatures) is hub-orchestrated and
+ * fail-closed before this handler runs.
  */
 export interface ConnectorIngressContext {
   readonly spaceId: string;
