@@ -65,7 +65,9 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkCreateSeriesAlertActions')
+      .mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [
@@ -74,7 +76,7 @@ describe('createUnsnoozeAction', () => {
       ],
       onSuccess,
     });
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+    expect(bulk.bulkCreateSeriesAlertActions).toHaveBeenCalledWith(deps.http, [
       { group_hash: 'g1', action_type: 'unsnooze' },
       { group_hash: 'g2', action_type: 'unsnooze' },
     ]);
@@ -84,7 +86,7 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockRejectedValue(new Error('network error'));
+    jest.spyOn(bulk, 'bulkCreateSeriesAlertActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [makeEpisode({ last_snooze_action: 'snooze' })],

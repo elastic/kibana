@@ -6,87 +6,103 @@
  */
 
 import {
-  bulkCreateAlertActionBodySchema,
+  bulkCreateEpisodeAlertActionBodySchema,
+  bulkCreateSeriesAlertActionBodySchema,
   bulkResponseSchema,
-  createAckAlertActionBodySchema,
-  createActivateAlertActionBodySchema,
-  createAssignAlertActionBodySchema,
-  createDeactivateAlertActionBodySchema,
-  createSnoozeAlertActionBodySchema,
-  createTagAlertActionBodySchema,
-  createUnackAlertActionBodySchema,
-  createUnsnoozeAlertActionBodySchema,
+  createAckEpisodeActionBodySchema,
+  createActivateEpisodeActionBodySchema,
+  createAssignEpisodeActionBodySchema,
+  createDeactivateEpisodeActionBodySchema,
+  createSnoozeSeriesActionBodySchema,
+  createTagSeriesActionBodySchema,
+  createUnackEpisodeActionBodySchema,
+  createUnsnoozeSeriesActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
 import {
-  BULK_CREATE_ALERT_ACTION_REQUEST,
-  BULK_CREATE_ALERT_ACTION_RESPONSE,
-} from './bulk_create_alert_action_oas_example';
-import { CREATE_ACK_ALERT_ACTION_REQUEST } from './create_ack_alert_action_oas_example';
-import { CREATE_ACTIVATE_ALERT_ACTION_REQUEST } from './create_activate_alert_action_oas_example';
-import { CREATE_ASSIGN_ALERT_ACTION_REQUEST } from './create_assign_alert_action_oas_example';
-import { CREATE_DEACTIVATE_ALERT_ACTION_REQUEST } from './create_deactivate_alert_action_oas_example';
-import { CREATE_SNOOZE_ALERT_ACTION_REQUEST } from './create_snooze_alert_action_oas_example';
-import { CREATE_TAG_ALERT_ACTION_REQUEST } from './create_tag_alert_action_oas_example';
-import { CREATE_UNACK_ALERT_ACTION_REQUEST } from './create_unack_alert_action_oas_example';
-import { CREATE_UNSNOOZE_ALERT_ACTION_REQUEST } from './create_unsnooze_alert_action_oas_example';
+  BULK_CREATE_SERIES_ACTION_REQUEST,
+  BULK_CREATE_SERIES_ACTION_RESPONSE,
+} from './series/bulk_create_series_action_oas_example';
+import { CREATE_TAG_SERIES_ACTION_REQUEST } from './series/create_tag_series_action_oas_example';
+import { CREATE_SNOOZE_SERIES_ACTION_REQUEST } from './series/create_snooze_series_action_oas_example';
+import { CREATE_UNSNOOZE_SERIES_ACTION_REQUEST } from './series/create_unsnooze_series_action_oas_example';
+import {
+  BULK_CREATE_EPISODE_ACTION_REQUEST,
+  BULK_CREATE_EPISODE_ACTION_RESPONSE,
+} from './episodes/bulk_create_episode_action_oas_example';
+import { CREATE_ACK_EPISODE_ACTION_REQUEST } from './episodes/create_ack_episode_action_oas_example';
+import { CREATE_UNACK_EPISODE_ACTION_REQUEST } from './episodes/create_unack_episode_action_oas_example';
+import { CREATE_ASSIGN_EPISODE_ACTION_REQUEST } from './episodes/create_assign_episode_action_oas_example';
+import { CREATE_ACTIVATE_EPISODE_ACTION_REQUEST } from './episodes/create_activate_episode_action_oas_example';
+import { CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST } from './episodes/create_deactivate_episode_action_oas_example';
 
-describe('alert OAS example payloads', () => {
-  it('keeps ack request example valid against createAckAlertActionBodySchema', () => {
-    expect(createAckAlertActionBodySchema.safeParse(CREATE_ACK_ALERT_ACTION_REQUEST).success).toBe(
-      true
-    );
-  });
-
-  it('keeps unack request example valid against createUnackAlertActionBodySchema', () => {
+describe('alert action OAS example payloads', () => {
+  it('keeps tag request example valid against createTagSeriesActionBodySchema', () => {
     expect(
-      createUnackAlertActionBodySchema.safeParse(CREATE_UNACK_ALERT_ACTION_REQUEST).success
+      createTagSeriesActionBodySchema.safeParse(CREATE_TAG_SERIES_ACTION_REQUEST).success
     ).toBe(true);
   });
 
-  it('keeps assign request example valid against createAssignAlertActionBodySchema', () => {
+  it('keeps snooze request example valid against createSnoozeSeriesActionBodySchema', () => {
     expect(
-      createAssignAlertActionBodySchema.safeParse(CREATE_ASSIGN_ALERT_ACTION_REQUEST).success
+      createSnoozeSeriesActionBodySchema.safeParse(CREATE_SNOOZE_SERIES_ACTION_REQUEST).success
     ).toBe(true);
   });
 
-  it('keeps tag request example valid against createTagAlertActionBodySchema', () => {
-    expect(createTagAlertActionBodySchema.safeParse(CREATE_TAG_ALERT_ACTION_REQUEST).success).toBe(
-      true
-    );
-  });
-
-  it('keeps snooze request example valid against createSnoozeAlertActionBodySchema', () => {
+  it('keeps unsnooze request example valid against createUnsnoozeSeriesActionBodySchema', () => {
     expect(
-      createSnoozeAlertActionBodySchema.safeParse(CREATE_SNOOZE_ALERT_ACTION_REQUEST).success
+      createUnsnoozeSeriesActionBodySchema.safeParse(CREATE_UNSNOOZE_SERIES_ACTION_REQUEST).success
     ).toBe(true);
   });
 
-  it('keeps unsnooze request example valid against createUnsnoozeAlertActionBodySchema', () => {
+  it('keeps ack request example valid against createAckEpisodeActionBodySchema', () => {
     expect(
-      createUnsnoozeAlertActionBodySchema.safeParse(CREATE_UNSNOOZE_ALERT_ACTION_REQUEST).success
+      createAckEpisodeActionBodySchema.safeParse(CREATE_ACK_EPISODE_ACTION_REQUEST).success
     ).toBe(true);
   });
 
-  it('keeps activate request example valid against createActivateAlertActionBodySchema', () => {
+  it('keeps unack request example valid against createUnackEpisodeActionBodySchema', () => {
     expect(
-      createActivateAlertActionBodySchema.safeParse(CREATE_ACTIVATE_ALERT_ACTION_REQUEST).success
+      createUnackEpisodeActionBodySchema.safeParse(CREATE_UNACK_EPISODE_ACTION_REQUEST).success
     ).toBe(true);
   });
 
-  it('keeps deactivate request example valid against createDeactivateAlertActionBodySchema', () => {
+  it('keeps assign request example valid against createAssignEpisodeActionBodySchema', () => {
     expect(
-      createDeactivateAlertActionBodySchema.safeParse(CREATE_DEACTIVATE_ALERT_ACTION_REQUEST)
+      createAssignEpisodeActionBodySchema.safeParse(CREATE_ASSIGN_EPISODE_ACTION_REQUEST).success
+    ).toBe(true);
+  });
+
+  it('keeps activate request example valid against createActivateEpisodeActionBodySchema', () => {
+    expect(
+      createActivateEpisodeActionBodySchema.safeParse(CREATE_ACTIVATE_EPISODE_ACTION_REQUEST)
         .success
     ).toBe(true);
   });
 
-  it('keeps bulk request example valid against bulkCreateAlertActionBodySchema', () => {
+  it('keeps deactivate request example valid against createDeactivateEpisodeActionBodySchema', () => {
     expect(
-      bulkCreateAlertActionBodySchema.safeParse(BULK_CREATE_ALERT_ACTION_REQUEST).success
+      createDeactivateEpisodeActionBodySchema.safeParse(CREATE_DEACTIVATE_EPISODE_ACTION_REQUEST)
+        .success
     ).toBe(true);
   });
 
-  it('keeps bulk response example valid against bulkResponseSchema', () => {
-    expect(bulkResponseSchema.safeParse(BULK_CREATE_ALERT_ACTION_RESPONSE).success).toBe(true);
+  it('keeps series bulk request example valid against bulkCreateSeriesAlertActionBodySchema', () => {
+    expect(
+      bulkCreateSeriesAlertActionBodySchema.safeParse(BULK_CREATE_SERIES_ACTION_REQUEST).success
+    ).toBe(true);
+  });
+
+  it('keeps series bulk response example valid against bulkResponseSchema', () => {
+    expect(bulkResponseSchema.safeParse(BULK_CREATE_SERIES_ACTION_RESPONSE).success).toBe(true);
+  });
+
+  it('keeps episode bulk request example valid against bulkCreateEpisodeAlertActionBodySchema', () => {
+    expect(
+      bulkCreateEpisodeAlertActionBodySchema.safeParse(BULK_CREATE_EPISODE_ACTION_REQUEST).success
+    ).toBe(true);
+  });
+
+  it('keeps episode bulk response example valid against bulkResponseSchema', () => {
+    expect(bulkResponseSchema.safeParse(BULK_CREATE_EPISODE_ACTION_RESPONSE).success).toBe(true);
   });
 });
