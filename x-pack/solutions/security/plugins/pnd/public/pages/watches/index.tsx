@@ -67,7 +67,7 @@ export const WatchesPage: React.FC = () => {
             <EuiButton
               key="new-watch"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={onNewWatch}
               data-test-subj="pndNewWatchButton"
             >
@@ -102,7 +102,12 @@ export const WatchesPage: React.FC = () => {
           <>
             {error ? (
               <>
-                <EuiCallOut color="warning" iconType="warning" title={i18n.STALE_DATA_WARNING} />
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  title={i18n.STALE_DATA_WARNING}
+                />
                 <EuiSpacer size="m" />
               </>
             ) : null}
