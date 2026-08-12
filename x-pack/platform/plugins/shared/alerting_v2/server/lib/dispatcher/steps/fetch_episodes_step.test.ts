@@ -9,6 +9,7 @@ import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import { EPISODE_QUERY_LIMIT } from '../queries';
 import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
 
 describe('FetchEpisodesStep', () => {
@@ -42,6 +43,69 @@ describe('FetchEpisodesStep', () => {
     const result = await step.execute(state);
 
     expect(result).toEqual({ type: 'halt', reason: 'no_episodes' });
+  });
+
+  it('passes windowStart as gte and windowEnd as lte in the filter', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createDispatchableAlertEventsResponse([createAlertEpisode()])
+    );
+
+    const state = createDispatcherPipelineState();
+    const { windowStart, windowEnd } = state.input;
+    await step.execute(state);
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: {
+          range: {
+            '@timestamp': {
+              gte: windowStart.toISOString(),
+              lte: windowEnd.toISOString(),
+            },
+          },
+        },
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('sets truncated: true when the query returns exactly EPISODE_QUERY_LIMIT rows', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    const maxEpisodes = Array.from({ length: EPISODE_QUERY_LIMIT }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+    );
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createDispatchableAlertEventsResponse(maxEpisodes)
+    );
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.truncated).toBe(true);
+  });
+
+  it('sets truncated: false when the query returns fewer than EPISODE_QUERY_LIMIT rows', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    const episodes = Array.from({ length: EPISODE_QUERY_LIMIT - 1 }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+    );
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.truncated).toBe(false);
   });
 
   it('propagates query errors', async () => {

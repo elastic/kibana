@@ -26,9 +26,10 @@ import type { RulesSavedObjectServiceContract } from '../services/rules_saved_ob
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { LOOKBACK_WINDOW_MINUTES } from './constants';
+import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES } from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
+import { createAlertEpisode } from './fixtures/test_utils';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
@@ -251,8 +252,13 @@ describe('DispatcherService', () => {
 
       expect(result.startedAt).toBeInstanceOf(Date);
 
-      const expectedLookback = moment(eventWatermark)
-        .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
+      // windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
+      // windowEnd   = windowStart + MAX_WINDOW_MINUTES (< now − settle since watermark is far in the past)
+      const expectedWindowStart = moment(eventWatermark)
+        .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
+        .toISOString();
+      const expectedWindowEnd = moment(expectedWindowStart)
+        .add(MAX_WINDOW_MINUTES, 'minutes')
         .toISOString();
 
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
@@ -263,7 +269,8 @@ describe('DispatcherService', () => {
           filter: {
             range: {
               '@timestamp': {
-                gte: expectedLookback,
+                gte: expectedWindowStart,
+                lte: expectedWindowEnd,
               },
             },
           },
@@ -880,6 +887,8 @@ describe('DispatcherService', () => {
             input: {
               startedAt: new Date(),
               eventWatermark: new Date(),
+              windowStart: new Date(),
+              windowEnd: new Date(),
               executionUuid: 'unused-in-result',
               signal: new AbortController().signal,
             },
@@ -941,6 +950,91 @@ describe('DispatcherService', () => {
       await service.run({ eventWatermark: new Date() });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── rna-program#436 regression ──────────────────────────────────────────────
+  // Before the fix, a truncated tick left nextWatermark = startedAt (wall clock),
+  // skipping the deferred tail permanently. After the fix, nextWatermark must be
+  // the last returned episode's timestamp so the tail is re-read next tick.
+  describe('rna-program#436 regression: truncated tick must not advance watermark past deferred tail', () => {
+    function buildMockTruncatedPipeline(
+      lastEpisodeTs: string
+    ): jest.Mocked<DispatcherPipelineContract> {
+      const episodes = [
+        createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
+        createAlertEpisode({ episode_id: 'e2', last_event_timestamp: lastEpisodeTs }),
+      ];
+      const mockInput = {
+        startedAt: new Date('2026-01-22T08:00:00.000Z'),
+        eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
+        windowStart: new Date('2026-01-22T07:20:00.000Z'),
+        windowEnd: new Date('2026-01-22T07:35:00.000Z'),
+        executionUuid: 'test-uuid',
+        signal: new AbortController().signal,
+      };
+      return {
+        execute: jest.fn().mockResolvedValue({
+          completed: true,
+          finalState: { input: mockInput, episodes, truncated: true, recordedEpisodes: 2 },
+        }),
+      };
+    }
+
+    it('tick 1 truncated: nextWatermark is the last episode ts, not startedAt', async () => {
+      const { loggerService } = createLoggerService();
+      const lastEpisodeTs = '2026-01-22T07:33:00.000Z';
+      const mockPipeline = buildMockTruncatedPipeline(lastEpisodeTs);
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      const result = await service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
+
+      expect(result.nextWatermark.toISOString()).toBe(lastEpisodeTs);
+      // On main (before fix), nextWatermark === startedAt which is ~now — far ahead of lastEpisodeTs.
+      expect(result.nextWatermark.toISOString()).not.toBe(result.startedAt.toISOString());
+    });
+
+    it('tick 2 starts from the truncation edge and covers the deferred tail', async () => {
+      const { loggerService } = createLoggerService();
+      const tick1LastEpisodeTs = '2026-01-22T07:33:00.000Z';
+
+      // Tick 1: truncated — watermark advances to 07:33
+      const pipeline1 = buildMockTruncatedPipeline(tick1LastEpisodeTs);
+      const service = new DispatcherService(pipeline1, loggerService);
+      const tick1 = await service.run({ eventWatermark: new Date('2026-01-22T07:30:00.000Z') });
+
+      expect(tick1.nextWatermark.toISOString()).toBe(tick1LastEpisodeTs);
+
+      // Tick 2 begins from 07:33 → windowStart = 07:23, windowEnd = 07:38.
+      // The deferred tail (events between 07:33 and 07:35) is within this window.
+      // We verify tick 2 does NOT skip: its windowStart ≤ tick1LastEpisodeTs.
+      const tick2MockInput = {
+        startedAt: new Date('2026-01-22T08:01:00.000Z'),
+        eventWatermark: tick1.nextWatermark,
+        windowStart: moment(tick1.nextWatermark)
+          .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
+          .toDate(),
+        windowEnd: moment(tick1.nextWatermark)
+          .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
+          .add(MAX_WINDOW_MINUTES, 'minutes')
+          .toDate(),
+        executionUuid: 'test-uuid-2',
+        signal: new AbortController().signal,
+      };
+      const pipeline2: jest.Mocked<DispatcherPipelineContract> = {
+        execute: jest.fn().mockResolvedValue({
+          completed: true,
+          finalState: { input: tick2MockInput, episodes: [], recordedEpisodes: 0 },
+        }),
+      };
+      const service2 = new DispatcherService(pipeline2, loggerService);
+      await service2.run({ eventWatermark: tick1.nextWatermark });
+
+      const [[tick2Input]] = pipeline2.execute.mock.calls;
+      expect(tick2Input.windowStart.getTime()).toBeLessThanOrEqual(
+        new Date(tick1LastEpisodeTs).getTime()
+      );
+      expect(tick2Input.eventWatermark.toISOString()).toBe(tick1LastEpisodeTs);
     });
   });
 });

@@ -23,9 +23,13 @@ import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 export function createDispatcherPipelineInput(
   overrides: Partial<DispatcherPipelineInput> = {}
 ): DispatcherPipelineInput {
+  // Default window: eventWatermark=07:30, windowStart=07:20 (−10min overlap),
+  // windowEnd=07:35 (windowStart+15min), consistent with OVERLAP/MAX constants.
   return {
     startedAt: new Date('2026-01-22T08:00:00.000Z'),
     eventWatermark: new Date('2026-01-22T07:30:00.000Z'),
+    windowStart: new Date('2026-01-22T07:20:00.000Z'),
+    windowEnd: new Date('2026-01-22T07:35:00.000Z'),
     executionUuid: '00000000-0000-4000-8000-000000000000',
     signal: new AbortController().signal,
     ...overrides,

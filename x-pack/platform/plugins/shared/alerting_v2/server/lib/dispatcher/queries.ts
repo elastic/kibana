@@ -25,6 +25,12 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // Rows with a null subject are dropped here: a doc with source "internal" and no rule is
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
 // TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
+/**
+ * Row cap of `getDispatchableAlertEventsQuery`. Kept in sync by a unit test —
+ * ES|QL will not accept a bound parameter in a LIMIT clause.
+ */
+export const EPISODE_QUERY_LIMIT = 10_000;
+
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM}
       | WHERE type IS NULL OR type == ${ALERT_EVENT_TYPE}

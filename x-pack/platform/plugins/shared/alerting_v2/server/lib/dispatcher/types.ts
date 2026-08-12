@@ -154,6 +154,10 @@ export interface DispatchFailure {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly eventWatermark: Date;
+  /** Lower bound of the ES|QL range filter. Equal to `eventWatermark − OVERLAP_WINDOW_MINUTES`. */
+  readonly windowStart: Date;
+  /** Upper bound of the ES|QL range filter. Equal to `min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)`. */
+  readonly windowEnd: Date;
   readonly executionUuid: string;
   readonly signal: AbortSignal;
 }
@@ -161,6 +165,10 @@ export interface DispatcherPipelineInput {
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
   readonly episodes?: AlertEpisode[];
+  /** True when the episode scan reached EPISODE_QUERY_LIMIT and a tail was deferred. */
+  readonly truncated?: boolean;
+  /** Count of episodes that received an `.alert-actions` record this tick. */
+  readonly recordedEpisodes?: number;
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
   readonly suppressed?: Array<AlertEpisode & { reason: string }>;

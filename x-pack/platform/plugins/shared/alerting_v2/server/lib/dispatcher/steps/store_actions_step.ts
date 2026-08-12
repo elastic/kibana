@@ -109,7 +109,13 @@ export class StoreActionsStep implements DispatcherStep {
       ],
     });
 
-    return { type: 'continue' };
+    const recordedEpisodes =
+      suppressed.length +
+      throttled.reduce((n, g) => n + g.episodes.length, 0) +
+      dispatch.reduce((n, g) => n + g.episodes.length, 0) +
+      unmatched.length;
+
+    return { type: 'continue', data: { recordedEpisodes } };
   }
 }
 

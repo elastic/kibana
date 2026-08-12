@@ -10,12 +10,13 @@ import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
-import { LOOKBACK_WINDOW_MINUTES } from './constants';
+import { OVERLAP_WINDOW_MINUTES, MAX_WINDOW_MINUTES, SETTLE_BUFFER_SECONDS } from './constants';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { computeNextWatermark } from './watermark';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
@@ -38,25 +39,64 @@ export class DispatcherService implements DispatcherServiceContract {
       this.logger.warn({
         code: ALERTING_LOG_CODES.DISPATCHER_COLD_START,
         message: () =>
-          `Dispatcher: no persisted watermark; starting from ${LOOKBACK_WINDOW_MINUTES}m ago. ` +
+          `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
           `Rule events older than that will not be dispatched.`,
       });
     }
 
     const resolvedWatermark =
-      eventWatermark ?? moment(startedAt).subtract(LOOKBACK_WINDOW_MINUTES, 'minutes').toDate();
+      eventWatermark ?? moment(startedAt).subtract(OVERLAP_WINDOW_MINUTES, 'minutes').toDate();
+
+    const windowStart = moment(resolvedWatermark)
+      .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
+      .toDate();
+    const maxEnd = moment(windowStart).add(MAX_WINDOW_MINUTES, 'minutes').toDate();
+    const settled = moment(startedAt).subtract(SETTLE_BUFFER_SECONDS, 'seconds').toDate();
+    const windowEnd = maxEnd < settled ? maxEnd : settled;
+
+    if (windowEnd <= windowStart) {
+      // Degenerate: watermark is ahead of now − settle (e.g. right after cold start with a fast
+      // clock). Skip the scan and hold the watermark to avoid a regress.
+      this.logger.debug({
+        message: () =>
+          `Dispatcher: windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
+          `(${windowStart.toISOString()}); skipping scan.`,
+      });
+      return {
+        startedAt,
+        nextWatermark: resolvedWatermark,
+        pipelineResult: {
+          completed: true,
+          finalState: {
+            input: {
+              startedAt,
+              eventWatermark: resolvedWatermark,
+              windowStart,
+              windowEnd,
+              executionUuid: uuidV4(),
+              signal,
+            },
+          },
+        },
+      };
+    }
 
     const executionUuid = uuidV4();
 
-    const pipelineResult = await this.pipeline.execute({
+    const input = {
       startedAt,
       eventWatermark: resolvedWatermark,
+      windowStart,
+      windowEnd,
       executionUuid,
       signal,
-    });
+    };
+    const pipelineResult = await this.pipeline.execute(input);
 
-    // Phase 2: nextWatermark still follows the old policy (startedAt) so scan
-    // behavior is byte-identical to main. Phase 3 derives it from the tick outcome.
-    return { startedAt, nextWatermark: startedAt, pipelineResult };
+    return {
+      startedAt,
+      nextWatermark: computeNextWatermark({ input, result: pipelineResult }),
+      pipelineResult,
+    };
   }
 }

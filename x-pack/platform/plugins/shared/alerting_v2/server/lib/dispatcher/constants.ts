@@ -5,7 +5,25 @@
  * 2.0.
  */
 
-export const LOOKBACK_WINDOW_MINUTES = 10;
+/**
+ * How far behind the persisted watermark each scan re-reads. Re-reads are
+ * free: the INLINE STATS dedup in `getDispatchableAlertEventsQuery`
+ * (queries.ts:38-39) drops already-recorded episodes server-side before
+ * LIMIT. The overlap absorbs rule events indexed with a `@timestamp` behind
+ * the watermark, so the settle buffer is a tuning knob rather than a
+ * correctness constant.
+ */
+export const OVERLAP_WINDOW_MINUTES = 10;
+
+/**
+ * Maximum span of a single scan. Must stay strictly greater than
+ * OVERLAP_WINDOW_MINUTES: the difference is the forward progress a lagging
+ * dispatcher makes per tick.
+ */
+export const MAX_WINDOW_MINUTES = 15;
+
+/** Excludes the most recent slice so in-flight indexing is not scanned mid-write. */
+export const SETTLE_BUFFER_SECONDS = 5;
 
 /**
  * Task manager task type and singleton task id used to schedule dispatcher

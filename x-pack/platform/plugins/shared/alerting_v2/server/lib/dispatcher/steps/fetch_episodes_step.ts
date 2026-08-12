@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
@@ -19,8 +18,7 @@ import type {
 } from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { LOOKBACK_WINDOW_MINUTES } from '../constants';
-import { getDispatchableAlertEventsQuery } from '../queries';
+import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
@@ -42,23 +40,24 @@ export class FetchEpisodesStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { eventWatermark, signal } = state.input;
-
-    const lookback = moment(eventWatermark)
-      .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
-      .toISOString();
+    const { windowStart, windowEnd, signal } = state.input;
 
     const result = await this.queryService.executeQueryRows<RawAlertEpisode>({
       query: getDispatchableAlertEventsQuery().query,
       filter: {
         range: {
           '@timestamp': {
-            gte: lookback,
+            gte: windowStart.toISOString(),
+            lte: windowEnd.toISOString(),
           },
         },
       },
       abortSignal: signal,
     });
+
+    // `lte: windowEnd` makes windowEnd a provable watermark advance target:
+    // the scan has a defined upper edge to advance to.
+    const truncated = result.length === EPISODE_QUERY_LIMIT;
 
     const episodes = parseAlertEpisodes(result);
 
@@ -66,7 +65,7 @@ export class FetchEpisodesStep implements DispatcherStep {
       return { type: 'halt', reason: 'no_episodes' };
     }
 
-    return { type: 'continue', data: { episodes } };
+    return { type: 'continue', data: { episodes, truncated } };
   }
 }
 
