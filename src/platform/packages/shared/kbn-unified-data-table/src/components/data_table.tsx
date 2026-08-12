@@ -1069,7 +1069,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     });
 
     // In JSON mode the source cell renders a variable-height tree: force the body cell height to auto
-    // and hide the "Body cell lines" setting (dropping its change handlers removes the control).
+    // and hide the "Body cell lines" setting.
     const isJsonSourceMode = sourceDisplayMode === 'json';
     const rowHeightLines = isJsonSourceMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
     const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;

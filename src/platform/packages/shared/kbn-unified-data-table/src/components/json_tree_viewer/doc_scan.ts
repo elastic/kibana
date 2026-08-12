@@ -7,22 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * In-table search support for the JSON tree. Both helpers are the same depth-first `visit` over the
- * document's node tree (`buildNodes`); they differ only in what they collect.
- *
- * `collectSearchMatches` drives *visible* auto-expansion and auto-reveal: in-table search only sees
- * rendered DOM text, so when a term is active every collection whose subtree contains a matching
- * value is force-opened, and any list that would hide a match past its "show more" cap is revealed
- * far enough (up to `MAX_SEARCH_REVEAL`) for the match to render. This runs only for the handful of
- * on-screen cells.
- *
- * `getDocumentText` drives the *counting* pass. The grid counts matches by rendering every row's cell
- * off-screen on each keystroke; mounting the whole tree there is what makes the grid freeze on large
- * result sets. Instead the cell renders this cheap, memoised text blob, which carries the same
- * searchable content for the counter to walk at a fraction of the render cost.
- */
-
 import {
   buildNodes,
   INITIAL_CHILDREN,
@@ -37,7 +21,7 @@ export interface SearchMatches {
   containers: ReadonlySet<string>;
   /**
    * The minimum number of children that list must reveal ("Show more") so a node containing a match
-   * is visible.
+   * is visible. (Show X more..)
    */
   reveals: ReadonlyMap<string, number>;
 }
@@ -47,8 +31,11 @@ export const EMPTY_SEARCH_MATCHES: SearchMatches = {
   reveals: new Map(),
 };
 
+const documentTextCache = new WeakMap<object, string>();
+
 /**
  * Collects the nodes that need to be expanded / revealed to display a search match.
+ * Capped by MAX_SEARCH_REVEAL to prevent the DOM from blowing up.
  */
 export const collectSearchMatches = (nodes: JsonNode[], termLower: string): SearchMatches => {
   const containers = new Set<string>();
@@ -86,11 +73,11 @@ export const collectSearchMatches = (nodes: JsonNode[], termLower: string): Sear
   return { containers, reveals };
 };
 
-// A '\n'-joined blob of a document's keys and primitive values, memoised in a WeakMap keyed by the
-// (stable, per-row) document so repeated keystrokes reuse it. The '\n' separators stop a match from
-// spanning two adjacent fields, mirroring how the rendered tree keeps each token in its own text node.
-const documentTextCache = new WeakMap<object, string>();
-
+/**
+ * Creates a text representation of a json value with just its keys and primitive values.
+ * Used for in-table search counting.
+ * Cached in a WeakMap to avoid recalculating the same document text for repeated keystrokes.
+ */
 export const getDocumentText = (json: JsonValue): string => {
   if (typeof json !== 'object' || json === null) {
     return json === undefined ? '' : String(json);

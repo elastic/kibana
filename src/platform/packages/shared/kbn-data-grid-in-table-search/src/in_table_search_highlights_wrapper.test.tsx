@@ -17,11 +17,6 @@ const colors = {
   highlightBackgroundColor: 'green',
 };
 
-const CountingProbe = () => {
-  const { isCounting } = useContext(InTableSearchCellContext);
-  return <span>{isCounting ? 'is-counting' : 'not-counting'}</span>;
-};
-
 describe('InTableSearchHighlightsWrapper', () => {
   describe('modifies the DOM and adds search highlights', () => {
     it('with matches', async () => {
@@ -199,6 +194,11 @@ describe('InTableSearchHighlightsWrapper', () => {
   });
 
   describe('InTableSearchCellContext', () => {
+    const CountingProofCell = () => {
+      const { isCounting } = useContext(InTableSearchCellContext);
+      return <span>{isCounting ? 'is-counting' : 'not-counting'}</span>;
+    };
+
     it('is true for children rendered in the offscreen dry-run counting pass', () => {
       render(
         <InTableSearchHighlightsWrapper
@@ -206,7 +206,7 @@ describe('InTableSearchHighlightsWrapper', () => {
           onHighlightsCountFound={jest.fn()}
           {...colors}
         >
-          <CountingProbe />
+          <CountingProofCell />
         </InTableSearchHighlightsWrapper>
       );
 
@@ -216,7 +216,7 @@ describe('InTableSearchHighlightsWrapper', () => {
     it('is false for children rendered as visible cells', () => {
       render(
         <InTableSearchHighlightsWrapper inTableSearchTerm="x" {...colors}>
-          <CountingProbe />
+          <CountingProofCell />
         </InTableSearchHighlightsWrapper>
       );
 

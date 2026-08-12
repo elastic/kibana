@@ -14,21 +14,50 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import { SourceDocumentJsonMode } from './source_document_json_mode';
 import { MAX_TREE_VALUES } from '../utils/build_document_tree';
 
 const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
-const renderCell = (hit: EsHitRecord) =>
-  renderWithI18n(
+const hitWithFields: EsHitRecord = {
+  _id: '1',
+  _index: 'test',
+  _source: { bytes: 100, extension: '.gz' },
+};
+
+const renderCell = (
+  hit: EsHitRecord,
+  {
+    shouldShowFieldHandler = () => true,
+    inTableSearch,
+  }: {
+    shouldShowFieldHandler?: (fieldName: string) => boolean;
+    inTableSearch?: { term: string; isCounting: boolean };
+  } = {}
+) => {
+  const cell = (
     <SourceDocumentJsonMode
       row={buildDataTableRecord(hit, dataViewMock)}
       dataView={dataViewMock}
       columnsMeta={undefined}
-      shouldShowFieldHandler={() => true}
+      shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
     />
   );
+
+  return renderWithI18n(
+    inTableSearch ? (
+      <InTableSearchCellContext.Provider
+        value={{ inTableSearchTerm: inTableSearch.term, isCounting: inTableSearch.isCounting }}
+      >
+        {cell}
+      </InTableSearchCellContext.Provider>
+    ) : (
+      cell
+    )
+  );
+};
 
 describe('SourceDocumentJsonMode', () => {
   it('warns when the document is too large and gets truncated', () => {
@@ -48,5 +77,29 @@ describe('SourceDocumentJsonMode', () => {
 
     expect(screen.queryByTestId('sourceDocumentTruncatedWarning')).not.toBeInTheDocument();
     expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+  });
+
+  describe('in-table search counting pass', () => {
+    it('renders the document content as cheap text instead of the tree while counting', () => {
+      const { container } = renderCell(hitWithFields, {
+        shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+        inTableSearch: { term: 'gz', isCounting: true },
+      });
+
+      // No interactive tree is mounted for the offscreen counting pass...
+      expect(screen.queryByTestId('jsonTreeViewer')).toBeNull();
+      // ...but the document's searchable content is present for the wrapper to count over.
+      expect(container.textContent).toContain('bytes');
+      expect(container.textContent).toContain('100');
+    });
+
+    it('renders the interactive tree for visible cells (not counting)', () => {
+      renderCell(hitWithFields, {
+        shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+        inTableSearch: { term: 'gz', isCounting: false },
+      });
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+    });
   });
 });

@@ -26,7 +26,7 @@ import type { FormatValue } from './json_tree_viewer/json_tree_viewer';
 import { JsonTreeViewer, type TreeExpansionState } from './json_tree_viewer/json_tree_viewer';
 import { getDocumentText } from './json_tree_viewer/doc_scan';
 
-// Virtual scrolling destroys and recreats cells while navigating, in order to keep which nodes are expanded
+// Virtualization destroys and recreats cells while navigating, in order to keep which nodes are expanded
 // we need to persist the state outside the cell so it survives the remounts.
 // Keyed by the raw ES hit so every entry is released automatically once the row is dropped.
 const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
@@ -55,7 +55,7 @@ export const SourceDocumentJsonMode = ({
     [row]
   );
 
-  // Unflatten the row and process some fields for better rendering.
+  // Unflatten the row and process fields for better rendering.
   const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
@@ -81,7 +81,6 @@ export const SourceDocumentJsonMode = ({
     [row, dataView, fieldFormats]
   );
 
-  // The tree only shows a capped slice of a very large document; warn that some fields are hidden.
   const truncatedWarning = useMemo(
     () =>
       truncated ? (
@@ -104,7 +103,7 @@ export const SourceDocumentJsonMode = ({
   );
 
   // in-table search renders the cells for all given rows for counting matches, this is expensive for the JSONTreeViewer,
-  // If we detect this case, we render a light version of the document tree (just text).
+  // If we detect this case, we render a light version of the document tree (just text). This is never seen by the user.
   if (isInTableSearchCounting) {
     return <span className={CELL_CLASS}>{getDocumentText(documentTree)}</span>;
   }

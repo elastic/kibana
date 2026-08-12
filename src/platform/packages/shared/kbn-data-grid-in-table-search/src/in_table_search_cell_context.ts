@@ -10,13 +10,10 @@
 import { createContext } from 'react';
 
 /**
- * The in-table search state a cell renderer needs to participate: the current search `inTableSearchTerm`
- * and whether this particular render is the off-screen "dry run" pass the grid uses to count matches
- * (`isCounting` is true only there). Provided per cell by `InTableSearchHighlightsWrapper` — which
- * already holds both — because the wrapper strips the term from the cell's props. An expensive cell
- * renderer can read the term (e.g. to expand matches) and, while counting, emit a lightweight,
- * count-equivalent representation instead of its full view — which keeps in-table search usable on
- * large result sets.
+ * The in-table search state a cell renderer needs to participate.
+ * The `inTableSearchTerm` is the current search term.
+ * The `isCounting` flag is true when the cell is part of the off-screen "dry run" pass the grid uses to count matches.
+ * Use it to produce a lightweight version of the cell content.
  */
 export const InTableSearchCellContext = createContext<{
   inTableSearchTerm: string;
