@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/fleet
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-server-utils'
   - '@kbn/tracing-utils'
   - '@kbn/licensing-plugin'
   - '@kbn/data-plugin'

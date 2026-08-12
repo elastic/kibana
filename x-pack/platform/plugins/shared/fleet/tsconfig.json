@@ -21,6 +21,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-http-server-utils",
     "@kbn/tracing-utils",
     // add references to other TypeScript projects the plugin depends on
 

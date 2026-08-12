@@ -15,5 +15,6 @@ export {
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
+export { createFleetInternalRequest } from './fake_request';
 export type { MessageSigningServiceInterface } from './message_signing_service';
 export { MessageSigningService } from './message_signing_service';

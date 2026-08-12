@@ -409,6 +409,25 @@ describe('stepInstallWorkflowAssets', () => {
     ...overrides,
   });
 
+  it('creates workflow assets when request context is missing', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const context = createContext({
+      logger,
+      request: undefined,
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Installing workflow assets for ${pkgName} using Fleet internal request (no install request context)`
+    );
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenCalledWith(
+      { id: workflowId, yaml: expect.any(String) },
+      spaceId,
+      expect.objectContaining({ isFakeRequest: true, isSystemRequest: true })
+    );
+  });
+
   it('creates a workflow and stamps managed ownership fields', async () => {
     await stepInstallWorkflowAssets(createContext());
 

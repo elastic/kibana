@@ -18,6 +18,7 @@ import type { KibanaAssetReference } from '../../../../../../common/types';
 import { getPathParts } from '../../../archive';
 import { appContextService } from '../../../../app_context';
 import { packagePolicyService } from '../../../../package_policy';
+import { createFleetInternalRequest } from '../../../../security/fake_request';
 import { saveKibanaAssetsRefs } from '../../install';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
@@ -166,11 +167,12 @@ export async function stepInstallWorkflowAssets(
     return;
   }
 
+  const request = context.request ?? createFleetInternalRequest();
+
   if (!context.request) {
     logger.debug(
-      `Skipping workflow asset installation for ${pkgName}: missing install request context`
+      `Installing workflow assets for ${pkgName} using Fleet internal request (no install request context)`
     );
-    return;
   }
 
   await withPackageSpan(`Install package workflows for ${pkgName}`, async () => {
@@ -247,20 +249,20 @@ export async function stepInstallWorkflowAssets(
             workflowId,
             { yaml: workflowYaml, ...managedWorkflowFields },
             spaceId,
-            context.request!,
+            request,
             { allowManagedWorkflowMutation: true }
           );
         } else {
           await workflowsApi.createWorkflow(
             { id: workflowId, yaml: workflowYaml },
             spaceId,
-            context.request!
+            request
           );
           await workflowsApi.updateWorkflow(
             workflowId,
             { yaml: workflowYaml, ...managedWorkflowFields },
             spaceId,
-            context.request!,
+            request,
             { allowManagedWorkflowMutation: true }
           );
         }
