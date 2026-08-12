@@ -106,6 +106,10 @@ jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
+jest.mock('../../hooks/use_setup_rule_notifications', () => ({
+  useSetupRuleNotifications: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
+
 const mockDeleteMutate = jest.fn();
 const mockUseDeleteRule = jest.fn();
 jest.mock('../../hooks/use_delete_rule', () => ({

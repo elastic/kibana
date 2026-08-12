@@ -513,8 +513,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/remove_v1.spec.ts",
-        "line": 50,
-        "column": 22
+        "line": 71,
+        "column": 5
       }
     },
     {
@@ -529,8 +529,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/remove_v1.spec.ts",
-        "line": 113,
-        "column": 14
+        "line": 142,
+        "column": 4
+      }
+    },
+    {
+      "id": "ee76a6a550f71bc-89fbd7f6c3fd445",
+      "title": "Entity Store remove_v1 SO cleanup install removes legacy entity-engine-status SO descriptors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/remove_v1.spec.ts",
+        "line": 173,
+        "column": 11
       }
     },
     {
