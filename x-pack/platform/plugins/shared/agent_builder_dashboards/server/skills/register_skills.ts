@@ -12,5 +12,5 @@ export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
   getCustomContentEnabled: () => Promise<boolean>
 ): void => {
-  agentBuilder.skills.register(createDashboardManagementSkill({ getCustomContentEnabled }));
+  agentBuilder.skills.register(createDashboardManagementSkill(getCustomContentEnabled));
 };
