@@ -20,6 +20,5 @@
   "kbn_references": [
     "@kbn/shared-ux-storybook-mock",
     "@kbn/i18n",
-    "@kbn/core-analytics-browser-mocks",
   ]
 }
