@@ -233,6 +233,13 @@ export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
  * non-ASCII input) so this maps directly onto Lucene's limit.
  */
 export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
+/**
+ * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
+ * Field Library values can legitimately occupy the full template/value payload, and each of the
+ * 200 fields can contribute both values of a TOGGLE filter.
+ */
+export const MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH = MAX_EXTENDED_FIELD_VALUE_BYTES;
+export const MAX_EXTENDED_FIELD_FILTERS = MAX_FIELD_DEFINITIONS_PER_OWNER * 2;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
@@ -331,6 +338,7 @@ export const LOCAL_STORAGE_KEYS = {
   attachmentFilters: 'cases.attachments.filters',
   casesUtilityBarHideMaxLimitWarning: 'cases.utilityBar.hideMaxLimitWarning',
   caseViewSidebarOpen: 'cases.caseView.sidebarOpen',
+  caseViewSidebarWidth: 'cases.caseView.sidebarWidth',
   caseViewSidebarAccordions: 'cases.caseView.sidebarAccordions',
   // Guided-tour / "what's new" banner state. Keys are version-scoped so a future refresh can
   // re-trigger the banner/tour by bumping the suffix.

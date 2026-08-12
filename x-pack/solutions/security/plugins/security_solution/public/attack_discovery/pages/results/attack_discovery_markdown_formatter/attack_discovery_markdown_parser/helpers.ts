@@ -9,8 +9,8 @@ import type { ParsedField } from '../types';
 
 const iconLookup: Record<string, string> = {
   // Entity fields
-  'host.name': 'desktop',
-  'host.hostname': 'desktop',
+  'host.name': 'display',
+  'host.hostname': 'display',
   'user.name': 'user',
   'user.id': 'user',
   'process.name': 'gear',
