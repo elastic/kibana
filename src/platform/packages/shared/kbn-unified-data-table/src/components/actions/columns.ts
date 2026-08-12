@@ -76,7 +76,8 @@ export function getStateColumnActions({
         : nextColumns;
     // Keep `_source` when present (including alone) so a pin survives removing other fields
     const actualColumns = colsWithoutDisplayTime;
-    let nextSettings = cleanColumnSettings(actualColumns, settings);
+    // Clean against nextColumns so display-only prepended time field width is preserved
+    let nextSettings = cleanColumnSettings(nextColumns, settings);
 
     // When columns are removed, reset the last column to auto width if only absolute
     // width columns remain, to ensure the columns fill the available grid space
