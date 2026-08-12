@@ -11,23 +11,29 @@ import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type { PostTransformsUpdateRequestSchema } from '../../api_schemas/update_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
+import type { RouteDependencies } from '../../../types';
 
 import { wrapError } from '../../utils/error_utils';
+import { updateTransformWithAuth } from './update_transform_with_auth';
 
-export const routeHandler: RequestHandler<
+export const routeHandlerFactory: (
+  routeDependencies: RouteDependencies
+) => RequestHandler<
   TransformIdParamSchema,
   undefined,
   PostTransformsUpdateRequestSchema,
   TransformRequestHandlerContext
-> = async (ctx, req, res) => {
+> = (routeDependencies) => async (ctx, req, res) => {
   const { transformId } = req.params;
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
-    const body = await esClient.asCurrentUser.transform.updateTransform({
-      // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+    const body = await updateTransformWithAuth({
       body: req.body,
-      transform_id: transformId,
+      esClient: esClient.asCurrentUser,
+      request: req,
+      routeDependencies,
+      transformId,
     });
     return res.ok({
       body,

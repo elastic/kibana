@@ -14,9 +14,10 @@ import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
-import { routeHandler } from './route_handler';
+import { routeHandlerFactory } from './route_handler';
 
-export function registerRoute({ router, getLicense }: RouteDependencies) {
+export function registerRoute(routeDependencies: RouteDependencies) {
+  const { router, getLicense } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -55,7 +56,7 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
           TransformIdParamSchema,
           undefined,
           PostTransformsUpdateRequestSchema
-        >(routeHandler)(ctx, request, response);
+        >(routeHandlerFactory(routeDependencies))(ctx, request, response);
       }
     );
 }

@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { MOCK_IDP_UIAM_PROJECT_ID2 } from '@kbn/mock-idp-utils';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import type { CookieHeader } from '@kbn/scout';
 import type { PutTransformsResponseSchema } from '../../../../common';
 import {
@@ -48,9 +49,10 @@ apiTest.describe(
     });
 
     apiTest(
-      'should save the selected project routing value',
+      'should save and update the selected project routing value',
       async ({ apiClient, apiServices }) => {
         const transformConfig = generateTransformConfig(transformId);
+        const updatedProjectRouting = PROJECT_ROUTING.ALL;
 
         const { statusCode, body } = await apiClient.put(
           `internal/transform/transforms/${transformId}?deferValidation=true`,
@@ -79,8 +81,33 @@ apiTest.describe(
           },
         ]);
 
-        const transform = await apiServices.transform.getTransform({ transform_id: transformId });
+        const transform = await apiServices.transform.getTransform({
+          transform_id: transformId,
+        });
         expect(transform.source.project_routing).toBe(projectRouting);
+
+        const { statusCode: updateStatusCode } = await apiClient.post(
+          `internal/transform/transforms/${transformId}/_update`,
+          {
+            headers: {
+              ...COMMON_HEADERS,
+              ...transformManagerCookieHeader,
+            },
+            body: {
+              source: {
+                project_routing: updatedProjectRouting,
+              },
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(updateStatusCode).toBe(200);
+
+        const updatedTransform = await apiServices.transform.getTransform({
+          transform_id: transformId,
+        });
+        expect(updatedTransform.source.project_routing).toBe(updatedProjectRouting);
       }
     );
   }

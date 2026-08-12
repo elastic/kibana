@@ -15,9 +15,12 @@ import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_t
 import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
+import { EditTransformProjectScope } from './edit_transform_project_scope';
 
 export const EditTransformFlyoutForm: FC = () => (
   <EuiForm>
+    <EditTransformProjectScope />
+
     <EditTransformFlyoutFormTextArea
       field="description"
       label={i18n.translate('xpack.transform.transformList.editFlyoutFormDescriptionLabel', {
