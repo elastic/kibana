@@ -114,9 +114,9 @@ export const balanceAgentsByCost = (
   agentIds: string[],
   capacities?: ReadonlyMap<string, number>
 ): Map<string, { agentId: string; condition: string }> => {
-  const byAgentId = balanceShardsByCost(monitors, agentIds, capacities);
+  const byMonitorId = balanceShardsByCost(monitors, agentIds, capacities);
   const result = new Map<string, { agentId: string; condition: string }>();
-  for (const [monitorId, agentId] of byAgentId) {
+  for (const [monitorId, agentId] of byMonitorId) {
     result.set(monitorId, { agentId, condition: agentIdCondition(agentId) });
   }
   return result;
