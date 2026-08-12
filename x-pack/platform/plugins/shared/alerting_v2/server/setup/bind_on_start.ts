@@ -19,11 +19,18 @@ import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { initSubscribers } from '../lib/events/init_subscribers';
+import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
+import {
+  LoggerServiceToken,
+} from '../lib/services/logger_service/logger_service';
+import { DISPATCHER_TASK_ID } from '../lib/dispatcher/constants';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
     const resourceManager = container.get(ResourceManager);
-    const logger = container.get(Logger);
+    const loggerService = container.get(LoggerServiceToken);
+    const tasksLogger = loggerService.forSubsystem('tasks');
+    const coreLogger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
     const changeHistoryClient = container.get(ChangeHistoryClientToken);
     const taskManager = container.get(
@@ -36,44 +43,29 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     initializeResources({
       resourceManager,
       esClient,
-      logger,
+      coreLogger,
       changeHistoryClient,
     });
 
     initSubscribers(container);
 
     scheduleDispatcherTask({ taskManager }).catch((error) => {
-      logger.error(error as Error, {
-        error: {
-          code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
-          type: 'DispatcherTask',
-        },
+      tasksLogger.error({
+        error,
+        code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+        labels: { task_id: DISPATCHER_TASK_ID },
       });
     });
 
     scheduleApiKeyInvalidationTask({
-      logger,
+      logger: tasksLogger,
       taskManager,
       interval: config.invalidateApiKeysTask.interval,
-    }).catch((error) => {
-      logger.error(error as Error, {
-        error: {
-          code: 'API_KEY_INVALIDATION_TASK_SCHEDULE_FAILURE',
-          type: 'ApiKeyInvalidationTask',
-        },
-      });
     });
 
     scheduleTelemetryTask({
-      logger,
+      logger: tasksLogger,
       taskManager,
-    }).catch((error) => {
-      logger.error(error as Error, {
-        error: {
-          code: 'TELEMETRY_TASK_SCHEDULE_FAILURE',
-          type: 'AlertingV2TelemetryTask',
-        },
-      });
     });
   });
 }

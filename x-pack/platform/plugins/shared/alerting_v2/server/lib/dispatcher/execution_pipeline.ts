@@ -10,6 +10,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type {
   DispatcherHaltReason,
   DispatcherPipelineInput,
@@ -31,33 +32,50 @@ export interface DispatcherPipelineContract {
 
 @injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult> {
     let pipelineState: DispatcherPipelineState = { input };
 
     for (const step of this.steps) {
-      this.logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
+      this.logger.debug({
+        message: 'Executing pipeline step',
+        labels: { step: step.name },
+      });
 
-      const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
+      try {
+        const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
 
-      if (output.type === 'halt') {
-        this.logger.debug({
-          message: `Dispatcher: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
+        if (output.type === 'halt') {
+          this.logger.debug({
+            message: 'Pipeline halted',
+            labels: { step: step.name, resource: output.reason },
+          });
+
+          return {
+            completed: false,
+            haltReason: output.reason,
+            finalState: pipelineState,
+          };
+        }
+
+        if (output.data) {
+          pipelineState = { ...pipelineState, ...output.data };
+        }
+      } catch (error) {
+        this.logger.error({
+          error,
+          code: ALERTING_LOG_CODES.DISPATCH_STEP_FAILED,
+          labels: { step: step.name },
         });
-
-        return {
-          completed: false,
-          haltReason: output.reason,
-          finalState: pipelineState,
-        };
-      }
-
-      if (output.data) {
-        pipelineState = { ...pipelineState, ...output.data };
+        throw error;
       }
     }
 

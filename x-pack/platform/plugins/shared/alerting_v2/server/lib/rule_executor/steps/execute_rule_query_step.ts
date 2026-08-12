@@ -31,14 +31,16 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
   private readonly maxAlertsPerRun: number;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
     this.maxAlertsPerRun = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
   }
 

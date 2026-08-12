@@ -127,7 +127,7 @@ function buildDispatcherService(deps: {
     new HydrateEpisodeDataStep(deps.queryService, loggerService),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
-    new FetchPoliciesStep(deps.npSoService),
+    new FetchPoliciesStep(deps.npSoService, loggerService),
     new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),

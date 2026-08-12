@@ -16,8 +16,9 @@
  * tracked by https://github.com/elastic/rna-program/issues/426.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import { Logger as CoreLogger } from '@kbn/core-di';
 import {
   ALERTING_CASES_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
@@ -79,7 +80,8 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
-    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient
+    @inject(EsServiceScopedToken) private readonly esClient: ElasticsearchClient,
+    @inject(CoreLogger) private readonly coreLogger: Logger
   ) {
     super(ctx);
   }
@@ -87,11 +89,10 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
   protected async execute() {
     const definitions = getDataStreamResourceDefinitions();
 
-    const dataStreamNames = definitions.map((definition) => definition.dataStreamName).join(', ');
-    const savedObjectTypes = ALERTING_V2_SAVED_OBJECT_TYPES.join(', ');
-    this.ctx.logger.debug(
-      `Resetting alerting v2 resources [data streams: ${dataStreamNames}, saved objects: ${savedObjectTypes}, task type: ${ALERTING_RULE_EXECUTOR_TASK_TYPE}]`
-    );
+    this.ctx.logger.debug({
+      message: 'Resetting alerting v2 resources',
+      labels: { resource: ALERTING_RULE_EXECUTOR_TASK_TYPE },
+    });
 
     await this.deleteAllRuleTasks();
     await this.deleteAllSavedObjects();
@@ -178,7 +179,7 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
     // DatastreamInitializer takes a per-resource definition plus an ES client;
     // here we pass the request-scoped client (startup registration passes the
     // internal one instead).
-    const initializer = new DatastreamInitializer(this.ctx.logger, this.esClient, definition);
+    const initializer = new DatastreamInitializer(this.coreLogger, this.esClient, definition);
     await initializer.initialize();
   }
 }

@@ -133,6 +133,8 @@ const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
 
 @injectable()
 export class ActionPolicyClient {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceScopedToken)
     private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
@@ -144,9 +146,10 @@ export class ActionPolicyClient {
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
     private readonly namespace: string | undefined,
-    @inject(LoggerServiceToken)
-    private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('actionPolicyClient');
+  }
 
   /**
    * Validates a request body with a Zod schema and produces a uniform
@@ -787,12 +790,23 @@ export class ActionPolicyClient {
     });
   }
 
-  private markApiKeysForInvalidation(apiKey?: string, createdByUser?: boolean): void {
+  private markApiKeysForInvalidation(
+    apiKey?: string,
+    createdByUser?: boolean,
+    policyId?: string
+  ): void {
     if (!apiKey || createdByUser) {
       return;
     }
 
-    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch(() => {});
+    this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
+      this.logger.warn({
+        message: 'Failed to queue action policy API key for invalidation',
+        error,
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+        labels: policyId ? { policy_id: policyId } : undefined,
+      });
+    });
   }
 
   private async getDecryptedAuth(id: string): Promise<ActionPolicyAuth | null> {
@@ -811,11 +825,11 @@ export class ActionPolicyClient {
         createdByUser: apiKeyCreatedByUser ?? false,
       };
     } catch (e) {
-      this.logger.debug({
-        message: () =>
-          `Failed to decrypt auth for action policy "${id}": ${
-            e instanceof Error ? e.message : String(e)
-          }`,
+      this.logger.warn({
+        message: 'Failed to decrypt action policy auth',
+        error: e,
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        labels: { policy_id: id },
       });
       return null;
     }
@@ -849,8 +863,12 @@ export class ActionPolicyClient {
           break;
         }
       }
-    } catch {
-      // best-effort — same as getDecryptedAuth returning null on failure
+    } catch (error) {
+      this.logger.warn({
+        message: 'Bulk action policy auth decrypt failed',
+        error,
+        code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+      });
     }
 
     return authMap;

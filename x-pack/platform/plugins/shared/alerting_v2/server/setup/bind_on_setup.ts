@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import {
+  LoggerServiceToken,
+} from '../lib/services/logger_service/logger_service';
 import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
@@ -32,7 +35,8 @@ import { alertingAdvancedSettings } from '../settings/advanced_settings';
  */
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
-    const logger = container.get(Logger);
+    const loggerService = container.get(LoggerServiceToken);
+    const savedObjectsLogger = loggerService.forSubsystem('savedObjects');
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
@@ -43,7 +47,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       ),
-      logger,
+      logger: savedObjectsLogger,
     });
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));

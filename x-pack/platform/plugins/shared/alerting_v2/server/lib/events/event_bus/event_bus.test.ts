@@ -70,7 +70,7 @@ describe('AsyncDomainEventBus', () => {
         expect.objectContaining({ labels: { event_type: 'foo' } })
       );
       const debugMessage = (mockLogger.debug as jest.Mock).mock.calls.at(-1)![0] as () => string;
-      expect(debugMessage()).toBe('[alerting_v2.EventBus] Emitted foo');
+      expect(debugMessage()).toBe('Published domain event');
       expect(debugMessage()).not.toContain('world');
       expect(debugMessage()).not.toContain('payload');
     });

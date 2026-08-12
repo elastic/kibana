@@ -30,7 +30,11 @@ import { createMatcherContext } from './utils/matcher_context';
 export class EvaluateMatchersStep implements DispatcherStep {
   public readonly name = 'evaluate_matchers';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const {

@@ -19,10 +19,14 @@ import { RulesClient } from '../../rules_client';
 export class FetchRuleStep implements RuleExecutionStep {
   public readonly name = 'fetch_rule';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return mapStep(streamState, async (state) => {
@@ -30,24 +34,32 @@ export class FetchRuleStep implements RuleExecutionStep {
       const { ruleId } = input;
 
       this.logger.debug({
-        message: `[${this.name}] Starting step for rule ${ruleId}`,
+        message: 'Starting fetch rule step',
+        labels: { step: this.name, rule_id: ruleId },
       });
 
       try {
         const rule = await this.rulesClient.getRule({ id: ruleId });
 
         this.logger.debug({
-          message: () => `[${this.name}] Fetched rule ${ruleId}`,
+          message: () => 'Fetched rule',
+          labels: { step: this.name, rule_id: ruleId },
         });
 
         return { type: 'continue', state: { ...state, rule } };
       } catch (error) {
         if (Boom.isBoom(error) && error.output.statusCode === 404) {
-          this.logger.debug({ message: `[${this.name}] Rule ${ruleId} not found, halting` });
+          this.logger.debug({
+            message: 'Rule not found, halting',
+            labels: { step: this.name, rule_id: ruleId },
+          });
           return { type: 'halt', reason: 'rule_deleted', state };
         }
 
-        this.logger.debug({ message: `[${this.name}] Failed to fetch rule ${ruleId}` });
+        this.logger.debug({
+          message: 'Failed to fetch rule',
+          labels: { step: this.name, rule_id: ruleId },
+        });
         throw error;
       }
     });

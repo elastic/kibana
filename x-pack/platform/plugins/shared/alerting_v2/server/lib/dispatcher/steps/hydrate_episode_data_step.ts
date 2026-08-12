@@ -31,10 +31,14 @@ interface RawEpisodeData {
 export class HydrateEpisodeDataStep implements DispatcherStep {
   public readonly name = 'hydrate_episode_data';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
@@ -63,10 +67,8 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     if (hydrated < requested) {
       this.logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
-        message: () =>
-          `hydrate_episode_data: ${
-            requested - hydrated
-          } of ${requested} episodes had no matching .rule-events row; data will be absent for those episodes`,
+        message: 'Episodes missing matching rule-events row',
+        labels: { step: this.name },
       });
     }
 

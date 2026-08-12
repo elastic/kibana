@@ -6,7 +6,7 @@
  */
 
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { Logger, SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   actionPolicyModelVersions,
@@ -23,6 +23,8 @@ import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../common/saved_object_types';
+import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../lib/services/logger_service/logger_service';
 
 export {
   RULE_SAVED_OBJECT_TYPE,
@@ -54,53 +56,89 @@ export function registerSavedObjects({
 }: {
   savedObjects: SavedObjectsServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  logger: Logger;
+  logger: LoggerServiceContract;
 }) {
-  savedObjects.registerType({
-    name: RULE_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: ruleMappings,
-    management: {
-      importableAndExportable: false,
-      getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
-        return `Rule: [${esqlRuleSavedObject.attributes.metadata.name}]`;
+  try {
+    savedObjects.registerType({
+      name: RULE_SAVED_OBJECT_TYPE,
+      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      hidden: true,
+      namespaceType: 'multiple-isolated',
+      mappings: ruleMappings,
+      management: {
+        importableAndExportable: false,
+        getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
+          return `Rule: [${esqlRuleSavedObject.attributes.metadata.name}]`;
+        },
       },
-    },
-    modelVersions: ruleModelVersions,
-  });
+      modelVersions: ruleModelVersions,
+    });
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.SAVED_OBJECTS_TYPE_REGISTRATION_FAILED,
+      labels: { resource: RULE_SAVED_OBJECT_TYPE },
+    });
+    throw error;
+  }
 
-  savedObjects.registerType({
-    name: ACTION_POLICY_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: actionPolicyMappings,
-    management: {
-      importableAndExportable: false,
-      getTitle(so: SavedObject<ActionPolicySavedObjectAttributes>) {
-        return `Action Policy: [${so.attributes.name}]`;
+  try {
+    savedObjects.registerType({
+      name: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      hidden: true,
+      namespaceType: 'multiple-isolated',
+      mappings: actionPolicyMappings,
+      management: {
+        importableAndExportable: false,
+        getTitle(so: SavedObject<ActionPolicySavedObjectAttributes>) {
+          return `Action Policy: [${so.attributes.name}]`;
+        },
       },
-    },
-    modelVersions: actionPolicyModelVersions,
-  });
+      modelVersions: actionPolicyModelVersions,
+    });
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.SAVED_OBJECTS_TYPE_REGISTRATION_FAILED,
+      labels: { resource: ACTION_POLICY_SAVED_OBJECT_TYPE },
+    });
+    throw error;
+  }
 
-  savedObjects.registerType({
-    name: API_KEY_PENDING_INVALIDATION_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'agnostic',
-    mappings: apiKeyPendingInvalidationMappings,
-    modelVersions: apiKeyPendingInvalidationModelVersions,
-  });
+  try {
+    savedObjects.registerType({
+      name: API_KEY_PENDING_INVALIDATION_TYPE,
+      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: apiKeyPendingInvalidationMappings,
+      modelVersions: apiKeyPendingInvalidationModelVersions,
+    });
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.SAVED_OBJECTS_TYPE_REGISTRATION_FAILED,
+      labels: { resource: API_KEY_PENDING_INVALIDATION_TYPE },
+    });
+    throw error;
+  }
 
-  encryptedSavedObjects.registerType({
-    type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-    enforceRandomId: false,
-    attributesToEncrypt: new Set(ActionPolicyAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
-  });
+  try {
+    encryptedSavedObjects.registerType({
+      type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+      enforceRandomId: false,
+      attributesToEncrypt: new Set(ActionPolicyAttributesToEncrypt),
+      attributesToIncludeInAAD: new Set(ActionPolicyAttributesIncludedInAAD),
+    });
+  } catch (error) {
+    logger.error({
+      error,
+      code: ALERTING_LOG_CODES.SAVED_OBJECTS_TYPE_REGISTRATION_FAILED,
+      labels: { resource: `${ACTION_POLICY_SAVED_OBJECT_TYPE}:encrypted` },
+    });
+    throw error;
+  }
 }
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';

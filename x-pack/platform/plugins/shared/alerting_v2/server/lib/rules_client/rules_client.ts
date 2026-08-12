@@ -138,6 +138,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 @injectable()
 export class RulesClient {
   private readonly config: PluginConfig;
+  private readonly logger: LoggerServiceContract;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -152,9 +153,10 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
@@ -378,7 +380,14 @@ export class RulesClient {
         scheduleEvery: ruleAttributes.schedule.every,
       });
     } catch (e) {
-      await this.rulesSavedObjectService.delete({ id }).catch(() => {});
+      await this.rulesSavedObjectService.delete({ id }).catch((rollbackError) => {
+        this.logger.error({
+          message: 'Compensating delete failed after rule task schedule failure',
+          error: rollbackError,
+          code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+          labels: { rule_id: id, space_id: spaceId },
+        });
+      });
       throw e;
     }
 

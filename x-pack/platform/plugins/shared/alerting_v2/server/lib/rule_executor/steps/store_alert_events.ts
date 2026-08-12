@@ -20,15 +20,20 @@ import { guardedMapStep } from '../stream_utils';
 export class StoreAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'store_alert_events';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
       this.logger.debug({
-        message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
+        message: 'Storing alert events batch',
+        labels: { step: this.name, resource: ALERT_EVENTS_DATA_STREAM },
       });
 
       const bulkResult = await this.storageService.bulkIndexDocs({
@@ -37,7 +42,8 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       });
 
       this.logger.debug({
-        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
+        message: () => 'Bulk-indexed alert events batch',
+        labels: { step: this.name, resource: ALERT_EVENTS_DATA_STREAM },
       });
 
       return {

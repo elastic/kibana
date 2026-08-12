@@ -9,6 +9,11 @@ import { inject, injectable } from 'inversify';
 import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -21,10 +26,15 @@ import type {
 export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(ActionPolicySavedObjectServiceInternalToken)
-    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
-  ) {}
+    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
@@ -35,6 +45,12 @@ export class FetchPoliciesStep implements DispatcherStep {
 
     for (const doc of result) {
       if ('error' in doc) {
+        this.logger.warn({
+          message: 'Action policy lookup failed',
+          error: doc.error,
+          code: ALERTING_LOG_CODES.DISPATCH_POLICY_LOOKUP_FAILED,
+          labels: { policy_id: doc.id },
+        });
         continue;
       }
 

@@ -7,6 +7,7 @@
 
 import type { ActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDispatcherPipelineState } from '../fixtures/test_utils';
 import { FetchPoliciesStep } from './fetch_policies_step';
 
@@ -19,7 +20,10 @@ describe('FetchPoliciesStep', () => {
       createActionPolicySavedObjectService());
   });
 
-  const buildStep = () => new FetchPoliciesStep(npSoService);
+  const buildStep = () => {
+    const { loggerService } = createLoggerService();
+    return new FetchPoliciesStep(npSoService, loggerService);
+  };
 
   it('fetches all decrypted policies via findAllDecrypted', async () => {
     mockFindAllDecrypted.mockResolvedValue([

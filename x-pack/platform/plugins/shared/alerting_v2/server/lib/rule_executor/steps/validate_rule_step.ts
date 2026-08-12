@@ -17,13 +17,18 @@ import {
 export class ValidateRuleStep implements RuleExecutionStep {
   public readonly name = 'validate_rule';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['rule'], (state) => {
       if (!state.rule.enabled) {
         this.logger.debug({
-          message: `[${this.name}] Rule ${state.input.ruleId} is disabled, halting`,
+          message: 'Rule is disabled, halting',
+          labels: { step: this.name, rule_id: state.input.ruleId },
         });
 
         return { type: 'halt', reason: 'rule_disabled', state };

@@ -9,6 +9,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../../services/logger_service/logger_service';
 import type { EventBus } from '../event_bus';
 import {
   AlertingDomainEventBusToken,
@@ -70,10 +75,15 @@ export interface AlertActionEventPublisherContract {
  */
 @injectable()
 export class AlertActionEventPublisher implements AlertActionEventPublisherContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
-  ) {}
+    private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertAction[]): void {
     const context = { request };
@@ -135,6 +145,16 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
           payload: { reason: action.reason! },
         };
       default:
+        this.logger.warn({
+          message: 'Alert action type has no domain event mapping',
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_TYPE_UNMAPPED,
+          labels: {
+            resource: action.action_type,
+            ...(action.rule_id != null ? { rule_id: action.rule_id } : {}),
+            group_hash: action.group_hash,
+            ...(action.episode_id != null ? { episode_id: action.episode_id } : {}),
+          },
+        });
         return undefined;
     }
   }

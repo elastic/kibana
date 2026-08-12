@@ -18,10 +18,14 @@ import { guardedExpandStep } from '../stream_utils';
 export class DirectorStep implements RuleExecutionStep {
   public readonly name = 'director';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(DirectorService) private readonly director: DirectorService
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
@@ -31,7 +35,8 @@ export class DirectorStep implements RuleExecutionStep {
 
       if (rule.kind !== 'alert') {
         step.logger.debug({
-          message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
+          message: 'Skipping episode tracking for signal rule',
+          labels: { step: step.name, rule_id: input.ruleId },
         });
 
         yield { type: 'continue', state };
@@ -40,7 +45,8 @@ export class DirectorStep implements RuleExecutionStep {
 
       if (alertEventsBatch.length === 0) {
         step.logger.debug({
-          message: `[${step.name}] No alert events to process for rule ${input.ruleId}`,
+          message: 'No alert events to process',
+          labels: { step: step.name, rule_id: input.ruleId },
         });
 
         yield { type: 'continue', state };

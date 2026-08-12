@@ -20,17 +20,21 @@ import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } fr
 export class WaitForResourcesStep implements DispatcherStep {
   public readonly name = 'wait_for_resources';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    this.logger.debug({ message: `[${this.name}] Waiting for resources to be ready` });
+    this.logger.debug({ message: 'Waiting for resources', labels: { step: this.name } });
 
     await this.resourceManager.waitUntilReady();
 
-    this.logger.debug({ message: `[${this.name}] Resources ready` });
+    this.logger.debug({ message: 'Resources ready', labels: { step: this.name } });
 
     return { type: 'continue' };
   }

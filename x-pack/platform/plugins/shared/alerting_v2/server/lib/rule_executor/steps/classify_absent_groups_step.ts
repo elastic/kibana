@@ -62,12 +62,16 @@ import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   public readonly name = 'classify_absent_groups';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly scopedQueryService: QueryServiceContract
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return forwardThenFinalize(streamState, {
@@ -89,7 +93,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         }
 
         this.logger.debug({
-          message: `[${this.name}] Emitting ${finalBatch.length} absence-based event(s) for rule ${lastState.input.ruleId}`,
+          message: () => 'Emitting absence-based alert events',
+          labels: { step: this.name, rule_id: lastState.input.ruleId },
         });
 
         return {

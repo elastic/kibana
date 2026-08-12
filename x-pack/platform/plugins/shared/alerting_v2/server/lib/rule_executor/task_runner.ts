@@ -25,10 +25,14 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid
 
 @injectable()
 export class RuleExecutorTaskRunner {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
@@ -84,7 +88,8 @@ export class RuleExecutorTaskRunner {
     if (result.haltReason === 'rule_deleted') {
       const params = taskInstance.params as RuleExecutorTaskParams;
       this.logger.debug({
-        message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
+        message: 'Rule no longer exists; task will be removed',
+        labels: { rule_id: params.ruleId, space_id: params.spaceId },
       });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }

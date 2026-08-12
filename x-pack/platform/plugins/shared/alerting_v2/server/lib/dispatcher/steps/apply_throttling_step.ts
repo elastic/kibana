@@ -7,6 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { parseDurationToMs } from '../../duration';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -30,10 +31,14 @@ import type {
 export class ApplyThrottlingStep implements DispatcherStep {
   public readonly name = 'apply_throttling';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
@@ -48,12 +53,13 @@ export class ApplyThrottlingStep implements DispatcherStep {
       groups,
       policies,
       lastNotifiedMap,
-      input.startedAt
+      input.startedAt,
+      this.logger
     );
 
     this.logger.debug({
-      message: () =>
-        `Applied throttling to ${throttled.length} groups and dispatched ${dispatch.length} groups`,
+      message: () => 'Applied throttling',
+      labels: { step: this.name },
     });
 
     return { type: 'continue', data: { dispatch, throttled } };
@@ -86,14 +92,15 @@ export function applyThrottling(
   groups: readonly ActionGroup[],
   policies: ReadonlyMap<string, ActionPolicy>,
   lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
-  now: Date
+  now: Date,
+  logger?: LoggerServiceContract
 ): { dispatch: ActionGroup[]; throttled: ActionGroup[] } {
   const dispatch: ActionGroup[] = [];
   const throttled: ActionGroup[] = [];
 
   for (const group of groups) {
     const policy = policies.get(group.policyId)!;
-    const bucket = shouldDispatch(group, policy, lastNotifiedMap.get(group.id), now)
+    const bucket = shouldDispatch(group, policy, lastNotifiedMap.get(group.id), now, logger)
       ? dispatch
       : throttled;
     bucket.push(group);
@@ -106,7 +113,8 @@ function shouldDispatch(
   group: ActionGroup,
   policy: ActionPolicy,
   lastRecord: LastNotifiedInfo | undefined,
-  now: Date
+  now: Date,
+  logger?: LoggerServiceContract
 ): boolean {
   if (!lastRecord) return true;
 
@@ -121,7 +129,13 @@ function shouldDispatch(
   if (groupingMode !== 'per_episode') {
     return (
       !policy.throttle?.interval ||
-      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+      !isWithinInterval(
+        lastRecord.lastNotified,
+        policy.throttle.interval,
+        now,
+        logger,
+        policy.id
+      )
     );
   }
 
@@ -133,7 +147,13 @@ function shouldDispatch(
   if (strategy === 'per_status_interval') {
     return (
       !!policy.throttle?.interval &&
-      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now)
+      !isWithinInterval(
+        lastRecord.lastNotified,
+        policy.throttle.interval,
+        now,
+        logger,
+        policy.id
+      )
     );
   }
 
@@ -141,11 +161,25 @@ function shouldDispatch(
   return false;
 }
 
-function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
+function isWithinInterval(
+  lastNotifiedAt: Date,
+  interval: string,
+  now: Date,
+  logger?: LoggerServiceContract,
+  policyId?: string
+): boolean {
   try {
     const intervalMillis = parseDurationToMs(interval);
     return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
-  } catch {
+  } catch (error) {
+    if (logger && policyId) {
+      logger.warn({
+        message: 'Action policy throttle interval is invalid',
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_THROTTLE_INTERVAL_INVALID,
+        labels: { policy_id: policyId },
+      });
+    }
     return false;
   }
 }

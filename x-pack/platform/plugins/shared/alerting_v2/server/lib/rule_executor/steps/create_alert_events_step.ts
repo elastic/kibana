@@ -22,7 +22,11 @@ import { guardedExpandStep } from '../stream_utils';
 export class CreateAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'create_alert_events';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
@@ -42,7 +46,8 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         });
 
         step.logger.debug({
-          message: `[${step.name}] Created alert events builder for rule ${state.input.ruleId}`,
+          message: 'Created alert events builder',
+          labels: { step: step.name, rule_id: state.input.ruleId },
         });
       }
 

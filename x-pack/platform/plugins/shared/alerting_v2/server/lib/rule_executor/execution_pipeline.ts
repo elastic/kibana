@@ -58,8 +58,10 @@ export interface RuleExecutionPipelineContract {
 
 @injectable()
 export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
     @multiInject(RuleExecutionMiddlewaresToken)
     private readonly middlewares: RuleExecutionMiddleware[],
@@ -67,7 +69,9 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     private readonly metricCollectorFactory: MetricCollectorFactoryContract,
     @inject(RuleExecutorEventPublisher)
     private readonly eventPublisher: RuleExecutorEventPublisherContract
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
     const executionContext = createExecutionContext(rawInput.abortSignal);
@@ -95,9 +99,16 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
         pipelineState = result.state;
 
         if (result.type === 'halt') {
-          this.logger.debug({
-            message: `RuleExecutor: Pipeline halted at step: ${result.reason}`,
-          });
+          if (result.reason !== 'state_not_ready') {
+            this.logger.debug({
+              message: 'Pipeline halted',
+              labels: {
+                resource: result.reason,
+                rule_id: rawInput.ruleId,
+                space_id: rawInput.spaceId,
+              },
+            });
+          }
 
           return {
             completed: false,
@@ -155,8 +166,9 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
     if (!rule) {
       this.logger.warn({
-        message: `[rule_executor] Skipping rule.execution.succeeded for rule "${rawInput.ruleId}": no rule in final state.`,
+        message: 'Skipping rule execution succeeded event publish',
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_SKIPPED,
+        labels: { rule_id: rawInput.ruleId, space_id: rawInput.spaceId },
       });
       return;
     }
@@ -175,10 +187,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (error) {
       this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: 'Failed to publish rule execution succeeded event',
+        error,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
+        labels: { rule_id: rawInput.ruleId, space_id: rawInput.spaceId },
       });
     }
   }
@@ -191,10 +203,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (publishError) {
       this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.failed event: ${
-          publishError instanceof Error ? publishError.message : String(publishError)
-        }`,
+        message: 'Failed to publish rule execution failed event',
+        error: publishError,
         code: ALERTING_LOG_CODES.RULE_EXECUTION_EVENT_PUBLISH_FAILED,
+        labels: { rule_id: rawInput.ruleId, space_id: rawInput.spaceId },
       });
     }
   }

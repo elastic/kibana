@@ -49,11 +49,15 @@ const MAX_CONCURRENT_DISPATCHES = 3;
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
-  ) {}
+  ) {
+    this.logger = loggerService.forSubsystem('dispatcher');
+  }
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { dispatch = [], policies } = state;
@@ -93,7 +97,7 @@ export class DispatchStep implements DispatcherStep {
       if (!apiKey) {
         const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
         this.logger.warn({
-          message: () => message,
+          message: 'Action policy has no API key, skipping dispatch',
           code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
           labels: { group_id: group.id, policy_id: group.policyId },
         });
@@ -220,7 +224,7 @@ export class DispatchStep implements DispatcherStep {
     if (!workflow) {
       const message = `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`;
       this.logger.warn({
-        message: () => message,
+        message: 'Workflow not found, skipping dispatch',
         code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
         labels: { group_id: group.id, workflow_id: workflowId },
       });
@@ -230,7 +234,7 @@ export class DispatchStep implements DispatcherStep {
     if (!workflow.enabled) {
       const message = `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`;
       this.logger.warn({
-        message: () => message,
+        message: 'Workflow is disabled, skipping dispatch',
         code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
         labels: { group_id: group.id, workflow_id: workflowId },
       });
@@ -254,8 +258,8 @@ export class DispatchStep implements DispatcherStep {
     };
 
     this.logger.debug({
-      message: () =>
-        `Dispatching action group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
+      message: () => 'Dispatching action group to workflow',
+      labels: { group_id: group.id, workflow_id: workflowId, policy_id: group.policyId },
     });
 
     const executionId = await this.workflowsManagement.scheduleWorkflow(
@@ -269,7 +273,7 @@ export class DispatchStep implements DispatcherStep {
     if (!executionId) {
       const message = `Workflow ${workflowId} scheduling returned no execution id for group ${group.id}`;
       this.logger.warn({
-        message: () => message,
+        message: 'Workflow scheduling returned no execution id',
         code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
         labels: { group_id: group.id, workflow_id: workflowId },
       });
@@ -277,8 +281,8 @@ export class DispatchStep implements DispatcherStep {
     }
 
     this.logger.debug({
-      message: () =>
-        `Workflow ${workflowId} execution scheduled with id ${executionId} for group ${group.id}`,
+      message: () => 'Workflow execution scheduled',
+      labels: { group_id: group.id, workflow_id: workflowId, execution_id: executionId },
     });
 
     return { executionId };

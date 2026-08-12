@@ -8,9 +8,11 @@
 import { BasicTransitionStrategy } from './basic_strategy';
 import { CountTimeframeStrategy } from './count_timeframe_strategy';
 import { TransitionStrategyFactory } from './strategy_resolver';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 export function createTransitionStrategyFactory(): TransitionStrategyFactory {
-  const countTimeframeStrategy = new CountTimeframeStrategy();
+  const { loggerService } = createLoggerService();
+  const countTimeframeStrategy = new CountTimeframeStrategy(loggerService);
   const basicStrategy = new BasicTransitionStrategy();
   return new TransitionStrategyFactory([countTimeframeStrategy, basicStrategy]);
 }
