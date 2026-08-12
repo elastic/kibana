@@ -9,12 +9,7 @@
 
 import { isFunctionExpression, isOptionNode } from '@elastic/esql';
 import { within, Walker } from '@elastic/esql';
-import type {
-  ESQLAst,
-  ESQLAstAllCommands,
-  ESQLAstNode,
-  ESQLSingleAstItem,
-} from '@elastic/esql/types';
+import type { ESQLAstAllCommands, ESQLAstNode, ESQLSingleAstItem } from '@elastic/esql/types';
 import { Location } from './types';
 
 const commandOptionNameToLocation: Record<string, Location> = {
