@@ -8,6 +8,12 @@
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
 import { DispatcherTaskRunner } from './task_runner';
+import { createDispatcherPipelineInput } from './fixtures/test_utils';
+
+const createMockPipelineResult = () => ({
+  completed: true,
+  finalState: { input: createDispatcherPipelineInput() },
+});
 
 describe('DispatcherTaskRunner', () => {
   let dispatcherService: jest.Mocked<DispatcherServiceContract>;
@@ -39,6 +45,7 @@ describe('DispatcherTaskRunner', () => {
     it('maps task state to dispatcher params', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        pipelineResult: createMockPipelineResult(),
       });
 
       await runner.run({ taskInstance, signal });
@@ -51,6 +58,7 @@ describe('DispatcherTaskRunner', () => {
     it('returns updated previousStartedAt in state', async () => {
       dispatcherService.run.mockResolvedValue({
         startedAt: new Date('2026-01-22T07:45:00.000Z'),
+        pipelineResult: createMockPipelineResult(),
       });
 
       const result = await runner.run({ taskInstance, signal });

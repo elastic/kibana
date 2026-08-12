@@ -20,12 +20,18 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
+    signal = new AbortController().signal,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
     const executionUuid = uuidV4();
 
-    await this.pipeline.execute({ startedAt, previousStartedAt, executionUuid });
+    const pipelineResult = await this.pipeline.execute({
+      startedAt,
+      previousStartedAt,
+      executionUuid,
+      signal,
+    });
 
-    return { startedAt };
+    return { startedAt, pipelineResult };
   }
 }

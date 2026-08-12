@@ -269,7 +269,7 @@ describe('DispatcherService', () => {
           },
           params: undefined,
         },
-        { signal: undefined }
+        { signal: expect.any(AbortSignal) }
       );
 
       expect(storageEsClient.bulk).toHaveBeenCalledWith({

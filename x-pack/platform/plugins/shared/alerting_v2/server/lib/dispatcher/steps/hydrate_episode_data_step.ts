@@ -47,9 +47,14 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
 
     const { gte, lte } = computeTimestampBounds(dispatchable);
 
+    const { signal } = state.input;
+
     const responses = await Promise.all(
       getEpisodeDataQueries(episodeIds, { gte, lte }).map((request) =>
-        this.queryService.executeQueryRows<RawEpisodeData>({ query: request.query })
+        this.queryService.executeQueryRows<RawEpisodeData>({
+          query: request.query,
+          abortSignal: signal,
+        })
       )
     );
 

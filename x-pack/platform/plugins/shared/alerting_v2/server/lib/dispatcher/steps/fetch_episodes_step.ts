@@ -42,7 +42,7 @@ export class FetchEpisodesStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { previousStartedAt } = state.input;
+    const { previousStartedAt, signal } = state.input;
 
     const lookback = moment(previousStartedAt)
       .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
@@ -57,6 +57,7 @@ export class FetchEpisodesStep implements DispatcherStep {
           },
         },
       },
+      abortSignal: signal,
     });
 
     const episodes = parseAlertEpisodes(result);

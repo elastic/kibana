@@ -52,10 +52,17 @@ export interface DispatcherExecutionParams {
 
 export interface DispatcherExecutionResult {
   startedAt: Date;
+  pipelineResult: DispatcherPipelineResult;
 }
 
 export interface DispatcherTaskState {
   previousStartedAt?: string;
+}
+
+export interface DispatcherPipelineResult {
+  readonly completed: boolean;
+  readonly haltReason?: DispatcherHaltReason;
+  readonly finalState: DispatcherPipelineState;
 }
 
 export interface Rule {
@@ -147,6 +154,7 @@ export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
   readonly executionUuid: string;
+  readonly signal: AbortSignal;
 }
 
 export interface DispatcherPipelineState {
@@ -165,7 +173,7 @@ export interface DispatcherPipelineState {
   readonly dispatchFailures?: DispatchFailure[];
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
+export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

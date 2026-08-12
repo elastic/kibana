@@ -142,5 +142,44 @@ describe('DispatcherPipeline', () => {
       expect(result.completed).toBe(true);
       expect(result.finalState).toEqual({ input });
     });
+
+    it('halts immediately with aborted when signal is already aborted before first step', async () => {
+      const { loggerService } = createLoggerService();
+      const controller = new AbortController();
+      controller.abort();
+
+      const step1 = createMockDispatcherStep('step1', async () => ({ type: 'continue' }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step1]);
+      const input = createDispatcherPipelineInput({ signal: controller.signal });
+
+      const result = await pipeline.execute(input);
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('aborted');
+      expect(step1.execute).not.toHaveBeenCalled();
+    });
+
+    it('halts between steps when signal is aborted after first step completes', async () => {
+      const { loggerService } = createLoggerService();
+      const controller = new AbortController();
+
+      const step1 = createMockDispatcherStep('step1', async () => {
+        controller.abort();
+        return { type: 'continue' };
+      });
+
+      const step2 = createMockDispatcherStep('step2', async () => ({ type: 'continue' }));
+
+      const pipeline = new DispatcherPipeline(loggerService, [step1, step2]);
+      const input = createDispatcherPipelineInput({ signal: controller.signal });
+
+      const result = await pipeline.execute(input);
+
+      expect(result.completed).toBe(false);
+      expect(result.haltReason).toBe('aborted');
+      expect(step1.execute).toHaveBeenCalledTimes(1);
+      expect(step2.execute).not.toHaveBeenCalled();
+    });
   });
 });

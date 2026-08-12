@@ -10,6 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
+  createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createActionGroup,
   createActionPolicy,
@@ -613,5 +614,36 @@ describe('DispatchStep', () => {
       workflowId: 'workflow-2',
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
     });
+  });
+
+  it('skips all groups when signal is already aborted, records no executions and no failures', async () => {
+    const { loggerService } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+    const controller = new AbortController();
+    controller.abort();
+
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
+
+    const group1 = createActionGroup({ id: 'g1', policyId: 'p1' });
+    const group2 = createActionGroup({ id: 'g2', policyId: 'p1' });
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [group1, group2],
+        policies: new Map([['p1', policy]]),
+        input: createDispatcherPipelineInput({ signal: controller.signal }),
+      })
+    );
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+
+    // no executions dispatched
+    const executionIds = result.data?.dispatchedExecutions;
+    expect(executionIds?.get('g1')).toBeUndefined();
+    expect(executionIds?.get('g2')).toBeUndefined();
+    // no failures — groups were silently skipped
+    expect(result.data?.dispatchFailures).toHaveLength(0);
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 });

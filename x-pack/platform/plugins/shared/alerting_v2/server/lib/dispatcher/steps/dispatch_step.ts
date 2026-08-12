@@ -60,8 +60,17 @@ export class DispatchStep implements DispatcherStep {
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
+    const { signal } = state.input;
+
     const groupResults = await Promise.allSettled(
-      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
+      dispatch.map((group) =>
+        limiter(async () => {
+          if (signal.aborted) {
+            return { groupId: group.id, executionIds: [], failures: [] };
+          }
+          return this.dispatchGroup(group, policies);
+        })
+      )
     );
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();

@@ -11,19 +11,15 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import type {
-  DispatcherHaltReason,
   DispatcherPipelineInput,
+  DispatcherPipelineResult,
   DispatcherPipelineState,
   DispatcherStep,
 } from './types';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
 import { withDispatcherSpan } from './with_dispatcher_span';
 
-export interface DispatcherPipelineResult {
-  readonly completed: boolean;
-  readonly haltReason?: DispatcherHaltReason;
-  readonly finalState: DispatcherPipelineState;
-}
+export type { DispatcherPipelineResult };
 
 export interface DispatcherPipelineContract {
   execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult>;
@@ -40,6 +36,13 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
     let pipelineState: DispatcherPipelineState = { input };
 
     for (const step of this.steps) {
+      if (input.signal.aborted) {
+        this.logger.debug({
+          message: `Dispatcher: Pipeline aborted before step: ${step.name}`,
+        });
+        return { completed: false, haltReason: 'aborted', finalState: pipelineState };
+      }
+
       this.logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
 
       const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));

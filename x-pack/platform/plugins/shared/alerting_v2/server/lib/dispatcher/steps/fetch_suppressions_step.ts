@@ -30,10 +30,15 @@ export class FetchSuppressionsStep implements DispatcherStep {
       return { type: 'continue', data: { suppressions: [] } };
     }
 
+    const { signal } = state.input;
+
     const queries = getAlertEpisodeSuppressionsQueries(episodes);
     const responses = await Promise.all(
       queries.map((request) =>
-        this.queryService.executeQueryRows<AlertEpisodeSuppression>({ query: request.query })
+        this.queryService.executeQueryRows<AlertEpisodeSuppression>({
+          query: request.query,
+          abortSignal: signal,
+        })
       )
     );
     const suppressions = responses.flat();
