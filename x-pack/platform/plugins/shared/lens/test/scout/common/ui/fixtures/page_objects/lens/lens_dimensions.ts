@@ -11,6 +11,9 @@ import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 /** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
 const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 
+/** Stable test-subj for the dimension time-shift combo (also passed into `waitForFunction`). */
+const TIME_SHIFT_TEST_SUBJ = 'indexPattern-dimension-time-shift';
+
 /** `LensApp` close-editor helpers needed by dimension open/close actions. */
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
@@ -23,9 +26,21 @@ interface LensDimensionsDeps {
 export class LensDimensions {
   /** Locator for all dimension-trigger buttons in the Lens config panel. */
   readonly dimensionTriggerLocator;
+  /** Reused across time-shift helpers (enable / set / clear). */
+  private readonly timeShift;
+  private readonly timeShiftComboInput;
+  private readonly timeShiftSearchInput;
+  /** Workspace error one-click fix (e.g. terms → filters for time shift). */
+  readonly errorFixAction;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
+    this.timeShift = this.page.testSubj.locator(TIME_SHIFT_TEST_SUBJ);
+    this.timeShiftComboInput = this.timeShift.locator('[data-test-subj="comboBoxInput"]');
+    this.timeShiftSearchInput = this.timeShift.locator(
+      'input[data-test-subj="comboBoxSearchInput"]'
+    );
+    this.errorFixAction = this.page.testSubj.locator('errorFixAction');
   }
 
   /**
@@ -142,11 +157,9 @@ export class LensDimensions {
 
   /** Enables empty rows for the current date histogram dimension. */
   async enableIncludeEmptyRows() {
-    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
-    await includeEmptyRows.click();
-    await includeEmptyRows
-      .and(this.page.locator('[aria-checked="true"]'))
-      .waitFor({ state: 'visible' });
+    const toggle = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await toggle.click();
+    await toggle.and(this.page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' });
   }
 
   /**
@@ -335,5 +348,124 @@ export class LensDimensions {
       const dimension = input.parentElement?.parentElement;
       return (dimension?.textContent ?? '').replace(/\u200b/g, '').trim();
     });
+  }
+
+  /**
+   * Opens the advanced accordion so time-shift / filter-by controls are available.
+   * Requires an open dimension editor.
+   */
+  async enableTimeShift() {
+    await this.page.testSubj.click('indexPattern-advanced-accordion');
+    await this.timeShift.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Clears any time-shift value on the open dimension (plain-text combo, not pills).
+   * Caller must open the advanced accordion first (`enableTimeShift`).
+   */
+  async clearTimeShift() {
+    await this.timeShiftComboInput.click();
+    // asPlainText selection: Backspace → EUI onRemoveOption. Do not use comboBox.clear() —
+    // it looks for `.euiComboBoxPill` clear buttons that this control does not render.
+    await this.timeShiftSearchInput.press('Backspace');
+    await this.page.waitForFunction(
+      (testSubj) => {
+        const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
+        const inputEl = rootEl?.querySelector(
+          'input[data-test-subj="comboBoxSearchInput"]'
+        ) as HTMLInputElement | null;
+        return !inputEl?.value;
+      },
+      TIME_SHIFT_TEST_SUBJ,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Sets a custom time-shift value (e.g. `6h`) on the open dimension.
+   * Caller must open the advanced accordion first (`enableTimeShift`).
+   *
+   * Mirrors FTR `comboBox.setCustom`: type + Enter. Lens humanizes the committed
+   * label (e.g. `6h` → `6 hours ago (6h)`), so EUI `setCustomSelectedOptions`
+   * exact-label membership checks are the wrong readiness signal.
+   */
+  async setTimeShift(shift: string) {
+    await this.timeShiftComboInput.click();
+    // Prefer fill over pressSequentially: EUI remounts the search input when the dropdown
+    // opens, which races character-by-character typing.
+    await this.timeShiftSearchInput.fill(shift);
+    await this.timeShiftSearchInput.press('Enter');
+    // Lens humanizes the label (e.g. `6h` → `6 hours ago (6h)`). Match the token anywhere
+    // under the combo root — committed asPlainText value may not live only on input.value.
+    await this.page.waitForFunction(
+      ({ testSubj, token }) => {
+        const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
+        return (rootEl?.textContent ?? '').includes(token);
+      },
+      { testSubj: TIME_SHIFT_TEST_SUBJ, token: shift },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Clicks the workspace error fix action (e.g. convert terms → filters for time shift).
+   * Waits for the fix button to clear so the next assert does not race the state update.
+   */
+  async useFixAction() {
+    await this.errorFixAction.click();
+    await this.errorFixAction.waitFor({ state: 'hidden', timeout: 30_000 });
+  }
+
+  /**
+   * Adds another terms field to a multi-field terms aggregation.
+   * Requires an open terms dimension editor.
+   *
+   * FieldInputs uses `useDebouncedValue` (256ms) before `secondaryFields` reaches store
+   * state. Closing the editor before that flush drops the pending commit and leaves a
+   * single-term column (fix-action then hits field-stats).
+   */
+  async addTermToAgg(field: string) {
+    const fieldCombos = this.page.locator('[data-test-subj^="indexPattern-dimension-field"]');
+    const lastIndex = await fieldCombos.count();
+    const comboTestSubj = `indexPattern-dimension-field-${lastIndex}`;
+
+    // FTR retries click+select together; the new combo can race the Add field remount.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      if ((await this.page.testSubj.locator(comboTestSubj).count()) === 0) {
+        await this.page.testSubj.click('indexPattern-terms-add-field');
+        try {
+          await this.page.testSubj
+            .locator(comboTestSubj)
+            .waitFor({ state: 'visible', timeout: 2000 });
+        } catch {
+          continue;
+        }
+      }
+      const combo = this.page.components.comboBox(comboTestSubj);
+      await combo.setSelectedOptions([field]);
+      const selected = await combo.getSelectedOptions();
+      if (selected.some((label) => label.includes(field))) {
+        break;
+      }
+      if (attempt === 4) {
+        throw new Error(`addTermToAgg: failed to select "${field}" on ${comboTestSubj}`);
+      }
+    }
+
+    // Combo UI updates from local state immediately; wait for the debounced store commit.
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(FORMAT_PARAM_DEBOUNCE_FLUSH_MS);
+
+    await this.page.waitForFunction(
+      ({ expected }) => {
+        const triggers = [...document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]')];
+        return triggers.some((el) => {
+          const text = el.textContent ?? '';
+          return text.includes('+ 1 other') || text.includes(expected);
+        });
+      },
+      { expected: field },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 }

@@ -12,16 +12,20 @@ import { normalizeComputedColor, WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_edi
  * Lens style flyout, palette details, gauge/heatmap settings, reference lines, and annotations.
  */
 export class LensStyle {
-  /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
-  private readonly dimensionContainerTitle;
-  private readonly styleSettingsButton;
-  private readonly flyoutBackButton;
+  private readonly closeDimensionEditorButton;
+  /** Shared by palette open/close helpers and `getPaletteColorStops`. */
+  private readonly palettePanelFlyout;
+  private readonly colorMappingPalettePicker;
   readonly referenceLineFillBelowButton;
 
   constructor(private readonly page: ScoutPage) {
-    this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
-    this.styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
-    this.flyoutBackButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
+    this.closeDimensionEditorButton = this.page.testSubj.locator(
+      'lns-indexPattern-dimensionContainerClose'
+    );
+    this.palettePanelFlyout = this.page.testSubj.locator('lns-palettePanelFlyout');
+    this.colorMappingPalettePicker = this.page.testSubj.locator(
+      'kbnColoring_ColorMapping_PalettePicker'
+    );
     this.referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
   }
 
@@ -30,8 +34,9 @@ export class LensStyle {
    * Caller must close any open dimension/palette flyout first.
    */
   async openStyleSettingsFlyout() {
-    await this.styleSettingsButton.click();
-    await this.dimensionContainerTitle.waitFor({ state: 'visible' });
+    await this.page.locator('button[data-test-subj="style"]').click();
+    // Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity).
+    await this.page.locator('#lnsDimensionContainerTitle').waitFor({ state: 'visible' });
   }
 
   /**
@@ -39,8 +44,33 @@ export class LensStyle {
    * Caller must have that flyout open (back button visible).
    */
   async closeFlyoutWithBackButton() {
-    await this.flyoutBackButton.click();
-    await this.flyoutBackButton.waitFor({ state: 'hidden' });
+    const backButton = this.page.testSubj.locator('lns-indexPattern-dimensionContainerBack');
+    await backButton.click();
+    await backButton.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Opens the palette panel flyout for the currently active dimension.
+   * Waits for the color-editing trigger (appears after field selection commits).
+   */
+  private async openPalettePanelFlyout() {
+    const colorEditingTrigger = this.page.testSubj.locator('lns_colorEditing_trigger');
+    await colorEditingTrigger.waitFor({ state: 'visible' });
+    await colorEditingTrigger.click();
+    await this.palettePanelFlyout.waitFor({
+      state: 'visible',
+    });
+  }
+
+  private async closePalettePanelFlyout() {
+    const backButton = this.page.testSubj.locator('lns-indexPattern-SettingWithSiblingFlyoutBack');
+    await backButton.click();
+    await backButton.waitFor({ state: 'hidden' });
+  }
+
+  private async closeDimensionEditor() {
+    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
+    await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Reads the selected donut hole size from the style settings flyout. */
@@ -49,7 +79,76 @@ export class LensStyle {
     const selectedOptions = await this.page.components
       .comboBox('lnsEmptySizeRatioOption')
       .getSelectedOptions();
+    await this.closeFlyoutWithBackButton();
     return selectedOptions[0] ?? '';
+  }
+
+  /** Sets the donut hole size from the style settings flyout (e.g. `Large`). */
+  async setDonutHoleSize(value: string) {
+    await this.openStyleSettingsFlyout();
+    await this.page.components.comboBox('lnsEmptySizeRatioOption').setSelectedOptions([value]);
+    await this.closeFlyoutWithBackButton();
+  }
+
+  /**
+   * Returns the currently selected palette id from the open dimension's palette panel.
+   * Closes the palette panel afterward. Dimension editor must already be open.
+   */
+  async getSelectedPaletteId(isLegacy: boolean): Promise<string> {
+    await this.openPalettePanelFlyout();
+    const palettePicker = isLegacy
+      ? this.page.testSubj.locator('lns-palettePicker')
+      : this.colorMappingPalettePicker;
+    await palettePicker.click();
+    const selected = this.page.locator('[role=option][aria-selected=true]');
+    await selected.waitFor({ state: 'visible' });
+    const paletteId = await selected.getAttribute('id');
+    // Close the open picker list, then the palette flyout.
+    await palettePicker.click();
+    await this.closePalettePanelFlyout();
+    if (!paletteId) {
+      throw new Error('No selected palette option found');
+    }
+    return paletteId;
+  }
+
+  /**
+   * Opens a dimension by test-subj, switches its color-mapping palette, and closes the editor.
+   * Prefer `configureDimension({ palette })` when configuring a new empty dimension.
+   */
+  async changeColorMappingPalette(dimensionSelector: string, paletteId: string) {
+    await this.page.testSubj.click(dimensionSelector);
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+    await this.openPalettePanelFlyout();
+    // Caller must already be on color-mapping mode (aria-checked=false).
+    await this.page.testSubj
+      .locator('lns_colorMappingOrLegacyPalette_switch')
+      .and(this.page.locator('[aria-checked="false"]'))
+      .waitFor({ state: 'visible' });
+    await this.colorMappingPalettePicker.click();
+    await this.page.testSubj.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
+    await this.closePalettePanelFlyout();
+    await this.closeDimensionEditor();
+  }
+
+  /**
+   * Overrides a categorical color-mapping assignment (0-based swatch / palette color indices).
+   * Closes the palette panel and dimension editor afterward.
+   */
+  async changeColorMappingCategoricalColors(
+    dimensionSelector: string,
+    colorSwatchIndex: number,
+    paletteColorIndex: number
+  ) {
+    await this.page.testSubj.click(dimensionSelector);
+    await this.closeDimensionEditorButton.waitFor({ state: 'visible' });
+    await this.openPalettePanelFlyout();
+    await this.page.testSubj.click('lns-colorMapping-assignmentsPromptAddAll');
+    await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+    await this.page.testSubj.click(`lns-colorMapping-colorPicker-staticColor-${paletteColorIndex}`);
+    await this.page.testSubj.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
+    await this.closePalettePanelFlyout();
+    await this.closeDimensionEditor();
   }
 
   /** Returns the selected bar orientation from the style settings flyout. */
@@ -141,11 +240,12 @@ export class LensStyle {
 
   /** Reads color-stop values and colors from the currently open palette panel. */
   async getPaletteColorStops(expectedStopsCount?: number) {
-    const palettePanel = this.page.testSubj.locator('lns-palettePanelFlyout');
-    const stopInputsLocator = palettePanel.locator(
+    const stopInputsLocator = this.palettePanelFlyout.locator(
       '[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]'
     );
-    const colorAnchorsLocator = palettePanel.locator('[data-test-subj="euiColorPickerAnchor"]');
+    const colorAnchorsLocator = this.palettePanelFlyout.locator(
+      '[data-test-subj="euiColorPickerAnchor"]'
+    );
 
     const readColorStops = async () => {
       const stopInputs = await stopInputsLocator.all();

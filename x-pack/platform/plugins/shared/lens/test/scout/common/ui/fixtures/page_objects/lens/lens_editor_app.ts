@@ -62,4 +62,63 @@ export class LensEditorApp extends LensApp {
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
   }
+
+  /**
+   * Chart-switch options remount under search filtering; Playwright's actionability
+   * click flakes ("not stable" / detached). Keep this override in the Lens PO so we
+   * do not patch shared `@kbn/scout` `LensApp`.
+   */
+  override async switchToVisualization(visType: string, options?: { search?: string }) {
+    const chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
+    const chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
+    await chartSwitchPopover.click();
+    await chartSwitchList.waitFor({ state: 'visible' });
+    if (options?.search) {
+      const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+      await searchInput.waitFor({ state: 'visible' });
+      await searchInput.fill(options.search);
+    }
+    const option = chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+    await option.waitFor({ state: 'visible' });
+    await option.dispatchEvent('click');
+    await chartSwitchList.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Library ("none") save: prefer checking the radio input — label clicks race
+   * save-modal remounts. Local override avoids changing shared `@kbn/scout` `LensApp`.
+   */
+  override async save(
+    title: string,
+    options?:
+      | {
+          addToDashboard: 'existing';
+          dashboardTitle: string;
+        }
+      | {
+          addToDashboard: 'new';
+        }
+      | {
+          addToDashboard: 'none';
+        }
+  ) {
+    await this.saveButton.click();
+    await this.saveModal.waitFor({ state: 'visible' });
+    await this.savedObjectTitleInput.fill(title);
+
+    if (options?.addToDashboard === 'existing') {
+      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.testSubj.locator('open-dashboard-picker').click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else if (options?.addToDashboard === 'new') {
+      await this.page.locator('label[for="new-dashboard-option"]').click();
+    } else if (options?.addToDashboard === 'none') {
+      await this.page.locator('#add-to-library-option').check();
+    }
+
+    await this.confirmSaveButton.click();
+    await this.saveModal.waitFor({ state: 'hidden' });
+  }
 }

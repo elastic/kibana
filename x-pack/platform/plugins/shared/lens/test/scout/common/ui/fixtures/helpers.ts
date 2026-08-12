@@ -127,6 +127,43 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   if (shouldClickMenu) {
     await csvMenuItem.click();
   }
+
+  // FTR `closeExportFlyout` — dismiss leftover export UI so the editor stays interactive.
+  await page.keyboard.press('Escape');
+  await expect(page.testSubj.locator('exportFlyoutCloseButton')).toBeHidden();
+  await expect(page.testSubj.locator('exportPopoverPanel')).toBeHidden();
+}
+
+type LensCsvContent = Record<string, { content: string; type: string }>;
+
+/** Reads `window.ELASTIC_LENS_CSV_CONTENT` when CSV download debug is enabled. */
+export async function getLensCsvContent(page: ScoutPage): Promise<LensCsvContent | undefined> {
+  return page.evaluate(
+    () =>
+      (
+        window as Window & {
+          ELASTIC_LENS_CSV_CONTENT?: LensCsvContent;
+        }
+      ).ELASTIC_LENS_CSV_CONTENT
+  );
+}
+
+/** Waits until CSV debug content has at least `minLayers` keys, then returns it. */
+export async function waitForLensCsvContent(
+  page: ScoutPage,
+  minLayers: number
+): Promise<LensCsvContent> {
+  await expect
+    .poll(async () => {
+      const content = await getLensCsvContent(page);
+      return content && Object.keys(content).length >= minLayers ? content : undefined;
+    })
+    .toBeTruthy();
+  const content = await getLensCsvContent(page);
+  if (!content || Object.keys(content).length < minLayers) {
+    throw new Error(`Expected at least ${minLayers} CSV layer(s)`);
+  }
+  return content;
 }
 
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
