@@ -12380,8 +12380,6 @@
     "xpack.agentBuilder.uiSettings.tracing.toolDetails.name": "Inclure les détails d'appel d'outil dans les traces",
     "xpack.agentBuilder.uiSettings.tracing.userPrompts.description": "Les messages des utilisateurs ne sont pas capturés par défaut.",
     "xpack.agentBuilder.uiSettings.tracing.userPrompts.name": "Inclure des instructions utilisateur dans les traces",
-    "xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description": "Passerelle interne pour les points de terminaison de gestion des clients OAuth UIAM et l'interface utilisateur des clients MCP Agent Builder. Non destiné à l'usage des utilisateurs finaux.",
-    "xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name": "Gestion du client OAuth UIAM",
     "xpack.agentBuilder.visualization.dashboardWriteControlsDisabledReason": "Vous avez besoin d'autorisations d'écriture sur le tableau de bord pour modifier les visualisations ou les enregistrer dans un tableau de bord.",
     "xpack.agentBuilder.visualization.label": "Visualisation",
     "xpack.agentBuilder.visualization.lens.errorTitle": "Impossible d'afficher la visualisation",
