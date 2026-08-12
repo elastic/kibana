@@ -121,4 +121,30 @@ describe('loadInboundConnector', () => {
     expect(result).toBeUndefined();
     expect(logger.debug).toHaveBeenCalled();
   });
+
+  it('returns undefined when saved object actionTypeId does not match', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: 'so-1',
+      type: ACTION_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        actionTypeId: '.otherConnector',
+        name: 'SO',
+        isMissingSecrets: false,
+        config: { ingestTokenHash: 'abc' },
+        secrets: {},
+      },
+    });
+
+    const result = await loadInboundConnector({
+      connectorId: 'so-1',
+      connectorTypeId: '.myConnector',
+      spaceId: 'space-a',
+      unsecuredSavedObjectsClient,
+      inMemoryConnectors: [],
+      logger,
+    });
+    expect(result).toBeUndefined();
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('type mismatch'));
+  });
 });

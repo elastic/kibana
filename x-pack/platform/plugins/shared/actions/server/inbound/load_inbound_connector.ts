@@ -54,12 +54,17 @@ export async function loadInboundConnector({
       actionTypeId = attributes.actionTypeId;
       config = attributes.config ?? {};
     } catch (error) {
-      logger.debug(`Failed to load inbound connector ${connectorId}: ${String(error)}`);
+      logger.debug(
+        `Failed to load inbound connector ${connectorId} space ${spaceId}: ${String(error)}`
+      );
       return undefined;
     }
   }
 
   if (actionTypeId !== normalizedTypeId) {
+    logger.debug(
+      `Inbound connector ${connectorId} space ${spaceId} type mismatch: expected ${normalizedTypeId}, got ${actionTypeId}`
+    );
     return undefined;
   }
 

@@ -9,11 +9,24 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { z } from '@kbn/zod/v4';
-import { buildEventId } from '@kbn/connector-specs';
+import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
-import { INBOUND_EVENTS_DISABLED_MESSAGE } from './constants';
+import {
+  INBOUND_EVENTS_DISABLED_MESSAGE,
+  INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
+} from './constants';
+import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { handleInboundRequest } from './handle_inbound_request';
+import {
+  INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH,
+  truncateInboundIngressDetail,
+} from './log_inbound_ingress_outcome';
+import type {
+  ConnectorEventEmitParams,
+  ConnectorEventEmitter,
+  DispatchConnectorEventsResult,
+} from './types';
 
 jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
@@ -30,14 +43,16 @@ const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getC
 describe('handleInboundRequest', () => {
   const logger = loggingSystemMock.createLogger();
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const emitConnectorEvents = jest.fn().mockResolvedValue(undefined);
-  const getSpaceId = jest.fn().mockReturnValue('default');
+  const emitConnectorEvents = jest
+    .fn<Promise<DispatchConnectorEventsResult>, []>()
+    .mockResolvedValue({ ok: true });
 
   const connectorId = 'connector-1';
   const token = 'ingest-token-value';
+  const spaceId = 'default';
   const ingestTokenHash = computeIngestTokenHash({
     connectorId,
-    spaceId: 'default',
+    spaceId,
     token,
   });
 
@@ -67,7 +82,7 @@ describe('handleInboundRequest', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    getSpaceId.mockReturnValue('default');
+    emitConnectorEvents.mockResolvedValue({ ok: true });
     unsecuredSavedObjectsClient.get.mockResolvedValue({
       id: connectorId,
       type: 'action',
@@ -76,16 +91,20 @@ describe('handleInboundRequest', () => {
         actionTypeId: '.myConnector',
         name: 'Test',
         isMissingSecrets: false,
-        config: { ingestTokenHash },
-        secrets: {},
+        config: { ingestTokenHash, other: 'kept' },
+        secrets: { apiKey: 'should-not-reach-spoke' },
       },
     });
   });
 
   const run = async (overrides?: {
     enabled?: boolean;
+    maxEmittedEvents?: number;
+    typeId?: string;
+    spaceId?: string;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
+    emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   }) => {
     const request = httpServerMock.createKibanaRequest({
       query: overrides?.query ?? { token },
@@ -96,28 +115,76 @@ describe('handleInboundRequest', () => {
     await handleInboundRequest({
       request,
       response,
-      typeId: 'myConnector',
+      typeId: overrides?.typeId ?? 'myConnector',
       connectorId,
+      spaceId: overrides?.spaceId ?? spaceId,
       inboundEventsEnabled: overrides?.enabled ?? true,
-      emitConnectorEvents,
+      maxEmittedEvents: overrides?.maxEmittedEvents ?? INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
+      emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
       unsecuredSavedObjectsClient,
       inMemoryConnectors: [],
-      getSpaceId,
     });
-    return response;
+    return { response, request };
+  };
+
+  const expectOutcome = (level: 'debug' | 'info' | 'warn' | 'error', outcome: string) => {
+    expect(logger[level]).toHaveBeenCalledWith(
+      expect.stringContaining(`outcome=${outcome}`),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          outcome,
+          spaceId: 'default',
+          connectorId,
+          connectorTypeId: expect.any(String),
+          requestId: expect.any(String),
+        }),
+      })
+    );
   };
 
   it('returns 403 when inbound events are disabled', async () => {
-    const res = await run({ enabled: false });
+    const { response: res } = await run({ enabled: false });
     expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expectOutcome('warn', 'disabled');
   });
 
   it('returns 404 when the spec has no events', async () => {
     getConnectorSpecMock.mockReturnValue(undefined);
-    const res = await run();
+    const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
+    expectOutcome('debug', 'no_spec');
+  });
+
+  it('returns 404 when loadInboundConnector returns undefined (type mismatch / miss)', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+    );
+    unsecuredSavedObjectsClient.get.mockResolvedValue({
+      id: connectorId,
+      type: 'action',
+      references: [],
+      attributes: {
+        actionTypeId: '.otherConnector',
+        name: 'Test',
+        isMissingSecrets: false,
+        config: { ingestTokenHash },
+        secrets: {},
+      },
+    });
+    const { response: res } = await run();
+    expect(res.notFound).toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'load_miss');
+  });
+
+  it('returns 404 when normalized typeId exceeds max length', async () => {
+    const undotted = 'a'.repeat(MAX_CONNECTOR_TYPE_ID_LENGTH);
+    const { response: res } = await run({ typeId: undotted });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(getConnectorSpecMock).not.toHaveBeenCalled();
+    expectOutcome('debug', 'no_spec');
   });
 
   it('returns 404 when the connector has no ingestTokenHash', async () => {
@@ -136,27 +203,30 @@ describe('handleInboundRequest', () => {
         secrets: {},
       },
     });
-    const res = await run();
+    const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
   });
 
   it('returns 404 when the token is missing', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
     );
-    const res = await run({ query: {} });
+    const { response: res } = await run({ query: {} });
     expect(res.notFound).toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
   });
 
   it('returns 404 for a bad token', async () => {
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
     );
-    const res = await run({ query: { token: 'wrong' } });
+    const { response: res } = await run({ query: { token: 'wrong' } });
     expect(res.notFound).toHaveBeenCalled();
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
   });
 
   it('accepts Authorization Bearer when query token is absent', async () => {
@@ -169,7 +239,7 @@ describe('handleInboundRequest', () => {
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
 
-    const res = await run({
+    const { response: res } = await run({
       query: {},
       headers: { authorization: `Bearer ${token}` },
     });
@@ -177,7 +247,7 @@ describe('handleInboundRequest', () => {
     expect(emitConnectorEvents).toHaveBeenCalled();
   });
 
-  it('returns 202 and emits on the happy path', async () => {
+  it('returns 202 and emits on the happy path without secrets or ingestTokenHash', async () => {
     const eventId = buildEventId('.myConnector', 'received');
     const handleEvents = jest.fn().mockResolvedValue({
       type: 'emit',
@@ -193,7 +263,7 @@ describe('handleInboundRequest', () => {
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
 
-    const res = await run();
+    const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
     expect(handleEvents).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -201,8 +271,11 @@ describe('handleInboundRequest', () => {
         connectorTypeId: '.myConnector',
         spaceId: 'default',
         rawBody: { hello: 'world' },
+        config: { other: 'kept' },
       })
     );
+    expect(handleEvents.mock.calls[0][0]).not.toHaveProperty('secrets');
+    expect(handleEvents.mock.calls[0][0].config).not.toHaveProperty('ingestTokenHash');
     expect(emitConnectorEvents).toHaveBeenCalledWith({
       eventId,
       payload: { body: { hello: 'world' } },
@@ -211,11 +284,28 @@ describe('handleInboundRequest', () => {
       connectorTypeId: '.myConnector',
       correlationKey: 'corr-1',
     });
+    expectOutcome('info', 'accepted');
   });
 
-  it('returns 202 when the emitter throws', async () => {
+  it('returns 202 for an empty events list', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events: [] })) as ReturnType<
+        typeof getConnectorSpec
+      >
+    );
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('info', 'accepted');
+  });
+
+  it('returns 202 with emit_partial when emitConnectorEvents returns ok:false', async () => {
     const eventId = buildEventId('.myConnector', 'received');
-    emitConnectorEvents.mockRejectedValueOnce(new Error('bridge down'));
+    emitConnectorEvents.mockResolvedValueOnce({
+      ok: false,
+      reason: 'emit_threw',
+      message: 'bridge down',
+    });
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(
         jest.fn().mockResolvedValue({
@@ -225,9 +315,96 @@ describe('handleInboundRequest', () => {
       ) as ReturnType<typeof getConnectorSpec>
     );
 
-    const res = await run();
+    const { response: res } = await run();
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('bridge down'));
+    expectOutcome('warn', 'emit_partial');
+  });
+
+  it('returns 202 with emit_partial when emitConnectorEvents throws', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    emitConnectorEvents.mockRejectedValueOnce(new Error('adapter threw'));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('adapter threw'));
+    expectOutcome('warn', 'emit_partial');
+    expect(res.customError).not.toHaveBeenCalled();
+  });
+
+  it('continues emitting after a partial failure (1 of N)', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    emitConnectorEvents
+      .mockResolvedValueOnce({ ok: false, reason: 'emit_threw', message: 'first failed' })
+      .mockResolvedValueOnce({ ok: true });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [
+            { eventId, correlationKey: 'corr-1', payload: { body: {} } },
+            { eventId, correlationKey: 'corr-2', payload: { body: {} } },
+          ],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run();
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(emitConnectorEvents).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('emit_failures=1_of=2'),
+      expect.anything()
+    );
+  });
+
+  it('returns 202 with emit_partial when production dispatch has no emitter', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run({
+      emit: (params) => dispatchConnectorEvents({ emitter: undefined, params, logger }),
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expectOutcome('warn', 'emit_partial');
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('No connector event emitter registered')
+    );
+  });
+
+  it('returns 202 with emit_partial when production dispatch emitter throws', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    const emitter: ConnectorEventEmitter = {
+      emit: jest.fn().mockRejectedValue(new Error('bridge down')),
+    };
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'emit',
+          events: [{ eventId, correlationKey: 'corr-1', payload: { body: {} } }],
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run({
+      emit: (params) => dispatchConnectorEvents({ emitter, params, logger }),
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expectOutcome('warn', 'emit_partial');
   });
 
   it('returns 500 when handleEvents throws', async () => {
@@ -236,7 +413,62 @@ describe('handleInboundRequest', () => {
         typeof getConnectorSpec
       >
     );
-    const res = await run();
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
+
+  it('returns 500 when handleEvents returns a non-emit type', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(
+        jest.fn().mockResolvedValue({
+          type: 'http',
+          status: 200,
+          body: {},
+        })
+      ) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expectOutcome('error', 'handle_fail');
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when emitted event count exceeds the max', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    const events = Array.from(
+      { length: INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT + 1 },
+      (_, i) => ({
+        eventId,
+        correlationKey: `corr-${i}`,
+        payload: { body: {} },
+      })
+    );
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+        typeof getConnectorSpec
+      >
+    );
+    const { response: res } = await run();
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'handle_fail');
+  });
+
+  it('respects a configured maxEmittedEvents', async () => {
+    const eventId = buildEventId('.myConnector', 'received');
+    const events = Array.from({ length: 3 }, (_, i) => ({
+      eventId,
+      correlationKey: `corr-${i}`,
+      payload: { body: {} },
+    }));
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
+        typeof getConnectorSpec
+      >
+    );
+    const { response: res } = await run({ maxEmittedEvents: 2 });
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(emitConnectorEvents).not.toHaveBeenCalled();
   });
@@ -256,8 +488,18 @@ describe('handleInboundRequest', () => {
         })
       ) as ReturnType<typeof getConnectorSpec>
     );
-    const res = await run();
+    const { response: res } = await run();
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expectOutcome('error', 'validate_fail');
+  });
+});
+
+describe('truncateInboundIngressDetail', () => {
+  it('truncates oversize detail', () => {
+    const input = 'a'.repeat(INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH + 10);
+    const out = truncateInboundIngressDetail(input);
+    expect(out.endsWith('…')).toBe(true);
+    expect(out.length).toBe(INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH + 1);
   });
 });

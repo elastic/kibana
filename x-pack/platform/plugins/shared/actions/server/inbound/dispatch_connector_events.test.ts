@@ -25,24 +25,36 @@ describe('dispatchConnectorEvents', () => {
     jest.clearAllMocks();
   });
 
-  it('warns and returns when no emitter is registered', async () => {
-    await dispatchConnectorEvents({ emitter: undefined, params, logger });
+  it('returns ok:false when no emitter is registered', async () => {
+    const result = await dispatchConnectorEvents({ emitter: undefined, params, logger });
+    expect(result).toEqual({
+      ok: false,
+      reason: 'no_emitter',
+      message: expect.stringContaining('No connector event emitter registered'),
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('No connector event emitter registered')
     );
   });
 
-  it('invokes the registered emitter', async () => {
+  it('invokes the registered emitter and returns ok:true', async () => {
     const emitter: ConnectorEventEmitter = { emit: jest.fn() };
-    await dispatchConnectorEvents({ emitter, params, logger });
+    await expect(dispatchConnectorEvents({ emitter, params, logger })).resolves.toEqual({
+      ok: true,
+    });
     expect(emitter.emit).toHaveBeenCalledWith(params);
   });
 
-  it('logs emitter failures without throwing', async () => {
+  it('returns ok:false when the emitter throws (does not rethrow)', async () => {
     const emitter: ConnectorEventEmitter = {
       emit: jest.fn().mockRejectedValue(new Error('boom')),
     };
-    await expect(dispatchConnectorEvents({ emitter, params, logger })).resolves.toBeUndefined();
+    await expect(dispatchConnectorEvents({ emitter, params, logger })).resolves.toEqual({
+      ok: false,
+      reason: 'emit_threw',
+      message: 'boom',
+    });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('space default'));
   });
 });

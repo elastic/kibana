@@ -7,11 +7,16 @@
 
 import type { Logger } from '@kbn/core/server';
 
-import type { ConnectorEventEmitParams, ConnectorEventEmitter } from './types';
+import type {
+  ConnectorEventEmitParams,
+  ConnectorEventEmitter,
+  DispatchConnectorEventsResult,
+} from './types';
 
 /**
  * Delivers a connector event to the registered emitter.
- * Failures are logged and do not fail the HTTP request (still 202).
+ * Returns a Result so the HTTP layer can count `emit_partial` without relying on throws.
+ * Callers must still isolate failures so the ingress response stays 202.
  */
 export async function dispatchConnectorEvents({
   emitter,
@@ -21,21 +26,27 @@ export async function dispatchConnectorEvents({
   emitter: ConnectorEventEmitter | undefined;
   params: ConnectorEventEmitParams;
   logger: Logger;
-}): Promise<void> {
+}): Promise<DispatchConnectorEventsResult> {
   if (!emitter) {
-    logger.warn(
-      `No connector event emitter registered; dropping event ${params.eventId} for connector ${params.connectorId}`
-    );
-    return;
+    const message = `No connector event emitter registered; dropping event ${params.eventId} for connector ${params.connectorId} type ${params.connectorTypeId} space ${params.spaceId}`;
+    logger.warn(message);
+    return { ok: false, reason: 'no_emitter', message };
   }
 
   try {
     await emitter.emit(params);
+    return { ok: true };
   } catch (reason) {
-    logger.warn(
-      `Connector event emitter failed for event ${params.eventId} connector ${
-        params.connectorId
-      }: ${reason instanceof Error ? reason.message : String(reason)}`
-    );
+    const message = `Connector event emitter failed for event ${params.eventId} connector ${
+      params.connectorId
+    } type ${params.connectorTypeId} space ${params.spaceId}: ${
+      reason instanceof Error ? reason.message : String(reason)
+    }`;
+    logger.warn(message);
+    return {
+      ok: false,
+      reason: 'emit_threw',
+      message: reason instanceof Error ? reason.message : String(reason),
+    };
   }
 }

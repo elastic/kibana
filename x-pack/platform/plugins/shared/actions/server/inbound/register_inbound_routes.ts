@@ -22,14 +22,15 @@ import {
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from './constants';
 import { handleInboundRequest } from './handle_inbound_request';
-import type { ConnectorEventEmitParams } from './types';
+import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
 export interface RegisterInboundRoutesParams {
   router: IRouter<ActionsRequestHandlerContext>;
   inboundEventsEnabled: boolean;
   maxBodyBytes: number;
+  maxEmittedEvents: number;
   logger: Logger;
-  emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<void>;
+  emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
   getSpaceId: (request: KibanaRequest) => string;
   inMemoryConnectors: InMemoryConnector[];
@@ -39,6 +40,7 @@ export function registerInboundRoutes({
   router,
   inboundEventsEnabled,
   maxBodyBytes,
+  maxEmittedEvents,
   logger,
   emitConnectorEvents,
   getStartServices,
@@ -68,6 +70,7 @@ export function registerInboundRoutes({
         validate: {
           request: {
             params: schema.object({
+              // maxLength is pre-normalize; handle rejects if normalize prepends '.' past the cap.
               typeId: schema.string({
                 minLength: 1,
                 maxLength: MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -112,10 +115,11 @@ export function registerInboundRoutes({
           response,
           typeId: request.params.typeId,
           connectorId: request.params.connectorId,
+          spaceId,
           inboundEventsEnabled,
+          maxEmittedEvents,
           emitConnectorEvents,
           logger,
-          getSpaceId,
           unsecuredSavedObjectsClient,
           inMemoryConnectors,
         });

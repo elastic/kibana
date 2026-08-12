@@ -38,9 +38,37 @@ describe('extractIngestToken', () => {
     ).toBe('from-header');
   });
 
-  it('rejects tokens longer than the max length', () => {
+  it('rejects tokens longer than the max length from query', () => {
     const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_MAX_LENGTH + 1);
     expect(extractIngestToken({ query: { token: tooLong }, headers: {} })).toBeUndefined();
+  });
+
+  it('does not fall back to query when Authorization Bearer is oversized', () => {
+    const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_MAX_LENGTH + 1);
+    expect(
+      extractIngestToken({
+        query: { token: 'from-query' },
+        headers: { authorization: `Bearer ${tooLong}` },
+      })
+    ).toBeUndefined();
+  });
+
+  it('does not fall back to query when Authorization is present but not Bearer', () => {
+    expect(
+      extractIngestToken({
+        query: { token: 'from-query' },
+        headers: { authorization: 'Basic abc' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('does not fall back to query when Authorization Bearer is empty', () => {
+    expect(
+      extractIngestToken({
+        query: { token: 'from-query' },
+        headers: { authorization: 'Bearer ' },
+      })
+    ).toBeUndefined();
   });
 });
 
@@ -80,6 +108,17 @@ describe('verifyIngestToken', () => {
         spaceId,
         providedToken: token,
         ingestTokenHash: 'abc',
+      })
+    ).toBe(false);
+  });
+
+  it('returns false for non-hex stored hash', () => {
+    expect(
+      verifyIngestToken({
+        connectorId,
+        spaceId,
+        providedToken: token,
+        ingestTokenHash: 'zzzz',
       })
     ).toBe(false);
   });

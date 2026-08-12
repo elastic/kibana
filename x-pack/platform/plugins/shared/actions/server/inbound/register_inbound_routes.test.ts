@@ -25,6 +25,7 @@ describe('registerInboundRoutes', () => {
       router,
       inboundEventsEnabled: false,
       maxBodyBytes: 1024 * 1024,
+      maxEmittedEvents: 25,
       logger: loggingSystemMock.createLogger(),
       emitConnectorEvents: jest.fn(),
       getStartServices: coreMock.createSetup().getStartServices,

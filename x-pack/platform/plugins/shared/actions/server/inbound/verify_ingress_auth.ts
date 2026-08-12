@@ -10,23 +10,31 @@ import { timingSafeEqual } from 'node:crypto';
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from './constants';
 
-const extractBearerToken = (
+const getAuthorizationHeaderValue = (
   headers: Record<string, string | string[] | undefined>
 ): string | undefined => {
   const authorization = headers.authorization;
   const headerValue = Array.isArray(authorization) ? authorization[0] : authorization;
-  if (typeof headerValue !== 'string') {
-    return undefined;
-  }
-  const bearerMatch = /^Bearer\s+(.+)$/i.exec(headerValue.trim());
+  return typeof headerValue === 'string' ? headerValue : undefined;
+};
+
+/**
+ * Returns the Bearer token when present and valid, or `undefined` when the
+ * Authorization header is missing / not Bearer / empty / oversize.
+ */
+const extractBearerToken = (authorizationHeader: string): string | undefined => {
+  const bearerMatch = /^Bearer\s+(.+)$/i.exec(authorizationHeader.trim());
   const bearerToken = bearerMatch?.[1];
   if (!bearerToken || bearerToken.length === 0) {
     return undefined;
   }
-  return bearerToken.length <= INBOUND_EVENTS_TOKEN_MAX_LENGTH ? bearerToken : undefined;
+  if (bearerToken.length > INBOUND_EVENTS_TOKEN_MAX_LENGTH) {
+    return undefined;
+  }
+  return bearerToken;
 };
 
-const extractQueryToken = (query: Record<string, unknown>): string | undefined => {
+const extractQueryToken = (query: { token?: string | string[] }): string | undefined => {
   const queryToken = query.token;
   if (typeof queryToken === 'string' && queryToken.length > 0) {
     return queryToken.length <= INBOUND_EVENTS_TOKEN_MAX_LENGTH ? queryToken : undefined;
@@ -41,11 +49,16 @@ export const extractIngestToken = ({
   query,
   headers,
 }: {
-  query: Record<string, unknown>;
+  query: { token?: string | string[] };
   headers: Record<string, string | string[] | undefined>;
 }): string | undefined => {
-  // Prefer Authorization: Bearer (keeps secrets out of URLs/logs); fall back to ?token=.
-  return extractBearerToken(headers) ?? extractQueryToken(query);
+  // Prefer Authorization: Bearer (keeps secrets out of URLs/logs).
+  // If Authorization is present but invalid, do not fall back to ?token=.
+  const authorizationHeader = getAuthorizationHeaderValue(headers);
+  if (authorizationHeader !== undefined) {
+    return extractBearerToken(authorizationHeader);
+  }
+  return extractQueryToken(query);
 };
 
 export const verifyIngestToken = ({
@@ -64,8 +77,10 @@ export const verifyIngestToken = ({
     spaceId,
     token: providedToken,
   });
-  if (expectedHash.length !== ingestTokenHash.length) {
+  const expected = Buffer.from(expectedHash, 'hex');
+  const stored = Buffer.from(ingestTokenHash, 'hex');
+  if (expected.length === 0 || expected.length !== stored.length) {
     return false;
   }
-  return timingSafeEqual(Buffer.from(expectedHash), Buffer.from(ingestTokenHash));
+  return timingSafeEqual(expected, stored);
 };

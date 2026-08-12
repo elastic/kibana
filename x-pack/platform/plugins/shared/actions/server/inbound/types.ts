@@ -21,3 +21,8 @@ export interface ConnectorEventEmitParams {
 export interface ConnectorEventEmitter {
   emit(params: ConnectorEventEmitParams): Promise<void>;
 }
+
+/** Result of delivering one event through the hub dispatch adapter. */
+export type DispatchConnectorEventsResult =
+  | { ok: true }
+  | { ok: false; reason: 'no_emitter' | 'emit_threw'; message: string };

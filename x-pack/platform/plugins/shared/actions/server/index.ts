@@ -29,7 +29,11 @@ export type {
   ConnectorLifecyclePostDeleteParams,
 } from './types';
 
-export type { ConnectorEventEmitParams, ConnectorEventEmitter } from './inbound';
+export type {
+  ConnectorEventEmitParams,
+  ConnectorEventEmitter,
+  DispatchConnectorEventsResult,
+} from './inbound';
 
 export type {
   ConnectorWithExtraFindData as FindActionResult,
