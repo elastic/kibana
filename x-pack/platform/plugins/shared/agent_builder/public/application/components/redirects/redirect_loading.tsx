@@ -8,10 +8,6 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
-/**
- * Centered spinner the redirect components render while they resolve which
- * agent to navigate to (e.g. waiting on the space-default query).
- */
 export const RedirectLoading: React.FC<{ 'data-test-subj'?: string }> = ({
   'data-test-subj': dataTestSubj,
 }) => (
