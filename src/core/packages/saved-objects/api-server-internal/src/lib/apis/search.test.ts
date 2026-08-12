@@ -115,6 +115,58 @@ describe('search', () => {
     }
   );
 
+  describe('forbidden esOptions that bypass namespace filtering', () => {
+    // Each key in this list introduces an independent ES retrieval branch that is not governed by
+    // the namespace/type bool filter. Allowing them would be a silent cross-namespace data leak.
+    it.each(['knn', 'retriever', 'rank', 'sub_searches'])(
+      'should throw a 400 bad request error when esOptions contains "%s"',
+      async (forbiddenKey) => {
+        const badOptions = {
+          ...options,
+          [forbiddenKey]: { some: 'value' },
+        } as SavedObjectsSearchOptions;
+
+        await expect(repository.search(badOptions)).rejects.toMatchObject({
+          output: {
+            statusCode: 400,
+            payload: expect.objectContaining({
+              message: expect.stringContaining(forbiddenKey),
+            }),
+          },
+        });
+        expect(client.search).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should include all offending keys in the error message when multiple forbidden keys are present', async () => {
+      const badOptions = {
+        ...options,
+        knn: { field: 'embedding', query_vector: [1, 2, 3], k: 10, num_candidates: 100 },
+        retriever: { standard: { query: { match_all: {} } } },
+      } as SavedObjectsSearchOptions;
+
+      await expect(repository.search(badOptions)).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: expect.objectContaining({
+            message: expect.stringMatching(/knn/),
+          }),
+        },
+      });
+      expect(client.search).not.toHaveBeenCalled();
+    });
+
+    it('should not throw for collapse, which operates on the already-filtered result set', async () => {
+      const collapseOptions = {
+        ...options,
+        collapse: { field: 'type' },
+      } as SavedObjectsSearchOptions;
+
+      await expect(repository.search(collapseOptions)).resolves.toEqual(EMPTY_SEARCH_RESPONSE);
+      expect(client.search).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('should return an empty response if the search returns 404', async () => {
     client.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(

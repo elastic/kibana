@@ -75,6 +75,31 @@ export async function performSearch<T extends SavedObjectsRawDocSource, A = unkn
     );
   }
 
+  // Guard: 'knn', 'retriever', 'rank', and 'sub_searches' introduce independent ES retrieval
+  // branches that are NOT governed by the namespace/type bool filter injected by
+  // mergeUserQueryWithNamespacesBool. An under-filtered branch is a silent cross-namespace data
+  // leak (S5 finding). Even when TypeScript forbids these keys for typed callers, runtime callers
+  // can spread untyped options — that is the entire bug class this guard addresses.
+  //
+  // 'collapse' is intentionally excluded: it performs field collapsing on the already-filtered
+  // result set and cannot retrieve documents that did not match the namespace filter in the query.
+  //
+  // 'sub_searches' is not present in the current @elastic/elasticsearch type definitions but is
+  // guarded here as a defense-in-depth measure against untyped callers on future ES API versions.
+  const FORBIDDEN_ES_OPTIONS = ['knn', 'retriever', 'rank', 'sub_searches'] as const;
+  const esOptionsRecord = esOptions as Record<string, unknown>;
+  const presentForbiddenOptions = FORBIDDEN_ES_OPTIONS.filter(
+    (key) => esOptionsRecord[key] != null
+  );
+  if (presentForbiddenOptions.length > 0) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      `esOptions contains keys that bypass namespace filtering: ${presentForbiddenOptions.join(
+        ', '
+      )}. ` +
+        `These options introduce independent retrieval branches outside the namespace/type bool filter.`
+    );
+  }
+
   const types = castArray(type).filter((t) => allowedTypes.includes(t));
   if (types.length === 0) {
     return createEmptySearchResponse();
