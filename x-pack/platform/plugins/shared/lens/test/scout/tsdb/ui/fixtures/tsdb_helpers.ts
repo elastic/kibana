@@ -154,6 +154,57 @@ export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeR
   },
 });
 
+const ONE_SECOND = 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const TWO_HOURS = 2 * ONE_HOUR;
+
+interface DowngradeBoundaryData {
+  hasDataBeforeDowngrade: boolean;
+  hasDataAfterDowngrade: boolean;
+}
+
+/** Verifies chart data around a stream downgrade using a caller-configured metric dimension. */
+export const getDowngradeBoundaryData = async ({
+  pageObjects,
+  timeRange,
+  configureMetricDimension,
+}: {
+  pageObjects: LensPageObjects;
+  timeRange: TsdbScenarioTimeRange;
+  configureMetricDimension: () => Promise<void>;
+}): Promise<DowngradeBoundaryData> => {
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.beforeRollover, -ONE_HOUR),
+    to: offsetPickerTime(timeRange.beforeRollover, ONE_HOUR),
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await configureMetricDimension();
+
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsBeforeDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.afterRollover, ONE_SECOND),
+    to: offsetPickerTime(timeRange.afterRollover, TWO_HOURS),
+  });
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsAfterDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+
+  return {
+    hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
+    hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
+  };
+};
+
 /** Runs all cleanup actions and reports their failures together. */
 export const runCleanupActions = async (
   description: string,

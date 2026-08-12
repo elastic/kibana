@@ -7,12 +7,13 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createTsdbScenarioTimeRange, offsetPickerTime, runCleanupActions } from './tsdb_helpers';
+import {
+  createTsdbScenarioTimeRange,
+  getDowngradeBoundaryData,
+  runCleanupActions,
+} from './tsdb_helpers';
 import type { LensUiTestFixtures, LensUiWorkerFixtures, TsdbScenarioIndex } from './tsdb_helpers';
 
-const ONE_SECOND = 1000;
-const ONE_HOUR = 60 * 60 * 1000;
-const TWO_HOURS = 2 * ONE_HOUR;
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
 export type LogsDBScenarioType =
@@ -154,37 +155,20 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
   };
 
   const assertDowngradeBoundary = async ({ pageObjects }: LensFixtures): Promise<void> => {
-    await pageObjects.lens.workspace.openFullEditor();
-    await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
-      to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes',
+    const { hasDataBeforeDowngrade, hasDataAfterDowngrade } = await getDowngradeBoundaryData({
+      pageObjects,
+      timeRange: TIME_RANGE,
+      configureMetricDimension: async () => {
+        await pageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'min',
+          field: 'bytes',
+        });
+      },
     });
 
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const barsBeforeDowngrade =
-      (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
-      [];
-    expect(barsBeforeDowngrade.some(({ y }) => y > 0)).toBe(true);
-
-    await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
-      to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
-    });
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const barsAfterDowngrade =
-      (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
-      [];
-    expect(barsAfterDowngrade.some(({ y }) => y > 0)).toBe(true);
+    expect(hasDataBeforeDowngrade).toBe(true);
+    expect(hasDataAfterDowngrade).toBe(true);
   };
 
   const assertAlternateDateHistogram = async ({ pageObjects }: LensFixtures): Promise<void> => {

@@ -11,15 +11,11 @@ import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
-  offsetPickerTime,
+  getDowngradeBoundaryData,
   sumFirstNValues,
   test,
 } from '../fixtures';
 import type { TsdbScenarioContext, TsdbScenarioIndex } from '../fixtures';
-
-const ONE_SECOND = 1000;
-const ONE_HOUR = 60 * 60 * 1000;
-const TWO_HOURS = 2 * ONE_HOUR;
 
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
@@ -102,40 +98,16 @@ const runScenario = async (
 
   const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
     await test.step('visualize data on both sides of the downgrade boundary', async () => {
-      // Reload Lens for a clean editor before narrowing the time window.
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
-        to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
+      return getDowngradeBoundaryData({
+        pageObjects,
+        timeRange: TIME_RANGE,
+        configureMetricDimension: async () => {
+          await pageObjects.lens.configureDimension({
+            dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+            operation: 'count',
+          });
+        },
       });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'count',
-      });
-
-      await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsBeforeDowngrade =
-        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-          ?.bars ?? [];
-
-      await pageObjects.datePicker.setAbsoluteRange({
-        from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
-        to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
-      });
-      await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsAfterDowngrade =
-        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
-          ?.bars ?? [];
-
-      return {
-        hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
-        hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
-      };
     });
 
   return {
