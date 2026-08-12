@@ -12,6 +12,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi, type BulkResponse } from '../services/rules_api';
 import type { BulkSelection } from './use_bulk_select';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesListView } from './invalidate_rules_content_list';
 
 const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
   const httpError = error as IHttpFetchError<{ message?: string }>;
@@ -74,6 +75,7 @@ export const useBulkEnableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
     },
     onError: (error) => {
@@ -113,6 +115,7 @@ export const useBulkDisableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
     },
     onError: (error) => {
