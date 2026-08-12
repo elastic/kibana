@@ -19,6 +19,7 @@ import {
   createToolCallMessage,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { isSubagentRosterUpdatedStep, type SubagentRosterEntry } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from './types';
 import type { ResearchAgentAction } from './actions';
 import { convertError, isRecoverableError } from './utils/errors';
@@ -44,7 +45,6 @@ import {
 } from './actions';
 import type { SubagentTracker } from './subagent_tracker';
 import type { ProcessedConversation } from './utils/prepare_conversation';
-import { isSubagentRosterUpdatedStep, type SubagentRosterEntry } from '@kbn/agent-builder-common';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -376,7 +376,9 @@ const tryParseCreatedMarker = (content: string): boolean => {
     if (typeof obj !== 'object' || obj === null) return false;
     const results = (obj as { results?: Array<{ data?: Record<string, unknown> }> }).results;
     if (!Array.isArray(results)) return false;
-    return results.some((r) => r?.data && typeof r.data === 'object' && '_subagent_created' in r.data);
+    return results.some(
+      (r) => r?.data && typeof r.data === 'object' && '_subagent_created' in r.data
+    );
   } catch {
     return false;
   }

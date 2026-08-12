@@ -8,11 +8,7 @@
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import {
-  ToolType,
-  isRoundCompleteEvent,
-  internalTools,
-} from '@kbn/agent-builder-common';
+import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';

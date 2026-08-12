@@ -8,11 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
-import {
-  createBadRequestError,
-  HookLifecycle,
-  ToolResultType,
-} from '@kbn/agent-builder-common';
+import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan, markToolSpanAsError } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,

@@ -320,10 +320,7 @@ class ConversationClientImpl implements ConversationClient {
     return this.deleteWithCascade(conversationId, new Set<string>());
   }
 
-  private async deleteWithCascade(
-    conversationId: string,
-    visited: Set<string>
-  ): Promise<boolean> {
+  private async deleteWithCascade(conversationId: string, visited: Set<string>): Promise<boolean> {
     // Guard against cycles / self-referential loops (should be impossible in prod
     // where child ids are always distinct, but keeps behavior robust and simplifies
     // test mocking where a broad search mock might return unexpected hits).

@@ -44,7 +44,7 @@ const schema = z.object({
       'Identifier for a persistent sub-agent (ignored when mode is "oneshot"). ' +
         'Defaults to "subagent". \n\n' +
         'This name is how you will address the sub-agent later via send_message. ' +
-        "Pick a short, meaningful name that reflects its role (e.g. \"researcher\", " +
+        'Pick a short, meaningful name that reflects its role (e.g. "researcher", ' +
         '"code-reviewer", "planner"). Names are scoped to the current conversation. \n\n' +
         'IMPORTANT: run_subagent ONLY creates. Calling it with a name that is ' +
         'ALREADY in use will fail — use send_message to talk to an existing ' +

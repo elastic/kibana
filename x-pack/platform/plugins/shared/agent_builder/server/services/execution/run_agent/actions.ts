@@ -8,10 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type {
-  BackgroundExecutionState,
-  SubagentRosterEntry,
-} from '@kbn/agent-builder-common/chat';
+import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
 export enum AgentActionType {
