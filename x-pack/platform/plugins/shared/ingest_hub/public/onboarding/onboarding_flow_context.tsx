@@ -21,8 +21,8 @@ export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'er
 export interface DeployAndDetectStepState {
   isDeploying: boolean;
   serviceStatuses: Record<string, ServiceChipState>;
-  policyIdsByPackage: Record<string, string>;
-  failedPackages: string[];
+  policyIdsByInstance: Record<string, string>;
+  failedInstances: string[];
   deployErrors: Record<string, string>;
 }
 
@@ -43,8 +43,8 @@ interface PersistedServicesStep {
 
 interface PersistedDeployAndDetectStep {
   serviceStatuses: Record<string, ServiceChipState>;
-  policyIdsByPackage: Record<string, string>;
-  failedPackages: string[];
+  policyIdsByInstance: Record<string, string>;
+  failedInstances: string[];
   deployErrors: Record<string, string>;
 }
 
@@ -58,9 +58,9 @@ interface OnboardingFlowState {
   setSelectedServiceIds: (ids: string[]) => void;
   deployAndDetectStep: DeployAndDetectStepState;
   updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
-  getLatestFailedPackages: () => string[];
-  registerDeployHandler: (fn: (packageNames?: string[]) => void) => void;
-  retryDeploy: (packageNames?: string[]) => void;
+  getLatestFailedInstances: () => string[];
+  registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
+  retryDeploy: (instanceIds?: string[]) => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -114,15 +114,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   const [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep] =
     useSessionStorage<PersistedDeployAndDetectStep>('onboarding.aws.deployAndDetectStep', {
       serviceStatuses: {},
-      policyIdsByPackage: {},
-      failedPackages: [],
+      policyIdsByInstance: {},
+      failedInstances: [],
       deployErrors: {},
     });
 
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const deployHandlerRef = useRef<((packageNames?: string[]) => void) | null>(null);
+  const deployHandlerRef = useRef<((instanceIds?: string[]) => void) | null>(null);
 
   // Ref always holds the latest persisted value so updateDeployAndDetectStep
   // reads current state even when called after an await (stale closure prevention).
@@ -139,11 +139,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         const prev = persistedDeployAndDetectStepRef.current;
         setPersistedDeployAndDetectStep({
           serviceStatuses: { ...(prev?.serviceStatuses ?? {}), ...(rest.serviceStatuses ?? {}) },
-          policyIdsByPackage: {
-            ...(prev?.policyIdsByPackage ?? {}),
-            ...(rest.policyIdsByPackage ?? {}),
+          policyIdsByInstance: {
+            ...(prev?.policyIdsByInstance ?? {}),
+            ...(rest.policyIdsByInstance ?? {}),
           },
-          failedPackages: rest.failedPackages ?? prev?.failedPackages ?? [],
+          failedInstances: rest.failedInstances ?? prev?.failedInstances ?? [],
           deployErrors:
             rest.deployErrors !== undefined ? rest.deployErrors : prev?.deployErrors ?? {},
         });
@@ -152,17 +152,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedDeployAndDetectStep]
   );
 
-  const getLatestFailedPackages = useCallback(
-    () => persistedDeployAndDetectStepRef.current?.failedPackages ?? [],
+  const getLatestFailedInstances = useCallback(
+    () => persistedDeployAndDetectStepRef.current?.failedInstances ?? [],
     []
   );
 
-  const registerDeployHandler = useCallback((fn: (packageNames?: string[]) => void) => {
+  const registerDeployHandler = useCallback((fn: (instanceIds?: string[]) => void) => {
     deployHandlerRef.current = fn;
   }, []);
 
-  const retryDeploy = useCallback((packageNames?: string[]) => {
-    deployHandlerRef.current?.(packageNames);
+  const retryDeploy = useCallback((instanceIds?: string[]) => {
+    deployHandlerRef.current?.(instanceIds);
   }, []);
 
   const servicesStep: ServicesStepState = {
@@ -191,7 +191,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setSelectedServiceIds,
         deployAndDetectStep,
         updateDeployAndDetectStep,
-        getLatestFailedPackages,
+        getLatestFailedInstances,
         registerDeployHandler,
         retryDeploy,
       }}

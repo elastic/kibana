@@ -9,7 +9,6 @@ import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getDefaultTransport, getRequiredTextFields } from './field_config';
 import type { TransportType } from './field_config';
@@ -114,7 +113,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
     () => reconcileInstances(selectedServiceIds, persisted?.instances),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedServiceIds, persisted?.instances]
   );
 

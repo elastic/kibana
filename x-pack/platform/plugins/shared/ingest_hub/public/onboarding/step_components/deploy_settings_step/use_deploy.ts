@@ -16,19 +16,20 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
 import { FIELD_CONFIG } from '../service_settings_step/field_config';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
+import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 
 interface ServiceSettingsPersistedState {
   globalRegion: string;
   serviceVars: Record<string, ServiceVars>;
+  instances?: ServiceInstance[];
 }
 
 export interface UseDeployResult {
   namespace: string;
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
-  failedPackages: string[];
-  handleDeploy: (packageNames?: string[]) => void;
+  failedInstances: string[];
+  handleDeploy: (instanceIds?: string[]) => void;
 }
 
 interface PackageInputEntry {
@@ -131,22 +132,20 @@ function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<st
   return new Set((pkgInfo.vars ?? []).map((v) => v.name));
 }
 
-function buildAgentlessPolicyName(services: AwsServiceMatrixEntry[]): string {
-  // truncating serviceIds in policy name to limit the length, the suffix of timestamp should ensure uniqueness
-  const serviceIdsTruncated = services
-    .map((s) => s.id)
-    .join('_')
-    .slice(0, 100);
-  return `${serviceIdsTruncated}-${Date.now()}`;
+function buildAgentlessPolicyName(instanceName: string, instanceId: string): string {
+  // Use the instance id (safe chars) to guarantee uniqueness across concurrent calls.
+  // Truncate to avoid Fleet's policy name length limit.
+  const safe = instanceId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+  return `${safe}-${instanceName.slice(0, 40).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 }
 
-interface PackageDeployOutcome {
+interface InstanceDeployOutcome {
   policyId?: string;
 }
 
-async function deployPackage(
-  packageName: string,
-  services: AwsServiceMatrixEntry[],
+async function deployInstance(
+  instance: ServiceInstance,
+  service: AwsServiceMatrixEntry,
   {
     namespace,
     globalRegion,
@@ -158,20 +157,24 @@ async function deployPackage(
     storedServiceVars: Record<string, ServiceVars>;
     deploySettingsStep: DeploySettingsStepState;
   }
-): Promise<PackageDeployOutcome> {
-  const pkgInfoResponse = await sendGetPackageInfoByKey(packageName);
+): Promise<InstanceDeployOutcome> {
+  const pkgInfoResponse = await sendGetPackageInfoByKey(service.packageName);
   const pkgInfo = pkgInfoResponse.data?.item;
   const pkgVersion = pkgInfo?.version;
   if (!pkgVersion) {
-    throw new Error(`Package ${packageName} is not installed`);
+    throw new Error(`Package ${service.packageName} is not installed`);
   }
 
   const { connectorId, staticKeys } = deploySettingsStep;
-  const inputs = buildPackageInputs(services, storedServiceVars, globalRegion);
 
-  // Explicitly disable all package inputs not in our selection.
-  // Fleet merges our partial inputs with package manifest defaults (including defaultEnabled: true
-  // inputs like aws-s3), causing "not allowed for agentless" errors for inputs we never wanted.
+  // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
+  const instanceVars: ServiceVars = storedServiceVars[instance.instanceId] ??
+    storedServiceVars[instance.serviceId] ?? { trigger: null, vars: {} };
+
+  const inputs = buildPackageInputs([service], { [service.id]: instanceVars }, globalRegion);
+
+  // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
+  // enabled inputs that would cause "not allowed for agentless" errors.
   const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
     (pkgInfo as any).policy_templates ?? [];
   for (const template of pkgTemplates) {
@@ -188,9 +191,9 @@ async function deployPackage(
   const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
   const response = await sendCreateAgentlessPolicy({
-    name: buildAgentlessPolicyName(services),
+    name: buildAgentlessPolicyName(instance.name, instance.instanceId),
     namespace,
-    package: { name: packageName, version: pkgVersion },
+    package: { name: service.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
     ...(connectorId ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId } } : {}),
@@ -208,45 +211,41 @@ function extractErrorMessage(reason: unknown): string {
 }
 
 export function collectDeployResults(
-  results: PromiseSettledResult<PackageDeployOutcome>[],
+  results: PromiseSettledResult<InstanceDeployOutcome>[],
   targets: string[]
 ): {
-  policyIdsByPackage: Record<string, string>;
-  failedPackages: string[];
-  errorsByPackage: Record<string, string>;
+  policyIdsByInstance: Record<string, string>;
+  failedInstances: string[];
+  errorsByInstance: Record<string, string>;
 } {
-  const policyIdsByPackage: Record<string, string> = {};
-  const failedPackages: string[] = [];
-  const errorsByPackage: Record<string, string> = {};
+  const policyIdsByInstance: Record<string, string> = {};
+  const failedInstances: string[] = [];
+  const errorsByInstance: Record<string, string> = {};
 
   for (let i = 0; i < targets.length; i++) {
-    const pkg = targets[i];
+    const instanceId = targets[i];
     const result = results[i];
     if (result.status === 'fulfilled') {
-      if (result.value.policyId) policyIdsByPackage[pkg] = result.value.policyId;
+      if (result.value.policyId) policyIdsByInstance[instanceId] = result.value.policyId;
     } else {
-      failedPackages.push(pkg);
-      errorsByPackage[pkg] = extractErrorMessage(result.reason);
+      failedInstances.push(instanceId);
+      errorsByInstance[instanceId] = extractErrorMessage(result.reason);
     }
   }
 
-  return { policyIdsByPackage, failedPackages, errorsByPackage };
+  return { policyIdsByInstance, failedInstances, errorsByInstance };
 }
 
-export function buildServiceStatuses(
+export function buildInstanceStatuses(
   targets: string[],
-  failedPackages: string[],
-  servicesByPackage: Map<string, AwsServiceMatrixEntry[]>,
+  failedInstances: string[],
   succeededState: ServiceChipState = 'instantiating'
 ): Record<string, ServiceChipState> {
   const statuses: Record<string, ServiceChipState> = {};
-  const failedSet = new Set(failedPackages);
+  const failedSet = new Set(failedInstances);
 
-  for (const pkg of targets) {
-    const chipState: ServiceChipState = failedSet.has(pkg) ? 'error' : succeededState;
-    for (const service of servicesByPackage.get(pkg) ?? []) {
-      statuses[service.id] = chipState;
-    }
+  for (const instanceId of targets) {
+    statuses[instanceId] = failedSet.has(instanceId) ? 'error' : succeededState;
   }
 
   return statuses;
@@ -258,7 +257,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     deploySettingsStep,
     deployAndDetectStep,
     updateDeployAndDetectStep,
-    getLatestFailedPackages,
+    getLatestFailedInstances,
     registerDeployHandler,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -270,29 +269,31 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
-  const [failedPackages, setFailedPackages] = useState<string[]>([]);
+  const [failedInstances, setFailedInstances] = useState<string[]>([]);
 
-  const agentlessServices: AwsServiceMatrixEntry[] = useMemo(
-    () =>
-      selectedServiceIds
-        .map((id) => AWS_SERVICES_MAP.get(id))
-        .filter(
-          (s): s is AwsServiceMatrixEntry =>
-            s !== undefined &&
-            s.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)
-        ),
-    [selectedServiceIds]
-  );
+  // Derive agentless instances from session storage — fall back to one base instance per selected
+  // service id when instances haven't been written yet (e.g. user skipped step 2).
+  const agentlessInstances: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> =
+    useMemo(() => {
+      const stored = serviceSettings?.instances;
+      const instances: ServiceInstance[] = stored?.length
+        ? stored
+        : selectedServiceIds.map((id) => ({
+            instanceId: id,
+            serviceId: id,
+            name: AWS_SERVICES_MAP.get(id)?.name ?? id,
+            isDuplicate: false,
+          }));
 
-  const servicesByPackage = useMemo(() => {
-    const map = new Map<string, AwsServiceMatrixEntry[]>();
-    for (const service of agentlessServices) {
-      const group = map.get(service.packageName) ?? [];
-      group.push(service);
-      map.set(service.packageName, group);
-    }
-    return map;
-  }, [agentlessServices]);
+      return instances.flatMap((inst) => {
+        const service = AWS_SERVICES_MAP.get(inst.serviceId);
+        if (!service) return [];
+        if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
+          return [];
+        }
+        return [{ instance: inst, service }];
+      });
+    }, [serviceSettings?.instances, selectedServiceIds]);
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>
@@ -307,24 +308,19 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   );
 
   const handleDeploy = useCallback(
-    async (packageNames?: string[]) => {
-      const isInitialDeploy = packageNames === undefined;
+    async (instanceIds?: string[]) => {
+      const isInitialDeploy = instanceIds === undefined;
 
       let targets: string[];
-      // For initial deploy, only the untracked services are deployed per package so that
-      // already-running services don't get a duplicate policy created for them.
-      let servicesToDeployByPackage: Map<string, AwsServiceMatrixEntry[]>;
-      if (isInitialDeploy) {
-        servicesToDeployByPackage = new Map();
-        for (const [pkg, services] of servicesByPackage) {
-          const untracked = services.filter((s) => !(s.id in deployAndDetectStep.serviceStatuses));
-          if (untracked.length > 0) {
-            servicesToDeployByPackage.set(pkg, untracked);
-          }
-        }
-        targets = [...servicesToDeployByPackage.keys()];
+      let instancesToDeploy: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
 
-        // Non-agentless services (e.g. cloud_forwarder) are shown as gray chips but never deployed.
+      if (isInitialDeploy) {
+        instancesToDeploy = agentlessInstances.filter(
+          ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
+        );
+        targets = instancesToDeploy.map(({ instance }) => instance.instanceId);
+
+        // Non-agentless services are shown as gray chips but never deployed.
         const newNonAgentlessStatuses: Record<string, ServiceChipState> = {};
         for (const service of nonAgentlessServices) {
           if (!(service.id in deployAndDetectStep.serviceStatuses)) {
@@ -337,9 +333,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           return;
         }
 
-        // Set target services to 'instantiating' before navigating so that a back-navigation
-        // mid-deploy sees them in serviceStatuses and won't resubmit.
-        const initialStatuses = buildServiceStatuses(targets, [], servicesByPackage);
+        const initialStatuses = buildInstanceStatuses(targets, []);
         if (targets.length > 0) setIsDeploying(true);
         updateDeployAndDetectStep({
           isDeploying: targets.length > 0,
@@ -349,17 +343,19 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
         if (targets.length === 0) return;
       } else {
-        targets = packageNames;
-        servicesToDeployByPackage = servicesByPackage;
-        const retryStatuses = buildServiceStatuses(targets, [], servicesByPackage);
-        const remainingFailed = deployAndDetectStep.failedPackages.filter(
-          (pkg) => !targets.includes(pkg)
+        targets = instanceIds;
+        instancesToDeploy = agentlessInstances.filter(({ instance }) =>
+          targets.includes(instance.instanceId)
+        );
+        const retryStatuses = buildInstanceStatuses(targets, []);
+        const remainingFailed = deployAndDetectStep.failedInstances.filter(
+          (id) => !targets.includes(id)
         );
         setIsDeploying(true);
         updateDeployAndDetectStep({
           isDeploying: true,
           serviceStatuses: retryStatuses,
-          failedPackages: remainingFailed,
+          failedInstances: remainingFailed,
           deployErrors: {},
         });
       }
@@ -368,8 +364,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
       const results = await Promise.allSettled(
-        targets.map((packageName) =>
-          deployPackage(packageName, servicesToDeployByPackage.get(packageName) ?? [], {
+        instancesToDeploy.map(({ instance, service }) =>
+          deployInstance(instance, service, {
             namespace,
             globalRegion,
             storedServiceVars,
@@ -379,44 +375,38 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       );
 
       const {
-        policyIdsByPackage,
-        failedPackages: newFailed,
-        errorsByPackage,
+        policyIdsByInstance,
+        failedInstances: newFailed,
+        errorsByInstance,
       } = collectDeployResults(results, targets);
-      const newServiceStatuses = buildServiceStatuses(
-        targets,
-        newFailed,
-        servicesByPackage,
-        'receiving'
-      );
+      const newServiceStatuses = buildInstanceStatuses(targets, newFailed, 'receiving');
 
-      // Merge with packages that failed in a prior run but weren't retried in this one.
-      // Use the ref-backed getter to get the freshest value, not the stale closure.
-      const previouslyFailed = getLatestFailedPackages().filter((pkg) => !targets.includes(pkg));
+      // Merge with instances that failed in a prior run but weren't retried in this one.
+      const previouslyFailed = getLatestFailedInstances().filter((id) => !targets.includes(id));
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       setIsDeploying(false);
-      setFailedPackages(mergedFailed);
+      setFailedInstances(mergedFailed);
       updateDeployAndDetectStep({
         isDeploying: false,
         serviceStatuses: newServiceStatuses,
-        policyIdsByPackage,
-        failedPackages: mergedFailed,
-        deployErrors: errorsByPackage,
+        policyIdsByInstance,
+        failedInstances: mergedFailed,
+        deployErrors: errorsByInstance,
       });
     },
 
     [
-      servicesByPackage,
+      agentlessInstances,
       nonAgentlessServices,
       serviceSettings,
       deploySettingsStep,
       namespace,
       onContinue,
       updateDeployAndDetectStep,
-      getLatestFailedPackages,
+      getLatestFailedInstances,
       deployAndDetectStep.serviceStatuses,
-      deployAndDetectStep.failedPackages,
+      deployAndDetectStep.failedInstances,
     ]
   );
 
@@ -424,5 +414,5 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     registerDeployHandler(handleDeploy);
   }, [handleDeploy, registerDeployHandler]);
 
-  return { namespace, setNamespace, isDeploying, failedPackages, handleDeploy };
+  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy };
 }
