@@ -2217,7 +2217,10 @@ class AgentPolicyService {
         .sort((a, b) => {
           const va = coerce(splitVersionSuffixFromPolicyId(a.policy_id ?? '').version ?? '0.0.0');
           const vb = coerce(splitVersionSuffixFromPolicyId(b.policy_id ?? '').version ?? '0.0.0');
-          return va && vb ? rcompare(va, vb) : 0;
+          if (!va && !vb) return 0;
+          if (!va) return 1;
+          if (!vb) return -1;
+          return rcompare(va, vb);
         })[0] ?? null
     );
   }

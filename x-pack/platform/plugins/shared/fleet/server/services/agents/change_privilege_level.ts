@@ -55,7 +55,7 @@ export async function changeAgentPrivilegeLevel(
   const packagePolicies =
     (await packagePolicyService.findAllForAgentPolicy(
       soClient,
-      agent.policy_id ? removeVersionSuffixFromPolicyId(agent.policy_id) : ''
+      removeVersionSuffixFromPolicyId(agent.policy_id ?? '')
     )) || [];
   const packagesWithRootPrivilege = getPackagesWithRootPrivilege(packagePolicies);
   if (packagesWithRootPrivilege.length > 0) {
