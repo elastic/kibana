@@ -288,6 +288,9 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       return instances.flatMap((inst) => {
         const service = AWS_SERVICES_MAP.get(inst.serviceId);
         if (!service) return [];
+        // TODO(follow-up): non-agentless duplicates are silently dropped here.
+        // ECF duplicate support is being decided (elastic/ingest-dev#9037);
+        // agent-based duplicate support is tracked in elastic/ingest-dev#9079.
         if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
           return [];
         }
