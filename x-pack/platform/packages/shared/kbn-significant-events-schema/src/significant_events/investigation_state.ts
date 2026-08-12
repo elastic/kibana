@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
-import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from './constants';
+import { MAX_MEDIUM_STRING_LENGTH, MAX_SHORT_STRING_LENGTH, MAX_TEXT_LENGTH } from './constants';
 
 /**
  * Name of the `tool_ui` custom event emitted by the investigation agent's progress-report
@@ -42,22 +42,22 @@ const investigationEvidenceCodeSchema = z.object({
    */
   source: z.enum(['github_connector', 'code_search']),
   /** Repository in `owner/name` form, e.g. `elastic/kibana`. */
-  repo: z.string().max(MAX_ID_LENGTH),
+  repo: z.string().max(MAX_SHORT_STRING_LENGTH),
   /** Repository-relative file path, e.g. `src/recommendationservice/recommendation_server.py`. */
-  path: z.string().max(MAX_TITLE_LENGTH),
+  path: z.string().max(MAX_MEDIUM_STRING_LENGTH),
   /**
    * Hostname the code can be browsed on, taken from the origin of the URL the tool itself
    * returned — never inferred from `repo`. Absent when the tool reported no browsable location,
    * as Semantic Code Search does: it records a bare `owner/repo` with no remote.
    */
-  host: z.string().max(MAX_ID_LENGTH).optional(),
+  host: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
   /**
    * Commit SHA the file was read at. GitHub resolves a branch name to a SHA in the URLs it
    * returns, so this is normally available without asking the model to look it up. Absent when the
    * tool reported no revision — in which case no link is built, because a branch-pinned link
    * drifts away from the code the investigation actually saw.
    */
-  ref: z.string().max(MAX_ID_LENGTH).optional(),
+  ref: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
 });
 export type InvestigationEvidenceCode = z.infer<typeof investigationEvidenceCodeSchema>;
 

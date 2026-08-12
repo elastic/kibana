@@ -36,6 +36,8 @@ export {
   significantEventStatusSchema,
 } from './events';
 export {
+  MAX_SHORT_STRING_LENGTH,
+  MAX_MEDIUM_STRING_LENGTH,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
