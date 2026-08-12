@@ -332,8 +332,9 @@ export const saveAutomationHandler = async ({
   } = resolveWorkflowYamlFromAttachments(attachments, params.workflowAttachmentId);
 
   let savedWorkflowId: string;
+  const isEditFlow = origin !== undefined;
 
-  if (origin) {
+  if (isEditFlow) {
     await assertWorkflowUpdateAccess({
       workflowId: origin,
       spaceId,
@@ -371,7 +372,8 @@ export const saveAutomationHandler = async ({
   return {
     aiIndexId,
     workflowId: savedWorkflowId,
-    status: attachStatus === 'already_attached' ? 'already_attached' : 'saved_and_attached',
+
+    status: isEditFlow || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
   };
 };
 

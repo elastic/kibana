@@ -237,7 +237,41 @@ describe('saveAutomationHandler', () => {
       request
     );
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
-    expect(result.workflowId).toBe('wf-persisted');
+    expect(result).toEqual({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-persisted',
+      status: 'saved_and_attached',
+    });
+  });
+
+  it('returns saved_and_attached when updating a workflow that is already linked', async () => {
+    aiIndexService.addAutomation.mockResolvedValue('already_attached');
+
+    const attachments = createAttachmentStateManager({ origin: 'wf-persisted' });
+
+    const result = await saveAutomationHandler({
+      params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+      request,
+      spaceId: 'default',
+      attachments: attachments as never,
+      logger,
+      getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getCoreStart,
+      getSecurityStart,
+      getWorkflowsManagement: () => workflowsManagement as never,
+    });
+
+    expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+      'wf-persisted',
+      { yaml: WORKFLOW_YAML },
+      'default',
+      request
+    );
+    expect(result).toEqual({
+      aiIndexId: 'my-ai-index',
+      workflowId: 'wf-persisted',
+      status: 'saved_and_attached',
+    });
   });
 
   it('attaches an already saved workflow by id', async () => {
