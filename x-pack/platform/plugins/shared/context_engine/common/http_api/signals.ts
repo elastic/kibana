@@ -42,7 +42,10 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
     conversation_id?: string;
     agent: { id: string; name: string; class: 'user' | 'management' };
     query?: string;
-    returned: { columns: string[]; row_count: number };
+    // `columns` is optional because the paginated list read strips it from `_source`
+    // (`SIGNAL_SOURCE_EXCLUDES` in server/signals/read.ts) — only `row_count` is needed there.
+    // The write path (server/tasks/transform.ts) still populates a concrete array.
+    returned: { columns?: string[]; row_count: number };
     error?: string;
     duration_ms: number;
     round_signals: { esql_count: number; raw_query_count: number; ki_retrieval_count: number };
