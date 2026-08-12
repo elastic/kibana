@@ -207,7 +207,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification clears it.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating — the job re-reads the labels and leaves the PR as a draft unless one of those two is set.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -332,9 +332,9 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 ## Opening the PR for review
 
-The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label. The fixer already requested the reviewers at creation, but GitHub suppresses review-request notifications on a draft — marking the PR ready is what actually notifies them.
+The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label.
 
-- **Red verdicts stay a draft.** On `failed` or `inconclusive` the fix isn't trusted, so don't call `mark_pr_ready`: a patch we can't vouch for shouldn't cost a reviewer their time, let alone arm auto-merge behind it. The terminal label and your verdict comment are what hand it to the owning team — say in that comment that the PR is left as a draft, so nobody reads the draft state as "still running". The job re-reads the labels and refuses to act without `passed` or `skipped`, so a mistaken call is a no-op rather than a premature review request.
+- **Red verdicts stay a draft.** On `failed` or `inconclusive` the fix isn't trusted, so don't call `mark_pr_ready`: a patch we can't vouch for shouldn't cost a reviewer their time, let alone arm auto-merge behind it. The terminal label and your verdict comment are what hand it to the owning team — say in that comment that the PR is left as a draft, so nobody reads the draft state as "still running".
 - **Terminal only.** Never call `mark_pr_ready` while you are still iterating — i.e. whenever you leave `flaky-fix-check:started` in place to trigger another `/flaky` run. Marking a PR ready fires the downstream review and CI automation, which would be wasted on a commit you are about to replace.
 
 ## Environment constraints
