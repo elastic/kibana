@@ -28,13 +28,9 @@ import { ConversationQueue } from '../../components/conversation_queue';
 import { BlastRadius } from '../../components/blast_radius';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
-const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
 
 const isQueueRow = (investigation: Investigation): boolean =>
   QUEUE_STATUSES.has(investigation.status ?? 'open');
-
-const isAutoResolved = (investigation: Investigation): boolean =>
-  AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
 export const ConversationsPage: React.FC = () => {
   const { data, isLoading, error } = useInvestigations();
@@ -53,11 +49,6 @@ export const ConversationsPage: React.FC = () => {
         }
         return b.updatedAt.localeCompare(a.updatedAt);
       }),
-    [conversations]
-  );
-
-  const autoResolvedCount = useMemo(
-    () => conversations.filter(isAutoResolved).length,
     [conversations]
   );
 
@@ -98,60 +89,59 @@ export const ConversationsPage: React.FC = () => {
         max-width: 960px;
       `}
     >
-      <PndPageHeader
-        title={
-          <>
-            {QUEUE_PAGE_INFO.greetingPrefix}{' '}
-            <span
-              css={css`
-                font-weight: 700;
-              `}
-            >
-              {QUEUE_PAGE_INFO.greetingEmphasis(sortedConversations.length)}
-            </span>
-          </>
-        }
-        subtitle={
-          autoResolvedCount > 0
-            ? QUEUE_PAGE_INFO.autonomousSubline(autoResolvedCount)
-            : QUEUE_PAGE_INFO.clearSubline
-        }
-      />
+      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+        <EuiFlexItem grow={false}>
+          <PndPageHeader
+            isQueueEmpty={sortedConversations.length === 0}
+            eventCount={filteredQueueItems.length}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <BlastRadius
+            investigations={sortedConversations}
+            surfaceFilter={surfaceFilter}
+            onSurfaceFilterChange={setSurfaceFilter}
+          />
+        </EuiFlexItem>
 
-      <BlastRadius
-        investigations={sortedConversations}
-        surfaceFilter={surfaceFilter}
-        onSurfaceFilterChange={setSurfaceFilter}
-      />
-
-      <EuiSpacer size="l" />
-
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
+        {isLoading ? (
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
+            <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="xl" aria-label={QUEUE_PAGE_INFO.loading} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
+        ) : null}
 
-      {error ? (
-        <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
-      ) : null}
+        {error ? (
+          <EuiFlexItem grow={false}>
+            <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
+          </EuiFlexItem>
+        ) : null}
 
-      {!isLoading && !error && filteredQueueItems.length === 0 ? (
-        <EuiEmptyPrompt iconType="chartTagCloud" title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>} />
-      ) : null}
-
-      {!isLoading && !error
-        ? groupedBriefingItems.map((group) => (
-            <ConversationQueue
-              briefingId={group.id}
-              briefingType={group.id as RecommendedAction}
-              briefingList={group.items}
-              isFiltered={filteredQueueItems.length !== sortedConversations.length}
+        {!isLoading && !error && filteredQueueItems.length === 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiEmptyPrompt
+              iconType="chartTagCloud"
+              title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>}
             />
-          ))
-        : null}
+          </EuiFlexItem>
+        ) : null}
+
+        {!isLoading && !error
+          ? groupedBriefingItems.map((group) => (
+              <EuiFlexItem key={group.id} grow={false}>
+                <ConversationQueue
+                  briefingId={group.id}
+                  briefingType={group.id as RecommendedAction}
+                  briefingList={group.items}
+                  isFiltered={filteredQueueItems.length !== sortedConversations.length}
+                />
+              </EuiFlexItem>
+            ))
+          : null}
+      </EuiFlexGroup>
     </PndPageSection>
   );
 };

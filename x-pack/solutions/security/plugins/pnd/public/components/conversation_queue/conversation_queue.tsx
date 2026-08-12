@@ -94,7 +94,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
         hasBorder
       >
         <StyledAccordion
-          id={`briefing-container-${briefingId}`}
+          id={`conversation-container-${briefingId}`}
           buttonContent={buttonContent}
           initialIsOpen
           paddingSize="none"
