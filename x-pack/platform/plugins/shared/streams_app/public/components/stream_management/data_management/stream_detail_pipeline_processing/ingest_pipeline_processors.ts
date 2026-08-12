@@ -130,6 +130,7 @@ const toEditableProcessorStep = (
       return {
         action: 'enrich',
         ...base,
+        field: typeof field === 'string' ? field : '',
         ...rest,
       } as PipelineProcessorDefinitionWithUIAttributes;
     case 'network_direction':

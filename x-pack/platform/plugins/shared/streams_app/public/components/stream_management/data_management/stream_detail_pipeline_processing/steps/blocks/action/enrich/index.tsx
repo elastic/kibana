@@ -19,6 +19,21 @@ export const EnrichProcessorForm = () => {
   return (
     <>
       <EnrichPolicySelector />
+      <EuiSpacer size="m" />
+      <ProcessorFieldSelector
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.pipelineProcessing.processor.enrichSourceFieldLabel',
+          { defaultMessage: 'Source field' }
+        )}
+        helpText={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.pipelineProcessing.processor.enrichSourceFieldHelpText',
+          {
+            defaultMessage:
+              'Field in the incoming document used to match documents from the enrich policy.',
+          }
+        )}
+      />
+      <EuiSpacer size="m" />
       <ProcessorFieldSelector
         fieldKey="target_field"
         label={i18n.translate(

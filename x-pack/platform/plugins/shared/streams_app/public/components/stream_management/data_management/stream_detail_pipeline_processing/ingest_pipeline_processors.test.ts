@@ -102,6 +102,36 @@ describe('ingest pipeline processor UI serialization', () => {
     ]);
   });
 
+  it('preserves native enrich processor fields when persisting editable steps', async () => {
+    const uiDefinition = processorsToUiDefinition([
+      {
+        enrich: {
+          field: 'source.ip',
+          policy_name: 'geoip-policy',
+          target_field: 'source.geo',
+        },
+      },
+    ]);
+
+    expect(uiDefinition.steps[0]).toEqual(
+      expect.objectContaining({
+        action: 'enrich',
+        field: 'source.ip',
+        policy_name: 'geoip-policy',
+        target_field: 'source.geo',
+      })
+    );
+    expect(uiDefinitionToProcessors(uiDefinition)).toEqual([
+      {
+        enrich: expect.objectContaining({
+          field: 'source.ip',
+          policy_name: 'geoip-policy',
+          target_field: 'source.geo',
+        }),
+      },
+    ]);
+  });
+
   it('does not persist generated UI identifiers into native processors by default', () => {
     expect(
       uiDefinitionToProcessors({

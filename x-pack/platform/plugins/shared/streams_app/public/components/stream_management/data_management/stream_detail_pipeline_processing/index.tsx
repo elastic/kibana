@@ -26,7 +26,6 @@ export function StreamDetailEnrichment({
   }
 
   // Intentionally parked in the native ingest-pipeline UI. The active entry
-  // point is `pipeline_processing_flyout.tsx`, which loads the ingest pipeline
-  // before rendering `StreamDetailEnrichmentContent`.
+  // point is the stream flyout Processing tab.
   return null;
 }
