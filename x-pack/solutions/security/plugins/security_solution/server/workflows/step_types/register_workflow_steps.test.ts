@@ -17,6 +17,7 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -26,7 +27,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(11);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -57,5 +58,6 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(getNotesStepDefinition);
   });
 });
