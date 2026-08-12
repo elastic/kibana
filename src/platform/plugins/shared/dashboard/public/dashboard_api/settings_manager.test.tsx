@@ -13,23 +13,18 @@ import type { DashboardState } from '../../common';
 import { initializeSettingsManager } from './settings_manager';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
-import type { ViewMode } from '@kbn/presentation-publishing';
 
 describe('initializeSettingsManager', () => {
-  const viewMode$ = new BehaviorSubject<ViewMode>('view');
   describe('setSettings', () => {
     test('Should not overwrite settings when setting partial state', () => {
-      const settingsManager = initializeSettingsManager(
-        {
-          ...DEFAULT_DASHBOARD_STATE,
-          title: 'dashboard 1',
-          options: {
-            ...DEFAULT_DASHBOARD_OPTIONS,
-            use_margins: false,
-          },
+      const settingsManager = initializeSettingsManager({
+        ...DEFAULT_DASHBOARD_STATE,
+        title: 'dashboard 1',
+        options: {
+          ...DEFAULT_DASHBOARD_OPTIONS,
+          use_margins: false,
         },
-        viewMode$
-      );
+      });
       settingsManager.api.setSettings({ time_restore: true });
       const settings = settingsManager.api.getSettings();
       expect(settings.time_restore).toBe(true);
@@ -40,7 +35,7 @@ describe('initializeSettingsManager', () => {
   describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value, viewMode$);
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`Object {}`);
         done();
@@ -49,7 +44,7 @@ describe('initializeSettingsManager', () => {
 
     test('Should return time_restore change when time_restoreChanges', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value, viewMode$);
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
@@ -67,7 +62,7 @@ describe('initializeSettingsManager', () => {
 
     test('Should return only changed keys when there are changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value, viewMode$);
+      const settingsManager = initializeSettingsManager(lastSavedState$.value);
       settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
         expect(changes).toMatchInlineSnapshot(`
           Object {
@@ -100,7 +95,7 @@ describe('initializeSettingsManager', () => {
         ...getSampleDashboardState(),
         // projectRouting is undefined
       };
-      const settingsManager = initializeSettingsManager(state, viewMode$);
+      const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
       expect(settings.project_routing_restore).toBe(false);
@@ -111,7 +106,7 @@ describe('initializeSettingsManager', () => {
         ...getSampleDashboardState(),
         project_routing: '_alias:_origin',
       };
-      const settingsManager = initializeSettingsManager(state, viewMode$);
+      const settingsManager = initializeSettingsManager(state);
       const settings = settingsManager.api.getSettings();
 
       expect(settings.project_routing_restore).toBe(true);

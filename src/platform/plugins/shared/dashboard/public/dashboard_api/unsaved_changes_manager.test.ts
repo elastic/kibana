@@ -25,7 +25,6 @@ import type { DashboardSaveEvent } from './types';
 import { getSampleDashboardState } from '../mocks';
 
 const setStateMock = () => {};
-const viewModeMock = new BehaviorSubject<ViewMode>('view');
 
 const layoutUnsavedChanges$ = new BehaviorSubject<{ panels?: DashboardState['panels'] }>({});
 const layoutManagerMock = {
@@ -98,7 +97,7 @@ describe('unsavedChangesManager', () => {
   describe('onUnsavedChanges', () => {
     describe('onSettingsChanges', () => {
       test('should have unsaved changes when tags change', (done) => {
-        const settingsManager = initializeSettingsManager(getSampleDashboardState(), viewModeMock);
+        const settingsManager = initializeSettingsManager(getSampleDashboardState());
         const unsavedChangesManager = initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: false,

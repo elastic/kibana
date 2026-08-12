@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PublishingSubject,
-  StateComparators,
-  ViewMode,
-  WithAllKeys,
-} from '@kbn/presentation-publishing';
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, screenshotModeService } from '../services/kibana_services';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
@@ -63,10 +58,7 @@ function deserializeState(state: DashboardState) {
   };
 }
 
-export function initializeSettingsManager(
-  initialState: DashboardState,
-  viewMode$: PublishingSubject<ViewMode>
-) {
+export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
     deserializeState(initialState),
     DEFAULT_SETTINGS,
@@ -74,11 +66,11 @@ export function initializeSettingsManager(
   );
 
   const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
-  const getFetchOnlyVisible = () => (viewMode$.value === 'print' ? false : deferBelowFold);
+  // disable defer below fold with reporting
+  // can not check viewMode === 'print' because viewMode is only "print" when print format is enabled
+  const getFetchOnlyVisible = () =>
+    screenshotModeService.isScreenshotMode() ? false : deferBelowFold;
   const fetchOnlyVisible$ = new BehaviorSubject<boolean>(getFetchOnlyVisible());
-  const fetchOnlyVisibleSubscription = viewMode$
-    .pipe(map(() => getFetchOnlyVisible()))
-    .subscribe((nextSetting) => fetchOnlyVisible$.next(nextSetting));
 
   function serializeSettings() {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
@@ -156,9 +148,6 @@ export function initializeSettingsManager(
       reset: (lastSavedState: DashboardState) => {
         stateManager.reinitializeState(deserializeState(lastSavedState));
       },
-    },
-    cleanup: () => {
-      fetchOnlyVisibleSubscription.unsubscribe();
     },
   };
 }
