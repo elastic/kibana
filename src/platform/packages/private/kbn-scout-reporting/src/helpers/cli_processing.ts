@@ -21,7 +21,7 @@ export const stripRunCommand = (commandArgs: string[]): string => {
 
   if (!isNodeCommand && !isNpxCommand) {
     throw new Error(
-      'Invalid command structure: Expected "node <playwright-path> test" or "npx playwright test".'
+      `Invalid command arguments: expected 'node scripts/playwright test'`
     );
   }
 
