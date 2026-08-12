@@ -31,7 +31,11 @@ export const addPanelsOperation = defineOperation({
     }));
 
     if (context.resolveCustomContentTemplate) {
-      await applyCustomContentTemplates(materialized, context.resolveCustomContentTemplate);
+      await applyCustomContentTemplates(
+        materialized,
+        context.resolveCustomContentTemplate,
+        context.failures
+      );
     }
 
     let nextDashboardData = dashboardData;

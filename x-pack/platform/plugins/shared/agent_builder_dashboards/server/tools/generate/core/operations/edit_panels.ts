@@ -14,6 +14,7 @@ import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { getErrorMessage } from '../utils';
 import {
   PANEL_TYPE_DEFINITIONS,
   editPanelItemSchema,
@@ -138,16 +139,22 @@ export const editPanelsOperation = defineOperation({
     let nextDashboardData = dashboardData;
     for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
-        const resolvedConfig =
-          panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
-          context.resolveCustomContentTemplate &&
-          existingPanel
-            ? await mergeAndResolveCustomContentEdit(
-                panelInput.config,
-                existingPanel.config as CustomContentState,
-                context.resolveCustomContentTemplate
-              )
-            : panelInput.config;
+        let resolvedConfig: typeof panelInput.config;
+        try {
+          resolvedConfig =
+            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
+            context.resolveCustomContentTemplate &&
+            existingPanel
+              ? await mergeAndResolveCustomContentEdit(
+                  panelInput.config,
+                  existingPanel.config as CustomContentState,
+                  context.resolveCustomContentTemplate
+                )
+              : panelInput.config;
+        } catch (err) {
+          recordFailure(panelInput.panelId, getErrorMessage(err));
+          continue;
+        }
 
         const panelContent =
           PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);

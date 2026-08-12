@@ -23,7 +23,7 @@ describe('applyCustomContentTemplates', () => {
     const panel = makeCustomContentPanel({ prompt: 'Show KPI' });
     const materialized = [{ panel }];
 
-    await applyCustomContentTemplates(materialized, resolveTemplate);
+    await applyCustomContentTemplates(materialized, resolveTemplate, []);
 
     expect(resolveTemplate).toHaveBeenCalledTimes(1);
     expect(resolveTemplate).toHaveBeenCalledWith({ prompt: 'Show KPI', esqlQuery: undefined });
@@ -39,7 +39,7 @@ describe('applyCustomContentTemplates', () => {
       esqlQuery: 'FROM logs-* | STATS count = COUNT(*)',
     });
 
-    await applyCustomContentTemplates([{ panel }], resolveTemplate);
+    await applyCustomContentTemplates([{ panel }], resolveTemplate, []);
 
     expect(resolveTemplate).toHaveBeenCalledWith({
       prompt: 'Bar chart',
@@ -51,7 +51,7 @@ describe('applyCustomContentTemplates', () => {
     const resolveTemplate = jest.fn();
     const panel = makeCustomContentPanel({ prompt: 'Show KPI', template: '<div>existing</div>' });
 
-    await applyCustomContentTemplates([{ panel }], resolveTemplate);
+    await applyCustomContentTemplates([{ panel }], resolveTemplate, []);
 
     expect(resolveTemplate).not.toHaveBeenCalled();
   });
@@ -60,7 +60,7 @@ describe('applyCustomContentTemplates', () => {
     const resolveTemplate = jest.fn();
     const panel = makeLensPanel();
 
-    await applyCustomContentTemplates([{ panel }], resolveTemplate);
+    await applyCustomContentTemplates([{ panel }], resolveTemplate, []);
 
     expect(resolveTemplate).not.toHaveBeenCalled();
   });
@@ -68,7 +68,7 @@ describe('applyCustomContentTemplates', () => {
   it('skips undefined panel entries', async () => {
     const resolveTemplate = jest.fn();
 
-    await applyCustomContentTemplates([{ panel: undefined }], resolveTemplate);
+    await applyCustomContentTemplates([{ panel: undefined }], resolveTemplate, []);
 
     expect(resolveTemplate).not.toHaveBeenCalled();
   });
@@ -82,7 +82,7 @@ describe('applyCustomContentTemplates', () => {
     const panel1 = makeCustomContentPanel({ prompt: 'First' });
     const panel2 = makeCustomContentPanel({ prompt: 'Second' });
 
-    await applyCustomContentTemplates([{ panel: panel1 }, { panel: panel2 }], resolveTemplate);
+    await applyCustomContentTemplates([{ panel: panel1 }, { panel: panel2 }], resolveTemplate, []);
 
     expect(resolveTemplate).toHaveBeenCalledTimes(2);
     expect((panel1.panelContent.config as Record<string, unknown>).template).toBe(
@@ -91,6 +91,27 @@ describe('applyCustomContentTemplates', () => {
     expect((panel2.panelContent.config as Record<string, unknown>).template).toBe(
       '<div>second</div>'
     );
+  });
+
+  it('records a per-panel failure and nulls the entry when resolveTemplate throws, leaving other panels intact', async () => {
+    const resolveTemplate = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('Generated template was rejected: contains a <script> tag.'))
+      .mockResolvedValueOnce('<div>second</div>');
+
+    const entry1 = { panel: makeCustomContentPanel({ prompt: 'First' }) };
+    const entry2 = { panel: makeCustomContentPanel({ prompt: 'Second' }) };
+    const failures: Array<{ type: string; identifier: string; error: string }> = [];
+
+    await applyCustomContentTemplates([entry1, entry2], resolveTemplate, failures as any);
+
+    expect(entry1.panel).toBeUndefined();
+    expect((entry2.panel!.panelContent.config as Record<string, unknown>).template).toBe(
+      '<div>second</div>'
+    );
+    expect(failures).toHaveLength(1);
+    expect(failures[0].identifier).toBe('First');
+    expect(failures[0].error).toContain('<script>');
   });
 });
 

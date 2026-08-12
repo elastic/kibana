@@ -49,7 +49,11 @@ export const addSectionOperation = defineOperation({
       }));
 
       if (context.resolveCustomContentTemplate) {
-        await applyCustomContentTemplates(materialized, context.resolveCustomContentTemplate);
+        await applyCustomContentTemplates(
+          materialized,
+          context.resolveCustomContentTemplate,
+          context.failures
+        );
       }
 
       const sectionPanels: AttachmentPanel[] = [];

@@ -10,6 +10,8 @@ import {
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { PanelFailure } from '../utils';
+import { getErrorMessage } from '../utils';
+import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import type { DashboardOperation } from './registry';
 import type { ResolveCustomContentTemplate } from './types';
 import {
@@ -225,29 +227,36 @@ export const createPanelInputMaterializer = ({
 
 export const applyCustomContentTemplates = async (
   materialized: Array<{ panel: MaterializedPanelInput | undefined }>,
-  resolveTemplate: ResolveCustomContentTemplate
+  resolveTemplate: ResolveCustomContentTemplate,
+  failures: PanelFailure[]
 ): Promise<void> => {
-  const needsTemplate = materialized.filter((entry): entry is { panel: MaterializedPanelInput } => {
-    const { panel } = entry;
-    if (!panel) return false;
-    if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return false;
-    const config = panel.panelContent.config as CustomContentState;
-    return Boolean(config.prompt && !config.template);
-  });
-
-  if (needsTemplate.length === 0) return;
-
-  const templates = await Promise.all(
-    needsTemplate.map(({ panel }) => {
+  await Promise.all(
+    materialized.map(async (entry) => {
+      const { panel } = entry;
+      if (!panel) return;
+      if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
       const config = panel.panelContent.config as CustomContentState;
-      return resolveTemplate({ prompt: config.prompt!, esqlQuery: config.esqlQuery });
+      if (!config.prompt || config.template) return;
+
+      try {
+        const template = await resolveTemplate({
+          prompt: config.prompt,
+          esqlQuery: config.esqlQuery,
+        });
+        panel.panelContent = {
+          ...panel.panelContent,
+          config: { ...(config as Record<string, unknown>), template },
+        };
+      } catch (err) {
+        failures.push({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.addPanels,
+          identifier: config.prompt,
+          error: getErrorMessage(err),
+        });
+        entry.panel = undefined;
+      }
     })
   );
-
-  needsTemplate.forEach(({ panel }, i) => {
-    const config = panel.panelContent.config as Record<string, unknown>;
-    panel.panelContent = { ...panel.panelContent, config: { ...config, template: templates[i] } };
-  });
 };
 
 export const mergeAndResolveCustomContentEdit = async (
