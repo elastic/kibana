@@ -53,13 +53,13 @@ export const categorizeLogsService = setup({
         samplingProbability: params.samplingProbability,
       })
     ),
-    resetCategorizationResults: assign({
+    resetCategorizationResults: assign(() => ({
       categories: [],
       documentCount: 0,
       error: undefined,
       hasReachedLimit: false,
       samplingProbability: 1,
-    }),
+    })),
   },
   guards: {
     hasTooFewDocuments: (_guardArgs, params: { documentCount: number }) => params.documentCount < 1,
@@ -79,7 +79,7 @@ export const categorizeLogsService = setup({
   initial: 'countingDocuments',
   states: {
     countingDocuments: {
-      // Clears stale categories so they don't appear in `ignoredCategoryTerms` on retry.
+      // Entry (not `retry`) so future paths here also clear stale `ignoredCategoryTerms`.
       entry: 'resetCategorizationResults',
       invoke: {
         src: 'countDocuments',

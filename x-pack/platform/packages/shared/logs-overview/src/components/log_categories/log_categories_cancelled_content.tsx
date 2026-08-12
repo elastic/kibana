@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 export interface LogCategoriesCancelledContentProps {
   onRetry: () => void;
@@ -16,15 +16,6 @@ export interface LogCategoriesCancelledContentProps {
 export const LogCategoriesCancelledContent: React.FC<LogCategoriesCancelledContentProps> = ({
   onRetry,
 }) => {
-  // Move focus to the Load button on mount. Clicking Cancel destroys the focused
-  // element and drops keyboard/AT users to <body> (WCAG 2.4.3). Moving focus to the
-  // natural replacement is the correct response when mount is the *direct consequence*
-  // of a user click that destroyed the previously focused element.
-  const loadButtonRef = useRef<HTMLButtonElement | null>(null);
-  useEffect(() => {
-    loadButtonRef.current?.focus();
-  }, []);
-
   return (
     <EuiEmptyPrompt
       color="subdued"
@@ -35,8 +26,8 @@ export const LogCategoriesCancelledContent: React.FC<LogCategoriesCancelledConte
       body={<p>{cancelledContentDescription}</p>}
       actions={[
         <EuiButton
+          autoFocus
           key="load"
-          buttonRef={loadButtonRef}
           data-test-subj="logsOverviewLogCategoriesLoadButton"
           onClick={onRetry}
         >
