@@ -161,7 +161,7 @@ export function SelectServices({
               <EuiButton
                 data-test-subj="apmSelectServicesButton"
                 onClick={handleOnSubmit}
-                iconType={!kuery ? 'search' : 'refresh'}
+                iconType={!kuery ? 'magnify' : 'refresh'}
                 isDisabled={isServiceListPreviewLoading || !stagedKuery}
               >
                 {!kuery
