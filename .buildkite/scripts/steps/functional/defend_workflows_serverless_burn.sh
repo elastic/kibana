@@ -13,4 +13,4 @@ source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
 echo "--- Defend Workflows Cypress tests, burning changed specs (Chrome)"
 
-pnpm --dir x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:changed-specs-only
+yarn --cwd x-pack/solutions/security/plugins/security_solution cypress:dw:serverless:changed-specs-only

@@ -5,4 +5,4 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo --- Test Projects
-pnpm kbn run-in-packages test
+yarn kbn run-in-packages test

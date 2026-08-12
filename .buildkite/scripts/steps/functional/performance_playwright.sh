@@ -7,11 +7,11 @@ source .buildkite/scripts/common/util.sh
 is_test_execution_step
 
 run_bootstrap() {
-    echo "Running pnpm kbn bootstrap --force-install"
-    pnpm kbn bootstrap --force-install
+    echo "Running yarn kbn bootstrap --force-install"
+    yarn kbn bootstrap --force-install
 }
 
-echo "--- pnpm install and boostrap"
+echo "--- yarn install and boostrap"
 if ! run_bootstrap; then
   echo "--- bootstrap failed, trying again in 15 seconds"
   sleep 15
@@ -24,7 +24,7 @@ if ! run_bootstrap; then
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
-  check_for_changed_files 'pnpm kbn bootstrap'
+  check_for_changed_files 'yarn kbn bootstrap'
 fi
 
 # These tests are running on static workers so we have to make sure we delete previous build of Kibana

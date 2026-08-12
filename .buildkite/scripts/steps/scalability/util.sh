@@ -26,14 +26,14 @@ upload_test_results() {
 }
 
 bootstrap_kibana() {
-  echo "--- pnpm kbn bootstrap  --force-install"
-  if ! pnpm kbn bootstrap  --force-install; then
+  echo "--- yarn kbn bootstrap  --force-install"
+  if ! yarn kbn bootstrap  --force-install; then
     echo "bootstrap failed, trying again in 15 seconds"
     sleep 15
 
     rm -rf node_modules
 
-    echo "--- pnpm kbn reset && pnpm kbn bootstrap, attempt 2"
-    pnpm kbn reset && pnpm kbn bootstrap
+    echo "--- yarn kbn reset && yarn kbn bootstrap, attempt 2"
+    yarn kbn reset && yarn kbn bootstrap
   fi
 }
