@@ -264,13 +264,13 @@ describe('RulesSavedObjectService', () => {
       expect((call.aggs as any).tags.terms).not.toHaveProperty('include');
     });
 
-    it('adds a case-insensitive include pattern when search is provided', async () => {
+    it('adds an escaped prefix include pattern when search is provided', async () => {
       mockSavedObjectsClient.find.mockResolvedValue(mockTagsResponse([{ key: 'production' }]));
 
       await rulesSavedObjectService.findTags({ search: 'pro' });
 
       const call = mockSavedObjectsClient.find.mock.calls[0][0];
-      expect((call.aggs as any).tags.terms.include).toBe('.*[pP][rR][oO].*');
+      expect((call.aggs as any).tags.terms.include).toBe('pro.*');
     });
 
     it('escapes regex special characters in the search prefix', async () => {
@@ -279,7 +279,7 @@ describe('RulesSavedObjectService', () => {
       await rulesSavedObjectService.findTags({ search: 'a.b+c' });
 
       const call = mockSavedObjectsClient.find.mock.calls[0][0];
-      expect((call.aggs as any).tags.terms.include).toBe('.*[aA]\\.[bB]\\+[cC].*');
+      expect((call.aggs as any).tags.terms.include).toBe('a\\.b\\+c.*');
     });
 
     it('escapes Elasticsearch-only regexp operators in the search prefix', async () => {
@@ -288,7 +288,7 @@ describe('RulesSavedObjectService', () => {
       await rulesSavedObjectService.findTags({ search: 'a<b&c' });
 
       const call = mockSavedObjectsClient.find.mock.calls[0][0];
-      expect((call.aggs as any).tags.terms.include).toBe('.*[aA]\\<[bB]\\&[cC].*');
+      expect((call.aggs as any).tags.terms.include).toBe('a\\<b\\&c.*');
     });
 
     it('forwards the SO filter when provided', async () => {

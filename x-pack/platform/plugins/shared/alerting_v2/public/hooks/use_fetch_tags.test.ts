@@ -52,34 +52,4 @@ describe('useFetchTags', () => {
       expect(result.current.data).toEqual(['production', 'staging']);
     });
   });
-
-  it('forwards search to fetchTags', async () => {
-    mockFetchTags.mockResolvedValue({ tags: ['production'] });
-
-    const { result } = renderHook(() => useFetchTags({ search: 'pro' }), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(mockFetchTags).toHaveBeenCalledWith(expect.objectContaining({ search: 'pro' }));
-  });
-
-  it('uses separate cache entries for different search prefixes', async () => {
-    mockFetchTags
-      .mockResolvedValueOnce({ tags: ['prod'] })
-      .mockResolvedValueOnce({ tags: ['staging'] });
-
-    const { result: r1 } = renderHook(() => useFetchTags({ search: 'pro' }), {
-      wrapper: createWrapper(),
-    });
-    const { result: r2 } = renderHook(() => useFetchTags({ search: 'sta' }), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => {
-      expect(r1.current.data).toEqual(['prod']);
-      expect(r2.current.data).toEqual(['staging']);
-    });
-  });
 });

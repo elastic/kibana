@@ -17,7 +17,7 @@ import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
-import { buildTermsIncludePattern } from '../../escape_terms_include';
+import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
@@ -262,7 +262,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
             field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
             size: TAGS_RESPONSE_LIMIT,
             order: { _count: 'desc' },
-            ...(search ? { include: buildTermsIncludePattern(search) } : {}),
+            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
           },
         },
       },

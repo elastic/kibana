@@ -498,7 +498,7 @@ describe('ActionPolicySavedObjectService', () => {
       });
     });
 
-    it('passes a case-insensitive include pattern when search is provided', async () => {
+    it('passes include prefix pattern when search is provided', async () => {
       mockSoClient.find.mockResolvedValue(makeTagsAggResponse([{ key: 'production' }]));
 
       const result = await service.findTags({ search: 'prod' });
@@ -513,7 +513,7 @@ describe('ActionPolicySavedObjectService', () => {
               field: `${ACTION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
               size: 20,
               order: { _count: 'desc' },
-              include: '.*[pP][rR][oO][dD].*',
+              include: 'prod.*',
             },
           },
         },
@@ -530,7 +530,7 @@ describe('ActionPolicySavedObjectService', () => {
           aggs: {
             tags: {
               terms: expect.objectContaining({
-                include: '.*[tT][eE][sS][tT]\\[[fF][oO][oO].*',
+                include: 'test\\[foo.*',
               }),
             },
           },

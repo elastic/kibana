@@ -157,7 +157,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
   );
 
   apiTest(
-    'search: should return only tags matching the search',
+    'search: should return only tags matching the prefix',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
@@ -170,37 +170,14 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       });
 
       expect(response).toHaveStatusCode(200);
-      // substring match: production matches, staging does not
+      // prefix match: production matches, staging does not
       expect(response.body.tags).toContain('production');
       expect(response.body.tags).not.toContain('staging');
     }
   );
 
   apiTest(
-    'search: should match case-insensitively and anywhere in the tag',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'rule-case', tags: ['Production', 'team-payments'] },
-        })
-      );
-
-      const lowerCased = await apiClient.get(tagsUrl({ search: 'prod' }), {
-        headers: readerHeaders,
-      });
-      expect(lowerCased).toHaveStatusCode(200);
-      expect(lowerCased.body.tags).toContain('Production');
-
-      const infix = await apiClient.get(tagsUrl({ search: 'payments' }), {
-        headers: readerHeaders,
-      });
-      expect(infix).toHaveStatusCode(200);
-      expect(infix.body.tags).toContain('team-payments');
-    }
-  );
-
-  apiTest(
-    'search: should escape regex special characters in the search',
+    'search: should escape regex special characters in the prefix',
     async ({ apiClient, apiServices }) => {
       // A tag with a literal dot; search for 'a.b' must not match 'axb'
       await apiServices.alertingV2.rules.create(
@@ -220,7 +197,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
   );
 
   apiTest(
-    'search: should escape Elasticsearch-only regexp operators in the search',
+    'search: should escape Elasticsearch-only regexp operators in the prefix',
     async ({ apiClient, apiServices }) => {
       // `<` opens an interval and `"` a quoted literal in the Lucene regexp the
       // terms aggregation `include` uses. Unescaped, either one makes the pattern

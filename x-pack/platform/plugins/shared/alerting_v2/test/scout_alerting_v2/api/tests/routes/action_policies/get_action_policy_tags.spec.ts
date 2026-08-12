@@ -74,7 +74,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   );
 
   apiTest(
-    'search: should return only tags matching the search',
+    'search: should return only tags matching the prefix',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -103,7 +103,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   });
 
   apiTest(
-    'search: should escape regex special characters in the search',
+    'search: should escape regex special characters in the prefix',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'policy-a', tags: ['a.b-real', 'axb-fake'] })
@@ -120,7 +120,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
   );
 
   apiTest(
-    'search: should escape Elasticsearch-only regexp operators in the search',
+    'search: should escape Elasticsearch-only regexp operators in the prefix',
     async ({ apiClient, apiServices }) => {
       // `<` opens an interval and `"` a quoted literal in the Lucene regexp the
       // terms aggregation `include` uses. Unescaped, either one makes the pattern
@@ -182,27 +182,6 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
       expect(response).toHaveStatusCode(200);
       const { tags } = response.body;
       expect(tags.indexOf('hot')).toBeLessThan(tags.indexOf('cold'));
-    }
-  );
-
-  apiTest(
-    'search: should match case-insensitively and anywhere in the tag',
-    async ({ apiClient, apiServices }) => {
-      await apiServices.alertingV2.actionPolicies.create(
-        buildCreateActionPolicyData({ name: 'policy-a', tags: ['Production', 'team-payments'] })
-      );
-
-      const lowerCased = await apiClient.get(tagsUrl({ search: 'prod' }), {
-        headers: readerHeaders,
-      });
-      expect(lowerCased).toHaveStatusCode(200);
-      expect(lowerCased.body.tags).toContain('Production');
-
-      const infix = await apiClient.get(tagsUrl({ search: 'payments' }), {
-        headers: readerHeaders,
-      });
-      expect(infix).toHaveStatusCode(200);
-      expect(infix.body.tags).toContain('team-payments');
     }
   );
 

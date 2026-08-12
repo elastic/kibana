@@ -20,6 +20,6 @@ export const useFetchTags = (params?: { search?: string }) => {
       return tags;
     },
     refetchOnWindowFocus: false,
-    staleTime: 30 * 1000,
+    staleTime: 30 * 1000, // 30 seconds
   });
 };
