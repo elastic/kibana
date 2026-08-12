@@ -75,4 +75,17 @@ describe('CuratedTileCard', () => {
       expect.any(String)
     );
   });
+
+  it('matches the design spec for card padding and the title-description gap', () => {
+    const { container } = render(<CuratedTileCard tile={baseTile} />);
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('padding', '12px', { target: '.euiCard' });
+    expect(wrapper).toHaveStyleRule('margin-top', '2px', { target: 'euiCard__description' });
+  });
+
+  it('does not affect the grid layout, the wrapper stays out of the box tree', () => {
+    const { container } = render(<CuratedTileCard tile={baseTile} />);
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('display', 'contents');
+  });
 });

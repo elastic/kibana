@@ -23,25 +23,45 @@ const clampStyle = (lines: number) => css`
   overflow: hidden;
 `;
 
+// EuiCard's own paddingSize scale tops out at 16px below the design's 24px
+// step, and its title-description gap is a fixed 8px. `display: contents`
+// keeps this wrapper out of the flex/grid box tree so overriding both here
+// doesn't disturb sibling tile alignment in the grid.
+const tileOverrideStyle = css`
+  display: contents;
+
+  .euiCard {
+    padding: 12px;
+  }
+
+  /* EUI doesn't expose a standalone .euiCard__description class, its name is
+   * only a label suffix baked into the generated hash class. */
+  [class*='euiCard__description'] {
+    margin-top: 2px;
+  }
+`;
+
 export const CuratedTileCard = ({ tile, descriptionLineCount }: CuratedTileCardProps) => (
-  <EuiCard
-    layout="horizontal"
-    titleSize="xs"
-    hasBorder
-    paddingSize="m"
-    icon={tile.icon}
-    title={tile.title}
-    description={
-      <EuiTextColor
-        color="subdued"
-        css={descriptionLineCount ? clampStyle(descriptionLineCount) : undefined}
-      >
-        {tile.description}
-      </EuiTextColor>
-    }
-    data-test-subj={tile['data-test-subj']}
-    href={tile.href}
-    target={tile.target}
-    onClick={tile.onClick}
-  />
+  <div css={tileOverrideStyle}>
+    <EuiCard
+      layout="horizontal"
+      titleSize="xs"
+      hasBorder
+      paddingSize="none"
+      icon={tile.icon}
+      title={tile.title}
+      description={
+        <EuiTextColor
+          color="subdued"
+          css={descriptionLineCount ? clampStyle(descriptionLineCount) : undefined}
+        >
+          {tile.description}
+        </EuiTextColor>
+      }
+      data-test-subj={tile['data-test-subj']}
+      href={tile.href}
+      target={tile.target}
+      onClick={tile.onClick}
+    />
+  </div>
 );
