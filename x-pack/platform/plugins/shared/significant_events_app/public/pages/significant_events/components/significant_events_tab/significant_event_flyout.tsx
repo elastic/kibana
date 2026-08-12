@@ -191,7 +191,14 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
   }, [latestEvent, focusedSignificantEventService]);
 
   return (
-    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId} hideCloseButton>
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      type="push"
+      ownFocus={false}
+      size="40%"
+      hideCloseButton
+    >
       <FlyoutToolbarHeader>
         {!isClosed && (
           <EuiFlexItem grow={false}>
