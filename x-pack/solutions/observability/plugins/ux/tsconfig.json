@@ -35,7 +35,6 @@
     "@kbn/utility-types",
     "@kbn/server-route-repository",
     "@kbn/es-types",
-    "@kbn/shared-ux-page-kibana-template",
     "@kbn/i18n-react",
     "@kbn/es-query",
     "@kbn/exploratory-view-plugin",
