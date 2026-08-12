@@ -49,8 +49,8 @@ const renderSettings = () => {
     return (
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <CreateDatasetFlyoutSettings control={control} />
-        <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
+          <CreateDatasetFlyoutSettings control={control} />
+          <div data-test-subj="settingsValue">{JSON.stringify(settings)}</div>
         </KibanaContextProvider>
       </EuiProvider>
     );

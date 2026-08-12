@@ -45,13 +45,13 @@ const renderFlyout = ({
   render(
     <EuiProvider>
       <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-      <CreateDatasetFlyout
-        initialDataSet={initialDataSet}
-        existingDataSetNames={existingDataSetNames}
-        dataSources={dataSources}
-        onClose={jest.fn()}
-        onSave={onSave}
-      />
+        <CreateDatasetFlyout
+          initialDataSet={initialDataSet}
+          existingDataSetNames={existingDataSetNames}
+          dataSources={dataSources}
+          onClose={jest.fn()}
+          onSave={onSave}
+        />
       </KibanaContextProvider>
     </EuiProvider>
   );

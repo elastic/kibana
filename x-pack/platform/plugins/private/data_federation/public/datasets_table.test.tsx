@@ -63,22 +63,22 @@ describe('DatasetsTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={true}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+          <DatasetsTable
+            filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+            selectedItems={[]}
+            dataSourceFilterOptions={[
+              { value: '', text: 'All' },
+              { value: 'ds1', text: 'ds1' },
+            ]}
+            dataSourceFilter=""
+            isCreateDisabled={true}
+            onSelectionChange={jest.fn()}
+            onDataSourceFilterChange={jest.fn()}
+            onCreate={onCreate}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -96,22 +96,22 @@ describe('DatasetsTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+          <DatasetsTable
+            filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+            selectedItems={[]}
+            dataSourceFilterOptions={[
+              { value: '', text: 'All' },
+              { value: 'ds1', text: 'ds1' },
+            ]}
+            dataSourceFilter=""
+            isCreateDisabled={false}
+            onSelectionChange={jest.fn()}
+            onDataSourceFilterChange={jest.fn()}
+            onCreate={onCreate}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -126,22 +126,22 @@ describe('DatasetsTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DatasetsTable
-          filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={onDataSourceFilterChange}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+          <DatasetsTable
+            filteredItems={[createDataSetRow({ name: 'set1', dataSource: 'ds1' })]}
+            selectedItems={[]}
+            dataSourceFilterOptions={[
+              { value: '', text: 'All' },
+              { value: 'ds1', text: 'ds1' },
+            ]}
+            dataSourceFilter=""
+            isCreateDisabled={false}
+            onSelectionChange={jest.fn()}
+            onDataSourceFilterChange={onDataSourceFilterChange}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -158,25 +158,25 @@ describe('DatasetsTable', () => {
     const { getAllByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DatasetsTable
-          filteredItems={[
-            createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
-            createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
-          ]}
-          selectedItems={[]}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onDeleteSelected={jest.fn()}
-        />
+          <DatasetsTable
+            filteredItems={[
+              createDataSetRow({ name: 'set1', dataSource: 'ds1' }),
+              createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+            ]}
+            selectedItems={[]}
+            dataSourceFilterOptions={[
+              { value: '', text: 'All' },
+              { value: 'ds1', text: 'ds1' },
+            ]}
+            dataSourceFilter=""
+            isCreateDisabled={false}
+            onSelectionChange={jest.fn()}
+            onDataSourceFilterChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -202,22 +202,25 @@ describe('DatasetsTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DatasetsTable
-          filteredItems={[...selectedItems, createDataSetRow({ name: 'set2', dataSource: 'ds1' })]}
-          selectedItems={selectedItems}
-          dataSourceFilterOptions={[
-            { value: '', text: 'All' },
-            { value: 'ds1', text: 'ds1' },
-          ]}
-          dataSourceFilter=""
-          isCreateDisabled={false}
-          onSelectionChange={jest.fn()}
-          onDataSourceFilterChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-        />
+          <DatasetsTable
+            filteredItems={[
+              ...selectedItems,
+              createDataSetRow({ name: 'set2', dataSource: 'ds1' }),
+            ]}
+            selectedItems={selectedItems}
+            dataSourceFilterOptions={[
+              { value: '', text: 'All' },
+              { value: 'ds1', text: 'ds1' },
+            ]}
+            dataSourceFilter=""
+            isCreateDisabled={false}
+            onSelectionChange={jest.fn()}
+            onDataSourceFilterChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={onDeleteSelected}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );

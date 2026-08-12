@@ -57,16 +57,16 @@ describe('DataSourcesTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DataSourcesTable
-          dataSources={[createDataSource('ds1', 's3')]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={onCreate}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+          <DataSourcesTable
+            dataSources={[createDataSource('ds1', 's3')]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={onCreate}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -81,19 +81,19 @@ describe('DataSourcesTable', () => {
     const { getAllByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DataSourcesTable
-          dataSources={[
-            createDataSource('supported', 's3'),
-            createDataSource('unsupported', 'http'),
-          ]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={onEdit}
-          onDelete={jest.fn()}
-          onDeleteSelected={jest.fn()}
-        />
+          <DataSourcesTable
+            dataSources={[
+              createDataSource('supported', 's3'),
+              createDataSource('unsupported', 'http'),
+            ]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={onEdit}
+            onDelete={jest.fn()}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -120,16 +120,16 @@ describe('DataSourcesTable', () => {
     const { getAllByTestId, getByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DataSourcesTable
-          dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
-          selectedDataSources={[]}
-          dataSetsCountByDataSource={dataSetsCountByDataSource}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={onDelete}
-          onDeleteSelected={jest.fn()}
-        />
+          <DataSourcesTable
+            dataSources={[createDataSource('Source A', 's3'), createDataSource('Source B', 's3')]}
+            selectedDataSources={[]}
+            dataSetsCountByDataSource={dataSetsCountByDataSource}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={onDelete}
+            onDeleteSelected={jest.fn()}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -164,16 +164,16 @@ describe('DataSourcesTable', () => {
     const { getByTestId } = render(
       <EuiProvider>
         <KibanaContextProvider services={{ docLinks: docLinksMock }}>
-        <DataSourcesTable
-          dataSources={[...selectedDataSources, createDataSource('other', 's3')]}
-          selectedDataSources={selectedDataSources}
-          dataSetsCountByDataSource={new Map()}
-          onSelectionChange={jest.fn()}
-          onCreate={jest.fn()}
-          onEdit={jest.fn()}
-          onDelete={jest.fn()}
-          onDeleteSelected={onDeleteSelected}
-        />
+          <DataSourcesTable
+            dataSources={[...selectedDataSources, createDataSource('other', 's3')]}
+            selectedDataSources={selectedDataSources}
+            dataSetsCountByDataSource={new Map()}
+            onSelectionChange={jest.fn()}
+            onCreate={jest.fn()}
+            onEdit={jest.fn()}
+            onDelete={jest.fn()}
+            onDeleteSelected={onDeleteSelected}
+          />
         </KibanaContextProvider>
       </EuiProvider>
     );
