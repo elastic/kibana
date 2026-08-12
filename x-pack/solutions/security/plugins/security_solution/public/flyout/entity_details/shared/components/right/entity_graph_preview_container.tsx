@@ -14,13 +14,13 @@ import {
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
 export interface EntityGraphPreviewContainerProps
-  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
+  extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon' | 'disableNavigation'> {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph preview on. */
   entityId: string;
 }
 
 export const EntityGraphPreviewContainer = memo(
-  ({ entityId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
+  ({ entityId, onShowGraph, showIcon, disableNavigation }: EntityGraphPreviewContainerProps) => {
     const shouldShowGraph = useShouldShowGraph();
 
     const { isLoading, isError, data } = useFetchGraphData({
@@ -41,10 +41,12 @@ export const EntityGraphPreviewContainer = memo(
       <GraphPreviewPanel
         onShowGraph={onShowGraph}
         showIcon={showIcon}
+        disableNavigation={disableNavigation}
         shouldShowGraph={shouldShowGraph}
         isLoading={isLoading}
         isError={isError}
         data={data}
+        originEntityId={entityId}
       />
     );
   }

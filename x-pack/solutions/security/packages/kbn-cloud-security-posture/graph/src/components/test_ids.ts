@@ -36,6 +36,7 @@ export const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEventDetails` as const;
 
 export const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSearch` as const;
+export const GRAPH_ACTIONS_SEARCH_MENU_ID = `${GRAPH_INVESTIGATION_TEST_ID}SearchMenu` as const;
 export const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline` as const;
 
@@ -43,9 +44,18 @@ export const GRAPH_CONTROLS_ZOOM_IN_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomIn` 
 export const GRAPH_CONTROLS_ZOOM_OUT_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomOut` as const;
 export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` as const;
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
+export const GRAPH_CONTROLS_FULL_SCREEN_ID = `${GRAPH_INVESTIGATION_TEST_ID}FullScreen` as const;
+
+export const GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}ApplyFilters` as const;
+export const GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}KeyboardShortcuts` as const;
+export const GRAPH_BOTTOM_BAR_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Search` as const;
 
 export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
 export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
+export const GRAPH_ORIGIN_NODE_OUTLINE_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}OriginNodeOutline` as const;
 export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as const;
 export const GRAPH_RELATIONSHIP_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}RelationshipNode` as const;
 export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
@@ -54,6 +64,7 @@ export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
 export const GRAPH_STACKED_SHAPE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackedShape` as const;
 
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
+export const GRAPH_MINIMAP_TOGGLE_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapToggle` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
 export const GRAPH_MINIMAP_LABEL_NODE_ID =
@@ -71,6 +82,8 @@ export const GRAPH_ENTITY_NODE_BUTTON_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeButton` as const;
 export const GRAPH_ENTITY_NODE_DETAILS_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeDetails` as const;
+export const GRAPH_ENTITY_NODE_SIMPLIFIED_LABEL_ID =
+  `${GRAPH_INVESTIGATION_TEST_ID}EntityNodeSimplifiedLabel` as const;
 
 export const GRAPH_IPS_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsText` as const;
 export const GRAPH_IPS_BUTTON_ID = `${GRAPH_INVESTIGATION_TEST_ID}IpsButton` as const;

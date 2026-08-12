@@ -20,7 +20,7 @@ import {
   GRAPH_RELATIONSHIP_NODE_TOOLTIP_ID,
   GRAPH_RELATIONSHIP_NODE_LABEL_TEXT_ID,
 } from '../../test_ids';
-import { RelationshipNode } from './relationship_node';
+import { RelationshipNode, TEST_SUBJ_RELATIONSHIP_EXPAND_BTN } from './relationship_node';
 
 describe('RelationshipNode', () => {
   const baseProps: NodeProps = {
@@ -78,7 +78,7 @@ describe('RelationshipNode', () => {
     expect(screen.getByText('test-relationship-node')).toBeInTheDocument();
   });
 
-  test('renders hover outline if interactive', async () => {
+  test('does not render legacy hover outline', async () => {
     render(
       <ReactFlow>
         <RelationshipNode {...baseProps} />
@@ -88,11 +88,27 @@ describe('RelationshipNode', () => {
     await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)
+      ).not.toBeInTheDocument();
     });
   });
 
-  test('does not render hover outline if not interactive', async () => {
+  test('renders expand button on hover if interactive', async () => {
+    render(
+      <ReactFlow>
+        <RelationshipNode {...baseProps} />
+      </ReactFlow>
+    );
+
+    await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId(TEST_SUBJ_RELATIONSHIP_EXPAND_BTN)).toBeInTheDocument();
+    });
+  });
+
+  test('does not render expand button on hover if not interactive', async () => {
     const props = {
       ...baseProps,
       data: {
@@ -110,9 +126,41 @@ describe('RelationshipNode', () => {
     await userEvent.hover(screen.getByTestId(GRAPH_RELATIONSHIP_NODE_ID));
 
     await waitFor(() => {
-      expect(
-        screen.queryByTestId(GRAPH_RELATIONSHIP_NODE_HOVER_OUTLINE_ID)
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId(TEST_SUBJ_RELATIONSHIP_EXPAND_BTN)).not.toBeInTheDocument();
+    });
+  });
+
+  test('does not render expand button when multiple nodes are selected', async () => {
+    render(
+      <ReactFlow
+        nodes={[
+          {
+            id: 'test-relationship-node',
+            type: 'relationship',
+            selected: true,
+            data: baseProps.data,
+            position: { x: 0, y: 0 },
+          },
+          {
+            id: 'other-relationship-node',
+            type: 'relationship',
+            selected: true,
+            data: {
+              ...baseProps.data,
+              id: 'other-relationship-node',
+              label: 'Uses',
+            },
+            position: { x: 100, y: 0 },
+          },
+        ]}
+        nodeTypes={{ relationship: RelationshipNode }}
+      />
+    );
+
+    await userEvent.hover(screen.getAllByTestId(GRAPH_RELATIONSHIP_NODE_ID)[0]);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId(TEST_SUBJ_RELATIONSHIP_EXPAND_BTN)).not.toBeInTheDocument();
     });
   });
 
@@ -192,15 +240,18 @@ describe('RelationshipNode', () => {
         textParagraph: '#DDDDDD',
         backgroundLightText: '#a1b2c3',
         backgroundFilledText: '#333333',
+        backgroundBaseFormsControlDisabled: '#8899aa',
+        borderBasePlain: '#cad3e2',
         borderBaseProminent: '#CCCCCC',
       },
     };
 
-    it('should return relationship colors with dark background and light text', () => {
+    it('should return relationship pill colors from the Figma spec', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.backgroundLightText,
-        borderColor: mockEuiTheme.colors.borderBaseProminent,
+        emphasizedBackgroundColor: mockEuiTheme.colors.backgroundBaseFormsControlDisabled,
+        borderColor: mockEuiTheme.colors.borderBasePlain,
         textColor: mockEuiTheme.colors.textParagraph,
       });
     });

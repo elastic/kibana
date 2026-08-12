@@ -22,7 +22,6 @@ export type LeftPanelTabsType = Array<{
 
 export enum EntityDetailsLeftPanelTab {
   RISK_INPUTS = 'risk_inputs',
-  ANOMALIES = 'anomalies',
   OKTA = 'okta_document',
   ENTRA = 'entra_document',
   CSP_INSIGHTS = 'csp_insights',
@@ -103,13 +102,16 @@ export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
 
     return (
       <FlyoutHeader
+        hasBorder={false}
         css={css`
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
           padding-bottom: 0 !important;
           border-block-end: none !important;
         `}
       >
-        <EuiTabs size="l">{renderTabs}</EuiTabs>
+        <EuiTabs size="l" bottomBorder>
+          {renderTabs}
+        </EuiTabs>
       </FlyoutHeader>
     );
   }

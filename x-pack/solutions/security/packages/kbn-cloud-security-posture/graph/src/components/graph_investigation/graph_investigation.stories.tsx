@@ -15,7 +15,10 @@ import {
   GlobalStylesStorybookDecorator,
 } from '../../../.storybook/decorators';
 import { mockDataView } from '../mock/data_view.mock';
-import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
+import {
+  SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
+  DISPLAY_STARTING_POINT_TOUR_STORAGE_KEY,
+} from '../../common/constants';
 import { MockDataProvider } from '../mock/mock_context_provider';
 import {
   USE_FETCH_GRAPH_DATA_ACTION,
@@ -27,6 +30,7 @@ import {
   groupedTargetMockData,
 } from '../mock/use_fetch_graph_data.mock';
 
+const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
   scopeId: 'storybook-graph-investigation',
   initialState: {
@@ -42,8 +46,8 @@ const defaultProps: GraphInvestigationProps = {
       },
     ],
     timeRange: {
-      from: 'now-75m',
-      to: 'now-45m',
+      from: `${hourAgo.toISOString()}||-15m`,
+      to: `${hourAgo.toISOString()}||+15m`,
     },
   },
   onInvestigateInTimeline: action('onInvestigateInTimeline'),
@@ -53,17 +57,22 @@ const defaultProps: GraphInvestigationProps = {
 
 type GraphInvestigationPropsAndCustomArgs = React.ComponentProps<typeof GraphInvestigation> & {
   shouldShowSearchBarTour: boolean;
+  shouldShowDisplayStartingPointTour: boolean;
   isLoading: boolean;
   supportNodePreviewPopover: boolean;
 };
 
 const createDecorator = (mockData: unknown): Decorator[] => {
   const scenarioDecorator: Decorator = (StoryComponent, context) => {
-    const { shouldShowSearchBarTour, isLoading } =
+    const { shouldShowSearchBarTour, shouldShowDisplayStartingPointTour, isLoading } =
       context.args as Partial<GraphInvestigationPropsAndCustomArgs>;
     localStorage.setItem(
       SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY,
       shouldShowSearchBarTour?.toString() || 'true'
+    );
+    localStorage.setItem(
+      DISPLAY_STARTING_POINT_TOUR_STORAGE_KEY,
+      shouldShowDisplayStartingPointTour?.toString() ?? 'false'
     );
     const mock = {
       useFetchGraphDataMock: {
@@ -116,6 +125,11 @@ const meta = {
       description: 'Toggle the button to set the initial state of showing search bar tour',
       control: { type: 'boolean' },
     },
+    shouldShowDisplayStartingPointTour: {
+      description:
+        'Toggle the button to set the initial state of showing the display starting point tour',
+      control: { type: 'boolean' },
+    },
     isLoading: {
       control: { type: 'boolean' },
     },
@@ -129,6 +143,7 @@ const meta = {
     showToggleSearch: false,
     showInvestigateInTimeline: false,
     shouldShowSearchBarTour: true,
+    shouldShowDisplayStartingPointTour: false,
     isLoading: false,
     supportNodePreviewPopover: true,
   },

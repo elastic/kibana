@@ -25,6 +25,8 @@ export interface Size {
 
 interface BaseNodeDataViewModel {
   interactive?: boolean;
+  /** When true, render a dashed outline around the node. */
+  highlightAsOrigin?: boolean;
 }
 
 export type NodeClickCallback = (e: React.MouseEvent<HTMLElement>, node: NodeProps) => void;
@@ -41,6 +43,16 @@ export type CountryClickCallback = (e: React.MouseEvent<HTMLElement>) => void;
 
 export type EventClickCallback = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
+/** Icon action used by the entity expand popover and hover toolbar. */
+export interface EntityActionItem {
+  type: 'item';
+  iconType: string;
+  label: string;
+  onClick: () => void;
+  testSubject: string;
+  disabled?: boolean;
+}
+
 export interface EntityNodeViewModel
   extends Record<string, unknown>,
     EntityNodeDataModel,
@@ -49,6 +61,31 @@ export interface EntityNodeViewModel
   nodeClick?: NodeClickCallback;
   ipClickHandler?: IpClickCallback;
   countryClickHandler?: CountryClickCallback;
+  showEntityId?: boolean;
+  /**
+   * How entity actions popover is opened.
+   * - `button`: show `⋯` and open on click
+   * - `hover` (Test A): hide `⋯` and open on card hover
+   */
+  entityActionsMode?: 'button' | 'hover';
+  /**
+   * Entity visual style for prototyping (dev-graph).
+   * - `default`: neutral header/icon
+   * - `colored`: variant 2D — plain header, risk-light icon, solid risk badge
+   */
+  entityStyleMode?: 'default' | 'colored';
+  /**
+   * Shared fixed width for all entity cards in the current graph
+   * (sized from the longest entity label).
+   */
+  cardWidth?: number;
+  /** Closes the entity actions popover (used by hover mode cleanup). */
+  closeEntityActions?: () => void;
+  /**
+   * Returns the same expand-action items as the `⋯` popover.
+   * Used by hover mode to render the toolbar above the entity.
+   */
+  getEntityActionItems?: () => EntityActionItem[];
 }
 
 export interface GroupNodeViewModel
@@ -72,7 +109,9 @@ export interface LabelNodeViewModel
 export interface RelationshipNodeViewModel
   extends Record<string, unknown>,
     RelationshipNodeDataModel,
-    BaseNodeDataViewModel {}
+    BaseNodeDataViewModel {
+  expandButtonClick?: ExpandButtonClickCallback;
+}
 
 export type NodeViewModel =
   | EntityNodeViewModel
@@ -91,6 +130,7 @@ export type EdgeProps = xyEdgeProps<
       sourceColor: NodeColor;
       targetShape: NodeShape;
       targetColor: NodeColor;
+      isOriginHighlightEdge?: boolean;
     }
   >
 >;

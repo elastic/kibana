@@ -5,159 +5,92 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useMemo, Suspense } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import {
-  GRAPH_SCOPE_ID,
-  GraphGroupedNodePreviewPanel,
-  type GraphGroupedNodePreviewPanelProps,
-} from '@kbn/cloud-security-posture-graph';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
-import { GRAPH_TITLE } from '../../../shared/constants/flyout_titles';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
+import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
-import { EventKind } from '../../main/constants/event_kinds';
-import { GraphVisualization } from './components/graph_visualization';
+import { GraphVisualization } from '../../../../flyout/shared/components/graph_visualization';
 import { useGraphPreview } from '../../main/hooks/use_graph_preview';
-import { useOpenFlyout } from '../../../shared/hooks/use_open_flyout';
-import { useFlyoutApi } from '../../../use_flyout_api';
-import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { useFlyoutSessionContext } from '../../../session_context';
-import {
-  FLYOUT_ORIGIN,
-  FLYOUT_SESSION_KIND,
-  FLYOUT_SURFACE,
-  FLYOUT_TOOL,
-  FLYOUT_TYPE,
-} from '../../../../common/lib/telemetry';
+import { EventKind } from '../../main/constants/event_kinds';
 
-export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
+export const GRAPH_VIEW_TEST_ID = `${PREFIX}GraphView` as const;
 
-export interface GraphDetailsProps {
+export interface GraphViewProps {
   hit: DataTableRecord;
   renderCellActions: CellActionRenderer;
   onAlertUpdated: () => void;
 }
 
-export const GraphDetails = memo(
-  ({ hit, renderCellActions, onAlertUpdated }: GraphDetailsProps) => {
-    const { euiTheme } = useEuiTheme();
-    const eventId = hit.raw._id ?? '';
-    const { timestamp, eventIds } = useGraphPreview({ hit });
-    const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+const TITLE = i18n.translate('xpack.securitySolution.flyout.graphView.title', {
+  defaultMessage: 'Graph view',
+});
 
-    const open = useOpenFlyout();
-    const { historyKey } = useFlyoutSessionContext();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const {
-      openDocumentFlyoutFromIndexAsChild,
-      openNetworkFlyoutAsChild,
-      openEntityDetailsAsChild,
-    } = useFlyoutApi();
+/**
+ * Full graph investigation opened from the alert/event flyout Visualizations preview.
+ */
+export const GraphView = memo(({ hit, renderCellActions, onAlertUpdated }: GraphViewProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { eventIds, timestamp } = useGraphPreview({ hit });
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
 
-    const onShowDocument = useCallback(
-      (documentId: string, indexName?: string) =>
-        openDocumentFlyoutFromIndexAsChild({
-          documentId,
-          indexName,
-          renderCellActions,
-          onAlertUpdated,
-          origin: FLYOUT_ORIGIN.GRAPH_DOCUMENT_NODE,
-        }),
-      [openDocumentFlyoutFromIndexAsChild, renderCellActions, onAlertUpdated]
-    );
+  if (!timestamp || eventIds.length === 0) {
+    return null;
+  }
 
-    const onShowNetwork = useCallback(
-      (ip: string) =>
-        openNetworkFlyoutAsChild({
-          ip,
-          flowTarget: FlowTargetSourceDest.source,
-          origin: FLYOUT_ORIGIN.GRAPH_NETWORK_NODE,
-        }),
-      [openNetworkFlyoutAsChild]
-    );
-
-    const onShowEntity = useCallback(
-      ({
-        engineType,
-        entityId,
-        entityName,
-      }: {
-        engineType: string | undefined;
-        entityId: string;
-        entityName: string | undefined;
-      }) => openEntityDetailsAsChild({ engineType, entityId, entityName, scopeId: GRAPH_SCOPE_ID }),
-      [openEntityDetailsAsChild]
-    );
-
-    const onShowGrouped = useCallback(
-      (
-        params: Omit<
-          GraphGroupedNodePreviewPanelProps,
-          'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
-        >
-      ) =>
-        open(
-          <GraphGroupedNodePreviewPanel
-            {...params}
-            scopeId={GRAPH_SCOPE_ID}
-            onShowDocument={onShowDocument}
-            onShowEntity={onShowEntity}
-          />,
-          { ...defaultFlyoutProperties, historyKey, session: FLYOUT_SESSION_KIND.INHERIT },
-          {
-            surface: FLYOUT_SURFACE.TOOL,
-            tool: FLYOUT_TOOL.GRAPH,
-            flyoutType: FLYOUT_TYPE.DOCUMENT,
-            session: FLYOUT_SESSION_KIND.INHERIT,
-            origin: FLYOUT_ORIGIN.GRAPH_GROUPED_NODE,
-          },
-          'inherit'
-        ),
-      [defaultFlyoutProperties, historyKey, onShowDocument, onShowEntity, open]
-    );
-
-    if (!eventId || !timestamp) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiFlyoutHeader
-          hasBorder
-          css={css`
-            padding-block: ${euiTheme.size.s} !important;
-          `}
-        >
-          <DocumentToolsFlyoutHeader
-            hit={hit}
-            title={GRAPH_TITLE}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <div data-test-subj={GRAPH_TOOLS_TEST_ID}>
+  return (
+    <>
+      <EuiFlyoutHeader
+        hasBorder
+        css={css`
+          padding-block: ${euiTheme.size.s} !important;
+        `}
+      >
+        <ToolsFlyoutHeader
+          hit={hit}
+          title={TITLE}
+          renderCellActions={renderCellActions}
+          onAlertUpdated={onAlertUpdated}
+        />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+          }
+        `}
+      >
+        <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+          <div
+            data-test-subj={GRAPH_VIEW_TEST_ID}
+            css={css`
+              flex: 1;
+              min-height: 480px;
+              height: 100%;
+            `}
+          >
             <GraphVisualization
               mode="event"
-              scopeId={GRAPH_SCOPE_ID}
+              scopeId={TableId.alertsOnAlertsPage}
               eventIds={eventIds}
               timestamp={timestamp}
               isAlert={isAlert}
-              onShowDocument={onShowDocument}
-              onShowEntity={onShowEntity}
-              onShowNetwork={onShowNetwork}
-              onShowGrouped={onShowGrouped}
             />
           </div>
-        </EuiFlyoutBody>
-      </>
-    );
-  }
-);
+        </Suspense>
+      </EuiFlyoutBody>
+    </>
+  );
+});
 
-GraphDetails.displayName = 'GraphDetails';
+GraphView.displayName = 'GraphView';

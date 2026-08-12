@@ -32,27 +32,37 @@ export const GraphPopover = ({
     return null;
   }
 
+  // Hover-triggered entity actions: keep focus on the graph so mouseleave works
+  // and EuiWrappingPopover does not fight the hover interaction.
+  const isHoverActionsAnchor = anchorElement.dataset.graphHoverActions === 'true';
+
   return (
     <EuiWrappingPopover
       {...rest}
       isOpen={isOpen}
       closePopover={closePopover}
       button={anchorElement}
-      ownFocus={true}
-      focusTrapProps={{
-        clickOutsideDisables: false,
-        disabled: false,
-        crossFrame: true,
-        noIsolation: false,
-        returnFocus: (_el) => {
-          anchorElement.focus();
-          return false;
-        },
-        preventScrollOnFocus: true,
-        onClickOutside: () => {
-          closePopover();
-        },
-      }}
+      ownFocus={!isHoverActionsAnchor}
+      focusTrapProps={
+        isHoverActionsAnchor
+          ? {
+              disabled: true,
+            }
+          : {
+              clickOutsideDisables: false,
+              disabled: false,
+              crossFrame: true,
+              noIsolation: false,
+              returnFocus: (_el) => {
+                anchorElement.focus();
+                return false;
+              },
+              preventScrollOnFocus: true,
+              onClickOutside: () => {
+                closePopover();
+              },
+            }
+      }
     >
       {children}
     </EuiWrappingPopover>

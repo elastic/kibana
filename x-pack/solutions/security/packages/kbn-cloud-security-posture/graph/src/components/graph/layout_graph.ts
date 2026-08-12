@@ -5,25 +5,97 @@
  * 2.0.
  */
 
-import { graphlib, layout } from '@dagrejs/dagre';
+import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
-import type { EdgeViewModel, NodeViewModel, Size } from '../types';
+import type { EdgeViewModel, NodeViewModel, Size, EntityNodeViewModel } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
 import {
-  GRID_SIZE,
+  isEntityNode,
+  isConnectorNode,
+  isStackNode,
+  isStackedLabel,
+  showStackedShape,
+} from '../utils';
+import {
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
   NODE_HEIGHT,
-  ENTITY_NODE_TOTAL_HEIGHT,
   NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
   NODE_LABEL_DETAILS,
 } from '../constants';
+import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
+import { alignOriginSpineInPlace } from './layout_origin_spine';
+import {
+  GRAPH_LAYOUT_MIN_NODE_GAP,
+  GRAPH_LAYOUT_NODE_SEP,
+  GRAPH_LAYOUT_RANK_SEP,
+  LAYOUT_GRID_SIZE_OFFSET,
+} from './layout_constants';
 
-const GRID_SIZE_OFFSET = GRID_SIZE * 2;
+/** Dagre minimum separation between ranks (horizontal gaps in LR layout). */
+const GRAPH_RANK_SEP = GRAPH_LAYOUT_RANK_SEP;
+
+/** Dagre minimum separation between nodes in the same rank (vertical gaps in LR layout). */
+const GRAPH_NODE_SEP = GRAPH_LAYOUT_NODE_SEP;
+
+const GRID_SIZE_OFFSET = LAYOUT_GRID_SIZE_OFFSET;
+
+/** Card header block: 12px padding + 40px icon + 12px padding. */
+const CARD_LAYOUT_HEADER_HEIGHT = 64;
+/** Card body outer padding (top + bottom). */
+const CARD_LAYOUT_BODY_PADDING = 24;
+/** Approximate height of one metadata field block (label + value). */
+const CARD_LAYOUT_METADATA_BLOCK = 40;
+/** Vertical gap between metadata sections in the card body. */
+const CARD_LAYOUT_SECTION_GAP = 16;
+/** Grouped-entity stack tab under the card. */
+const CARD_LAYOUT_GROUP_STACK = 8;
+
+/**
+ * Estimates entity card height from visible metadata so Dagre can pack nodes
+ * tightly (close but non-overlapping) instead of always reserving the max card.
+ */
+const estimateEntityCardLayoutHeight = (data: EntityNodeViewModel): number => {
+  const showIp = Boolean(data.ips && data.ips.length > 0);
+  const showGeo = Boolean(data.countryCodes && data.countryCodes.length > 0);
+  const showCriticality = Boolean(data.assetCriticality || data.assetCriticalityCounts);
+  const showRisk =
+    data.riskScore !== undefined ||
+    (data.riskScoreMin !== undefined && data.riskScoreMax !== undefined);
+  const showEntityId = Boolean(data.showEntityId);
+  const hasBody = showIp || showGeo || showEntityId || showCriticality || showRisk;
+
+  let height = CARD_LAYOUT_HEADER_HEIGHT;
+
+  if (hasBody) {
+    height += CARD_LAYOUT_BODY_PADDING;
+
+    if (showIp || showGeo) {
+      height += CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showEntityId) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showCriticality) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showRisk) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+  }
+
+  if (showStackedShape(data.count)) {
+    height += CARD_LAYOUT_GROUP_STACK;
+  }
+
+  return Math.min(height, CARD_NODE_DEFAULT_HEIGHT);
+};
 
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
@@ -35,11 +107,12 @@ export const layoutGraph = (
     directed: true,
   };
 
-  const g = new graphlib.Graph(graphOpts)
+  const g = new Dagre.graphlib.Graph(graphOpts)
     .setGraph({
       rankdir: 'LR',
       align: 'UL',
-      ranksep: GRID_SIZE_OFFSET * 3,
+      ranksep: GRAPH_RANK_SEP,
+      nodesep: GRAPH_NODE_SEP,
     })
     .setDefaultEdgeLabel(() => ({}));
 
@@ -61,7 +134,12 @@ export const layoutGraph = (
     }
   });
   nodes.forEach((node) => {
-    let size = { width: NODE_WIDTH, height: node.measured?.height ?? NODE_HEIGHT };
+    let size = {
+      width: isEntityNode(node.data)
+        ? (node.data as { cardWidth?: number }).cardWidth ?? CARD_NODE_WIDTH
+        : NODE_WIDTH,
+      height: node.measured?.height ?? NODE_HEIGHT,
+    };
 
     if (isConnectorNode(node.data)) {
       size = {
@@ -82,7 +160,7 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      size.height = ENTITY_NODE_TOTAL_HEIGHT;
+      size.height = node.measured?.height ?? estimateEntityCardLayoutHeight(node.data);
     }
 
     if (!nodesById[node.id]) {
@@ -99,7 +177,7 @@ export const layoutGraph = (
     });
   });
 
-  layout(g);
+  Dagre.layout(g);
 
   alignNodesCenterInPlace(
     g,
@@ -109,6 +187,13 @@ export const layoutGraph = (
     },
     nodesById
   );
+
+  alignOriginSpineInPlace(g, nodesById, edges, stackedNodeIds, (nodeId: string) => {
+    const node = nodesById[nodeId]?.data;
+    return node !== undefined && isStackedLabel(node);
+  });
+
+  resolveRankOverlapsInPlace(g, () => true);
 
   const layoutedNodes = nodes.map((node) => {
     // For stacked nodes, we want to keep the original position relative to the parent
@@ -127,8 +212,9 @@ export const layoutGraph = (
     const dagreNode = g.node(node.data.id);
 
     if (isConnectorNode(node.data)) {
+      const nodeHeight = dagreNode.height ?? NODE_LABEL_TOTAL_HEIGHT;
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - NODE_LABEL_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - nodeHeight / 2);
 
       return {
         ...node,
@@ -137,8 +223,9 @@ export const layoutGraph = (
     }
 
     if (isEntityNode(node.data)) {
+      const nodeHeight = dagreNode.height ?? estimateEntityCardLayoutHeight(node.data);
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - NODE_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - nodeHeight / 2);
 
       return {
         ...node,
@@ -200,29 +287,13 @@ const layoutStackedLabels = (
 };
 
 /**
- * Position/size of a node after `layout()` has run.
- *
- * Mirrors the shape this file previously cast to (dagre v2's `Dagre.Node`, removed in v3).
- * dagre v3's `NodeLabel` marks x/y optional (unset pre-layout) and `graphlib.Graph` now
- * defaults its generics to `any`, so `g.node(id)` is `any` and this cast is unchecked.
- * Kept as a local mirror to keep the v3 migration minimal; properly typing the graph is
- * left to the owning team.
- */
-interface DagrePositionedNode {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-/**
  * Shared context for graph alignment operations.
  * - Y/Height/setY: accessors for node vertical position and height in Dagre
  * - prevNodeY: tracks original Y positions before adjustments for cascading calculations
  * - nodesById: map of node ID to node data for accessing node properties
  */
 interface GraphHelpers {
-  g: graphlib.Graph;
+  g: Dagre.graphlib.Graph;
   filter: (node: string) => boolean;
   Y: (id: string) => number;
   Height: (id: string) => number;
@@ -233,7 +304,7 @@ interface GraphHelpers {
 
 /** Returns child nodes (successors) that pass the filter. */
 const getFilteredSuccessors = (
-  g: graphlib.Graph,
+  g: Dagre.graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -241,7 +312,7 @@ const getFilteredSuccessors = (
 
 /** Returns parent nodes (predecessors) that pass the filter. */
 const getFilteredPredecessors = (
-  g: graphlib.Graph,
+  g: Dagre.graphlib.Graph,
   node: string,
   filter: (n: string) => boolean
 ): string[] =>
@@ -319,14 +390,22 @@ const handleMultipleChildren = (
     const allChildren = Array.from(allChildrenSet);
     const commonCenterY = calculateCenterY(allChildren, Y);
 
-    const siblingIndex = siblingsWithSharedChildren.indexOf(currNode);
-    const siblingCount = siblingsWithSharedChildren.length;
-    const spacing = Height(currNode) + GRID_SIZE_OFFSET;
-    const totalHeight = (siblingCount - 1) * spacing;
-    const newY = commonCenterY - totalHeight / 2 + siblingIndex * spacing;
+    const sortedSiblings = [...siblingsWithSharedChildren].sort((a, b) => Y(a) - Y(b));
+    const heights = sortedSiblings.map((nodeId) => Height(nodeId));
+    const totalHeight =
+      heights.reduce((sum, height) => sum + height, 0) +
+      (sortedSiblings.length - 1) * GRID_SIZE_OFFSET;
 
-    prevNodeY[currNode] = currY;
-    setY(currNode, snapped(newY));
+    let topEdge = commonCenterY - totalHeight / 2;
+
+    for (let index = 0; index < sortedSiblings.length; index += 1) {
+      const nodeId = sortedSiblings[index];
+      const centerY = topEdge + heights[index] / 2;
+
+      prevNodeY[nodeId] = Y(nodeId);
+      setY(nodeId, snapped(centerY));
+      topEdge += heights[index] + GRID_SIZE_OFFSET;
+    }
   } else {
     const centerY = calculateCenterY(children, Y);
     prevNodeY[currNode] = currY;
@@ -441,16 +520,16 @@ const handleSingleParent = (helpers: GraphHelpers, currNode: string, parent: str
  * Mutates the Dagre graph in place.
  */
 const alignNodesCenterInPlace = (
-  g: graphlib.Graph,
+  g: Dagre.graphlib.Graph,
   filter: (node: string) => boolean,
   nodesById: Record<string, Node<NodeViewModel>>
 ) => {
   const helpers: GraphHelpers = {
     g,
     filter,
-    Y: (id: string) => (g.node(id) as DagrePositionedNode).y,
-    Height: (id: string) => (g.node(id) as DagrePositionedNode).height,
-    setY: (id: string, y: number) => ((g.node(id) as DagrePositionedNode).y = y),
+    Y: (id: string) => (g.node(id) as Dagre.Node).y,
+    Height: (id: string) => (g.node(id) as Dagre.Node).height,
+    setY: (id: string, y: number) => ((g.node(id) as Dagre.Node).y = y),
     prevNodeY: {},
     nodesById,
   };
@@ -470,7 +549,7 @@ const alignNodesCenterInPlace = (
   }
 };
 
-const topsort = (g: graphlib.Graph, filter: (node: string) => boolean): string[] => {
+const topsort = (g: Dagre.graphlib.Graph, filter: (node: string) => boolean): string[] => {
   const visited: Record<string, boolean> = {};
   const stack: Record<string, boolean> = {};
   const results: string[] = [];
@@ -530,4 +609,47 @@ function analyzeSiblings(
 
 const snapped = (value: number, method: 'round' | 'floor' = 'round'): number => {
   return Math[method](value / GRID_SIZE_OFFSET) * GRID_SIZE_OFFSET;
+};
+
+/**
+ * Ensures nodes in the same rank do not overlap after spine and centering adjustments.
+ * Mutates the Dagre graph in place.
+ */
+const resolveRankOverlapsInPlace = (
+  g: Dagre.graphlib.Graph,
+  filter: (nodeId: string) => boolean
+): void => {
+  const nodesByRank = new Map<number, string[]>();
+
+  for (const nodeId of g.nodes()) {
+    if (filter(nodeId)) {
+      const dagreNode = g.node(nodeId) as Dagre.Node;
+      const rankKey = Math.round(dagreNode.x);
+      const rankNodes = nodesByRank.get(rankKey) ?? [];
+
+      rankNodes.push(nodeId);
+      nodesByRank.set(rankKey, rankNodes);
+    }
+  }
+
+  for (const rankNodeIds of nodesByRank.values()) {
+    if (rankNodeIds.length >= 2) {
+      const sorted = [...rankNodeIds].sort(
+        (left, right) => (g.node(left) as Dagre.Node).y - (g.node(right) as Dagre.Node).y
+      );
+
+      for (let index = 1; index < sorted.length; index += 1) {
+        const previousNode = g.node(sorted[index - 1]) as Dagre.Node;
+        const currentNode = g.node(sorted[index]) as Dagre.Node;
+        const previousHeight = previousNode.height ?? NODE_HEIGHT;
+        const currentHeight = currentNode.height ?? NODE_HEIGHT;
+        const minCenterY =
+          previousNode.y + previousHeight / 2 + GRAPH_LAYOUT_MIN_NODE_GAP + currentHeight / 2;
+
+        if (currentNode.y < minCenterY) {
+          currentNode.y = snapped(minCenterY);
+        }
+      }
+    }
+  }
 };

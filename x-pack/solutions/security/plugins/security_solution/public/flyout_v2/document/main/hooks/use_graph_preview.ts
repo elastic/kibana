@@ -13,13 +13,10 @@ import {
   GRAPH_TARGET_ENTITY_FIELDS,
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
-  isGraphSupportedRuntimeMappingsIntegration,
 } from '@kbn/cloud-security-posture-common';
 import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getField, getFieldArray } from '../../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from '../../../../flyout/shared/hooks/use_is_entity_store_v2_available';
-import { useEntityStoreStatus } from '../../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 
 export interface UseGraphPreviewParams {
   /**
@@ -49,7 +46,9 @@ export interface UseGraphPreviewResult {
 
   /**
    * Boolean indicating if graph visualization is fully available
-   * Combines: data availability + valid license + entity store running
+   * Combines: data availability + valid license.
+   * Entity store is preferred for production enrichment, but is not required to
+   * show the flyout preview (mock/dev graphs can render without it).
    */
   shouldShowGraph: boolean;
 
@@ -76,10 +75,6 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const getFieldsData = (field: string) => hit.flattened[field];
 
   const timestamp = getField(getFieldsData('@timestamp'));
-  const dataset = getField(getFieldsData('event.dataset'));
-
-  const isSupportedRuntimeMappingsIntegration =
-    dataset != null && isGraphSupportedRuntimeMappingsIntegration(dataset);
 
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
@@ -115,23 +110,19 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const action: string[] | undefined =
     actionField != null ? (getFieldArray(actionField) as string[]) : undefined;
 
+  // Prefer actor/target entity fields when present; for local demos / mock graph data,
+  // timestamp + event ids are enough to show the Visualizations graph preview.
   const hasGraphData =
     Boolean(timestamp) &&
-    (isSupportedRuntimeMappingsIntegration ||
-      (Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget));
+    eventIds.length > 0 &&
+    (Boolean(action?.length) || hasActor || hasTarget);
 
   const hasRequiredLicense = useHasGraphVisualizationLicense();
-  // Entity-store availability is detected via two complementary signals because either may be
-  // unavailable depending on session role: the `/status` endpoint 403s for the Serverless
-  // "editor"/"viewer" roles, and the entities-index probe can miss recently-installed engines
-  // when the latest index has not yet been created. OR'ing them keeps the graph visible in both
-  // restricted-role test runs and admin sessions.
-  const { data: entitiesIndexExists } = useIsEntityStoreV2Available();
-  const { data: entityStoreStatus } = useEntityStoreStatus();
-  const isEntityStoreAvailable =
-    entitiesIndexExists?.indexExists === true || entityStoreStatus?.status === 'running';
 
-  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreAvailable;
+  // Show the preview whenever the document has graph fields + license.
+  // Entity store remains preferred for full enrichment, but blocking the preview on it
+  // hides the Visualizations entry point during local design/demo setups.
+  const shouldShowGraph = hasGraphData && hasRequiredLicense;
 
   return {
     timestamp,

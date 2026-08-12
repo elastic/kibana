@@ -108,30 +108,20 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
 
   const toggleIcon = useMemo(
     () => (
-      <EuiToolTip
-        content={i18n.translate(
+      <EuiButtonIcon
+        data-test-subj={`${dataTestSubj}ToggleIcon`}
+        aria-label={i18n.translate(
           'xpack.securitySolution.flyout.shared.ExpandablePanelButtonIconAriaLabel',
           {
             defaultMessage: 'Expandable panel toggle',
           }
         )}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          data-test-subj={`${dataTestSubj}ToggleIcon`}
-          aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.shared.ExpandablePanelButtonIconAriaLabel',
-            {
-              defaultMessage: 'Expandable panel toggle',
-            }
-          )}
-          color="text"
-          display="empty"
-          iconType={toggleStatus ? 'chevronSingleDown' : 'chevronSingleRight'}
-          onClick={toggleQuery}
-          size="xs"
-        />
-      </EuiToolTip>
+        color="text"
+        display="empty"
+        iconType={toggleStatus ? 'chevronSingleDown' : 'chevronSingleRight'}
+        onClick={toggleQuery}
+        size="xs"
+      />
     ),
     [dataTestSubj, toggleStatus, toggleQuery]
   );
@@ -163,7 +153,6 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
                   margin: ${euiTheme.size.s} 0;
                 `}
                 data-test-subj={`${dataTestSubj}TitleIcon`}
-                aria-hidden={true}
               />
             </EuiFlexItem>
           )}
@@ -242,7 +231,13 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
   );
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder data-test-subj={`${dataTestSubj}Panel`}>
+    <EuiSplitPanel.Outer
+      grow
+      hasBorder
+      css={css`
+        overflow: visible;
+      `}
+    >
       <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize={'xs'}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {headerLeftSection}
@@ -250,8 +245,20 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       {showContent && (
-        <EuiSplitPanel.Inner paddingSize="none">
-          <EuiPanel paddingSize={contentPaddingSize} data-test-subj={`${dataTestSubj}Content`}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            overflow: visible;
+          `}
+        >
+          <EuiPanel
+            hasShadow={false}
+            paddingSize={contentPaddingSize}
+            data-test-subj={`${dataTestSubj}Content`}
+            css={css`
+              overflow: visible;
+            `}
+          >
             {content}
           </EuiPanel>
         </EuiSplitPanel.Inner>

@@ -6,10 +6,10 @@
  */
 
 import { createContext } from 'react';
-import type { ReactReduxContextValue } from 'react-redux-v7';
-import { createDispatchHook, createSelectorHook } from 'react-redux-v7';
-import { configureStore } from 'redux-toolkit-v1';
-import { createSelector } from 'reselect-v4';
+import type { ReactReduxContextValue } from 'react-redux';
+import { createDispatchHook, createSelectorHook } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { createSelector } from 'reselect';
 import { panelsReducer, uiReducer } from './reducers';
 import type { State } from './state';
 import { initialState } from './state';
@@ -26,7 +26,8 @@ export const store = configureStore({
     ui: uiReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
-  middleware: [
+  // RTK 2 requires a builder callback (array form throws "`middleware` field must be a callback").
+  middleware: () => [
     savePushVsOverlayToLocalStorageMiddleware,
     saveUserSectionWidthsToLocalStorageMiddleware,
     saveUserFlyoutWidthsToLocalStorageMiddleware,

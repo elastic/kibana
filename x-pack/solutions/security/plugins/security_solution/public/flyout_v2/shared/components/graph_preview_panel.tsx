@@ -26,6 +26,8 @@ export interface GraphPreviewPanelProps {
   onShowGraph?: () => void;
   /** Whether to show the graph preview panel header icon. */
   showIcon: boolean;
+  /** Whether to hide navigation to the full graph visualization. */
+  disableNavigation: boolean;
   /** Whether the graph preview is available for the current document. */
   shouldShowGraph: boolean;
   /** Whether the graph preview data is currently loading. */
@@ -34,6 +36,8 @@ export interface GraphPreviewPanelProps {
   isError: boolean;
   /** Data used to render the graph preview nodes and edges. */
   data?: GraphPreviewData;
+  /** Entity that opened the flyout — keeps left preview pill in sync with the graph origin. */
+  originEntityId?: string;
 }
 
 /** Displays a graph preview panel or graph visualization upsell for the current document. */
@@ -44,6 +48,8 @@ export const GraphPreviewPanel = ({
   data,
   onShowGraph,
   showIcon,
+  disableNavigation,
+  originEntityId,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
@@ -57,7 +63,7 @@ export const GraphPreviewPanel = ({
     return null;
   }
 
-  const showLink = shouldShowGraph && onShowGraph != null;
+  const showLink = !disableNavigation && shouldShowGraph && onShowGraph != null;
 
   return (
     <ExpandablePanel
@@ -65,7 +71,7 @@ export const GraphPreviewPanel = ({
         title: (
           <FormattedMessage
             id="xpack.securitySolution.flyout.document.visualizations.graphPreview.graphPreviewTitle"
-            defaultMessage="Graph preview"
+            defaultMessage="Graph view"
           />
         ),
         headerContent: (
@@ -103,7 +109,35 @@ export const GraphPreviewPanel = ({
       content={!isLoading && !isError ? { paddingSize: 'none' } : undefined}
     >
       {shouldShowGraph ? (
-        <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+        <div
+          role={showLink ? 'button' : undefined}
+          tabIndex={showLink ? 0 : undefined}
+          onClick={showLink ? onShowGraph : undefined}
+          onKeyDown={
+            showLink
+              ? (event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onShowGraph?.();
+                  }
+                }
+              : undefined
+          }
+          css={
+            showLink
+              ? {
+                  cursor: 'pointer',
+                }
+              : undefined
+          }
+        >
+          <GraphPreview
+            isLoading={isLoading}
+            isError={isError}
+            data={data}
+            originEntityId={originEntityId}
+          />
+        </div>
       ) : (
         GraphVisualizationUpsell && <GraphVisualizationUpsell />
       )}

@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createContext, useContext } from 'react';
+
+export type PanelToggleHandler = () => void;
+export type FocusSearchInputHandler = () => void;
+
+export interface GraphInteractionToolContextValue {
+  registerApplyFiltersToggle: (toggle: PanelToggleHandler | null) => void;
+  registerSearchPanelToggle: (toggle: PanelToggleHandler | null) => void;
+  registerFocusSearchInput: (focus: FocusSearchInputHandler | null) => void;
+  /** Opens the in-graph find/filter panel (find-in-page). */
+  openInGraphSearch: () => void;
+}
+
+export const GraphInteractionToolContext = createContext<GraphInteractionToolContextValue | null>(
+  null
+);
+
+export const useGraphInteractionTool = (): GraphInteractionToolContextValue => {
+  const context = useContext(GraphInteractionToolContext);
+
+  if (!context) {
+    throw new Error('useGraphInteractionTool must be used within GraphInteractionToolProvider');
+  }
+
+  return context;
+};

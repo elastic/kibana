@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
+import { GraphExpandPopoverSync } from '../graph/graph_expand_popover_sync';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
 import { useIpPopover } from '../node/ips/ips';
@@ -28,14 +28,19 @@ import type { DocumentAnalysisOutput } from '../node/label_node/analyze_document
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
+import { BottomBar } from '../controls/bottom_bar';
+import { DEFAULT_GRAPH_FILTERS } from '../controls/apply_filters_popover';
+import type { GraphFiltersState } from '../controls/apply_filters_popover';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
+import { GRAPH_PANEL_INSET } from '../constants';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
-import type { NodeViewModel } from '../types';
+import type { EntityActionItem, NodeProps, NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 import { useGraphFilters } from '../filters/use_graph_filters';
+import { getEntityCardWidthForLabels } from '../node/card_node';
 
 const useGraphPopovers = ({
   scopeId,
@@ -189,13 +194,6 @@ export interface GraphInvestigationProps {
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
-
-    /**
-     * CPS project routing for the logs/events query. Forwarded as-is to the Graph API.
-     * Alerts and entity-store enrichment are always fetched from the origin project,
-     * regardless of this value. Leave undefined for non-CPS environments.
-     */
-    projectRouting?: ProjectRouting;
   };
 
   /**
@@ -227,6 +225,27 @@ export interface GraphInvestigationProps {
    * Whether to show toggle search action button. Defaults value is false.
    */
   showToggleSearch?: boolean;
+
+  /**
+   * Search controls layout for prototyping.
+   * - `split` (Option A): top KQL toggle + bottom in-graph search
+   * - `unified` (Option B): top KQL toggle only; bottom in-graph search hidden
+   */
+  searchControlsVariant?: 'split' | 'unified';
+
+  /**
+   * Entity actions popover interaction for prototyping (dev-graph).
+   * - `button`: `⋯` in header, open on click
+   * - `hover` (Test A): hide `⋯`, open popover on entity hover
+   */
+  entityActionsMode?: 'button' | 'hover';
+
+  /**
+   * Entity visual style for prototyping (dev-graph Entity Colors tab).
+   * - `default`: neutral header/icon
+   * - `colored`: risk-tinted icon/header + compact zoom-out card
+   */
+  entityStyleMode?: 'default' | 'colored';
 }
 
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
@@ -244,10 +263,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originEventIds,
       entityIds,
       timeRange: initialTimeRange,
-      projectRouting,
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
+    searchControlsVariant = 'unified',
+    entityActionsMode = 'button',
+    entityStyleMode = 'default',
     onInvestigateInTimeline,
     onOpenEventPreview,
     onOpenNetworkPreview,
@@ -266,6 +287,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
+    const [graphFilters, setGraphFilters] = useState<GraphFiltersState>(DEFAULT_GRAPH_FILTERS);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -324,7 +346,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
           entityIds: entityIdsForApi,
           pinnedIds: pinnedEuids,
-          projectRouting,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -361,6 +382,15 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
+
+    const closeGraphExpandPopovers = useCallback(() => {
+      nodeExpandPopover.actions.closePopover();
+      labelExpandPopover.actions.closePopover();
+      ipPopover.actions.closePopover();
+      countryFlagsPopover.actions.closePopover();
+      eventPopover.actions.closePopover();
+    }, [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]);
+
     const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
@@ -385,27 +415,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const handlePointerDownCapture = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!isExternalOverlayOpen()) return;
         const eventTarget = event.target as HTMLElement | null;
         if (!eventTarget?.closest?.('.react-flow__pane')) return;
-
-        // The KQL search input grows to fit a long query while it is focused.
-        // d3-zoom calls `preventDefault()` on the pane's pointer events, which
-        // suppresses the browser's native focus change — so clicking the graph
-        // would otherwise leave the input focused and expanded. Blur it
-        // explicitly so it collapses back to a single line, matching what
-        // happens when clicking any other DOM node outside the input.
-        const activeElement = document.activeElement as HTMLElement | null;
-        const isSearchInputFocused = Boolean(activeElement?.closest?.('.kbnQueryBar__wrap'));
-        if (isSearchInputFocused) {
-          activeElement?.blur();
-        }
-
-        // Synthesize the suppressed `mousedown`/`mouseup` on the graph container
-        // in capture phase (before d3-zoom) so `EuiOutsideClickDetector` (which
-        // collapses the search input and closes KQL autocomplete) and
-        // `react-focus-on` (EuiPopover) react to the click while it stays
-        // "inside" the parent EuiFlyout.
-        if (!isSearchInputFocused && !isExternalOverlayOpen()) return;
 
         const opts = { bubbles: true, cancelable: true, view: window, button: 0 };
         event.currentTarget.dispatchEvent(new MouseEvent('mousedown', opts));
@@ -458,22 +470,58 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [data?.edges]);
 
     const nodes = useMemo(() => {
+      const entityCardWidth = getEntityCardWidthForLabels(
+        (data?.nodes ?? [])
+          .filter(isEntityNode)
+          .map((node) => node.label ?? node.id)
+      );
+
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
-            const isOrigin = originEntityIdsSet.has(node.id);
+            const { nodeMetadata } = graphFilters;
             return {
               ...node,
-              ...(isOrigin && { isOrigin }),
+              isOrigin: originEntityIdsSet.has(node.id),
+              showEntityId: nodeMetadata.entityId,
+              ips: nodeMetadata.ipAddress ? node.ips : undefined,
+              countryCodes: nodeMetadata.geolocation ? node.countryCodes : undefined,
+              assetCriticality: nodeMetadata.assetCriticality ? node.assetCriticality : undefined,
+              assetCriticalityCounts: nodeMetadata.assetCriticality
+                ? node.assetCriticalityCounts
+                : undefined,
+              riskScore:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScore
+                  : undefined,
+              riskScoreMin:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScoreMin
+                  : undefined,
+              riskScoreMax:
+                entityStyleMode === 'colored' || nodeMetadata.riskScore
+                  ? node.riskScoreMax
+                  : undefined,
               expandButtonClick: nodeExpandButtonClickHandler,
-              ipClickHandler: createIpClickHandler(nodeIps),
-              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              closeEntityActions: () => nodeExpandPopover.actions.closePopover(),
+              getEntityActionItems: () =>
+                nodeExpandPopover
+                  .getActionItems({ id: node.id, data: node } as NodeProps)
+                  .filter((item): item is EntityActionItem => item.type === 'item'),
+              entityActionsMode,
+              entityStyleMode,
+              cardWidth: entityCardWidth,
+              ipClickHandler: createIpClickHandler(nodeMetadata.ipAddress ? nodeIps : []),
+              countryClickHandler: createCountryClickHandler(
+                nodeMetadata.geolocation ? nodeCountryCodes : []
+              ),
             };
           } else if (isLabelNode(node)) {
             const nodeIps = node.ips || [];
             const nodeCountryCodes = node.countryCodes || [];
+            const { eventAlertMetadata } = graphFilters;
             const numEvents = node.uniqueEventsCount ?? 0;
             const numAlerts = node.uniqueAlertsCount ?? 0;
             const analysis = analyzeDocuments({
@@ -487,11 +535,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
                 : [];
             return {
               ...node,
+              ips: eventAlertMetadata.sourceIpAddress ? node.ips : undefined,
+              countryCodes: eventAlertMetadata.sourceGeolocation ? node.countryCodes : undefined,
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
-              ipClickHandler: createIpClickHandler(nodeIps),
-              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              ipClickHandler: createIpClickHandler(
+                eventAlertMetadata.sourceIpAddress ? nodeIps : []
+              ),
+              countryClickHandler: createCountryClickHandler(
+                eventAlertMetadata.sourceGeolocation ? nodeCountryCodes : []
+              ),
               eventClickHandler: createEventClickHandler(analysis, text),
             };
           } else if (isRelationshipNode(node)) {
@@ -501,6 +555,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             return {
               ...node,
               ...(isOrigin && { isOrigin }),
+              expandButtonClick: labelExpandButtonClickHandler,
             };
           }
 
@@ -514,6 +569,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
+      graphFilters,
+      entityActionsMode,
+      entityStyleMode,
     ]);
 
     const searchFilterCounter = useMemo(() => {
@@ -542,18 +600,53 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         ? NEGATED_FILTER_SEARCH_WARNING_MESSAGE
         : undefined;
 
+    const graphTopBorder = useBorder();
+    const showGraphTopBorder = searchToggled || !showToggleSearch;
+
     return (
-      <>
+      <div
+        css={css`
+          height: 100%;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        `}
+      >
         <EuiFlexGroup
           data-test-subj={GRAPH_INVESTIGATION_TEST_ID}
           direction="column"
           gutterSize="none"
           onPointerDownCapture={handlePointerDownCapture}
           css={css`
+            flex: 1 1 auto;
+            min-height: 0;
             height: 100%;
+            overflow: hidden;
 
-            .react-flow__panel {
-              margin-right: 8px;
+            .react-flow__panel.top.right {
+              margin-top: ${GRAPH_PANEL_INSET}px;
+              margin-right: ${GRAPH_PANEL_INSET}px;
+            }
+
+            .react-flow__panel.bottom {
+              overflow: visible;
+            }
+
+            .react-flow__panel.bottom.center {
+              overflow: visible;
+            }
+
+            .react-flow__panel.bottom.right {
+              overflow: visible;
+              margin-right: ${GRAPH_PANEL_INSET}px;
+              margin-bottom: ${GRAPH_PANEL_INSET}px;
+            }
+
+            .react-flow__panel.bottom.left {
+              overflow: visible;
+              margin-left: ${GRAPH_PANEL_INSET}px;
+              margin-bottom: ${GRAPH_PANEL_INSET}px;
             }
           `}
         >
@@ -594,8 +687,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           )}
           <EuiFlexItem
             css={css`
-              border-top: ${useBorder()};
+              /* Avoid a double divider under flyout tabs when the KQL bar is collapsed. */
+              border-top: ${showGraphTopBorder ? graphTopBorder : 'none'};
               position: relative;
+              min-height: 0;
+              overflow: hidden;
             `}
           >
             {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
@@ -609,16 +705,32 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               interactive={true}
               isLocked={isPopoverOpen}
               showMinimap={true}
+              highlightOriginsOnly={graphFilters.highlightOriginsOnly}
             >
-              <Panel position="top-right">
+              <GraphExpandPopoverSync onClosePopovers={closeGraphExpandPopovers} />
+              <Panel
+                position="top-right"
+                style={{ marginTop: GRAPH_PANEL_INSET, marginRight: GRAPH_PANEL_INSET }}
+              >
                 <Actions
-                  showInvestigateInTimeline={showInvestigateInTimeline}
+                  showInvestigateInTimeline={false}
                   showToggleSearch={showToggleSearch}
-                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
+                  searchControlsVariant={searchControlsVariant}
+                  nodes={nodes}
                   onSearchToggle={(isSearchToggle) => setSearchToggled(isSearchToggle)}
                   searchFilterCounter={searchFilterCounter}
                   searchToggled={searchToggled}
                   searchWarningMessage={searchWarningMessage}
+                />
+              </Panel>
+              <Panel position="bottom-center" style={{ overflow: 'visible' }}>
+                <BottomBar
+                  showInvestigateInTimeline={showInvestigateInTimeline}
+                  onInvestigateInTimeline={onInvestigateInTimelineCallback}
+                  filtersState={graphFilters}
+                  onFiltersChange={setGraphFilters}
+                  nodes={nodes}
+                  showInGraphSearch={searchControlsVariant !== 'unified'}
                 />
               </Panel>
             </Graph>
@@ -629,7 +741,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         <ipPopover.PopoverComponent />
         <countryFlagsPopover.PopoverComponent />
         <eventPopover.PopoverComponent />
-      </>
+      </div>
     );
   }
 );

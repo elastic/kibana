@@ -7,20 +7,16 @@
 
 import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
-  getAnomaliesTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
-import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import type {
   LeftPanelTabsType,
   EntityDetailsLeftPanelTab,
 } from '../shared/components/left_panel/left_panel_header';
-import { getGraphViewTab } from '../shared/components/left';
 
 import type { HostDetailsPanelProps } from '.';
 import { HostDetailsPanelKey } from '.';
@@ -63,10 +59,6 @@ export const useTabs = ({
   entityStoreEntityId,
 }: HostDetailsPanelProps): LeftPanelTabsType => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
-  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
-  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
-  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
-  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
 
   return useMemo(() => {
     const isRiskScoreTabAvailable = (isRiskScoreExist || entityStoreEntityId) && hostName;
@@ -95,10 +87,6 @@ export const useTabs = ({
           ]
         : [];
 
-    const graphViewTab = entityStoreEntityId
-      ? [getGraphViewTab({ entityId: entityStoreEntityId, scopeId })]
-      : [];
-
     const resolutionTab =
       entityStoreEntityId && hasEntityResolutionLicense
         ? [
@@ -110,26 +98,17 @@ export const useTabs = ({
           ]
         : [];
 
-    const anomaliesTab = loadAnomalies
-      ? [
-          getAnomaliesTab({
-            entityId: entityStoreEntityId,
-            entityType: EntityType.host,
-          }),
-        ]
-      : [];
-
-    return [...riskScoreTab, ...anomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    // Graph opens from the entity flyout preview (system flyout), not as a left-panel tab.
+    return [...riskScoreTab, ...insightsTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
-    entityStoreEntityId,
     hostName,
+    entityId,
     scopeId,
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    entityId,
+    entityStoreEntityId,
     hasEntityResolutionLicense,
-    loadAnomalies,
   ]);
 };

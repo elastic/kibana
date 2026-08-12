@@ -11,6 +11,12 @@ import userEvent from '@testing-library/user-event';
 import { useStore, useReactFlow } from '@xyflow/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { Controls, type ControlsProps } from './controls';
+import {
+  GRAPH_CONTROLS_FIT_VIEW_ID,
+  GRAPH_CONTROLS_FULL_SCREEN_ID,
+  GRAPH_CONTROLS_ZOOM_IN_ID,
+  GRAPH_CONTROLS_ZOOM_OUT_ID,
+} from '../test_ids';
 
 const defaultProps: ControlsProps = {
   showZoom: true,
@@ -36,8 +42,8 @@ const renderWithProviders = (props: ControlsProps = defaultProps) => {
 describe('Controls', () => {
   beforeEach(() => {
     useReactFlowMock.mockReturnValue({
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
+      getZoom: jest.fn(() => 1),
+      zoomTo: jest.fn(),
       fitView: jest.fn(),
     });
 
@@ -62,77 +68,78 @@ describe('Controls', () => {
 
   describe('zoom', () => {
     it('renders zoom in and zoom out buttons', () => {
-      const { getByLabelText } = renderWithProviders();
-      expect(getByLabelText('Zoom in')).toBeInTheDocument();
-      expect(getByLabelText('Zoom out')).toBeInTheDocument();
+      const { getByTestId } = renderWithProviders();
+      expect(getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID)).toHaveAttribute('aria-label', 'Zoom in   +');
+      expect(getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID)).toHaveAttribute('aria-label', 'Zoom out   -');
     });
 
     it('hides zoom in and zoom out buttons if showZoom is false', () => {
-      const { queryByLabelText } = renderWithProviders({ showZoom: false });
-      expect(queryByLabelText('Zoom in')).not.toBeInTheDocument();
-      expect(queryByLabelText('Zoom out')).not.toBeInTheDocument();
+      const { queryByTestId } = renderWithProviders({ showZoom: false });
+      expect(queryByTestId(GRAPH_CONTROLS_ZOOM_IN_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID)).not.toBeInTheDocument();
     });
 
     it('calls onZoomIn when zoom in button is clicked', () => {
       const onZoomIn = jest.fn();
-      const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomIn });
+      const { getByTestId } = renderWithProviders({ ...defaultProps, onZoomIn });
 
-      fireEvent.click(getByLabelText('Zoom in'));
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID));
 
-      expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1.12, { duration: undefined });
       expect(onZoomIn).toHaveBeenCalled();
     });
 
     it('calls onZoomOut when zoom out button is clicked', () => {
       const onZoomOut = jest.fn();
-      const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomOut });
+      const { getByTestId } = renderWithProviders({ ...defaultProps, onZoomOut });
 
-      fireEvent.click(getByLabelText('Zoom out'));
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID));
 
-      expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1 / 1.12, { duration: undefined });
       expect(onZoomOut).toHaveBeenCalled();
     });
 
     it('disables zoom in button when max zoom is reached', () => {
       useStoreMock.mockReturnValue({ minZoomReached: false, maxZoomReached: true });
 
-      const { getByLabelText } = renderWithProviders();
+      const { getByTestId } = renderWithProviders();
 
-      const zoomInButton = getByLabelText('Zoom in');
-      expect(zoomInButton).toBeDisabled();
+      expect(getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID)).toBeDisabled();
     });
 
     it('disables zoom out button when min zoom is reached', () => {
       useStoreMock.mockReturnValue({ minZoomReached: true, maxZoomReached: false });
 
-      const { getByLabelText } = renderWithProviders();
+      const { getByTestId } = renderWithProviders();
 
-      const zoomOutButton = getByLabelText('Zoom out');
-      expect(zoomOutButton).toBeDisabled();
+      expect(getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID)).toBeDisabled();
     });
   });
 
   describe('fit view', () => {
-    it('renders fit view button', () => {
-      const { getByLabelText } = renderWithProviders();
-      expect(getByLabelText('Fit view')).toBeInTheDocument();
+    it('renders fit to screen button', () => {
+      const { getByTestId } = renderWithProviders();
+      expect(getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID)).toHaveAttribute(
+        'aria-label',
+        'Fit to screen   0'
+      );
     });
 
     it('hides fit view button', () => {
-      const { queryByLabelText } = renderWithProviders({ showFitView: false });
-      expect(queryByLabelText('Fit view')).not.toBeInTheDocument();
+      const { queryByTestId } = renderWithProviders({ showFitView: false });
+      expect(queryByTestId(GRAPH_CONTROLS_FIT_VIEW_ID)).not.toBeInTheDocument();
     });
 
     it('calls onFitView when fit view button is clicked', () => {
       const onFitView = jest.fn();
       const fitViewOptions = { duration: 200 };
-      const { getByLabelText } = renderWithProviders({
+      const { getByTestId } = renderWithProviders({
         ...defaultProps,
         onFitView,
         fitViewOptions,
       });
 
-      fireEvent.click(getByLabelText('Fit view'));
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID));
 
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith(fitViewOptions);
       expect(onFitView).toHaveBeenCalled();
@@ -186,7 +193,7 @@ describe('Controls', () => {
         ...defaultProps,
         nodeIdsToCenterOn: ['node1'], // Need at least one non-empty node ID for center button to render
       });
-      expect(getByLabelText('Center')).toBeInTheDocument();
+      expect(getByLabelText('Center   C')).toBeInTheDocument();
     });
 
     it('renders center button when nodeIdsToCenterOn contains mix of empty and non-empty IDs', () => {
@@ -195,7 +202,7 @@ describe('Controls', () => {
         nodeIdsToCenterOn: ['', 'node1', '  ', 'node2', ''],
       });
 
-      expect(getByLabelText('Center')).toBeInTheDocument();
+      expect(getByLabelText('Center   C')).toBeInTheDocument();
     });
 
     it('calls onCenter and centers graph on selected node IDs when center button is clicked', () => {
@@ -208,7 +215,7 @@ describe('Controls', () => {
         nodeIdsToCenterOn: ['node1', 'node2'],
       });
 
-      fireEvent.click(getByLabelText('Center'));
+      fireEvent.click(getByLabelText('Center   C'));
 
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
         ...fitViewOptions,
@@ -227,7 +234,7 @@ describe('Controls', () => {
         nodeIdsToCenterOn: ['', 'node1', '  ', 'node2', ''],
       });
 
-      fireEvent.click(getByLabelText('Center'));
+      fireEvent.click(getByLabelText('Center   C'));
 
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
         ...fitViewOptions,
@@ -244,7 +251,7 @@ describe('Controls', () => {
         nodeIdsToCenterOn: nodeIds,
       });
 
-      const centerButton = getByLabelText('Center');
+      const centerButton = getByLabelText('Center   C');
       fireEvent.click(centerButton);
 
       const firstCall = useReactFlowMock().fitView.mock.calls[0][0];
@@ -256,7 +263,7 @@ describe('Controls', () => {
         </EuiThemeProvider>
       );
 
-      const newCenterButton = getByLabelText('Center');
+      const newCenterButton = getByLabelText('Center   C');
       fireEvent.click(newCenterButton);
 
       const secondCall = useReactFlowMock().fitView.mock.calls[1][0];
@@ -267,25 +274,52 @@ describe('Controls', () => {
     });
   });
 
+  describe('full screen', () => {
+    it('hides full screen button when onToggleFullScreen is not provided', () => {
+      const { queryByTestId } = renderWithProviders();
+      expect(queryByTestId(GRAPH_CONTROLS_FULL_SCREEN_ID)).not.toBeInTheDocument();
+    });
+
+    it('renders full screen button when onToggleFullScreen is provided', () => {
+      const onToggleFullScreen = jest.fn();
+      const { getByTestId } = renderWithProviders({ onToggleFullScreen });
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_FULL_SCREEN_ID));
+      expect(onToggleFullScreen).toHaveBeenCalled();
+    });
+
+    it('shows exit full screen label when isFullScreen is true', () => {
+      const { getByTestId } = renderWithProviders({
+        onToggleFullScreen: jest.fn(),
+        isFullScreen: true,
+      });
+
+      expect(getByTestId(GRAPH_CONTROLS_FULL_SCREEN_ID)).toHaveAttribute(
+        'aria-label',
+        'Exit full screen   F'
+      );
+    });
+  });
+
   describe('fitViewOptions', () => {
     it('handles undefined fitViewOptions', () => {
-      const { getByLabelText } = renderWithProviders({
+      const { getByTestId } = renderWithProviders({
         ...defaultProps,
         fitViewOptions: undefined,
       });
 
-      fireEvent.click(getByLabelText('Fit view'));
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID));
 
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith(undefined);
     });
 
     it('handles empty fitViewOptions object', () => {
-      const { getByLabelText } = renderWithProviders({
+      const { getByTestId } = renderWithProviders({
         ...defaultProps,
         fitViewOptions: {},
       });
 
-      fireEvent.click(getByLabelText('Fit view'));
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID));
 
       expect(useReactFlowMock().fitView).toHaveBeenCalledWith({});
     });
@@ -295,28 +329,28 @@ describe('Controls', () => {
     it('should handle keyboard navigation correctly', async () => {
       const user = userEvent.setup();
 
-      const { getByLabelText } = renderWithProviders({
+      const { getByTestId, getByLabelText } = renderWithProviders({
         ...defaultProps,
         nodeIdsToCenterOn: ['node1'],
       });
 
-      const zoomInButton = getByLabelText('Zoom in');
-      const zoomOutButton = getByLabelText('Zoom out');
-      const centerButton = getByLabelText('Center');
-      const fitViewButton = getByLabelText('Fit view');
+      const zoomInButton = getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID);
+      const zoomOutButton = getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID);
+      const centerButton = getByLabelText('Center   C');
+      const fitViewButton = getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID);
 
       // Test tab navigation and keyboard activation - zoom in
       await user.tab();
       expect(document.activeElement).toBe(zoomInButton);
       // Test keyboard activation
       await user.keyboard('{Enter}');
-      expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1.12, { duration: undefined });
 
       // Test tab navigation and keyboard activation - zoom out
       await user.tab();
       expect(document.activeElement).toBe(zoomOutButton);
       await user.keyboard('{Enter}');
-      expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1 / 1.12, { duration: undefined });
 
       // Test tab navigation and keyboard activation - center
       await user.tab();
@@ -332,18 +366,18 @@ describe('Controls', () => {
     });
 
     it('should have proper accessible names', () => {
-      const { getByLabelText } = renderWithProviders({
+      const { getByTestId, getByLabelText } = renderWithProviders({
         ...defaultProps,
         nodeIdsToCenterOn: ['node1'],
       });
 
-      const zoomInButton = getByLabelText('Zoom in');
-      const centerButton = getByLabelText('Center');
-      const fitViewButton = getByLabelText('Fit view');
+      const zoomInButton = getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID);
+      const centerButton = getByLabelText('Center   C');
+      const fitViewButton = getByTestId(GRAPH_CONTROLS_FIT_VIEW_ID);
 
-      expect(zoomInButton).toHaveAccessibleName('Zoom in');
-      expect(centerButton).toHaveAccessibleName('Center');
-      expect(fitViewButton).toHaveAccessibleName('Fit view');
+      expect(zoomInButton).toHaveAttribute('aria-label', 'Zoom in   +');
+      expect(centerButton).toHaveAccessibleName('Center   C');
+      expect(fitViewButton).toHaveAttribute('aria-label', 'Fit to screen   0');
     });
   });
 });

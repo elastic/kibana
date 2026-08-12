@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   type CommonProps,
   EuiBeacon,
@@ -14,20 +14,32 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiNotificationBadge,
   EuiToolTip,
   EuiTourStep,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { GraphNotificationBadge } from '../graph_notification_badge';
 import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
 import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
+import { useGraphInteractionTool } from './graph_interaction_tool_context';
+import type { NodeViewModel } from '../types';
+
+/** Match controls / minimap floating chrome shadow. */
+const SEARCH_BUTTON_SHADOW = 'm' as const;
+
+/**
+ * - `split`: top KQL toggle + bottom in-graph search
+ * - `unified`: top KQL toggle only (in-graph search hidden for now)
+ */
+export type SearchControlsVariant = 'split' | 'unified';
 
 const toggleSearchBarTourTitle = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.toggleSearchBar.tour.title',
@@ -93,6 +105,16 @@ export interface ActionsProps extends CommonProps {
    * Warning message to show. Defaults value is undefined.
    */
   searchWarningMessage?: { title: string; content: string };
+
+  /**
+   * Search controls layout. `unified` hides bottom in-graph search; both use a direct KQL toggle.
+   */
+  searchControlsVariant?: SearchControlsVariant;
+
+  /**
+   * Graph nodes (kept for API compatibility; in-graph search is temporarily hidden).
+   */
+  nodes?: NodeViewModel[];
 }
 
 // eslint-disable-next-line complexity
@@ -104,9 +126,12 @@ export const Actions = ({
   searchFilterCounter = 0,
   searchToggled,
   searchWarningMessage,
+  searchControlsVariant = 'unified',
+  nodes: _nodes = [],
   ...props
 }: ActionsProps) => {
   const { euiTheme } = useEuiTheme();
+  const searchButtonShadow = useEuiShadow(SEARCH_BUTTON_SHADOW);
   const [isSearchBarTourOpen, setIsSearchBarTourOpen] = useState(false);
   const hasSearchWarning = searchWarningMessage !== undefined && searchWarningMessage !== null;
   const [shouldShowSearchBarButtonTour, setShouldShowSearchBarButtonTour] = useLocalStorage(
@@ -115,6 +140,37 @@ export const Actions = ({
   );
   const { notifications } = useKibana().services;
   const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
+  const isUnified = searchControlsVariant === 'unified';
+  const { registerSearchPanelToggle, registerFocusSearchInput } = useGraphInteractionTool();
+
+  const openKqlSearch = useCallback(() => {
+    onSearchToggle?.(true);
+  }, [onSearchToggle]);
+
+  const toggleKqlSearch = useCallback(() => {
+    onSearchToggle?.(!searchToggled);
+  }, [onSearchToggle, searchToggled]);
+
+  // When bottom in-graph search is hidden (unified), wire shortcuts to the KQL bar.
+  useEffect(() => {
+    if (!isUnified) {
+      return;
+    }
+
+    registerSearchPanelToggle(toggleKqlSearch);
+    registerFocusSearchInput(openKqlSearch);
+
+    return () => {
+      registerSearchPanelToggle(null);
+      registerFocusSearchInput(null);
+    };
+  }, [
+    isUnified,
+    openKqlSearch,
+    registerFocusSearchInput,
+    registerSearchPanelToggle,
+    toggleKqlSearch,
+  ]);
 
   if (shouldShowSearchBarButtonTour && isTourEnabled) {
     if (searchFilterCounter > 0) {
@@ -135,6 +191,23 @@ export const Actions = ({
       ? toggleSearchBarTooltip
       : undefined;
 
+  const searchButtonCss = [
+    css`
+      position: relative;
+      overflow: visible;
+      width: 40px;
+      min-width: 40px;
+      border-radius: 4px;
+      ${searchButtonShadow};
+    `,
+    !searchToggled
+      ? css`
+          border: ${euiTheme.border.thin};
+          background-color: ${euiTheme.colors.backgroundBasePlain};
+        `
+      : undefined,
+  ];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       {showToggleSearch && (
@@ -154,19 +227,7 @@ export const Actions = ({
                 iconType="magnify"
                 color={searchToggled ? 'primary' : 'text'}
                 fill={searchToggled}
-                css={[
-                  css`
-                    position: relative;
-                    overflow: visible;
-                    width: 40px;
-                  `,
-                  !searchToggled
-                    ? css`
-                        border: ${euiTheme.border.thin};
-                        background-color: ${euiTheme.colors.backgroundBasePlain};
-                      `
-                    : undefined,
-                ]}
+                css={searchButtonCss}
                 contentProps={{
                   css: css`
                     position: initial;
@@ -201,7 +262,7 @@ export const Actions = ({
                   />
                 )}
                 {searchFilterCounter > 0 && (
-                  <EuiNotificationBadge
+                  <GraphNotificationBadge
                     css={css`
                       position: absolute;
                       right: ${-4.5 + (searchToggled ? 1 : 0)}px;
@@ -211,7 +272,7 @@ export const Actions = ({
                     `}
                   >
                     {searchFilterCounter > 99 ? '99+' : searchFilterCounter}
-                  </EuiNotificationBadge>
+                  </GraphNotificationBadge>
                 )}
               </EuiButton>
             </EuiToolTip>

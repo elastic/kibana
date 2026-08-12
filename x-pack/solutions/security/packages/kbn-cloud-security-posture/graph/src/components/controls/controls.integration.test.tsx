@@ -36,8 +36,8 @@ describe('Controls integration with Graph', () => {
 
   beforeEach(() => {
     useReactFlowMock.mockReturnValue({
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
+      getZoom: jest.fn(() => 1),
+      zoomTo: jest.fn(),
       fitView: jest.fn(),
     });
 
@@ -219,7 +219,7 @@ describe('Controls integration with Graph', () => {
 
       await waitFor(() => {
         expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: 'originEvent' }, { id: 'originAlert' }],
         });
       });
@@ -322,8 +322,8 @@ describe('Controls integration with Graph', () => {
         fireEvent.click(screen.getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID));
       });
       await waitFor(() => {
-        expect(useReactFlowMock().zoomIn).toHaveBeenCalledWith({
-          duration: 200,
+        expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1.12, {
+          duration: 350,
         });
       });
 
@@ -332,8 +332,8 @@ describe('Controls integration with Graph', () => {
         fireEvent.click(screen.getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID));
       });
       await waitFor(() => {
-        expect(useReactFlowMock().zoomOut).toHaveBeenCalledWith({
-          duration: 200,
+        expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1 / 1.12, {
+          duration: 350,
         });
       });
 
@@ -343,7 +343,7 @@ describe('Controls integration with Graph', () => {
       });
       await waitFor(() => {
         expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
         });
       });
 
@@ -353,7 +353,7 @@ describe('Controls integration with Graph', () => {
       });
       await waitFor(() => {
         expect(useReactFlowMock().fitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: 'node1' }],
         });
       });

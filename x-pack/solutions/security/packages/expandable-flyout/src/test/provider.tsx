@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Provider as ReduxProvider } from 'react-redux-v7';
-import { configureStore } from 'redux-toolkit-v1';
+import { Provider as ReduxProvider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -38,7 +38,8 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
     },
     devTools: false,
     preloadedState: state,
-    middleware: [
+    // RTK 2 requires a builder callback (array form throws "`middleware` field must be a callback").
+    middleware: () => [
       savePushVsOverlayToLocalStorageMiddleware,
       saveUserSectionWidthsToLocalStorageMiddleware,
       saveUserFlyoutWidthsToLocalStorageMiddleware,

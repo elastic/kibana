@@ -18,14 +18,22 @@ import {
   GRAPH_STACK_NODE_ID,
   GRAPH_EDGE_ID,
   GRAPH_MINIMAP_ID,
+  GRAPH_MINIMAP_TOGGLE_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
-import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
+
+// Turn off the optimization that hides elements that are not visible in the viewport
+jest.mock('../constants', () => ({
+  ...jest.requireActual('../constants'),
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
 
 describe('Minimap', () => {
   it('should render empty', () => {
@@ -36,10 +44,11 @@ describe('Minimap', () => {
     );
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
-    expect(minimap.firstChild?.firstChild?.childNodes).toHaveLength(2); // only <title> and <path> for mask
+    const rfMinimap = minimap.querySelector('.react-flow__minimap');
+    expect(rfMinimap?.firstChild?.childNodes).toHaveLength(2); // only <title> and <path> for mask
   });
 
-  it('should be at the bottom-left corner and have "backgroundBasePlain" viewport over a "backgroundBaseFormsControlDisabled" frame', async () => {
+  it('should be at the bottom-right corner with subdued viewport over a plain frame', async () => {
     render(
       <ReactFlow>
         <Minimap />
@@ -47,11 +56,51 @@ describe('Minimap', () => {
     );
 
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
-    expect(minimap.firstChild).toHaveStyle({
-      'background-color': '#FFFFFF',
-      '--xy-minimap-mask-background-color-props': 'rgba(202,211,226,0.75)',
+    expect(minimap).toHaveClass('bottom right');
+    const flowMinimap = minimap.querySelector('.react-flow__minimap');
+    expect(flowMinimap).toHaveStyle({
+      '--xy-minimap-background-color-props': '#F6F9FC',
     });
-    expect(minimap.firstChild).toHaveClass('bottom left');
+    // Mask is a semi-transparent mix so the overview stays visible when zoomed in
+    expect(flowMinimap?.getAttribute('style') ?? '').toContain(
+      '--xy-minimap-mask-background-color-props'
+    );
+  });
+
+  it('should collapse and expand when the toggle is clicked', () => {
+    render(
+      <ReactFlow>
+        <Minimap />
+      </ReactFlow>
+    );
+
+    const toggle = screen.getByTestId(GRAPH_MINIMAP_TOGGLE_ID);
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeTruthy();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.click(toggle);
+
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeNull();
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-label', 'Expand minimap');
+
+    fireEvent.click(toggle);
+
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeTruthy();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle).toHaveAttribute('aria-label', 'Collapse minimap');
+  });
+
+  it('should start collapsed when defaultExpanded is false', () => {
+    render(
+      <ReactFlow>
+        <Minimap defaultExpanded={false} />
+      </ReactFlow>
+    );
+
+    const toggle = screen.getByTestId(GRAPH_MINIMAP_TOGGLE_ID);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId(GRAPH_MINIMAP_ID).querySelector('.react-flow__minimap')).toBeNull();
   });
 });
 
@@ -211,11 +260,10 @@ describe('Minimap integrated with Graph', () => {
       // 3 label nodes: IndividualLabel, StackedLabel1, StackedLabel2
       // 2 relationship nodes: Owns, Communicates_with
       // 1 stack node: Stack(StackedLabel1, StackedLabel2)
-      // 12 edges:
+      // 10 edges (stack return paths are not rendered):
       //   A->IndividualLabel, IndividualLabel->B
       //   B->Stack
-      //   Stack->StackedLabel1, StackedLabel1->Stack
-      //   Stack->StackedLabel2, StackedLabel2->Stack
+      //   Stack->StackedLabel1, Stack->StackedLabel2
       //   Stack->C
       //   A->Owns, Owns->D
       //   A->Communicates_with, Communicates_with->E
@@ -228,7 +276,7 @@ describe('Minimap integrated with Graph', () => {
       const graphStackNodes = screen.getAllByTestId(GRAPH_STACK_NODE_ID);
       expect(graphStackNodes).toHaveLength(1);
       const graphEdgeNodes = screen.getAllByTestId(GRAPH_EDGE_ID);
-      expect(graphEdgeNodes).toHaveLength(12);
+      expect(graphEdgeNodes).toHaveLength(10);
 
       // Check Minimap contains the same number of entity, label, and relationship nodes as Graph
       // Check it does not render stack nodes or edges
@@ -286,12 +334,12 @@ describe('Minimap integrated with Graph', () => {
       const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
       const minimapRelationshipNodes = screen.getAllByTestId(GRAPH_MINIMAP_RELATIONSHIP_NODE_ID);
 
-      // Verify Minimap entity nodes have the correct dimensions (but scaled down)
+      // Entity cards: always drawn at card footprint so the overview stays "full"
       expect(
         minimapEntityNodes.every(
           (node) =>
-            node.getAttribute('width') === NODE_WIDTH.toString() &&
-            node.getAttribute('height') === NODE_HEIGHT.toString()
+            node.getAttribute('width') === CARD_NODE_WIDTH.toString() &&
+            node.getAttribute('height') === CARD_NODE_DEFAULT_HEIGHT.toString()
         )
       ).toBe(true);
 

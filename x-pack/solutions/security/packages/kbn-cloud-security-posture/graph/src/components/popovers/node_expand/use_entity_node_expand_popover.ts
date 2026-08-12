@@ -157,10 +157,8 @@ export const useEntityNodeExpandPopover = (
         },
         isEntityRelationshipsExpanded: isEntityRelationshipExpandedForScope(scopeId, node.id),
         isInitialEntity,
-        toggleEntityRelationships: (action) => {
-          emitEntityRelationshipToggle(scopeId, node.id, action);
-          emitPinnedEuidToggle(scopeId, node.id, action);
-        },
+        toggleEntityRelationships: (action) =>
+          emitEntityRelationshipToggle(scopeId, node.id, action),
         showEntityRelationshipsDisabled: !isEnriched || isInitialEntity,
         showEntityDetailsDisabled: isSingleEntity && !isEnriched,
       });
@@ -168,9 +166,13 @@ export const useEntityNodeExpandPopover = (
     [scopeId, onOpenEventPreview]
   );
 
-  return useNodeExpandPopover({
-    id: 'entity-node-expand-popover',
-    itemsFn,
-    testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
-  });
+  return {
+    ...useNodeExpandPopover({
+      id: 'entity-node-expand-popover',
+      itemsFn,
+      testSubject: GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
+    }),
+    /** Raw action items (without popover close wrapper) — used by hover toolbar. */
+    getActionItems: itemsFn,
+  };
 };

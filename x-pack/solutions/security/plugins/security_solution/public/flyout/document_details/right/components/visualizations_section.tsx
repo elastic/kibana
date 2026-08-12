@@ -19,13 +19,16 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
-import { VISUALIZATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/main/components/visualizations_section';
-import { VISUALIZATION_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
+import {
+  VISUALIZATION_SECTION_TEST_ID,
+  VISUALIZATION_SECTION_TITLE,
+} from '../../../../flyout_v2/document/main/components/visualizations_section';
 
 const KEY = 'visualizations';
 
 /**
- * Visualizations section in overview. It contains analyzer preview and session view preview.
+ * Visualizations section in overview.
+ * Preview order: Graph view, Analyzer, Session view.
  */
 export const VisualizationsSection = memo(() => {
   const expanded = useExpandSection({
@@ -70,13 +73,17 @@ export const VisualizationsSection = memo(() => {
       sectionId={KEY}
       data-test-subj={VISUALIZATION_SECTION_TEST_ID}
     >
-      <SessionPreviewContainer
-        hit={hit}
-        disableNavigation={isRulePreview}
-        showIcon={!isPreviewMode}
-        onShowSessionView={navigateToSessionView}
-      />
-      <EuiSpacer />
+      {hasGraphData && (
+        <>
+          <GraphPreviewContainer
+            hit={hit}
+            onShowGraph={navigateToGraphVisualization}
+            disableNavigation={isRulePreview}
+            showIcon={!isPreviewMode}
+          />
+          <EuiSpacer />
+        </>
+      )}
       <AnalyzerPreviewContainer
         hit={hit}
         onShowAnalyzer={navigateToAnalyzer}
@@ -84,16 +91,13 @@ export const VisualizationsSection = memo(() => {
         showIcon={!isPreviewMode}
         disableNavigation={isRulePreview}
       />
-      {hasGraphData && (
-        <>
-          <EuiSpacer />
-          <GraphPreviewContainer
-            hit={hit}
-            onShowGraph={isRulePreview ? undefined : navigateToGraphVisualization}
-            showIcon={!isPreviewMode}
-          />
-        </>
-      )}
+      <EuiSpacer />
+      <SessionPreviewContainer
+        hit={hit}
+        disableNavigation={isRulePreview}
+        showIcon={!isPreviewMode}
+        onShowSessionView={navigateToSessionView}
+      />
     </ExpandableSection>
   );
 });

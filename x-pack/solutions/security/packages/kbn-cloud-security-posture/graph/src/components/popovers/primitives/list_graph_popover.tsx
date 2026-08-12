@@ -70,11 +70,14 @@ export interface SeparatorExpandPopoverListItemProps {
 export const ListGraphPopover = memo<ListGroupGraphPopoverProps>(
   ({ isOpen, anchorElement, closePopover, items, itemsFn, testSubject }) => {
     const listItems = items || itemsFn?.() || [];
+    const opensAbove =
+      anchorElement?.dataset.graphActionsPlacement === 'above' ||
+      Boolean(anchorElement?.closest?.('[data-graph-actions-placement="above"]'));
 
     return (
       <GraphPopover
         panelPaddingSize="none"
-        anchorPosition="rightCenter"
+        anchorPosition={opensAbove ? 'upCenter' : 'rightCenter'}
         isOpen={isOpen}
         anchorElement={anchorElement}
         closePopover={closePopover}

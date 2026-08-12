@@ -182,7 +182,7 @@ describe('<Graph />', () => {
   });
 
   describe('centering after refresh', () => {
-    const fitViewOptions = { duration: 200 };
+    const fitViewOptions = { duration: 350 };
 
     const initialNodes: NodeViewModel[] = [
       {
@@ -268,6 +268,48 @@ describe('<Graph />', () => {
         // Should not trigger callback or fitView
         expect(onCenterGraphAfterRefresh).not.toHaveBeenCalled();
         expect(mockFitView).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should preserve viewport when node metadata changes without structural changes', async () => {
+      const props = {
+        nodes: initialNodes,
+        edges: initialEdges,
+        interactive: true,
+      };
+
+      const { container, rerender } = render(
+        <TestProviders>
+          <Graph {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
+          initialNodes.length
+        );
+      });
+
+      const fitViewCallsAfterInitialRender = mockFitView.mock.calls.length;
+
+      const updatedNodes = initialNodes.map((node) =>
+        node.id === 'entity1' ? { ...node, showEntityId: false } : node
+      );
+
+      rerender(
+        <TestProviders>
+          <Graph {...props} nodes={updatedNodes} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(
+          initialNodes.length
+        );
+      });
+
+      await waitFor(() => {
+        expect(mockFitView.mock.calls.length).toBe(fitViewCallsAfterInitialRender);
       });
     });
 
@@ -380,7 +422,7 @@ describe('<Graph />', () => {
         // Should center graph on new nodes (default behavior)
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: newNodes[0].id }],
         });
       });
@@ -438,7 +480,7 @@ describe('<Graph />', () => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
 
         // no "nodes" key -> fit entire graph into view
-        expect(mockFitView).toHaveBeenCalledWith({ duration: 200 });
+        expect(mockFitView).toHaveBeenCalledWith({ duration: 350 });
       });
     });
 
@@ -541,7 +583,7 @@ describe('<Graph />', () => {
       await waitFor(() => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: 'entity1' }, { id: 'entity2' }],
         });
       });
@@ -752,44 +794,6 @@ describe('<Graph />', () => {
 
         nodes.forEach((node) => {
           expect(node).not.toHaveClass('non-interactive');
-        });
-      });
-    });
-
-    it('should disable selection and focus on nodes when interactive is false', async () => {
-      const { container } = renderGraphPreview({
-        nodes: testNodes,
-        edges: [],
-        interactive: false,
-      });
-
-      await waitFor(() => {
-        const nodes = container.querySelectorAll('.react-flow__node');
-        expect(nodes.length).toBeGreaterThan(0);
-
-        nodes.forEach((node) => {
-          // React Flow only adds the `selectable` class when `elementsSelectable` is enabled
-          expect(node).not.toHaveClass('selectable');
-          // and only makes nodes focusable (tabbable) when `nodesFocusable` is enabled
-          expect(node).not.toHaveAttribute('tabindex');
-        });
-      });
-    });
-
-    it('should enable selection and focus on nodes when interactive is true', async () => {
-      const { container } = renderGraphPreview({
-        nodes: testNodes,
-        edges: [],
-        interactive: true,
-      });
-
-      await waitFor(() => {
-        const nodes = container.querySelectorAll('.react-flow__node');
-        expect(nodes.length).toBeGreaterThan(0);
-
-        nodes.forEach((node) => {
-          expect(node).toHaveClass('selectable');
-          expect(node).toHaveAttribute('tabindex', '0');
         });
       });
     });

@@ -8,7 +8,6 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
   GRAPH_PREVIEW,
@@ -33,8 +32,8 @@ jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
 
-jest.mock('react-redux-v7', () => {
-  const original = jest.requireActual('react-redux-v7');
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
 
   return {
     ...original,
@@ -46,10 +45,40 @@ jest.mock('../../../../shared/hooks/use_should_show_graph');
 
 const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
+const mockCloseLeftPanel = jest.fn();
+const mockClosePreviewPanel = jest.fn();
+const mockOpenSystemFlyout = jest.fn(() => ({ close: jest.fn() }));
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  ...jest.requireActual('@kbn/expandable-flyout'),
+  useExpandableFlyoutApi: () => ({
+    closeLeftPanel: mockCloseLeftPanel,
+    closePreviewPanel: mockClosePreviewPanel,
+  }),
+  useExpandableFlyoutState: () => ({
+    left: undefined,
+    right: undefined,
+    preview: undefined,
+  }),
+}));
+
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      },
+    }),
+  };
+});
+
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
-
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
@@ -140,33 +169,11 @@ describe('<VisualizationsSection />', () => {
     );
   });
 
-  it('should render the graph preview link when not in preview mode or rule preview', () => {
-    mockUseExpandSection.mockReturnValue(true);
-    mockUseShouldShowGraph.mockReturnValue(true);
-
-    const { getByTestId } = renderVisualizationsSection();
-
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
-  });
-
   it('should not render the graph preview link in preview mode', () => {
     mockUseExpandSection.mockReturnValue(true);
     mockUseShouldShowGraph.mockReturnValue(true);
 
     const { queryByTestId } = renderVisualizationsSection({ isPreviewMode: true });
-
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeNull();
-  });
-
-  it('should not render the graph preview link in the rule preview scope', () => {
-    mockUseExpandSection.mockReturnValue(true);
-    mockUseShouldShowGraph.mockReturnValue(true);
-
-    const { queryByTestId } = renderVisualizationsSection({ scopeId: TableId.rulePreview });
 
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))

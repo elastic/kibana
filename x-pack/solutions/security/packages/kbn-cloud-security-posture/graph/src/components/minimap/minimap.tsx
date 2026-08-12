@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { MiniMap, Panel, type Node, type MiniMapNodeProps } from '@xyflow/react';
+import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiIcon, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   GRAPH_MINIMAP_ID,
+  GRAPH_MINIMAP_TOGGLE_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
@@ -17,7 +20,24 @@ import {
 } from '../test_ids';
 import type { NodeViewModel } from '../types';
 import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
-import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { CARD_NODE_DEFAULT_HEIGHT, CARD_NODE_WIDTH } from '../node/card_node';
+import { GRAPH_PANEL_INSET } from '../constants';
+import minimapMapIcon from '../../assets/icons/minimap_map.svg';
+
+/** Folded-map glyph from Figma MiniMap Type=closed — not the EUI `map` (pin) icon. */
+const MinimapExpandIcon = () => <EuiIcon type={minimapMapIcon} size="m" color="text" />;
+
+/** Expanded minimap content size from Figma (node 13994:673). */
+const MINIMAP_CONTENT_WIDTH = 151;
+const MINIMAP_CONTENT_HEIGHT = 96;
+
+/**
+ * Padding around graph bounds in the MiniMap viewBox.
+ * xyflow defaults to 5 (viewBox ~11× graph size), which leaves the overview looking tiny.
+ * A small scale matches the Figma "fit" overview with modest margins.
+ */
+const MINIMAP_OFFSET_SCALE = 0.15;
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
   data?: NodeViewModel;
@@ -26,8 +46,8 @@ interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
 const MiniMapNode = ({
   x,
   y,
-  width = NODE_WIDTH,
-  height = NODE_HEIGHT,
+  width = 0,
+  height = 0,
   data,
   id,
 }: MiniMapNodeRenderedProps) => {
@@ -44,7 +64,8 @@ const MiniMapNode = ({
   // If we don't have node data, we can't render anything useful
   if (!data) return null;
 
-  // For entity nodes, render a square
+  // Always use card footprint for the overview schematic. Measured sizes can shrink
+  // in simplified/zoom-invariant mode (~48px) and would make the minimap look tiny again.
   if (isEntityNode(data)) {
     return (
       <rect
@@ -52,8 +73,8 @@ const MiniMapNode = ({
         data-test-subj={GRAPH_MINIMAP_ENTITY_NODE_ID}
         x={x}
         y={y}
-        height={NODE_HEIGHT}
-        width={NODE_WIDTH}
+        height={CARD_NODE_DEFAULT_HEIGHT}
+        width={CARD_NODE_WIDTH}
         fill={getEuiColor(data.color ?? 'primary')}
       />
     );
@@ -64,7 +85,9 @@ const MiniMapNode = ({
     return null;
   }
 
-  // For label nodes, render a horizontal rectangle
+  const labelWidth = NODE_LABEL_WIDTH;
+
+  // For label nodes, render a horizontal rectangle (schematic bar, not full layout height)
   if (isLabelNode(data)) {
     return (
       <rect
@@ -73,7 +96,7 @@ const MiniMapNode = ({
         x={x}
         y={y}
         height={NODE_LABEL_HEIGHT}
-        width={NODE_LABEL_WIDTH}
+        width={labelWidth}
         fill={getEuiColor(data.color ?? 'primary')}
       />
     );
@@ -88,7 +111,7 @@ const MiniMapNode = ({
         x={x}
         y={y}
         height={NODE_LABEL_HEIGHT}
-        width={NODE_LABEL_WIDTH}
+        width={labelWidth}
         fill={euiTheme.colors.backgroundFilledText}
       />
     );
@@ -101,8 +124,8 @@ const MiniMapNode = ({
       data-test-subj={GRAPH_MINIMAP_UNKNOWN_NODE_ID}
       x={x}
       y={y}
-      width={width}
-      height={height}
+      width={width > 0 ? width : CARD_NODE_WIDTH}
+      height={height > 0 ? height : CARD_NODE_DEFAULT_HEIGHT}
       stroke={getEuiColor('shadow')}
       fill={getEuiColor('backgroundBasePlain')}
     />
@@ -130,11 +153,26 @@ export interface MinimapProps {
    * Nodes state from ReactFlow
    */
   nodesState?: Node<NodeViewModel>[];
+  /**
+   * Whether the minimap starts expanded. Defaults to true.
+   */
+  defaultExpanded?: boolean;
 }
+
+const collapseLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.minimap.collapseAriaLabel',
+  {
+    defaultMessage: 'Collapse minimap',
+  }
+);
+
+const expandLabel = i18n.translate('securitySolutionPackages.csp.graph.minimap.expandAriaLabel', {
+  defaultMessage: 'Expand minimap',
+});
 
 /**
  * Minimap component for the Graph. Provides a scaled-down overview of the entire graph
- * with navigation capabilities.
+ * with navigation capabilities, and can collapse to a compact expand control.
  *
  * @component
  * @param {MinimapProps} props - The properties for the Minimap component.
@@ -146,8 +184,11 @@ export const Minimap = ({
   zoomStep = 2,
   style,
   nodesState,
+  defaultExpanded = true,
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
+  const minimapShadow = useEuiShadow('m');
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Create a mapping of node ids to their data for easy lookup
   const nodeDataMap = React.useMemo(() => {
@@ -179,24 +220,102 @@ export const Minimap = ({
     [getNodeById]
   );
 
-  const defaultStyle: React.CSSProperties = {
-    height: 120,
-    width: 200,
-    // NOTE MiniMap's `bgColor` prop affects the mask so we need to pass our custom bgColor within the `style` prop
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((current) => !current);
+  }, []);
+
+  const shellCss = css`
+    ${minimapShadow}
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: ${euiTheme.size.xs};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border: ${euiTheme.border.thin};
+    border-color: ${euiTheme.colors.borderBaseSubdued};
+    border-radius: ${euiTheme.border.radius.small};
+  `;
+
+  const headerCss = css`
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
+
+  const contentCss = css`
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border-radius: ${euiTheme.border.radius.small};
+    overflow: hidden;
+
+    /* Embed xyflow MiniMap inside our chrome instead of as a floating panel. */
+    & > .react-flow__minimap {
+      position: relative !important;
+      inset: auto !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      width: 100% !important;
+      height: ${MINIMAP_CONTENT_HEIGHT}px !important;
+    }
+
+    .react-flow__minimap-mask {
+      vector-effect: non-scaling-stroke;
+      stroke-width: 1.5px !important;
+    }
+  `;
+
+  const minimapStyle: React.CSSProperties = {
+    height: MINIMAP_CONTENT_HEIGHT,
+    width: MINIMAP_CONTENT_WIDTH,
+    borderRadius: 0,
+    overflow: 'hidden',
+    ...style,
   };
 
+  // Dim outside the viewport instead of opaque white, so the overview stays "full"
+  // (Figma) even when the main canvas is zoomed in.
+  const maskColor = `color-mix(in srgb, ${euiTheme.colors.backgroundBasePlain} 55%, transparent)`;
+
   return (
-    <div data-test-subj={GRAPH_MINIMAP_ID}>
-      <MiniMap<Node<NodeViewModel>>
-        maskColor={transparentize(euiTheme.colors.backgroundBaseFormsControlDisabled, 0.75)}
-        nodeComponent={NodeRenderer}
-        style={{ ...defaultStyle, ...style }}
-        zoomable={zoomable}
-        pannable={pannable}
-        zoomStep={zoomStep}
-        position="bottom-left"
-      />
-    </div>
+    <Panel
+      position="bottom-right"
+      data-test-subj={GRAPH_MINIMAP_ID}
+      css={shellCss}
+      style={{ marginRight: GRAPH_PANEL_INSET, marginBottom: GRAPH_PANEL_INSET }}
+    >
+      <div css={headerCss}>
+        <EuiButtonIcon
+          iconType={isExpanded ? 'minus' : MinimapExpandIcon}
+          aria-label={isExpanded ? collapseLabel : expandLabel}
+          aria-expanded={isExpanded}
+          size="xs"
+          color="text"
+          data-test-subj={GRAPH_MINIMAP_TOGGLE_ID}
+          onClick={toggleExpanded}
+        />
+      </div>
+      {isExpanded ? (
+        <div css={contentCss}>
+          <MiniMap<Node<NodeViewModel>>
+            bgColor={euiTheme.colors.backgroundBaseSubdued}
+            maskColor={maskColor}
+            maskStrokeColor={euiTheme.colors.borderBasePlain}
+            maskStrokeWidth={1.5}
+            offsetScale={MINIMAP_OFFSET_SCALE}
+            nodeComponent={NodeRenderer}
+            style={minimapStyle}
+            zoomable={zoomable}
+            pannable={pannable}
+            zoomStep={zoomStep}
+            position="bottom-right"
+          />
+        </div>
+      ) : null}
+    </Panel>
   );
 };

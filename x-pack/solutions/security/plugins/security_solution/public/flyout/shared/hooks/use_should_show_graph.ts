@@ -6,18 +6,13 @@
  */
 
 import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
-import { useIsEntityStoreV2Available } from './use_is_entity_store_v2_available';
 
 /**
  * Hook to determine if the graph visualization should be shown in the alert, event or entity flyout.
+ *
+ * License is required. Entity store is preferred for production enrichment, but is not required to
+ * show the flyout preview (mock/dev graphs can render without it).
  */
 export const useShouldShowGraph = (): boolean => {
-  // Check if user license is high enough to access graph visualization
-  const hasRequiredLicense = useHasGraphVisualizationLicense();
-
-  // Check if entity store v2 entities index exists
-  const { data: entitiesIndexExists } = useIsEntityStoreV2Available();
-  const isEntityStoreRunning = entitiesIndexExists?.indexExists === true;
-
-  return hasRequiredLicense && isEntityStoreRunning;
+  return useHasGraphVisualizationLicense();
 };
