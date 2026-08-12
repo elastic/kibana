@@ -86,9 +86,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
               }
             );
 
-            const listIds = dedupedExceptionListIds.map(
-              ({ exception_list_id: listId }) => listId
-            );
+            const listIds = dedupedExceptionListIds.map(({ exception_list_id: listId }) => listId);
             const namespaceTypes = dedupedExceptionListIds.map(
               ({ namespace_type: namespaceType }) => namespaceType
             );
