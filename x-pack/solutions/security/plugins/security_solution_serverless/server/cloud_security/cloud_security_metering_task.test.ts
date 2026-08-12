@@ -364,7 +364,7 @@ describe('getGcpComputeDurationFilter', () => {
 });
 
 describe('getGcpComputeDurationRuntimeMapping', () => {
-  it('should define a long runtime field with nowMillis and subType params', () => {
+  it('should define a long runtime field with nowMillis, lookbackStartMs and subType params', () => {
     const nowMillis = Date.now();
     const mapping = getGcpComputeDurationRuntimeMapping(nowMillis);
 
@@ -374,10 +374,24 @@ describe('getGcpComputeDurationRuntimeMapping', () => {
         lang: 'painless',
         params: {
           nowMillis,
+          // must stay aligned with the now-24h @timestamp range filter (ASSETS_SAMPLE_GRANULARITY)
+          lookbackStartMs: nowMillis - 24 * 60 * 60 * 1000,
           subType: GCP_COMPUTE_INSTANCE_SUB_TYPE,
         },
       },
     });
+  });
+
+  it('should only count stopped instances whose stop event falls within the look-back window', () => {
+    const mapping = getGcpComputeDurationRuntimeMapping(Date.now());
+    const source: string = mapping[GCP_COMPUTE_DURATION_RUNTIME_FIELD].script.source;
+
+    // A stopped instance with a >=24h historical run must not be re-billed on every
+    // later day it appears in scans — only during the window in which it stopped.
+    const guardIndex = source.indexOf("if (lastStopMs < params['lookbackStartMs']) return;");
+    expect(guardIndex).toBeGreaterThan(-1);
+    // The guard must run before the duration is emitted
+    expect(guardIndex).toBeLessThan(source.indexOf('emit('));
   });
 
   it('should read _source via params and not use doc[] for resource.raw fields', () => {
