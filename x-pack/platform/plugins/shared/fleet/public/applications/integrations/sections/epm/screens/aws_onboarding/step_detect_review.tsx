@@ -207,24 +207,16 @@ const DeploymentSummaryCard: React.FunctionComponent<{
 // (templates, pipelines, transforms) are listed too, but are not removable.
 type AssetState = 'installed' | 'removing' | 'removed' | 'installing';
 
-const TYPE_ORDER: AwsContentType[] = [
+// Removable content types get their own accordion each; the required
+// technical types are lumped into a single "Required assets" accordion so
+// they don't demand per-category attention.
+const CONTENT_TYPE_ORDER: AwsContentType[] = [
   'dashboard',
   'search',
   'alert_rule',
   'detection_rule',
   'content_package',
-  'index_template',
-  'component_template',
-  'ingest_pipeline',
-  'transform',
 ];
-
-const REQUIRED_TYPES = new Set<AwsContentType>([
-  'index_template',
-  'component_template',
-  'ingest_pipeline',
-  'transform',
-]);
 
 const TYPE_GROUP_LABELS: Record<AwsContentType, string> = {
   dashboard: 'Dashboards',
@@ -236,6 +228,18 @@ const TYPE_GROUP_LABELS: Record<AwsContentType, string> = {
   component_template: 'Component templates',
   ingest_pipeline: 'Ingest pipelines',
   transform: 'Transforms',
+};
+
+const TYPE_ITEM_LABELS: Record<AwsContentType, string> = {
+  dashboard: 'Dashboard',
+  search: 'Saved search',
+  alert_rule: 'Alert rule template',
+  detection_rule: 'Detection rule',
+  content_package: 'Content package',
+  index_template: 'Index template',
+  component_template: 'Component template',
+  ingest_pipeline: 'Ingest pipeline',
+  transform: 'Transform',
 };
 
 interface ReviewItem extends AwsContentItem {
@@ -310,11 +314,10 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
     return () => timers.current.forEach((t) => window.clearTimeout(t));
   }, []);
 
-  // Flatten all content for the selected services, tagged with the service
-  // it belongs to. Detection rules come from the separate
-  // security_detection_engine package; technical assets (templates,
-  // pipelines, transforms) are required and listed as non-removable.
-  const allItems: ReviewItem[] = [
+  // Removable content for the selected services, tagged with the service it
+  // belongs to. Detection rules come from the separate
+  // security_detection_engine package.
+  const contentItems: ReviewItem[] = [
     ...GENERAL_CONTENT.map((item) => ({ ...item, serviceName: 'Amazon Web Services' })),
     ...services.flatMap((service) =>
       (CONTENT_BY_SERVICE[service.id] ?? []).map((item) => ({
@@ -328,11 +331,13 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
         serviceName: service.name,
       }))
     ),
-    ...getTechnicalAssets(services),
   ];
+  // Technical assets are required (non-removable) and live in their own
+  // single accordion — they don't count toward the installed/total numbers.
+  const requiredItems: ReviewItem[] = getTechnicalAssets(services);
 
   const stateOf = (id: string): AssetState => assetState[id] ?? 'installed';
-  const installedCount = allItems.filter((i) => stateOf(i.id) === 'installed').length;
+  const installedCount = contentItems.filter((i) => stateOf(i.id) === 'installed').length;
 
   const onToggle = (id: string) => {
     const current = stateOf(id);
@@ -361,10 +366,12 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
     item.title.toLowerCase().includes(query) ||
     item.serviceName.toLowerCase().includes(query);
 
-  const typeGroups = TYPE_ORDER.map((type) => ({
+  const typeGroups = CONTENT_TYPE_ORDER.map((type) => ({
     type,
-    items: allItems.filter((i) => i.type === type && matches(i)),
+    items: contentItems.filter((i) => i.type === type && matches(i)),
   })).filter((g) => g.items.length > 0);
+
+  const filteredRequired = requiredItems.filter(matches);
 
   return (
     <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
@@ -380,17 +387,14 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
             <p>
               Everything below was installed with the AWS integration. Remove anything you
               don&apos;t need — you can reinstall it at any time, here or from the
-              integration&apos;s Assets tab. Assets marked{' '}
-              <EuiBadge color="hollow" iconType="lock">
-                Required
-              </EuiBadge>{' '}
-              are needed for data ingestion and cannot be removed.
+              integration&apos;s Assets tab. Required technical assets are listed separately at
+              the bottom and cannot be removed.
             </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {`${installedCount} of ${allItems.length} installed`}
+            {`${installedCount} of ${contentItems.length} installed`}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -406,7 +410,6 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
       />
 
       {typeGroups.map(({ type, items }) => {
-        const isRequired = REQUIRED_TYPES.has(type);
         const groupInstalled = items.filter((i) => stateOf(i.id) === 'installed').length;
         return (
           <React.Fragment key={type}>
@@ -431,9 +434,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
               }
               extraAction={
                 <EuiText size="xs" color="subdued">
-                  {isRequired
-                    ? 'Required — installed with the package'
-                    : `${groupInstalled} of ${items.length} installed`}
+                  {`${groupInstalled} of ${items.length} installed`}
                 </EuiText>
               }
             >
@@ -444,7 +445,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
                   <ContentItemRow
                     item={item}
                     state={stateOf(item.id)}
-                    isRequired={isRequired}
+                    isRequired={false}
                     onToggle={() => onToggle(item.id)}
                   />
                 </React.Fragment>
@@ -453,6 +454,56 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
           </React.Fragment>
         );
       })}
+
+      {filteredRequired.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="awsOnboardingContentGroup-required"
+            forceState={query ? 'open' : undefined}
+            buttonContent={
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="lock" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="xxs">
+                    <h4>Required assets</h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiNotificationBadge color="subdued">
+                    {filteredRequired.length}
+                  </EuiNotificationBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiText size="xs" color="subdued">
+                Installed with the package — cannot be removed
+              </EuiText>
+            }
+          >
+            <EuiSpacer size="s" />
+            {filteredRequired.map((item, i) => (
+              <React.Fragment key={item.id}>
+                {i > 0 && <EuiSpacer size="s" />}
+                <ContentItemRow
+                  item={{
+                    ...item,
+                    description: TYPE_ITEM_LABELS[item.type],
+                  }}
+                  state="installed"
+                  isRequired
+                  onToggle={() => {}}
+                />
+              </React.Fragment>
+            ))}
+          </EuiAccordion>
+        </>
+      )}
     </EuiPanel>
   );
 };
