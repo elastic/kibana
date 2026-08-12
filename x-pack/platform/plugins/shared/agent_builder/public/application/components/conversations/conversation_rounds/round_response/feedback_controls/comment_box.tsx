@@ -36,15 +36,26 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ value, onChange }) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiText
-          size="xs"
-          color={remaining < 50 ? 'warning' : 'subdued'}
-          css={css`
-            text-align: right;
-          `}
-        >
-          {remaining}
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.agentBuilder.feedback.commentDisclosure', {
+                defaultMessage: 'Your comment may be used to improve the product.',
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color={remaining < 50 ? 'warning' : 'subdued'}
+              css={css`
+                text-align: right;
+              `}
+            >
+              {remaining}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

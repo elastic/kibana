@@ -312,8 +312,12 @@ export interface ReportFeedbackSubmittedParams {
   vote: string;
   /** Predefined chip IDs selected by the user */
   chips: string[];
-  /** True when the user wrote a free-text comment (text itself is not sent — PII) */
-  has_comment: boolean;
+  /**
+   * Free-text comment from the user. Only sent when non-empty.
+   * Users are informed via disclosure text in the modal that comments
+   * may be used to improve the product.
+   */
+  comment?: string;
   /** OTel trace ID of the round — correlates with traces-* and round_complete events */
   trace_id?: string;
   /** LLM connector used for this round */
@@ -1384,11 +1388,13 @@ const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
       },
       _meta: { description: 'Predefined chip IDs selected by the user', optional: false },
     },
-    has_comment: {
-      type: 'boolean',
+    comment: {
+      type: 'text',
       _meta: {
-        description: 'Whether the user wrote a free-text comment (text itself is not sent)',
-        optional: false,
+        description:
+          'Free-text comment from the user. Only present when non-empty. ' +
+          'Users are shown a disclosure before submitting.',
+        optional: true,
       },
     },
     trace_id: {

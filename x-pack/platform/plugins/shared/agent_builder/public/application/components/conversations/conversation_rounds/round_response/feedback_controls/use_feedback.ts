@@ -258,7 +258,7 @@ export const useFeedback = (
           conversation_id: conversationId,
           vote: currentVote,
           chips: chips as string[],
-          has_comment: comment.trim().length > 0,
+          ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
           trace_id: ebtContext?.traceId,
           connector_id: ebtContext?.connectorId,
           model: ebtContext?.model,
