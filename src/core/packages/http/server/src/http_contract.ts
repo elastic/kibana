@@ -57,12 +57,16 @@ export interface HttpSelfFetchHeaders {
 
 /** @public */
 export interface HttpSelfFetchOptions<TRequestBody = unknown> {
+  /** Forces the configured local listener instead of the global self HTTP target. */
+  target?: 'local';
   /** HTTP method. Defaults to `GET`. */
   method?: string;
   /** Query string parameters to append to the target path. */
   query?: HttpSelfFetchQuery;
   /** JSON-serializable or text request body. */
   body?: TRequestBody | string | null;
+  /** Buffered non-JSON request body (mutually exclusive with `body`). */
+  rawBody?: FormData | Blob | URLSearchParams | ArrayBuffer | ArrayBufferView<ArrayBuffer> | null;
   /** Non-auth, non-Core-owned headers to send with the request. */
   headers?: HttpSelfFetchHeaders;
   /**

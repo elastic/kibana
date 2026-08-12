@@ -13,6 +13,10 @@
 
 import { restoreSelfClientTestEnvironment } from './self_client_test_environment';
 import { readFileSync } from 'node:fs';
+import {
+  ReadableStream as NodeReadableStream,
+  TransformStream as NodeTransformStream,
+} from 'node:stream/web';
 import http from 'node:http';
 import https from 'node:https';
 import Supertest from 'supertest';
@@ -21,6 +25,7 @@ import {
   Headers as UndiciHeaders,
   Request as UndiciRequest,
   Response as UndiciResponse,
+  FormData as UndiciFormData,
 } from 'undici';
 import { schema } from '@kbn/config-schema';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
@@ -48,6 +53,9 @@ const originalFetch = global.fetch;
 const originalHeaders = global.Headers;
 const originalRequest = global.Request;
 const originalResponse = global.Response;
+const originalFormData = global.FormData;
+const originalReadableStream = global.ReadableStream;
+const originalTransformStream = global.TransformStream;
 const routeSecurity = {
   authz: {
     enabled: false,
@@ -151,6 +159,41 @@ const startServer = async (serverConfig: TestHttpConfig = { port: TEST_PORT }) =
       validate: false,
     },
     (_context, _req, res) => res.ok({ body: { ok: true } })
+  );
+
+  router.get(
+    {
+      path: '/self/call_form_data',
+      security: routeSecurity,
+      validate: false,
+    },
+    async (_context, req, res) => {
+      const form = new FormData();
+      form.append('message', 'hello');
+      try {
+        const response = await started
+          .httpStart!.selfClient.asScoped(req)
+          .fetch<{ body: string; contentType: string }>('/self/form_target', {
+            method: 'POST',
+            rawBody: form,
+          });
+        return res.ok({ body: response });
+      } catch (error) {
+        const cause = (error as Error & { cause?: Error }).cause;
+        return res.ok({ body: { error: (error as Error).message, cause: cause?.message } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/self/form_target',
+      options: { body: { accepts: 'multipart/form-data', output: 'stream' } },
+      security: routeSecurity,
+      validate: { body: schema.any() },
+    },
+    (_context, req, res) =>
+      res.ok({ body: { received: req.body, contentType: req.headers['content-type'] } })
   );
 
   router.get(
@@ -351,6 +394,9 @@ describe('Http self client', () => {
     global.Headers = UndiciHeaders as typeof global.Headers;
     global.Request = UndiciRequest as unknown as typeof global.Request;
     global.Response = UndiciResponse as unknown as typeof global.Response;
+    global.FormData = UndiciFormData as unknown as typeof global.FormData;
+    global.ReadableStream = NodeReadableStream as typeof global.ReadableStream;
+    global.TransformStream = NodeTransformStream as typeof global.TransformStream;
   });
 
   afterAll(() => {
@@ -358,6 +404,9 @@ describe('Http self client', () => {
     global.Headers = originalHeaders;
     global.Request = originalRequest;
     global.Response = originalResponse;
+    global.FormData = originalFormData;
+    global.ReadableStream = originalReadableStream;
+    global.TransformStream = originalTransformStream;
     restoreSelfClientTestEnvironment();
   });
 
@@ -391,6 +440,12 @@ describe('Http self client', () => {
       const response = await supertest.get('/self/recursive/2').expect(200);
 
       expect(response.body.error).toContain('a self call cannot issue another self call');
+    });
+
+    it('sends a buffered FormData self-call with its multipart boundary', async () => {
+      const response = await supertest.get('/self/call_form_data').expect(200);
+      expect(response.body.received).toEqual({ message: 'hello' });
+      expect(response.body.contentType).toMatch(/^multipart\/form-data; boundary=/);
     });
 
     it('does not follow redirects', async () => {

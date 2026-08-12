@@ -217,6 +217,56 @@ describe('callKibanaApi', () => {
 
   // The self client resolves the base URL itself, and the workflow fake request has no base path, so
   // the space can only reach Core through the path we hand it.
+  it('rejects dot-segment paths that could escape the workflow space', async () => {
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+        { method: 'GET', path: '/s/current/../victim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    for (const path of [
+      '/api/.%2e/victim',
+      '/api/%2e./victim',
+      '/api/%2e%2e/victim',
+      '/api/../victim',
+    ]) {
+      await expect(
+        callKibanaApi(
+          { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'current' },
+          { method: 'GET', path }
+        )
+      ).rejects.toThrow('Invalid Kibana API path');
+    }
+  });
+
+  it('allows encoded route parameters while rejecting malformed and authority paths', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    for (const path of ['/api/items/foo%20bar', '/api/items/%E2%9C%93']) {
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path }
+      );
+    }
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/%2e%2e%2fvictim' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '//victim/api' }
+      )
+    ).rejects.toThrow('Invalid Kibana API path');
+  });
+
   it('prefixes the path with /s/{spaceId} for a non-default space', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
@@ -413,7 +463,52 @@ describe('callKibanaApi', () => {
     expect(headers['x-kibana-workflow-execution-id']).toBe('run-42');
   });
 
-  it('drops caller-supplied reserved headers (Core-owned or engine-stamped) but keeps custom ones', async () => {
+  it('strips Content-Type for FormData but preserves it for buffered non-FormData bodies', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new FormData(),
+        headers: { 'Content-Type': 'multipart/form-data; boundary=caller' },
+      }
+    );
+    expect(lastFetchHeaders()['Content-Type']).toBeUndefined();
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        rawBody: new URLSearchParams({ value: 'one' }),
+        headers: { 'Content-Type': 'text/plain' },
+      }
+    );
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
+  });
+
+  it('defaults JSON string bodies to application/json while preserving explicit content types', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'POST', path: '/api/foo', body: '{"a":1}' }
+    );
+    expect(lastFetchHeaders()['content-type']).toBe('application/json');
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/foo',
+        body: '{"a":1}',
+        headers: { 'Content-Type': 'text/plain' },
+      }
+    );
+    expect((mockSelfFetch.mock.calls[1][1] as any).headers['Content-Type']).toBe('text/plain');
+  });
+
+  it('drops caller-supplied protected headers but keeps custom ones', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
     await callKibanaApi(
@@ -433,9 +528,9 @@ describe('callKibanaApi', () => {
     );
 
     const headers = lastFetchHeaders();
-    // Core owns these; forwarding them would make the self client throw, so they are stripped here.
+    // Core owns authorization; the explicit caller content type is preserved for JSON requests.
     expect(headers.Authorization).toBeUndefined();
-    expect(headers['content-type']).toBeUndefined();
+    expect(headers['content-type']).toBe('text/plain');
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();

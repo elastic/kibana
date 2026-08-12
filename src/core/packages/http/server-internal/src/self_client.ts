@@ -99,7 +99,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
 
     const fetchOptions = { ...options, path };
     const request = this.createRequest(path, options);
-    this.logAttempt(request.method);
+    this.logAttempt(request.method, options.target);
     const cleanup: Array<() => void> = [];
 
     try {
@@ -107,7 +107,10 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
       const fetchInit: SelfFetchInit = {
         signal,
         redirect: 'error',
-        dispatcher: this.dispatcherProvider.get(new URL(request.url)),
+        dispatcher: this.dispatcherProvider.get(
+          new URL(request.url),
+          this.getEffectiveTarget(options.target)
+        ),
       };
       const response = await fetch(request, fetchInit);
 
@@ -136,9 +139,8 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
   }
 
-  private logAttempt(targetMethod: string): void {
-    const targetMode =
-      this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  private logAttempt(targetMethod: string, target?: 'local'): void {
+    const targetMode = this.getEffectiveTarget(target) === 'local' ? 'local' : 'public';
 
     this.params.log.debug(() => 'Kibana scoped self HTTP call attempted', {
       labels: {
@@ -168,7 +170,18 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const method = options.method ?? 'GET';
     const url = this.createUrl(path, options);
     const headers = this.createHeaders(options);
-    const body = serializeBody(headers, options.body);
+    if (options.body !== undefined && options.rawBody !== undefined) {
+      throw new Error('Invalid self HTTP options, body and rawBody are mutually exclusive.');
+    }
+    if (
+      options.rawBody !== undefined &&
+      options.rawBody !== null &&
+      !isBufferedRawBody(options.rawBody)
+    ) {
+      throw new Error('Invalid self HTTP rawBody, only buffered body types are supported.');
+    }
+    const body =
+      options.rawBody !== undefined ? options.rawBody : serializeBody(headers, options.body);
 
     return new Request(url, {
       method,
@@ -178,8 +191,12 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
   }
 
   private createUrl<TRequestBody>(path: string, options: HttpSelfFetchOptions<TRequestBody>): URL {
-    const baseUrl = this.getBaseUrl();
-    const pathname = options.prependBasePath === false ? path : `${this.request.basePath}${path}`;
+    const baseUrl = this.getBaseUrl(options.target);
+    const requestBasePath =
+      options.prependBasePath === false
+        ? this.params.basePath.serverBasePath
+        : this.request.basePath;
+    const pathname = `${requestBasePath}${path}`;
     const url = new URL(pathname, baseUrl);
 
     if (url.origin !== baseUrl.origin) {
@@ -201,8 +218,13 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     return url;
   }
 
-  private getBaseUrl(): URL {
-    if (this.params.target === 'auto' && this.params.basePath.publicBaseUrl) {
+  private getEffectiveTarget(target?: 'local'): 'local' | 'public' {
+    if (target === 'local') return 'local';
+    return this.params.target === 'auto' && this.params.basePath.publicBaseUrl ? 'public' : 'local';
+  }
+
+  private getBaseUrl(target?: 'local'): URL {
+    if (this.getEffectiveTarget(target) === 'public' && this.params.basePath.publicBaseUrl) {
       return new URL(this.params.basePath.publicBaseUrl);
     }
 
@@ -371,6 +393,13 @@ const addHeaders = (
     }
   }
 };
+
+const isBufferedRawBody = (body: unknown): boolean =>
+  body instanceof FormData ||
+  body instanceof Blob ||
+  body instanceof URLSearchParams ||
+  body instanceof ArrayBuffer ||
+  ArrayBuffer.isView(body);
 
 const serializeBody = <TRequestBody>(
   headers: Headers,
