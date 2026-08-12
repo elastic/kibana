@@ -23,9 +23,11 @@ spaceTest.describe(
   'Discover doc viewer flyout - escape key',
   { tag: '@local-stateful-classic' },
   () => {
-    // Required, not inherited: below EUI's breakpoint the doc viewer renders as
-    // an overlay flyout rather than a push flyout, and the overlay traps focus —
-    // which is exactly what these key handlers depend on.
+    // Required: above EUI's breakpoint the doc viewer renders as a push flyout
+    // rather than an overlay. The push flyout keeps focus on the
+    // `docViewerFlyout` container that owns the keydown handler. The overlay
+    // traps focus inside itself (data-no-focus-lock is absent), so escape there
+    // closes the overlay rather than reaching the flyout's handler.
     spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
@@ -43,15 +45,13 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    // The flyout takes focus a tick after `kbnDocViewer` becomes visible. Keys
-    // sent before that go to the grid's expand toggle, which sits outside the
-    // flyout and so never reaches its key handler — hence the focus assertion
-    // before the first key press in every test that doesn't click first.
-
     spaceTest('closes the flyout', async ({ page, pageObjects }) => {
       const { docViewer } = pageObjects;
 
       await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+      // The flyout takes focus a tick after becoming visible. Keys sent before
+      // that land on the grid's expand toggle (outside the flyout), so assert
+      // focus before the first key press.
       await expect(page.locator(':focus')).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
       await page.keyboard.press('Escape');

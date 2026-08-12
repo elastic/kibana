@@ -24,9 +24,11 @@ spaceTest.describe(
   'Discover doc viewer flyout - arrow keys',
   { tag: '@local-stateful-classic' },
   () => {
-    // Required, not inherited: below EUI's breakpoint the doc viewer renders as
-    // an overlay flyout rather than a push flyout, and the overlay traps focus —
-    // which is exactly what these key handlers depend on.
+    // Required: above EUI's breakpoint the doc viewer renders as a push flyout
+    // rather than an overlay. The push flyout keeps focus on the
+    // `docViewerFlyout` container that owns the keydown handler. The overlay
+    // traps focus inside itself (data-no-focus-lock is absent), so arrow keys
+    // there never reach the handler either.
     spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
