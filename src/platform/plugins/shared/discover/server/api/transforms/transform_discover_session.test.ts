@@ -129,7 +129,7 @@ describe('discover session API transforms', () => {
           },
         ],
       });
-      expect(sessionState.tabs[0].esql_approximation).toBe(true);
+      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
     });
 
     it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
