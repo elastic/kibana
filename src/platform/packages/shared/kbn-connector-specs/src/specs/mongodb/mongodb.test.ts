@@ -399,6 +399,91 @@ describe('aggregate', () => {
     expect(collectionInstance.aggregate).toHaveBeenCalledWith([{ $match: {} }, { $limit: 50 }]);
   });
 
+  it('appends a $limit inside each $facet branch, not just the outer pipeline', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $facet: { all: [{ $match: {} }] } }],
+      limit: 10,
+    });
+
+    // Without per-branch clamping, $facet would return the whole matching set inside
+    // one document, defeating the outer $limit (which only ever bounds it to 1 doc).
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $facet: { all: [{ $match: {} }, { $limit: 10 }] } },
+      { $limit: 10 },
+    ]);
+  });
+
+  it('preserves an existing within-cap $limit inside a $facet branch', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $facet: { all: [{ $match: {} }, { $limit: 5 }] } }],
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $facet: { all: [{ $match: {} }, { $limit: 5 }] } },
+      { $limit: 100 },
+    ]);
+  });
+
+  it('clamps every branch of a multi-branch $facet independently', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [
+        {
+          $facet: {
+            all: [{ $match: {} }],
+            oversized: [{ $match: {} }, { $limit: 9999 }],
+          },
+        },
+      ],
+      limit: 25,
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      {
+        $facet: {
+          all: [{ $match: {} }, { $limit: 25 }],
+          oversized: [{ $match: {} }, { $limit: 25 }],
+        },
+      },
+      { $limit: 25 },
+    ]);
+  });
+
   it.each(['$out', '$merge', '$function', '$accumulator'])(
     'rejects pipeline containing %s at the top level',
     async (stage) => {

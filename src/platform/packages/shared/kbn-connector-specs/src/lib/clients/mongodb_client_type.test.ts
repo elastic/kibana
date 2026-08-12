@@ -261,6 +261,26 @@ describe('mongodbClientType', () => {
       expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
+    it('throws if config.uri contains embedded credentials', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb://alice:secret@mongo.example.com:27017/mydb' },
+      });
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'config.uri must not contain embedded credentials'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
+    it('throws if config.uri contains an embedded username with no password', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb://alice@mongo.example.com:27017/mydb' },
+      });
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'config.uri must not contain embedded credentials'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
     it('throws if auth headers contain no recognisable Basic credential', async () => {
       const ctx = makeBuildContext({
         credential: {
@@ -340,6 +360,16 @@ describe('mongodbClientType', () => {
         isUserError(
           new Error(
             'basic auth credentials (username and password) are required for MongoDB connections'
+          )
+        )
+      ).toBe(true);
+    });
+
+    it('returns true for the embedded-credentials pre-connect error', () => {
+      expect(
+        isUserError(
+          new Error(
+            'config.uri must not contain embedded credentials — use the username and password fields instead'
           )
         )
       ).toBe(true);

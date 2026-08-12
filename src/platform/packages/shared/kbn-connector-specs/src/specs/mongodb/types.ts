@@ -93,8 +93,9 @@ export const AggregateInputSchema = lazySchema(() =>
     pipeline: z
       .array(z.record(z.string().max(200), z.unknown()))
       .min(1)
+      .max(100)
       .describe(
-        'MongoDB aggregation pipeline — an ordered array of stage objects. ' +
+        'MongoDB aggregation pipeline — an ordered array of stage objects (maximum 100 stages). ' +
           'Example: [{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]. ' +
           'Write stages ($out, $merge) and code-execution stages ($function, $accumulator) are not allowed.'
       ),

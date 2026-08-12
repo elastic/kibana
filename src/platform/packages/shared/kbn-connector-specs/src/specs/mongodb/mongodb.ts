@@ -112,6 +112,43 @@ const assertReadOnly = (value: unknown): void => {
   }
 };
 
+/**
+ * Enforce maxLimit on a pipeline's final result count, recursing into every `$facet` branch.
+ * `$facet` emits a single document whose fields are arrays holding each branch's full results,
+ * so a $limit on the outer pipeline only ever bounds that to 1 document — it does nothing to
+ * bound the data volume hidden inside the branch arrays. Clamping each branch the same way the
+ * outer pipeline is clamped closes that gap.
+ */
+const clampPipelineLimit = (
+  pipeline: Record<string, unknown>[],
+  maxLimit: number
+): Record<string, unknown>[] => {
+  const lastStage = pipeline[pipeline.length - 1];
+  const existingLimit =
+    lastStage != null && '$limit' in lastStage ? (lastStage as { $limit: unknown }).$limit : null;
+
+  const limited: Record<string, unknown>[] =
+    existingLimit === null
+      ? [...pipeline, { $limit: maxLimit }]
+      : typeof existingLimit === 'number' && existingLimit <= maxLimit
+      ? pipeline
+      : [...pipeline.slice(0, -1), { $limit: maxLimit }];
+
+  return limited.map((stage) => {
+    if (!('$facet' in stage)) return stage;
+    const facet = stage.$facet as Record<string, unknown>;
+    const clampedFacet = Object.fromEntries(
+      Object.entries(facet).map(([branchName, branchPipeline]) => [
+        branchName,
+        Array.isArray(branchPipeline)
+          ? clampPipelineLimit(branchPipeline, maxLimit)
+          : branchPipeline,
+      ])
+    );
+    return { ...stage, $facet: clampedFacet };
+  });
+};
+
 export const MongoDBConnector: ConnectorSpec = {
   metadata: {
     id: '.mongodb',
@@ -195,27 +232,14 @@ export const MongoDBConnector: ConnectorSpec = {
         '($match, $group, $sort, $project, $lookup, $unwind, $limit, $skip, $count, etc.). ' +
         'Write stages ($out, $merge) and code-execution operators ($where, $function, $accumulator) ' +
         'are rejected, at any nesting depth. ' +
-        'A $limit stage is appended automatically unless the pipeline already ends with one. ' +
-        'Maximum 1000 results.',
+        'A $limit stage is appended automatically unless the pipeline already ends with one, ' +
+        'including inside every $facet branch. Maximum 1000 results per branch.',
       input: AggregateInputSchema,
       handler: async (ctx, input: AggregateInput) => {
         assertReadOnly(input.pipeline);
 
         const maxLimit = input.limit ?? 100;
-        const lastStage = input.pipeline[input.pipeline.length - 1];
-        const existingLimit =
-          lastStage != null && '$limit' in lastStage
-            ? (lastStage as { $limit: unknown }).$limit
-            : null;
-
-        // Always enforce the cap. If the pipeline already ends with $limit, replace it
-        // if its value exceeds maxLimit; otherwise append a fresh $limit stage.
-        const pipeline: Record<string, unknown>[] =
-          existingLimit !== null
-            ? typeof existingLimit === 'number' && existingLimit <= maxLimit
-              ? input.pipeline
-              : [...input.pipeline.slice(0, -1), { $limit: maxLimit }]
-            : [...input.pipeline, { $limit: maxLimit }];
+        const pipeline = clampPipelineLimit(input.pipeline, maxLimit);
 
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');

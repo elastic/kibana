@@ -66,6 +66,16 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
 
     await ensureHostsAllowed(ctx, connectionString);
 
+    // config.uri is stored as unencrypted connector config, not a secret. A URI with
+    // embedded userinfo (mongodb://user:pass@host/db) would persist that password in
+    // plaintext alongside the encrypted basic-auth secrets — reject it and make the
+    // caller use the separate username/password fields instead.
+    if (connectionString.username || connectionString.password) {
+      throw new Error(
+        'config.uri must not contain embedded credentials — use the username and password fields instead'
+      );
+    }
+
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');
     if (!credentials || !credentials.username || !credentials.password) {
@@ -103,7 +113,9 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
       if (
         err.message === 'config.uri is required' ||
         err.message ===
-          'basic auth credentials (username and password) are required for MongoDB connections'
+          'basic auth credentials (username and password) are required for MongoDB connections' ||
+        err.message ===
+          'config.uri must not contain embedded credentials — use the username and password fields instead'
       ) {
         return true;
       }

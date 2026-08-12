@@ -3,7 +3,7 @@ navigation_title: "MongoDB"
 type: reference
 description: "Use the MongoDB connector to query and write to MongoDB collections using find, aggregate, count, listCollections, insertOne, updateOne, and deleteOne."
 applies_to:
-  stack: preview 9.5
+  stack: preview 9.6
   serverless: preview
 ---
 
@@ -28,11 +28,11 @@ Username
 Password
 :   The password for MongoDB Basic authentication.
 
-## Test connectors [mongodb-action-configuration]
+### Test connectors [mongodb-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by pinging the MongoDB deployment.
 
-The MongoDB connector has the following actions:
+## Connector actions [mongodb-connector-actions]
 
 List collections
 :   List all collections in a database. Returns collection names and types. Use this first to discover what data is available before calling find, aggregate, or count.
@@ -50,11 +50,11 @@ Find
     - `skip` (optional): Number of documents to skip before returning results. Use with `limit` for pagination.
 
 Aggregate
-:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution operators (`$where`, `$function`, `$accumulator`) are rejected anywhere in the pipeline, including nested inside stage expressions (for example, `$project` or `$group`) and sub-pipelines (`$facet`, `$lookup`, `$unionWith`). A `$limit` stage is appended automatically unless the pipeline already ends with one.
+:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution operators (`$where`, `$function`, `$accumulator`) are rejected anywhere in the pipeline, including nested inside stage expressions (for example, `$project` or `$group`) and sub-pipelines (`$facet`, `$lookup`, `$unionWith`). A `$limit` stage is appended automatically unless the pipeline already ends with one, including separately inside every `$facet` branch, so `$facet` can't be used to return more than the limit's worth of documents per branch.
     - `collection` (required): Name of the collection to aggregate.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
-    - `pipeline` (required): MongoDB aggregation pipeline — an ordered array of stage objects. Example: `[{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]`.
-    - `limit` (optional): Maximum number of documents to return (1–1000). Defaults to 100.
+    - `pipeline` (required): MongoDB aggregation pipeline — an ordered array of stage objects (maximum 100 stages). Example: `[{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]`.
+    - `limit` (optional): Maximum number of documents to return, per `$facet` branch if present (1–1000). Defaults to 100.
 
 Count
 :   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Use this to understand data volume before running a find or aggregate. Code-execution operators (`$where`, `$expr` containing `$function`/`$accumulator`) are rejected in the filter.
