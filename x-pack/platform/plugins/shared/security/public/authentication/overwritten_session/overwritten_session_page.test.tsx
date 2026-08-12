@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { act } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { OverwrittenSessionPage } from './overwritten_session_page';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { AuthenticationStatePage } from '../components/authentication_state_page';
 import { authenticationMock } from '../index.mock';
 
 describe('OverwrittenSessionPage', () => {
@@ -32,19 +30,16 @@ describe('OverwrittenSessionPage', () => {
       mockAuthenticatedUser({ username: 'mock-user' })
     );
 
-    const wrapper = mountWithIntl(
+    const { container } = renderWithI18n(
       <OverwrittenSessionPage basePath={basePathMock} authc={authenticationSetupMock} />
     );
 
     // Shouldn't render anything if username isn't yet available.
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(container).toBeEmptyDOMElement();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    expect(await screen.findByTestId('secAuthenticationStatePage')).toBeInTheDocument();
 
-    expect(wrapper.find(AuthenticationStatePage).render()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('properly parses `next` parameter', async () => {
@@ -58,18 +53,15 @@ describe('OverwrittenSessionPage', () => {
       mockAuthenticatedUser({ username: 'mock-user' })
     );
 
-    const wrapper = mountWithIntl(
+    renderWithI18n(
       <OverwrittenSessionPage basePath={basePathMock} authc={authenticationSetupMock} />
     );
 
-    // Shouldn't render anything if username isn't yet available.
-    expect(wrapper.isEmptyRender()).toBe(true);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    expect(wrapper.find(EuiButton).prop('href')).toBe('/mock-base-path/app/home#/?_g=()');
+    await waitFor(() =>
+      expect(screen.getByRole('link', { name: /Continue as mock-user/ })).toHaveAttribute(
+        'href',
+        '/mock-base-path/app/home#/?_g=()'
+      )
+    );
   });
 });
