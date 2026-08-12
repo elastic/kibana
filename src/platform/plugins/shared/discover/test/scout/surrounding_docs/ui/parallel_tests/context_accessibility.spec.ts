@@ -27,21 +27,24 @@ spaceTest.describe('Discover context - accessibility', { tag: '@local-stateful-c
   });
 
   spaceTest(
-    'should tab from the Columns control to the Load link',
+    'should tab from the Load link to the Columns control',
     async ({ page, pageObjects }) => {
       await navigateToFirstDocContext(pageObjects);
 
       // Skip to main content via Tab + Enter, then Tab through toolbar controls.
-      // Columns is always available (including summary-only), so it precedes Load more.
+      // Left action bar is Load more, then the count picker; Columns follows (including summary-only).
       await page.keyboard.press('Tab');
       await page.keyboard.press('Enter');
       await page.keyboard.press('Tab');
 
       const activeElement = page.locator(':focus');
-      await expect(activeElement).toHaveAttribute('data-test-subj', /dataGridColumnSelectorButton/);
+      await expect(activeElement).toHaveAttribute('data-test-subj', /predecessorsLoadMoreButton/);
 
       await page.keyboard.press('Tab');
-      await expect(activeElement).toHaveAttribute('data-test-subj', /predecessorsLoadMoreButton/);
+      await expect(activeElement).toHaveAttribute('data-test-subj', /predecessorsCountPicker/);
+
+      await page.keyboard.press('Tab');
+      await expect(activeElement).toHaveAttribute('data-test-subj', /dataGridColumnSelectorButton/);
     }
   );
 });
