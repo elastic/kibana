@@ -219,8 +219,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Mute the alert instance first
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
-      // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      // Run the rule to trigger reconciliation. Use force so we do not get "Rule is already
+      // running" without queueing a run; muted flags only reconcile on execution.
+      await alertUtils.runSoon(ruleId, { force: true });
 
       // Wait for alert to be muted
       await retry.try(async () => {
@@ -234,8 +235,9 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Now unmute the alert instance
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
-      // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
+      // Run the rule to trigger reconciliation. Use force so we do not get "Rule is already
+      // running" without queueing a run; muted flags only reconcile on execution.
+      await alertUtils.runSoon(ruleId, { force: true });
 
       // Wait for alert document to be updated
       await retry.try(async () => {
