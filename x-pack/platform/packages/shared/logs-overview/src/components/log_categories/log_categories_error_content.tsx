@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiAccordion, EuiCodeBlock, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -17,14 +17,31 @@ export const LogCategoriesErrorContent: React.FC<LogCategoriesErrorContentProps>
   return (
     <EuiEmptyPrompt
       color="danger"
+      data-test-subj="logsOverviewLogCategoriesErrorPrompt"
       iconType="error"
+      layout="vertical"
       title={<h2>{logsOverviewErrorTitle}</h2>}
       body={
-        <EuiCodeBlock className="eui-textLeft" whiteSpace="pre">
-          <p>{error?.stack ?? error?.toString() ?? unknownErrorDescription}</p>
-        </EuiCodeBlock>
+        <>
+          <p>{error?.message ?? unknownErrorDescription}</p>
+          {error?.stack != null && (
+            <EuiAccordion
+              id="logsOverviewLogCategoriesErrorDetails"
+              buttonContent={errorDetailsAccordionLabel}
+              paddingSize="s"
+            >
+              <EuiCodeBlock
+                className="eui-textLeft"
+                isCopyable
+                overflowHeight={200}
+                whiteSpace="pre"
+              >
+                {error.stack}
+              </EuiCodeBlock>
+            </EuiAccordion>
+          )}
+        </>
       }
-      layout="vertical"
     />
   );
 };
@@ -40,5 +57,12 @@ const unknownErrorDescription = i18n.translate(
   'xpack.observabilityLogsOverview.logCategories.unknownErrorDescription',
   {
     defaultMessage: 'An unspecified error occurred.',
+  }
+);
+
+const errorDetailsAccordionLabel = i18n.translate(
+  'xpack.observabilityLogsOverview.logCategories.errorDetailsAccordionLabel',
+  {
+    defaultMessage: 'Technical details',
   }
 );

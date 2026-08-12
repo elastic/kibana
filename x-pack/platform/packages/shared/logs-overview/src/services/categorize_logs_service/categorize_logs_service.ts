@@ -31,9 +31,7 @@ export const categorizeLogsService = setup({
       parameters: LogCategorizationParams;
       samplingProbability: number;
     },
-    events: {} as {
-      type: 'cancel';
-    },
+    events: {} as { type: 'cancel' } | { type: 'retry' },
   },
   actors: {
     countDocuments: getPlaceholderFor(countDocuments),
@@ -55,6 +53,13 @@ export const categorizeLogsService = setup({
         samplingProbability: params.samplingProbability,
       })
     ),
+    resetCategorizationResults: assign({
+      categories: [],
+      documentCount: 0,
+      error: undefined,
+      hasReachedLimit: false,
+      samplingProbability: 1,
+    }),
   },
   guards: {
     hasTooFewDocuments: (_guardArgs, params: { documentCount: number }) => params.documentCount < 1,
@@ -74,6 +79,8 @@ export const categorizeLogsService = setup({
   initial: 'countingDocuments',
   states: {
     countingDocuments: {
+      // Clears stale categories so they don't appear in `ignoredCategoryTerms` on retry.
+      entry: 'resetCategorizationResults',
       invoke: {
         src: 'countDocuments',
         input: ({ context }) => context.parameters,
@@ -126,15 +133,7 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Counting cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
       },
     },
 
@@ -169,15 +168,7 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Categorization cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
       },
     },
 
@@ -212,15 +203,14 @@ export const categorizeLogsService = setup({
       },
 
       on: {
-        cancel: {
-          target: 'failed',
-          actions: [
-            {
-              type: 'storeError',
-              params: () => ({ error: new Error('Categorization cancelled') }),
-            },
-          ],
-        },
+        cancel: { target: 'cancelled' },
+      },
+    },
+
+    // Not `type: 'final'` — keeps the actor alive to receive the `retry` event.
+    cancelled: {
+      on: {
+        retry: { target: 'countingDocuments' },
       },
     },
 
