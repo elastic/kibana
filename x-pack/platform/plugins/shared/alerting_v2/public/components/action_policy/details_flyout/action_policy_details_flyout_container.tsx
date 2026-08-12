@@ -51,8 +51,8 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
     isLoading: isDisabling,
     variables: disableVariables,
   } = useDisableActionPolicy();
-  const { mutate: snoozePolicy } = useSnoozeActionPolicy();
-  const { mutate: unsnoozePolicy } = useUnsnoozeActionPolicy();
+  const { mutate: snoozePolicy, isLoading: isSnoozing } = useSnoozeActionPolicy();
+  const { mutate: unsnoozePolicy, isLoading: isUnsnoozing } = useUnsnoozeActionPolicy();
   const { mutate: updateApiKey, isLoading: isUpdatingApiKey } = useUpdateActionPolicyApiKey();
 
   const navigateToEdit = (id: string) => {
@@ -120,6 +120,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isEnabling && enableVariables === policy.id) ||
             (isDisabling && disableVariables === policy.id)
           }
+          isSnoozeLoading={isSnoozing || isUnsnoozing}
           session={'start'}
           ownFocus={false}
           hasAnimation={false}
