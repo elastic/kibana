@@ -504,6 +504,10 @@ export interface ValidationErrors {
     message: string;
     type: { type: string };
   };
+  highlightOnFieldWrongType: {
+    message: string;
+    type: { fieldName: string; type: string };
+  };
   tsdbIncompatibleFunction: {
     message: string;
     type: { fnName: string };

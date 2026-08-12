@@ -9,14 +9,18 @@
 
 import { isMap } from '@elastic/esql';
 import type { ESQLAstAllCommands, ESQLAst, ESQLAstHighlightCommand } from '@elastic/esql/types';
-import type { ICommandContext, ICommandCallbacks } from '../types';
+import type { ESQLMessage } from '../../definitions/types';
+import { getExpressionType } from '../../definitions/utils/expressions';
+import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { validateMap } from '../../definitions/utils/validation/map';
-import type { ESQLMessage } from '../../definitions/types';
+import type { ICommandContext, ICommandCallbacks } from '../types';
+import { getItemLocation } from './utils';
 
 // `pre_tags`/`post_tags` accept `keyword | keyword[]`; using type=[keyword] still validates
 // list values because getExpressionType delegates a list's type to its first element.
 const HIGHLIGHT_MAP_DEFINITION =
+  "{name='analyzer', description='Analyzer used to re-analyze the ON fields before highlighting', type=[keyword]}" +
   "{name='pre_tags', description='HTML tag to insert before highlighted text', type=[keyword]}" +
   "{name='post_tags', description='HTML tag to insert after highlighted text', type=[keyword]}" +
   "{name='number_of_fragments', description='Maximum number of fragments to return', type=[integer]}" +
@@ -31,6 +35,9 @@ const HIGHLIGHT_MAP_DEFINITION =
   "{name='max_analyzed_offset', description='Maximum character offset to analyze', type=[integer]}" +
   "{name='phrase_limit', description='Maximum number of phrases to examine', type=[integer]}";
 
+/** Field types accepted by ES for the HIGHLIGHT ON list. */
+const ALLOWED_HIGHLIGHT_FIELD_TYPES = ['text', 'keyword', 'param', 'unknown'];
+
 export const validate = (
   command: ESQLAstAllCommands,
   ast: ESQLAst,
@@ -39,9 +46,25 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { namedParameters } = command as ESQLAstHighlightCommand;
+  const highlightCommand = command as ESQLAstHighlightCommand;
+  const { highlightFields, namedParameters } = highlightCommand;
 
-  if (namedParameters && !Array.isArray(namedParameters) && isMap(namedParameters)) {
+  // Validate ON field types: each field must be text or keyword.
+  for (const field of highlightFields ?? []) {
+    const fieldType = getExpressionType(field, context?.columns, context?.unmappedFieldsStrategy);
+
+    if (!ALLOWED_HIGHLIGHT_FIELD_TYPES.includes(fieldType)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'highlightOnFieldWrongType',
+          values: { fieldName: field.name, type: fieldType },
+          locations: getItemLocation(field, command.location),
+        })
+      );
+    }
+  }
+
+  if (namedParameters !== undefined && !Array.isArray(namedParameters) && isMap(namedParameters)) {
     const mapError = validateMap(namedParameters, HIGHLIGHT_MAP_DEFINITION);
     if (mapError) {
       messages.push(mapError);

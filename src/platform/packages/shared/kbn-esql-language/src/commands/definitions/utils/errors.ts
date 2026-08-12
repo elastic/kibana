@@ -507,6 +507,15 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'highlightOnFieldWrongType':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightOnFieldWrongType', {
+          defaultMessage:
+            '[HIGHLIGHT] ON field [{fieldName}] must be of type text or keyword. Found {type}',
+          values: { fieldName: out.fieldName, type: out.type },
+        }),
+        type: 'error',
+      };
     case 'tsdbIncompatibleFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {

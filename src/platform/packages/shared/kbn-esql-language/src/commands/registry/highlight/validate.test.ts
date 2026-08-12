@@ -20,33 +20,68 @@ describe('HIGHLIGHT Validation', () => {
     jest.clearAllMocks();
   });
 
-  // The query text is constrained to a string literal by the grammar, so a non-string query
-  // (e.g. `HIGHLIGHT 123`) is a parser syntax error, not a semantic one. validate() never
-  // receives the integer, so it reports nothing for these two cases.
-  it('does not report a non-string query (handled by the parser as a syntax error)', () => {
-    highlightExpectErrors('FROM index | HIGHLIGHT 123', []);
+  describe('basic queries', () => {
+    it('does not report errors for a valid string query', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField', []);
+    });
+
+    it('does not report errors for a valid MATCH query', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON textField', []);
+    });
+
+    it('does not report errors for a prefix modifier', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT prefix = "hl_" "ring" ON textField', []);
+    });
+
+    it('does not report errors for a prefix modifier with a field list and WITH map', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT prefix = "hl_" "ring" ON keywordField, textField WITH { "encoder": "html" }',
+        []
+      );
+    });
   });
 
-  it('does not report a non-string query and ON field (handled by the parser)', () => {
-    highlightExpectErrors('FROM index | HIGHLIGHT 123 ON 456', []);
+  describe('ON field type validation', () => {
+    it('reports an error when an ON field is not text or keyword', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON integerField', [
+        '[HIGHLIGHT] ON field [integerField] must be of type text or keyword. Found integer',
+      ]);
+    });
+
+    it('does not report an error for a text field', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField', []);
+    });
+
+    it('does not report an error for a keyword field', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON keywordField', []);
+    });
   });
 
-  it('reports an unknown WITH parameter name', () => {
-    highlightExpectErrors('FROM index | HIGHLIGHT 123 ON 456 WITH { "test": 789 }', [
-      'Unknown parameter "test".',
-    ]);
-  });
+  describe('WITH map validation', () => {
+    it('reports an unknown WITH parameter name', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField WITH { "test": 789 }', [
+        'Unknown parameter "test".',
+      ]);
+    });
 
-  it('reports a WITH parameter with a wrong value type', () => {
-    highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": true }', [
-      'Invalid type for parameter "encoder". Expected type: keyword. Received: boolean.',
-    ]);
-  });
+    it('reports a WITH parameter with a wrong value type', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": true }', [
+        'Invalid type for parameter "encoder". Expected type: keyword. Received: boolean.',
+      ]);
+    });
 
-  it('does not report errors for a valid query', () => {
-    highlightExpectErrors(
-      'FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": "html" }',
-      []
-    );
+    it('does not report errors for a valid WITH map including analyzer', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "analyzer": "standard", "encoder": "html" }',
+        []
+      );
+    });
+
+    it('does not report errors for a valid query with multiple WITH options', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": "html" }',
+        []
+      );
+    });
   });
 });
