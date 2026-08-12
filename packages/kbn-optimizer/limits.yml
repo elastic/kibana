@@ -77,7 +77,7 @@ pageLoadAssetSize:
   expressionPartitionVis: 29826
   expressions: 104955
   expressionTagcloud: 14009
-  expressionXY: 46000
+  expressionXY: 45000
   features: 4145
   feedback: 7642
   fieldFormats: 64634
@@ -144,7 +144,7 @@ pageLoadAssetSize:
   observabilityShared: 86067
   osquery: 48500
   painlessLab: 6299
-  pnd: 20000
+  pnd: 13291
   presentationUtil: 8391
   productDocBase: 6767
   productIntercept: 9860

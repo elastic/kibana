@@ -22,6 +22,8 @@ import {
 import { useHistory } from 'react-router-dom';
 import { compareWatchesForDisplay, type Lifecycle, type Watch } from '@kbn/pnd-common';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
+// Shared with the deep-link registry, which is page-load critical — see the note on their definition.
+import { SUBNAV_SKILLS, SUBNAV_WORKERS } from '../../../components/app_chrome/translations';
 import { useWatches } from '../../../hooks/use_watches_api';
 import * as i18n from '../translations';
 
@@ -50,13 +52,13 @@ interface GlobalNavItem {
 const GLOBAL_NAV_ITEMS: GlobalNavItem[] = [
   {
     id: WATCHES_NAV_WORKERS_ID,
-    label: i18n.SUBNAV_WORKERS,
+    label: SUBNAV_WORKERS,
     path: '/watches/workers',
     icon: 'gear',
   },
   {
     id: WATCHES_NAV_SKILLS_ID,
-    label: i18n.SUBNAV_SKILLS,
+    label: SUBNAV_SKILLS,
     path: '/watches/skills',
     icon: 'nested',
   },
