@@ -2204,6 +2204,262 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/access_control:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/access_control</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Technical Preview; added in 9.6.0.** Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-conversations-conversation-id-access-control
+      parameters:
+        - description: The unique identifier of the conversation whose access control to retrieve.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getConversationAccessControlAsMemberResponseExample:
+                  description: Example response for a member — the full member list is returned, but the member cannot change it.
+                  value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - added_at: '2026-08-11T10:00:00.000Z'
+                          id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                          role: member
+                          type: user
+                        - added_at: '2026-08-11T11:30:00.000Z'
+                          id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                          role: member
+                          type: user
+                    permissions:
+                      update_access_control: false
+                getConversationAccessControlResponseExample:
+                  description: Example response for the conversation owner — the conversation is shared with two members.
+                  value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - added_at: '2026-08-11T10:00:00.000Z'
+                          id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                          role: member
+                          type: user
+                        - added_at: '2026-08-11T11:30:00.000Z'
+                          id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                          role: member
+                          type: user
+                    permissions:
+                      update_access_control: true
+          description: Indicates a successful response
+        '404':
+          content:
+            application/json:
+              examples:
+                conversationNotFoundResponseExample:
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation my-conversation-id not found
+                    statusCode: 404
+          description: Not Found — no conversation with this ID is readable by the caller, either because it is not shared with them or because they lost access to its agent. Matches the existing `conversationNotFound` shape, so callers cannot probe for hidden conversations.
+      summary: Get a conversation's access control
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}/access_control" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/conversations/{conversation_id}/access_control
+      x-state: Added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/access_control</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Technical Preview; added in 9.6.0.** Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: put-agent-builder-conversations-conversation-id-access-control
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation whose access control to update.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              publishConversationRequestExample:
+                description: Switch the conversation to `public` so any user with access to its agent can read and continue it. A public conversation is already open to everyone with agent access, so `entries` must be empty.
+                value:
+                  access_mode: public
+                  entries: []
+              shareConversationRequestExample:
+                description: Example request sharing a private conversation with two users. They can read and continue the conversation, provided they also have access to its agent.
+                value:
+                  access_mode: private
+                  entries:
+                    - id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                      role: member
+                      type: user
+                    - id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                      role: member
+                      type: user
+              unshareConversationRequestExample:
+                description: Submit an empty entries list to remove every member. Access then falls back to the access mode alone.
+                value:
+                  access_mode: private
+                  entries: []
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                access_mode:
+                  description: 'Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation agent can read and continue it).'
+                  enum:
+                    - private
+                    - public
+                  type: string
+                entries:
+                  description: Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored. Must be empty when `access_mode` is `public`; repeated ids are rejected.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        description: 'Stable identifier of the user to share the conversation with: a Kibana user profile uid. Users without a profile cannot be granted access.'
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                      role:
+                        description: 'Role granted to the principal. `member` is the only role: it grants read and converse access to the conversation.'
+                        enum:
+                          - member
+                        type: string
+                      type:
+                        enum:
+                          - user
+                        type: string
+                    required:
+                      - type
+                      - id
+                      - role
+                  maxItems: 100
+                  type: array
+              required:
+                - access_mode
+                - entries
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateConversationAccessControlResponseExample:
+                  description: Example response returning the persisted access control. `added_at` is stamped by the server for newly added members and preserved for members that were already listed.
+                  value:
+                    access_mode: private
+                    entries:
+                      - added_at: '2026-08-11T10:00:00.000Z'
+                        id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                        role: member
+                        type: user
+                      - added_at: '2026-08-11T11:30:00.000Z'
+                        id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                        role: member
+                        type: user
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                duplicateEntryResponseExample:
+                  description: Two entries name the same user id.
+                  value:
+                    error: Bad Request
+                    message: Duplicate ACL entry for user "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0"
+                    statusCode: 400
+                entriesWithPublicModeResponseExample:
+                  description: '`entries` must be empty when `access_mode` is `public` — a public conversation is already open to everyone with agent access.'
+                  value:
+                    error: Bad Request
+                    message: ACL entries are not supported when access_mode is "public"
+                    statusCode: 400
+                tooManyEntriesResponseExample:
+                  description: Request body exceeds the 100-member maximum.
+                  value:
+                    error: Bad Request
+                    message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
+                    statusCode: 400
+          description: Bad Request — the request body failed validation.
+        '404':
+          content:
+            application/json:
+              examples:
+                conversationNotFoundResponseExample:
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation my-conversation-id not found
+                    statusCode: 404
+          description: Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist.
+      summary: Update a conversation's access control
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}/access_control" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "access_mode": "private",
+                "entries": [
+                  { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+                ]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/conversations/{conversation_id}/access_control
+            {
+              "access_mode": "private",
+              "entries": [
+                { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+              ]
+            }
+      x-state: Added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}/attachments:
     get:
       description: |-
