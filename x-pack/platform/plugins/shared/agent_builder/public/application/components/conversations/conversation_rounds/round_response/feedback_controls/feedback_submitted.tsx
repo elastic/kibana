@@ -18,7 +18,7 @@ export const FeedbackSubmitted: React.FC = () => (
       <EuiText size="xs">
         <span>
           {i18n.translate('xpack.agentBuilder.feedback.submitted', {
-            defaultMessage: 'Thanks for your feedback',
+            defaultMessage: 'Thank you for your feedback',
           })}
         </span>
       </EuiText>

@@ -52,7 +52,7 @@ const UP_CHIPS: Chip[] = [
   {
     id: 'well_explained',
     label: i18n.translate('xpack.agentBuilder.feedback.chip.wellExplained', {
-      defaultMessage: 'Well-explained',
+      defaultMessage: 'Well explained',
     }),
   },
 ];
