@@ -7,29 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+// Component Objects from the published `@elastic/eui-test-helpers`, consumed
+// through the `page.components` factories. Re-exported here so `@kbn/scout` and
+// the solution Scout packages expose them under a single entry point.
+export {
   EuiComboBoxObject,
   EuiDataGridObject,
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
 } from '@elastic/eui-test-helpers';
-import { EuiDataGridWrapper } from './data_grid';
-import { EuiToastWrapper } from './toast';
-import { EuiFieldTextWrapper } from './field_text';
-import { EuiCodeBlockWrapper } from './code_block';
-import { EuiSuperSelectWrapper } from './super_select';
-
-export {
-  // Component Objects from the published `@elastic/eui-test-helpers`, consumed
-  // through the `page.components` factories.
-  EuiComboBoxObject,
-  EuiDataGridObject,
-  EuiGlobalToastListObject,
-  EuiSuperSelectObject,
-  // Deprecated wrappers, kept until all consumers are migrated to `page.components`.
-  EuiDataGridWrapper,
-  EuiToastWrapper,
-  EuiFieldTextWrapper,
-  EuiCodeBlockWrapper,
-  EuiSuperSelectWrapper,
-};
