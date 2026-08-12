@@ -108,6 +108,19 @@ export const Main: FunctionComponent = () => {
         tabs={tabs}
         spacing="bleed"
         docLink={dataFederationLinks.overview}
+        menu={{
+          items: [
+            {
+              id: 'quickstart',
+              label: mainTranslations.quickstartLink,
+              iconType: 'launch',
+              href: dataFederationLinks.quickstart,
+              target: '_blank',
+              overflow: true,
+              order: 3,
+            },
+          ],
+        }}
       />
       <EuiSpacer size="l" />
 
