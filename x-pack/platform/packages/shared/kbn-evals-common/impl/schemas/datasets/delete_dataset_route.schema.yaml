@@ -31,6 +31,7 @@ paths:
             the dataset's spaces call for.
           schema:
             type: string
+            maxLength: 16
             enum:
               - unshare
               - delete
