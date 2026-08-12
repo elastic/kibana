@@ -847,13 +847,34 @@ describe('EvalsClient', () => {
     it.each([
       ['no spaces are requested', undefined],
       ['the default space is among them', ['default', 'marketing']],
-      ['every space is requested', ['*']],
     ])('stays in the default space when %s', async (_, spaceIds) => {
-      // `*` is not a path segment, and the privilege it needs is global, so it
-      // is checked from wherever the request lands.
       await expect(requestFor(spaceIds)).resolves.toEqual(
         expect.objectContaining({ path: EVALS_DATASET_UPSERT_URL })
       );
+    });
+
+    it('leaves no request behind in the space the run was started from', async () => {
+      const kbnClient = createMockKbnClient();
+      // The responses don't matter: every call is only asked where it went.
+      kbnClient.request.mockResolvedValue(asKbnResponse({}));
+      const client = new EvalsClient(kbnClient, createLog(), { spaceIds: ['marketing'] });
+
+      await Promise.allSettled([
+        client.assertPluginEnabled(),
+        client.ingestScores(createIngestRequest()),
+        client.upsertDataset({ name: 'ds', description: '', examples: [] }),
+        client.getDatasetByName('ds'),
+        client.deleteDataset('ds-1'),
+        client.getExperimentStats('experiment-1'),
+        client.getExperimentScores('experiment-1'),
+        client.findLatestBaselineExperiment({ suiteId: 'suite-a', branch: 'main' }),
+        client.findLatestExperimentForBuild({ suiteId: 'suite-a', baseExecutionId: 'bk-1' }),
+      ]);
+
+      const paths = kbnClient.request.mock.calls.map(([{ path }]) => path as string);
+
+      expect(paths.length).toBeGreaterThan(8);
+      expect(paths.filter((path) => !path.startsWith('/s/marketing/'))).toEqual([]);
     });
 
     it('names the space when a prefixed request finds nothing there', async () => {

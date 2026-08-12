@@ -49,11 +49,13 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
       const updated = await evalsClient.getDatasetByName(datasetName);
       expect(updated?.examples).toHaveLength(2);
 
+      // The dataset was never shared, since this creates it without naming any
+      // spaces, so the delete is a real one wherever the run works.
       const { unshared } = await evalsClient.deleteDataset(datasetId);
-      datasetToCleanUp = undefined;
       expect(unshared).toBe(false);
-
       expect(await evalsClient.getDatasetByName(datasetName)).toBeNull();
+
+      datasetToCleanUp = undefined;
     } finally {
       if (datasetToCleanUp) {
         // A failed assertion above would otherwise leave the dataset behind on

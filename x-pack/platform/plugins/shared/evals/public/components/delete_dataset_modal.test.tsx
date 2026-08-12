@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import { useAccessibleSpaces } from '../hooks/use_spaces';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
 import { DeleteDatasetModal } from './delete_dataset_modal';
@@ -106,7 +106,53 @@ describe('DeleteDatasetModal', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Remove from this space' }));
 
-    expect(mutateAsync).toHaveBeenCalledWith({ datasetId: 'dataset-1' });
+    expect(mutateAsync).toHaveBeenCalledWith({ datasetId: 'dataset-1', intent: 'unshare' });
+  });
+
+  it('asks again as a delete when the other spaces have since let go', async () => {
+    // The assignment the dialog was opened with is a snapshot. Going ahead on
+    // it would destroy the dataset behind a dialog promising its examples stay.
+    mutateAsync.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict'), {
+        request: {},
+        response: { status: 409 } as Response,
+      })
+    );
+
+    renderModal(['default', 'marketing']);
+    await userEvent.click(screen.getByRole('button', { name: 'Remove from this space' }));
+
+    expect(screen.getByText('Delete dataset "Golden set"?')).toBeInTheDocument();
+    expect(screen.getByText(/only one holding it/)).toBeInTheDocument();
+    expect(screen.getByTestId('deleteDatasetConfirmInput')).toBeInTheDocument();
+
+    await userEvent.type(screen.getByTestId('deleteDatasetConfirmInput'), 'Golden set');
+    await userEvent.click(screen.getByRole('button', { name: 'Delete dataset' }));
+
+    expect(mutateAsync).toHaveBeenLastCalledWith({ datasetId: 'dataset-1', intent: 'delete' });
+  });
+
+  it('asks again as an unshare without counting spaces it can no longer vouch for', async () => {
+    mutateAsync.mockRejectedValueOnce(
+      Object.assign(new Error('Conflict'), {
+        request: {},
+        response: { status: 409 } as Response,
+      })
+    );
+
+    renderModal(['default']);
+    await userEvent.type(screen.getByTestId('deleteDatasetConfirmInput'), 'Golden set');
+    await userEvent.click(screen.getByRole('button', { name: 'Delete dataset' }));
+
+    expect(screen.getByText('Remove "Golden set" from this space?')).toBeInTheDocument();
+    // The spaces this was opened with are the ones the server just called
+    // stale, so saying it stays in "0 other spaces" would contradict itself.
+    expect(screen.getByText(/spaces it has since been shared with/)).toBeInTheDocument();
+    expect(screen.queryByText(/0 other spaces/)).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove from this space' }));
+
+    expect(mutateAsync).toHaveBeenLastCalledWith({ datasetId: 'dataset-1', intent: 'unshare' });
   });
 
   it.each([
@@ -122,13 +168,5 @@ describe('DeleteDatasetModal', () => {
     renderModal(['default', UNKNOWN_SPACE]);
 
     expect(screen.getByText(/stays in 1 space you do not have access to/)).toBeInTheDocument();
-  });
-
-  it('warns that deleting an all-spaces dataset removes it everywhere', () => {
-    renderModal([ALL_SPACES_ID]);
-
-    expect(screen.getByText('Delete dataset "Golden set"?')).toBeInTheDocument();
-    expect(screen.getByText('This dataset is in every space')).toBeInTheDocument();
-    expect(screen.getByTestId('deleteDatasetConfirmInput')).toBeInTheDocument();
   });
 });

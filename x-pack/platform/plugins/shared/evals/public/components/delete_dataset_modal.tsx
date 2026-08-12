@@ -16,9 +16,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { DeleteEvaluationDatasetRequestQuery } from '@kbn/evals-common';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
 import { useDatasetSharing } from './dataset_spaces';
+
+/** Which delete the dialog is describing, and asks the server to hold it to. */
+type DatasetDeleteIntent = NonNullable<DeleteEvaluationDatasetRequestQuery['intent']>;
 
 export interface DeleteDatasetModalProps {
   datasetId: string;
@@ -46,15 +51,18 @@ const CALLOUT_TITLE = i18n.translate('xpack.evals.deleteDatasetModal.calloutTitl
   defaultMessage: 'This action cannot be undone',
 });
 
-const ALL_SPACES_CALLOUT_TITLE = i18n.translate(
-  'xpack.evals.deleteDatasetModal.allSpacesCalloutTitle',
-  {
-    defaultMessage: 'This dataset is in every space',
-  }
-);
-
 const REMOVE_CALLOUT_TITLE = i18n.translate('xpack.evals.deleteDatasetModal.removeCalloutTitle', {
   defaultMessage: 'The dataset stays in its other spaces',
+});
+
+const NOW_LAST_SPACE = i18n.translate('xpack.evals.deleteDatasetModal.nowLastSpace', {
+  defaultMessage:
+    'The other spaces have since let go of this dataset, so this is the only one holding it and removing it would delete it. Nothing has been deleted; confirm below to go ahead.',
+});
+
+const NOW_SHARED = i18n.translate('xpack.evals.deleteDatasetModal.nowShared', {
+  defaultMessage:
+    'This dataset has since been shared with another space, so deleting it here would only remove it from this one. Nothing has been deleted; confirm below to go ahead.',
 });
 
 const CANCEL = i18n.translate('xpack.evals.deleteDatasetModal.cancelButton', {
@@ -89,9 +97,11 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
 }) => {
   const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // Set when the server refuses the delete the dialog described, because the
+  // dataset's spaces moved on after they were read.
+  const [correction, setCorrection] = useState<DatasetDeleteIntent | null>(null);
   const deleteDataset = useDeleteDataset();
-  const { isShared, isGlobal, spaceCount, otherSpaceNames, hiddenSpaceCount } =
-    useDatasetSharing(spaceIds);
+  const { isShared, spaceCount, otherSpaceNames, hiddenSpaceCount } = useDatasetSharing(spaceIds);
 
   // Only mounted while the modal is open, so this lazily fetches the usage count.
   const { data: usageData, isLoading: isUsageLoading } = useEvaluationExperiments({
@@ -103,15 +113,26 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
 
   // Leaving a shared dataset keeps the data, so it doesn't warrant the
   // name-typing gate an irreversible delete does.
-  const isUnshare = isShared && !isGlobal;
+  const isUnshare = correction ? correction === 'unshare' : isShared;
 
   const onConfirm = async () => {
     try {
       setError(null);
-      await deleteDataset.mutateAsync({ datasetId });
+      await deleteDataset.mutateAsync({
+        datasetId,
+        intent: isUnshare ? 'unshare' : 'delete',
+      });
       onClose();
       onDeleted?.();
     } catch (err) {
+      // A refusal, not a failure: the dialog re-reads as the delete that would
+      // now happen, and the user confirms that one instead.
+      if (isHttpFetchError(err) && err.response?.status === 409) {
+        setCorrection(isUnshare ? 'delete' : 'unshare');
+        setConfirmText('');
+        return;
+      }
+
       setError(err instanceof Error ? err.message : String(err));
     }
   };
@@ -119,24 +140,29 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
   const isConfirmed = isUnshare || confirmText.trim() === datasetName;
   const title = isUnshare ? getRemoveTitle(datasetName) : getTitle(datasetName);
 
-  const getCalloutTitle = () => {
-    if (isUnshare) return REMOVE_CALLOUT_TITLE;
-    if (isGlobal) return ALL_SPACES_CALLOUT_TITLE;
-    return CALLOUT_TITLE;
-  };
-
   const calloutText = (
     <>
+      {correction ? <p>{correction === 'delete' ? NOW_LAST_SPACE : NOW_SHARED}</p> : null}
       {isUnshare ? (
         <>
           <p>
-            <FormattedMessage
-              id="xpack.evals.deleteDatasetModal.unshareWarning"
-              defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
-              values={{ examplesCount, remainingCount: spaceCount - 1 }}
-            />
+            {correction ? (
+              // The spaces this was opened with are the ones the server just
+              // said are out of date, so this says nothing about how many.
+              <FormattedMessage
+                id="xpack.evals.deleteDatasetModal.correctedUnshareWarning"
+                defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the spaces it has since been shared with."
+                values={{ examplesCount }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.evals.deleteDatasetModal.unshareWarning"
+                defaultMessage="This removes the dataset from the current space only. Its {examplesCount, plural, one {# example stays} other {# examples stay}} available in the {remainingCount, plural, one {# other space} other {# other spaces}} it belongs to."
+                values={{ examplesCount, remainingCount: spaceCount - 1 }}
+              />
+            )}
           </p>
-          {otherSpaceNames.length > 0 ? (
+          {!correction && otherSpaceNames.length > 0 ? (
             <p>
               <FormattedMessage
                 id="xpack.evals.deleteDatasetModal.remainingSpaces"
@@ -145,7 +171,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
               />
             </p>
           ) : null}
-          {hiddenSpaceCount > 0 ? (
+          {!correction && hiddenSpaceCount > 0 ? (
             <p>
               <FormattedMessage
                 id="xpack.evals.deleteDatasetModal.remainingHiddenSpaces"
@@ -156,23 +182,13 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
           ) : null}
         </>
       ) : (
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.evals.deleteDatasetModal.permanentWarning"
-              defaultMessage="Permanently deletes this dataset and its {examplesCount, plural, one {# example} other {# examples}}."
-              values={{ examplesCount }}
-            />
-          </p>
-          {isGlobal ? (
-            <p>
-              <FormattedMessage
-                id="xpack.evals.deleteDatasetModal.allSpacesWarning"
-                defaultMessage="It is available in every space, so it disappears for everyone, not just here."
-              />
-            </p>
-          ) : null}
-        </>
+        <p>
+          <FormattedMessage
+            id="xpack.evals.deleteDatasetModal.permanentWarning"
+            defaultMessage="Permanently deletes this dataset and its {examplesCount, plural, one {# example} other {# examples}}."
+            values={{ examplesCount }}
+          />
+        </p>
       )}
       {isUsageLoading ? (
         <EuiText size="s">
@@ -217,7 +233,10 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
       confirmButtonDisabled={!isConfirmed || deleteDataset.isLoading}
       isLoading={deleteDataset.isLoading}
     >
-      <KbnWarningCallout title={getCalloutTitle()} text={calloutText} />
+      <KbnWarningCallout
+        title={isUnshare ? REMOVE_CALLOUT_TITLE : CALLOUT_TITLE}
+        text={calloutText}
+      />
 
       <EuiSpacer size="m" />
 

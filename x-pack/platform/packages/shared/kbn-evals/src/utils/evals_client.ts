@@ -9,7 +9,6 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
   API_VERSIONS,
-  DATASET_UUID_NAMESPACE,
   DeleteEvaluationDatasetResponse,
   EVALS_DATASETS_URL,
   EVALS_DATASET_RESOLVE_URL,
@@ -29,13 +28,13 @@ import {
   DEFAULT_SPACE_ID,
   ResolveEvaluationDatasetResponse,
   UpsertEvaluationDatasetResponse,
+  getDatasetId,
   resolveDatasetHomeSpace,
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
-import { v5 as uuidv5 } from 'uuid';
 import { getStatusCode } from './retry_utils';
 
 export interface EvaluatorStats {
@@ -188,8 +187,7 @@ export class EvalsClient {
   ) {
     // Runs in the space the datasets are written to, rather than writing to it
     // from the default space, so ids resolve and privileges are checked where
-    // the data lands. `*` stays unprefixed: it is not a path segment, and the
-    // privilege it needs is global anyway.
+    // the data lands.
     const homeSpaceId = resolveDatasetHomeSpace(DEFAULT_SPACE_ID, spaceIds ?? []);
     this.homeSpaceId = homeSpaceId === DEFAULT_SPACE_ID ? undefined : homeSpaceId;
   }
@@ -341,7 +339,7 @@ export class EvalsClient {
    */
   async getDatasetByName(datasetName: string): Promise<DatasetWithId | null> {
     const defaultSpaceDataset = await this.fetchDatasetById(
-      uuidv5(datasetName, DATASET_UUID_NAMESPACE)
+      getDatasetId(DEFAULT_SPACE_ID, datasetName)
     );
     if (defaultSpaceDataset) {
       return defaultSpaceDataset;

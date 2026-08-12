@@ -33,11 +33,11 @@ describe('query_builders', () => {
   });
 
   describe('buildSpaceFilter', () => {
-    it('matches the space or all-spaces, plus legacy (missing) docs in the default space', () => {
+    it('matches the space, plus docs predating space-awareness in the default space', () => {
       expect(buildSpaceFilter('default')).toEqual({
         bool: {
           should: [
-            { terms: { space_ids: ['default', '*'] } },
+            { terms: { space_ids: ['default'] } },
             { bool: { must_not: { exists: { field: 'space_ids' } } } },
           ],
           minimum_should_match: 1,
@@ -45,10 +45,10 @@ describe('query_builders', () => {
       });
     });
 
-    it('matches only the space or all-spaces for a non-default space (no legacy fallback)', () => {
+    it('matches only the space itself elsewhere, with no legacy fallback', () => {
       expect(buildSpaceFilter('marketing')).toEqual({
         bool: {
-          should: [{ terms: { space_ids: ['marketing', '*'] } }],
+          should: [{ terms: { space_ids: ['marketing'] } }],
           minimum_should_match: 1,
         },
       });

@@ -19,21 +19,11 @@ interface DatasetSpacesBadgeProps {
  * a dataset that only lives here, gets no badge.
  */
 export const DatasetSpacesBadge: React.FC<DatasetSpacesBadgeProps> = ({ spaceIds }) => {
-  const { isEnabled, isGlobal, isShared, spaceCount, otherSpaceNames, hiddenSpaceCount } =
+  const { isEnabled, isShared, spaceCount, otherSpaceNames, hiddenSpaceCount } =
     useDatasetSharing(spaceIds);
 
   if (!isEnabled || !isShared) {
     return null;
-  }
-
-  if (isGlobal) {
-    return (
-      <EuiToolTip content={i18n.ALL_SPACES_TOOLTIP}>
-        <EuiBadge color="accent" iconType="spaces" tabIndex={0} data-test-subj="datasetSpacesBadge">
-          {i18n.ALL_SPACES_BADGE}
-        </EuiBadge>
-      </EuiToolTip>
-    );
   }
 
   const tooltip = otherSpaceNames.length

@@ -20,19 +20,6 @@ export const SPACES_PLACEHOLDER = i18n.translate('xpack.evals.datasetSpaces.plac
   defaultMessage: 'Select spaces',
 });
 
-export const ALL_SPACES_OPTION = i18n.translate('xpack.evals.datasetSpaces.allSpacesOption', {
-  defaultMessage: 'All spaces',
-});
-
-export const ALL_SPACES_BADGE = i18n.translate('xpack.evals.datasetSpaces.allSpacesBadge', {
-  defaultMessage: 'All spaces',
-});
-
-export const ALL_SPACES_TOOLTIP = i18n.translate('xpack.evals.datasetSpaces.allSpacesTooltip', {
-  defaultMessage:
-    'This dataset is available in every space, including spaces created in the future.',
-});
-
 export const getCurrentSpaceOption = (name: string) =>
   i18n.translate('xpack.evals.datasetSpaces.currentSpaceOption', {
     defaultMessage: '{name} (current)',
@@ -67,17 +54,6 @@ export const getHiddenSpacesHelpText = (count: number) =>
 
 export const SHARED_NOTICE_TITLE = i18n.translate('xpack.evals.datasetSpaces.sharedNoticeTitle', {
   defaultMessage: 'This dataset is shared',
-});
-
-export const ALL_SPACES_NOTICE_TITLE = i18n.translate(
-  'xpack.evals.datasetSpaces.allSpacesNoticeTitle',
-  {
-    defaultMessage: 'This dataset is in every space',
-  }
-);
-
-export const EVERY_SPACE_SCOPE = i18n.translate('xpack.evals.datasetSpaces.everySpaceScope', {
-  defaultMessage: 'every space',
 });
 
 export const getSpaceCountScope = (count: number) =>
@@ -140,13 +116,6 @@ export const getRemovedSpacesMessage = (spaceNames: string[]) =>
     defaultMessage:
       'It will no longer appear in {spaceNames}. Its examples are kept, and you can add {spaceCount, plural, one {the space} other {those spaces}} back later.',
     values: { spaceNames: spaceNames.join(', '), spaceCount: spaceNames.length },
-  });
-
-export const getLeavingAllSpacesMessage = (spaceNames: string[]) =>
-  i18n.translate('xpack.evals.datasetSpaces.leavingAllSpacesMessage', {
-    defaultMessage:
-      'It is in every space today. Afterwards it will only be in {spaceNames}, and every other space will lose it. Its examples are kept.',
-    values: { spaceNames: spaceNames.join(', ') },
   });
 
 export const CONFIRM_SAVE_BUTTON = i18n.translate('xpack.evals.datasetSpaces.confirmSaveButton', {

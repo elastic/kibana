@@ -9,11 +9,17 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import { findUnauthorizedTargetSpaces } from './authorize_target_spaces';
 
-export interface DatasetSpaceDependencies {
+/**
+ * What a route needs to place a write in a space. The plugin always supplies
+ * all three, each handling a missing spaces or security plugin itself; they are
+ * optional so tests can leave out what they aren't exercising. Leaving one out
+ * fails closed: an unnameable space is unknown, an unverifiable privilege is
+ * absent.
+ */
+export interface SpaceDependencies {
   getSpaceId?: (request: KibanaRequest) => Promise<string>;
   getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
   checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
-  checkManageEvalsPrivilegesGlobally?: (request: KibanaRequest) => Promise<boolean>;
 }
 
 export type ResolveTargetSpacesResult =
@@ -21,9 +27,9 @@ export type ResolveTargetSpacesResult =
   | { authorized: false; statusCode: 400 | 403; message: string };
 
 /**
- * Decides which spaces a dataset write may target. Named ids must be visible to
- * the caller and manageable by them; `*` also needs that privilege everywhere.
- * Omitting them means the active space.
+ * Decides which spaces a dataset write may target. Each id must name a space
+ * the caller can see and manage evaluations in. Omitting them means the active
+ * space.
  *
  * A reassignment only authorizes the difference, so a rename isn't blocked by a
  * space that stays assigned and the caller can't manage.
@@ -35,13 +41,12 @@ export const resolveTargetSpaces = async ({
   currentSpaceIds,
   getAccessibleSpaceIds,
   checkManageEvalsPrivileges,
-  checkManageEvalsPrivilegesGlobally,
 }: {
   request: KibanaRequest;
   activeSpaceId: string;
   requestedSpaceIds: string[] | undefined;
   currentSpaceIds?: string[];
-} & Omit<DatasetSpaceDependencies, 'getSpaceId'>): Promise<ResolveTargetSpacesResult> => {
+} & Omit<SpaceDependencies, 'getSpaceId'>): Promise<ResolveTargetSpacesResult> => {
   let requested = dedupe(requestedSpaceIds ?? []);
 
   if (requested.length === 0) {
@@ -49,27 +54,11 @@ export const resolveTargetSpaces = async ({
   }
 
   if (requested.includes(ALL_SPACES_ID)) {
-    if (requested.length > 1) {
-      return {
-        authorized: false,
-        statusCode: 400,
-        message: `All spaces ("${ALL_SPACES_ID}") cannot be combined with specific space ids.`,
-      };
-    }
-
-    const authorizedGlobally = checkManageEvalsPrivilegesGlobally
-      ? await checkManageEvalsPrivilegesGlobally(request)
-      : false;
-
-    if (!authorizedGlobally) {
-      return {
-        authorized: false,
-        statusCode: 403,
-        message: `Insufficient privileges to assign a dataset to all spaces ("${ALL_SPACES_ID}"); it requires permission to manage evaluations in every space.`,
-      };
-    }
-
-    return { authorized: true, spaceIds: [ALL_SPACES_ID] };
+    return {
+      authorized: false,
+      statusCode: 400,
+      message: `All spaces ("${ALL_SPACES_ID}") is not a space id; name each space the dataset belongs to.`,
+    };
   }
 
   // Reads redact hidden spaces down to a single `?`. Expanding it back lets the
@@ -114,26 +103,7 @@ export const resolveTargetSpaces = async ({
     };
   }
 
-  // `*` can't go through the per-space check below, so narrowing away from it
-  // needs the same global privilege that assigning it did. Otherwise managing
-  // one space would be enough to pull a dataset out of every other one.
-  if (current.has(ALL_SPACES_ID)) {
-    const authorizedGlobally = checkManageEvalsPrivilegesGlobally
-      ? await checkManageEvalsPrivilegesGlobally(request)
-      : false;
-
-    if (!authorizedGlobally) {
-      return {
-        authorized: false,
-        statusCode: 403,
-        message: `Insufficient privileges to change the spaces of a dataset assigned to all spaces ("${ALL_SPACES_ID}"); it requires permission to manage evaluations in every space.`,
-      };
-    }
-  }
-
-  const removed = Array.from(current).filter(
-    (spaceId) => !requested.includes(spaceId) && spaceId !== ALL_SPACES_ID
-  );
+  const removed = Array.from(current).filter((spaceId) => !requested.includes(spaceId));
 
   const unauthorizedSpaceIds = await findUnauthorizedTargetSpaces({
     request,
@@ -191,8 +161,7 @@ const findUnknownSpaces = async ({
   request: KibanaRequest;
   spaceIds: string[];
   activeSpaceId: string;
-  getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
-}): Promise<string[]> => {
+} & Pick<SpaceDependencies, 'getAccessibleSpaceIds'>): Promise<string[]> => {
   const foreignSpaceIds = spaceIds.filter((spaceId) => spaceId !== activeSpaceId);
   if (foreignSpaceIds.length === 0) {
     return [];
@@ -220,8 +189,7 @@ const describeSpaces = async ({
 }: {
   request: KibanaRequest;
   spaceIds: string[];
-  getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
-}): Promise<string> => {
+} & Pick<SpaceDependencies, 'getAccessibleSpaceIds'>): Promise<string> => {
   const accessibleSpaceIds = getAccessibleSpaceIds
     ? new Set(await getAccessibleSpaceIds(request))
     : undefined;
@@ -247,11 +215,7 @@ export const redactSpaceIds = (
   spaceIds: string[] | undefined,
   accessibleSpaceIds: string[] | undefined
 ): string[] | undefined => {
-  if (!spaceIds || spaceIds.includes(ALL_SPACES_ID)) {
-    return spaceIds;
-  }
-
-  if (!accessibleSpaceIds) {
+  if (!spaceIds || !accessibleSpaceIds) {
     return spaceIds;
   }
 

@@ -8,12 +8,12 @@
 import {
   API_VERSIONS,
   DeleteEvaluationDatasetRequestParams,
+  DeleteEvaluationDatasetRequestQuery,
   EVALS_DATASET_URL,
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -29,7 +29,6 @@ export const registerDeleteDatasetRoute = ({
   canEncrypt,
   getEncryptedSavedObjectsStart,
   getSpaceId,
-  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .delete({
@@ -46,6 +45,7 @@ export const registerDeleteDatasetRoute = ({
         validate: {
           request: {
             params: buildRouteValidationWithZod(DeleteEvaluationDatasetRequestParams),
+            query: buildRouteValidationWithZod(DeleteEvaluationDatasetRequestQuery),
           },
         },
       },
@@ -81,29 +81,12 @@ export const registerDeleteDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
+          const { intent } = request.query;
           const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
 
-          // A dataset in every space has no single space to be removed from, so
-          // deleting it destroys it everywhere. That takes the privilege it took
-          // to put it there, not just the one covering the space deleting it.
-          const existing = await datasetClient.getMetadata(datasetId);
-          if (existing?.space_ids?.includes(ALL_SPACES_ID)) {
-            const authorizedGlobally = checkManageEvalsPrivilegesGlobally
-              ? await checkManageEvalsPrivilegesGlobally(request)
-              : false;
-
-            if (!authorizedGlobally) {
-              return response.forbidden({
-                body: {
-                  message: `Insufficient privileges to delete a dataset assigned to all spaces ("${ALL_SPACES_ID}"); it requires permission to manage evaluations in every space.`,
-                },
-              });
-            }
-          }
-
-          const result = await datasetClient.delete(datasetId);
+          const result = await datasetClient.delete(datasetId, { intent });
 
           if (result === 'not_found') {
             return response.notFound({
@@ -111,11 +94,22 @@ export const registerDeleteDatasetRoute = ({
             });
           }
 
+          // The dataset's spaces changed since the caller read them, so the
+          // delete they asked for is no longer the one that would happen.
+          if (result === 'intent_mismatch') {
+            return response.conflict({
+              body: {
+                message:
+                  intent === 'unshare'
+                    ? 'This dataset is no longer shared with any other space, so removing it from this one would delete it.'
+                    : 'This dataset is now shared with another space, so deleting it here would only remove it from this one.',
+              },
+            });
+          }
+
           return response.ok({
             body: {
               success: true,
-              // Lets the caller say whether the dataset was deleted or only
-              // detached from this space.
               unshared: result === 'unshared',
             },
           });

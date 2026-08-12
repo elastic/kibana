@@ -10,6 +10,12 @@
  * nor its offline callers can depend on.
  */
 export const DEFAULT_SPACE_ID = 'default';
+
+/**
+ * The spaces wildcard. Evaluations data is never assigned to it: a dataset for
+ * several spaces names each one. Kept so the wildcard can be recognised and
+ * refused rather than stored as if it were a space id.
+ */
 export const ALL_SPACES_ID = '*';
 
 /**
@@ -24,7 +30,7 @@ export const resolveDatasetHomeSpace = (
   activeSpaceId: string,
   targetSpaceIds: string[]
 ): string => {
-  if (targetSpaceIds.includes(ALL_SPACES_ID) || targetSpaceIds.includes(activeSpaceId)) {
+  if (targetSpaceIds.includes(activeSpaceId)) {
     return activeSpaceId;
   }
 

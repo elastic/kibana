@@ -8,6 +8,7 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
+  readSpaceIdsFlag,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
@@ -92,9 +93,9 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVAL_REPETITIONS = repetitions;
     }
 
-    const spaceIds = flagsReader.string('space-ids');
+    const spaceIds = readSpaceIdsFlag(flagsReader);
     if (spaceIds) {
-      envOverrides.EVAL_SPACE_IDS = spaceIds;
+      envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
     }
 
     const traceEsUrl = flagsReader.string('trace-es-url');

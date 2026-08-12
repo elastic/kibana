@@ -30,6 +30,7 @@ import {
   isExportProfileImplicitLocal,
 } from './profiles';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import { parseSpaceIds } from '../utils/space_ids';
 import {
   runConfigInit,
   runConnectorSetup,
@@ -184,6 +185,18 @@ export const resolveEvalSuite = async (
     configPath,
     resolvedConfigPath,
   };
+};
+
+/**
+ * The spaces to run in, as `--space-ids` gave them. Validated here so a run
+ * that names an impossible space stops before booting a stack for it.
+ */
+export const readSpaceIdsFlag = (flagsReader: FlagsReader): string[] | undefined => {
+  try {
+    return parseSpaceIds(flagsReader.string('space-ids'));
+  } catch (error) {
+    throw createFlagError(error instanceof Error ? error.message : String(error));
+  }
 };
 
 export interface ResolvedProfileEnv {
@@ -366,9 +379,9 @@ export const buildEvalRunEnv = ({
     envOverrides.EVAL_REPETITIONS = repetitions;
   }
 
-  const spaceIds = flagsReader.string('space-ids');
+  const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
-    envOverrides.EVAL_SPACE_IDS = spaceIds;
+    envOverrides.EVAL_SPACE_IDS = spaceIds.join(',');
   }
 
   const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
@@ -438,9 +451,9 @@ export const buildEvalRunArgs = ({
     runArgs.push('--repetitions', repetitions);
   }
 
-  const spaceIds = flagsReader.string('space-ids');
+  const spaceIds = readSpaceIdsFlag(flagsReader);
   if (spaceIds) {
-    runArgs.push('--space-ids', spaceIds);
+    runArgs.push('--space-ids', spaceIds.join(','));
   }
 
   if (skipServer) {

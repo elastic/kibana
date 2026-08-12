@@ -14,7 +14,6 @@ import {
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -22,6 +21,7 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import {
   redactSpaceIds,
   resolveTargetSpaces,
@@ -37,7 +37,6 @@ export const registerUpdateDatasetRoute = ({
   getSpaceId,
   getAccessibleSpaceIds,
   checkManageEvalsPrivileges,
-  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .put({
@@ -112,7 +111,6 @@ export const registerUpdateDatasetRoute = ({
               currentSpaceIds: existing.space_ids,
               getAccessibleSpaceIds,
               checkManageEvalsPrivileges,
-              checkManageEvalsPrivilegesGlobally,
             });
 
             if (!targetSpaces.authorized) {
@@ -124,10 +122,7 @@ export const registerUpdateDatasetRoute = ({
 
             // Dropping the active space here would make the dataset vanish
             // mid-edit. Leaving a space is a delete, where the confirmation is.
-            if (
-              !targetSpaces.spaceIds.includes(ALL_SPACES_ID) &&
-              !targetSpaces.spaceIds.includes(activeSpaceId)
-            ) {
+            if (!targetSpaces.spaceIds.includes(activeSpaceId)) {
               return response.badRequest({
                 body: {
                   message: `A dataset cannot be removed from the current space by updating it; delete it from this space instead.`,
@@ -173,6 +168,10 @@ export const registerUpdateDatasetRoute = ({
               statusCode: 400,
               body: { message: error.message },
             });
+          }
+
+          if (error instanceof DatasetAlreadyExistsError) {
+            return response.conflict({ body: { message: error.message } });
           }
 
           const errorMessage = error instanceof Error ? error.message : String(error);

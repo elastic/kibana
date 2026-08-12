@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { useDatasetSharing, type DatasetSharing } from './use_dataset_sharing';
+import { useDatasetSharing } from './use_dataset_sharing';
 import * as i18n from './translations';
 
 export type SharedDatasetAction =
@@ -20,9 +20,6 @@ interface DatasetSharedNoticeProps {
   spaceIds?: string[];
   action: SharedDatasetAction;
 }
-
-const getScope = ({ isGlobal, spaceCount }: DatasetSharing): string =>
-  isGlobal ? i18n.EVERY_SPACE_SCOPE : i18n.getSpaceCountScope(spaceCount);
 
 const getMessage = (action: SharedDatasetAction, scope: string): string => {
   switch (action) {
@@ -38,12 +35,24 @@ const getMessage = (action: SharedDatasetAction, scope: string): string => {
 };
 
 /**
+ * How far an edit to a shared dataset reaches, from the assignment alone. Split
+ * out for callers that can't name the spaces, having no access to them.
+ */
+export const getSharedNoticeCopy = (
+  spaceIds: string[] | undefined,
+  action: SharedDatasetAction
+): { title: string; message: string } => ({
+  title: i18n.SHARED_NOTICE_TITLE,
+  message: getMessage(action, i18n.getSpaceCountScope((spaceIds ?? []).length)),
+});
+
+/**
  * Spells out that an edit reaches past the space being worked in. Renders
  * nothing for a dataset that only lives here.
  */
 export const DatasetSharedNotice: React.FC<DatasetSharedNoticeProps> = ({ spaceIds, action }) => {
-  const sharing = useDatasetSharing(spaceIds);
-  const { isEnabled, isShared, isGlobal, otherSpaceNames, hiddenSpaceCount } = sharing;
+  const { isEnabled, isShared, otherSpaceNames, hiddenSpaceCount } = useDatasetSharing(spaceIds);
+  const { title, message } = getSharedNoticeCopy(spaceIds, action);
 
   if (!isEnabled || !isShared) {
     return null;
@@ -52,17 +61,15 @@ export const DatasetSharedNotice: React.FC<DatasetSharedNoticeProps> = ({ spaceI
   return (
     <KbnWarningCallout
       size="s"
-      title={isGlobal ? i18n.ALL_SPACES_NOTICE_TITLE : i18n.SHARED_NOTICE_TITLE}
+      title={title}
       data-test-subj="datasetSharedNotice"
       text={
         <>
-          <p>{getMessage(action, getScope(sharing))}</p>
-          {!isGlobal && otherSpaceNames.length > 0 ? (
+          <p>{message}</p>
+          {otherSpaceNames.length > 0 ? (
             <p>{i18n.getOtherSpacesSentence(otherSpaceNames)}</p>
           ) : null}
-          {!isGlobal && hiddenSpaceCount > 0 ? (
-            <p>{i18n.getHiddenSpacesSentence(hiddenSpaceCount)}</p>
-          ) : null}
+          {hiddenSpaceCount > 0 ? <p>{i18n.getHiddenSpacesSentence(hiddenSpaceCount)}</p> : null}
         </>
       }
     />

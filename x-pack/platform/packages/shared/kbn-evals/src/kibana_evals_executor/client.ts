@@ -11,7 +11,7 @@ import { randomUUID } from 'crypto';
 import { withInferenceContext } from '@kbn/inference-tracing';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
-import { DATASET_UUID_NAMESPACE } from '@kbn/evals-common';
+import { DEFAULT_SPACE_ID, getDatasetId } from '@kbn/evals-common';
 import type {
   EvalsExecutorClient,
   Evaluator,
@@ -26,14 +26,6 @@ import type {
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
-
-/**
- * The id a dataset gets in the default space. A last resort: ids derive from
- * the owning space, so a local guess can detach scores from their dataset.
- */
-function computeDefaultSpaceDatasetId(name: string): string {
-  return uuidv5(name, DATASET_UUID_NAMESPACE);
-}
 
 function computeExperimentId(
   executionId: string | undefined,
@@ -176,9 +168,10 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const upsertedId = await this.options.upsertDataset?.(resolvedDataset);
 
       // Scores are stamped with this id, so it has to be the one the server
-      // stored the dataset under, not one guessed from the name.
+      // stored the dataset under. Deriving it locally is a last resort: ids
+      // follow the owning space, which only the server knows here.
       const datasetId =
-        upsertedId || upstreamId || computeDefaultSpaceDatasetId(resolvedDataset.name);
+        upsertedId || upstreamId || getDatasetId(DEFAULT_SPACE_ID, resolvedDataset.name);
       const experimentId = computeExperimentId(
         this.options.executionId,
         experimentName,

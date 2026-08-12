@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import * as i18n from './translations';
 
@@ -29,13 +29,11 @@ export const DatasetSpacesPicker: React.FC<DatasetSpacesPickerProps> = ({
   const { isEnabled, isLoading, activeSpaceId, spaces } = useAccessibleSpaces();
 
   const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(
-    () => [
-      { value: ALL_SPACES_ID, label: i18n.ALL_SPACES_OPTION },
-      ...spaces.map((space) => ({
+    () =>
+      spaces.map((space) => ({
         value: space.id,
         label: space.id === activeSpaceId ? i18n.getCurrentSpaceOption(space.name) : space.name,
       })),
-    ],
     [spaces, activeSpaceId]
   );
 
@@ -53,17 +51,9 @@ export const DatasetSpacesPicker: React.FC<DatasetSpacesPickerProps> = ({
   );
 
   const onSelectionChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    const selectedSpaceIds = selected.map((option) => option.value as string);
-    // "All spaces" already covers every named space, so the two can't be mixed.
-    const nextSpaceIds = selectedSpaceIds.includes(ALL_SPACES_ID)
-      ? [ALL_SPACES_ID]
-      : selectedSpaceIds;
+    const nextSpaceIds = selected.map((option) => option.value as string);
 
-    onChange(
-      nextSpaceIds.includes(ALL_SPACES_ID) || hiddenSpaceCount === 0
-        ? nextSpaceIds
-        : [...nextSpaceIds, UNKNOWN_SPACE]
-    );
+    onChange(hiddenSpaceCount === 0 ? nextSpaceIds : [...nextSpaceIds, UNKNOWN_SPACE]);
   };
 
   return (

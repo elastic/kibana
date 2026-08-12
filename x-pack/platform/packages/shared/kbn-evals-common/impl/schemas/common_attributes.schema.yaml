@@ -38,10 +38,11 @@ components:
         minLength: 1
         maxLength: 256
       description: >-
-        Spaces a dataset is assigned to, or `["*"]` for every space. Each id
-        must name an existing space the caller can manage evaluations in.
-        Omitted on write means the active space; absent on read means the
-        default space.
+        Spaces the dataset is assigned to. Each id must name an existing space
+        the caller can manage evaluations in; wildcards are not accepted, so
+        every space is listed. Defaults to the space the request was made in,
+        taken from the URL's `/s/` prefix and the default space without one.
+        Absent in a response means the default space.
 
     RedactedSpaceIds:
       type: array
@@ -50,9 +51,8 @@ components:
         type: string
         maxLength: 256
       description: >-
-        Spaces a dataset is assigned to, with ids the caller cannot access
-        replaced by `?`, so a dataset can show it is shared without naming
-        where.
+        Spaces the dataset is assigned to, with ids the caller cannot access
+        replaced by a single `?` entry.
 
     DatasetFacetBucket:
       type: object

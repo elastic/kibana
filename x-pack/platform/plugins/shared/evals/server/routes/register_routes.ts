@@ -8,8 +8,9 @@
 import type { Logger } from '@kbn/logging';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter, EvalsWorkflowsManagementSetup } from '../types';
+import type { SpaceDependencies } from './shared/resolve_dataset_spaces';
 import type { EvaluatorRegistry } from '../evaluators/types';
 import type { TaskProviderRegistry } from '../task_providers/types';
 import { registerGetExperimentsRoute } from './experiments/get_experiments';
@@ -46,7 +47,7 @@ import {
   registerCancelExperimentExecutionRoute,
 } from './experiments/experiment_executions';
 
-export interface RouteDependencies {
+export interface RouteDependencies extends SpaceDependencies {
   router: EvalsRouter;
   logger: Logger;
   canEncrypt: boolean;
@@ -54,10 +55,6 @@ export interface RouteDependencies {
   getInferenceStart: () => Promise<InferenceServerStart>;
   getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
   getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
-  getSpaceId?: (request: KibanaRequest) => Promise<string>;
-  checkManageEvalsPrivileges?: (request: KibanaRequest, spaceIds: string[]) => Promise<boolean>;
-  checkManageEvalsPrivilegesGlobally?: (request: KibanaRequest) => Promise<boolean>;
-  getAccessibleSpaceIds?: (request: KibanaRequest) => Promise<string[]>;
   taskProviderRegistry?: TaskProviderRegistry;
   workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
@@ -75,8 +72,8 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerIngestScoresRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
-  // Before the `{datasetId}` route so the literal path reads as the more
-  // specific match; hapi orders literals ahead of parameters either way.
+  // Registered before the `{datasetId}` route it would otherwise read as an id.
+  // Order is for the reader: hapi matches the literal path first regardless.
   registerResolveDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);
   registerUpdateDatasetRoute(dependencies);

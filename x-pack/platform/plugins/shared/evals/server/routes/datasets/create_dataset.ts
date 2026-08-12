@@ -33,7 +33,6 @@ export const registerCreateDatasetRoute = ({
   getSpaceId,
   getAccessibleSpaceIds,
   checkManageEvalsPrivileges,
-  checkManageEvalsPrivilegesGlobally,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -94,7 +93,6 @@ export const registerCreateDatasetRoute = ({
             requestedSpaceIds,
             getAccessibleSpaceIds,
             checkManageEvalsPrivileges,
-            checkManageEvalsPrivilegesGlobally,
           });
 
           if (!targetSpaces.authorized) {

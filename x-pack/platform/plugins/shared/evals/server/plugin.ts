@@ -163,24 +163,6 @@ export class EvalsPlugin
     };
 
     /**
-     * `*` covers spaces that don't exist yet, so it can't be checked space by
-     * space; only a global privilege implies them all.
-     */
-    const checkManageEvalsPrivilegesGlobally = async (request: KibanaRequest): Promise<boolean> => {
-      const [, pluginsStart] = await coreSetup.getStartServices();
-      const security = pluginsStart.security;
-      if (!security) {
-        return true;
-      }
-      const { hasAllRequested } = await security.authz
-        .checkPrivilegesWithRequest(request)
-        .globally({
-          kibana: [security.authz.actions.api.get(EVALS_API_PRIVILEGES.manage)],
-        });
-      return hasAllRequested;
-    };
-
-    /**
      * Spaces the caller can see, for rejecting writes that name an unknown one
      * and redacting the rest out of reads. The spaces client already filters by
      * authorization.
@@ -206,7 +188,6 @@ export class EvalsPlugin
       getInternalRemoteConfigsSoClient: () => internalRemoteConfigsSoClientPromise,
       getSpaceId,
       checkManageEvalsPrivileges,
-      checkManageEvalsPrivilegesGlobally,
       getAccessibleSpaceIds,
       taskProviderRegistry: this.taskProviderRegistry,
       workflowsManagement,

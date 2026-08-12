@@ -49,7 +49,6 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   MAX_DATASET_DESCRIPTION_LENGTH,
   type DatasetExample,
@@ -279,12 +278,7 @@ export const DatasetDetailPage: React.FC = () => {
 
     // Leaving a shared dataset means dropping the space being viewed, which is
     // the delete button's job and has its own confirmation.
-    if (
-      spacesEnabled &&
-      activeSpaceId &&
-      !metadataSpaceIds.includes(ALL_SPACES_ID) &&
-      !metadataSpaceIds.includes(activeSpaceId)
-    ) {
+    if (spacesEnabled && activeSpaceId && !metadataSpaceIds.includes(activeSpaceId)) {
       setFormError(i18n.CANNOT_LEAVE_SPACE_BY_EDITING_ERROR);
       return;
     }

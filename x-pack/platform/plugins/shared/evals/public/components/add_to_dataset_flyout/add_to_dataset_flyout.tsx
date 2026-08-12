@@ -38,7 +38,7 @@ import {
 } from '@kbn/evals-common';
 import type { CoreStart } from '@kbn/core/public';
 import type { AddToDatasetFlyoutOpenOptions } from '../../types';
-import { isSharedAssignment } from '../dataset_spaces';
+import { getSharedNoticeCopy, isSharedAssignment } from '../dataset_spaces';
 
 const DEFAULT_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.title', {
   defaultMessage: 'Add to dataset',
@@ -114,14 +114,6 @@ const SUBMIT_BUTTON = i18n.translate('xpack.evals.addToDatasetFlyout.submitButto
 
 const LOAD_DATASETS_ERROR = i18n.translate('xpack.evals.addToDatasetFlyout.loadDatasetsError', {
   defaultMessage: 'Failed to load datasets',
-});
-
-const SHARED_DATASET_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.sharedDatasetTitle', {
-  defaultMessage: 'This dataset is shared',
-});
-
-const SHARED_DATASET_BODY = i18n.translate('xpack.evals.addToDatasetFlyout.sharedDatasetBody', {
-  defaultMessage: 'It belongs to more than one space, so anything you add is visible there too.',
 });
 
 const SUBMIT_ERROR = i18n.translate('xpack.evals.addToDatasetFlyout.submitError', {
@@ -324,9 +316,13 @@ export function AddToDatasetFlyout({
 
   // A remote deployment's spaces are its own, so its assignment says nothing
   // about who here would see the example.
-  const isSelectedDatasetShared =
-    destinationType === 'local' &&
-    isSharedAssignment(datasets.find((d) => d.id === selectedDatasetId)?.space_ids);
+  const selectedDatasetSpaceIds =
+    destinationType === 'local'
+      ? datasets.find((dataset) => dataset.id === selectedDatasetId)?.space_ids
+      : undefined;
+  // The flyout opens outside the app, so it can't look the spaces up by name.
+  const isSelectedDatasetShared = isSharedAssignment(selectedDatasetSpaceIds);
+  const sharedNotice = getSharedNoticeCopy(selectedDatasetSpaceIds, 'add-example');
 
   const remoteOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
     return remotes.map((r) => ({
@@ -619,9 +615,9 @@ export function AddToDatasetFlyout({
                   <KbnWarningCallout
                     announceOnMount
                     size="s"
-                    title={SHARED_DATASET_TITLE}
+                    title={sharedNotice.title}
                     data-test-subj="addToDatasetSharedNotice"
-                    text={<p>{SHARED_DATASET_BODY}</p>}
+                    text={<p>{sharedNotice.message}</p>}
                   />
                   <EuiSpacer size="s" />
                 </>

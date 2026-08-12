@@ -40,7 +40,6 @@ import {
   type DatasetSummary,
 } from '@kbn/evals-common';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { NotificationsStart } from '@kbn/core/public';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
@@ -279,9 +278,7 @@ export const DatasetsListPage: React.FC = () => {
       !spacesEnabled || (spaceIds.length === 1 && spaceIds[0] === activeSpaceId);
 
     const isVisibleHere =
-      isDefaultSpaceSelection ||
-      spaceIds.includes(ALL_SPACES_ID) ||
-      (activeSpaceId != null && spaceIds.includes(activeSpaceId));
+      isDefaultSpaceSelection || (activeSpaceId != null && spaceIds.includes(activeSpaceId));
 
     try {
       const datasetName = name.trim();

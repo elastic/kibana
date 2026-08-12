@@ -32,7 +32,7 @@ export interface DatasetStorageProperties {
   maturity?: DatasetMaturity;
   examples_count?: number;
   /**
-   * Visible spaces, or `['*']` for all. Absent means the default space, so an
+   * The spaces the dataset is visible in. Absent means the default space, so an
    * empty array is never stored: it would read back the same way.
    */
   space_ids?: string[];

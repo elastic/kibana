@@ -41,13 +41,13 @@ export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
 export const DatasetMaturityEnum = DatasetMaturity.enum;
 
 /**
- * Spaces a dataset is assigned to, or `["*"]` for every space. Each id must name an existing space the caller can manage evaluations in. Omitted on write means the active space; absent on read means the default space.
+ * Spaces the dataset is assigned to. Each id must name an existing space the caller can manage evaluations in; wildcards are not accepted, so every space is listed. Defaults to the space the request was made in, taken from the URL's `/s/` prefix and the default space without one. Absent in a response means the default space.
  */
 export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
 export type SpaceIds = z.infer<typeof SpaceIds>;
 
 /**
- * Spaces a dataset is assigned to, with ids the caller cannot access replaced by `?`, so a dataset can show it is shared without naming where.
+ * Spaces the dataset is assigned to, with ids the caller cannot access replaced by a single `?` entry.
  */
 export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
 export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;

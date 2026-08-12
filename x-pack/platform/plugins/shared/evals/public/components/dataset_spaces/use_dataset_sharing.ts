@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 
 /**
@@ -14,29 +14,21 @@ import { useAccessibleSpaces } from '../../hooks/use_spaces';
  * needing to know which space that was.
  */
 export const isSharedAssignment = (spaceIds: string[] | undefined): boolean =>
-  (spaceIds?.length ?? 0) > 1 || Boolean(spaceIds?.includes(ALL_SPACES_ID));
+  (spaceIds?.length ?? 0) > 1;
 
 /**
- * The spaces an edit takes a dataset out of. Expanding to `*` takes it out of
- * none of them, and narrowing away from `*` takes it out of every space that
- * isn't kept, which only `*` itself can stand for. Spaces the caller cannot see
- * are held out: the picker re-attaches them rather than dropping them.
+ * The spaces an edit takes a dataset out of. Spaces the caller cannot see are
+ * held out: the picker re-attaches them rather than dropping them.
  */
 export const getRemovedSpaceIds = (currentSpaceIds: string[], nextSpaceIds: string[]): string[] =>
-  nextSpaceIds.includes(ALL_SPACES_ID)
-    ? []
-    : currentSpaceIds.filter(
-        (spaceId) => spaceId !== UNKNOWN_SPACE && !nextSpaceIds.includes(spaceId)
-      );
+  currentSpaceIds.filter((spaceId) => spaceId !== UNKNOWN_SPACE && !nextSpaceIds.includes(spaceId));
 
 export interface DatasetSharing {
   /** Spaces are available, so sharing is worth showing at all. */
   isEnabled: boolean;
-  /** Assigned to every space, including ones created later. */
-  isGlobal: boolean;
   /** Reachable from somewhere other than the space being viewed. */
   isShared: boolean;
-  /** Spaces assigned. Meaningless when global. */
+  /** Spaces assigned. */
   spaceCount: number;
   /** Names of the assigned spaces other than the active one, where readable. */
   otherSpaceNames: string[];
@@ -59,7 +51,6 @@ export const useDatasetSharing = (spaceIds: string[] | undefined): DatasetSharin
 
   return useMemo(() => {
     const assigned = spaceIds ?? [];
-    const isGlobal = assigned.includes(ALL_SPACES_ID);
     const namedSpaceIds = assigned.filter((spaceId) => spaceId !== UNKNOWN_SPACE);
     const hiddenSpaceCount = assigned.length - namedSpaceIds.length;
     const spaceNamesById = new Map(spaces.map((space) => [space.id, space.name]));
@@ -68,13 +59,12 @@ export const useDatasetSharing = (spaceIds: string[] | undefined): DatasetSharin
       isEnabled,
       isLoading,
       activeSpaceId,
-      isGlobal,
       // Not compared against the active space, which is undefined in
       // single-space deployments and while spaces load.
       isShared: isSharedAssignment(assigned),
       spaceCount: assigned.length,
       otherSpaceNames: namedSpaceIds
-        .filter((spaceId) => spaceId !== activeSpaceId && spaceId !== ALL_SPACES_ID)
+        .filter((spaceId) => spaceId !== activeSpaceId)
         .map((spaceId) => spaceNamesById.get(spaceId) ?? spaceId),
       hiddenSpaceCount,
       namedSpaceIds,

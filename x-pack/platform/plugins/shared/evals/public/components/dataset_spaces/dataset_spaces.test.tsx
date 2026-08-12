@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
+import { UNKNOWN_SPACE } from '@kbn/spaces-plugin/common/constants';
 import type { AccessibleSpacesResult } from '../../hooks/use_spaces';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 import { DatasetSharedNotice } from './dataset_shared_notice';
@@ -71,12 +71,6 @@ describe('DatasetSpacesBadge', () => {
     expect(screen.getByTestId('datasetSpacesBadge')).toHaveTextContent('2 spaces');
   });
 
-  it('calls out a dataset that is in every space', () => {
-    render(<DatasetSpacesBadge spaceIds={[ALL_SPACES_ID]} />, { wrapper: Wrapper });
-
-    expect(screen.getByTestId('datasetSpacesBadge')).toHaveTextContent('All spaces');
-  });
-
   it('marks a dataset as shared even when the other space cannot be named', () => {
     render(<DatasetSpacesBadge spaceIds={['default', UNKNOWN_SPACE]} />, { wrapper: Wrapper });
 
@@ -134,14 +128,18 @@ describe('DatasetSpacesPicker', () => {
     expect(screen.getByText('Default (current)')).toBeInTheDocument();
   });
 
-  it('replaces named spaces when all spaces is picked', async () => {
-    const onChange = jest.fn();
-    render(<DatasetSpacesPicker value={['default']} onChange={onChange} />, { wrapper: Wrapper });
+  it('offers the spaces themselves and no wildcard among them', async () => {
+    render(<DatasetSpacesPicker value={[]} onChange={jest.fn()} />, { wrapper: Wrapper });
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    await userEvent.click(screen.getByRole('option', { name: 'All spaces' }));
 
-    expect(onChange).toHaveBeenCalledWith([ALL_SPACES_ID]);
+    // A dataset for several spaces names each one, so there is nothing here
+    // standing for spaces that don't exist yet.
+    expect(screen.getAllByRole('option').map(({ textContent }) => textContent)).toEqual([
+      'Default (current)',
+      'Marketing',
+      'Sales',
+    ]);
   });
 
   it('keeps spaces the caller cannot see attached to the dataset', async () => {
@@ -160,17 +158,6 @@ describe('DatasetSpacesPicker', () => {
 });
 
 describe('getRemovedSpaceIds', () => {
-  it('takes the dataset out of nowhere when it is expanded to all spaces', () => {
-    // Granting access everywhere is the opposite of a removal, so the spaces it
-    // already had must not read as losing it.
-    expect(getRemovedSpaceIds(['default', 'marketing'], [ALL_SPACES_ID])).toEqual([]);
-    expect(getRemovedSpaceIds(['default'], [ALL_SPACES_ID])).toEqual([]);
-  });
-
-  it('reports all spaces itself when a dataset is narrowed out of it', () => {
-    expect(getRemovedSpaceIds([ALL_SPACES_ID], ['marketing'])).toEqual([ALL_SPACES_ID]);
-  });
-
   it('reports the spaces an edit drops', () => {
     expect(getRemovedSpaceIds(['default', 'marketing'], ['default'])).toEqual(['marketing']);
   });
@@ -201,18 +188,24 @@ describe('SharedChangeConfirmModal', () => {
     );
   });
 
-  it('says what a dataset leaving all spaces is left with', () => {
-    // `*` stands for every space rather than naming one, so listing it as a
-    // space losing the dataset would read as a space called "*".
+  it('describes the spaces a narrowed dataset is left in, not the ones it loses', () => {
     renderModal({
-      spaceIds: [ALL_SPACES_ID],
-      removedSpaceIds: [ALL_SPACES_ID],
-      nextSpaceIds: ['marketing'],
+      spaceIds: ['default', 'marketing', 'sales'],
+      removedSpaceIds: ['sales'],
+      nextSpaceIds: ['default', 'marketing'],
     });
 
-    const notice = screen.getByTestId('datasetRemovedSpacesNotice');
-    expect(notice).toHaveTextContent('It is in every space today.');
-    expect(notice).toHaveTextContent('it will only be in Marketing');
-    expect(notice).not.toHaveTextContent(ALL_SPACES_ID);
+    // Saying the edit reaches Sales would contradict the callout that just
+    // said the dataset is leaving it.
+    const notice = screen.getByTestId('datasetSharedNotice');
+    expect(notice).toHaveTextContent('Marketing');
+    expect(notice).not.toHaveTextContent('Sales');
+  });
+
+  it('asks plainly about an edit that takes no space away', () => {
+    renderModal({ spaceIds: ['default', 'marketing'], nextSpaceIds: ['default', 'marketing'] });
+
+    expect(screen.queryByTestId('datasetRemovedSpacesNotice')).not.toBeInTheDocument();
+    expect(screen.getByTestId('datasetSharedNotice')).toHaveTextContent('Marketing');
   });
 });

@@ -18,21 +18,17 @@ const resolve = ({
   activeSpaceId = DEFAULT_SPACE_ID,
   accessibleSpaceIds = [DEFAULT_SPACE_ID, 'marketing', 'sales'],
   authorized = true,
-  authorizedGlobally = true,
 }: {
   requestedSpaceIds: string[] | undefined;
   currentSpaceIds?: string[];
   activeSpaceId?: string;
   accessibleSpaceIds?: string[];
   authorized?: boolean;
-  authorizedGlobally?: boolean;
 }) => {
   const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(authorized);
-  const checkManageEvalsPrivilegesGlobally = jest.fn().mockResolvedValue(authorizedGlobally);
 
   return {
     checkManageEvalsPrivileges,
-    checkManageEvalsPrivilegesGlobally,
     result: resolveTargetSpaces({
       request,
       activeSpaceId,
@@ -40,7 +36,6 @@ const resolve = ({
       currentSpaceIds,
       getAccessibleSpaceIds: jest.fn().mockResolvedValue(accessibleSpaceIds),
       checkManageEvalsPrivileges,
-      checkManageEvalsPrivilegesGlobally,
     }),
   };
 };
@@ -108,14 +103,12 @@ describe('resolveTargetSpaces', () => {
     });
   });
 
-  it('requires privileges everywhere for all spaces, and refuses to mix it with named ones', async () => {
-    await expect(
-      resolve({ requestedSpaceIds: [ALL_SPACES_ID], authorizedGlobally: false }).result
-    ).resolves.toMatchObject({ authorized: false, statusCode: 403 });
-
-    await expect(resolve({ requestedSpaceIds: [ALL_SPACES_ID] }).result).resolves.toEqual({
-      authorized: true,
-      spaceIds: [ALL_SPACES_ID],
+  it('refuses the spaces wildcard, alone or among named spaces', async () => {
+    // Assignments name their spaces; `*` would be stored as if a space were
+    // called that, and read back as one nothing can be filtered by.
+    await expect(resolve({ requestedSpaceIds: [ALL_SPACES_ID] }).result).resolves.toMatchObject({
+      authorized: false,
+      statusCode: 400,
     });
 
     await expect(
@@ -161,23 +154,6 @@ describe('resolveTargetSpaces', () => {
     expect(checkManageEvalsPrivileges).toHaveBeenCalledWith(request, ['sales', 'marketing']);
   });
 
-  it('takes privileges everywhere to narrow an all-spaces dataset', async () => {
-    const { result, checkManageEvalsPrivilegesGlobally } = resolve({
-      requestedSpaceIds: [DEFAULT_SPACE_ID],
-      currentSpaceIds: [ALL_SPACES_ID],
-      authorizedGlobally: false,
-    });
-
-    // Managing one space would otherwise be enough to pull the dataset out of
-    // every other one, undoing an assignment that took global privileges.
-    await expect(result).resolves.toMatchObject({ authorized: false, statusCode: 403 });
-    expect(checkManageEvalsPrivilegesGlobally).toHaveBeenCalledWith(request);
-
-    await expect(
-      resolve({ requestedSpaceIds: [DEFAULT_SPACE_ID], currentSpaceIds: [ALL_SPACES_ID] }).result
-    ).resolves.toEqual({ authorized: true, spaceIds: [DEFAULT_SPACE_ID] });
-  });
-
   it('accepts a space already on the dataset even if it has since disappeared', async () => {
     const { result } = resolve({
       requestedSpaceIds: [DEFAULT_SPACE_ID, 'deleted-space'],
@@ -196,7 +172,6 @@ describe('resolveTargetSpaces', () => {
         requestedSpaceIds: ['sales'],
         getAccessibleSpaceIds: undefined,
         checkManageEvalsPrivileges: jest.fn().mockResolvedValue(true),
-        checkManageEvalsPrivilegesGlobally: jest.fn().mockResolvedValue(true),
       })
     ).resolves.toMatchObject({ authorized: false, statusCode: 400 });
   });
@@ -210,8 +185,7 @@ describe('redactSpaceIds', () => {
     ]);
   });
 
-  it('leaves all-spaces and unknown accessibility untouched', () => {
-    expect(redactSpaceIds([ALL_SPACES_ID], ['sales'])).toEqual([ALL_SPACES_ID]);
+  it('leaves the assignment alone when accessibility is unknown', () => {
     expect(redactSpaceIds(['finance'], undefined)).toEqual(['finance']);
     expect(redactSpaceIds(undefined, ['sales'])).toBeUndefined();
   });

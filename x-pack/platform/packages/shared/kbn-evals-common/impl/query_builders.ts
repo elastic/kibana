@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from './spaces';
+import { DEFAULT_SPACE_ID } from './spaces';
 
 // ---------------------------------------------------------------------------
 // Shared types
@@ -91,12 +91,10 @@ export interface ExperimentsListingResult {
 
 /**
  * Builds a filter that matches score documents visible in the given space: those
- * assigned to the space (or to all spaces via `*`)
+ * assigned to it, and in the default space those predating space-awareness.
  */
 export const buildSpaceFilter = (spaceId: string): Record<string, unknown> => {
-  const should: Array<Record<string, unknown>> = [
-    { terms: { space_ids: [spaceId, ALL_SPACES_ID] } },
-  ];
+  const should: Array<Record<string, unknown>> = [{ terms: { space_ids: [spaceId] } }];
   if (spaceId === DEFAULT_SPACE_ID) {
     should.push({ bool: { must_not: { exists: { field: 'space_ids' } } } });
   }

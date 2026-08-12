@@ -454,6 +454,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await adminClient.get(inSpace(datasetPath(datasetId))).expect(200);
       });
 
+      it('refuses to share a dataset into a space that already holds its name', async () => {
+        const name = `FTR Collide ${suffix}`;
+        const { body: here } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'default space' })
+          .expect(200);
+        const { body: there } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'other space', space_ids: [spaceId] })
+          .expect(200);
+
+        createdDatasetIds.push(
+          { id: (here as CreateEvaluationDatasetResponse).dataset_id, path: datasetPath },
+          {
+            id: (there as CreateEvaluationDatasetResponse).dataset_id,
+            path: (id) => inSpace(datasetPath(id)),
+          }
+        );
+
+        // Both would answer to one name in the default space.
+        await adminClient
+          .put(inSpace(datasetPath((there as CreateEvaluationDatasetResponse).dataset_id)))
+          .send({ space_ids: [spaceId, 'default'] })
+          .expect(409);
+      });
+
       it('refuses to drop the space the update is made from', async () => {
         const name = `FTR Self Removal ${suffix}`;
         const { body } = await adminClient
@@ -520,7 +546,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             .expect(400);
         });
 
-        it('refuses to assign to all spaces without the privilege everywhere', async () => {
+        it('refuses the spaces wildcard, which is not a space to assign to', async () => {
           await scopedClient
             .post(inSpace(EVALS_DATASETS_URL))
             .send({
@@ -528,7 +554,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               description: 'should be rejected',
               space_ids: [ALL_SPACES_ID],
             })
-            .expect(403);
+            .expect(400);
         });
 
         it('hides the ids of spaces the caller cannot see', async () => {
