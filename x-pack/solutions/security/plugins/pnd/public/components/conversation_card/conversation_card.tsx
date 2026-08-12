@@ -6,29 +6,20 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
-import { CONVERSATION_CARD_LABELS } from './translations';
-import { getEmptyValue } from '../helpers';
 import { ConversationsActionsGroup } from './actions_group';
+import { ConversationMetaInfo } from './conversation_meta_info';
+
 const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 
 export const ConversationCard = memo<{
   investigation: Investigation;
   hasBorder: boolean;
-}>(({ investigation, hasBorder }) => {
+  onClickAction: (action: 'case' | 'dismiss' | 'assign') => void;
+}>(({ investigation, hasBorder, onClickAction }) => {
   const { euiTheme } = useEuiTheme();
-  const emptyValue = getEmptyValue();
   const history = useHistory();
 
   const onOpen = useCallback(() => {
@@ -96,51 +87,39 @@ export const ConversationCard = memo<{
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
+          <EuiFlexGroup gutterSize="s" responsive direction="column">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 alignItems="center"
-                gutterSize="s"
+                gutterSize="m"
                 responsive={false}
                 direction="row"
-                justifyContent="flexStart"
+                justifyContent="spaceBetween"
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={'hollow'}>
-                      {CONVERSATION_CARD_LABELS.templateTypes[investigation.template_id] ??
-                        emptyValue}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" component="span">
-                      <FormattedRelative value={investigation.updatedAt} />
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <ConversationMetaInfo
+                  templateId={investigation.template_id}
+                  updatedAt={investigation.updatedAt}
+                />
                 <ConversationsActionsGroup
                   investigation={investigation}
                   onOpen={onOpen}
                   onOpenChat={onOpenChat}
+                  onClickAction={onClickAction}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3>{investigation.title}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiTitle size="xs">
+                <h3>{investigation.title}</h3>
+              </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {investigation.summary ? (
+            {investigation.summary ? (
+              <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
                   <p>{investigation.summary}</p>
                 </EuiText>
-              ) : null}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

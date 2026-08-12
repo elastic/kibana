@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,8 +16,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { RecommendedAction } from '@kbn/pnd-common';
-import { type Investigation } from '@kbn/pnd-common';
+import { type Investigation, type RecommendedAction } from '@kbn/pnd-common';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
 import { BaseActions } from './base_actions';
 
@@ -50,14 +50,14 @@ interface ConversationsActionsGroupProps {
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onOpen, onOpenChat }) => {
+  ({ investigation, onOpen, onOpenChat, onClickAction }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"
-        responsive={false}
+        responsive
         direction="row"
         justifyContent="flexEnd"
       >
@@ -88,13 +88,16 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
         </EuiFlexItem>
         <span
           aria-hidden="true"
-          style={{
+          css={css({
             width: '1px',
             height: euiTheme.size.base,
             background: euiTheme.colors.backgroundLightText,
             marginLeft: euiTheme.size.s,
             marginRight: euiTheme.size.xs,
-          }}
+            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+              display: 'none',
+            },
+          })}
         />
         <EuiFlexItem grow={false}>
           <EuiToolTip content={CONVERSATION_CARD_ACTIONS.openChat} disableScreenReaderOutput>
@@ -111,7 +114,11 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <BaseActions investigation={investigation} onOpen={onOpen} onOpenChat={onOpenChat} />
+          <BaseActions
+            investigation={investigation}
+            onOpen={onOpen}
+            onOpenChat={onOpenChat}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
