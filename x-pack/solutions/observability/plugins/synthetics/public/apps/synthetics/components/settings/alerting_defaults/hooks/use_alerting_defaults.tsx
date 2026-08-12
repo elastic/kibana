@@ -29,17 +29,17 @@ export const useAlertingDefaults = () => {
 
   const options = (connectors ?? [])
     .filter((action) => (actionTypes ?? []).find((type) => type.id === action.actionTypeId))
-    .map((connectorAction) => ({
-      value: connectorAction.id,
-      label: connectorAction.name,
-      prepend: (
-        <EuiIcon
-          type={actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass}
-          size="s"
-          aria-hidden={true}
-        />
-      ),
-    }));
+    .map((connectorAction) => {
+      const iconClass = actionTypeRegistry.has(connectorAction.actionTypeId)
+        ? actionTypeRegistry.get(connectorAction.actionTypeId).iconClass
+        : undefined;
+
+      return {
+        value: connectorAction.id,
+        label: connectorAction.name,
+        prepend: iconClass ? <EuiIcon type={iconClass} size="s" aria-hidden={true} /> : undefined,
+      };
+    });
 
   return {
     options,

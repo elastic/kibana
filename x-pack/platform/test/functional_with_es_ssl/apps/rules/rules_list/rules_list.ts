@@ -625,8 +625,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
               id: action.id,
               group: 'default',
               params: {
-                subAction: 'sendMessage',
-                subActionParams: { text: 'gfghfhg' },
+                body: '{"message":"gfghfhg"}',
               },
               frequency: {
                 summary: false,
@@ -639,23 +638,23 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       });
       await refreshAlertsList();
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.slack2FilterOption');
+      await testSubjects.click('actionType.webhookFilterOption');
 
       await retry.try(async () => {
-        const filterWithSlackOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
-        expect(filterWithSlackOnlyResults.length).to.equal(1);
-        expect(filterWithSlackOnlyResults[0].name).to.equal(
+        const filterWithWebhookOnlyResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filterWithWebhookOnlyResults.length).to.equal(1);
+        expect(filterWithWebhookOnlyResults[0].name).to.equal(
           `${noopAlertWithAction.name}Test: Noop`
         );
-        expect(filterWithSlackOnlyResults[0].interval).to.equal('1 min');
-        expect(filterWithSlackOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
+        expect(filterWithWebhookOnlyResults[0].interval).to.equal('1 min');
+        expect(filterWithWebhookOnlyResults[0].duration).to.match(/\d{2,}:\d{2}/);
       });
 
       await refreshAlertsList();
 
       // de-select action type filter
       await testSubjects.click('actionTypeFilterButton');
-      await testSubjects.click('actionType.slack2FilterOption');
+      await testSubjects.click('actionType.webhookFilterOption');
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
@@ -809,8 +808,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
               id: action.id,
               group: 'default',
               params: {
-                subAction: 'sendMessage',
-                subActionParams: { text: 'gfghfhg' },
+                body: '{"message":"gfghfhg"}',
               },
               frequency: {
                 summary: false,
