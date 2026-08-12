@@ -244,7 +244,7 @@ export const ManageDashboardsPopover = ({
       isOpen={isOpen}
       closePopover={onClose}
       panelPaddingSize="none"
-      anchorPosition="upCenter"
+      anchorPosition="downCenter"
       ownFocus
       initialFocus="[data-test-subj='ruleDashboardArtifactsSearch']"
       aria-labelledby={popoverTitleId}
