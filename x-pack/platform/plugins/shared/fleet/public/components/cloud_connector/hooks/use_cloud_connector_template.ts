@@ -70,7 +70,9 @@ export const useCloudConnectorTemplate = ({
   );
 
   // The static URL doubles as the quick-create scaffold for the rendered
-  // artifact (console host + param_ElasticResourceId), so it is always built.
+  // artifact (console host plus any quick-create params the package's URL
+  // carries — the aws package's Identity Federation URL has none since the
+  // external ID was removed, ingest-dev#9116), so it is always built.
   const staticTemplateUrl = cloud
     ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
     : undefined;
