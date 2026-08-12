@@ -21,7 +21,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -191,34 +190,42 @@ export const DocumentViewModeToggle = ({
 
   const countDisplay = useMemo(() => {
     if (viewMode === VIEW_MODE.PATTERN_LEVEL) {
-      return patternCount === undefined ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        <EuiText size="s" data-test-subj="dscViewModePatternCount">
-          <strong>
-            <FormattedMessage
-              id="discover.viewModes.patternAnalysis.countLabel"
-              defaultMessage="{count} {count, plural, one {pattern} other {patterns}}"
-              values={{ count: patternCount }}
-            />
-          </strong>
-        </EuiText>
+      const isLoading = patternCount === undefined;
+      return (
+        <CountLabel
+          label={
+            patternCount === undefined
+              ? i18n.translate('discover.viewModes.patternAnalysis.countLoadingLabel', {
+                  defaultMessage: 'patterns',
+                })
+              : i18n.translate('discover.viewModes.patternAnalysis.countLabel', {
+                  defaultMessage: '{count} {count, plural, one {pattern} other {patterns}}',
+                  values: { count: patternCount },
+                })
+          }
+          isLoading={isLoading}
+          data-test-subj="dscViewModePatternCount"
+        />
       );
     }
 
     if (viewMode === VIEW_MODE.AGGREGATED_LEVEL) {
-      return fieldsCount === undefined ? (
-        <EuiLoadingSpinner size="m" />
-      ) : (
-        <EuiText size="s" data-test-subj="dscViewModeFieldsCount">
-          <strong>
-            <FormattedMessage
-              id="discover.viewModes.fieldStatistics.countLabel"
-              defaultMessage="{count} {count, plural, one {field} other {fields}}"
-              values={{ count: fieldsCount }}
-            />
-          </strong>
-        </EuiText>
+      const isLoading = fieldsCount === undefined;
+      return (
+        <CountLabel
+          label={
+            fieldsCount === undefined
+              ? i18n.translate('discover.viewModes.fieldStatistics.countLoadingLabel', {
+                  defaultMessage: 'fields',
+                })
+              : i18n.translate('discover.viewModes.fieldStatistics.countLabel', {
+                  defaultMessage: '{count} {count, plural, one {field} other {fields}}',
+                  values: { count: fieldsCount },
+                })
+          }
+          isLoading={isLoading}
+          data-test-subj="dscViewModeFieldsCount"
+        />
       );
     }
 
@@ -274,6 +281,33 @@ export const DocumentViewModeToggle = ({
         </>
       )}
     </EuiFlexGroup>
+  );
+};
+
+const CountLabel = ({
+  label,
+  isLoading,
+  'data-test-subj': dataTestSubj,
+}: {
+  label: string;
+  isLoading: boolean;
+  'data-test-subj'?: string;
+}) => {
+  return (
+    <EuiText size="s" data-test-subj={isLoading ? undefined : dataTestSubj}>
+      {isLoading ? (
+        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <strong>{label}</strong>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <strong>{label}</strong>
+      )}
+    </EuiText>
   );
 };
 

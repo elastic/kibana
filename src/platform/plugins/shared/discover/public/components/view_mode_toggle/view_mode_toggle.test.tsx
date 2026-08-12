@@ -215,6 +215,8 @@ describe('Document view mode toggle component', () => {
     });
 
     expect(screen.queryByTestId('dscViewModePatternCount')).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeVisible();
+    expect(screen.getByText('patterns')).toBeVisible();
   });
 
   it('should switch to document and hide pattern option when there are no text fields', async () => {
