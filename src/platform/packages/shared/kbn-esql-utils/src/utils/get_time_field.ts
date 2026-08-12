@@ -35,8 +35,7 @@ export async function getESQLTimeField({
   query: string;
   http?: HttpStart;
 }): Promise<string | undefined> {
-  const normalizedQuery = query.replace(/\u00a0/g, ' ');
-  const cached = timeFieldCache.get(normalizedQuery);
+  const cached = timeFieldCache.get(query);
   if (cached !== undefined) {
     return cached;
   }
@@ -44,14 +43,14 @@ export async function getESQLTimeField({
     return undefined;
   }
   const pendingRequest = http
-    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: normalizedQuery }) })
+    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch the timefield', error);
-      timeFieldCache.delete(normalizedQuery);
+      timeFieldCache.delete(query);
       return undefined;
     });
-  timeFieldCache.set(normalizedQuery, pendingRequest);
+  timeFieldCache.set(query, pendingRequest);
   return pendingRequest;
 }

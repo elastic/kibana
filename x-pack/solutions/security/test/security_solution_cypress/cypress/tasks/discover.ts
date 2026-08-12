@@ -46,6 +46,19 @@ export const fillEsqlQueryBar = (query: string) => {
     $textarea[0].dispatchEvent(pasteEvent);
   });
 
+  cy.window().then((win) => {
+    const monacoApi = (win as any).MonacoEnvironment?.monaco;
+    if (monacoApi) {
+      monacoApi.editor.getModels().forEach((model: any) => {
+        const value = model.getValue();
+        const normalized = value.replace(/\u00a0/g, ' ');
+        if (normalized !== value) {
+          model.setValue(normalized);
+        }
+      });
+    }
+  });
+
   cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
     expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(query);
   });
