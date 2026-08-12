@@ -208,6 +208,4 @@ directory and report this error to the Operations team.\n`);
   }
 }
 
-module.exports = {
-  LmdbCache,
-};
+exports.LmdbCache = LmdbCache;
