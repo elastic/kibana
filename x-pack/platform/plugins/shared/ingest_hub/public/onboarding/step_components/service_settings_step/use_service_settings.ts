@@ -161,8 +161,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
 
-      const n = instances.filter((i) => i.serviceId === source.serviceId && i.isDuplicate).length;
-      const newInstanceId = `${source.serviceId}__dup-${n + 1}`;
+      const existingIds = new Set(instances.map((i) => i.instanceId));
+      let n = instances.filter((i) => i.serviceId === source.serviceId && i.isDuplicate).length + 1;
+      let newInstanceId = `${source.serviceId}__dup-${n}`;
+      while (existingIds.has(newInstanceId)) {
+        newInstanceId = `${source.serviceId}__dup-${++n}`;
+      }
 
       const sourceVars = getServiceVars(sourceInstanceId);
       const newInstance: ServiceInstance = {

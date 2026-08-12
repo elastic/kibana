@@ -162,7 +162,7 @@ export function DuplicateServiceModal({
             <EuiButton
               fill
               onClick={handleAdd}
-              isDisabled={nameTouched && !canAdd}
+              isDisabled={!canAdd}
               data-test-subj="duplicateServiceModal-addButton"
             >
               <FormattedMessage

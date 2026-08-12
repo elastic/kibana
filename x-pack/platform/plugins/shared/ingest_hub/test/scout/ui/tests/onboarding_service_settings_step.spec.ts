@@ -236,12 +236,15 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('expand icon opens flyout for the correct service', async ({ browserAuth, page }) => {
+    // cloudtrail has configurable flyout fields (transport toggle + bucket_arn),
+    // so it shows an edit button. ec2_metrics has no configurable fields after
+    // removing the region selector and shows plain text instead.
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.getByRole('heading', { name: 'AWS EC2' })).toBeVisible();
+    await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
+    await expect(page.getByRole('heading', { name: 'AWS CloudTrail' })).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeHidden();
@@ -249,10 +252,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
   test('service name link also opens flyout', async ({ browserAuth, page }) => {
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['ec2_metrics'],
+      selectedServiceIds: ['cloudtrail'],
     });
 
-    await page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics').click();
+    await page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail').click();
     await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
   });
 
@@ -354,9 +357,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
     await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
 
-    await expect(page.testSubj.locator('duplicateServiceModal')).toBeVisible();
-    await expect(page.getByText(/Add another instance of/)).toBeVisible();
-    await expect(page.getByText('AWS CloudTrail')).toBeVisible();
+    const modal = page.testSubj.locator('duplicateServiceModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText(/Add another instance of/)).toBeVisible();
+    await expect(modal.getByText('AWS CloudTrail')).toBeVisible();
   });
 
   test('duplicate modal pre-fills name as "Service [Duplicate]"', async ({ browserAuth, page }) => {
