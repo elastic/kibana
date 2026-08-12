@@ -15,17 +15,13 @@ import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 
-let capturedOnTemplateChange: ((t: string) => void) | undefined;
-
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
     prompt: string | undefined;
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
-    onTemplateChange: (t: string) => void;
   }) => {
-    capturedOnTemplateChange = props.onTemplateChange;
     return (
       <div
         data-test-subj="mockCustomContentComponent"
@@ -169,21 +165,6 @@ describe('customContentEmbeddableFactory', () => {
       expect(el).toHaveAttribute('data-prompt', 'Show KPI cards');
       expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
-    });
-  });
-
-  describe('template caching', () => {
-    it('writes back template when onTemplateChange is called from the component', async () => {
-      const { embeddable } = await buildEmbeddable({ prompt: 'Test', template: undefined });
-      await act(async () => render(<embeddable.Component />));
-
-      expect(embeddable.api.serializeState().template).toBeUndefined();
-
-      act(() => {
-        capturedOnTemplateChange!('<div>generated</div>');
-      });
-
-      expect(embeddable.api.serializeState().template).toBe('<div>generated</div>');
     });
   });
 

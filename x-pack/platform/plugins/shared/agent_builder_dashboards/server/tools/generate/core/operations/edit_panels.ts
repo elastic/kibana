@@ -6,6 +6,10 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  type CustomContentState,
+} from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { createPanelFailureResult, type PanelContentAttempt } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
@@ -16,6 +20,7 @@ import {
   type EditPanelItem,
   type EditPanelRequestInput,
 } from './panels';
+import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
 /**
@@ -90,7 +95,7 @@ export const editPanelsOperation = defineOperation({
           recordFailure(panelInput.panelId, validation.error);
           continue;
         }
-        validEdits.push({ panelInput });
+        validEdits.push({ panelInput, existingPanel });
         continue;
       }
 
@@ -131,11 +136,21 @@ export const editPanelsOperation = defineOperation({
 
     // Apply valid edits in input order so state changes remain deterministic.
     let nextDashboardData = dashboardData;
-    for (const { panelInput } of validEdits) {
+    for (const { panelInput, existingPanel } of validEdits) {
       if (panelInput.source === 'config') {
-        const panelContent = PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(
-          panelInput.config
-        );
+        const resolvedConfig =
+          panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
+          context.resolveCustomContentTemplate &&
+          existingPanel
+            ? await mergeAndResolveCustomContentEdit(
+                panelInput.config,
+                existingPanel.config as CustomContentState,
+                context.resolveCustomContentTemplate
+              )
+            : panelInput.config;
+
+        const panelContent =
+          PANEL_TYPE_DEFINITIONS[panelInput.type].buildPanelContent(resolvedConfig);
         const updateResult = updatePanelInDashboard({
           dashboardData: nextDashboardData,
           panelId: panelInput.panelId,

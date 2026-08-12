@@ -9,9 +9,22 @@ import {
   stripMarkdownFences,
   containsScript,
   injectCsp,
+  injectStyleTag,
   sanitizeHtml,
   isValidTemplate,
 } from './prepare_html';
+
+describe('injectStyleTag', () => {
+  it('injects a <style> tag after <head>', () => {
+    const result = injectStyleTag('<html><head></head><body></body></html>', ':root{--x:red}');
+    expect(result).toContain('<head><style>:root{--x:red}</style>');
+  });
+
+  it('prepends when there is no <head>', () => {
+    const result = injectStyleTag('<p>hello</p>', ':root{--x:red}');
+    expect(result.startsWith('<style>:root{--x:red}</style>')).toBe(true);
+  });
+});
 
 describe('injectCsp', () => {
   it('injects CSP and color-scheme meta into an existing <head>', () => {

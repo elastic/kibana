@@ -24,6 +24,16 @@ export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): 
   return inject + html;
 }
 
+export function injectStyleTag(html: string, style: string): string {
+  const styleTag = `<style>${style}</style>`;
+  const headMatch = html.match(/<head[^>]*>/i);
+  if (headMatch?.index !== undefined) {
+    const at = headMatch.index + headMatch[0].length;
+    return html.slice(0, at) + styleTag + html.slice(at);
+  }
+  return styleTag + html;
+}
+
 export function prepareHtml(html: string, colorMode?: EuiThemeColorModeStandard): string {
   return injectCsp(sanitizeHtml(stripMarkdownFences(html)), colorMode);
 }

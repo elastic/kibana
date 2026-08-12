@@ -10,7 +10,13 @@ import { generateDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
 
-export const createDashboardManagementSkill = (getCustomContentEnabled: () => Promise<boolean>) =>
+interface DashboardManagementSkillParams {
+  getCustomContentEnabled: () => Promise<boolean>;
+}
+
+export const createDashboardManagementSkill = ({
+  getCustomContentEnabled,
+}: DashboardManagementSkillParams) =>
   defineSkillType({
     id: 'dashboard-management',
     name: 'dashboard-management',

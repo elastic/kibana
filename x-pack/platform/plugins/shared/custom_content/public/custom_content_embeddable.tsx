@@ -145,10 +145,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        const onTemplateChange = useCallback((t: string) => {
-          template$.next(t);
-        }, []);
-
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
@@ -210,7 +206,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
-              onTemplateChange={onTemplateChange}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>

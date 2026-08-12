@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 
 // DOMPurify requires a real DOM — pass-through in Jest
 jest.mock('dompurify', () => ({
@@ -14,15 +14,13 @@ jest.mock('dompurify', () => ({
 }));
 
 jest.mock('../services');
-jest.mock('../utils/stream_generate');
 jest.mock('../utils/fetch_esql_data');
 jest.mock('../utils/fill_template');
 
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { CustomContentTokenEvent } from '../../common/types';
 import { getServices } from '../services';
-import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
@@ -33,42 +31,46 @@ const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate
 const mockHttp = {} as unknown as HttpStart;
 const mockSearch = jest.fn();
 
-function makeHttp(events: CustomContentTokenEvent[]) {
-  return (_http: unknown, _params: unknown, onToken: (t: string) => void) => {
-    events.forEach((e) => {
-      if (e.type === 'token' && e.token) onToken(e.token as string);
-    });
-    return Promise.resolve();
-  };
-}
-
 beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: mockSearch });
-  (streamGenerate as jest.Mock).mockResolvedValue(undefined);
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<div>rendered</div>');
 });
 
+const mockEuiTheme = {
+  colors: {
+    textParagraph: '#343741',
+    emptyShade: '#FFFFFF',
+    lightestShade: '#F5F7FA',
+    primary: '#0077CC',
+    accentSecondary: '#008B87',
+    accent: '#F04E98',
+    warning: '#FEC514',
+    danger: '#BD271E',
+    borderBasePlain: '#D3DAE6',
+  },
+} as any;
+
 const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   embeddableId: 'panel-1',
-  prompt: 'Show revenue by category',
   esqlQuery: undefined,
   timeRange: undefined,
   generationVersion: 0,
   savedTemplate: undefined,
   colorMode: 'LIGHT' as const,
-  onTemplateChange: jest.fn(),
+  euiTheme: mockEuiTheme,
 };
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
 
 describe('useCustomContentHtml', () => {
-  describe('empty prompt', () => {
-    it('clears isLoading immediately when prompt is empty', () => {
-      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams, prompt: '' }));
+  describe('no template available', () => {
+    it('leaves isLoading false and signals noContent when there is no stored template', () => {
+      const { result } = renderHook(() => useCustomContentHtml(baseParams));
       expect(result.current.isLoading).toBe(false);
-      expect(streamGenerate).not.toHaveBeenCalled();
+      expect(result.current.html).toBe('');
+      expect(result.current.noContent).toBe(true);
     });
   });
 
@@ -79,83 +81,8 @@ describe('useCustomContentHtml', () => {
       );
       await waitFor(() => expect(result.current.isLoading).toBe(false));
       expect(result.current.html).toContain('hello');
-      expect(streamGenerate).not.toHaveBeenCalled();
+      expect(result.current.noContent).toBe(false);
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('slow path — no stored template, LLM generation', () => {
-    it('calls streamGenerate and saves the result via onTemplateChange', async () => {
-      const onTemplateChange = jest.fn();
-      (streamGenerate as jest.Mock).mockImplementation(
-        makeHttp([{ type: 'token', token: VALID_HTML }])
-      );
-
-      const { result } = renderHook(() =>
-        useCustomContentHtml({ ...baseParams, onTemplateChange })
-      );
-
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
-      expect(streamGenerate).toHaveBeenCalledTimes(1);
-      expect(onTemplateChange).toHaveBeenCalledWith(expect.stringContaining('hello'));
-      expect(result.current.html).toContain('hello');
-    });
-
-    it('surfaces LLM error', async () => {
-      (streamGenerate as jest.Mock).mockRejectedValue(new Error('LLM unavailable'));
-
-      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
-
-      await waitFor(() => expect(result.current.error).toBe('LLM unavailable'));
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    it('shows a script-not-supported error instead of silently rendering blank', async () => {
-      (streamGenerate as jest.Mock).mockImplementation(
-        makeHttp([
-          {
-            type: 'token',
-            token: '<html><body><div id="chart"></div><script>doStuff()</script></body></html>',
-          },
-        ])
-      );
-
-      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
-
-      await waitFor(() => expect(result.current.error).toMatch(/javascript/i));
-      expect(result.current.html).toBe('');
-    });
-
-    it('sets isAiUnavailable when the error carries code no_connector', async () => {
-      const err = Object.assign(new Error('No inference connector configured'), {
-        code: 'no_connector',
-      });
-      (streamGenerate as jest.Mock).mockRejectedValue(err);
-
-      const { result } = renderHook(() => useCustomContentHtml({ ...baseParams }));
-
-      await waitFor(() => expect(result.current.isAiUnavailable).toBe(true));
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    it('clears isAiUnavailable when a subsequent generation succeeds', async () => {
-      const noConnectorErr = Object.assign(new Error('No inference connector configured'), {
-        code: 'no_connector',
-      });
-      (streamGenerate as jest.Mock).mockRejectedValueOnce(noConnectorErr);
-
-      const { result, rerender } = renderHook(
-        ({ version }: { version: number }) =>
-          useCustomContentHtml({ ...baseParams, generationVersion: version }),
-        { initialProps: { version: 0 } }
-      );
-
-      await waitFor(() => expect(result.current.isAiUnavailable).toBe(true));
-
-      (streamGenerate as jest.Mock).mockResolvedValueOnce(undefined);
-      rerender({ version: 1 });
-
-      await waitFor(() => expect(result.current.isAiUnavailable).toBe(false));
     });
   });
 
@@ -181,153 +108,34 @@ describe('useCustomContentHtml', () => {
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
       expect(result.current.html).toContain('rendered');
-      expect(streamGenerate).not.toHaveBeenCalled();
+      expect(result.current.noContent).toBe(false);
     });
 
-    it('surfaces a fetch error without calling the LLM', async () => {
+    it('surfaces a fetch error', async () => {
       mockFetchEsqlData.mockRejectedValue(new Error('index not found'));
 
       const { result } = renderHook(() => useCustomContentHtml(esqlParams));
 
       await waitFor(() => expect(result.current.error).toBe('index not found'));
       expect(result.current.isLoading).toBe(false);
-      expect(streamGenerate).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('slow path — ES|QL panel, LLM then client-side render', () => {
-    const LIQUID_TEMPLATE =
-      '<html><body>{% for row in rows %}{{ row["revenue"].value }}{% endfor %}</body></html>';
-    const esqlParams = {
-      ...baseParams,
-      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
-    };
-
-    it('calls streamGenerate then fetchEsqlData + fillTemplate, saves the Liquid template', async () => {
-      const onTemplateChange = jest.fn();
-      (streamGenerate as jest.Mock).mockImplementation(
-        makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
-      );
-
-      const { result } = renderHook(() =>
-        useCustomContentHtml({ ...esqlParams, onTemplateChange })
-      );
-
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
-
-      expect(streamGenerate).toHaveBeenCalledTimes(1);
-      expect(mockFetchEsqlData).toHaveBeenCalledWith(
-        mockSearch,
-        mockHttp,
-        esqlParams.esqlQuery,
-        undefined,
-        expect.any(AbortSignal)
-      );
-      expect(mockFillTemplate).toHaveBeenCalledWith(LIQUID_TEMPLATE, [], []);
-      expect(result.current.html).toContain('rendered');
-      expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
-    });
-
-    it('passes timeRange to streamGenerate and fetchEsqlData', async () => {
-      const timeRange = { from: 'now-7d', to: 'now' };
-      (streamGenerate as jest.Mock).mockImplementation(
-        makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
-      );
-
-      renderHook(() => useCustomContentHtml({ ...esqlParams, timeRange }));
-
-      await waitFor(() => expect(streamGenerate).toHaveBeenCalledTimes(1));
-      expect(streamGenerate).toHaveBeenCalledWith(
-        mockHttp,
-        expect.objectContaining({ esqlQuery: esqlParams.esqlQuery, timeRange }),
-        expect.any(Function),
-        expect.any(AbortSignal)
-      );
-      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
-      expect(mockFetchEsqlData).toHaveBeenCalledWith(
-        mockSearch,
-        mockHttp,
-        esqlParams.esqlQuery,
-        timeRange,
-        expect.any(AbortSignal)
-      );
-    });
-
-    it('surfaces a render error and does not save the template', async () => {
-      (streamGenerate as jest.Mock).mockImplementation(
-        makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }])
-      );
-      mockFetchEsqlData.mockRejectedValue(new Error('query failed'));
-      const onTemplateChange = jest.fn();
-
-      const { result } = renderHook(() =>
-        useCustomContentHtml({ ...esqlParams, onTemplateChange })
-      );
-
-      await waitFor(() => expect(result.current.error).toBeDefined());
-      expect(result.current.isLoading).toBe(false);
-      expect(onTemplateChange).not.toHaveBeenCalled();
-      expect(streamGenerate).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('retry logic', () => {
-    it('retries once when static LLM output contains a script tag, succeeds on second attempt', async () => {
-      const SCRIPT_HTML = '<html><body><script>bad()</script></body></html>';
-      const VALID_HTML_RETRY = '<html><body><p>fixed</p></body></html>';
-      (streamGenerate as jest.Mock)
-        .mockImplementationOnce(makeHttp([{ type: 'token', token: SCRIPT_HTML }]))
-        .mockImplementation(makeHttp([{ type: 'token', token: VALID_HTML_RETRY }]));
-
-      const onTemplateChange = jest.fn();
-      const { result } = renderHook(() =>
-        useCustomContentHtml({ ...baseParams, onTemplateChange })
-      );
-
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
-      expect(streamGenerate).toHaveBeenCalledTimes(2);
-      expect(result.current.error).toBeUndefined();
-      expect(result.current.html).toContain('fixed');
-      expect(onTemplateChange).toHaveBeenCalledTimes(1);
-    });
-
-    it('retries once when ES|QL LLM output is invalid HTML, succeeds on second attempt', async () => {
-      const LIQUID_TEMPLATE =
-        '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>';
-      (streamGenerate as jest.Mock)
-        .mockImplementationOnce(makeHttp([{ type: 'token', token: 'just text, no tags' }]))
-        .mockImplementation(makeHttp([{ type: 'token', token: LIQUID_TEMPLATE }]));
-
-      const onTemplateChange = jest.fn();
-      const { result } = renderHook(() =>
-        useCustomContentHtml({
-          ...baseParams,
-          esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
-          onTemplateChange,
-        })
-      );
-
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
-      expect(streamGenerate).toHaveBeenCalledTimes(2);
-      expect(result.current.error).toBeUndefined();
-      expect(result.current.html).toContain('rendered');
-      expect(onTemplateChange).toHaveBeenCalledWith(LIQUID_TEMPLATE);
     });
   });
 
   describe('abort on unmount', () => {
-    it('aborts the inflight request when the hook unmounts', async () => {
+    it('aborts the inflight ES|QL fetch when the hook unmounts', async () => {
       let capturedSignal: AbortSignal | undefined;
-      (streamGenerate as jest.Mock).mockImplementation(
-        (_http: unknown, _params: unknown, _onToken: unknown, signal: AbortSignal) => {
-          capturedSignal = signal;
-          return new Promise(() => {}); // never resolves
-        }
-      );
+      mockFetchEsqlData.mockImplementation((_search, _http, _query, _timeRange, signal) => {
+        capturedSignal = signal;
+        return new Promise(() => {}); // never resolves
+      });
 
-      const { unmount } = renderHook(() => useCustomContentHtml({ ...baseParams }));
+      const esqlParams = {
+        ...baseParams,
+        esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+        savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+      };
 
-      await act(async () => {});
+      const { unmount } = renderHook(() => useCustomContentHtml(esqlParams));
       unmount();
 
       expect(capturedSignal?.aborted).toBe(true);
@@ -364,16 +172,13 @@ describe('useCustomContentHtml', () => {
     });
   });
 
-  describe('refresh re-fetches ES|QL panels after first generation', () => {
+  describe('generationVersion refresh', () => {
     it('re-calls fetchEsqlData when generationVersion increments on a panel with a stored template', async () => {
-      const LIQUID_TEMPLATE =
-        '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>';
       const esqlParams = {
         ...baseParams,
         esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
-        savedTemplate: LIQUID_TEMPLATE,
-        // simulate selfWrittenRef by having savedTemplate already match what the LLM would write
-        prompt: undefined,
+        savedTemplate:
+          '<html><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>',
       };
 
       const { rerender } = renderHook(
@@ -390,23 +195,68 @@ describe('useCustomContentHtml', () => {
     });
   });
 
-  describe('re-render on generationVersion change', () => {
-    it('re-runs LLM generation when generationVersion increments', async () => {
-      (streamGenerate as jest.Mock).mockResolvedValue(undefined);
+  describe('theme change does not re-fetch ES|QL', () => {
+    it('does not call fetchEsqlData again when only colorMode changes', async () => {
+      const esqlParams = {
+        ...baseParams,
+        esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+        savedTemplate:
+          '<html><head></head><body>{% for row in rows %}<p>{{ row["revenue"].value }}</p>{% endfor %}</body></html>',
+      };
 
       const { rerender } = renderHook(
-        ({ version }: { version: number }) =>
-          useCustomContentHtml({
-            ...baseParams,
-            generationVersion: version,
-          }),
-        { initialProps: { version: 0 } }
+        ({ colorMode }: { colorMode: EuiThemeColorModeStandard }) =>
+          useCustomContentHtml({ ...esqlParams, colorMode }),
+        { initialProps: { colorMode: 'LIGHT' as EuiThemeColorModeStandard } }
       );
 
-      await waitFor(() => expect(streamGenerate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
 
-      rerender({ version: 1 });
-      await waitFor(() => expect(streamGenerate).toHaveBeenCalledTimes(2));
+      rerender({ colorMode: 'DARK' });
+
+      // Give the effect a chance to run if it incorrectly re-triggered
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+    });
+  });
+
+  describe('CSS custom properties in rendered html', () => {
+    it('injects --cc-color-text and other theme vars into the final html', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...baseParams,
+          savedTemplate: '<html><head></head><body><p>hello</p></body></html>',
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.html).toContain('--cc-color-text');
+      expect(result.current.html).toContain('--cc-color-background');
+      expect(result.current.html).toContain('--cc-color-surface');
+    });
+
+    it('updates html with new CSS vars when colorMode changes without re-fetching', async () => {
+      const esqlParams = {
+        ...baseParams,
+        savedTemplate: '<html><head></head><body><p>hello</p></body></html>',
+      };
+
+      const { result, rerender } = renderHook(
+        ({ colorMode }: { colorMode: EuiThemeColorModeStandard }) =>
+          useCustomContentHtml({ ...esqlParams, colorMode }),
+        { initialProps: { colorMode: 'LIGHT' as EuiThemeColorModeStandard } }
+      );
+
+      await waitFor(() => expect(result.current.html).toContain('--cc-color-text'));
+
+      const lightHtml = result.current.html;
+
+      rerender({ colorMode: 'DARK' });
+
+      await waitFor(() => expect(result.current.html).not.toBe(lightHtml));
+      expect(result.current.html).toContain('--cc-color-text');
+      // No additional fetch happened
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
     });
   });
 });

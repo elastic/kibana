@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
@@ -19,7 +20,6 @@ interface CustomContentComponentProps {
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
-  onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
 }
 
@@ -45,19 +45,17 @@ export const CustomContentComponent = ({
   timeRange,
   generationVersion,
   savedTemplate,
-  onTemplateChange,
   onErrorChange,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
+  const { html, isLoading, error, noContent } = useCustomContentHtml({
     embeddableId,
-    prompt,
     esqlQuery,
     timeRange,
     generationVersion,
     savedTemplate,
     colorMode,
-    onTemplateChange,
+    euiTheme,
   });
 
   useEffect(() => {
@@ -79,41 +77,32 @@ export const CustomContentComponent = ({
 
   return (
     <div css={wrapperCss}>
-      {isAiUnavailable && (
-        <EuiEmptyPrompt
-          iconType="sparkles"
-          iconColor="subdued"
-          title={
-            <h3>
-              {i18n.translate('xpack.customContent.aiUnavailable.title', {
-                defaultMessage: 'Set up an AI connector to use this panel',
-              })}
-            </h3>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.customContent.aiUnavailable.body', {
-                defaultMessage:
-                  'This panel generates content using AI. Ask your administrator to configure an AI connector in Stack Management.',
-              })}
-            </p>
-          }
-          color="subdued"
-        />
-      )}
-      {!isAiUnavailable && error && (
-        <EuiCallOut
-          color="danger"
+      {error && (
+        <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
-            defaultMessage: 'Failed to generate panel',
+            defaultMessage: 'Failed to render panel',
           })}
           style={{ margin: euiTheme.size.base }}
           announceOnMount
         >
           {error}
-        </EuiCallOut>
+        </KbnDangerCallout>
       )}
-      {!isAiUnavailable && !error && html && (
+      {!error && noContent && !isLoading && (
+        <KbnWarningCallout
+          announceOnMount
+          title={i18n.translate('xpack.customContent.noContent.title', {
+            defaultMessage: 'Content not yet generated',
+          })}
+          style={{ margin: euiTheme.size.base }}
+        >
+          {i18n.translate('xpack.customContent.noContent.body', {
+            defaultMessage:
+              'This panel has no content. Use the AI chat to refine it, or edit the panel to generate content.',
+          })}
+        </KbnWarningCallout>
+      )}
+      {!error && !noContent && html && (
         <div css={iframeContainerCss}>
           <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
         </div>
