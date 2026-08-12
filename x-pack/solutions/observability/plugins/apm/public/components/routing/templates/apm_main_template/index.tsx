@@ -164,7 +164,8 @@ export function ApmMainTemplate({
     // Always put the global menu on inline AppHeader (classic + solution). Do not also
     // call chrome.setAppMenu here — ClassicHeader would duplicate the same actions
     // next to breadcrumbs (kibana-team#3549). Page-local `header.menu` is merged so
-    // page items compose with the registered APM menu instead of replacing it.
+    // page items compose with the registered APM menu; page `primaryActionItem` wins
+    // the primary slot (e.g. Edit service group) and demotes the global primary.
     const resolvedHeader: ApmMainTemplateHeaderProps = {
       ...header,
       menu: mergeAppMenuConfigs(registeredAppMenu, header.menu),

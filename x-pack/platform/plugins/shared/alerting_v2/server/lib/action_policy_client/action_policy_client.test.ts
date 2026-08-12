@@ -1106,6 +1106,115 @@ describe('ActionPolicyClient', () => {
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
     });
 
+    it('logs POLICY_API_KEY_INVALIDATION_FAILED when fire-and-forget invalidation rejects', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      apiKeyService.markApiKeysForInvalidation.mockRejectedValueOnce(
+        new Error('queue write failed')
+      );
+
+      await client.updateActionPolicy({
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      await Promise.resolve();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to mark superseded API key for invalidation',
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
+            policy_id: 'policy-id-update-1',
+          },
+        })
+      );
+    });
+
+    it('logs POLICY_API_KEY_LOOKUP_FAILED when decrypting the old key fails', async () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'original-policy',
+        description: 'original-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'original-workflow' }],
+        apiKey: 'old-api-key',
+        apiKeyOwner: 'old-user',
+        apiKeyCreatedByUser: false,
+        createdBy: 'creator_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-decrypt-fail',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-decrypt-fail',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as ActionPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      const esoClient = mockEncryptedSavedObjects.getClient();
+      (esoClient.getDecryptedAsInternalUser as jest.Mock).mockRejectedValueOnce(
+        new Error('cannot decrypt')
+      );
+
+      await client.updateActionPolicy({
+        data: {
+          name: 'updated-policy',
+          destinations: [{ type: 'workflow', id: 'updated-workflow' }],
+        },
+        options: { id: 'policy-id-update-decrypt-fail', version: 'WzEsMV0=' },
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to decrypt action policy auth; skipping API key invalidation',
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+            policy_id: 'policy-id-update-decrypt-fail',
+          },
+        })
+      );
+      // New key still invalidated on success path only for old key; create always
+      // produces a new key that is kept. Old key was never resolved, so no old
+      // invalidation call for the previous credential.
+      expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalledWith(['old-api-key']);
+    });
+
     it('preserves existing tags when tags is not provided in update', async () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'tagged-policy',
@@ -2458,6 +2567,12 @@ describe('ActionPolicyClient', () => {
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to decrypt action policy auth; skipping API key invalidation',
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED },
+        })
+      );
     });
   });
 
