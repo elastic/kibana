@@ -254,7 +254,7 @@ export class ActionPolicyClient {
         attributes,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false);
+      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
@@ -338,11 +338,11 @@ export class ActionPolicyClient {
         version: params.options.version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, params.options.id);
 
     return transformActionPolicySoAttributesToApiResponse({
       id: params.options.id,
@@ -485,11 +485,11 @@ export class ActionPolicyClient {
         },
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
   }
 
   public async bulkEnableActionPolicies({
@@ -801,10 +801,10 @@ export class ActionPolicyClient {
 
     this.apiKeyService.markApiKeysForInvalidation([apiKey]).catch((error) => {
       this.logger.warn({
-        message: 'Failed to queue action policy API key for invalidation',
-        error,
+        message: 'Failed to mark superseded API key for invalidation',
         code: ALERTING_LOG_CODES.POLICY_API_KEY_INVALIDATION_FAILED,
-        labels: policyId ? { policy_id: policyId } : undefined,
+        labels: policyId != null ? { policy_id: policyId } : undefined,
+        error,
       });
     });
   }
@@ -824,12 +824,12 @@ export class ActionPolicyClient {
         apiKey,
         createdByUser: apiKeyCreatedByUser ?? false,
       };
-    } catch (e) {
+    } catch (error) {
       this.logger.warn({
-        message: 'Failed to decrypt action policy auth',
-        error: e,
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
         code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
         labels: { policy_id: id },
+        error,
       });
       return null;
     }
@@ -865,9 +865,9 @@ export class ActionPolicyClient {
       }
     } catch (error) {
       this.logger.warn({
-        message: 'Bulk action policy auth decrypt failed',
-        error,
+        message: 'Failed to decrypt action policy auth; skipping API key invalidation',
         code: ALERTING_LOG_CODES.POLICY_API_KEY_LOOKUP_FAILED,
+        error,
       });
     }
 
@@ -962,11 +962,11 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
       throw e;
     }
 
-    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser);
+    this.markApiKeysForInvalidation(oldAuth?.apiKey, oldAuth?.createdByUser, id);
 
     return {
       policy: transformActionPolicySoAttributesToApiResponse({

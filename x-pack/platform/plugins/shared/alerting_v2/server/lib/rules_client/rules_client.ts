@@ -14,6 +14,7 @@ import {
   isSignalUsingStandaloneFormat,
   isStateTransitionAllowed,
   updateRuleDataSchema,
+  type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -380,14 +381,16 @@ export class RulesClient {
         scheduleEvery: ruleAttributes.schedule.every,
       });
     } catch (e) {
-      await this.rulesSavedObjectService.delete({ id }).catch((rollbackError) => {
+      try {
+        await this.rulesSavedObjectService.delete({ id });
+      } catch (rollbackError) {
         this.logger.error({
-          message: 'Compensating delete failed after rule task schedule failure',
+          message: 'Failed to roll back rule creation after task scheduling failed',
           error: rollbackError,
           code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
           labels: { rule_id: id, space_id: spaceId },
         });
-      });
+      }
       throw e;
     }
 
@@ -669,9 +672,15 @@ export class RulesClient {
   }
 
   @withApm
-  public async getTags(params: { filter?: string } = {}): Promise<string[]> {
-    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
-    return this.rulesSavedObjectService.findTags({ filter: soFilter });
+  public async getTags(
+    params: { search?: string; kind?: RuleKind; size?: number } = {}
+  ): Promise<string[]> {
+    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      filter: soFilter,
+      size: params.size,
+    });
   }
 
   @withApm
