@@ -158,6 +158,17 @@ describe('StepIcon', () => {
       );
       expect(container.querySelector('[data-euiicon-type="hourglass"]')).toBeInTheDocument();
     });
+
+    it('keeps brand logo colors when FAILED instead of tinting with danger', () => {
+      const { container } = render(
+        <StepIcon stepType="elasticsearch.esql" executionStatus={ExecutionStatus.FAILED} />
+      );
+      const icon = container.querySelector('[data-euiicon-type="logoElasticsearch"]');
+      expect(icon).toBeInTheDocument();
+      // Status color must not be passed through — logos use their own tokens.
+      expect(icon).not.toHaveAttribute('color', 'danger');
+      expect(container.innerHTML).not.toMatch(/fill:\s*[^;]*danger|fill:\s*#/);
+    });
   });
 
   describe('custom step definitions', () => {

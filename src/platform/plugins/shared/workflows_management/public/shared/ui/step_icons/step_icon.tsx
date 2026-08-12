@@ -54,7 +54,6 @@ export const StepIcon = React.memo(
       return getExecutionStatusIcon(euiTheme, executionStatus);
     }
 
-    const shouldApplyColorToIcon = executionStatus !== undefined;
     if (executionStatus === ExecutionStatus.RUNNING) {
       return <EuiLoadingSpinner size="m" />;
     }
@@ -72,6 +71,8 @@ export const StepIcon = React.memo(
       );
     }
 
+    // Brand / step-type logos keep their own tokens. Status is signaled by the
+    // tree label and row background, not by recoloring the logo.
     let iconType: IconType;
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
@@ -83,28 +84,9 @@ export const StepIcon = React.memo(
         actionTypeRegistry,
       });
       if (registeredIcon) {
-        const statusColor = shouldApplyColorToIcon
-          ? getExecutionStatusColors(euiTheme, executionStatus).color
-          : undefined;
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon
-              type={registeredIcon}
-              size="m"
-              color={statusColor}
-              css={
-                shouldApplyColorToIcon &&
-                executionStatus !== ExecutionStatus.COMPLETED &&
-                css`
-                  & * {
-                    fill: ${statusColor};
-                    color: ${statusColor};
-                  }
-                `
-              }
-              {...rest}
-              aria-hidden={true}
-            />
+            <EuiIcon type={registeredIcon} size="m" {...rest} aria-hidden={true} />
           </Suspense>,
           title
         );
@@ -114,9 +96,6 @@ export const StepIcon = React.memo(
     }
 
     if (typeof iconType === 'string' && iconType.startsWith('data:')) {
-      const statusColor = shouldApplyColorToIcon
-        ? getExecutionStatusColors(euiTheme, executionStatus).color
-        : undefined;
       return withTooltip(
         <span
           css={css`
@@ -127,11 +106,9 @@ export const StepIcon = React.memo(
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
-            // Tint precedence: execution-status color, then an explicit
-            // caller-provided tint (e.g. the graph node's accent/pink), then a
-            // neutral text tone so the shared default is consistent everywhere
-            // StepIcon is used.
-            background-color: ${statusColor ?? iconColor ?? euiTheme.colors.textParagraph};
+            // Prefer an explicit caller-provided tint (e.g. graph accent), then
+            // a neutral text tone. Do not tint with execution status color.
+            background-color: ${iconColor ?? euiTheme.colors.textParagraph};
           `}
           onClick={onClick}
           aria-hidden={true}
@@ -142,45 +119,13 @@ export const StepIcon = React.memo(
 
     if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return withTooltip(
-        <EuiToken
-          iconType={iconType}
-          size="s"
-          color={
-            shouldApplyColorToIcon
-              ? getExecutionStatusColors(euiTheme, executionStatus).tokenColor
-              : undefined
-          }
-          fill="light"
-          onClick={onClick}
-        />,
+        <EuiToken iconType={iconType} size="s" fill="light" onClick={onClick} />,
         title
       );
     }
 
     return withTooltip(
-      <EuiIcon
-        type={iconType}
-        size="m"
-        color={
-          shouldApplyColorToIcon
-            ? getExecutionStatusColors(euiTheme, executionStatus).color
-            : undefined
-        }
-        css={
-          // change fill and color of the icon for non-completed statuses, for multi-color logos
-          shouldApplyColorToIcon &&
-          executionStatus !== ExecutionStatus.COMPLETED &&
-          css`
-            & * {
-              fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-              color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-            }
-          `
-        }
-        onClick={onClick}
-        {...rest}
-        aria-hidden={true}
-      />,
+      <EuiIcon type={iconType} size="m" onClick={onClick} {...rest} aria-hidden={true} />,
       title
     );
   }

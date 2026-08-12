@@ -33,38 +33,38 @@ jest.mock('../build_step_executions_tree', () => ({
 }));
 
 // Mock child components
-jest.mock('../step_execution_tree_item_label', () => ({
-  StepExecutionTreeItemLabel: ({
+jest.mock('../step_execution_tree_row', () => ({
+  TREE_ROW_CHEVRON_SLOT_PX: 16,
+  StepExecutionTreeRow: ({
     stepId,
     stepType,
     selected,
     status,
-    executionIndex,
     executionTimeMs,
-    onClick,
+    onSelect,
+    'data-test-subj': dataTestSubj = 'step-execution-tree-item-label',
   }: {
     stepId: string;
-    stepType: string;
+    stepType?: string;
     selected: boolean;
     status?: ExecutionStatus;
-    executionIndex: number;
-    executionTimeMs: number | null;
-    onClick?: React.MouseEventHandler;
+    executionTimeMs?: number | null;
+    onSelect: () => void;
+    'data-test-subj'?: string;
   }) => (
     <span
-      data-test-subj="step-execution-tree-item-label"
+      data-test-subj={dataTestSubj}
       data-step-id={stepId}
       data-step-type={stepType}
       data-selected={selected}
       data-status={status}
-      data-execution-index={executionIndex}
       data-execution-time-ms={executionTimeMs}
-      onClick={onClick}
+      onClick={onSelect}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          onClick?.(e as unknown as React.MouseEvent);
+          onSelect();
         }
       }}
     >
@@ -291,7 +291,7 @@ describe('WorkflowStepExecutionTree', () => {
 
       expect(screen.queryByText('No step executions found')).not.toBeInTheDocument();
       expect(
-        screen.getByRole('list', { name: 'Workflow step execution tree' })
+        screen.getByRole('tree', { name: 'Workflow step execution tree' })
       ).toBeInTheDocument();
     });
   });
@@ -351,7 +351,7 @@ describe('WorkflowStepExecutionTree', () => {
         undefined
       );
       expect(
-        screen.getByRole('list', { name: 'Workflow step execution tree' })
+        screen.getByRole('tree', { name: 'Workflow step execution tree' })
       ).toBeInTheDocument();
       expect(screen.getByTestId('step-execution-tree-item-label')).toBeInTheDocument();
     });
@@ -652,7 +652,7 @@ describe('WorkflowStepExecutionTree', () => {
       });
     });
 
-    it('should call onStepExecutionClick when step icon is clicked', async () => {
+    it('should call onStepExecutionClick when step row is clicked', async () => {
       const user = userEvent.setup();
       isTerminalStatus.mockReturnValue(true);
 
@@ -698,8 +698,8 @@ describe('WorkflowStepExecutionTree', () => {
         </TestWrapper>
       );
 
-      const icon = screen.getByTestId('step-icon');
-      await user.click(icon);
+      const row = screen.getByTestId('step-execution-tree-item-label');
+      await user.click(row);
 
       await waitFor(() => {
         expect(mockOnStepExecutionClick).toHaveBeenCalledWith('step-exec-1');
@@ -869,9 +869,9 @@ describe('WorkflowStepExecutionTree', () => {
         </TestWrapper>
       );
 
-      // Find the expand/collapse button for the parent node
-      const expandButton = screen.getAllByRole('button')[0];
-      await user.click(expandButton);
+      // Select the parent row (no stepExecutionId) — falls back to first child.
+      const parentLabel = screen.getByText('parent-step');
+      await user.click(parentLabel);
 
       await waitFor(() => {
         // Should select the first child when parent has no stepExecutionId
@@ -1101,7 +1101,7 @@ describe('WorkflowStepExecutionTree', () => {
 
       expect(screen.queryByText('No step executions found')).not.toBeInTheDocument();
       expect(
-        screen.getByRole('list', { name: 'Workflow step execution tree' })
+        screen.getByRole('tree', { name: 'Workflow step execution tree' })
       ).toBeInTheDocument();
 
       const labels = screen.getAllByTestId('step-execution-tree-item-label');
