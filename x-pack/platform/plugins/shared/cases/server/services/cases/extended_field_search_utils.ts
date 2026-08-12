@@ -538,8 +538,8 @@ export const EF_ALL_VALUES_FIELD = `${CASE_SAVED_OBJECT}.ef_all_values`;
 
 /**
  * Builds a runtime field mapping that combines ALL extended field values into
- * one normalized keyword value per case, enabling word-level matching without
- * exceeding Elasticsearch's per-document runtime emit limit (100).
+ * at most one normalized keyword value per case, enabling word-level matching
+ * without exceeding Elasticsearch's per-document runtime emit limit (100).
  */
 export const buildAllExtendedFieldValuesRuntimeMapping = (): Record<
   string,
@@ -566,7 +566,7 @@ export const getAllExtendedFieldSearchWords = (search: string): string[] =>
 
 /**
  * Builds a query clause that requires every normalized search word to appear
- * as a substring of the combined extended-field runtime value.
+ * as a complete token in the combined extended-field runtime value.
  */
 export const buildAllExtendedFieldValuesSearchClause = (
   search: string,
@@ -580,7 +580,7 @@ export const buildAllExtendedFieldValuesSearchClause = (
   const wordClauses: estypes.QueryDslQueryContainer[] = words.map((word) => ({
     wildcard: {
       [field]: {
-        value: `*${escapeWildcard(word)}*`,
+        value: `* ${escapeWildcard(word)} *`,
         case_insensitive: true,
       },
     },
@@ -599,19 +599,20 @@ export const buildAllExtendedFieldValuesSearchClause = (
 
 /**
  * Collects every extended-field value into one lowercased string and emits it
- * once. USER_PICKER values contribute extracted display names; other values are
- * cleaned of JSON punctuation with separators normalized to spaces.
+ * at most once. USER_PICKER values contribute extracted display names; other
+ * values are cleaned of JSON punctuation with separators normalized to spaces.
  *
- * Truncation uses a UTF-16 code-unit budget of MAX_EXTENDED_FIELD_VALUE_BYTES / 3
- * so the emitted keyword stays under Lucene's UTF-8 byte limit even for
- * multi-byte characters. Painless runtime fields cannot use StandardCharsets /
- * getBytes, so a conservative char cap is required instead of true byte counting.
+ * Truncation reserves two UTF-16 code units for the leading and trailing token
+ * delimiters. The remaining budget uses MAX_EXTENDED_FIELD_VALUE_BYTES / 3 so
+ * the emitted keyword stays under Lucene's UTF-8 byte limit even for multi-byte
+ * characters. Painless runtime fields cannot use StandardCharsets / getBytes,
+ * so a conservative char cap is required instead of true byte counting.
  */
 const buildAllValuesCombinedScript = (): string => {
   const soType = `'${CASE_SAVED_OBJECT}'`;
   const efKey = `'${CASE_EXTENDED_FIELDS}'`;
-  // Max 3 UTF-8 bytes per UTF-16 code unit for BMP; keeps emit under Lucene's limit.
-  const maxChars = Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3);
+  // Max 3 UTF-8 bytes per UTF-16 code unit for BMP; reserves two spaces for token boundaries.
+  const maxChars = Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) - 2;
 
   return (
     `if (params._source == null) { return; }` +
@@ -643,8 +644,12 @@ const buildAllValuesCombinedScript = (): string => {
     `if (i > 0) { combined += ' '; }` +
     `combined += parts.get(i);` +
     `}` +
-    `if (combined.length() > ${maxChars}) { combined = combined.substring(0, ${maxChars}); }` +
-    `emit(combined);`
+    `if (combined.length() > ${maxChars}) {` +
+    `int boundary = combined.lastIndexOf(' ', ${maxChars});` +
+    `if (boundary == -1) { return; }` +
+    `combined = combined.substring(0, boundary);` +
+    `}` +
+    `emit(' ' + combined + ' ');`
   );
 };
 

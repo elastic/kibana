@@ -689,7 +689,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(runtimeClause).toEqual({
       wildcard: {
         [EF_ALL_VALUES_FIELD]: {
-          value: '*reason*',
+          value: '* reason *',
           case_insensitive: true,
         },
       },
@@ -712,7 +712,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(runtimeClause).toEqual({
       wildcard: {
         [EF_ALL_VALUES_FIELD]: {
-          value: '*emea*',
+          value: '* emea *',
           case_insensitive: true,
         },
       },
@@ -762,7 +762,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
         expect.objectContaining({
           wildcard: {
             [EF_ALL_VALUES_FIELD]: {
-              value: '*test*',
+              value: '* test *',
               case_insensitive: true,
             },
           },
@@ -800,7 +800,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*test*',
+                value: '* test *',
                 case_insensitive: true,
               },
             },
@@ -808,7 +808,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*text*',
+                value: '* text *',
                 case_insensitive: true,
               },
             },
@@ -837,7 +837,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*test*',
+                value: '* test *',
                 case_insensitive: true,
               },
             },
@@ -845,7 +845,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*text*',
+                value: '* text *',
                 case_insensitive: true,
               },
             },
@@ -871,7 +871,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(runtimeClause).toEqual({
       wildcard: {
         [EF_ALL_VALUES_FIELD]: {
-          value: '*spy*',
+          value: '* spy *',
           case_insensitive: true,
         },
       },

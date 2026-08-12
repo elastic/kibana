@@ -1876,12 +1876,12 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).toContain('extended_fields');
   });
 
-  it('generates a Painless script that lowercases and emits one combined value', () => {
+  it('generates a Painless script that lowercases and emits one boundary-padded combined value', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
 
     expect(src).toContain('toLowerCase(Locale.ROOT)');
-    expect(src).toContain('emit(combined)');
+    expect(src).toContain("emit(' ' + combined + ' ')");
     expect(src.match(/emit\(/g)).toHaveLength(1);
   });
 
@@ -1920,13 +1920,15 @@ describe('buildAllExtendedFieldValuesRuntimeMapping', () => {
     expect(src).toContain('instanceof Map');
   });
 
-  it('truncates the combined value using a Lucene-safe UTF-8 character budget', () => {
+  it('truncates at a complete token using a Lucene-safe UTF-8 character budget', () => {
     const mappings = buildAllExtendedFieldValuesRuntimeMapping();
     const src = (mappings[EF_ALL_VALUES_FIELD].script as { source: string })?.source ?? '';
-    const maxChars = Math.floor(30000 / 3);
+    const maxChars = Math.floor(30000 / 3) - 2;
 
-    expect(src).toContain(`substring(0, ${maxChars})`);
     expect(src).toContain(`combined.length() > ${maxChars}`);
+    expect(src).toContain(`combined.lastIndexOf(' ', ${maxChars})`);
+    expect(src).toContain('if (boundary == -1) { return; }');
+    expect(src).toContain('combined = combined.substring(0, boundary)');
     expect(src).not.toContain('StandardCharsets');
     expect(src).not.toContain('getBytes');
   });
@@ -1947,7 +1949,7 @@ describe('buildAllExtendedFieldValuesSearchClause', () => {
     expect(buildAllExtendedFieldValuesSearchClause('distributed')).toEqual({
       wildcard: {
         [EF_ALL_VALUES_FIELD]: {
-          value: '*distributed*',
+          value: '* distributed *',
           case_insensitive: true,
         },
       },
@@ -1961,7 +1963,7 @@ describe('buildAllExtendedFieldValuesSearchClause', () => {
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*distributed*',
+                value: '* distributed *',
                 case_insensitive: true,
               },
             },
@@ -1969,7 +1971,7 @@ describe('buildAllExtendedFieldValuesSearchClause', () => {
           {
             wildcard: {
               [EF_ALL_VALUES_FIELD]: {
-                value: '*malware*',
+                value: '* malware *',
                 case_insensitive: true,
               },
             },
@@ -1983,7 +1985,7 @@ describe('buildAllExtendedFieldValuesSearchClause', () => {
     expect(buildAllExtendedFieldValuesSearchClause('foo*bar')).toEqual({
       wildcard: {
         [EF_ALL_VALUES_FIELD]: {
-          value: '*foo\\*bar*',
+          value: '* foo\\*bar *',
           case_insensitive: true,
         },
       },
@@ -1998,10 +2000,21 @@ describe('buildAllExtendedFieldValuesSearchClause', () => {
     expect(buildAllExtendedFieldValuesSearchClause('spy', 'custom.field')).toEqual({
       wildcard: {
         'custom.field': {
-          value: '*spy*',
+          value: '* spy *',
           case_insensitive: true,
         },
       },
     });
+  });
+
+  it('requires whole-word boundaries instead of matching partial words', () => {
+    const clause = buildAllExtendedFieldValuesSearchClause('cat')!;
+    const wildcardQuery = clause.wildcard?.[EF_ALL_VALUES_FIELD] as { value: string };
+    const wildcardValue = wildcardQuery.value;
+    const token = wildcardValue.replace(/\*/g, '');
+
+    expect(wildcardValue).toBe('* cat *');
+    expect(' the cat sat ').toContain(token);
+    expect(' category theory ').not.toContain(token);
   });
 });
