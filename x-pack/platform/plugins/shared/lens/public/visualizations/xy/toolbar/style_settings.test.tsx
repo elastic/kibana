@@ -91,8 +91,6 @@ describe('xy style settings', () => {
     );
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246652
-  // FLAKY: https://github.com/elastic/kibana/issues/246653
   describe('Axis settings', () => {
     it('should disable the popover if there is no right axis', () => {
       renderComponent();
