@@ -74,6 +74,21 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
  * - if the type does NOT define model versions =>
  *   - the initialModelVersion aka 10.0.0 (if useModelVersionsOnly is set to true)
  *   - the latest migration version for the type (if useModelVersionsOnly is set to false)
+ *
+ * Types declaring {@link SavedObjectsType.semanticSearch} are bumped by exactly +1 over
+ * their natural latest model version so that change-detection fires on existing indexes that
+ * predate the opt-in, regardless of how many model versions the type already has (the shadow
+ * field addition is a platform-managed mapping change). Using `Math.max(n, 1)` was a no-op
+ * for any type already at model version ≥ 1.
+ *
+ * This bump must stay consistent with {@link getLatestMappingsVersionNumber}, which applies
+ * the same +1, so that stored mapping metadata is never mismatched against the comparison
+ * value — a mismatch in opposite directions would cause an infinite mapping-update loop.
+ *
+ * @remarks GA hazard: the synthetic +1 version is renumbered if the type author later adds
+ * a real model version. Documents stamped with the synthetic version will skip that new
+ * version's transform. GA requires pinned synthetic versions; for the POC this is a
+ * documented limitation.
  */
 export const getCurrentVirtualVersion = (
   type: SavedObjectsType,
@@ -81,7 +96,11 @@ export const getCurrentVirtualVersion = (
 ): string => {
   if (type.modelVersions || useModelVersionsOnly) {
     const versionNumber = getLatestModelVersion(type);
-    return modelVersionToVirtualVersion(versionNumber);
+    // A semanticSearch declaration synthesizes a shadow semantic_text field; bump by exactly
+    // +1 over the natural latest so mapping-change detection fires on any existing type,
+    // including those already at model version ≥ 1 (Math.max(n,1) was a no-op for those).
+    const effectiveVersion = type.semanticSearch ? versionNumber + 1 : versionNumber;
+    return modelVersionToVirtualVersion(effectiveVersion);
   } else {
     return getLatestMigrationVersion(type);
   }
@@ -108,18 +127,34 @@ export const getVirtualVersionMap = ({
 
 /**
  * Returns the latest version number that includes changes in the mappings, for the given type.
- * If none of the versions are updating the mappings, it will return 0
+ * If none of the versions are updating the mappings, it will return 0.
+ *
+ * Types declaring {@link SavedObjectsType.semanticSearch} are bumped by exactly +1 over their
+ * natural latest mappings version because the platform synthesizes shadow fields as a mapping
+ * change. Using `Math.max(n, 1)` was a no-op for any type whose latest mappings version was
+ * already ≥ 1, causing change-detection to miss the opt-in on existing indexes.
+ *
+ * This bump must stay consistent with {@link getCurrentVirtualVersion}, which applies the same
+ * +1, so that stored mapping metadata is never mismatched against the comparison value — a
+ * mismatch in opposite directions would cause an infinite mapping-update loop.
+ *
+ * @remarks GA hazard: the synthetic +1 version is renumbered if the type author later adds
+ * a real model version. Documents stamped with the synthetic version will skip that new
+ * version's transform. GA requires pinned synthetic versions; for the POC this is a
+ * documented limitation.
  */
 export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number => {
   const versionMap =
     typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
-  return Object.entries(versionMap)
-    .filter(([version, info]) =>
-      info.changes?.some((change) => change.type === 'mappings_addition')
-    )
+  const fromModelVersions = Object.entries(versionMap)
+    .filter(([, info]) => info.changes?.some((change) => change.type === 'mappings_addition'))
     .reduce<number>((memo, [current]) => {
       return Math.max(memo, assertValidModelVersion(current));
     }, 0);
+  // A semanticSearch declaration synthesizes shadow semantic_text fields; bump by exactly
+  // +1 over the natural latest so getNewAndUpdatedTypes fires on any existing type, including
+  // those whose latest mappings version was already ≥ 1 (Math.max(n,1) was a no-op for those).
+  return type.semanticSearch ? fromModelVersions + 1 : fromModelVersions;
 };
 
 /**

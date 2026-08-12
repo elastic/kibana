@@ -190,6 +190,71 @@ describe('ModelVersion map utilities', () => {
         )
       ).toEqual('10.1.0');
     });
+
+    it('returns at least 10.1.0 when a type declares semanticSearch with no model versions (useModelVersionsOnly=true)', () => {
+      // Simulates the ZDT mapping-version check: a type opting into semanticSearch for the first
+      // time must be detected as changed against an existing index at 10.0.0.
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            mappings: { properties: { title: { type: 'text' } } },
+            semanticSearch: { fields: ['title'] },
+          }),
+          true
+        )
+      ).toEqual('10.1.0');
+    });
+
+    it('returns the migration version (not bumped) for semanticSearch with no modelVersions when useModelVersionsOnly=false', () => {
+      // Only the model-version branch is bumped; the legacy-migration branch is not, so
+      // outdated-document queries for types with no modelVersions are unaffected.
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            migrations: { '8.6.0': dummyMigration },
+            mappings: { properties: { title: { type: 'text' } } },
+            semanticSearch: { fields: ['title'] },
+          }),
+          false
+        )
+      ).toEqual('8.6.0');
+    });
+
+    it('bumps a type with existing model versions by +1 when semanticSearch is declared', () => {
+      // This is the key case that the Math.max(n,1) semantics missed: a type already at
+      // model version 3 gets max(3,1)=3 (no-op). The +1 semantics produce 3+1=4=10.4.0,
+      // which is detectable against a stored 10.3.0.
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            modelVersions: {
+              1: dummyModelVersion(),
+              2: dummyModelVersion(),
+              3: dummyModelVersion(),
+            },
+            mappings: { properties: { title: { type: 'text' } } },
+            semanticSearch: { fields: ['title'] },
+          }),
+          true
+        )
+      ).toEqual('10.4.0');
+    });
+
+    it('returns the natural latest version (no bump) for the same type without semanticSearch', () => {
+      expect(
+        getCurrentVirtualVersion(
+          buildType({
+            modelVersions: {
+              1: dummyModelVersion(),
+              2: dummyModelVersion(),
+              3: dummyModelVersion(),
+            },
+            mappings: { properties: { title: { type: 'text' } } },
+          }),
+          true
+        )
+      ).toEqual('10.3.0');
+    });
   });
 
   describe('getVirtualVersionMap', () => {
@@ -295,6 +360,68 @@ describe('ModelVersion map utilities', () => {
       ).toEqual(2);
     });
 
+    it('returns at least 1 for a type that declares semanticSearch with no model versions', () => {
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            mappings: { properties: { title: { type: 'text' } } },
+            semanticSearch: { fields: ['title'] },
+          })
+        )
+      ).toEqual(1);
+    });
+
+    it('bumps a type with existing mappings versions by +1 when semanticSearch is declared', () => {
+      // This mirrors the getCurrentVirtualVersion fix: Math.max(3,1)=3 was a no-op.
+      // The +1 semantics produce 3+1=4, detectable against a stored 10.3.0.
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            mappings: { properties: { title: { type: 'text' } } },
+            modelVersions: {
+              '1': dummyModelVersion(),
+              '2': dummyModelVersion(),
+              '3': dummyModelVersionWithMappingsChanges(),
+            },
+            semanticSearch: { fields: ['title'] },
+          })
+        )
+      ).toEqual(4);
+    });
+
+    it('returns the natural latest version (no bump) for the same type without semanticSearch', () => {
+      expect(
+        getLatestMappingsVersionNumber(
+          buildType({
+            mappings: { properties: { title: { type: 'text' } } },
+            modelVersions: {
+              '1': dummyModelVersion(),
+              '2': dummyModelVersion(),
+              '3': dummyModelVersionWithMappingsChanges(),
+            },
+          })
+        )
+      ).toEqual(3);
+    });
+
+    it('agrees with getCurrentVirtualVersion on the effective version, preventing an infinite mapping-update loop', () => {
+      // After a migration stamps the bumped version via getCurrentVirtualVersion, on the next
+      // boot getLatestMappingsVersionNumber must return the same effective number so the type
+      // is not re-detected as needing a mapping update.
+      const type = buildType({
+        modelVersions: {
+          '1': dummyModelVersion(),
+          '2': dummyModelVersion(),
+          '3': dummyModelVersionWithMappingsChanges(),
+        },
+        mappings: { properties: { title: { type: 'text' } } },
+        semanticSearch: { fields: ['title'] },
+      });
+      const mappingsVersion = getLatestMappingsVersionNumber(type); // 3+1=4
+      const virtualVersion = getCurrentVirtualVersion(type, true); // 10.4.0
+      expect(virtualVersion).toEqual(`10.${mappingsVersion}.0`);
+    });
+
     it('accepts provider functions', () => {
       expect(
         getLatestMappingsVersionNumber(
@@ -390,6 +517,26 @@ describe('ModelVersion map utilities', () => {
         foo: '10.1.0',
         bar: '10.0.0',
         dolly: '10.0.0',
+      });
+    });
+
+    it('returns at least 10.1.0 for a type that declares semanticSearch without explicit model versions', () => {
+      // This is the key property that makes v2 change-detection fire when an existing type
+      // opts into semanticSearch against an already-migrated index (stored at 10.0.0).
+      expect(
+        getLatestMappingsVirtualVersionMap([
+          buildType({
+            name: 'withSemantic',
+            mappings: { properties: { title: { type: 'text' } } },
+            semanticSearch: { fields: ['title'] },
+          }),
+          buildType({
+            name: 'noSemantic',
+          }),
+        ])
+      ).toEqual({
+        withSemantic: '10.1.0',
+        noSemantic: '10.0.0',
       });
     });
   });

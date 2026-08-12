@@ -22,6 +22,60 @@ import type {
 import type { SavedObjectUnsanitizedDoc } from './serialization';
 
 /**
+ * Declarative intent for semantic (vector) search on a {@link SavedObjectsType | saved object type}.
+ *
+ * Declare which `text` source attributes should be made semantically searchable. The platform
+ * synthesises a shadow `{field}_semantic` field in the index mappings automatically — authors must
+ * never write `semantic_text` mappings by hand.
+ *
+ * @example
+ * ```ts
+ * savedObjects.registerType({
+ *   name: 'dashboard',
+ *   mappings: {
+ *     properties: {
+ *       title: { type: 'text' },
+ *       description: { type: 'text' },
+ *     },
+ *   },
+ *   semanticSearch: {
+ *     fields: ['title', 'description'],
+ *     // inferenceId is optional; omit it to use the platform default (.elser-2-elasticsearch)
+ *   },
+ * });
+ * ```
+ *
+ * @public
+ */
+export interface SavedObjectsTypeSemanticSearchDefinition {
+  /**
+   * Source attribute names (must exist in {@link SavedObjectsType.mappings | mappings} as `text`
+   * fields) to make semantically searchable.
+   */
+  fields: string[];
+  /**
+   * Optional inference endpoint override. Omit to use the platform default (discouraged to set
+   * explicitly — the platform selects the best available model).
+   */
+  inferenceId?: string;
+  /**
+   * Per-type default embedding timing.
+   *
+   * - `'sync'` (default) — the save call pays synchronous inference latency inside Elasticsearch;
+   *   the object is semantically searchable immediately after the write returns.
+   * - `'deferred'` — the write costs exactly what it costs today (no inference at write time);
+   *   the object is immediately findable via `find()`/BM25 and becomes semantically searchable
+   *   only after a background reconciliation cycle (eventual consistency for semantic search only).
+   *   Use this for bulk-heavy types (e.g. prebuilt detection rules) where synchronous inference
+   *   per write would be prohibitively slow.
+   *
+   * Can be overridden at request scope via `deferEmbeddings` in
+   * {@link SavedObjectsCreateOptions | SavedObjectsCreateOptions}.
+   */
+  embedding?: 'sync' | 'deferred';
+}
+
+/**
  * Definition of a type of savedObject.
  *
  * @public
@@ -253,6 +307,13 @@ export interface SavedObjectsType<Attributes = any> {
    * purpose. This field will be removed once the deprecated SO HTTP API is removed.
    */
   typeVersionGuesser?: SavedObjectTypeVersionGuesser;
+
+  /**
+   * Optional declaration that makes one or more `text` attributes semantically searchable via the
+   * platform's vector-search infrastructure. See {@link SavedObjectsTypeSemanticSearchDefinition}
+   * for details and constraints.
+   */
+  semanticSearch?: SavedObjectsTypeSemanticSearchDefinition;
 }
 
 /**

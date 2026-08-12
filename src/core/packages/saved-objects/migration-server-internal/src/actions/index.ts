@@ -106,6 +106,9 @@ export { checkForUnknownDocs } from './check_for_unknown_docs';
 
 export { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 
+export type { InferenceEndpointPreflightReport } from './ensure_inference_endpoints';
+export { ensureInferenceEndpoints } from './ensure_inference_endpoints';
+
 export type { BulkOverwriteTransformedDocumentsParams } from './bulk_overwrite_transformed_documents';
 export { bulkOverwriteTransformedDocuments } from './bulk_overwrite_transformed_documents';
 

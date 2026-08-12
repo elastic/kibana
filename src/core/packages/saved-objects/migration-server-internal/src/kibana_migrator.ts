@@ -39,6 +39,7 @@ import { DocumentMigrator } from './document_migrator';
 import { runZeroDowntimeMigration } from './zdt';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { runV2Migration } from './run_v2_migration';
+import { ensureInferenceEndpoints } from './actions';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -182,6 +183,12 @@ export class KibanaMigrator implements IKibanaMigrator {
     process.on('uncaughtExceptionMonitor', dumpLogs);
 
     try {
+      // Use this.log (the real logger) so preflight degradation errors are always
+      // emitted immediately, even when the cumulative logger is active (serverless/ZDT).
+      // The cumulative logger buffers all calls and clears them on success, which
+      // would silently drop the missing-endpoint error that operators need to act on.
+      await this.runInferenceEndpointPreflight(this.log);
+
       const migrationAlgorithm = this.soMigrationsConfig.algorithm;
       if (migrationAlgorithm === 'zdt') {
         return await runZeroDowntimeMigration({
@@ -223,6 +230,60 @@ export class KibanaMigrator implements IKibanaMigrator {
     } finally {
       process.removeListener('uncaughtExceptionMonitor', dumpLogs);
       logger.clear?.();
+    }
+  }
+
+  /** Checks inference endpoints for all types that declare semanticSearch and logs results. Never throws. */
+  private async runInferenceEndpointPreflight(logger: Logger): Promise<void> {
+    // Build a map of inferenceId → type names so we can produce context-rich log messages.
+    const inferenceIdToTypes = new Map<string, string[]>();
+    for (const type of this.typeRegistry.getAllTypes()) {
+      const def = this.typeRegistry.getSemanticSearchDefinition(type.name);
+      if (def) {
+        const existing = inferenceIdToTypes.get(def.inferenceId);
+        if (existing) {
+          existing.push(type.name);
+        } else {
+          inferenceIdToTypes.set(def.inferenceId, [type.name]);
+        }
+      }
+    }
+
+    const inferenceIds = [...inferenceIdToTypes.keys()];
+    if (inferenceIds.length === 0) {
+      // No types declare semanticSearch — skip entirely (zero ES calls, zero log noise).
+      return;
+    }
+
+    logger.debug(
+      `Semantic search preflight: checking ${
+        inferenceIds.length
+      } inference endpoint(s): ${inferenceIds.join(', ')}`
+    );
+
+    const report = await ensureInferenceEndpoints(this.client, inferenceIds);
+
+    for (const inferenceId of report.checked) {
+      logger.debug(`Semantic search preflight: inference endpoint '${inferenceId}' confirmed.`);
+    }
+
+    for (const inferenceId of report.missing) {
+      const types = inferenceIdToTypes.get(inferenceId) ?? [];
+      logger.error(
+        `Inference endpoint '${inferenceId}' was not found. ` +
+          `Semantic search for type(s) [${types.join(
+            ', '
+          )}] will be degraded until the endpoint is available.`
+      );
+    }
+
+    for (const { inferenceId, error } of report.errors) {
+      const types = inferenceIdToTypes.get(inferenceId) ?? [];
+      logger.error(
+        `Could not verify inference endpoint '${inferenceId}' (type(s): [${types.join(
+          ', '
+        )}]): ${error}. ` + `Semantic search availability is unknown; proceeding.`
+      );
     }
   }
 

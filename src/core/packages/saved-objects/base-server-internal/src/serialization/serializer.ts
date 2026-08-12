@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
+import { SEMANTIC_FIELD_SUFFIX } from '../semantic_search';
 import { decodeVersion, encodeVersion } from '../version';
 import type {
   ISavedObjectTypeRegistryInternal,
@@ -113,13 +114,31 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       namespace && (namespaceTreatment === 'lax' || this.registry.isSingleNamespace(type));
     const includeNamespaces = this.registry.isMultiNamespace(type);
 
+    // Introduce intermediate variable (flag D).
+    // Strip shadow semantic keys only for opted-in types — non-opted-in types return
+    // the same reference with zero extra work (this is a hot path).
+    //
+    // Phase 1 / Phase 2 consequence (accepted): during reindex migrations or outdated-doc
+    // transforms, rawToSavedObject strips *_semantic values, and savedObjectToRaw does not
+    // restore them.  Any Mechanism-B embeddings stored in _source[type] are therefore
+    // silently dropped on each migration pass and must be re-populated by the reconciler.
+    // Phase 4 must account for this re-embedding cost in the backfill design.
+    const rawAttributes = _source[type];
+    const attributes: T =
+      rawAttributes !== null &&
+      rawAttributes !== undefined &&
+      typeof rawAttributes === 'object' &&
+      this.registry.getSemanticSearchDefinition(type) !== undefined
+        ? (stripSemanticAttributes(rawAttributes as Record<string, unknown>) as T)
+        : (rawAttributes as T);
+
     return {
       type,
       id,
       ...(includeNamespace && { namespace }),
       ...(includeNamespaces && { namespaces }),
       ...(originId && { originId }),
-      attributes: _source[type],
+      attributes,
       references: references || [], // adds references default
       ...(managed != null ? { managed } : {}),
       ...(migrationVersion && { migrationVersion }),
@@ -269,6 +288,19 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
 
 function checkIdMatchesPrefix(id: string, prefix: string) {
   return id.startsWith(prefix) && id.length > prefix.length;
+}
+
+// Returns a shallow copy of attrs with every key ending in SEMANTIC_FIELD_SUFFIX removed.
+// Called only for types that declare semanticSearch; safe because Mechanism B writes shadow
+// keys into _source[type] alongside the original attribute values.
+function stripSemanticAttributes(attrs: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(attrs)) {
+    if (!key.endsWith(SEMANTIC_FIELD_SUFFIX)) {
+      result[key] = attrs[key];
+    }
+  }
+  return result;
 }
 
 function assertNonEmptyString(value: string, name: string) {

@@ -31,6 +31,7 @@ const createMockedTypeRegistry = ({
     isMultiNamespace: jest.fn().mockReturnValue(isMultiNamespace),
     setAccessControlEnabled: jest.fn(),
     isAccessControlEnabled: jest.fn().mockReturnValue(accessControlEnabled),
+    getSemanticSearchDefinition: jest.fn().mockReturnValue(undefined),
   };
   return typeRegistry as ISavedObjectTypeRegistryInternal;
 };
@@ -1500,6 +1501,93 @@ describe('#generateRawLegacyUrlAliasId', () => {
     test(`for namespace-agnostic types`, () => {
       const id = namespaceAgnosticSerializer.generateRawLegacyUrlAliasId('foo', 'bar', 'baz');
       expect(id).toEqual(expected);
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Semantic search stripping tests
+// Verifies that rawToSavedObject strips *_semantic shadow keys only for types
+// that opt in to semanticSearch (Mechanism B, ADR-6).
+// ---------------------------------------------------------------------------
+
+const createSemanticRegistry = (semanticTypeName: string): ISavedObjectTypeRegistryInternal => {
+  const registry: Partial<ISavedObjectTypeRegistryInternal> = {
+    isNamespaceAgnostic: jest.fn().mockReturnValue(false),
+    isSingleNamespace: jest.fn().mockReturnValue(true),
+    isMultiNamespace: jest.fn().mockReturnValue(false),
+    setAccessControlEnabled: jest.fn(),
+    isAccessControlEnabled: jest.fn().mockReturnValue(false),
+    getSemanticSearchDefinition: jest
+      .fn()
+      .mockImplementation((typeName: string) =>
+        typeName === semanticTypeName
+          ? { fields: ['description'], inferenceId: '.elser-2-elasticsearch' }
+          : undefined
+      ),
+  };
+  return registry as ISavedObjectTypeRegistryInternal;
+};
+
+describe('#rawToSavedObject — semantic search stripping', () => {
+  const SEMANTIC_TYPE = 'mytype';
+  const semanticSerializer = new SavedObjectsSerializer(createSemanticRegistry(SEMANTIC_TYPE));
+
+  test('strips *_semantic shadow keys from attributes of an opted-in type', () => {
+    const actual = semanticSerializer.rawToSavedObject({
+      _id: `${SEMANTIC_TYPE}:doc1`,
+      _source: {
+        type: SEMANTIC_TYPE,
+        [SEMANTIC_TYPE]: {
+          title: 'Hello',
+          description: 'World',
+          description_semantic: { text: 'World', inference: { chunks: [] } },
+        },
+      },
+    });
+    expect(actual.attributes).toEqual({ title: 'Hello', description: 'World' });
+    expect(actual.attributes).not.toHaveProperty('description_semantic');
+  });
+
+  test('returns attributes unchanged (equal) when no shadow keys are present for opted-in type', () => {
+    const actual = semanticSerializer.rawToSavedObject({
+      _id: `${SEMANTIC_TYPE}:doc2`,
+      _source: {
+        type: SEMANTIC_TYPE,
+        [SEMANTIC_TYPE]: { title: 'Hello', description: 'World' },
+      },
+    });
+    expect(actual.attributes).toEqual({ title: 'Hello', description: 'World' });
+  });
+
+  test('does NOT strip *_semantic keys from a non-opted-in type', () => {
+    // 'other' is not registered with semanticSearch — its foo_semantic key is legitimate.
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'other:doc3',
+      _source: {
+        type: 'other',
+        other: { foo: 'bar', foo_semantic: 'legitimate value' },
+      },
+    });
+    expect(actual.attributes).toEqual({ foo: 'bar', foo_semantic: 'legitimate value' });
+  });
+
+  test('round-trip savedObjectToRaw -> rawToSavedObject preserves non-opted-in type attributes with _semantic suffix', () => {
+    // Confirms a non-opted-in type's attributes are never accidentally stripped.
+    const saved = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'other:doc4',
+      _source: {
+        type: 'other',
+        namespace: undefined,
+        other: { normal: 'value', custom_semantic: 'also legitimate' },
+        references: [],
+      },
+    });
+    const raw = singleNamespaceSerializer.savedObjectToRaw(saved);
+    const roundTripped = singleNamespaceSerializer.rawToSavedObject(raw);
+    expect(roundTripped.attributes).toEqual({
+      normal: 'value',
+      custom_semantic: 'also legitimate',
     });
   });
 });

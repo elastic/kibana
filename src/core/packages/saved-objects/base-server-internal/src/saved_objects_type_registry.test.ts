@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsType,
+  SavedObjectsMappingProperties,
+} from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
@@ -294,6 +297,314 @@ describe('SavedObjectTypeRegistry', () => {
     });
 
     // TODO: same test with 'onImport'
+
+    describe('semanticSearch validation', () => {
+      it('allows a valid semanticSearch declaration', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeWithSemantic',
+              mappings: {
+                properties: {
+                  title: { type: 'text' },
+                  description: { type: 'text' },
+                },
+              },
+              semanticSearch: { fields: ['title', 'description'] },
+            })
+          );
+        }).not.toThrow();
+      });
+
+      it('allows a semanticSearch declaration with an explicit inferenceId override', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeWithSemantic',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['title'], inferenceId: '.my-custom-endpoint' },
+            })
+          );
+        }).not.toThrow();
+      });
+
+      it('throws when semanticSearch.fields is empty', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeEmpty',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: [] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeEmpty: 'semanticSearch.fields' must contain at least one field name"`
+        );
+      });
+
+      it('throws when semanticSearch.fields exceeds MAX_SEMANTIC_SEARCH_FIELDS', () => {
+        const manyFields = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9'];
+        const properties = Object.fromEntries(
+          manyFields.map((f) => [f, { type: 'text' as const }])
+        ) as SavedObjectsMappingProperties;
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeTooMany',
+              mappings: { properties },
+              semanticSearch: { fields: manyFields },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeTooMany: 'semanticSearch.fields' exceeds the maximum of 8 fields"`
+        );
+      });
+
+      it('throws when semanticSearch.fields contains duplicates', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeDup',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['title', 'title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeDup: 'semanticSearch.fields' contains duplicate field 'title'"`
+        );
+      });
+
+      it('throws when a declared field does not exist in mappings.properties', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeMissing',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['missing'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeMissing: semanticSearch field 'missing' does not exist in mappings.properties"`
+        );
+      });
+
+      it('throws when a declared field has a non-text mapping type', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeKeyword',
+              mappings: { properties: { title: { type: 'keyword' } } },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeKeyword: semanticSearch field 'title' must have mapping type 'text', got 'keyword'"`
+        );
+      });
+
+      it("throws when a mapping property name ends with '_semantic' (reserved suffix)", () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeReserved',
+              mappings: {
+                properties: {
+                  title: { type: 'text' },
+                  title_semantic: { type: 'keyword' },
+                },
+              },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeReserved: mapping property 'title_semantic' uses the reserved suffix '_semantic'"`
+        );
+      });
+
+      it("throws when a mapping property has type 'semantic_text' for a type declaring semanticSearch", () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeManualSemantic',
+              mappings: {
+                properties: {
+                  title: { type: 'text' },
+                  embeddings: { type: 'semantic_text' },
+                },
+              },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeManualSemantic: mapping property 'embeddings' uses type 'semantic_text', which is reserved for platform-managed shadow fields; remove it and use 'semanticSearch.fields' instead"`
+        );
+      });
+
+      it("throws when a mapping property has type 'dense_vector' for a type declaring semanticSearch", () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'typeDenseVec',
+              mappings: {
+                properties: {
+                  title: { type: 'text' },
+                  vec: { type: 'dense_vector' },
+                },
+              },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type typeDenseVec: mapping property 'vec' uses type 'dense_vector', which is reserved for platform-managed shadow fields; remove it and use 'semanticSearch.fields' instead"`
+        );
+      });
+
+      it('accepts a hyphenated type name with semanticSearch (hyphens are safe in bracket-notation Painless)', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'index-pattern',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).not.toThrow();
+      });
+
+      it('rejects a type name containing a single quote (would break Painless string literal)', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: "bad'type",
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type bad'type: type name must match /^[a-zA-Z0-9_-]+$/ to be used with semanticSearch (got 'bad'type')"`
+        );
+      });
+
+      it('rejects a type name containing a backslash (would break Painless string literal)', () => {
+        expect(() => {
+          registry.registerType(
+            createType({
+              name: 'bad\\type',
+              mappings: { properties: { title: { type: 'text' } } },
+              semanticSearch: { fields: ['title'] },
+            })
+          );
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Type bad\\\\type: type name must match /^[a-zA-Z0-9_-]+$/ to be used with semanticSearch (got 'bad\\\\type')"`
+        );
+      });
+    });
+  });
+
+  describe('#getSemanticSearchDefinition', () => {
+    it('returns undefined for a type that does not declare semanticSearch', () => {
+      registry.registerType(createType({ name: 'noSemantic' }));
+      expect(registry.getSemanticSearchDefinition('noSemantic')).toBeUndefined();
+    });
+
+    it('returns undefined for an unregistered type name', () => {
+      expect(registry.getSemanticSearchDefinition('unregistered')).toBeUndefined();
+    });
+
+    it('returns the resolved definition with the default inferenceId when none is declared', () => {
+      registry.registerType(
+        createType({
+          name: 'typeA',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'] },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeA')).toEqual({
+        fields: ['title'],
+        inferenceId: '.elser-2-elasticsearch',
+        embedding: 'sync',
+      });
+    });
+
+    it('returns the resolved definition with the overridden inferenceId', () => {
+      registry.registerType(
+        createType({
+          name: 'typeB',
+          mappings: { properties: { title: { type: 'text' }, body: { type: 'text' } } },
+          semanticSearch: { fields: ['title', 'body'], inferenceId: '.custom-endpoint' },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeB')).toEqual({
+        fields: ['title', 'body'],
+        inferenceId: '.custom-endpoint',
+        embedding: 'sync',
+      });
+    });
+
+    it('does not expose the definition for a different type name', () => {
+      registry.registerType(
+        createType({
+          name: 'typeC',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'] },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeD')).toBeUndefined();
+    });
+
+    it("defaults embedding to 'sync' when not declared", () => {
+      registry.registerType(
+        createType({
+          name: 'typeSync',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'] },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeSync')).toMatchObject({
+        embedding: 'sync',
+      });
+    });
+
+    it("preserves embedding: 'sync' when explicitly declared", () => {
+      registry.registerType(
+        createType({
+          name: 'typeSyncExplicit',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'], embedding: 'sync' },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeSyncExplicit')).toMatchObject({
+        embedding: 'sync',
+      });
+    });
+
+    it("resolves embedding: 'deferred' when declared", () => {
+      registry.registerType(
+        createType({
+          name: 'typeDeferred',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'], embedding: 'deferred' },
+        })
+      );
+      expect(registry.getSemanticSearchDefinition('typeDeferred')).toEqual({
+        fields: ['title'],
+        inferenceId: '.elser-2-elasticsearch',
+        embedding: 'deferred',
+      });
+    });
+
+    it('returns a frozen definition that callers cannot mutate', () => {
+      registry.registerType(
+        createType({
+          name: 'typeFrozen',
+          mappings: { properties: { title: { type: 'text' } } },
+          semanticSearch: { fields: ['title'], embedding: 'deferred' },
+        })
+      );
+      const def = registry.getSemanticSearchDefinition('typeFrozen')!;
+      expect(Object.isFrozen(def)).toBe(true);
+      expect(Object.isFrozen(def.fields)).toBe(true);
+    });
   });
 
   describe('#getType', () => {

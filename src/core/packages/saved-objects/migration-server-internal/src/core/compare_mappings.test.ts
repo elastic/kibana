@@ -113,6 +113,89 @@ describe('getNewAndUpdatedTypes', () => {
   });
 });
 
+describe('getNewAndUpdatedTypes — semanticSearch version bump', () => {
+  test('detects a type as updated when semanticSearch bumps latestMappingsVersions above the stored version', () => {
+    // Simulates an existing deployment: the stored mappingVersions reflect the type before
+    // it declared semanticSearch (10.0.0). The platform now returns 10.1.0 via
+    // getLatestMappingsVirtualVersionMap because semanticSearch is present.
+    // getNewAndUpdatedTypes must classify the type as 'updated' so
+    // UPDATE_TARGET_MAPPINGS_PROPERTIES fires and the shadow field is added.
+    const indexMeta: IndexMappingMeta = {
+      mappingVersions: {
+        myType: '10.0.0',
+      },
+    };
+
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes: ['myType'],
+      indexMeta,
+      latestMappingsVersions: { myType: '10.1.0' },
+    });
+
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual(['myType']);
+  });
+
+  test('leaves a type unchanged after a migration stamps the bumped version in the index', () => {
+    // After UPDATE_TARGET_MAPPINGS_PROPERTIES the index stores 10.1.0.
+    // On the next boot the type is still at 10.1.0 — no spurious re-migration.
+    const indexMeta: IndexMappingMeta = {
+      mappingVersions: {
+        myType: '10.1.0',
+      },
+    };
+
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes: ['myType'],
+      indexMeta,
+      latestMappingsVersions: { myType: '10.1.0' },
+    });
+
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual([]);
+  });
+
+  test('detects a type with existing model versions as updated when semanticSearch bumps the version above stored', () => {
+    // Simulates the dashboard case: type already at model version 3 (stored 10.3.0),
+    // semanticSearch is then declared. getLatestMappingsVirtualVersionMap now returns
+    // 10.4.0 (3+1). The type must be classified as 'updated' so the shadow field is added.
+    // Math.max(3,1)=3 produced 10.3.0 — a no-op that let this bug ship.
+    const indexMeta: IndexMappingMeta = {
+      mappingVersions: {
+        myVersionedType: '10.3.0',
+      },
+    };
+
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes: ['myVersionedType'],
+      indexMeta,
+      latestMappingsVersions: { myVersionedType: '10.4.0' },
+    });
+
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual(['myVersionedType']);
+  });
+
+  test('leaves a model-versioned type unchanged after a migration stamps the +1 bumped version', () => {
+    // After UPDATE_TARGET_MAPPINGS_PROPERTIES the index stores 10.4.0. On the next boot
+    // the type is still at 10.4.0 — no spurious re-migration.
+    const indexMeta: IndexMappingMeta = {
+      mappingVersions: {
+        myVersionedType: '10.4.0',
+      },
+    };
+
+    const { newTypes, updatedTypes } = getNewAndUpdatedTypes({
+      indexTypes: ['myVersionedType'],
+      indexMeta,
+      latestMappingsVersions: { myVersionedType: '10.4.0' },
+    });
+
+    expect(newTypes).toEqual([]);
+    expect(updatedTypes).toEqual([]);
+  });
+});
+
 describe('getUpdatedRootFields', () => {
   it('deep compares provided indexMappings against the current baseMappings()', () => {
     const updatedFields = getUpdatedRootFields({

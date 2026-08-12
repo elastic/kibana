@@ -9,6 +9,11 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import {
+  MAX_SEMANTIC_SEARCH_FIELDS,
+  SEMANTIC_FIELD_SUFFIX,
+  resolveSemanticInferenceId,
+} from './semantic_search';
 
 export interface SavedObjectTypeRegistryConfig {
   legacyTypes?: string[];
@@ -36,6 +41,13 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
   isAccessControlEnabled(): boolean;
 }
 
+/** Resolved semantic-search metadata stored outside the frozen type object (flag C). */
+interface ResolvedSemanticDefinition {
+  readonly fields: readonly string[];
+  readonly inferenceId: string;
+  readonly embedding: 'sync' | 'deferred';
+}
+
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.
  *
@@ -44,6 +56,7 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
 export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
+  private readonly resolvedSemanticDefinitions = new Map<string, ResolvedSemanticDefinition>();
 
   private accessControlEnabled: boolean = true;
 
@@ -77,6 +90,20 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
     validateType(type);
+
+    // Compute and cache derived semantic state before the type object is frozen.
+    // Copy the fields array so the stored definition is independent of the frozen type object;
+    // freeze the definition to prevent callers from mutating the registry's cached state.
+    if (type.semanticSearch) {
+      this.resolvedSemanticDefinitions.set(
+        type.name,
+        Object.freeze({
+          fields: Object.freeze([...type.semanticSearch.fields]) as readonly string[],
+          inferenceId: resolveSemanticInferenceId(type),
+          embedding: type.semanticSearch.embedding ?? 'sync',
+        })
+      );
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       deepFreeze(typeWithAccessControl);
@@ -164,6 +191,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
     return this.types.get(type)?.supportsAccessControl ?? false;
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.getSemanticSearchDefinition} */
+  public getSemanticSearchDefinition(typeName: string): ResolvedSemanticDefinition | undefined {
+    return this.resolvedSemanticDefinitions.get(typeName);
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistryInternal.setAccessControlEnabled} */
   public setAccessControlEnabled(enabled: boolean) {
     this.accessControlEnabled = enabled;
@@ -175,7 +207,14 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistryInternal
   }
 }
 
-const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObjectsType) => {
+const validateType = ({
+  name,
+  management,
+  hidden,
+  hiddenFromHttpApis,
+  semanticSearch,
+  mappings,
+}: SavedObjectsType) => {
   if (management) {
     if (management.onExport && !management.importableAndExportable) {
       throw new Error(
@@ -193,5 +232,93 @@ const validateType = ({ name, management, hidden, hiddenFromHttpApis }: SavedObj
     throw new Error(
       `Type ${name}: 'hiddenFromHttpApis' cannot be 'false' when specifying 'hidden' as 'true'`
     );
+  }
+
+  if (semanticSearch) {
+    validateSemanticSearch(name, semanticSearch.fields, mappings.properties ?? {});
+  }
+};
+
+/**
+ * Alphanumerics, underscores, and hyphens are allowed in type names and field names used in
+ * Painless scripts. Hyphens are safe because the builder uses single-quoted bracket notation
+ * (e.g. ctx._source.get('index-pattern')), which is inert for hyphens. The characters that
+ * would actually break a Painless script — quotes, backslashes, braces — remain excluded.
+ */
+const SAFE_IDENTIFIER_RE = /^[a-zA-Z0-9_-]+$/;
+
+const validateSemanticSearch = (
+  typeName: string,
+  fields: string[],
+  properties: Record<string, { type?: string }>
+): void => {
+  // Type name safety: the type name is interpolated into Painless scripts. Reject any
+  // character that could break the script (quotes, backslashes, etc.).
+  if (!SAFE_IDENTIFIER_RE.test(typeName)) {
+    throw new Error(
+      `Type ${typeName}: type name must match /^[a-zA-Z0-9_-]+$/ to be used with semanticSearch (got '${typeName}')`
+    );
+  }
+
+  if (fields.length === 0) {
+    throw new Error(
+      `Type ${typeName}: 'semanticSearch.fields' must contain at least one field name`
+    );
+  }
+  if (fields.length > MAX_SEMANTIC_SEARCH_FIELDS) {
+    throw new Error(
+      `Type ${typeName}: 'semanticSearch.fields' exceeds the maximum of ${MAX_SEMANTIC_SEARCH_FIELDS} fields`
+    );
+  }
+
+  const seen = new Set<string>();
+  for (const field of fields) {
+    if (seen.has(field)) {
+      throw new Error(
+        `Type ${typeName}: 'semanticSearch.fields' contains duplicate field '${field}'`
+      );
+    }
+    seen.add(field);
+
+    // Field name safety: field names are also interpolated into Painless scripts.
+    if (!SAFE_IDENTIFIER_RE.test(field)) {
+      throw new Error(
+        `Type ${typeName}: semanticSearch field '${field}' must match /^[a-zA-Z0-9_-]+$/ (got '${field}')`
+      );
+    }
+
+    const mapping = properties[field];
+    if (!mapping) {
+      throw new Error(
+        `Type ${typeName}: semanticSearch field '${field}' does not exist in mappings.properties`
+      );
+    }
+    if (mapping.type !== 'text') {
+      throw new Error(
+        `Type ${typeName}: semanticSearch field '${field}' must have mapping type 'text', got '${mapping.type}'`
+      );
+    }
+  }
+
+  // Reserve the '_semantic' suffix: no hand-written property name may end with it.
+  // POC limitation: only top-level properties are scanned; nested `properties` and
+  // multi-field `fields` are not recursed into. Track as a Phase 2 hardening item.
+  for (const propName of Object.keys(properties)) {
+    if (propName.endsWith(SEMANTIC_FIELD_SUFFIX)) {
+      throw new Error(
+        `Type ${typeName}: mapping property '${propName}' uses the reserved suffix '${SEMANTIC_FIELD_SUFFIX}'`
+      );
+    }
+  }
+
+  // Reject hand-written 'semantic_text' or 'dense_vector' field types for types declaring
+  // semanticSearch — the platform must remain in control of shadow-field creation (flag F).
+  // POC limitation: same as above — only top-level properties are checked.
+  for (const [propName, mapping] of Object.entries(properties)) {
+    if (mapping.type === 'semantic_text' || mapping.type === 'dense_vector') {
+      throw new Error(
+        `Type ${typeName}: mapping property '${propName}' uses type '${mapping.type}', which is reserved for platform-managed shadow fields; remove it and use 'semanticSearch.fields' instead`
+      );
+    }
   }
 };

@@ -33,6 +33,7 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => 
     supportsAccessControl: jest.fn(),
     isAccessControlEnabled: jest.fn(),
     setAccessControlEnabled: jest.fn(),
+    getSemanticSearchDefinition: jest.fn(),
   });
 
   mock.getVisibleTypes.mockReturnValue([]);
@@ -54,6 +55,7 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistryInternal> => 
   mock.getNameAttribute.mockReturnValue(undefined);
   mock.supportsAccessControl.mockReturnValue(false);
   mock.isAccessControlEnabled.mockReturnValue(true);
+  mock.getSemanticSearchDefinition.mockReturnValue(undefined);
 
   return mock;
 };

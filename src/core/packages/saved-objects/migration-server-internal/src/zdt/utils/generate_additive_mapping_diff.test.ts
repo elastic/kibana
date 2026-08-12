@@ -260,6 +260,33 @@ describe('generateAdditiveMappingDiff', () => {
     });
   });
 
+  it('includes the shadow semantic_text field for a type that declares semanticSearch', () => {
+    // Verify that the additive diff routes through buildTypesMappings so the
+    // {field}_semantic shadow field is included in the mapping update sent to ES.
+    const semanticType = createType({
+      name: 'semantic',
+      mappings: { properties: { title: { type: 'text' } } },
+      semanticSearch: { fields: ['title'] },
+    });
+    const types = [semanticType];
+    const meta: IndexMappingMeta = {
+      // Index is at 10.0.0 (pre-semanticSearch); type is now at 10.1.0 (bumped).
+      mappingVersions: { semantic: '10.0.0' },
+    };
+
+    const addedMappings = generateAdditiveMappingDiff({
+      types,
+      mapping: mappingFromMeta(meta),
+      deletedTypes,
+    });
+
+    // The mapping update must contain the shadow field, not just the author-written mappings.
+    expect(addedMappings.semantic).toBeDefined();
+    expect((addedMappings.semantic as any).properties?.title_semantic).toMatchObject({
+      type: 'semantic_text',
+    });
+  });
+
   it('combines the changes from the types and from the root fields', () => {
     const { foo, bar } = getTypes();
     const types = [foo, bar];

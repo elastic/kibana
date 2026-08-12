@@ -20,6 +20,7 @@ import {
 import { initialModelVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { getUpdatedRootFields } from '../../core/compare_mappings';
 import { getBaseMappings } from '../../core/build_active_mappings';
+import { buildTypesMappings } from '../../core';
 
 interface GenerateAdditiveMappingsDiffOpts {
   types: SavedObjectsType[];
@@ -77,7 +78,9 @@ export const generateAdditiveMappingDiff = ({
 
   const addedMappings: SavedObjectsMappingProperties = {};
   changedTypes.forEach((type) => {
-    addedMappings[type] = typeMap[type].mappings;
+    // Route through buildTypesMappings so shadow semantic_text fields synthesized for
+    // types that declare semanticSearch are included in the mapping update sent to ES.
+    addedMappings[type] = buildTypesMappings([typeMap[type]])[type];
   });
 
   const changedRootFields = getUpdatedRootFields(mapping);

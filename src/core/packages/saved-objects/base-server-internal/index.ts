@@ -38,6 +38,13 @@ export {
 } from './src/saved_objects_config';
 export type { ISavedObjectTypeRegistryInternal } from './src/saved_objects_type_registry';
 export { SavedObjectTypeRegistry } from './src/saved_objects_type_registry';
+export {
+  DEFAULT_SEMANTIC_SEARCH_INFERENCE_ID,
+  SEMANTIC_FIELD_SUFFIX,
+  MAX_SEMANTIC_SEARCH_FIELDS,
+  getSemanticFieldName,
+  resolveSemanticInferenceId,
+} from './src/semantic_search';
 export type {
   IKibanaMigrator,
   KibanaMigratorStatus,

@@ -105,4 +105,18 @@ export interface ISavedObjectTypeRegistry {
    * Returns whether the type supports access control.
    */
   supportsAccessControl(type: string): boolean;
+
+  /**
+   * Returns the resolved semantic-search definition for the given type, with `inferenceId` already
+   * run through the platform resolver and `embedding` defaulted to `'sync'`. Returns `undefined`
+   * if the type is not registered or does not declare
+   * {@link SavedObjectsType.semanticSearch | semanticSearch}.
+   */
+  getSemanticSearchDefinition(typeName: string):
+    | {
+        readonly fields: readonly string[];
+        readonly inferenceId: string;
+        readonly embedding: 'sync' | 'deferred';
+      }
+    | undefined;
 }
