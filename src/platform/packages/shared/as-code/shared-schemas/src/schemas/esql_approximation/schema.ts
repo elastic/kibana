@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { asCodeEsqlApproximationSchema } from './esql_approximation';
-export { asCodeIdSchema } from './id';
-export { asCodeMetaSchema, getMeta, type AsCodeMeta } from './meta';
-export { asCodeQuerySchema, type AsCodeQuery } from './query';
-export { asCodePaginationParamsSchema, asCodePaginationResponseMetaSchema } from './pagination';
-export { asCodeSearchRequestSchema } from './search';
-export { getAsCodeTagsSchema } from './tags';
+import { z } from '@kbn/zod';
+
+export const asCodeEsqlApproximationSchema = z.object({
+  esql_approximation: z.boolean().optional().meta({
+    description:
+      'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
+  }),
+});

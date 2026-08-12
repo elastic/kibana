@@ -8,6 +8,7 @@
  */
 
 export {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
