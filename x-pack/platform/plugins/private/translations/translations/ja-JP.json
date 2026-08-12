@@ -42746,7 +42746,6 @@
     "xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.textareaPlaceholderText": "ここにデータを入力",
     "xpack.securitySolution.consoleCommandsDefinition.killProcess.sentinelOne.instructions": "実行するプロセス名を入力",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.kernelTypeNotSupported": "「{type}」メモリダンプタイプは現在、このホストOSタイプ（{osType}）でサポートされていません。",
-    "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdNotSupportedForKernel": "「pid」および「entityId」引数は「kernel」メモリダンプではサポートされていません",
     "xpack.securitySolution.consoleCommandsDefinition.memoryDump.pidAndEntityIdRequiredForProcess": "「process」メモリダンプには「pid」または「entityId」の引数が必要です",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.inputParamsArg": "選択したスクリプトの入力引数",
     "xpack.securitySolution.consoleCommandsDefinition.runscript.endpoint.scriptArg": "実行するスクリプト（ポップアップリストから選択）",

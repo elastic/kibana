@@ -32,6 +32,7 @@ import type {
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
   LogsEndpointAction,
+  ResponseActionMemoryDumpParameters,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -430,9 +431,22 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           type: 'json',
           content: {
             code: 'ra_memory-dump_success_done',
-            file_size: 2322000,
+            file_size: 2_322_000,
             path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
-            disk_free_space: 123045678009,
+            disk_free_space: 123_045_678_009,
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'raw'
+              ? {
+                  total_memory_size: 4_000_000_000,
+                  total_bytes_captured: 3_999_900_000,
+                  success_ratio: 3_999_998_000 / 4_000_000_000,
+                }
+              : {}),
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'kernel'
+              ? {
+                  dump_executed_from_driver: endpointActionGenerator.randomChoice([true, false]),
+                  user_space_included: endpointActionGenerator.randomChoice([true, false]),
+                }
+              : {}),
           },
         },
       } as unknown as ResponseOutput;
