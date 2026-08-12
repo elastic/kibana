@@ -76,6 +76,17 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
 
+    // Register change-history telemetry event types once, lazily, to keep the
+    // React UI out of the page-load bundle.
+    const analytics = container.get(CoreSetup('analytics'));
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
+
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,

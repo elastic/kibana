@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { AnalyticsServiceStart } from '@kbn/core/public';
 import {
   ChangeHistoryModal,
   ChangeHistoryProvider,
@@ -21,6 +22,8 @@ export interface RuleChangeHistoryProviderProps {
   children: React.ReactNode;
   /** Enable restore affordances when the adapter implements `restoreChange`. */
   canRestore?: boolean;
+  /** Analytics service for `@kbn/change-history-ui` telemetry; omit in Storybook/tests. */
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
 }
 
 /**
@@ -33,6 +36,7 @@ export const RuleChangeHistoryProvider = ({
   adapter,
   children,
   canRestore = false,
+  analytics,
 }: RuleChangeHistoryProviderProps): JSX.Element => {
   return (
     <ChangeHistoryProvider
@@ -46,6 +50,7 @@ export const RuleChangeHistoryProvider = ({
         restore: canRestore,
       }}
       permissions={{ canRestore }}
+      analytics={analytics}
     >
       {children}
       <ChangeHistoryModal />
