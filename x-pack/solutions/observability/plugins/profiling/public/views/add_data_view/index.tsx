@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
   EuiFlexItem,
@@ -24,12 +23,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import major from 'semver/functions/major';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
+import { useProfilingSetupStatus } from '../../components/contexts/profiling_setup_status/use_profiling_setup_status';
 
 export enum AddDataTabs {
   Kubernetes = 'kubernetes',
@@ -60,6 +61,7 @@ export function AddDataView() {
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
+  const profilingSetupStatus = useProfilingSetupStatus();
   const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
 
   const {
@@ -514,6 +516,7 @@ EOF`}
       pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
         defaultMessage: 'Add profiling data',
       })}
+      suppressMenu={profilingSetupStatus.profilingSetupStatus?.has_data === false}
     >
       {isLoading ? (
         <EuiFlexItem>
@@ -521,10 +524,8 @@ EOF`}
         </EuiFlexItem>
       ) : (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="question"
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
