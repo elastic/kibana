@@ -17,3 +17,5 @@ export {
 
 export { customContentStateSchema } from './schema';
 export type { CustomContentState } from './schema';
+
+export { stripMarkdownFences } from './strip_markdown_fences';

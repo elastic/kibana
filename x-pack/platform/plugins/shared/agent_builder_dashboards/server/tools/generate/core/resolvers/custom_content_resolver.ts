@@ -13,6 +13,7 @@ import { appendLimitToQuery } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+  stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import { sanitizeCellValue } from './sanitize_cell_value';
 
@@ -169,7 +170,7 @@ export const createCustomContentTemplateResolver = ({
       stream: false,
     });
 
-    const template = response.content;
+    const template = stripMarkdownFences(response.content);
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');

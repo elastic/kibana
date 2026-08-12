@@ -7,7 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
+import { CUSTOM_CONTENT_SCRIPT_PATTERN, stripMarkdownFences } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
@@ -44,22 +44,6 @@ export function sanitizeHtml(html: string): string {
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
   }) as string;
-}
-
-const FENCE_OPEN = /^```(?:html|HTML)?\s*\n?/;
-const FENCE_CLOSE = /\n?```\s*$/;
-const FENCE_MARKER = /```(?:html|HTML)?/g;
-// Only strip markers near an edge — likely the wrapping fence, not fenced code meant to display.
-const FENCE_EDGE_WINDOW = 200;
-
-export function stripMarkdownFences(raw: string): string {
-  const trimmed = raw.trim().replace(FENCE_OPEN, '').replace(FENCE_CLOSE, '');
-  return trimmed
-    .replace(FENCE_MARKER, (match, offset: number) => {
-      const distanceFromEdge = Math.min(offset, trimmed.length - offset - match.length);
-      return distanceFromEdge <= FENCE_EDGE_WINDOW ? '' : match;
-    })
-    .trim();
 }
 
 // The rendering iframe is scripting-disabled and sanitizeHtml() strips <script> tags outright,

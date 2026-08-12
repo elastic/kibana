@@ -6,7 +6,6 @@
  */
 
 import {
-  stripMarkdownFences,
   containsScript,
   injectCsp,
   injectStyleTag,
@@ -47,29 +46,6 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
-  });
-});
-
-describe('stripMarkdownFences', () => {
-  it('strips leading ```html and trailing ```', () => {
-    expect(stripMarkdownFences('```html\n<p>hi</p>\n```')).toBe('<p>hi</p>');
-  });
-
-  it('strips fences embedded inside an HTML shell', () => {
-    const raw = '<html><body>```html\n<p>hi</p>\n```</body></html>';
-    expect(stripMarkdownFences(raw)).not.toContain('```');
-  });
-
-  it('leaves plain HTML unchanged', () => {
-    expect(stripMarkdownFences('<p>hello</p>')).toBe('<p>hello</p>');
-  });
-
-  it('leaves a fenced code example deep in the body untouched', () => {
-    const filler = '<p>content</p>'.repeat(30);
-    const raw = `<html><body>${filler}<pre>Use \`\`\`bash\necho hi\n\`\`\` in your terminal</pre>${filler}</body></html>`;
-    const result = stripMarkdownFences(raw);
-    expect(result).toContain('```bash');
-    expect(result).toContain('echo hi');
   });
 });
 

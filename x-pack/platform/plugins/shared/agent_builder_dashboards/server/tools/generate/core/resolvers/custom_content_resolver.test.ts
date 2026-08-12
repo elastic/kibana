@@ -69,4 +69,15 @@ describe('createCustomContentTemplateResolver — output validation', () => {
       'Generated template was rejected: contains a <script> tag.'
     );
   });
+
+  it('strips markdown code fences before storing the template', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '```html\n<div>hello</div>\n```',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result).toBe('<div>hello</div>');
+    expect(result).not.toContain('```');
+  });
 });

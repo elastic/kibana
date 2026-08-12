@@ -8,15 +8,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
+import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
-import {
-  sanitizeHtml,
-  stripMarkdownFences,
-  injectCsp,
-  injectStyleTag,
-} from '../utils/prepare_html';
+import { sanitizeHtml, injectCsp, injectStyleTag } from '../utils/prepare_html';
 
 const RENDER_ERROR_MESSAGE = 'Failed to render panel. Try refreshing or rephrasing the request.';
 
