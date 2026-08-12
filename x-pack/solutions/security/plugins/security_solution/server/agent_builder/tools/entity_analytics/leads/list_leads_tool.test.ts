@@ -26,23 +26,28 @@ jest.mock('../../../../lib/entity_analytics/lead_generation/get_user_lead_privil
 const mockCreateLeadDataClient = createLeadDataClient as jest.Mock;
 const mockGetUserLeadPrivileges = getUserLeadPrivileges as jest.Mock;
 
-const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
-  id: 'lead-1',
-  title: 'Suspicious lateral movement detected',
-  byline: 'User admin shows brute-force indicators',
-  description: 'Detailed investigation guide.',
-  entities: [{ type: 'user', name: 'admin' }],
-  tags: ['brute_force', 'T1110'],
-  priority: 8,
-  chatRecommendations: ['Check risk score history'],
-  timestamp: new Date().toISOString(),
-  staleness: 'fresh',
-  status: 'active',
-  observations: [],
-  executionUuid: '550e8400-e29b-41d4-a716-446655440000',
-  sourceType: 'adhoc',
-  ...overrides,
-});
+const makeTestLead = (overrides: Partial<Lead> = {}): Lead => {
+  const timestamp = overrides.timestamp ?? new Date().toISOString();
+  return {
+    id: 'lead-1',
+    title: 'Suspicious lateral movement detected',
+    byline: 'User admin shows brute-force indicators',
+    description: 'Detailed investigation guide.',
+    entities: [{ type: 'user', name: 'admin' }],
+    tags: ['brute_force', 'T1110'],
+    priority: 8,
+    chatRecommendations: ['Check risk score history'],
+    staleness: 'fresh',
+    status: 'active',
+    observations: [],
+    executionUuid: '550e8400-e29b-41d4-a716-446655440000',
+    sourceType: 'adhoc',
+    ...overrides,
+    timestamp,
+    createdAt: overrides.createdAt ?? timestamp,
+    updatedAt: overrides.updatedAt ?? timestamp,
+  };
+};
 
 const makeStatusResult = (overrides: Record<string, unknown> = {}) => ({
   isEnabled: true,
