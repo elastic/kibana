@@ -11,11 +11,79 @@
 // (`?type=content` — the per-service OTel content packages, all beta).
 // Services without prebuilt content simply don't appear on step 5.
 
+export type AwsContentType =
+  | 'dashboard'
+  | 'search'
+  | 'alert_rule'
+  | 'content_package'
+  | 'detection_rule'
+  | 'index_template'
+  | 'component_template'
+  | 'ingest_pipeline'
+  | 'transform';
+
 export interface AwsContentItem {
   id: string;
   title: string;
-  type: 'dashboard' | 'search' | 'alert_rule' | 'content_package' | 'detection_rule';
+  type: AwsContentType;
   description?: string;
+}
+
+// Real ES transforms shipped by the aws package (latest_cdr_*), keyed by the
+// service whose data stream feeds them.
+export const TRANSFORMS_BY_SERVICE: Record<string, string[]> = {
+  securityhub_cspm: ['latest_cdr_misconfigurations'],
+  config: ['latest_cdr_misconfigurations_awsconfig'],
+  inspector: ['latest_cdr_vulnerabilities_awsinspector'],
+};
+
+// Required technical assets for a service's data streams, following Fleet's
+// real naming conventions (`logs-aws.<ds>`, `<template>@package/@custom`,
+// versioned ingest pipelines). These install with the package and are not
+// removable.
+export function getTechnicalAssets(services: Array<{ id: string; name: string; dataTypes: string[] }>): Array<{
+  id: string;
+  title: string;
+  type: AwsContentType;
+  serviceName: string;
+}> {
+  const assets: Array<{ id: string; title: string; type: AwsContentType; serviceName: string }> =
+    [];
+  for (const service of services) {
+    for (const dataType of service.dataTypes) {
+      const ds = `${dataType.toLowerCase()}-aws.${service.id}`;
+      assets.push(
+        { id: `${ds}-it`, title: ds, type: 'index_template', serviceName: service.name },
+        {
+          id: `${ds}-ct-package`,
+          title: `${ds}@package`,
+          type: 'component_template',
+          serviceName: service.name,
+        },
+        {
+          id: `${ds}-ct-custom`,
+          title: `${ds}@custom`,
+          type: 'component_template',
+          serviceName: service.name,
+        },
+        {
+          id: `${ds}-pipeline`,
+          title: `${ds}-7.1.1`,
+          type: 'ingest_pipeline',
+          serviceName: service.name,
+        }
+      );
+    }
+    for (const transform of TRANSFORMS_BY_SERVICE[service.id] ?? []) {
+      assets.push({
+        id: `${service.id}-${transform}`,
+        title: transform,
+        type: 'transform',
+        serviceName: service.name,
+      });
+    }
+  }
+  return assets;
 }
 
 // Prebuilt SIEM detection rules from the `security_detection_engine` package

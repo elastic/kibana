@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiCheckbox,
+  EuiButtonEmpty,
   EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -30,7 +30,9 @@ import {
   CONTENT_BY_SERVICE,
   DETECTION_RULES_BY_SERVICE,
   GENERAL_CONTENT,
+  getTechnicalAssets,
   type AwsContentItem,
+  type AwsContentType,
 } from './aws_content_data';
 
 const REGION_LABELS: Record<string, string> = {
@@ -40,12 +42,16 @@ const REGION_LABELS: Record<string, string> = {
   'ap-southeast-1': 'AP-Southeast-1',
 };
 
-const CONTENT_TYPE_ICONS: Record<AwsContentItem['type'], string> = {
+const CONTENT_TYPE_ICONS: Record<AwsContentType, string> = {
   dashboard: 'dashboardApp',
   search: 'discoverApp',
   alert_rule: 'bell',
   content_package: 'package',
   detection_rule: 'securityApp',
+  index_template: 'indexSettings',
+  component_template: 'indexMapping',
+  ingest_pipeline: 'pipelineApp',
+  transform: 'merge',
 };
 
 const SummaryItem: React.FunctionComponent<{ label: string; value: React.ReactNode }> = ({
@@ -193,30 +199,43 @@ const DeploymentSummaryCard: React.FunctionComponent<{
 };
 
 // Everything ships installed with the package today (all-or-nothing), so
-// this card is an OPT-OUT review, not an installer: every item starts
-// checked/"Installed" and unticking removes it (re-tick to reinstall). Only
-// removable *content* is listed — required technical assets (templates,
-// pipelines, transforms) are summarized in a single non-interactive line.
+// this card is an OPT-OUT review, not an installer: every item starts as
+// "Installed" and an explicit per-row Remove action uninstalls it (Install
+// brings it back for day-2). Explicit verb buttons instead of checkboxes:
+// removal is semi-destructive, and a checkbox reads as batch selection
+// rather than an immediate state change. Required technical assets
+// (templates, pipelines, transforms) are listed too, but are not removable.
 type AssetState = 'installed' | 'removing' | 'removed' | 'installing';
 
-// Real package-wide counts from the aws package's Assets tab.
-const REQUIRED_ASSETS_SUMMARY =
-  '48 index templates, 99 component templates, 48 ingest pipelines, 3 transforms';
-
-const TYPE_ORDER: Array<AwsContentItem['type']> = [
+const TYPE_ORDER: AwsContentType[] = [
   'dashboard',
   'search',
   'alert_rule',
   'detection_rule',
   'content_package',
+  'index_template',
+  'component_template',
+  'ingest_pipeline',
+  'transform',
 ];
 
-const TYPE_GROUP_LABELS: Record<AwsContentItem['type'], string> = {
+const REQUIRED_TYPES = new Set<AwsContentType>([
+  'index_template',
+  'component_template',
+  'ingest_pipeline',
+  'transform',
+]);
+
+const TYPE_GROUP_LABELS: Record<AwsContentType, string> = {
   dashboard: 'Dashboards',
   search: 'Saved searches',
   alert_rule: 'Alert rule templates',
   detection_rule: 'Detection rules',
   content_package: 'Content packages',
+  index_template: 'Index templates',
+  component_template: 'Component templates',
+  ingest_pipeline: 'Ingest pipelines',
+  transform: 'Transforms',
 };
 
 interface ReviewItem extends AwsContentItem {
@@ -226,26 +245,13 @@ interface ReviewItem extends AwsContentItem {
 const ContentItemRow: React.FunctionComponent<{
   item: ReviewItem;
   state: AssetState;
+  isRequired: boolean;
   onToggle: () => void;
-}> = ({ item, state, onToggle }) => {
-  const isChecked = state === 'installed' || state === 'installing';
+}> = ({ item, state, isRequired, onToggle }) => {
   const isTransitioning = state === 'removing' || state === 'installing';
   return (
     <EuiPanel hasBorder paddingSize="s">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={`awsOnboardingKeep-${item.id}`}
-            checked={isChecked}
-            disabled={isTransitioning}
-            onChange={onToggle}
-            aria-label={`Keep ${item.title} installed`}
-            data-test-subj={`awsOnboardingKeepContent-${item.id}`}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={CONTENT_TYPE_ICONS[item.type]} size="m" />
-        </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="s" className="eui-textTruncate">
             <strong>{item.title}</strong>
@@ -256,25 +262,38 @@ const ContentItemRow: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {state === 'installed' && (
+          {isRequired ? (
+            <EuiBadge color="hollow" iconType="lock">
+              Required
+            </EuiBadge>
+          ) : state === 'installed' || state === 'removing' ? (
             <EuiBadge color="success" iconType="check">
               Installed
             </EuiBadge>
-          )}
-          {state === 'removing' && (
-            <EuiBadge color="hollow" iconType="empty">
-              Removing…
-            </EuiBadge>
-          )}
-          {state === 'installing' && (
-            <EuiBadge color="hollow" iconType="empty">
-              Installing…
-            </EuiBadge>
-          )}
-          {state === 'removed' && (
+          ) : (
             <EuiBadge color="hollow">Available to install</EuiBadge>
           )}
         </EuiFlexItem>
+        {!isRequired && (
+          <EuiFlexItem grow={false} style={{ minWidth: 90 }}>
+            <EuiButtonEmpty
+              size="xs"
+              color={state === 'installed' ? 'danger' : 'primary'}
+              isLoading={isTransitioning}
+              onClick={onToggle}
+              aria-label={`${state === 'installed' ? 'Remove' : 'Install'} ${item.title}`}
+              data-test-subj={`awsOnboardingToggleContent-${item.id}`}
+            >
+              {state === 'removing'
+                ? 'Removing…'
+                : state === 'installing'
+                ? 'Installing…'
+                : state === 'installed'
+                ? 'Remove'
+                : 'Install'}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -293,7 +312,8 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
 
   // Flatten all content for the selected services, tagged with the service
   // it belongs to. Detection rules come from the separate
-  // security_detection_engine package.
+  // security_detection_engine package; technical assets (templates,
+  // pipelines, transforms) are required and listed as non-removable.
   const allItems: ReviewItem[] = [
     ...GENERAL_CONTENT.map((item) => ({ ...item, serviceName: 'Amazon Web Services' })),
     ...services.flatMap((service) =>
@@ -308,6 +328,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
         serviceName: service.name,
       }))
     ),
+    ...getTechnicalAssets(services),
   ];
 
   const stateOf = (id: string): AssetState => assetState[id] ?? 'installed';
@@ -359,7 +380,11 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
             <p>
               Everything below was installed with the AWS integration. Remove anything you
               don&apos;t need — you can reinstall it at any time, here or from the
-              integration&apos;s Assets tab.
+              integration&apos;s Assets tab. Assets marked{' '}
+              <EuiBadge color="hollow" iconType="lock">
+                Required
+              </EuiBadge>{' '}
+              are needed for data ingestion and cannot be removed.
             </p>
           </EuiText>
         </EuiFlexItem>
@@ -369,13 +394,6 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        <p>
-          <EuiIcon type="check" color="success" size="s" /> Required assets installed:{' '}
-          {REQUIRED_ASSETS_SUMMARY}. These are needed for data ingestion and cannot be removed.
-        </p>
-      </EuiText>
       <EuiSpacer size="m" />
       <EuiFieldSearch
         fullWidth
@@ -388,6 +406,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
       />
 
       {typeGroups.map(({ type, items }) => {
+        const isRequired = REQUIRED_TYPES.has(type);
         const groupInstalled = items.filter((i) => stateOf(i.id) === 'installed').length;
         return (
           <React.Fragment key={type}>
@@ -412,7 +431,9 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
               }
               extraAction={
                 <EuiText size="xs" color="subdued">
-                  {`${groupInstalled} of ${items.length} installed`}
+                  {isRequired
+                    ? 'Required — installed with the package'
+                    : `${groupInstalled} of ${items.length} installed`}
                 </EuiText>
               }
             >
@@ -423,6 +444,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
                   <ContentItemRow
                     item={item}
                     state={stateOf(item.id)}
+                    isRequired={isRequired}
                     onToggle={() => onToggle(item.id)}
                   />
                 </React.Fragment>
