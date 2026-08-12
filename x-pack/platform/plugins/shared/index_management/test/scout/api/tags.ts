@@ -15,10 +15,8 @@ export const SERVERLESS_LOGS_CAPABLE: string[] = [
   ...tags.serverless.security.all,
 ];
 
-// Serverless deployment-agnostic targets minus Cloud (MKI) Security, whose different default
-// retention (elastic/kibana#241105) is covered separately in data_streams_mki_security.spec.ts.
-export const SERVERLESS_EXCEPT_MKI_SECURITY: string[] = [
-  ...tags.serverless.search,
-  ...tags.serverless.observability.complete,
-  '@local-serverless-security_complete',
-];
+// Every serverless target except Cloud (MKI) Security, whose different default retention
+// (elastic/kibana#241105) is covered instead in data_streams_mki_security.spec.ts.
+export const SERVERLESS_EXCEPT_MKI_SECURITY: string[] = tags.serverless.all.filter(
+  (tag) => tag !== '@cloud-serverless-security_complete'
+);
