@@ -58,9 +58,9 @@ spaceTest.describe('Lens chart creation', { tag: '@local-stateful-classic' }, ()
         await visualize.goto();
         await visualize.clickSavedVisualization(NEW_CHART_TITLE);
         await lens.waitForVisualization('xyVisChart');
-        await expect(lens.chartTitle).toHaveText(NEW_CHART_TITLE);
+        await expect(lens.workspace.chartTitle).toHaveText(NEW_CHART_TITLE);
         // Terms uses DEFAULT_SIZE=9, plus "Other" = 10.
-        await expect(lens.xyLegendItems).toHaveCount(10);
+        await expect(lens.workspace.xyLegendItems).toHaveCount(10);
       });
     }
   );
@@ -70,29 +70,29 @@ spaceTest.describe('Lens chart creation', { tag: '@local-stateful-classic' }, ()
     async ({ pageObjects }) => {
       const { lens } = pageObjects;
 
-      await lens.openEditor(xyVisId, 'xyVisChart');
+      await lens.workspace.openEditor(xyVisId, 'xyVisChart');
 
       await lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
         keepOpen: true,
       });
-      await lens.addFilterToAgg('geo.src : CN');
+      await lens.workspace.addFilterToAgg('geo.src : CN');
       await lens.waitForVisualization('xyVisChart');
 
       // The previous split (`terms of ip`) should be preserved as the first auto-generated
       // filter, alongside the newly added one.
       await expect
-        .poll(() => lens.getFiltersAggLabels())
+        .poll(() => lens.workspace.getFiltersAggLabels())
         .toStrictEqual([`"ip" : *`, `geo.src : CN`]);
-      await expect(lens.xyLegendItems).toHaveCount(2);
+      await expect(lens.workspace.xyLegendItems).toHaveCount(2);
     }
   );
 
   spaceTest('switches the first layer to a different data view', async ({ pageObjects }) => {
     const { lens } = pageObjects;
 
-    await lens.openFullEditor();
+    await lens.workspace.openFullEditor();
 
     await lens.layers.switchLayerIndexPattern(testData.DATA_VIEW_ID.LOGSTASH_WILDCARD);
 

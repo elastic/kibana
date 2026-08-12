@@ -954,7 +954,7 @@
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
-        "eslint-plugin-eslint-comments",
+        "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
         "eslint-plugin-jest",
@@ -1875,15 +1875,6 @@
         "@types/node-forge",
         "@types/object-hash"
       ],
-      "reviewers": ["team:kibana-security"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@kayahr/text-encoding",
-      "matchDepNames": ["@kayahr/text-encoding"],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Security"],
