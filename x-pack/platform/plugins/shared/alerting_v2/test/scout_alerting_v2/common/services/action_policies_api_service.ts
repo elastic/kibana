@@ -25,7 +25,7 @@ export interface ActionPoliciesApiService {
   patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   enable: (id: string) => Promise<ActionPolicyResponse>;
   disable: (id: string) => Promise<ActionPolicyResponse>;
-  snooze: (id: string, snoozed_until: string) => Promise<ActionPolicyResponse>;
+  snooze: (id: string, snoozedUntil: string) => Promise<ActionPolicyResponse>;
   unsnooze: (id: string) => Promise<void>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (ids: string[]) => Promise<BulkResponse>;

@@ -38,7 +38,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
     await apiServices.alertingV2.actionPolicies.cleanUp();
   });
 
-  apiTest('snooze: snoozes policies with snoozedUntil', async ({ apiClient, apiServices }) => {
+  apiTest('snooze: snoozes policies with snoozed_until', async ({ apiClient, apiServices }) => {
     const p1 = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-snooze-1' })
     );
@@ -82,7 +82,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
     }
   );
 
-  apiTest('validation: rejects an invalid snoozedUntil', async ({ apiClient, apiServices }) => {
+  apiTest('validation: rejects an invalid snoozed_until', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-snooze-invalid' })
     );
@@ -96,7 +96,7 @@ apiTest.describe('Bulk snooze action policies API', { tag: '@local-stateful-clas
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects a missing snoozedUntil', async ({ apiClient, apiServices }) => {
+  apiTest('validation: rejects a missing snoozed_until', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'bulk-snooze-missing-date' })
     );

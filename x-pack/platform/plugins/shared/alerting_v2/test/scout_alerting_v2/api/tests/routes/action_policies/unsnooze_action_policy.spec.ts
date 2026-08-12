@@ -41,7 +41,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   });
 
   apiTest(
-    'unsnooze: unsnoozes a snoozed policy and returns snoozedUntil=null',
+    'unsnooze: unsnoozes a snoozed policy and returns snoozed_until=null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-unsnooze' })
@@ -88,7 +88,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   );
 
   apiTest(
-    'idempotency: unsnoozing an already-unsnoozed policy returns snoozedUntil=null',
+    'idempotency: unsnoozing an already-unsnoozed policy returns snoozed_until=null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-unsnooze-noop' })

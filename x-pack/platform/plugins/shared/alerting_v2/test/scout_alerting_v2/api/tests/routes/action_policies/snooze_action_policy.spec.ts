@@ -41,7 +41,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest(
-    'snooze: snoozes a policy with a future ISO date and returns snoozedUntil',
+    'snooze: snoozes a policy with a future ISO date and returns snoozed_until',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-snooze' })
@@ -77,7 +77,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({
         ...disabled,
-        snoozedUntil,
+        snoozed_until: snoozedUntil,
         updated_at: response.body.updated_at,
         updated_by: response.body.updated_by,
         version: response.body.version,
@@ -90,7 +90,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'idempotency: updates snoozedUntil when snoozing an already-snoozed policy',
+    'idempotency: updates snoozed_until when snoozing an already-snoozed policy',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-snooze-overwrite' })
@@ -151,7 +151,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: rejects empty snoozedUntil', async ({ apiClient, apiServices }) => {
+  apiTest('validation: rejects empty snoozed_until', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'test-snooze-empty' })
     );
@@ -165,7 +165,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects missing snoozedUntil', async ({ apiClient, apiServices }) => {
+  apiTest('validation: rejects missing snoozed_until', async ({ apiClient, apiServices }) => {
     const created = await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'test-snooze-missing' })
     );

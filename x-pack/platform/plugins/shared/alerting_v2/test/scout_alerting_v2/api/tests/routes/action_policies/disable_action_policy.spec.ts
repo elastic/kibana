@@ -72,7 +72,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
   );
 
   apiTest(
-    'state: preserves snoozedUntil and all other fields when disabling a snoozed policy',
+    'state: preserves snoozed_until and all other fields when disabling a snoozed policy',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-disable-keep-snooze' })

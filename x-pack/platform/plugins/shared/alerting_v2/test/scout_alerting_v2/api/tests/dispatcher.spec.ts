@@ -1047,7 +1047,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'groups episodes by the specified data fields when the action policy has groupBy fields',
+    'groups episodes by the specified data fields when the action policy has group_by fields',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
       await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_GROUPBY_ID);

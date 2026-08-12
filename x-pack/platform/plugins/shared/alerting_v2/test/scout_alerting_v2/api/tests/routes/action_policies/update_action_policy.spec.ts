@@ -141,7 +141,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'partial: updates matcher/groupBy/throttle and preserves name/description/destinations',
+    'partial: updates matcher/group_by/throttle and preserves name/description/destinations',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -211,7 +211,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'partial: updates groupingMode and throttle strategy together',
+    'partial: updates grouping_mode and throttle strategy together',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -276,7 +276,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'nullable: clears groupingMode/groupBy/throttle when set to null',
+    'nullable: clears grouping_mode/group_by/throttle when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -307,7 +307,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'nullable: clears matcher/groupBy/throttle when set to null',
+    'nullable: clears matcher/group_by/throttle when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({

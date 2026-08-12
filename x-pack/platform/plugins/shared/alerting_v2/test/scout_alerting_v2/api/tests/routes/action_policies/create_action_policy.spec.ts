@@ -328,7 +328,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects groupBy with too many fields', async ({ apiClient }) => {
+  apiTest('validation: rejects group_by with too many fields', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
@@ -340,7 +340,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects groupBy with empty field name', async ({ apiClient }) => {
+  apiTest('validation: rejects group_by with empty field name', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ group_by: [''] }),
@@ -350,7 +350,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects groupBy field name over max length', async ({ apiClient }) => {
+  apiTest('validation: rejects group_by field name over max length', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
@@ -362,7 +362,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects unknown groupingMode', async ({ apiClient }) => {
+  apiTest('validation: rejects unknown grouping_mode', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
@@ -429,7 +429,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
+  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({

@@ -123,7 +123,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('pagination: paginates with page+perPage', async ({ apiClient, apiServices }) => {
+  apiTest('pagination: paginates with page+per_page', async ({ apiClient, apiServices }) => {
     await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'page-policy-1' })
     );
@@ -309,7 +309,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(names).toStrictEqual(['Gamma Policy', 'Beta Policy', 'Alpha Policy']);
   });
 
-  apiTest('sort: by createdAt ascending', async ({ apiClient, apiServices }) => {
+  apiTest('sort: by created_at ascending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
@@ -324,7 +324,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.items[2].name).toBe('Gamma Policy');
   });
 
-  apiTest('sort: by createdAt descending', async ({ apiClient, apiServices }) => {
+  apiTest('sort: by created_at descending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
@@ -376,7 +376,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
+  apiTest('validation: rejects per_page=0', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl({ per_page: 0 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
@@ -384,7 +384,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects perPage over the maximum', async ({ apiClient }) => {
+  apiTest('validation: rejects per_page over the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(
       getListActionPoliciesUrl({ per_page: ACTION_POLICY_PER_PAGE_MAX + 1 }),
       {

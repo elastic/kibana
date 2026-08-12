@@ -87,7 +87,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy',
+    'upsert: 200 replaces and rotates version+updated_at, preserves created_at/created_by',
     async ({ apiClient, apiServices }) => {
       const id = 'upsert-replace-policy';
       const created = await apiServices.alertingV2.actionPolicies.upsert(
@@ -169,7 +169,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(replaced.body.enabled).toBe(false);
   });
 
-  apiTest('upsert: preserves snoozedUntil on replace', async ({ apiClient, apiServices }) => {
+  apiTest('upsert: preserves snoozed_until on replace', async ({ apiClient, apiServices }) => {
     const id = 'upsert-preserve-snooze-policy';
     await apiServices.alertingV2.actionPolicies.upsert(
       id,
@@ -275,7 +275,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
+  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
