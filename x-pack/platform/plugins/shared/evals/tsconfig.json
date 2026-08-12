@@ -49,6 +49,7 @@
     "@kbn/crypto",
     "@kbn/std",
     "@kbn/repo-info",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-http-browser-mocks"
   ]
 }
