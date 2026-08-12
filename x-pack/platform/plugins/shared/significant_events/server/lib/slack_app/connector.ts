@@ -7,9 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InMemoryConnector, PluginStartContract } from '@kbn/actions-plugin/server';
+import { RELAY_AUTH_ID } from '@kbn/connector-specs';
 
-/** Connector type id of the `@kbn/connector-specs` spec backed by the Relay. */
-export const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.elastic_apps_slack';
+/**
+ * Connector type id of the Slack (v2) `@kbn/connector-specs` spec. The Elastic Slack app is not a
+ * connector type of its own — it is the `relay` auth method on that spec, which routes the actions
+ * the Relay can serve through it instead of the Slack Web API.
+ */
+export const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
 
 /**
  * Id of the single in-memory connector instance. A deployment installs the Elastic Slack app
@@ -25,9 +30,11 @@ const buildConnector = (tenantKey: string): InMemoryConnector => ({
   actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
   name: ELASTIC_APPS_SLACK_CONNECTOR_NAME,
   // The Relay holds the Slack credentials and authenticates this deployment at the transport
-  // layer, so the connector itself has nothing secret to store.
-  config: { tenantKey },
-  secrets: {},
+  // layer, so `tenantKey` — which workspace this connector speaks for — is all the `relay` auth
+  // method needs. `config.authType` mirrors the secret in plaintext, the same way
+  // `ensureConfigAuthType` does for saved connectors.
+  config: { authType: RELAY_AUTH_ID },
+  secrets: { authType: RELAY_AUTH_ID, tenantKey },
   isMissingSecrets: false,
   isPreconfigured: true,
   isDeprecated: false,

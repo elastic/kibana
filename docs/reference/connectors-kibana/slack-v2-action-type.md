@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods you can choose when creating a connector — EARS (Elastic OAuth, recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token — plus the [Elastic Slack app](#slack-v2-elastic-app), which is set up for you rather than chosen in the connector form.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -30,6 +30,33 @@ Bot Token
 
 ::::{note}
 The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
+::::
+
+## Elastic Slack app [slack-v2-elastic-app]
+
+```{applies_to}
+stack: preview 9.4
+serverless: preview
+```
+
+A Slack (v2) connector can also authenticate through the Elastic Slack app, which holds no Slack credentials of its own: the Slack token is held by Elastic's Relay service, which only lets a deployment post to the channels that deployment has connected.
+
+This authentication method is not offered in the connector form, because there is nothing to fill in. Instead, the connector is created for you: once you install the Elastic Slack app and connect at least one channel, a single connector named **Slack (Elastic app)** becomes available to rules and workflows. There is no token to rotate and no webhook URL to store.
+
+To set it up:
+
+1. In {{kib}}, go to **Streams > Significant events > Settings**, and connect the Slack app. This starts a Slack OAuth flow and installs the Elastic app into your workspace.
+2. In Slack, invite `@Elastic` to each channel you want to post to.
+3. Back in the settings, connect those channels.
+
+Each connected channel then becomes selectable in the rule form and in the workflow YAML editor.
+
+::::{note}
+Only **Send message** and **List channels** work with this authentication method; every other action fails, because the Elastic Slack app can only reach connected channels and cannot read history, search, or list users. **List channels** returns exactly the connected channels, and **Send message** requires one of their IDs — a channel name is rejected as unconnected. Calls go to the Relay service configured by `xpack.actions.relay` rather than to `slack.com`.
+::::
+
+::::{note}
+The connector exists only while the Elastic Slack app is connected. Disconnecting the app removes it, and any rule or workflow referencing it stops sending until the app is reconnected.
 ::::
 
 ## Test connectors [slack-v2-action-configuration]

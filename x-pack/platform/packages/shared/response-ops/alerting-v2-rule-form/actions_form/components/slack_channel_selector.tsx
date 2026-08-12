@@ -19,11 +19,6 @@ interface SlackChannelSelectorProps {
   onParamsChange: (params: string) => void;
   /** Sub-action returning the connector's channels. */
   subAction?: string;
-  /**
-   * Which channel field to write into the step params. Slack (v2) resolves channels by name,
-   * while the Elastic Slack app resolves the deployment's binding by channel id.
-   */
-  channelValueField?: 'id' | 'name';
   dataTestSubj?: string;
 }
 
@@ -32,7 +27,6 @@ export const SlackChannelSelector = ({
   params,
   onParamsChange,
   subAction,
-  channelValueField = 'name',
   dataTestSubj = 'slackChannelSelector',
 }: SlackChannelSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,9 +36,11 @@ export const SlackChannelSelector = ({
     enabled: isOpen,
   });
 
+  // Always select by channel id: chat.postMessage accepts one, and the Elastic Slack app
+  // resolves the deployment's binding by id and would reject a channel name as unconnected.
   const options: Array<EuiComboBoxOptionOption<string>> = channels.map((channel) => ({
     label: `#${channel.name}`,
-    value: channel[channelValueField],
+    value: channel.id,
   }));
 
   const handleChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -75,9 +71,9 @@ export const SlackChannelSelector = ({
       return [];
     }
 
-    // Channels are only fetched once the combo box is opened, so an id-valued selection shows
-    // its raw id until the list arrives and can resolve the display name.
-    const match = channels.find(({ [channelValueField]: value }) => value === channel);
+    // Channels are only fetched once the combo box is opened, so a selection shows its raw
+    // id until the list arrives and can resolve the display name.
+    const match = channels.find(({ id }) => id === channel);
     return [{ label: `#${match?.name ?? channel}`, value: channel }];
   })();
 
@@ -121,25 +117,5 @@ export const SlackChannelSelectorWrapper = ({
     connectorId={value.connectorId}
     params={value.params}
     onParamsChange={(params) => onChange({ ...value, params })}
-  />
-);
-
-/**
- * The Elastic Slack app posts through the Relay, which resolves the deployment's binding by
- * channel id — a channel name would be rejected as unbound.
- */
-export const ElasticAppsSlackChannelSelectorWrapper = ({
-  value,
-  onChange,
-}: {
-  value: InlineWorkflowActionDraft;
-  onChange: (value: InlineWorkflowActionDraft) => void;
-}) => (
-  <SlackChannelSelector
-    connectorId={value.connectorId}
-    params={value.params}
-    onParamsChange={(params) => onChange({ ...value, params })}
-    channelValueField="id"
-    dataTestSubj="elasticAppsSlackChannelSelector"
   />
 );

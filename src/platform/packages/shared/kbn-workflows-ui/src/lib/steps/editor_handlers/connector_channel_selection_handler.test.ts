@@ -16,7 +16,7 @@ import {
 
 const contextWithConnector = (connectorId?: string): SelectionContext =>
   ({
-    stepType: 'elastic_apps_slack.sendMessage',
+    stepType: 'slack2.sendMessage',
     scope: 'input',
     propertyKey: 'channel',
     values: { config: connectorId ? { 'connector-id': connectorId } : {}, input: {} },

@@ -1557,4 +1557,180 @@ describe('Slack', () => {
       expect(result.message).toBe('Network timeout');
     });
   });
+
+  describe('relay auth', () => {
+    const trigger = jest.fn();
+    const listBindings = jest.fn();
+
+    const relayContext = (secrets: Record<string, unknown> = { tenantKey: 'tenant-A' }) =>
+      ({
+        client: mockClient,
+        log: { debug: jest.fn(), error: jest.fn() },
+        relay: { trigger, listBindings },
+        secrets: { authType: 'relay', ...secrets },
+      } as unknown as ActionContext);
+
+    it('is offered as an auth type but hidden from the connector form', () => {
+      const relayType = (Slack.auth?.types as Array<string | { type: string }>).find(
+        (t) => typeof t !== 'string' && t.type === 'relay'
+      ) as { isInternal?: boolean } | undefined;
+
+      expect(relayType).toBeDefined();
+      expect(relayType?.isInternal).toBe(true);
+    });
+
+    describe('sendMessage', () => {
+      it('posts through the Relay and returns the message ref as ts', async () => {
+        trigger.mockResolvedValue({ ref: '1700000000.000100', tenantKey: 'tenant-A' });
+
+        const result = await Slack.actions.sendMessage.handler(relayContext(), {
+          channel: 'C001',
+          text: 'hello',
+          threadTs: '1699999999.000100',
+        });
+
+        expect(trigger).toHaveBeenCalledWith({
+          tenantKey: 'tenant-A',
+          channel: 'C001',
+          message: 'hello',
+          threadTs: '1699999999.000100',
+        });
+        expect(result).toEqual({ ok: true, channel: 'C001', ts: '1700000000.000100' });
+        expect(mockClient.post).not.toHaveBeenCalled();
+      });
+
+      it('explains that the channel is not connected when the Relay rejects it', async () => {
+        trigger.mockRejectedValue(Object.assign(new Error('relay 403'), { statusCode: 403 }));
+
+        await expect(
+          Slack.actions.sendMessage.handler(relayContext(), { channel: 'C404', text: 'hello' })
+        ).rejects.toThrow(/C404 is not connected to this deployment/);
+      });
+
+      it('explains that the workspace is gone when the Relay reports a conflict', async () => {
+        trigger.mockRejectedValue(Object.assign(new Error('relay 409'), { statusCode: 409 }));
+
+        await expect(
+          Slack.actions.sendMessage.handler(relayContext(), { channel: 'C001', text: 'hello' })
+        ).rejects.toThrow(/no longer installed/);
+      });
+
+      it('surfaces an unrecognized Relay failure as-is', async () => {
+        trigger.mockRejectedValue(Object.assign(new Error('relay 502'), { statusCode: 502 }));
+
+        await expect(
+          Slack.actions.sendMessage.handler(relayContext(), { channel: 'C001', text: 'hello' })
+        ).rejects.toThrow('relay 502');
+      });
+
+      it('fails when the Slack app connection is gone and no tenant key is left', async () => {
+        await expect(
+          Slack.actions.sendMessage.handler(relayContext({}), { channel: 'C001', text: 'hello' })
+        ).rejects.toThrow(/Elastic Slack app is not connected/);
+        expect(trigger).not.toHaveBeenCalled();
+      });
+
+      it('fails when the deployment has no Relay configured', async () => {
+        const ctx = {
+          client: mockClient,
+          log: { debug: jest.fn(), error: jest.fn() },
+          secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+        } as unknown as ActionContext;
+
+        await expect(
+          Slack.actions.sendMessage.handler(ctx, { channel: 'C001', text: 'hello' })
+        ).rejects.toThrow(/Relay service is not configured/);
+      });
+    });
+
+    describe('listChannels', () => {
+      it('maps the deployment bindings to the Slack channel shape', async () => {
+        listBindings.mockResolvedValue({
+          bindings: [
+            { scope_id: 'C001', display_name: 'general', visibility: 'public' },
+            { scope_id: 'C002', visibility: 'private' },
+          ],
+        });
+
+        const result = await Slack.actions.listChannels.handler(
+          relayContext(),
+          SlackListChannelsInputSchema.parse({})
+        );
+
+        expect(result).toEqual({
+          ok: true,
+          source: 'relay_bindings',
+          channels: [
+            { id: 'C001', name: 'general', is_private: false, is_archived: false, is_member: true },
+            { id: 'C002', name: 'C002', is_private: true, is_archived: false, is_member: true },
+          ],
+          nextCursor: undefined,
+          hasMore: false,
+        });
+        expect(mockClient.get).not.toHaveBeenCalled();
+      });
+
+      it('passes the cursor and limit through and reports more pages', async () => {
+        listBindings.mockResolvedValue({ bindings: [], nextCursor: 'page-2' });
+
+        const result = await Slack.actions.listChannels.handler(
+          relayContext(),
+          SlackListChannelsInputSchema.parse({ cursor: 'page-1', limit: 25 })
+        );
+
+        expect(listBindings).toHaveBeenCalledWith('tenant-A', { cursor: 'page-1', limit: 25 });
+        expect(result.nextCursor).toBe('page-2');
+        expect(result.hasMore).toBe(true);
+      });
+
+      it('caps the page size at what the Relay accepts, not the Slack API default', async () => {
+        listBindings.mockResolvedValue({ bindings: [] });
+
+        // The shared input schema defaults `limit` to the Slack maximum of 1000, which the
+        // Relay's bindings endpoint rejects.
+        await Slack.actions.listChannels.handler(
+          relayContext(),
+          SlackListChannelsInputSchema.parse({})
+        );
+
+        expect(listBindings).toHaveBeenCalledWith('tenant-A', { cursor: undefined, limit: 200 });
+      });
+    });
+
+    describe('unsupported actions', () => {
+      it.each(['searchMessages', 'getConversationHistory', 'listUsers', 'createConversation'])(
+        'rejects %s with a message naming what the Elastic Slack app can do',
+        async (action) => {
+          await expect(Slack.actions[action].handler(relayContext(), {})).rejects.toThrow(
+            new RegExp(`${action} is not available.*sendMessage and listChannels`, 's')
+          );
+          expect(mockClient.get).not.toHaveBeenCalled();
+          expect(mockClient.post).not.toHaveBeenCalled();
+        }
+      );
+
+      it('leaves those actions working for a token-authenticated connector', async () => {
+        mockClient.get.mockResolvedValue({ data: { ok: true, members: [] } });
+
+        await expect(
+          Slack.actions.listUsers.handler(mockContext, SlackListUsersInputSchema.parse({}))
+        ).resolves.toEqual(expect.objectContaining({ ok: true }));
+      });
+    });
+
+    describe('test handler', () => {
+      it('checks the Relay bindings instead of calling auth.test', async () => {
+        listBindings.mockResolvedValue({ bindings: [{ scope_id: 'C001' }] });
+
+        if (!Slack.test) {
+          throw new Error('Test handler not defined');
+        }
+        const result = await Slack.test.handler(relayContext());
+
+        expect(mockClient.get).not.toHaveBeenCalled();
+        expect(result.ok).toBe(true);
+        expect(result.message).toContain('At least one channel connected');
+      });
+    });
+  });
 });

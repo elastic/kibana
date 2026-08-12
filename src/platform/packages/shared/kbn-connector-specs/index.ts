@@ -12,6 +12,7 @@ export type * from './src/connector_spec';
 export type { ConnectorActionErrorMeta } from './src/connector_utils';
 export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { RELAY_AUTH_ID } from './src/auth_types/relay';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
   CERTIFICATE_BINDING_KINDS,

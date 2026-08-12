@@ -253,7 +253,11 @@ export interface RelayActionClient {
     tenantKey: string,
     options?: { cursor?: string; limit?: number }
   ): Promise<{
-    bindings: Array<{ scope_id?: string; display_name?: string }>;
+    bindings: Array<{
+      scope_id?: string;
+      display_name?: string;
+      visibility?: 'public' | 'private';
+    }>;
     nextCursor?: string;
   }>;
 }
@@ -327,6 +331,12 @@ export interface AuthTypeDef {
   isRecommended?: boolean;
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
+  /**
+   * When true, excluded from the UI picker because the credentials are set programmatically
+   * rather than entered by a user — there is nothing for the user to fill in. Unlike `isLegacy`,
+   * such an auth type is not a deprecated leftover and stays fully supported.
+   */
+  isInternal?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {

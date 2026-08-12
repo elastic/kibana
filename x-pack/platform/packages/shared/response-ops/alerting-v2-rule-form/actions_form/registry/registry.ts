@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { InlineActionStepType } from '../types';
 import type { InlineActionStepDefinition } from './types';
-import {
-  ElasticAppsSlackChannelSelectorWrapper,
-  SlackChannelSelectorWrapper,
-} from '../components/slack_channel_selector';
+import { SlackChannelSelectorWrapper } from '../components/slack_channel_selector';
 
 const EMAIL_PARAMS_TEMPLATE = `to: 
   - ""
@@ -19,12 +16,7 @@ subject: ""
 message: ""
 `;
 
-// ToDo: add a channel selector to the Slack (v2) step form
 const SLACK2_PARAMS_TEMPLATE = `channel: ""
-text: ""
-`;
-
-const ELASTIC_APPS_SLACK_PARAMS_TEMPLATE = `channel: ""
 text: ""
 `;
 
@@ -60,24 +52,6 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
     connectorTypeSubAction: 'sendMessage',
     paramsTemplate: SLACK2_PARAMS_TEMPLATE,
     CustomComponent: SlackChannelSelectorWrapper,
-  },
-  {
-    id: 'elastic_apps_slack.sendMessage',
-    label: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.elasticAppsSlack.label',
-      { defaultMessage: 'Slack (Elastic app)' }
-    ),
-    description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.elasticAppsSlack.description',
-      {
-        defaultMessage: 'Post a Slack message to a connected channel',
-      }
-    ),
-    iconType: 'logoSlack',
-    connectorTypeId: '.elastic_apps_slack',
-    connectorTypeSubAction: 'sendMessage',
-    paramsTemplate: ELASTIC_APPS_SLACK_PARAMS_TEMPLATE,
-    CustomComponent: ElasticAppsSlackChannelSelectorWrapper,
   },
 ];
 

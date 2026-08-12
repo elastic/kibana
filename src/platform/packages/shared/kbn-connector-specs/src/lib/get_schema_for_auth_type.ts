@@ -33,6 +33,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let labelOverride: string | undefined;
   let isRecommendedOverride: boolean | undefined;
   let isLegacyOverride: boolean | undefined;
+  let isInternalOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -44,6 +45,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
+    isInternalOverride = def.isInternal;
   }
 
   if (!authTypeId) {
@@ -96,6 +98,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
     ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
+    ...(isInternalOverride !== undefined ? { isInternal: isInternalOverride } : {}),
   };
 
   return {

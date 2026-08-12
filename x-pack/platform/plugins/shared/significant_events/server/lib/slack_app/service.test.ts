@@ -768,7 +768,12 @@ describe('SlackAppService', () => {
     const connectedConnector = expect.objectContaining({
       id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
       actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
-      config: { tenantKey: 'tenant-A' },
+      config: { authType: 'relay' },
+      secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+    });
+
+    it('registers a Slack (v2) connector authenticated through the Relay', () => {
+      expect(ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID).toBe('.slack2');
     });
 
     it('registers the connector when the Relay claim completes', async () => {
@@ -843,7 +848,7 @@ describe('SlackAppService', () => {
 
       expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
       expect(registerDynamicConnector).toHaveBeenCalledWith(
-        expect.objectContaining({ config: { tenantKey: 'tenant-B' } })
+        expect.objectContaining({ secrets: { authType: 'relay', tenantKey: 'tenant-B' } })
       );
     });
 

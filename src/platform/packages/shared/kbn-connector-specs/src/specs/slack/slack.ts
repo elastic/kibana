@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
+import { getRelayConnection, relayListChannels, relaySendMessage, withRelayGuards } from './relay';
 import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
@@ -235,6 +236,18 @@ export const Slack: ConnectorSpec = {
         },
       },
       {
+        // Set programmatically when the Elastic Slack app is connected, never chosen by a user,
+        // so it stays out of the auth picker. See `./relay.ts` for what it supports.
+        type: 'relay',
+        isInternal: true,
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
+            defaultMessage: 'Elastic Slack app',
+          }),
+        },
+      },
+      {
         type: 'bearer',
         defaults: {},
         overrides: {
@@ -264,7 +277,7 @@ export const Slack: ConnectorSpec = {
   // No additional configuration needed beyond OAuth credentials
   schema: lazySchema(() => z.object({})),
 
-  actions: {
+  actions: withRelayGuards({
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
@@ -369,6 +382,11 @@ export const Slack: ConnectorSpec = {
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
       handler: async (ctx, input: SlackListChannelsInput) => {
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          return relayListChannels(relayConnection, ctx, input);
+        }
+
         const params: SlackConversationsListParams = {
           types: input.types.join(','),
           exclude_archived: input.excludeArchived,
@@ -1048,6 +1066,11 @@ export const Slack: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
 
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          return relaySendMessage(relayConnection, ctx, typedInput);
+        }
+
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
           text: typedInput.text,
@@ -1099,7 +1122,7 @@ export const Slack: ConnectorSpec = {
         }
       },
     },
-  },
+  }),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {
@@ -1109,6 +1132,24 @@ export const Slack: ConnectorSpec = {
       ctx.log.debug('Slack test handler');
 
       try {
+        // auth.test needs a workspace token. Through the Elastic Slack app the equivalent
+        // check is that the Relay still resolves this deployment's connected channels.
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          const { channels } = await relayListChannels(relayConnection, ctx, {
+            limit: 1,
+          } as SlackListChannelsInput);
+
+          return {
+            ok: true,
+            message: i18n.translate('core.kibanaConnectorSpecs.slack.test.relaySuccessMessage', {
+              defaultMessage:
+                'Connected to Slack through the Elastic app. {count, plural, =0 {No channels connected yet.} other {At least one channel connected.}}',
+              values: { count: channels.length },
+            }),
+          };
+        }
+
         // Test connection by calling auth.test which validates the token
         const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
 
@@ -1139,6 +1180,7 @@ export const Slack: ConnectorSpec = {
   },
 
   skill: [
+    'When this connector is authenticated through the Elastic Slack app, only sendMessage and listChannels work — every other action fails, because that app can only reach the channels connected to the deployment. listChannels then returns exactly those connected channels, and sendMessage requires one of their ids.',
     'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',

@@ -11,10 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { parse } from 'yaml';
-import {
-  ElasticAppsSlackChannelSelectorWrapper,
-  SlackChannelSelector,
-} from './slack_channel_selector';
+import { SlackChannelSelector } from './slack_channel_selector';
 import { type SlackChannel, useFetchSlackChannels } from '../hooks/use_fetch_slack_channels';
 import type { UseQueryResult } from '@kbn/react-query';
 
@@ -120,7 +117,7 @@ describe('SlackChannelSelector', () => {
     expect(screen.getByRole('combobox')).toBeDisabled();
   });
 
-  it('writes the selected channel into the params YAML', async () => {
+  it('writes the id of the selected channel into the params YAML', async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     const { onParamsChange } = renderSelector({ params: 'channel: ""\ntext: "hello"\n' });
 
@@ -129,7 +126,7 @@ describe('SlackChannelSelector', () => {
 
     expect(onParamsChange).toHaveBeenCalledTimes(1);
     const parsed = parse(onParamsChange.mock.calls[0][0]);
-    expect(parsed.channel).toBe('general');
+    expect(parsed.channel).toBe('C001');
   });
 
   it('preserves other params fields when writing the channel', async () => {
@@ -141,11 +138,20 @@ describe('SlackChannelSelector', () => {
 
     const parsed = parse(onParamsChange.mock.calls[0][0]);
     expect(parsed.text).toBe('hello');
-    expect(parsed.channel).toBe('alerts');
+    expect(parsed.channel).toBe('C002');
   });
 
-  it('pre-fills the selector when params already has a valid channel', () => {
-    renderSelector({ params: 'channel: general\ntext: ""\n' });
+  it('shows the stored channel id until the channel list resolves its name', () => {
+    renderSelector({ params: 'channel: C001\ntext: ""\n' });
+    expect(screen.getByDisplayValue('#C001')).toBeInTheDocument();
+  });
+
+  it('resolves the stored channel id to a name once the list is loaded', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    renderSelector({ params: 'channel: C001\ntext: ""\n' });
+
+    await user.click(screen.getByRole('combobox'));
+
     expect(screen.getByDisplayValue('#general')).toBeInTheDocument();
   });
 
@@ -157,92 +163,11 @@ describe('SlackChannelSelector', () => {
     expect(() => renderSelector({ params: 'text: "hello"\n' })).not.toThrow();
   });
 
-  describe('when configured to write the channel id', () => {
-    const renderIdSelector = (
-      props: Partial<React.ComponentProps<typeof SlackChannelSelector>> = {}
-    ) => renderSelector({ channelValueField: 'id', ...props });
-
-    it('writes the channel id rather than its name', async () => {
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
-      const { onParamsChange } = renderIdSelector({ params: 'channel: ""\ntext: "hello"\n' });
-
-      await user.click(screen.getByRole('combobox'));
-      await user.click(screen.getByText('#general'));
-
-      const parsed = parse(onParamsChange.mock.calls[0][0]);
-      expect(parsed.channel).toBe('C001');
-      expect(parsed.text).toBe('hello');
-    });
-
-    it('still labels options by channel name', async () => {
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderIdSelector();
-
-      await user.click(screen.getByRole('combobox'));
-
-      expect(screen.getByText('#general')).toBeInTheDocument();
-    });
-
-    it('shows the stored id until the channel list resolves its name', () => {
-      renderIdSelector({ params: 'channel: C001\n' });
-      expect(screen.getByDisplayValue('#C001')).toBeInTheDocument();
-    });
-
-    it('resolves the stored id to a channel name once the list is loaded', async () => {
-      const user = userEvent.setup({ pointerEventsCheck: 0 });
-      renderIdSelector({ params: 'channel: C001\n' });
-
-      await user.click(screen.getByRole('combobox'));
-
-      expect(screen.getByDisplayValue('#general')).toBeInTheDocument();
-    });
-  });
-
   it('requests the channels through the given sub-action', () => {
     renderSelector({ subAction: 'listConnectedChannels' });
 
     expect(mockUseFetchSlackChannels).toHaveBeenCalledWith(
       expect.objectContaining({ subAction: 'listConnectedChannels' })
     );
-  });
-});
-
-describe('ElasticAppsSlackChannelSelectorWrapper', () => {
-  const renderWrapper = (params: string) => {
-    const onChange = jest.fn();
-    render(
-      <I18nProvider>
-        <ElasticAppsSlackChannelSelectorWrapper
-          value={{
-            id: 'draft-1',
-            source: 'inline',
-            stepType: 'elastic_apps_slack.sendMessage',
-            connectorId: 'elastic-apps-slack',
-            params,
-          }}
-          onChange={onChange}
-        />
-      </I18nProvider>
-    );
-    return { onChange };
-  };
-
-  beforeEach(() => {
-    mockUseFetchSlackChannels.mockReturnValue({
-      data: [{ id: 'C001', name: 'general' }],
-      isFetching: false,
-    } as UseQueryResult<SlackChannel[], Error>);
-  });
-
-  it('writes the channel id, which is what the Relay resolves the binding by', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    const { onChange } = renderWrapper('channel: ""\ntext: "hello"\n');
-
-    expect(screen.getByTestId('elasticAppsSlackChannelSelector')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('combobox'));
-    await user.click(screen.getByText('#general'));
-
-    expect(parse(onChange.mock.calls[0][0].params).channel).toBe('C001');
   });
 });

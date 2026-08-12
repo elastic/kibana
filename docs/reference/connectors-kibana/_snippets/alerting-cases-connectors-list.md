@@ -14,7 +14,6 @@
 * [{{sn-itom}}](/reference/connectors-kibana/servicenow-itom-action-type.md): Create an event in {{sn}}.
 * [{{sn-sir}}](/reference/connectors-kibana/servicenow-sir-action-type.md): Create a security incident in {{sn}}.
 * [Slack](/reference/connectors-kibana/slack-action-type.md): Send a message to a Slack channel or user.
-* [Slack (Elastic app)](/reference/connectors-kibana/elastic-apps-slack-action-type.md): Send a message to a Slack channel connected through the Elastic Slack app.
 * [{{swimlane}}](/reference/connectors-kibana/swimlane-action-type.md): Create an incident in {{swimlane}}.
 * [{{hive}}](/reference/connectors-kibana/thehive-action-type.md): Create cases and alerts in {{hive}}.
 * [Tines](/reference/connectors-kibana/tines-action-type.md): Send events to a Tines Story.

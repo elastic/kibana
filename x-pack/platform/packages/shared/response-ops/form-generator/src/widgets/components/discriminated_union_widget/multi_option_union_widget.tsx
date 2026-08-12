@@ -63,11 +63,14 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  // Skip legacy options (backwards-compat entries) so they are never
+  // Skip legacy options (backwards-compat entries) and internal ones (set
+  // programmatically, nothing for a user to fill in) so neither is ever
   // auto-selected as the default when creating a new connector.
   return (
-    options.find((option) => !Boolean((getMeta(option) as Record<string, unknown>).isLegacy)) ??
-    options[0]
+    options.find((option) => {
+      const optionMeta = getMeta(option) as Record<string, unknown>;
+      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isInternal);
+    }) ?? options[0]
   );
 };
 
@@ -141,12 +144,13 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const label = optionMeta.label;
         const isRecommended = Boolean((optionMeta as Record<string, unknown>).isRecommended);
         const isLegacy = Boolean((optionMeta as Record<string, unknown>).isLegacy);
+        const isInternal = Boolean((optionMeta as Record<string, unknown>).isInternal);
         const isChecked = selectedOption === discriminatorValue;
 
-        // Legacy auth types are kept only for existing connectors.
-        // Don't render them as selectable choices, but do render if currently active
-        // so the user can still view/edit credentials on an existing connector.
-        if (isLegacy && !isChecked) return null;
+        // Legacy auth types are kept only for existing connectors, and internal ones are
+        // set programmatically. Don't render either as a selectable choice, but do render
+        // if currently active so the user can still view the connector's credentials.
+        if ((isLegacy || isInternal) && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {
