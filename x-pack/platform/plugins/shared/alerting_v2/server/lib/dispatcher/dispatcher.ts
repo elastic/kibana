@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import { toAction } from './steps/store_actions_step';
 import {
   OVERLAP_WINDOW_MINUTES,
   MAX_WINDOW_MINUTES,
@@ -28,6 +27,8 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { computeNextWatermark } from './watermark';
 
+const NEVER_ABORTED = new AbortController().signal;
+
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
 }
@@ -43,7 +44,7 @@ export class DispatcherService implements DispatcherServiceContract {
   public async run({
     eventWatermark,
     stuckTicks = 0,
-    signal = new AbortController().signal,
+    signal = NEVER_ABORTED,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
 
@@ -57,13 +58,11 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     const resolvedWatermark =
-      eventWatermark ?? moment(startedAt).subtract(OVERLAP_WINDOW_MINUTES, 'minutes').toDate();
+      eventWatermark ?? new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
 
-    const windowStart = moment(resolvedWatermark)
-      .subtract(OVERLAP_WINDOW_MINUTES, 'minutes')
-      .toDate();
-    const maxEnd = moment(windowStart).add(MAX_WINDOW_MINUTES, 'minutes').toDate();
-    const settled = moment(startedAt).subtract(SETTLE_BUFFER_SECONDS, 'seconds').toDate();
+    const windowStart = new Date(resolvedWatermark.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+    const maxEnd = new Date(windowStart.getTime() + MAX_WINDOW_MINUTES * 60_000);
+    const settled = new Date(startedAt.getTime() - SETTLE_BUFFER_SECONDS * 1_000);
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
     if (windowEnd <= windowStart) {
@@ -86,7 +85,7 @@ export class DispatcherService implements DispatcherServiceContract {
               eventWatermark: resolvedWatermark,
               windowStart,
               windowEnd,
-              executionUuid: uuidV4(),
+              executionUuid: '',
               signal,
             },
           },
@@ -180,19 +179,17 @@ export class DispatcherService implements DispatcherServiceContract {
 
         if (blockingEpisodes.length > 0) {
           const escapeNow = new Date();
-          await this.storageService.bulkIndexDocs<AlertAction>({
+          await this.storageService.bulkIndexDocs({
             index: ALERT_ACTIONS_DATA_STREAM,
-            docs: blockingEpisodes.map((episode) => ({
-              '@timestamp': escapeNow.toISOString(),
-              group_hash: episode.group_hash,
-              last_series_event_timestamp: episode.last_event_timestamp,
-              actor: 'system',
-              action_type: 'unmatched',
-              rule_id: episode.rule_id,
-              source: episode.source,
-              reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
-              space_id: episode.space_id,
-            })),
+            docs: blockingEpisodes.map((episode) =>
+              toAction({
+                episode,
+                actionType: 'unmatched',
+                now: escapeNow,
+                reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
+                spaceId: episode.space_id,
+              })
+            ),
           });
         }
 

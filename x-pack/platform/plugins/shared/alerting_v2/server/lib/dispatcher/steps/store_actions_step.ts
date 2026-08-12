@@ -119,7 +119,7 @@ export class StoreActionsStep implements DispatcherStep {
   }
 }
 
-function toAction({
+export function toAction({
   episode,
   actionType,
   now,
