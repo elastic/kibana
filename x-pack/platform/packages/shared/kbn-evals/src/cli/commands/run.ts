@@ -12,6 +12,7 @@ import {
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
+import { buildPlaywrightArgs } from './playwright_args';
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
@@ -34,6 +35,7 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite agent-builder --judge bedrock-claude
     node scripts/evals run --suite obs-ai-assistant --model azure-gpt4o --repetitions 3
     node scripts/evals run --suite agent-builder --grep "product documentation"
+    node scripts/evals run --suite significant-events --grep-invert "KI query generation"
     node scripts/evals run --suite streams --dry-run
   `,
   flags: {
@@ -44,6 +46,7 @@ export const runSuiteCmd: Command<void> = {
       'evaluation-connector-id',
       'repetitions',
       'grep',
+      'grep-invert',
       'profile',
       'datasets-profile',
       'export-profile',
@@ -107,21 +110,13 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.EVAL_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
-    const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
-    const project = flagsReader.string('project');
-    if (project) {
-      args.push('--project', project);
-    }
-
-    const grep = flagsReader.string('grep');
-    if (grep) {
-      args.push('--grep', grep);
-    }
-
-    const positionals = flagsReader.getPositionals();
-    if (positionals.length > 0) {
-      args.push(...positionals);
-    }
+    const args = buildPlaywrightArgs({
+      configPath: resolvedConfigPath,
+      specFiles: flagsReader.getPositionals(),
+      project: flagsReader.string('project'),
+      grep: flagsReader.string('grep'),
+      grepInvert: flagsReader.string('grep-invert'),
+    });
 
     const commandPreview = `${formatEnvPrefix(envOverrides)} node ${args.join(' ')}`.trim();
     log.info(`Running: ${commandPreview}`);
