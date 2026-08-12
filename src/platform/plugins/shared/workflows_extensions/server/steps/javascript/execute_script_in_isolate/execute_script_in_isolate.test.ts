@@ -222,6 +222,21 @@ describe('executeScriptInIsolate', () => {
     CODE_EXECUTION_TIMEOUT_MS + 2_000
   );
 
+  it(
+    'times out a console-busy loop (applySync boundary does not bypass the timeout)',
+    async () => {
+      await expect(
+        executeScriptInIsolate({
+          script: 'while (true) { console.log("x"); }',
+          logger: createLogger(),
+          abortSignal: new AbortController().signal,
+          ...defaultIsolateParams,
+        })
+      ).rejects.toThrow(createScriptExecutionTimeoutMessage(CODE_EXECUTION_TIMEOUT_MS));
+    },
+    CODE_EXECUTION_TIMEOUT_MS + 2_000
+  );
+
   it('cancels execution when the abort signal fires', async () => {
     const abortController = new AbortController();
 

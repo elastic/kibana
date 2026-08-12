@@ -14,6 +14,7 @@ import { scriptsJavaScriptStepDefinition } from './javascript_step';
 import {
   CODE_EXECUTION_TIMEOUT_MS,
   CODE_MAX_LENGTH_CHARS,
+  CODE_MAX_LENGTH_MB,
   CODE_MEMORY_LIMIT_MB,
   ScriptsJavaScriptStepTypeId,
 } from '../../../common/steps/javascript';
@@ -56,8 +57,8 @@ describe('scriptsJavaScriptStepDefinition', () => {
     );
   });
 
-  it('uses an 8 MB memory limit for the isolate', () => {
-    expect(CODE_MEMORY_LIMIT_MB).toBe(8);
+  it(`uses a ${CODE_MEMORY_LIMIT_MB} MB memory limit for the isolate`, () => {
+    expect(CODE_MEMORY_LIMIT_MB).toBe(10);
   });
 
   it('returns an error when code is missing', async () => {
@@ -74,7 +75,7 @@ describe('scriptsJavaScriptStepDefinition', () => {
 
     const result = await scriptsJavaScriptStepDefinition.handler(context);
 
-    expect(result.error?.message).toContain('exceeds maximum allowed size of 1 MB');
+    expect(result.error?.message).toContain(`exceeds maximum allowed size of ${CODE_MAX_LENGTH_MB} MB`);
     expect(result.error?.message).toContain('Reduce interpolated data or split the workflow');
   });
 
