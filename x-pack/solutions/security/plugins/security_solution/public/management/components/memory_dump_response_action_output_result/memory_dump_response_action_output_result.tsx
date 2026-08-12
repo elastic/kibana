@@ -140,37 +140,17 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                     <EuiFlexItem grow={false}>
                       <KeyValueDisplay
                         name={CONSOLE_COMMANDS.memoryDump.resultTotalMemorySizeLabel}
-                        value={
-                          <EuiToolTip
-                            content={`${numeral(
-                              agentActionResult.content.total_memory_size ?? 0
-                            ).format('0,0')} ${CONSOLE_COMMANDS.memoryDump.bytesValue}`}
-                          >
-                            <>
-                              {numeral(agentActionResult.content.total_memory_size ?? 0).format(
-                                '0.00b'
-                              )}
-                            </>
-                          </EuiToolTip>
-                        }
+                        value={numeral(agentActionResult.content.total_memory_size ?? 0).format(
+                          '0.00b'
+                        )}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <KeyValueDisplay
                         name={CONSOLE_COMMANDS.memoryDump.resultTotalBytesCapturedLabel}
-                        value={
-                          <EuiToolTip
-                            content={`${numeral(
-                              agentActionResult.content.total_bytes_captured ?? 0
-                            ).format('0,0')} ${CONSOLE_COMMANDS.memoryDump.bytesValue}`}
-                          >
-                            <>
-                              {numeral(agentActionResult.content.total_bytes_captured ?? 0).format(
-                                '0.00b'
-                              )}
-                            </>
-                          </EuiToolTip>
-                        }
+                        value={numeral(agentActionResult.content.total_bytes_captured ?? 0).format(
+                          '0.00b'
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
