@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFilterGroup,
@@ -17,6 +18,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -31,6 +33,7 @@ import {
 } from '@kbn/significant-events-schema';
 import type {
   SignificantEvent,
+  SignificantEventResponse,
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
@@ -49,6 +52,7 @@ import { formatTimestamp } from '../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
+import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
@@ -67,6 +71,18 @@ const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
   {
     defaultMessage: 'Close this significant event',
   }
+);
+
+const VIEW_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.viewDetailsAriaLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.minimizeDetailsAriaLabel',
+  { defaultMessage: 'Collapse details' }
 );
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
@@ -117,10 +133,6 @@ const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
   );
 };
 
-const clickableRowCss = css`
-  cursor: pointer;
-`;
-
 const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.searchPlaceholder',
   {
@@ -148,14 +160,33 @@ const LOADING_MESSAGE = i18n.translate(
 const EMPTY_MESSAGE = i18n.translate('xpack.significantEventsApp.significantEventsTab.emptyBody', {
   defaultMessage: 'No significant events found.',
 });
-const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
+
+export const getSignificantEventTableColumns = ({
+  selectedEventId,
+  onToggleEvent,
+}: {
+  selectedEventId?: string;
+  onToggleEvent: (eventId: string) => void;
+}): Array<EuiBasicTableColumn<SignificantEventResponse>> => [
   {
-    field: '@timestamp',
-    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.timestampColumn', {
-      defaultMessage: 'Timestamp',
-    }),
-    width: '200px',
-    render: (timestamp: string) => formatTimestamp(timestamp),
+    name: '',
+    width: '40px',
+    render: (event: SignificantEventResponse) => {
+      const isExpanded = selectedEventId === event.event_id;
+      return (
+        <EuiToolTip
+          content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="significantEventsDetailsButton"
+            iconType={isExpanded ? 'minimize' : 'maximize'}
+            aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+            onClick={() => onToggleEvent(event.event_id)}
+          />
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'title',
@@ -163,6 +194,11 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
       defaultMessage: 'Title',
     }),
     truncateText: true,
+    render: (_: unknown, event: SignificantEventResponse) => (
+      <EuiButtonEmpty size="s" flush="both" onClick={() => onToggleEvent(event.event_id)}>
+        {event.title}
+      </EuiButtonEmpty>
+    ),
   },
   {
     field: 'status',
@@ -232,8 +268,16 @@ const columns: Array<EuiBasicTableColumn<SignificantEvent>> = [
     }),
     width: '100px',
     render: (severity: SignificantEvent['severity']) => (
-      <EuiText size="xs">{getSeverityLabel(severity)}</EuiText>
+      <SeverityBadge score={Number.parseInt(severity, 10)} />
     ),
+  },
+  {
+    field: 'created_at',
+    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.createdAtColumn', {
+      defaultMessage: 'Created at',
+    }),
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     name: '',
@@ -276,6 +320,7 @@ const buildSelectableOptions = <T extends string>({
   }));
 
 export const SignificantEventsTab = () => {
+  const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
 
   const { filteredStreams } = useKiGeneration();
@@ -309,7 +354,7 @@ export const SignificantEventsTab = () => {
     });
   useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
 
-  const { selectedEventId, openEvent, closeEvent } = useSignificantEventsUrlState();
+  const { selectedEventId, toggleEvent, closeEvent } = useSignificantEventsUrlState();
 
   // Fast path: event is already loaded in the current list page.
   const eventFromList = selectedEventId
@@ -325,6 +370,15 @@ export const SignificantEventsTab = () => {
   const eventFromDeeplink = lifecycleData?.events.at(-1);
 
   const selectedEvent = eventFromList ?? eventFromDeeplink;
+
+  const columns = useMemo(
+    () =>
+      getSignificantEventTableColumns({
+        selectedEventId,
+        onToggleEvent: toggleEvent,
+      }),
+    [selectedEventId, toggleEvent]
+  );
 
   const onStatusChange = useCallback(
     (opts: EuiSelectableOption[]) =>
@@ -425,8 +479,13 @@ export const SignificantEventsTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-          <EuiFlexItem grow style={{ minWidth: 160 }}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem
+            grow
+            css={css`
+              min-width: 0;
+            `}
+          >
             <SignificantEventsSearchBar
               onQuerySubmit={handleQueryChange}
               onQueryChange={handleQueryChange}
@@ -481,10 +540,16 @@ export const SignificantEventsTab = () => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiBasicTable<SignificantEvent>
+        <EuiBasicTable<SignificantEventResponse>
+          css={css`
+            & thead tr {
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            }
+          `}
           tableLayout="fixed"
           tableCaption={TABLE_CAPTION}
           items={data?.hits ?? []}
+          itemId="event_id"
           columns={columns}
           pagination={{
             pageIndex: pagination.page - 1,
@@ -495,8 +560,7 @@ export const SignificantEventsTab = () => {
           onChange={onTableChange}
           loading={isLoading}
           rowProps={(item) => ({
-            onClick: () => openEvent(item.event_id),
-            css: clickableRowCss,
+            isSelected: selectedEventId === item.event_id,
           })}
           noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
         />
