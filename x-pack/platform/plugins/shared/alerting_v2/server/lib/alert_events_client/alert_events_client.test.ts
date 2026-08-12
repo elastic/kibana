@@ -59,7 +59,16 @@ describe('getGroupHash', () => {
       },
       spaceId
     );
-    expect(hash).toBe(sha256('default:datadog:monitor_id|scope|labels.env|55501|host:web-01|prod'));
+    expect(hash).toBe(
+      sha256(
+        'default:datadog:' +
+          JSON.stringify([
+            ['monitor_id', '55501'],
+            ['scope', 'host:web-01'],
+            ['labels.env', 'prod'],
+          ])
+      )
+    );
   });
 
   it('ignores root fields named in fingerprint_fields', () => {
@@ -81,7 +90,7 @@ describe('getGroupHash', () => {
       spaceId
     );
     expect(withRoot).toBe(missing);
-    expect(withRoot).toBe(sha256('default:datadog:rule_id|'));
+    expect(withRoot).toBe(sha256('default:datadog:' + JSON.stringify([['rule_id', '']])));
   });
 
   it('is deterministic for the same fingerprint_fields inputs', () => {

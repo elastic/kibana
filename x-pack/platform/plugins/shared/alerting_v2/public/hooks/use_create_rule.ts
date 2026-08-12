@@ -11,6 +11,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
 
@@ -28,8 +29,9 @@ export const useCreateRule = () => {
           values: { ruleName: data.metadata.name },
         })
       );
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
     },
     onError: (error: Error) => {
       toasts.addError(enrichHttpErrorMessage(error), {

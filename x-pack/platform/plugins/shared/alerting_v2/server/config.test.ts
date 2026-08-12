@@ -119,4 +119,23 @@ describe('alerting_v2 config schema', () => {
       ).toThrow();
     });
   });
+
+  describe('rules.run.timeout', () => {
+    it('defaults to undefined', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.timeout).toBeUndefined();
+    });
+
+    it('accepts a valid duration', () => {
+      expect(configSchema.validate({ rules: { run: { timeout: '5m' } } }).rules.run.timeout).toBe(
+        '5m'
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ rules: { run: { timeout: 'nonsense' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
 });
