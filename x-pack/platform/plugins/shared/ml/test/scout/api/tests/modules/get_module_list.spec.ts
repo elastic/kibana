@@ -53,8 +53,8 @@ const SECURITY_MODULE_IDS = [
 // TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('get_module: list and filter', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry
-  apiTest.beforeAll(async ({ apiServices, kbnClient }) => {
-    await setupFleetPackages(apiServices, kbnClient);
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await setupFleetPackages(apiServices);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {

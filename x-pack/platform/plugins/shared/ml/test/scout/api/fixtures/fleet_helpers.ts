@@ -6,10 +6,12 @@
  */
 
 import type { ApiServicesFixture } from '@kbn/scout';
-import type { KbnRequestable } from './general_test_helpers';
 
 /** Fleet packages required for ML data stream modules (apache_data_stream, nginx_data_stream). */
-export const ML_DATA_STREAM_FLEET_PACKAGES = ['apache', 'nginx'] as const;
+export const ML_DATA_STREAM_FLEET_PACKAGES = [
+  { name: 'apache', version: '3.0.2' },
+  { name: 'nginx', version: '3.2.2' },
+] as const;
 
 /**
  * Sets up Fleet and installs packages so ML data stream modules are registered.
@@ -17,16 +19,13 @@ export const ML_DATA_STREAM_FLEET_PACKAGES = ['apache', 'nginx'] as const;
  */
 export async function setupFleetPackages(
   apiServices: Pick<ApiServicesFixture, 'fleet'>,
-  kbnClient: KbnRequestable,
-  packages: readonly string[] = ML_DATA_STREAM_FLEET_PACKAGES
+  packages: readonly { name: string; version: string }[] = ML_DATA_STREAM_FLEET_PACKAGES
 ): Promise<void> {
   await apiServices.fleet.internal.setup();
 
   for (const pkg of packages) {
-    await kbnClient.request({
-      method: 'POST',
-      path: `/api/fleet/epm/packages/${pkg}`,
-      body: { force: true },
+    await apiServices.fleet.integration.installPackage(pkg.name, pkg.version, {
+      force: true,
     });
   }
 }
@@ -37,9 +36,9 @@ export async function setupFleetPackages(
  */
 export async function removeFleetPackages(
   apiServices: Pick<ApiServicesFixture, 'fleet'>,
-  packages: readonly string[] = ML_DATA_STREAM_FLEET_PACKAGES
+  packages: readonly { name: string; version: string }[] = ML_DATA_STREAM_FLEET_PACKAGES
 ): Promise<void> {
   for (const pkg of packages) {
-    await apiServices.fleet.integration.delete(pkg);
+    await apiServices.fleet.integration.delete(pkg.name);
   }
 }

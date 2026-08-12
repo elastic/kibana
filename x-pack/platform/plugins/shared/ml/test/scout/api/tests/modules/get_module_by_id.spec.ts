@@ -38,8 +38,8 @@ const MODULE_IDS = [
 // TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('get_module: load each module by ID', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry
-  apiTest.beforeAll(async ({ apiServices, kbnClient }) => {
-    await setupFleetPackages(apiServices, kbnClient);
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await setupFleetPackages(apiServices);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -56,7 +56,7 @@ apiTest.describe('get_module: load each module by ID', { tag: '@local-stateful-c
           responseType: 'json',
         });
 
-        expect(res).toHaveStatusCode(200);
+        expect(res, `get_module/${moduleId} should return 200`).toHaveStatusCode(200);
         const body = res.body as Record<string, unknown>;
 
         // Every module must have these required fields with valid types
