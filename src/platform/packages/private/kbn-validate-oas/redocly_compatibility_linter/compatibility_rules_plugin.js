@@ -33,18 +33,16 @@ const isPathParameter = (value) => {
 
 /**
  * @param {unknown} value
- * @returns {value is SchemaLike & { nullable: true; type?: undefined }}
+ * @returns {value is SchemaLike & { enum: []; nullable: true; type?: undefined }}
  */
 const isNullablePlaceholder = (value) => {
-  if (!isPlainObject(value) || value.nullable !== true || value.type !== undefined) {
-    return false;
-  }
-
-  if (Array.isArray(value.enum)) {
-    return value.enum.length === 0;
-  }
-
-  return Object.keys(value).length === 1;
+  return (
+    isPlainObject(value) &&
+    Array.isArray(value.enum) &&
+    value.enum.length === 0 &&
+    value.nullable === true &&
+    value.type === undefined
+  );
 };
 
 /**
@@ -88,7 +86,7 @@ function NoEmptyNullableEnum() {
 
         ctx.report({
           message:
-            'Found an internal nullable placeholder (`enum: []` + `nullable: true`, or a bare `nullable: true` branch). Null values must be emitted as an OpenAPI-compatible schema.',
+            'Found the internal `enum: []` + `nullable: true` placeholder. Null values must be emitted as an OpenAPI-compatible schema.',
           location: ctx.location,
         });
       },
