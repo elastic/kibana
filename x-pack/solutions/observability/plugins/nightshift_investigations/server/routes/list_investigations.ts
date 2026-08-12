@@ -18,6 +18,7 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
     description: 'Returns a paginated list of investigations in the current space.',
   },
   security: {
+    // agentBuilder:read as a proxy for AI feature access. See start_investigation.ts.
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({

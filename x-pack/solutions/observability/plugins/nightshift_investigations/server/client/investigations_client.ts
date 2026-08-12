@@ -84,11 +84,18 @@ export class NightshiftInvestigationsClient {
     private readonly request: KibanaRequest,
     private readonly workflowsManagement: WorkflowsServerPluginSetup | undefined,
     private readonly spaces: SpacesPluginStart | undefined,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
+    // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
+    private readonly spaceIdOverride?: string
   ) {}
 
   private getSpaceId(): string {
-    return this.spaces?.spacesService.getSpaceId(this.request) ?? DEFAULT_SPACE_ID;
+    return (
+      this.spaceIdOverride ??
+      this.spaces?.spacesService.getSpaceId(this.request) ??
+      DEFAULT_SPACE_ID
+    );
   }
 
   async start({
@@ -116,9 +123,9 @@ export class NightshiftInvestigationsClient {
       message: `Investigation requested for ${subject.type} ${subject.id}`,
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
+        ...context,
         source: subject.type,
         [`${subject.type}_id`]: subject.id,
-        ...context,
       },
     };
 
@@ -150,6 +157,10 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!execution) {
+      throw new Error(`Investigation "${investigationId}" not found`);
+    }
+
+    if (execution.workflowId !== SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID) {
       throw new Error(`Investigation "${investigationId}" not found`);
     }
 
