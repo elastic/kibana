@@ -13,20 +13,7 @@ import { appPaths } from '../../utils/app_paths';
 import { getAgentIdFromPath } from '../../route_config';
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 
-/**
- * Pins restricted (non-`manageAgents`) users to their space's default agent.
- *
- * When the active space has an effective default agent and the user cannot
- * manage agents, opening any *other* agent's routes (e.g. via a deep link or a
- * stale bookmark) redirects back to the space default. This is a UI-only
- * restriction: the converse/API layer is intentionally left open so background,
- * preconfigured, and direct-API agent calls keep working.
- *
- * Admins and users in unconfigured spaces are unaffected. The guard is a no-op
- * until the effective default resolves (`isRestricted` stays `false` until
- * then) and only acts on `/agents/:agentId` routes, so it never interferes with
- * the management section or the common path.
- */
+/** Pins restricted users to their space's default agent. */
 export const AgentRouteGuard: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const { pathname } = useLocation();
   const currentAgentId = getAgentIdFromPath(pathname);
