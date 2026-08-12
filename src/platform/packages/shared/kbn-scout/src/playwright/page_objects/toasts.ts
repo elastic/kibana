@@ -72,6 +72,6 @@ export class Toasts {
    * Use before clicks that toasts can intercept (e.g. top-nav Share).
    */
   async dismissAll() {
-    await this.toast.closeAllToasts();
+    await this.toastList.closeAll();
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { EuiToastWrapper, type Locator, type ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -49,7 +49,6 @@ export class LensWorkspace {
   readonly exportButton;
   private readonly shareModal;
   private readonly copyShareUrlButton;
-  private readonly toasts;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
@@ -74,7 +73,6 @@ export class LensWorkspace {
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
-    this.toasts = new EuiToastWrapper(this.page, { locator: '.euiToast' });
   }
 
   async openFullEditor() {
@@ -313,7 +311,7 @@ export class LensWorkspace {
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
 
-    await this.toasts.closeAllToasts();
+    await this.page.components.toast().closeAll();
     await this.shareButton.click();
     await this.shareModal.waitFor({ state: 'visible' });
     await this.copyShareUrlButton.waitFor({ state: 'visible' });
