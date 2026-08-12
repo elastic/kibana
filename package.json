@@ -76,8 +76,8 @@
   },
   "engines": {
     "node": "24.19.0",
-    "yarn": "1.22.22",
-    "pnpm": "~11.17.0"
+    "pnpm": "~11.17.0",
+    "yarn": "1.22.22"
   },
   "resolutions": {
     "**/@babel/parser": "7.24.7",

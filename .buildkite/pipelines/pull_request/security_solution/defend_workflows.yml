@@ -3,7 +3,7 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     key: defend-workflows
     env:
-      CLEAR_INSTALL_CACHE: '1'
+      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
@@ -26,7 +26,7 @@ steps:
     key: defend-workflows-serverless
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     env:
-      CLEAR_INSTALL_CACHE: '1'
+      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
