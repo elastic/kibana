@@ -327,6 +327,8 @@ State only _what to change_ — the "why" belongs in Root cause & evidence, so d
 
 **A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
 
+**Never propose tolerance patches to shared test-framework infrastructure or exposing framework internals.** A retry/error-swallowing loop in a framework package or shared service (`kbn-test*`, `kbn-ftr-*`, the Scout framework packages) masks the root cause for every consumer suite, and a fix that needs a framework's internal helper exported (rather than its documented API, e.g. the `tags` constants) is a framework feature request, not a flaky-test fix. In both cases diagnose the underlying failure and recommend fixing that — or recommend escalating to the framework's owning team. (Improving a page object or a suite's own fixtures is fine.)
+
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
 - **No concrete fix:** in one or two sentences, name the evidence that would unblock one.
