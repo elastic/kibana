@@ -16,6 +16,7 @@ export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroupDefin
   Object.freeze({
     [SecurityGroupName.alertDetections]: { title: i18nStrings.alertDetections.title },
     [SecurityGroupName.rules]: { title: i18nStrings.rules.title },
+    [SecurityGroupName.cases]: { title: i18nStrings.cases.title },
     [SecurityGroupName.explore]: { title: i18nStrings.explore.title },
     [SecurityGroupName.investigations]: { title: i18nStrings.investigations.title },
     [SecurityGroupName.assets]: { title: i18nStrings.assets.title },

@@ -22,7 +22,7 @@ import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detect
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { links as casesLinks } from '../../cases/links';
+import { links as casesLinks, getCasesLinks } from '../../cases/links';
 import { getManagementFilteredLinks, links as managementLinks } from '../../management/links';
 import { exploreLinks } from '../../explore/links';
 import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
@@ -83,7 +83,7 @@ export const getFilteredLinks = async (
     // alignment setting.
     attackDiscoveryLinks,
     findingsLinks,
-    casesLinks,
+    getCasesLinks(plugins.cases?.config.templatesEnabled ?? false),
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,

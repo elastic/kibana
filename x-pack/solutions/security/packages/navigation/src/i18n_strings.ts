@@ -31,6 +31,11 @@ export const i18nStrings = {
       }),
     },
   },
+  cases: {
+    title: i18n.translate('securitySolutionPackages.navLinks.cases', {
+      defaultMessage: 'Cases',
+    }),
+  },
   investigations: {
     title: i18n.translate('securitySolutionPackages.navLinks.investigations', {
       defaultMessage: 'Investigations',

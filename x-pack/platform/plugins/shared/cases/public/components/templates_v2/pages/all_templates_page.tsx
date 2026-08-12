@@ -8,9 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBasicTable, EuiSkeletonText } from '@elastic/eui';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
-import { PAGE_TITLE } from '../../../common/translations';
 import {
-  useAllCasesNavigation,
   useCasesCreateTemplateNavigation,
   useCasesFieldLibraryNavigation,
 } from '../../../common/navigation/hooks';
@@ -44,7 +42,6 @@ export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
   const { owner } = useCasesContext();
   const { docLinks } = useKibana().services;
-  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
   const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
@@ -81,20 +78,6 @@ export const AllTemplatesPage: React.FC = () => {
       navigateToCasesFieldLibrary,
       openFlyout,
     ]
-  );
-
-  const templatesListBack = useMemo(
-    () => ({
-      href: getAllCasesUrl(),
-      label: PAGE_TITLE,
-      // AppHeader's back button keeps its `href` on the rendered anchor, so the default
-      // navigation must be prevented here to avoid a full page reload alongside the SPA one.
-      onClick: (event: React.MouseEvent) => {
-        event.preventDefault();
-        navigateToAllCases();
-      },
-    }),
-    [getAllCasesUrl, navigateToAllCases]
   );
 
   const { queryParams, setQueryParams, sorting, selectedTemplates, selection, deselectTemplates } =
@@ -165,7 +148,6 @@ export const AllTemplatesPage: React.FC = () => {
     <>
       <CasesAppHeader
         title={i18n.TEMPLATE_TITLE}
-        back={templatesListBack}
         menu={templatesListMenu}
         // Native "Documentation" item in the header overflow menu, linking to the case-templates
         // guide via the doclinks service (kept consistent with the template editor header).

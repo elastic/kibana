@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { createEvent, fireEvent, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -22,14 +22,14 @@ jest.mock('../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
-const mockNavigateToAllCases = jest.fn();
 const mockNavigateToCasesCreateTemplate = jest.fn();
 const mockNavigateToCasesEditTemplate = jest.fn();
+const mockNavigateToCasesTemplates = jest.fn();
 
 jest.mock('../../../common/navigation/hooks', () => ({
-  useAllCasesNavigation: () => ({
-    getAllCasesUrl: jest.fn().mockReturnValue('/'),
-    navigateToAllCases: mockNavigateToAllCases,
+  useCasesTemplatesNavigation: () => ({
+    getCasesTemplatesUrl: jest.fn().mockReturnValue('/configure/templates'),
+    navigateToCasesTemplates: mockNavigateToCasesTemplates,
   }),
   useCasesCreateTemplateNavigation: () => ({
     getCasesCreateTemplateUrl: jest.fn().mockReturnValue('/templates/create'),
@@ -130,21 +130,6 @@ describe('AllTemplatesPage', () => {
 
     expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId('create-template-button')).toBeInTheDocument();
-  });
-
-  it('navigates to all cases and prevents the anchor default navigation on back click', async () => {
-    const queryClient = createTestQueryClient();
-
-    renderWithTestingProviders(<AllTemplatesPage />, {
-      wrapperProps: { queryClient },
-    });
-
-    const backButton = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.back);
-    const clickEvent = createEvent.click(backButton);
-    fireEvent(backButton, clickEvent);
-
-    expect(clickEvent.defaultPrevented).toBe(true);
-    expect(mockNavigateToAllCases).toHaveBeenCalled();
   });
 
   it('renders the info panel', async () => {

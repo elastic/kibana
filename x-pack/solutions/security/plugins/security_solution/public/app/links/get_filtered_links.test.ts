@@ -142,4 +142,29 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('launchpad');
     });
   });
+
+  describe('cases templates deep link', () => {
+    it('includes the templates link when templates are enabled', async () => {
+      mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
+      const plugins = {
+        cases: { config: { templatesEnabled: true } },
+      } as StartPlugins;
+
+      const result = await getFilteredLinks(mockCore, plugins, mockExperimentalFeatures);
+      const casesLink = result.find((link) => link.id === SecurityPageName.case);
+
+      expect(casesLink?.links?.map((link) => link.id)).toContain(SecurityPageName.caseTemplates);
+    });
+
+    it('excludes the templates link when templates are disabled', async () => {
+      mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
+
+      const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
+      const casesLink = result.find((link) => link.id === SecurityPageName.case);
+
+      expect(casesLink?.links?.map((link) => link.id)).not.toContain(
+        SecurityPageName.caseTemplates
+      );
+    });
+  });
 });

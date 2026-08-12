@@ -24,6 +24,7 @@ export enum LinkCategoryType {
  */
 export enum SecurityGroupName {
   rules = 'securityGroup:rules',
+  cases = 'securityGroup:cases',
   explore = 'securityGroup:explore',
   investigations = 'securityGroup:investigations',
   assets = 'securityGroup:assets',
