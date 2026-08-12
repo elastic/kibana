@@ -19,3 +19,8 @@ export { isTemplateExpression } from './templates';
 export { isTextContentType, readResponseStream } from './http_response';
 export type { ReadStreamResult } from './http_response';
 export { extractTokenUsage, extractConnectorId, sumTokenUsage } from './token_usage/token_usage';
+export {
+  extractAgentConversationIds,
+  extractFirstAgentConversationId,
+} from './agent_conversation_ids';
+export type { AgentConversationId } from './agent_conversation_ids';

@@ -12,6 +12,7 @@
 // rest of the workflow engine is `any`-free; this module is the chokepoint
 // where the upstream typing gaps are absorbed so they don't bleed elsewhere.
 
+import { INVALID_TRACEID, trace } from '@opentelemetry/api';
 import type agent from 'elastic-apm-node';
 
 type ApmAgentInternals = typeof agent & {
@@ -38,6 +39,17 @@ export function getAlertingRuleId(transaction: agent.Transaction | null): string
  * Resolves the trace ID for a transaction. Tries the documented `ids` field
  * first, then falls back to the private `traceId` / `trace.id` shapes that
  * older builds of `elastic-apm-node` expose.
+ *
+ * Finally falls back to the active OTEL span context. `elastic-apm-node` is deprecated in favour
+ * of the EDOT collector, and under EDOT-only instrumentation (e.g. the Scout eval stack, which
+ * runs EDOT via `ensureEdot` but no APM agent) every APM-shaped lookup above returns undefined —
+ * spans ARE being exported, the engine just could not see their trace id. Measured 2026-08-11:
+ * 7/7 workflow executions persisted `traceId: undefined`, which silently degraded the eval
+ * suite's trace-based routing evaluator to N/A on every example.
+ *
+ * Mirrors the `apm ?? trace.getActiveSpan()` precedent in core (`http_server.ts`, `logger.ts`,
+ * `analytics_service.ts`). APM is still tried first so behaviour is unchanged wherever the
+ * legacy agent is active.
  */
 export function getTraceId(transaction: agent.Transaction): string | undefined {
   const fromIds = transaction.ids?.['trace.id'];
@@ -45,6 +57,26 @@ export function getTraceId(transaction: agent.Transaction): string | undefined {
   const t = transaction as TransactionInternals;
   if (typeof t.traceId === 'string') return t.traceId;
   if (typeof t.trace?.id === 'string') return t.trace.id;
+
+  // EDOT / OTEL-only path.
+  return getActiveOtelTraceId();
+}
+
+/**
+ * Reads the trace ID from the active OTEL span context, or `undefined` when no span is active
+ * (or the context is the all-zero invalid trace id).
+ *
+ * This exists as a standalone export because the APM-shaped helpers above are only reachable
+ * when `agent.currentTransaction` is non-null. Under EDOT-only instrumentation there is no APM
+ * agent at all, so callers must be able to resolve a trace id WITHOUT first obtaining an
+ * `agent.Transaction` — see the `else` branch of `WorkflowExecutionRuntimeManager.start()`.
+ */
+export function getActiveOtelTraceId(): string | undefined {
+  const spanContext = trace.getActiveSpan()?.spanContext();
+  if (spanContext?.traceId && spanContext.traceId !== INVALID_TRACEID) {
+    return spanContext.traceId;
+  }
+
   return undefined;
 }
 

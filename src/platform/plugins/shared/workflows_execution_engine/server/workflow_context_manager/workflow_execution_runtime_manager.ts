@@ -18,7 +18,12 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
+import {
+  getActiveOtelTraceId,
+  getAlertingRuleId,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
@@ -403,10 +408,33 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // Fallback if no task transaction exists - proceed without tracing
-      this.workflowLogger?.logWarn(
-        'No active Task Manager transaction found, proceeding without APM tracing'
-      );
+      // No APM transaction. Under EDOT-only instrumentation (the Scout eval stack, and any
+      // deployment that has migrated off the deprecated `elastic-apm-node` agent) this is the
+      // NORMAL path, not an error: spans are being produced and exported by OTEL, there is
+      // simply no APM agent to read them from.
+      //
+      // Previously this branch persisted no `traceId` at all, so every workflow execution was
+      // unlinkable to its own trace. Measured 2026-08-11: 7/7 executions had `traceId: undefined`
+      // while EDOT exported spans normally, which silently degraded trace-based eval evaluators
+      // to N/A (and N/A is not a failure, so suites still reported a pass).
+      //
+      // Read the trace id from the active OTEL span context instead, mirroring the
+      // `apm ?? trace.getActiveSpan()` precedent in core (`http_server.ts`, `logger.ts`,
+      // `analytics_service.ts`).
+      const otelTraceId = getActiveOtelTraceId();
+
+      if (otelTraceId) {
+        this.workflowLogger?.logDebug('Captured OTEL trace ID (no APM transaction)', {
+          trace: { trace_id: otelTraceId },
+        });
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceId: otelTraceId,
+        });
+      } else {
+        this.workflowLogger?.logWarn(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      }
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
