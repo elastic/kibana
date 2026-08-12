@@ -246,10 +246,9 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       lastMessage &&
       lastMessage.role === 'user' &&
       lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
-      curr.role === 'user' &&
-      curr.rawContent?.some((c) => 'toolResult' in c)
+      curr.role === 'user'
     ) {
-      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent ?? []);
     } else {
       acc.push(curr);
     }
