@@ -52,6 +52,8 @@
     "@kbn/esql-utils",
     "@kbn/scout",
     "@kbn/presentation-util",
+    "@kbn/zod",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": [
     "target/**/*",
