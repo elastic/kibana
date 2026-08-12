@@ -9,7 +9,7 @@
 - [Parallelization](#parallelization)
 - [Fixtures](#fixtures)
 - [Package Organization](#package-organization)
-- [EUI Component Objects](#eui-component-objects)
+- [EUI Test Helpers](#eui-test-helpers)
 
 ## Testing Layer Priority
 
