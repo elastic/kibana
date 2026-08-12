@@ -484,9 +484,9 @@ describe('FieldDefinitionsService', () => {
     it('does not delete when the version-guarded update conflicts', async () => {
       soClient.update.mockRejectedValue(new Error('version conflict'));
 
-      await expect(
-        service.deleteFieldDefinition('fd-1', { version: 'stale' })
-      ).rejects.toThrow('version conflict');
+      await expect(service.deleteFieldDefinition('fd-1', { version: 'stale' })).rejects.toThrow(
+        'version conflict'
+      );
 
       expect(soClient.delete).not.toHaveBeenCalled();
     });

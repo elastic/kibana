@@ -104,7 +104,9 @@ const backfillCasesForSpace = async (
   // and the field-definitions migration phase use — never the raw v1 key. A field with no
   // resolvable link is skipped (undefined), matching the rest of the migration's "never guess"
   // philosophy; the reconciliation phase re-reports it.
-  const linkIndexes = buildFieldLinkIndexes(await findFieldDefinitionsForOwner(repo, owner, nsOption));
+  const linkIndexes = buildFieldLinkIndexes(
+    await findFieldDefinitionsForOwner(repo, owner, nsOption)
+  );
   const resolveStorageKey = (cf: { key: string; type: string }): string | undefined => {
     const resolution = resolveDefinitionForLegacyField(cf, linkIndexes);
     return resolution.status === 'resolved' ? resolution.storageKey : undefined;

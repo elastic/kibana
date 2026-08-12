@@ -533,10 +533,9 @@ describe('customFields → extended_fields adapter utilities', () => {
     it('never overwrites a key already present in existingExtendedFields', () => {
       // FAILURE SCENARIO: adapter called twice on same case — second call must not
       // overwrite the value set by the first (existing-wins semantics).
-      const result = rawKeyBackfill(
-        [{ key: 'priority', type: 'text', value: 'low' }],
-        { priority_as_keyword: 'high' }
-      );
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: 'high',
+      });
 
       expect(result).toEqual({});
     });
@@ -566,23 +565,17 @@ describe('customFields → extended_fields adapter utilities', () => {
       // before a space's backfill completes, so a '' observed at backfill time may be a
       // deliberate clear. It is ambiguous, so it must never be overwritten with the stale
       // legacy value.
-      const result = rawKeyBackfill(
-        [{ key: 'priority', type: 'text', value: 'low' }],
-        {
-          priority_as_keyword: '',
-        }
-      );
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: '',
+      });
 
       expect(result).toEqual({});
     });
 
     it('fills a key whose existing value is null', () => {
-      const result = rawKeyBackfill(
-        [{ key: 'priority', type: 'text', value: 'low' }],
-        {
-          priority_as_keyword: null,
-        }
-      );
+      const result = rawKeyBackfill([{ key: 'priority', type: 'text', value: 'low' }], {
+        priority_as_keyword: null,
+      });
 
       expect(result).toEqual({ priority_as_keyword: 'low' });
     });

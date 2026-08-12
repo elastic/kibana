@@ -113,18 +113,12 @@ describe('buildExtendedFieldsBackfill', () => {
   });
 
   it('treats a null extended_fields the same as empty', () => {
-    const result = rawKeyBackfill(
-      [{ key: 'a', type: CustomFieldTypes.TEXT, value: 'x' }],
-      null
-    );
+    const result = rawKeyBackfill([{ key: 'a', type: CustomFieldTypes.TEXT, value: 'x' }], null);
     expect(result).toEqual({ a_as_keyword: 'x' });
   });
 
   it('preserves a zero number value', () => {
-    const result = rawKeyBackfill(
-      [{ key: 'n', type: CustomFieldTypes.NUMBER, value: 0 }],
-      {}
-    );
+    const result = rawKeyBackfill([{ key: 'n', type: CustomFieldTypes.NUMBER, value: 0 }], {});
     expect(result).toEqual({ n_as_integer: '0' });
   });
 });

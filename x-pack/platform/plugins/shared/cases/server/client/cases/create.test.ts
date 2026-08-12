@@ -1759,16 +1759,16 @@ describe('create', () => {
       );
       // The persisted extended_fields (from the injected default) must be recorded in the
       // activity log even without a template — that audit trail is no longer template-scoped.
-      expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
-        {
-          userActions: [
-            expect.objectContaining({
-              type: 'extended_fields',
-              payload: { extended_fields: { risk_score_as_keyword: 'high' } },
-            }),
-          ],
-        }
-      );
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith({
+        userActions: [
+          expect.objectContaining({
+            type: 'extended_fields',
+            payload: { extended_fields: { risk_score_as_keyword: 'high' } },
+          }),
+        ],
+      });
     });
 
     it('caller-sent values win over global defaults', async () => {
