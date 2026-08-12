@@ -140,9 +140,17 @@ const buildPainlessScript = (
 
   switch (runtimeType) {
     case 'long':
-      return `${readRaw} emit(Long.parseLong(raw));`;
+      return (
+        `${readRaw}` +
+        `if (raw.trim().isEmpty()) { return; }` +
+        `try { emit(Long.parseLong(raw)); } catch (Exception e) {}`
+      );
     case 'double':
-      return `${readRaw} emit(Double.parseDouble(raw));`;
+      return (
+        `${readRaw}` +
+        `if (raw.trim().isEmpty()) { return; }` +
+        `try { emit(Double.parseDouble(raw)); } catch (Exception e) {}`
+      );
     default:
       return `${readRaw} emit(raw);`;
   }

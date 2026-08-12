@@ -551,6 +551,9 @@ describe('buildExtendedFieldRuntimeMappings', () => {
         },
       },
     });
+    const source = (mappings.ef_effort_as_integer.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Long.parseLong(raw)); } catch (Exception e) {}');
   });
 
   it('builds double runtime field for float type', () => {
@@ -574,6 +577,9 @@ describe('buildExtendedFieldRuntimeMappings', () => {
         },
       },
     });
+    const source = (mappings.ef_score_as_double.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Double.parseDouble(raw)); } catch (Exception e) {}');
   });
 
   it('skips runtime mapping for DATE_PICKER (uses flattened field directly)', () => {
@@ -1731,6 +1737,22 @@ describe('buildFieldLabelRuntimeMappings', () => {
     ]);
 
     expect(mappings).toHaveProperty('ef_reviewers_as_keyword');
+  });
+
+  it('builds guarded numeric runtime mappings for numeric labels', () => {
+    const mappings = buildFieldLabelRuntimeMappings([
+      {
+        storageKey: 'effort_as_integer',
+        esType: 'integer',
+        control: 'INPUT_NUMBER',
+        templateVersions: [{ id: 'tmpl-a', version: 1 }],
+      },
+    ]);
+
+    expect(mappings.ef_effort_as_integer.type).toBe('long');
+    const source = (mappings.ef_effort_as_integer.script as { source: string }).source;
+    expect(source).toContain('if (raw.trim().isEmpty()) { return; }');
+    expect(source).toContain('try { emit(Long.parseLong(raw)); } catch (Exception e) {}');
   });
 });
 
