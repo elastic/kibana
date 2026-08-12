@@ -514,9 +514,37 @@ export const GetKnowledgeBaseResponseSchema = schema.object(
   { meta: { id: 'get_knowledge_base_response' } }
 );
 
+const ConflictTypeSchema = schema.oneOf([
+  schema.literal('overrides_fleet'),
+  schema.literal('blocked_by_same_priority'),
+  schema.literal('overridden_by_fleet'),
+]);
+
+const ConflictingTemplateSchema = schema.object({
+  name: schema.string({ maxLength: 1000 }),
+  priority: schema.number(),
+  conflictType: ConflictTypeSchema,
+});
+
+export const NamespaceConflictWarningSchema = schema.object({
+  dataStreamName: schema.string({ maxLength: 1000 }),
+  namespace: schema.string({ maxLength: 255 }),
+  baseTemplateName: schema.string({ maxLength: 1000 }),
+  nsTemplateName: schema.string({ maxLength: 1000 }),
+  conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema, { maxSize: 100 }),
+});
+
 export const UpdatePackageResponseSchema = schema.object(
-  { item: GetPackageInfoSchema },
+  {
+    item: GetPackageInfoSchema,
+    warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
+  },
   { meta: { id: 'update_package_response' } }
+);
+
+export const NamespacePreflightCheckResponseSchema = schema.object(
+  { warnings: schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 }) },
+  { meta: { id: 'namespace_preflight_check_response' } }
 );
 
 export const AssetReferenceSchema = schema.oneOf([
@@ -750,8 +778,19 @@ export const GetFileRequestSchema = {
 };
 
 const PackageRequestParamsSchema = schema.object({
-  pkgName: schema.string({ meta: { description: 'Package name' } }),
+  pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
 });
+
+export const NamespacePreflightCheckRequestSchema = {
+  params: PackageRequestParamsSchema,
+  body: schema.object({
+    namespaces: schema.arrayOf(schema.string({ maxLength: 255 }), {
+      minSize: 1,
+      maxSize: 100,
+      meta: { description: 'Namespaces to check for pre-existing index template conflicts.' },
+    }),
+  }),
+};
 
 const PackageVersionRequestParamsSchema = schema.object({
   pkgName: schema.string({ meta: { description: 'Package name' } }),
@@ -924,6 +963,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object(
             },
           })
         ),
+        warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
         error: schema.maybe(schema.string()),
       }),
       { maxSize: 1000 }

@@ -253,7 +253,7 @@ const CasesTableFiltersComponent = ({
                 selectedColumns={listFields}
                 onSelectedColumnsChange={onListFieldsChange}
                 buttonLabel={i18n.FIELDS_BUTTON_LABEL}
-                buttonIconType="list"
+                buttonIconType="listBullet"
               />
             )}
           </EuiFlexItem>
