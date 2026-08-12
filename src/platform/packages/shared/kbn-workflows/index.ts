@@ -46,6 +46,7 @@ export type { BaseStepDefinition, StepDocumentation } from './spec/step_definiti
 export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
+export * from './types/agent_conversation_ids';
 export * from './common/constants';
 export * from './common/validate_step_names';
 export * from './common/workflows_events';

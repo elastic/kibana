@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto } from './v1';
 
 /**
  * One `ai.agent` step's conversation join key, keyed by the step that produced it.

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
   extractAgentConversationIds,
   extractFirstAgentConversationId,
 } from './agent_conversation_ids';
+import type { WorkflowStepExecutionDto } from './v1';
 
 /**
  * Covers the multi-agent case (one conversation id per `ai.agent` step) and the
