@@ -127,6 +127,7 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
               idMapping.get(tool.id) ?? tool.id,
               tool.description,
               toolSchema.shape,
+              tool.annotations ?? {},
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({
                   toolId: tool.id,

@@ -139,6 +139,28 @@ describe('filterToolsByNamespace', () => {
   });
 });
 
+describe('MCP route — annotation argument logic', () => {
+  const mockAnnotations = {
+    title: 'List Indices',
+    readOnlyHint: true as const,
+    destructiveHint: false as const,
+    idempotentHint: true as const,
+    openWorldHint: false as const,
+  };
+
+  it('resolves tool.annotations when present', () => {
+    const tool = createMockTool('platform.core.list_indices', { annotations: mockAnnotations });
+    const annotationsArg = tool.annotations ?? {};
+    expect(annotationsArg).toEqual(mockAnnotations);
+  });
+
+  it('resolves to empty object when annotations are absent', () => {
+    const tool = createMockTool('platform.core.list_indices');
+    const annotationsArg = tool.annotations ?? {};
+    expect(annotationsArg).toEqual({});
+  });
+});
+
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
   const getRouteKey = `GET:${MCP_SERVER_PATH}`;
