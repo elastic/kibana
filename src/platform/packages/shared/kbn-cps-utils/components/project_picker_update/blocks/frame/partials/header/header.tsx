@@ -31,7 +31,7 @@ interface HeaderContextMenuClickActionContext {
   state: ProjectPickerState;
 }
 export interface HeaderContextMenuItemProps
-  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'external' | 'disabled'> {
+  extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'href' | 'external' | 'disabled'> {
   label: string;
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
 }
@@ -149,7 +149,12 @@ export function ProjectPickerFrameHeader({
                         <EuiContextMenuItem
                           key={item.label}
                           icon={item.icon}
-                          onClick={item.onClick}
+                          href={item.href}
+                          external={item.external}
+                          onClick={(event) => {
+                            item.onClick?.(event);
+                            closePopover();
+                          }}
                           disabled={item.isDisabled?.({ state }) ?? false}
                         >
                           {item.label}
