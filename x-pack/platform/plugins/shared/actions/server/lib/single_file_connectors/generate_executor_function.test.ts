@@ -688,6 +688,67 @@ describe('generateExecutorFunction', () => {
       });
     });
 
+    it('invalidates the exact pooled client once for a terminal operation error and does not retry', async () => {
+      const staleClient = { id: 'stale' };
+      const freshClient = { id: 'fresh' };
+      let buildCount = 0;
+      const terminate = jest.fn().mockResolvedValue(undefined);
+      const callTool = jest
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('session gone'), { code: 'UND_ERR_CLOSED' })
+        );
+      const fakeClientType = {
+        id: 'mcp',
+        build: jest.fn(async () => {
+          buildCount++;
+          return buildCount === 1 ? staleClient : freshClient;
+        }),
+        terminate,
+        shouldInvalidateOnError: jest.fn((err: unknown) => {
+          return (
+            typeof err === 'object' &&
+            err !== null &&
+            'code' in err &&
+            (err as { code?: string }).code === 'UND_ERR_CLOSED'
+          );
+        }),
+      };
+      const pool = new LeasePool<unknown>();
+      const handler = jest.fn(async (ctx: ActionContext) => {
+        const client = (await (ctx.getClient as unknown as GetClient)('mcp')) as { id: string };
+        await callTool(client);
+        return {};
+      });
+      const executor = generateExecutorFunction({
+        actions: { testAction: { isTool: true, input: {} as never, handler } },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => pool,
+        networkSettings: mockNetwork,
+        clientTypes: { mcp: fakeClientType },
+      });
+
+      const first = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+      expect(first).toMatchObject({
+        status: 'error',
+        message: 'session gone',
+      });
+      expect(callTool).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledTimes(1);
+      expect(terminate).toHaveBeenCalledWith(staleClient);
+
+      const second = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+      expect(second).toEqual({ status: 'ok', data: {}, actionId: connectorId });
+      expect(buildCount).toBe(2);
+      expect(callTool).toHaveBeenCalledTimes(2);
+      expect(callTool).toHaveBeenLastCalledWith(freshClient);
+    });
+
     it('surfaces a request for an unknown client type id as an error result', async () => {
       const pool = new LeasePool<unknown>();
       const handler = jest.fn(async (ctx: ActionContext) => {

@@ -13,6 +13,8 @@ import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
+const MAX_CAUSE_DEPTH = 5;
+const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
 
 /**
  * Tracks the `McpFetchResource` backing each pooled client so `terminate` can close it
@@ -29,6 +31,33 @@ export interface McpClientTypeDeps {
   defaultHeaders?: Readonly<Record<string, string>>;
   userAgent?: string;
 }
+
+const getErrorCode = (err: unknown): string | undefined => {
+  if (typeof err !== 'object' || err === null || !('code' in err)) {
+    return undefined;
+  }
+  return typeof err.code === 'string' ? err.code : undefined;
+};
+
+const walkCauseChain = (err: unknown, predicate: (current: unknown) => boolean): boolean => {
+  let current: unknown = err;
+  const seen = new Set<unknown>();
+
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current != null; depth++) {
+    if (seen.has(current)) {
+      return false;
+    }
+    seen.add(current);
+
+    if (predicate(current)) {
+      return true;
+    }
+
+    current = current instanceof Error ? current.cause : undefined;
+  }
+
+  return false;
+};
 
 /**
  * Factory for the registered client type behind `ctx.getClient('mcp')`.
@@ -60,6 +89,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       );
     }
 
+    const credentialHeaderNames = Object.keys(authHeaders);
     const headers: Record<string, string> = { ...(deps.defaultHeaders ?? {}), ...authHeaders };
     const hasHeaders = Object.keys(headers).length > 0;
 
@@ -68,62 +98,81 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       logger: ctx.logger,
       targetUrl: serverUrl,
       ...(hasHeaders ? { headers } : {}),
+      ...(credentialHeaderNames.length > 0 ? { credentialHeaderNames } : {}),
       ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
     });
     const customFetch = createSseGatedFetch(resource);
 
-    const client = new McpClient(
-      ctx.logger,
-      {
-        name: `kibana-mcp-${serverUrl}`,
-        version: DEFAULT_MCP_CLIENT_VERSION,
-        url: serverUrl,
-      },
-      {
-        ...(hasHeaders ? { headers: { ...headers } } : {}),
-        fetch: customFetch,
+    let client: McpClient | undefined;
+    try {
+      client = new McpClient(
+        ctx.logger,
+        {
+          name: `kibana-mcp-${serverUrl}`,
+          version: DEFAULT_MCP_CLIENT_VERSION,
+          url: serverUrl,
+        },
+        {
+          ...(hasHeaders ? { headers: { ...headers } } : {}),
+          fetch: customFetch,
+        }
+      );
+
+      fetchResources.set(client, resource);
+      await client.connect();
+      return client;
+    } catch (err) {
+      if (client) {
+        fetchResources.delete(client);
       }
-    );
-
-    fetchResources.set(client, resource);
-
-    await client.connect();
-
-    return client;
-  },
-
-  async terminate(client: McpClient): Promise<void> {
-    await client.disconnect();
-
-    const resource = fetchResources.get(client);
-    if (resource) {
-      fetchResources.delete(client);
       try {
         await resource.close();
       } catch {
-        // best-effort
+        // Preserve the original connection error.
+      }
+      throw err;
+    }
+  },
+
+  async terminate(client: McpClient): Promise<void> {
+    const resource = fetchResources.get(client);
+    fetchResources.delete(client);
+
+    try {
+      await client.disconnect();
+    } finally {
+      if (resource) {
+        try {
+          await resource.close();
+        } catch {
+          // Best-effort; do not mask a disconnect error with a cleanup failure.
+        }
       }
     }
   },
 
   isUserError(err: unknown): boolean {
-    if (err instanceof UnauthorizedError) {
-      return true;
-    }
-    if (err instanceof StreamableHTTPError) {
-      return err.code === 401 || err.code === 403;
-    }
-    if (err instanceof Error) {
-      if (err.message.startsWith('Unauthorized error:')) {
+    return walkCauseChain(err, (current) => {
+      if (current instanceof UnauthorizedError) {
         return true;
       }
-      if (err.cause instanceof UnauthorizedError) {
+      if (current instanceof StreamableHTTPError) {
+        return current.code === 401 || current.code === 403;
+      }
+      if (current instanceof Error && current.message.startsWith('Unauthorized error:')) {
         return true;
       }
-      if (err.cause instanceof StreamableHTTPError) {
-        return err.cause.code === 401 || err.cause.code === 403;
+      return false;
+    });
+  },
+
+  shouldInvalidateOnError(err: unknown): boolean {
+    return walkCauseChain(err, (current) => {
+      if (current instanceof StreamableHTTPError && current.code === 404) {
+        return true;
       }
-    }
-    return false;
+      const code = getErrorCode(current);
+      return code !== undefined && TERMINAL_UNDICI_CODES.has(code);
+    });
   },
 });

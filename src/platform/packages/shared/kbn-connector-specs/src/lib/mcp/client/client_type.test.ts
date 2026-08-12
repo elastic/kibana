@@ -134,7 +134,7 @@ describe('createMcpClientType', () => {
       const { createFetchResource } = jest.requireMock('./fetch_resource') as {
         createFetchResource: jest.Mock;
       };
-      const authHeaders = { Authorization: 'Bearer tok' };
+      const authHeaders = { Authorization: 'Bearer tok', 'X-API-Key': 'secret' };
       const ctx = makeBuildContext({
         credential: { getAuthHeaders: jest.fn().mockResolvedValue(authHeaders) },
       });
@@ -142,7 +142,10 @@ describe('createMcpClientType', () => {
       await createMcpClientType().build(ctx);
 
       expect(createFetchResource).toHaveBeenCalledWith(
-        expect.objectContaining({ headers: expect.objectContaining(authHeaders) })
+        expect.objectContaining({
+          headers: expect.objectContaining(authHeaders),
+          credentialHeaderNames: ['Authorization', 'X-API-Key'],
+        })
       );
       expect(McpClient).toHaveBeenCalledWith(
         expect.anything(),
@@ -160,6 +163,23 @@ describe('createMcpClientType', () => {
 
       expect(client.connect).toHaveBeenCalled();
       expect(ctx.logger.debug).toHaveBeenCalledWith(expect.stringContaining('No auth headers'));
+    });
+
+    it('closes the fetch resource and preserves the original error when connect fails', async () => {
+      const { createFetchResource } = jest.requireMock('./fetch_resource') as {
+        createFetchResource: jest.Mock;
+      };
+      const mockResource = { fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
+      createFetchResource.mockReturnValue(mockResource);
+
+      const connectError = new Error('connect failed');
+      (McpClient as unknown as jest.Mock).mockImplementationOnce(() => ({
+        connect: jest.fn().mockRejectedValue(connectError),
+        disconnect: jest.fn().mockResolvedValue(undefined),
+      }));
+
+      await expect(createMcpClientType().build(makeBuildContext())).rejects.toBe(connectError);
+      expect(mockResource.close).toHaveBeenCalled();
     });
   });
 
@@ -188,6 +208,46 @@ describe('createMcpClientType', () => {
       await clientType.terminate(client);
 
       expect(mockResource.close).toHaveBeenCalled();
+    });
+
+    it('closes the fetch resource even when disconnect fails and preserves the disconnect error', async () => {
+      const { createFetchResource } = jest.requireMock('./fetch_resource') as {
+        createFetchResource: jest.Mock;
+      };
+      const mockResource = {
+        fetch: jest.fn(),
+        close: jest.fn().mockRejectedValue(new Error('close failed')),
+      };
+      createFetchResource.mockReturnValue(mockResource);
+
+      const disconnectError = new Error('disconnect failed');
+      (McpClient as unknown as jest.Mock).mockImplementationOnce(() => ({
+        connect: jest.fn().mockResolvedValue({ connected: true }),
+        disconnect: jest.fn().mockRejectedValue(disconnectError),
+      }));
+
+      const clientType = createMcpClientType();
+      const client = await clientType.build(makeBuildContext());
+
+      await expect(clientType.terminate(client)).rejects.toBe(disconnectError);
+      expect(mockResource.close).toHaveBeenCalled();
+    });
+
+    it('is idempotent for WeakMap-backed resource cleanup', async () => {
+      const { createFetchResource } = jest.requireMock('./fetch_resource') as {
+        createFetchResource: jest.Mock;
+      };
+      const mockResource = { fetch: jest.fn(), close: jest.fn().mockResolvedValue(undefined) };
+      createFetchResource.mockReturnValue(mockResource);
+
+      const clientType = createMcpClientType();
+      const client = await clientType.build(makeBuildContext());
+
+      await clientType.terminate(client);
+      await clientType.terminate(client);
+
+      expect(mockResource.close).toHaveBeenCalledTimes(1);
+      expect(client.disconnect).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -227,6 +287,25 @@ describe('createMcpClientType', () => {
 
     it('returns false for plain Error', () => {
       expect(createMcpClientType().isUserError?.(new Error('boom'))).toBe(false);
+    });
+  });
+
+  describe('shouldInvalidateOnError', () => {
+    it.each([
+      [new StreamableHTTPError(404, 'gone'), true],
+      [Object.assign(new Error('socket gone'), { code: 'UND_ERR_SOCKET' }), true],
+      [Object.assign(new Error('socket gone'), { code: 'UND_ERR_CLOSED' }), true],
+      [Object.assign(new Error('socket gone'), { code: 'UND_ERR_DESTROYED' }), true],
+      [new StreamableHTTPError(500, 'boom'), false],
+      [new Error('boom'), false],
+    ])('classifies terminal errors', (error, expected) => {
+      expect(createMcpClientType().shouldInvalidateOnError?.(error)).toBe(expected);
+    });
+
+    it('returns true when a terminal error is nested in a bounded cause chain', () => {
+      const nested = Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' });
+      const err = new Error('wrapped', { cause: new Error('mid', { cause: nested }) });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
   });
 });

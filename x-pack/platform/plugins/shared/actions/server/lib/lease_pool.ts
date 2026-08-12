@@ -9,6 +9,8 @@ import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/core/server';
 
 export const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
+// Persistent MCP connections occupy pool slots for the idle TTL. Size this capacity (and Kibana
+// process limits) before any feature enables MCP execution; do not raise the limit ad hoc.
 const MAX_ENTRIES = 1000;
 
 interface PoolEntry<TClient> {
@@ -65,6 +67,22 @@ export class LeasePool<TClient> {
     const entry: PoolEntry<TClient> = { promise, terminate };
     this.cache.set(key, entry);
     return promise;
+  }
+
+  /**
+   * Removes one pooled entry when its identity still matches `promise`, then terminates that
+   * client. A late failure from a replaced client is a no-op so it cannot evict the replacement.
+   * Prefer this over {@link evict} for operation failures: connector-wide eviction would drop
+   * unrelated client types / user profiles.
+   */
+  async invalidate(key: string, promise: Promise<TClient>): Promise<void> {
+    const entry = this.cache.peek(key);
+    if (entry === undefined || entry.promise !== promise) {
+      return;
+    }
+
+    this.cache.delete(key);
+    await this.terminateEntry(entry, key);
   }
 
   /**
