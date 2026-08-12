@@ -25,8 +25,6 @@ export type {
   Dimension,
   MetricUnit,
   MetricsSort,
-  MetricsSortBy,
-  MetricsSortDirection,
   UnifiedMetricsGridProps,
 } from './src/types';
 export {
@@ -34,8 +32,3 @@ export {
   HISTOGRAM_PERCENTILE_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
 } from './src/components/flyout/metrics_grid_settings_flyout';
-export {
-  DEFAULT_METRICS_SORT,
-  METRICS_SORT_BY,
-  METRICS_SORT_DIRECTION,
-} from './src/common/constants';
