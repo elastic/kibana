@@ -42,13 +42,17 @@ import {
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
-import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
+import type {
+  WriteAuditRecord,
+  SavedObjectAuditDiffRecorder,
+} from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
 export interface PerformBulkCreateParams<T = unknown> {
   objects: Array<SavedObjectsBulkCreateObject<T>>;
   options: SavedObjectsCreateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 type ExpectedResult = Either<
@@ -66,7 +70,7 @@ type ExpectedResult = Either<
 >;
 
 export const performBulkCreate = async <T>(
-  { objects, options }: PerformBulkCreateParams<T>,
+  { objects, options, auditDiffRecorder }: PerformBulkCreateParams<T>,
   {
     registry,
     helpers,
@@ -87,7 +91,7 @@ export const performBulkCreate = async <T>(
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension, encryptionExtension } = extensions;
+  const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   const {
@@ -238,270 +242,243 @@ export const performBulkCreate = async <T>(
     'bulk_create'
   );
 
-  // Per-object audit state for the events emitted in the `finally` below: one entry per
-  // authorized object, keyed by `type:id`. `after` starts as the requested attributes and
-  // is refined to the migrated (stored) attributes during response mapping; `before` is
-  // populated by the overwrite preflight fetch; `outcome` flips to 'success' per object
-  // once ES confirms its write. Objects rejected before authorization are not audited.
-  const auditRecords = new Map<
-    string,
-    {
-      savedObject: { type: string; id: string };
-      after: Record<string, unknown>;
-      outcome: 'success' | 'unknown';
+  // Track each authorized object for auditing (flushed by the repository once the
+  // operation settles). `after` starts as the requested attributes and is refined to
+  // the migrated (stored) attributes during response mapping; `before` is populated by
+  // the overwrite preflight fetch. Objects rejected before authorization are not audited.
+  const auditRecordsByKey = new Map<string, WriteAuditRecord>();
+  if (auditDiffRecorder) {
+    for (const { value } of validObjects) {
+      auditRecordsByKey.set(
+        `${value.type}:${value.id}`,
+        auditDiffRecorder.track(
+          { type: value.type, id: value.id },
+          { after: (value.object.attributes ?? {}) as Record<string, unknown> }
+        )
+      );
     }
-  >();
-  for (const { value } of validObjects) {
-    auditRecords.set(`${value.type}:${value.id}`, {
-      savedObject: { type: value.type, id: value.id },
-      after: (value.object.attributes ?? {}) as Record<string, unknown>,
-      outcome: 'unknown',
-    });
   }
-  const beforeAttributesMap = new Map<string, Record<string, unknown>>();
 
-  // When saved object diff auditing is enabled, the authorization step above did not
-  // audit the operation (its pre-operation events are suppressed) — the events emitted
-  // in the `finally` below are the operation's only record, on both the success and the
-  // failure path (errors propagate unchanged).
-  try {
-    let bulkRequestIndexCounter = 0;
-    const bulkCreateParams: object[] = [];
-    type ExpectedBulkResult = Either<
-      { type: string; id?: string; error: Payload },
-      {
-        esRequestIndex: number;
-        requestedId: string;
-        rawMigratedDoc: SavedObjectsRawDoc;
-        isOverwrite: boolean;
-      }
-    >;
-    const expectedBulkResults = await Promise.all(
-      (expectedAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
-        async (expectedBulkGetResult) => {
-          if (isLeft(expectedBulkGetResult)) {
-            return expectedBulkGetResult;
-          }
+  let bulkRequestIndexCounter = 0;
+  const bulkCreateParams: object[] = [];
+  type ExpectedBulkResult = Either<
+    { type: string; id?: string; error: Payload },
+    {
+      esRequestIndex: number;
+      requestedId: string;
+      rawMigratedDoc: SavedObjectsRawDoc;
+      isOverwrite: boolean;
+    }
+  >;
+  const expectedBulkResults = await Promise.all(
+    (expectedAuthorizedResults ?? expectedResults).map<Promise<ExpectedBulkResult>>(
+      async (expectedBulkGetResult) => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
 
-          let savedObjectNamespace: string | undefined;
-          let savedObjectNamespaces: string[] | undefined;
-          let existingOriginId: string | undefined;
-          let versionProperties;
-          let accessControl: SavedObjectAccessControl | undefined;
-          const {
-            esRequestIndex,
-            object: { initialNamespaces, version, ...object },
-            method,
-          } = expectedBulkGetResult.value;
-          if (esRequestIndex !== undefined) {
-            const preflightResult = preflightCheckResponse[esRequestIndex];
-            const { type, id, existingDocument, error } = preflightResult;
-            if (error) {
-              const { metadata } = error;
-              return left({
-                id,
-                type,
-                error: {
-                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                  ...(metadata && { metadata }),
-                },
-              });
-            }
-            savedObjectNamespaces =
-              initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-            versionProperties = getExpectedVersionProperties(version);
-            existingOriginId = existingDocument?._source?.originId;
-            accessControl = existingDocument?._source?.accessControl;
-          } else {
-            if (registry.isSingleNamespace(object.type)) {
-              savedObjectNamespace = initialNamespaces
-                ? normalizeNamespace(initialNamespaces[0])
-                : namespace;
-            } else if (registry.isMultiNamespace(object.type)) {
-              savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
-            }
-            versionProperties = getExpectedVersionProperties(version);
-          }
-          const accessControlToWrite = accessControl ? accessControl : object.accessControl;
-          // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
-          // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
-          const originId = Object.keys(object).includes('originId')
-            ? object.originId
-            : existingOriginId;
-          const migrated = migrationHelper.migrateInputDocument({
-            id: object.id,
-            type: object.type,
-            attributes: await encryptionHelper.optionallyEncryptAttributes(
-              object.type,
-              object.id,
-              savedObjectNamespace, // only used for multi-namespace object types
-              object.attributes
-            ),
-            migrationVersion: object.migrationVersion,
-            coreMigrationVersion: object.coreMigrationVersion,
-            typeMigrationVersion: object.typeMigrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            managed: setManaged({ optionsManaged, objectManaged: object.managed }),
-            ...(accessControlToWrite && { accessControl: accessControlToWrite }),
-            updated_at: time,
-            created_at: time,
-            ...(createdBy && { created_by: createdBy }),
-            ...(updatedBy && { updated_by: updatedBy }),
-            references: object.references || [],
-            originId,
-          }) as SavedObjectSanitizedDoc<T>;
-
-          /**
-           * If a validation has been registered for this type, we run it against the migrated attributes.
-           * This is an imperfect solution because malformed attributes could have already caused the
-           * migration to fail, but it's the best we can do without devising a way to run validations
-           * inside the migration algorithm itself.
-           */
-          try {
-            validationHelper.validateObjectForCreate(object.type, migrated);
-          } catch (error) {
+        let savedObjectNamespace: string | undefined;
+        let savedObjectNamespaces: string[] | undefined;
+        let existingOriginId: string | undefined;
+        let versionProperties;
+        let accessControl: SavedObjectAccessControl | undefined;
+        const {
+          esRequestIndex,
+          object: { initialNamespaces, version, ...object },
+          method,
+        } = expectedBulkGetResult.value;
+        if (esRequestIndex !== undefined) {
+          const preflightResult = preflightCheckResponse[esRequestIndex];
+          const { type, id, existingDocument, error } = preflightResult;
+          if (error) {
+            const { metadata } = error;
             return left({
-              id: object.id,
-              type: object.type,
-              error,
+              id,
+              type,
+              error: {
+                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+                ...(metadata && { metadata }),
+              },
             });
           }
-
-          const expectedResult = {
-            esRequestIndex: bulkRequestIndexCounter++,
-            requestedId: object.id,
-            rawMigratedDoc: serializer.savedObjectToRaw(migrated),
-            isOverwrite: method === 'index',
-          };
-
-          bulkCreateParams.push(
-            {
-              [method]: {
-                _id: expectedResult.rawMigratedDoc._id,
-                _index: commonHelper.getIndexForType(object.type),
-                ...(overwrite && versionProperties),
-              },
-            },
-            expectedResult.rawMigratedDoc._source
-          );
-
-          return right(expectedResult);
+          savedObjectNamespaces =
+            initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
+          versionProperties = getExpectedVersionProperties(version);
+          existingOriginId = existingDocument?._source?.originId;
+          accessControl = existingDocument?._source?.accessControl;
+        } else {
+          if (registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = initialNamespaces
+              ? normalizeNamespace(initialNamespaces[0])
+              : namespace;
+          } else if (registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
+          versionProperties = getExpectedVersionProperties(version);
         }
-      )
-    );
+        const accessControlToWrite = accessControl ? accessControl : object.accessControl;
+        // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
+        // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+        const originId = Object.keys(object).includes('originId')
+          ? object.originId
+          : existingOriginId;
+        const migrated = migrationHelper.migrateInputDocument({
+          id: object.id,
+          type: object.type,
+          attributes: await encryptionHelper.optionallyEncryptAttributes(
+            object.type,
+            object.id,
+            savedObjectNamespace, // only used for multi-namespace object types
+            object.attributes
+          ),
+          migrationVersion: object.migrationVersion,
+          coreMigrationVersion: object.coreMigrationVersion,
+          typeMigrationVersion: object.typeMigrationVersion,
+          ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+          ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+          managed: setManaged({ optionsManaged, objectManaged: object.managed }),
+          ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+          updated_at: time,
+          created_at: time,
+          ...(createdBy && { created_by: createdBy }),
+          ...(updatedBy && { updated_by: updatedBy }),
+          references: object.references || [],
+          originId,
+        }) as SavedObjectSanitizedDoc<T>;
 
-    // When overwriting, capture previous attributes for diffs. Feature-gated and
-    // failure-isolated so an mget error degrades to before={} instead of failing the write.
-    if (securityExtension?.savedObjectDiffEnabled) {
-      const overwriteRequests = expectedBulkResults.flatMap((expectedResult) => {
-        if (isLeft(expectedResult) || !expectedResult.value.isOverwrite) {
-          return [];
-        }
-        const { requestedId, rawMigratedDoc } = expectedResult.value;
-        const type = rawMigratedDoc._source.type;
-        return [
-          {
-            rawId: rawMigratedDoc._id,
-            type,
-            id: requestedId,
-          },
-        ];
-      });
-
-      if (overwriteRequests.length > 0) {
+        /**
+         * If a validation has been registered for this type, we run it against the migrated attributes.
+         * This is an imperfect solution because malformed attributes could have already caused the
+         * migration to fail, but it's the best we can do without devising a way to run validations
+         * inside the migration algorithm itself.
+         */
         try {
-          const objectByRawId = new Map(overwriteRequests.map((req) => [req.rawId, req]));
-          const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
-            {
-              docs: overwriteRequests.map(({ rawId, type }) => ({
-                _id: rawId,
-                _index: commonHelper.getIndexForType(type),
-                _source: [type],
-              })),
-            },
-            { ignore: [404] }
-          );
-          beforeDocs.docs?.forEach((doc) => {
-            if (!isMgetDoc(doc)) return;
-            const target = objectByRawId.get(doc._id);
-            if (!target) return;
-            const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
-            if (attrs) {
-              beforeAttributesMap.set(
-                `${target.type}:${target.id}`,
-                attrs as Record<string, unknown>
-              );
-            }
-          });
+          validationHelper.validateObjectForCreate(object.type, migrated);
         } catch (error) {
-          logger.error(
-            `Failed to fetch before-state for saved object diff on bulk overwrite create: ${String(
-              error
-            )}`
-          );
+          return left({
+            id: object.id,
+            type: object.type,
+            error,
+          });
         }
+
+        const expectedResult = {
+          esRequestIndex: bulkRequestIndexCounter++,
+          requestedId: object.id,
+          rawMigratedDoc: serializer.savedObjectToRaw(migrated),
+          isOverwrite: method === 'index',
+        };
+
+        bulkCreateParams.push(
+          {
+            [method]: {
+              _id: expectedResult.rawMigratedDoc._id,
+              _index: commonHelper.getIndexForType(object.type),
+              ...(overwrite && versionProperties),
+            },
+          },
+          expectedResult.rawMigratedDoc._source
+        );
+
+        return right(expectedResult);
+      }
+    )
+  );
+
+  // When overwriting, capture previous attributes for diffs. Feature-gated and
+  // failure-isolated so an mget error degrades to before={} instead of failing the write.
+  if (auditDiffRecorder) {
+    const overwriteRequests = expectedBulkResults.flatMap((expectedResult) => {
+      if (isLeft(expectedResult) || !expectedResult.value.isOverwrite) {
+        return [];
+      }
+      const { requestedId, rawMigratedDoc } = expectedResult.value;
+      const type = rawMigratedDoc._source.type;
+      return [
+        {
+          rawId: rawMigratedDoc._id,
+          type,
+          id: requestedId,
+        },
+      ];
+    });
+
+    if (overwriteRequests.length > 0) {
+      try {
+        const objectByRawId = new Map(overwriteRequests.map((req) => [req.rawId, req]));
+        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+          {
+            docs: overwriteRequests.map(({ rawId, type }) => ({
+              _id: rawId,
+              _index: commonHelper.getIndexForType(type),
+              _source: [type],
+            })),
+          },
+          { ignore: [404] }
+        );
+        beforeDocs.docs?.forEach((doc) => {
+          if (!isMgetDoc(doc)) return;
+          const target = objectByRawId.get(doc._id);
+          if (!target) return;
+          const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
+          if (attrs) {
+            auditRecordsByKey
+              .get(`${target.type}:${target.id}`)
+              ?.setBefore(attrs as Record<string, unknown>);
+          }
+        });
+      } catch (error) {
+        logger.error(
+          `Failed to fetch before-state for saved object diff on bulk overwrite create: ${String(
+            error
+          )}`
+        );
       }
     }
-
-    const bulkResponse = bulkCreateParams.length
-      ? await client.bulk({
-          refresh,
-          require_alias: true,
-          operations: bulkCreateParams,
-        })
-      : undefined;
-
-    const result = {
-      saved_objects: expectedBulkResults.map((expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.value as any;
-        }
-
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
-
-        const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
-        if (error) {
-          return { type: rawMigratedDoc._source.type, id: requestedId, error };
-        }
-
-        const type = rawMigratedDoc._source.type;
-        const auditRecord = auditRecords.get(`${type}:${requestedId}`);
-        if (auditRecord) {
-          auditRecord.after = (rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>;
-          auditRecord.outcome = 'success';
-        }
-
-        // When method == 'index' the bulkResponse doesn't include the indexed
-        // _source so we return rawMigratedDoc but have to spread the latest
-        // _seq_no and _primary_term values from the rawResponse.
-        return serializerHelper.rawToSavedObject(
-          {
-            ...rawMigratedDoc,
-            ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
-          },
-          { migrationVersionCompatibility }
-        );
-      }),
-    };
-    return encryptionHelper.optionallyDecryptAndRedactBulkResult(
-      result,
-      authorizationResult?.typeMap,
-      objects
-    );
-  } finally {
-    for (const [key, { savedObject, after, outcome }] of auditRecords) {
-      emitSavedObjectDiffAuditEvent({
-        securityExtension,
-        encryptionExtension,
-        logger,
-        action: 'saved_object_create',
-        savedObject,
-        outcome,
-        before: beforeAttributesMap.get(key) ?? {},
-        after,
-      });
-    }
   }
+
+  const bulkResponse = bulkCreateParams.length
+    ? await client.bulk({
+        refresh,
+        require_alias: true,
+        operations: bulkCreateParams,
+      })
+    : undefined;
+
+  const result = {
+    saved_objects: expectedBulkResults.map((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return expectedResult.value as any;
+      }
+
+      const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+      const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
+
+      const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
+      if (error) {
+        return { type: rawMigratedDoc._source.type, id: requestedId, error };
+      }
+
+      const type = rawMigratedDoc._source.type;
+      const auditRecord = auditRecordsByKey.get(`${type}:${requestedId}`);
+      auditRecord?.setAfter((rawMigratedDoc._source[type] ?? {}) as Record<string, unknown>);
+      auditRecord?.succeed();
+
+      // When method == 'index' the bulkResponse doesn't include the indexed
+      // _source so we return rawMigratedDoc but have to spread the latest
+      // _seq_no and _primary_term values from the rawResponse.
+      return serializerHelper.rawToSavedObject(
+        {
+          ...rawMigratedDoc,
+          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+        },
+        { migrationVersionCompatibility }
+      );
+    }),
+  };
+  return encryptionHelper.optionallyDecryptAndRedactBulkResult(
+    result,
+    authorizationResult?.typeMap,
+    objects
+  );
 };

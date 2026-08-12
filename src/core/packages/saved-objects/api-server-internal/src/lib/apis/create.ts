@@ -25,7 +25,7 @@ import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
-import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -33,10 +33,11 @@ export interface PerformCreateParams<T = unknown> {
   type: string;
   attributes: T;
   options: SavedObjectsCreateOptions;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performCreate = async <T>(
-  { type, attributes, options }: PerformCreateParams<T>,
+  { type, attributes, options, auditDiffRecorder }: PerformCreateParams<T>,
   {
     registry,
     helpers,
@@ -57,7 +58,7 @@ export const performCreate = async <T>(
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension, encryptionExtension } = extensions;
+  const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const {
@@ -151,126 +152,103 @@ export const performCreate = async <T>(
     },
   });
 
-  // State for the single post-operation audit event emitted in the `finally` below.
-  // `after` starts as the caller's requested attributes and is refined to the migrated
-  // (stored) attributes once those are computed; `before` is populated by the overwrite
-  // preflight fetch; `outcome` flips to 'success' once the ES write is known to have
-  // committed. Encrypted attributes are redacted by the emit helper.
-  let beforeAttributes: Record<string, unknown> = {};
-  let afterAttributes = attributes as unknown as Record<string, unknown>;
-  let outcome: 'success' | 'unknown' = 'unknown';
-
-  // When saved object diff auditing is enabled, the authorization step above did not
-  // audit the operation (its pre-operation event is suppressed) — the event emitted in
-  // the `finally` below is the operation's only record, on both the success and the
-  // failure path (errors propagate unchanged).
-  try {
-    if (preflightResult?.error) {
-      // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
-      throw SavedObjectsErrorHelpers.createConflictError(type, id);
-    }
-
-    // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
-    // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
-    const originId = Object.keys(options).includes('originId')
-      ? options.originId
-      : existingOriginId;
-    const migrated = migrationHelper.migrateInputDocument({
-      id,
-      type,
-      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      originId,
-      attributes: await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        savedObjectNamespace, // if single namespace type, this is the first in initialNamespaces. If multi-namespace type this is options.namespace/current namespace.
-        attributes
-      ),
-      migrationVersion,
-      coreMigrationVersion,
-      typeMigrationVersion,
-      managed: setManaged({ optionsManaged: managed }),
-      created_at: time,
-      updated_at: time,
-      ...(createdBy && { created_by: createdBy }),
-      ...(updatedBy && { updated_by: updatedBy }),
-      ...(Array.isArray(references) && { references }),
-      ...(accessControlToWrite && { accessControl: accessControlToWrite }),
-    });
-    afterAttributes = (migrated.attributes ?? {}) as Record<string, unknown>;
-
-    /**
-     * If a validation has been registered for this type, we run it against the migrated attributes.
-     * This is an imperfect solution because malformed attributes could have already caused the
-     * migration to fail, but it's the best we can do without devising a way to run validations
-     * inside the migration algorithm itself.
-     */
-    validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
-
-    const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
-
-    // When overwriting, fetch the previous attributes so the diff is replace/remove ops
-    // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
-    // get error degrades to before={} (create-shaped diff) instead of failing the write.
-    if (overwrite && securityExtension?.savedObjectDiffEnabled) {
-      try {
-        const existing = await client.get<SavedObjectsRawDocSource>(
-          {
-            id: raw._id,
-            index: commonHelper.getIndexForType(type),
-            _source_includes: [type],
-          },
-          { ignore: [404], meta: true }
-        );
-        beforeAttributes = (existing.body._source?.[type] ?? {}) as Record<string, unknown>;
-      } catch (error) {
-        logger.error(
-          `Failed to fetch before-state for saved object diff on overwrite create ${type}:${id}: ${String(
-            error
-          )}`
-        );
-      }
-    }
-
-    const requestParams: IndexRequest | CreateRequest = {
-      id: raw._id,
-      index: commonHelper.getIndexForType(type),
-      refresh,
-      document: raw._source,
-      ...(overwrite && version ? decodeRequestVersion(version) : {}),
-      require_alias: true,
-    };
-
-    const { body, statusCode, headers } =
-      id && overwrite
-        ? await client.index(requestParams as IndexRequest, { meta: true })
-        : await client.create(requestParams as CreateRequest, { meta: true });
-
-    // throw if we can't verify a 404 response is from Elasticsearch
-    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-    }
-
-    // The write has committed; a failure while preparing the response (below) no
-    // longer makes the operation's outcome unknown.
-    outcome = 'success';
-
-    return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      serializerHelper.rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
-      authorizationResult?.typeMap,
-      attributes
-    );
-  } finally {
-    emitSavedObjectDiffAuditEvent({
-      securityExtension,
-      encryptionExtension,
-      logger,
-      action: 'saved_object_create',
-      savedObject: { type, id },
-      outcome,
-      before: beforeAttributes,
-      after: afterAttributes,
-    });
+  // Track the write for auditing (flushed by the repository once the operation
+  // settles). `after` starts as the requested attributes and is refined to the
+  // migrated (stored) attributes below.
+  const auditRecord = auditDiffRecorder?.track(
+    { type, id },
+    { after: attributes as unknown as Record<string, unknown> }
+  );
+  if (preflightResult?.error) {
+    // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
+    throw SavedObjectsErrorHelpers.createConflictError(type, id);
   }
+
+  // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
+  // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
+  const originId = Object.keys(options).includes('originId') ? options.originId : existingOriginId;
+  const migrated = migrationHelper.migrateInputDocument({
+    id,
+    type,
+    ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+    ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+    originId,
+    attributes: await encryptionHelper.optionallyEncryptAttributes(
+      type,
+      id,
+      savedObjectNamespace, // if single namespace type, this is the first in initialNamespaces. If multi-namespace type this is options.namespace/current namespace.
+      attributes
+    ),
+    migrationVersion,
+    coreMigrationVersion,
+    typeMigrationVersion,
+    managed: setManaged({ optionsManaged: managed }),
+    created_at: time,
+    updated_at: time,
+    ...(createdBy && { created_by: createdBy }),
+    ...(updatedBy && { updated_by: updatedBy }),
+    ...(Array.isArray(references) && { references }),
+    ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+  });
+  auditRecord?.setAfter((migrated.attributes ?? {}) as Record<string, unknown>);
+
+  /**
+   * If a validation has been registered for this type, we run it against the migrated attributes.
+   * This is an imperfect solution because malformed attributes could have already caused the
+   * migration to fail, but it's the best we can do without devising a way to run validations
+   * inside the migration algorithm itself.
+   */
+  validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
+
+  const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
+
+  // When overwriting, fetch the previous attributes so the diff is replace/remove ops
+  // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
+  // get error degrades to before={} (create-shaped diff) instead of failing the write.
+  if (overwrite && auditDiffRecorder) {
+    try {
+      const existing = await client.get<SavedObjectsRawDocSource>(
+        {
+          id: raw._id,
+          index: commonHelper.getIndexForType(type),
+          _source_includes: [type],
+        },
+        { ignore: [404], meta: true }
+      );
+      auditRecord?.setBefore((existing.body._source?.[type] ?? {}) as Record<string, unknown>);
+    } catch (error) {
+      logger.error(
+        `Failed to fetch before-state for saved object diff on overwrite create ${type}:${id}: ${String(
+          error
+        )}`
+      );
+    }
+  }
+
+  const requestParams: IndexRequest | CreateRequest = {
+    id: raw._id,
+    index: commonHelper.getIndexForType(type),
+    refresh,
+    document: raw._source,
+    ...(overwrite && version ? decodeRequestVersion(version) : {}),
+    require_alias: true,
+  };
+
+  const { body, statusCode, headers } =
+    id && overwrite
+      ? await client.index(requestParams as IndexRequest, { meta: true })
+      : await client.create(requestParams as CreateRequest, { meta: true });
+
+  // throw if we can't verify a 404 response is from Elasticsearch
+  if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
+  }
+
+  auditRecord?.succeed();
+
+  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    serializerHelper.rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),
+    authorizationResult?.typeMap,
+    attributes
+  );
 };

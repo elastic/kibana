@@ -27,7 +27,7 @@ import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
-import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
+import type { SavedObjectAuditDiffRecorder } from './utils/saved_object_audit_diff_recorder';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -36,6 +36,7 @@ export interface PerformUpdateParams<T = unknown> {
   id: string;
   attributes: T;
   options: SavedObjectsUpdateOptions<T>;
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder;
 }
 
 export const performUpdate = async <T>(
@@ -76,7 +77,7 @@ export const performUpdate = async <T>(
 };
 
 export const executeUpdate = async <T>(
-  { id, type, attributes, options }: PerformUpdateParams<T>,
+  { id, type, attributes, options, auditDiffRecorder }: PerformUpdateParams<T>,
   { registry, helpers, client, serializer, extensions = {}, logger }: ApiExecutionContext,
   { namespace }: { namespace: string | undefined }
 ): Promise<SavedObjectsUpdateResponse<T>> => {
@@ -88,7 +89,7 @@ export const executeUpdate = async <T>(
     validation: validationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension, encryptionExtension } = extensions;
+  const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
   const {
     version,
@@ -130,295 +131,277 @@ export const executeUpdate = async <T>(
     },
   });
 
-  // State for the single post-operation audit event emitted in the `finally` below.
-  // `after` starts as the caller's requested attributes and is refined per path (upsert
-  // vs update) once the stored attributes are computed; `before` is populated from the
-  // preflight document on the update path; `outcome` flips to 'success' once the ES
-  // write is known to have committed. Encrypted attributes are redacted by the emit helper.
-  let beforeAttributes: Record<string, unknown> = {};
-  let afterAttributes = attributes as unknown as Record<string, unknown>;
-  let outcome: 'success' | 'unknown' = 'unknown';
+  // Track the write for auditing (flushed by the repository once the operation
+  // settles). `after` starts as the requested attributes and is refined per path
+  // (upsert vs update) below; a conflict retry re-tracks the object, so the final
+  // attempt determines what is audited.
+  const auditRecord = auditDiffRecorder?.track(
+    { type, id },
+    { after: attributes as unknown as Record<string, unknown> }
+  );
+  // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
+  const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
+  const docNotFound =
+    preflightDocNSResult?.checkResult === 'not_found' ||
+    preflightDocResult.checkDocFound === 'not_found';
 
-  // When saved object diff auditing is enabled, the authorization step above did not
-  // audit the operation (its pre-operation event is suppressed) — the event emitted in
-  // the `finally` below is the operation's only record, on both the success and the
-  // failure path (errors propagate unchanged).
-  try {
-    // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
-    const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
-    const docNotFound =
-      preflightDocNSResult?.checkResult === 'not_found' ||
-      preflightDocResult.checkDocFound === 'not_found';
-
-    // doc not in namespace, or doc not found but we're not upserting => throw 404
-    if (docOutsideNamespace || (docNotFound && !upsert)) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
-
-    if (upsert && preflightDocNSResult?.checkResult === 'not_found') {
-      // we only need to check multi-namespace objects. Single and agnostic types do not have aliases.
-      // throws SavedObjectsErrorHelpers.createConflictError(type, id) if there is one
-      await preflightHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
-    }
-
-    // migrate the existing doc to the current version
-    let migrated: SavedObject<T>;
-    if (preflightDocResult.checkDocFound === 'found') {
-      const document = getSavedObjectFromSource<T>(
-        registry,
-        type,
-        id,
-        preflightDocResult.rawDocSource!,
-        { migrationVersionCompatibility }
-      );
-      try {
-        migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-      } catch (migrateStorageDocError) {
-        throw SavedObjectsErrorHelpers.decorateGeneralError(
-          migrateStorageDocError,
-          'Failed to migrate document to the latest version.'
-        );
-      }
-    }
-    // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
-
-    const time = getCurrentTime();
-    const updatedBy = userHelper.getCurrentUserProfileUid();
-    let updatedOrCreatedSavedObject: SavedObject<T>;
-    // `upsert` option set and document was not found -> we need to perform an upsert operation
-    const shouldPerformUpsert = upsert && docNotFound;
-
-    let savedObjectNamespace: string | undefined;
-    let savedObjectNamespaces: string[] | undefined;
-
-    if (namespace && registry.isSingleNamespace(type)) {
-      savedObjectNamespace = namespace;
-    } else if (registry.isMultiNamespace(type)) {
-      savedObjectNamespaces = preflightDocNSResult.savedObjectNamespaces;
-    }
-
-    // UPSERT CASE START
-    if (shouldPerformUpsert) {
-      // Note: Update does not support accessControl parameters. If applicable and possible (type supports access control
-      // and there is an active user profile), the default access control metadata will be set.
-      // To explicitly set access control for a new object, the `create` API should be used.
-      let accessControlToWrite: SavedObjectAccessControl | undefined;
-      if (securityExtension) {
-        accessControlToWrite = setAccessControl({
-          typeSupportsAccessControl: registry.supportsAccessControl(type),
-          createdBy: updatedBy,
-          accessMode: 'default',
-        });
-      }
-
-      // ignore attributes if creating a new doc: only use the upsert attributes
-      // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
-      const migratedUpsert = migrationHelper.migrateInputDocument({
-        id,
-        type,
-        ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-        ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-        attributes: {
-          ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
-        },
-        created_at: time,
-        updated_at: time,
-        ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
-        ...(Array.isArray(references) && { references }),
-        ...(accessControlToWrite && { accessControl: accessControlToWrite }),
-      }) as SavedObjectSanitizedDoc<T>;
-      validationHelper.validateObjectForCreate(type, migratedUpsert);
-      afterAttributes = (migratedUpsert.attributes ?? {}) as Record<string, unknown>;
-      const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
-
-      const createRequestParams: CreateRequest = {
-        id: rawUpsert._id,
-        index: commonHelper.getIndexForType(type),
-        refresh,
-        document: rawUpsert._source,
-        ...(version ? decodeRequestVersion(version) : {}),
-        require_alias: true,
-      };
-
-      const {
-        body: createDocResponseBody,
-        statusCode,
-        headers,
-      } = await client.create(createRequestParams, { meta: true }).catch((err) => {
-        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
-          throw err;
-        }
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          // see "404s from missing index" above
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        if (SavedObjectsErrorHelpers.isConflictError(err)) {
-          // flag the error as being caused by an update conflict
-          err.retryableConflict = true;
-        }
-        throw err;
-      });
-      if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-      }
-      // client.create doesn't return the index document.
-      // Use rawUpsert as the _source
-      const upsertedSavedObject = serializer.rawToSavedObject<T>(
-        {
-          ...rawUpsert,
-          ...createDocResponseBody,
-        },
-        { migrationVersionCompatibility }
-      );
-      const { originId } = upsertedSavedObject ?? {};
-      let namespaces: string[] = [];
-      if (!registry.isNamespaceAgnostic(type)) {
-        namespaces = upsertedSavedObject.namespaces ?? [
-          SavedObjectsUtils.namespaceIdToString(upsertedSavedObject.namespace),
-        ];
-      }
-
-      updatedOrCreatedSavedObject = {
-        id,
-        type,
-        created_at: time,
-        updated_at: time,
-        ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
-        version: encodeHitVersion(createDocResponseBody),
-        namespaces,
-        ...(originId && { originId }),
-        references,
-        attributes: upsert, // these ignore the attribute values provided in the main request body.
-      } as SavedObject<T>;
-
-      outcome = 'success';
-
-      // UPSERT CASE END
-    } else {
-      // UPDATE CASE START
-      // at this point, we already know 1. the document exists 2. we're not doing an upsert
-      // therefor we can safely process with the "standard" update sequence.
-
-      const mergeAttributes = options.mergeAttributes ?? true;
-      const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        attributes
-      );
-
-      const updatedAttributes = mergeAttributes
-        ? mergeForUpdate({
-            targetAttributes: {
-              ...(migrated!.attributes as Record<string, unknown>),
-            },
-            updatedAttributes: encryptedUpdatedAttributes,
-            typeMappings: typeDefinition.mappings,
-          })
-        : encryptedUpdatedAttributes;
-      beforeAttributes = (migrated!.attributes ?? {}) as Record<string, unknown>;
-      afterAttributes = updatedAttributes as Record<string, unknown>;
-
-      const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
-        ...migrated!,
-        id,
-        type,
-        // need to override the redacted NS values from the decrypted/migrated document
-        namespace: savedObjectNamespace,
-        namespaces: savedObjectNamespaces,
-        attributes: updatedAttributes,
-        updated_at: time,
-        updated_by: updatedBy,
-        ...(accessControl ? { accessControl } : {}),
-        ...(Array.isArray(references) && { references }),
-      });
-
-      const docToSend = serializer.savedObjectToRaw(
-        migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
-      );
-
-      // implement creating the call params
-      const indexRequestParams: IndexRequest = {
-        id: docToSend._id,
-        index: commonHelper.getIndexForType(type),
-        refresh,
-        document: docToSend._source,
-        // using version from the source doc if not provided as option to avoid erasing changes in case of concurrent calls
-        ...decodeRequestVersion(version || migrated!.version),
-        require_alias: true,
-      };
-
-      const {
-        body: indexDocResponseBody,
-        statusCode,
-        headers,
-      } = await client.index(indexRequestParams, { meta: true }).catch((err) => {
-        if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
-          throw err;
-        }
-        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          // see "404s from missing index" above
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-        }
-        if (SavedObjectsErrorHelpers.isConflictError(err)) {
-          // flag the error as being caused by an update conflict
-          err.retryableConflict = true;
-        }
-        throw err;
-      });
-      // throw if we can't verify a 404 response is from Elasticsearch
-      if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
-        throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
-      }
-      // client.index doesn't return the indexed document.
-      // Rather than making another round trip to elasticsearch to fetch the doc, we use the SO we sent
-      // rawToSavedObject adds references as [] if undefined
-      const updatedSavedObject = serializer.rawToSavedObject<T>(
-        {
-          ...docToSend,
-          ...indexDocResponseBody,
-        },
-        { migrationVersionCompatibility }
-      );
-
-      const { originId } = updatedSavedObject ?? {};
-      let namespaces: string[] = [];
-      if (!registry.isNamespaceAgnostic(type)) {
-        namespaces = updatedSavedObject.namespaces ?? [
-          SavedObjectsUtils.namespaceIdToString(updatedSavedObject.namespace),
-        ];
-      }
-
-      updatedOrCreatedSavedObject = {
-        id,
-        type,
-        updated_at: time,
-        ...(updatedBy && { updated_by: updatedBy }),
-        version: encodeHitVersion(indexDocResponseBody),
-        namespaces,
-        ...(originId && { originId }),
-        references,
-        attributes,
-      } as SavedObject<T>;
-
-      outcome = 'success';
-    }
-
-    return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-      updatedOrCreatedSavedObject!,
-      authorizationResult?.typeMap,
-      shouldPerformUpsert ? upsert : attributes
-    );
-  } finally {
-    emitSavedObjectDiffAuditEvent({
-      securityExtension,
-      encryptionExtension,
-      logger,
-      action: 'saved_object_update',
-      savedObject: { type, id },
-      outcome,
-      before: beforeAttributes,
-      after: afterAttributes,
-    });
+  // doc not in namespace, or doc not found but we're not upserting => throw 404
+  if (docOutsideNamespace || (docNotFound && !upsert)) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
+
+  if (upsert && preflightDocNSResult?.checkResult === 'not_found') {
+    // we only need to check multi-namespace objects. Single and agnostic types do not have aliases.
+    // throws SavedObjectsErrorHelpers.createConflictError(type, id) if there is one
+    await preflightHelper.preflightCheckForUpsertAliasConflict(type, id, namespace);
+  }
+
+  // migrate the existing doc to the current version
+  let migrated: SavedObject<T>;
+  if (preflightDocResult.checkDocFound === 'found') {
+    const document = getSavedObjectFromSource<T>(
+      registry,
+      type,
+      id,
+      preflightDocResult.rawDocSource!,
+      { migrationVersionCompatibility }
+    );
+    try {
+      migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+    } catch (migrateStorageDocError) {
+      throw SavedObjectsErrorHelpers.decorateGeneralError(
+        migrateStorageDocError,
+        'Failed to migrate document to the latest version.'
+      );
+    }
+  }
+  // END ALL PRE_CLIENT CALL CHECKS && MIGRATE EXISTING DOC;
+
+  const time = getCurrentTime();
+  const updatedBy = userHelper.getCurrentUserProfileUid();
+  let updatedOrCreatedSavedObject: SavedObject<T>;
+  // `upsert` option set and document was not found -> we need to perform an upsert operation
+  const shouldPerformUpsert = upsert && docNotFound;
+
+  let savedObjectNamespace: string | undefined;
+  let savedObjectNamespaces: string[] | undefined;
+
+  if (namespace && registry.isSingleNamespace(type)) {
+    savedObjectNamespace = namespace;
+  } else if (registry.isMultiNamespace(type)) {
+    savedObjectNamespaces = preflightDocNSResult.savedObjectNamespaces;
+  }
+
+  // UPSERT CASE START
+  if (shouldPerformUpsert) {
+    // Note: Update does not support accessControl parameters. If applicable and possible (type supports access control
+    // and there is an active user profile), the default access control metadata will be set.
+    // To explicitly set access control for a new object, the `create` API should be used.
+    let accessControlToWrite: SavedObjectAccessControl | undefined;
+    if (securityExtension) {
+      accessControlToWrite = setAccessControl({
+        typeSupportsAccessControl: registry.supportsAccessControl(type),
+        createdBy: updatedBy,
+        accessMode: 'default',
+      });
+    }
+
+    // ignore attributes if creating a new doc: only use the upsert attributes
+    // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
+    const migratedUpsert = migrationHelper.migrateInputDocument({
+      id,
+      type,
+      ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+      ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+      attributes: {
+        ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
+      },
+      created_at: time,
+      updated_at: time,
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
+      ...(Array.isArray(references) && { references }),
+      ...(accessControlToWrite && { accessControl: accessControlToWrite }),
+    }) as SavedObjectSanitizedDoc<T>;
+    validationHelper.validateObjectForCreate(type, migratedUpsert);
+    auditRecord?.setAfter((migratedUpsert.attributes ?? {}) as Record<string, unknown>);
+    const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
+
+    const createRequestParams: CreateRequest = {
+      id: rawUpsert._id,
+      index: commonHelper.getIndexForType(type),
+      refresh,
+      document: rawUpsert._source,
+      ...(version ? decodeRequestVersion(version) : {}),
+      require_alias: true,
+    };
+
+    const {
+      body: createDocResponseBody,
+      statusCode,
+      headers,
+    } = await client.create(createRequestParams, { meta: true }).catch((err) => {
+      if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+        throw err;
+      }
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        // flag the error as being caused by an update conflict
+        err.retryableConflict = true;
+      }
+      throw err;
+    });
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
+    }
+    // client.create doesn't return the index document.
+    // Use rawUpsert as the _source
+    const upsertedSavedObject = serializer.rawToSavedObject<T>(
+      {
+        ...rawUpsert,
+        ...createDocResponseBody,
+      },
+      { migrationVersionCompatibility }
+    );
+    const { originId } = upsertedSavedObject ?? {};
+    let namespaces: string[] = [];
+    if (!registry.isNamespaceAgnostic(type)) {
+      namespaces = upsertedSavedObject.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(upsertedSavedObject.namespace),
+      ];
+    }
+
+    updatedOrCreatedSavedObject = {
+      id,
+      type,
+      created_at: time,
+      updated_at: time,
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
+      version: encodeHitVersion(createDocResponseBody),
+      namespaces,
+      ...(originId && { originId }),
+      references,
+      attributes: upsert, // these ignore the attribute values provided in the main request body.
+    } as SavedObject<T>;
+
+    auditRecord?.succeed();
+
+    // UPSERT CASE END
+  } else {
+    // UPDATE CASE START
+    // at this point, we already know 1. the document exists 2. we're not doing an upsert
+    // therefor we can safely process with the "standard" update sequence.
+
+    const mergeAttributes = options.mergeAttributes ?? true;
+    const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+      type,
+      id,
+      namespace,
+      attributes
+    );
+
+    const updatedAttributes = mergeAttributes
+      ? mergeForUpdate({
+          targetAttributes: {
+            ...(migrated!.attributes as Record<string, unknown>),
+          },
+          updatedAttributes: encryptedUpdatedAttributes,
+          typeMappings: typeDefinition.mappings,
+        })
+      : encryptedUpdatedAttributes;
+    auditRecord?.setBefore((migrated!.attributes ?? {}) as Record<string, unknown>);
+    auditRecord?.setAfter(updatedAttributes as Record<string, unknown>);
+
+    const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
+      ...migrated!,
+      id,
+      type,
+      // need to override the redacted NS values from the decrypted/migrated document
+      namespace: savedObjectNamespace,
+      namespaces: savedObjectNamespaces,
+      attributes: updatedAttributes,
+      updated_at: time,
+      updated_by: updatedBy,
+      ...(accessControl ? { accessControl } : {}),
+      ...(Array.isArray(references) && { references }),
+    });
+
+    const docToSend = serializer.savedObjectToRaw(
+      migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+    );
+
+    // implement creating the call params
+    const indexRequestParams: IndexRequest = {
+      id: docToSend._id,
+      index: commonHelper.getIndexForType(type),
+      refresh,
+      document: docToSend._source,
+      // using version from the source doc if not provided as option to avoid erasing changes in case of concurrent calls
+      ...decodeRequestVersion(version || migrated!.version),
+      require_alias: true,
+    };
+
+    const {
+      body: indexDocResponseBody,
+      statusCode,
+      headers,
+    } = await client.index(indexRequestParams, { meta: true }).catch((err) => {
+      if (SavedObjectsErrorHelpers.isEsUnavailableError(err)) {
+        throw err;
+      }
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        // see "404s from missing index" above
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+      }
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        // flag the error as being caused by an update conflict
+        err.retryableConflict = true;
+      }
+      throw err;
+    });
+    // throw if we can't verify a 404 response is from Elasticsearch
+    if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
+    }
+    // client.index doesn't return the indexed document.
+    // Rather than making another round trip to elasticsearch to fetch the doc, we use the SO we sent
+    // rawToSavedObject adds references as [] if undefined
+    const updatedSavedObject = serializer.rawToSavedObject<T>(
+      {
+        ...docToSend,
+        ...indexDocResponseBody,
+      },
+      { migrationVersionCompatibility }
+    );
+
+    const { originId } = updatedSavedObject ?? {};
+    let namespaces: string[] = [];
+    if (!registry.isNamespaceAgnostic(type)) {
+      namespaces = updatedSavedObject.namespaces ?? [
+        SavedObjectsUtils.namespaceIdToString(updatedSavedObject.namespace),
+      ];
+    }
+
+    updatedOrCreatedSavedObject = {
+      id,
+      type,
+      updated_at: time,
+      ...(updatedBy && { updated_by: updatedBy }),
+      version: encodeHitVersion(indexDocResponseBody),
+      namespaces,
+      ...(originId && { originId }),
+      references,
+      attributes,
+    } as SavedObject<T>;
+
+    auditRecord?.succeed();
+  }
+
+  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
+    updatedOrCreatedSavedObject!,
+    authorizationResult?.typeMap,
+    shouldPerformUpsert ? upsert : attributes
+  );
 };

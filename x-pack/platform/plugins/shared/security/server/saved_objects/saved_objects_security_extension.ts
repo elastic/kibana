@@ -56,6 +56,7 @@ import type {
   ObjectRequiringPrivilegeCheckResult,
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type { Logger } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   Actions,
@@ -80,6 +81,7 @@ interface Params {
   savedObjectDiffEnabled?: boolean;
   savedObjectDiffTypesToExclude?: string[];
   savedObjectDiffFieldSizeLimit?: number;
+  logger?: Logger;
 }
 
 /**
@@ -327,6 +329,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   public readonly savedObjectDiffEnabled: boolean;
   private readonly savedObjectDiffTypesToExclude: Set<string>;
   private readonly savedObjectDiffFieldSizeLimit?: number;
+  private readonly logger?: Logger;
 
   constructor({
     actions,
@@ -338,6 +341,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     savedObjectDiffEnabled = false,
     savedObjectDiffTypesToExclude = [],
     savedObjectDiffFieldSizeLimit,
+    logger,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
@@ -347,6 +351,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.savedObjectDiffEnabled = savedObjectDiffEnabled;
     this.savedObjectDiffTypesToExclude = new Set(savedObjectDiffTypesToExclude);
     this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
+    this.logger = logger;
 
     this.typeRegistry = typeRegistry;
     this.accessControlService = new AccessControlService({ typeRegistry });
@@ -882,11 +887,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // including on 'unknown'-outcome events. The pre-operation audit event is
     // suppressed in this mode, so this event is the operation's only audit record:
     // excluded types still emit it, they just don't carry the attribute diff.
+    // For the same reason the event must survive a diff computation failure — the
+    // diff is best-effort enrichment, so an error here degrades to an event without
+    // `kibana.diff` rather than a missing audit record.
     // `before`/`after` are the object's attributes (not the full SO), so there
     // are no system-managed root fields to filter out here.
-    const savedObjectDiff = this.savedObjectDiffTypesToExclude.has(type)
-      ? undefined
-      : computeJsonPatch({
+    let savedObjectDiff: ExtendedJsonPatch | undefined;
+    if (!this.savedObjectDiffTypesToExclude.has(type)) {
+      try {
+        savedObjectDiff = computeJsonPatch({
           a: params.before,
           b: params.after,
           // ESO attributes are compared as ciphertext here; forwarding them as
@@ -897,16 +906,35 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           fieldsToRedact: params.fieldsToRedact,
           fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
         });
+      } catch (error) {
+        // Use String(error) rather than error.message, which would throw if a
+        // non-Error (e.g. null) was thrown.
+        this.logger?.error(
+          `Failed to compute the saved object diff for the ${
+            params.action
+          } audit event of ${type} [id=${id}]: ${String(error)}`
+        );
+      }
+    }
 
     // Resolve the object name from its attributes (create/update populate `after`,
     // delete populates `before`) so the event is self-contained like the other audit
     // events, falling back to the caller-provided name when the attributes don't
-    // yield one. `addAuditEvent` handles name redaction.
-    const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
-    const name =
-      SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
-        attributes: attributesForName,
-      }) ?? params.savedObject.name;
+    // yield one (or resolution fails). `addAuditEvent` handles name redaction.
+    let name = params.savedObject.name;
+    try {
+      const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
+      name =
+        SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
+          attributes: attributesForName,
+        }) ?? params.savedObject.name;
+    } catch (error) {
+      this.logger?.error(
+        `Failed to resolve the saved object name for the ${
+          params.action
+        } audit event of ${type} [id=${id}]: ${String(error)}`
+      );
+    }
 
     this.addAuditEvent({
       // `action` is the narrow SO-diff union; cast to the internal AuditAction enum.

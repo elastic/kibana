@@ -20,6 +20,7 @@ import type {
   AuthorizeUpdateObject,
   BulkResolveError,
 } from '@kbn/core-saved-objects-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import type {
   CheckPrivilegesResponse,
   CheckSavedObjectsPrivileges,
@@ -7199,6 +7200,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     const checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
     const typeRegistryMocked = typeRegistryMock.create();
 
+    const logger = loggerMock.create();
     const securityExtension = new SavedObjectsSecurityExtension({
       actions,
       auditLogger,
@@ -7207,9 +7209,10 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       getCurrentUser,
       typeRegistry: typeRegistryMocked,
       savedObjectDiffEnabled,
+      logger,
       ...extra,
     });
-    return { securityExtension, auditLogger };
+    return { securityExtension, auditLogger, logger };
   }
 
   beforeEach(() => {
@@ -7464,6 +7467,51 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
 
     const { savedObject } = addAuditEventSpy.mock.calls[0][0] as any;
     expect(savedObject).toEqual({ type: 'dashboard', id: '1', name: 'My Dashboard' });
+  });
+
+  it('still emits the event, without a diff, when diff computation fails', () => {
+    const { securityExtension, logger } = setupForEmit();
+    // A throwing getter poisons attribute access during diff computation
+    const poisoned = {
+      get title(): string {
+        throw new Error('diff boom');
+      },
+    };
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1', name: 'My Dashboard' },
+      outcome: 'success',
+      before: { title: 'old' },
+      after: poisoned,
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const event = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(event.outcome).toBe('success');
+    expect(event.savedObjectDiff).toBeUndefined();
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('diff boom'));
+  });
+
+  it('falls back to the caller-provided name when name resolution fails', () => {
+    const { securityExtension } = setupForEmit();
+    const poisoned = {
+      get title(): string {
+        throw new Error('name boom');
+      },
+    };
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1', name: 'Fallback Name' },
+      outcome: 'success',
+      before: { title: 'old' },
+      after: poisoned,
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const event = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(event.savedObject).toEqual({ type: 'dashboard', id: '1', name: 'Fallback Name' });
   });
 
   it('emits an unknown-outcome event with an empty diff when no attributes are known', () => {
