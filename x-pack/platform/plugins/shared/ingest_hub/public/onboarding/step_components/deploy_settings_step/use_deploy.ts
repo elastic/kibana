@@ -133,10 +133,13 @@ function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<st
 }
 
 function buildAgentlessPolicyName(instanceName: string, instanceId: string): string {
-  // Use the instance id (safe chars) to guarantee uniqueness across concurrent calls.
-  // Truncate to avoid Fleet's policy name length limit.
+  // instanceId makes the name unique within a single deploy (no concurrent collision).
+  // Date.now() suffix prevents cross-session collisions: Fleet enforces unique agent-policy
+  // names, so re-running onboarding in a fresh session would fail without it.
+  // Truncate segments to stay within Fleet's policy name length limit.
   const safe = instanceId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return `${safe}-${instanceName.slice(0, 40).replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+  const name = instanceName.slice(0, 40).replace(/[^a-zA-Z0-9_-]/g, '_');
+  return `${safe}-${name}-${Date.now()}`;
 }
 
 interface InstanceDeployOutcome {
