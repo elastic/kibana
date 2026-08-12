@@ -166,7 +166,16 @@ interface ParsedToolQuery {
   severity_score: number;
   evidence?: string[];
   replaces?: string;
+  expects_matches?: boolean;
   features: QueryFeature[];
+}
+
+// Eval-only: one record per query across all add_queries calls, incl. rejected ones.
+export interface QueryAttempt {
+  title: string;
+  esql: string;
+  status: 'Added' | 'Duplicate' | 'Failed to add';
+  replaces?: string;
 }
 
 /**
@@ -187,6 +196,8 @@ export async function identifyKIQueries({
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   maxSteps,
   queryValidationTimeoutMs = DEFAULT_QUERY_VALIDATION_TIMEOUT_MS,
+  requireQueryIntent = false,
+  collectQueryAttempts = false,
 }: {
   stream: Streams.all.Definition;
   esClient: ElasticsearchClient;
@@ -210,16 +221,25 @@ export async function identifyKIQueries({
    */
   maxSteps?: number;
   queryValidationTimeoutMs?: number;
+  /** Eval-only: require `expects_matches` on every add_queries item. */
+  requireQueryIntent?: boolean;
+  /** Eval-only: return a record of every attempted query, incl. rejected ones. */
+  collectQueryAttempts?: boolean;
 }): Promise<{
   queries: ParsedToolQuery[];
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
+  queryAttempts?: QueryAttempt[];
 }> {
   logger.debug('Starting Significant Events KI query generation');
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
-  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt, additionalTools });
+  const prompt = createGenerateSignificantEventsPrompt({
+    systemPrompt,
+    additionalTools,
+    requireQueryIntent,
+  });
   const targetSources = getSourcesForStream(stream);
 
   const validationLookback = await computeValidationLookback({
@@ -245,6 +265,7 @@ export async function identifyKIQueries({
 
   const returnedFeatureMap = new Map<string, string | undefined>();
   const validatedQueries: ParsedToolQuery[] = [];
+  const queryAttempts: QueryAttempt[] | undefined = collectQueryAttempts ? [] : undefined;
 
   logger.trace('Generating Significant Events KI queries via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -323,6 +344,17 @@ export async function identifyKIQueries({
 
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
+              if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
+                hasFailures = true;
+                return {
+                  query,
+                  valid: false,
+                  status: 'Failed to add' as const,
+                  error:
+                    'Missing intent: set "expects_matches" to true when the query is grounded in evidence currently present and should match rows in the evaluation window, or to false when it deliberately watches for a plausible future condition not present in the current evidence.',
+                };
+              }
+
               try {
                 const derivedType: QueryType = deriveQueryType(query.esql);
                 const warnings: string[] = [];
@@ -404,6 +436,7 @@ export async function identifyKIQueries({
                   severity_score: query.severity_score,
                   evidence: query.evidence,
                   replaces: query.replaces,
+                  expects_matches: query.expects_matches,
                   features: queryFeatures,
                 });
 
@@ -434,6 +467,16 @@ export async function identifyKIQueries({
               }
             })
           );
+          if (collectQueryAttempts && queryAttempts) {
+            for (const result of queryValidationResults) {
+              queryAttempts.push({
+                title: result.query.title,
+                esql: result.query.esql,
+                status: result.status as QueryAttempt['status'],
+                replaces: result.query.replaces,
+              });
+            }
+          }
           if (hasFailures) {
             toolUsage.add_queries.failures += 1;
           }
@@ -457,5 +500,6 @@ export async function identifyKIQueries({
     queries: validatedQueries,
     tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
+    ...(collectQueryAttempts && queryAttempts ? { queryAttempts } : {}),
   };
 }

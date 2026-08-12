@@ -18,6 +18,7 @@ import { queryTypeDistributionEvaluator } from './query_type/query_type_distribu
 import { statsStructureValidationEvaluator } from './stats/stats_structure_validation';
 import { createStatsQualityCalibrationEvaluator } from './stats/stats_quality_calibration';
 import { createToolUsageEvaluator } from './tool_usage/tool_usage_validation';
+import { exactDuplicateAvoidanceEvaluator } from './novelty/exact_duplicate_avoidance';
 import type {
   KIQueryGenerationEvaluationExample,
   KIQueryGenerationEvaluator,
@@ -50,6 +51,7 @@ export const createKIQueryGenerationEvaluators = (
     queryTypeDistributionEvaluator,
     statsStructureValidationEvaluator,
     createToolUsageEvaluator(),
+    exactDuplicateAvoidanceEvaluator,
   ];
   const base = selectEvaluators(evaluators);
 
@@ -65,8 +67,21 @@ export const createKIQueryGenerationEvaluators = (
         criteriaFn: (c) =>
           criteriaFn(c) as Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>,
         criteria,
-        transformOutput: (output) =>
-          getQueriesFromOutput(output) as unknown as KIQueryGenerationOutput,
+        transformOutput: (output) => {
+          // Rerun arms also expose attempts so the judge can see semantic retreads.
+          if (
+            output != null &&
+            typeof output === 'object' &&
+            !Array.isArray(output) &&
+            (output as { evaluation_arm?: string }).evaluation_arm === 'rerun'
+          ) {
+            return {
+              queries: getQueriesFromOutput(output),
+              query_attempts: (output as { query_attempts?: unknown[] }).query_attempts ?? [],
+            } as unknown as KIQueryGenerationOutput;
+          }
+          return getQueriesFromOutput(output) as unknown as KIQueryGenerationOutput;
+        },
       }
     ),
     createStatsQualityCalibrationEvaluator({ criteriaFn }),

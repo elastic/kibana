@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -42,6 +43,11 @@ export interface KIQueryGenerationScenario {
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
+  /** Eval-only novelty arm: seeds existing_queries, scored against hidden criteria. */
+  rerun?: {
+    existing_queries: ExistingQuerySummary[];
+    criteria: SamplingCriterion[];
+  };
 }
 
 export interface KIFeatureExtractionScenario {

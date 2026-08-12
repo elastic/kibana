@@ -30,6 +30,16 @@ export interface Query {
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];
+  /** Eval-only: whether the query expects to match rows in the window. */
+  expects_matches?: boolean;
+}
+
+/** Eval-only: a query attempt from add_queries, incl. rejected ones. */
+export interface QueryAttempt {
+  title: string;
+  esql: string;
+  status: 'Added' | 'Duplicate' | 'Failed to add';
+  replaces?: string;
 }
 
 export interface KIQueryGenerationEvaluationExample {
@@ -50,6 +60,8 @@ interface KIQueryGenerationTaskOutput {
   traceId?: string | null;
   sample_logs?: string[];
   sample_docs?: Array<Record<string, unknown>>;
+  query_attempts?: QueryAttempt[];
+  evaluation_arm?: 'clean' | 'rerun';
 }
 
 export type KIQueryGenerationOutput = Query[] | KIQueryGenerationTaskOutput;
