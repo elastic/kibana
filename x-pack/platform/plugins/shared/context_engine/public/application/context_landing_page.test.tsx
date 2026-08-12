@@ -7,7 +7,8 @@
 
 import { EuiProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { createSearchNavigationMock } from './test_utils/search_navigation_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -36,7 +37,13 @@ const renderWithProviders = (core: CoreStart) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={core}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            history: scopedHistoryMock.create(),
+            searchNavigation: createSearchNavigationMock(),
+          }}
+        >
           <QueryClientProvider client={createTestQueryClient()}>
             <MemoryRouter>
               <ContextLandingPage />
@@ -63,11 +70,10 @@ describe('ContextLandingPage', () => {
     renderWithProviders(core);
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
-
-    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
-    expect(createButtons).toHaveLength(1);
-    expect(createButtons[0]).toHaveTextContent('Create AI Index');
     expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+
+    const createButton = screen.getByTestId('contextCreateAiIndexButton');
+    expect(createButton).toHaveTextContent('Create AI Index');
 
     await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
@@ -82,8 +88,9 @@ describe('ContextLandingPage', () => {
 
     await screen.findAllByTestId('contextAiIndexCard');
 
-    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
-    expect(createButtons).toHaveLength(1);
+    await waitFor(() => {
+      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    });
     expect(screen.queryByTestId('contextAiIndexCardsEmpty')).not.toBeInTheDocument();
   });
 
@@ -142,7 +149,7 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
-    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
   it('renders an error prompt when the list API fails', async () => {

@@ -153,6 +153,7 @@ describe('saveAutomationHandler', () => {
     getWorkflow: jest.Mock;
     createWorkflow: jest.Mock;
     updateWorkflow: jest.Mock;
+    deleteWorkflows: jest.Mock;
   };
 
   beforeEach(() => {
@@ -168,6 +169,7 @@ describe('saveAutomationHandler', () => {
       getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new' }),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      deleteWorkflows: jest.fn().mockResolvedValue({ total: 1, deleted: 1, failures: [] }),
     };
     getCoreStart.mockResolvedValue({});
   });
@@ -440,6 +442,12 @@ describe('saveAutomationHandler', () => {
         getWorkflowsManagement: () => workflowsManagement as never,
       })
     ).rejects.toBeInstanceOf(AiIndexManagedError);
+
+    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
+      ['wf-new'],
+      'default',
+      request
+    );
   });
 
   it('rejects when the automation limit is reached', async () => {
@@ -463,5 +471,32 @@ describe('saveAutomationHandler', () => {
         getWorkflowsManagement: () => workflowsManagement as never,
       })
     ).rejects.toThrow(/maximum number of automations/);
+
+    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
+      ['wf-new'],
+      'default',
+      request
+    );
+  });
+
+  it('does not roll back workflows created in the edit flow when attach fails', async () => {
+    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: createAttachmentStateManager({ origin: 'wf-persisted' }) as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toBeInstanceOf(AiIndexManagedError);
+
+    expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
   });
 });

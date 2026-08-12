@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/shared-ux-page-solution-nav'
+  - '@kbn/app-header'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
   - '@kbn/esql'

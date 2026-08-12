@@ -6,15 +6,17 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { CoreStart } from '@kbn/core/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ContextEngineStartDependencies } from '../../types';
+import type { ContextEngineAppServices } from '../../types';
 
-export interface ContextEngineServices extends CoreStart {
+export interface ContextEngineServices extends ContextEngineAppServices {
   agentBuilder?: AgentBuilderPluginStart;
-  share: ContextEngineStartDependencies['share'];
-  triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
-  console?: ContextEngineStartDependencies['console'];
+  share: SharePluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  console?: ConsolePluginStart;
 }
 
 const useTypedKibana = () => useKibana<ContextEngineServices>();

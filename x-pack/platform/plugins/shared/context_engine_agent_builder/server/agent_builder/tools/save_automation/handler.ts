@@ -273,6 +273,62 @@ const assertWorkflowUpdateAccess = async ({
   }
 };
 
+const persistWorkflowFromAttachment = async ({
+  attachments,
+  workflowAttachmentId,
+  yaml,
+  proposedWorkflowId,
+  existingWorkflowId,
+  workflowsManagement,
+  spaceId,
+  request,
+  getSecurityStart,
+  logger,
+}: {
+  attachments: AttachmentStateManager;
+  workflowAttachmentId: string;
+  yaml: string;
+  proposedWorkflowId?: string;
+  existingWorkflowId?: string;
+  workflowsManagement: WorkflowsManagementApi;
+  spaceId: string;
+  request: KibanaRequest;
+  getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  logger: Logger;
+}): Promise<{ workflowId: string; newlyCreated: boolean }> => {
+  if (existingWorkflowId !== undefined) {
+    await assertWorkflowUpdateAccess({
+      workflowId: existingWorkflowId,
+      spaceId,
+      request,
+      getSecurityStart,
+    });
+    await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
+    return { workflowId: existingWorkflowId, newlyCreated: false };
+  }
+
+  await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
+  const created = await workflowsManagement.createWorkflow(
+    { yaml, ...(proposedWorkflowId ? { id: proposedWorkflowId } : {}) },
+    spaceId,
+    request
+  );
+
+  const originUpdated = await attachments.updateOrigin(
+    workflowAttachmentId,
+    created.id,
+    ATTACHMENT_REF_ACTOR.agent
+  );
+  if (!originUpdated) {
+    logger.warn(
+      `Workflow '${created.id}' was created but its attachment origin could not be recorded; ` +
+        `a future save for attachment '${workflowAttachmentId}' may create a duplicate workflow.`
+    );
+  }
+
+  return { workflowId: created.id, newlyCreated: true };
+};
+
 export const saveAutomationHandler = async ({
   params,
   request,
@@ -328,53 +384,46 @@ export const saveAutomationHandler = async ({
   const {
     yaml,
     workflowId: proposedWorkflowId,
-    origin,
+    origin: existingWorkflowId,
   } = resolveWorkflowYamlFromAttachments(attachments, params.workflowAttachmentId);
+  const isUpdate = existingWorkflowId !== undefined;
 
-  let savedWorkflowId: string;
-  const isEditFlow = origin !== undefined;
-
-  if (isEditFlow) {
-    await assertWorkflowUpdateAccess({
-      workflowId: origin,
-      spaceId,
-      request,
-      getSecurityStart,
-    });
-    savedWorkflowId = origin;
-    await workflowsManagement.updateWorkflow(origin, { yaml }, spaceId, request);
-  } else {
-    await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
-    const created = await workflowsManagement.createWorkflow(
-      { yaml, ...(proposedWorkflowId ? { id: proposedWorkflowId } : {}) },
-      spaceId,
-      request
-    );
-    savedWorkflowId = created.id;
-    const originUpdated = await attachments.updateOrigin(
-      params.workflowAttachmentId,
-      savedWorkflowId,
-      ATTACHMENT_REF_ACTOR.agent
-    );
-    if (!originUpdated) {
-      logger.warn(
-        `Workflow '${savedWorkflowId}' was created but its attachment origin could not be recorded; ` +
-          `a future save for attachment '${params.workflowAttachmentId}' may create a duplicate workflow.`
-      );
-    }
-  }
-
-  const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
-    type: 'workflow',
-    value: savedWorkflowId,
+  const { workflowId, newlyCreated } = await persistWorkflowFromAttachment({
+    attachments,
+    workflowAttachmentId: params.workflowAttachmentId,
+    yaml,
+    proposedWorkflowId,
+    existingWorkflowId,
+    workflowsManagement,
+    spaceId,
+    request,
+    getSecurityStart,
+    logger,
   });
 
-  return {
-    aiIndexId,
-    workflowId: savedWorkflowId,
+  try {
+    const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
+      type: 'workflow',
+      value: workflowId,
+    });
+    return {
+      aiIndexId,
+      workflowId,
+      status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
+    };
+  } catch (error) {
+    if (newlyCreated) {
+      try {
+        await workflowsManagement.deleteWorkflows([workflowId], spaceId, request);
+      } catch (deleteError) {
+        logger.warn(`Failed to roll back workflow '${workflowId}' after attach failure`, {
+          error: deleteError,
+        });
+      }
+    }
 
-    status: isEditFlow || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
-  };
+    throw error;
+  }
 };
 
 export const getSaveAutomationErrorMessage = (error: unknown): string => {

@@ -28,6 +28,7 @@ import type {
   ClassicNavItem,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
 import { SearchIndexManagementLocatorDefinition } from './locator';
@@ -36,6 +37,7 @@ export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
 {
   private readonly logger: Logger;
+  private contextEngineSetup: AppPluginSetupDependencies['contextEngine'];
   private currentChromeStyle: ChromeStyle | undefined = undefined;
   private coreStart: CoreStart | undefined = undefined;
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
@@ -47,7 +49,8 @@ export class SearchNavigationPlugin
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(_core: CoreSetup): SearchNavigationPluginSetup {
+  public setup(_core: CoreSetup, plugins: AppPluginSetupDependencies): SearchNavigationPluginSetup {
+    this.contextEngineSetup = plugins.contextEngine;
     return {};
   }
 
@@ -74,7 +77,7 @@ export class SearchNavigationPlugin
       );
     }
 
-    return {
+    const startContract: SearchNavigationPluginStart = {
       handleOnAppMount: this.handleOnAppMount.bind(this),
       registerOnAppMountHandler: this.registerOnAppMountHandler.bind(this),
       getBaseClassicNavItems: this.getBaseClassicNavItems.bind(this),
@@ -84,6 +87,14 @@ export class SearchNavigationPlugin
         clearBreadcrumbs: this.clearBreadcrumbs.bind(this),
       },
     };
+
+    this.contextEngineSetup?.registerSearchNavigationAdapter({
+      handleOnAppMount: startContract.handleOnAppMount,
+      useClassicNavigation: startContract.useClassicNavigation,
+      breadcrumbs: startContract.breadcrumbs,
+    });
+
+    return startContract;
   }
 
   public stop() {

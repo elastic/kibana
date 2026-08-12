@@ -12,6 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ContextEnginePluginStart, ContextEngineStartDependencies } from '../types';
+import type { ContextEngineSearchNavigationAdapter } from '../search_navigation_adapter';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { resolveAgentBuilderStart } from './resolve_agent_builder';
 import { ContextEngineRoutes } from './routes';
@@ -24,12 +25,14 @@ export const mountApp = async ({
   coreSetup,
   element,
   history,
+  searchNavigation,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
   coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>;
   element: HTMLElement;
   history: ScopedHistory;
+  searchNavigation?: ContextEngineSearchNavigationAdapter;
 }) => {
   const agentBuilder = await resolveAgentBuilderStart(coreSetup);
 
@@ -39,6 +42,8 @@ export const mountApp = async ({
     share: plugins.share,
     triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
+    searchNavigation,
+    history,
   };
 
   ReactDOM.render(

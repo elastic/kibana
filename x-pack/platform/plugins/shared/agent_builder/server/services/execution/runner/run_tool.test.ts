@@ -479,7 +479,7 @@ describe('runInternalTool - confirmation policy', () => {
       expect(toolHandler).not.toHaveBeenCalled();
     });
 
-    it('passes attachments, request, and spaceId to getConfirmation', async () => {
+    it('passes toolParams and toolHandlerContext to getConfirmation', async () => {
       const getConfirmation = jest.fn().mockResolvedValue({
         title: 'Confirm',
         message: 'Proceed?',
@@ -501,12 +501,16 @@ describe('runInternalTool - confirmation policy', () => {
         parentManager: runnerManager,
       });
 
-      expect(getConfirmation).toHaveBeenCalledWith({
-        toolParams: { foo: 'bar' },
-        attachments: runnerDeps.attachmentStateManager,
-        request: runnerDeps.request,
-        spaceId: expect.any(String),
-      });
+      expect(getConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolParams: { foo: 'bar' },
+          context: expect.objectContaining({
+            attachments: runnerDeps.attachmentStateManager,
+            request: runnerDeps.request,
+            spaceId: expect.any(String),
+          }),
+        })
+      );
     });
 
     it('should execute tool when confirmation status is accepted', async () => {

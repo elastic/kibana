@@ -23,16 +23,34 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBack } from '@kbn/app-header';
+import React, { useMemo, useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
 import { SourcePicker } from '../components/source_picker';
 import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
-import { getAiIndexDetailPath } from '../paths';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from '../layout/context_engine_page_template';
+import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
+
+const landingPageTitle = i18n.translate('xpack.contextEngine.landing.title', {
+  defaultMessage: 'Context',
+});
 import { validateAiIndexId } from '../utils/ai_index_dest';
+
+const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
+  defaultMessage:
+    'Start by picking a source to build context from — or skip and add sources later.',
+});
+
+const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title', {
+  defaultMessage: 'Create AI index',
+});
 
 const STORAGE_TYPES: Array<{
   type: AiIndexType;
@@ -68,13 +86,25 @@ const STORAGE_TYPES: Array<{
 ];
 
 export const CreateAiIndexPage = () => {
-  const { navigateToContextEngine } = useNavigation();
+  const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
   const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
   const [storageType, setStorageType] = useState<AiIndexType>('index');
   const storageGroupName = useGeneratedHtmlId({ prefix: 'aiIndexStorageType' });
+
+  const back = useMemo<AppHeaderBack>(
+    () => ({
+      href: createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing),
+      label: landingPageTitle,
+      onClick: (event) => {
+        event.preventDefault();
+        navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
+      },
+    }),
+    [createContextEngineUrl, navigateToContextEngine]
+  );
 
   const { dest, error: nameError } = validateAiIndexId(storageType, id);
   const destValue = dest?.value;
@@ -92,17 +122,19 @@ export const CreateAiIndexPage = () => {
   };
 
   return (
-    <KibanaPageTemplate data-test-subj="contextCreateAiIndexPage">
-      <KibanaPageTemplate.Header
-        pageTitle={i18n.translate('xpack.contextEngine.createAiIndex.title', {
-          defaultMessage: 'Create AI index',
-        })}
-        description={i18n.translate('xpack.contextEngine.createAiIndex.description', {
-          defaultMessage:
-            'Start by picking a source to build context from — or skip and add sources later.',
-        })}
-      />
-      <KibanaPageTemplate.Section>
+    <ContextEnginePageTemplate
+      data-test-subj="contextCreateAiIndexPage"
+      breadcrumbPageName={createPageTitle}
+    >
+      <ContextEnginePageSection paddingSize="l">
+        <AppHeader
+          spacing="flush"
+          back={back}
+          title={createPageTitle}
+          description={createPageDescription}
+        />
+      </ContextEnginePageSection>
+      <ContextEnginePageSection>
         <EuiPanel hasBorder paddingSize="l">
           <EuiTitle size="s">
             <h2>
@@ -271,7 +303,7 @@ export const CreateAiIndexPage = () => {
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+      </ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };

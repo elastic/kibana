@@ -6,11 +6,18 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { AI_INDEX_ATTACHMENT_TYPE } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '@kbn/context-engine-plugin/common/agent_builder_tools';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createSaveAutomationTool } from './tool';
+
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  hasWorkflowReadPrivilege: jest.fn().mockResolvedValue(true),
+}));
+
+const { hasWorkflowReadPrivilege } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 describe('save_automation tool', () => {
   const getWorkflowMock = jest.fn();
@@ -64,8 +71,30 @@ describe('save_automation tool', () => {
       ]),
     } as unknown as AttachmentStateManager);
 
+  const createConfirmationContext = (
+    toolParams: {
+      workflowAttachmentId?: string;
+      workflowId?: string;
+      aiIndexId?: string;
+    },
+    attachments: AttachmentStateManager = createAttachments(),
+    spaceId = 'default'
+  ) => {
+    const handlerContext = agentBuilderMocks.tools.createHandlerContext();
+    return {
+      toolParams,
+      context: {
+        ...handlerContext,
+        attachments,
+        request: httpServerMock.createKibanaRequest(),
+        spaceId,
+      },
+    };
+  };
+
   beforeEach(() => {
     getWorkflowMock.mockReset();
+    hasWorkflowReadPrivilege.mockResolvedValue(true);
   });
 
   it('uses the expected tool id', () => {
@@ -78,15 +107,15 @@ describe('save_automation tool', () => {
 
     expect(tool.confirmation?.askUser).toBe('always');
 
-    const draftConfirmation = await tool.confirmation?.getConfirmation?.({
-      toolParams: {
-        workflowAttachmentId: 'attachment-1',
-        aiIndexId: 'my-ai-index',
-      },
-      attachments,
-      request: httpServerMock.createKibanaRequest(),
-      spaceId: 'default',
-    });
+    const draftConfirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext(
+        {
+          workflowAttachmentId: 'attachment-1',
+          aiIndexId: 'my-ai-index',
+        },
+        attachments
+      )
+    );
 
     expect(draftConfirmation).toEqual(
       expect.objectContaining({
@@ -104,12 +133,11 @@ describe('save_automation tool', () => {
     const tool = createTool();
     getWorkflowMock.mockResolvedValue(undefined);
 
-    const savedConfirmation = await tool.confirmation?.getConfirmation?.({
-      toolParams: {
+    const savedConfirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext({
         workflowId: 'workflow-1',
-      },
-      spaceId: 'default',
-    });
+      })
+    );
 
     expect(savedConfirmation?.message).toContain('workflow "workflow-1"');
     expect(getWorkflowMock).toHaveBeenCalledWith('workflow-1', 'default');
@@ -119,13 +147,28 @@ describe('save_automation tool', () => {
     const tool = createTool();
     getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Existing Pilot' });
 
-    const savedConfirmation = await tool.confirmation?.getConfirmation?.({
-      toolParams: {
+    const savedConfirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext({
         workflowId: 'workflow-1',
-      },
-      spaceId: 'default',
-    });
+      })
+    );
 
     expect(savedConfirmation?.message).toContain('workflow "Existing Pilot"');
+  });
+
+  it('does not resolve workflow names without read privilege', async () => {
+    hasWorkflowReadPrivilege.mockResolvedValue(false);
+    const tool = createTool();
+    getWorkflowMock.mockResolvedValue({ id: 'workflow-1', name: 'Secret Workflow' });
+
+    const savedConfirmation = await tool.confirmation?.getConfirmation?.(
+      createConfirmationContext({
+        workflowId: 'workflow-1',
+      })
+    );
+
+    expect(savedConfirmation?.message).toContain('workflow "workflow-1"');
+    expect(savedConfirmation?.message).not.toContain('Secret Workflow');
+    expect(getWorkflowMock).not.toHaveBeenCalled();
   });
 });

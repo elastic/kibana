@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContextEnginePluginSetup {}
+export type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
+
+export interface ContextEnginePluginSetup {
+  registerSearchNavigationAdapter: (adapter: ContextEngineSearchNavigationAdapter) => void;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginStart {}
@@ -23,3 +28,10 @@ export interface ContextEngineStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   console?: ConsolePluginStart;
 }
+
+export interface ContextEngineServicesContextDeps {
+  history: AppMountParameters['history'];
+  searchNavigation?: ContextEngineSearchNavigationAdapter;
+}
+
+export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;

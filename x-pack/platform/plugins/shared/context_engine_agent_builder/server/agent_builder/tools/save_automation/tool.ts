@@ -7,6 +7,7 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -107,7 +108,8 @@ export const createSaveAutomationTool = ({
   schema: saveAutomationSchema,
   confirmation: {
     askUser: 'always',
-    getConfirmation: async ({ toolParams, attachments, spaceId }) => {
+    getConfirmation: async ({ toolParams, context }) => {
+      const { attachments, request, spaceId } = context;
       const aiIndexLabel = tryResolveAiIndexDisplayLabelFromAttachments(
         attachments,
         typeof toolParams.aiIndexId === 'string' ? toolParams.aiIndexId : undefined
@@ -129,11 +131,20 @@ export const createSaveAutomationTool = ({
           ? `workflow "${workflowName}"`
           : `draft workflow attachment "${workflowAttachmentId}"`;
       } else if (workflowId) {
-        const workflowName = await tryResolveWorkflowDisplayNameById({
-          workflowsManagement: getWorkflowsManagement(),
-          workflowId,
-          spaceId: spaceId ?? 'default',
+        let workflowName: string | undefined;
+        const security = await getSecurityStart();
+        const canRead = await hasWorkflowReadPrivilege({
+          security,
+          request,
+          spaceId,
         });
+        if (canRead) {
+          workflowName = await tryResolveWorkflowDisplayNameById({
+            workflowsManagement: getWorkflowsManagement(),
+            workflowId,
+            spaceId,
+          });
+        }
         workflowLabel = workflowName ? `workflow "${workflowName}"` : `workflow "${workflowId}"`;
       }
 
