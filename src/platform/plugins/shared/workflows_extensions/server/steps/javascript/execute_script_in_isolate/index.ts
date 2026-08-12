@@ -8,3 +8,4 @@
  */
 
 export { executeScriptInIsolate } from './execute_script_in_isolate';
+export type { ScriptLogger } from './script_logger';
