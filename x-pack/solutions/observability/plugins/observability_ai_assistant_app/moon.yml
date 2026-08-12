@@ -75,8 +75,6 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/data-service'
   - '@kbn/inference-common'
-  - '@kbn/observability-ai-server'
-  - '@kbn/observability-ai-common'
   - '@kbn/llm-tasks-plugin'
   - '@kbn/product-doc-common'
   - '@kbn/charts-theme'
