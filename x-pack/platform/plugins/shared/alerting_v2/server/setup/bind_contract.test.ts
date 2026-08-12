@@ -7,7 +7,6 @@
 
 import { Container, ContainerModule } from 'inversify';
 import type { KibanaRequest } from '@kbn/core/server';
-<<<<<<< HEAD
 import type { ServiceToken } from '@kbn/core-di';
 import { Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
