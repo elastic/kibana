@@ -76,7 +76,7 @@ export const JiraConnector: ConnectorSpec = {
     id: '.jira-cloud',
     displayName: 'Jira Cloud',
     description: i18n.translate('core.kibanaConnectorSpecs.jira.metadata.description', {
-      defaultMessage: 'Search issues, browse projects, and look up users in Jira Cloud',
+      defaultMessage: 'Search, create, and manage issues, projects, and users in Jira Cloud',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -96,7 +96,7 @@ export const JiraConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://auth.atlassian.com/authorize',
           tokenUrl: 'https://auth.atlassian.com/oauth/token',
-          scope: 'read:jira-work read:jira-user offline_access',
+          scope: 'read:jira-work read:jira-user write:jira-work offline_access',
         },
       },
       {
@@ -562,5 +562,10 @@ export const JiraConnector: ConnectorSpec = {
     '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',
     '- Issue lookup: searchIssuesWithJql → getIssue (by key from results)',
     '- User-filtered search: searchUsers (to get accountId) → searchIssuesWithJql with assignee = "accountId"',
+    '- Create issue: getIssueTypes (to pick a valid type) → getCreateMetadata (to check required fields) → createIssue',
+    '- Transition: getTransitions (to get the transition ID — Jira rejects status names) → transitionIssue',
+    '- Assign: searchUsers (to get accountId — Jira rejects usernames) → assignIssue',
+    '- Remediation chain: createIssue → addComment → transitionIssue (close when resolved)',
+    '- File evidence: addAttachment (base64-encoded file) → addComment referencing the attachment',
   ].join('\n'),
 };
