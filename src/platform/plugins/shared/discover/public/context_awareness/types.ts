@@ -107,6 +107,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  isApproximate?: boolean;
 }
 
 /**
@@ -237,6 +241,10 @@ export interface DefaultAppStateExtension {
    * The state for data table visibility toggle
    */
   hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**

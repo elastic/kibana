@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import yaml from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { INTERNAL_TEMPLATES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           name: 'Incident Template',
           owner: 'securitySolutionFixture',
-          definition: yaml.dump({
+          definition: stringify({
             name: 'Incident Template',
             fields: [
               {
@@ -363,6 +363,87 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(cases.total).to.eql(0);
+      });
+    });
+
+    describe('extendedFieldFilters on global TOGGLE fields', () => {
+      const FIELD_DEFINITIONS_URL = '/internal/cases/field_definitions';
+
+      before(async () => {
+        await supertest
+          .post(FIELD_DEFINITIONS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: 'escalate',
+            owner: 'securitySolutionFixture',
+            isGlobal: true,
+            definition: stringify({
+              name: 'escalate',
+              label: 'Escalate',
+              control: 'TOGGLE',
+              type: 'boolean',
+            }),
+          })
+          .expect(200);
+      });
+
+      it('filters cases by a global TOGGLE field value', async () => {
+        const onCase = await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          [CASE_EXTENDED_FIELDS]: {
+            escalate_as_boolean: 'true',
+          },
+        });
+
+        await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          [CASE_EXTENDED_FIELDS]: {
+            escalate_as_boolean: 'false',
+          },
+        });
+
+        const cases = await searchCases({
+          supertest,
+          body: {
+            extendedFieldFilters: [{ label: 'Escalate', value: 'true' }],
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        expect(cases.total).to.eql(1);
+        expect(cases.cases[0].id).to.eql(onCase.id);
+      });
+
+      it('ORs multiple values for the same toggle label', async () => {
+        const onCase = await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          [CASE_EXTENDED_FIELDS]: {
+            escalate_as_boolean: 'true',
+          },
+        });
+
+        const offCase = await createCase(supertest, {
+          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          [CASE_EXTENDED_FIELDS]: {
+            escalate_as_boolean: 'false',
+          },
+        });
+
+        const cases = await searchCases({
+          supertest,
+          body: {
+            extendedFieldFilters: [
+              { label: 'Escalate', value: 'true' },
+              { label: 'Escalate', value: 'false' },
+            ],
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        expect(cases.total).to.eql(2);
+        expect(cases.cases.map((c: { id: string }) => c.id).sort()).to.eql(
+          [onCase.id, offCase.id].sort()
+        );
       });
     });
   });

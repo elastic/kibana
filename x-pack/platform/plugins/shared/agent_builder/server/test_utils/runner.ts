@@ -166,6 +166,7 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
     setEventEmitter: jest.fn(),
+    setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
     list: jest.fn(),
     recordToolUse: jest.fn(),
@@ -304,6 +305,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolRegistry: createToolRegistryMock(),
     runner: createScopedRunnerMock(),
     attachments: createAttachmentsService(),
+    renderers: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
@@ -325,6 +327,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
@@ -382,6 +385,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     runContext: { runId: 'mock-run-id', stack: [] },
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
@@ -423,6 +427,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     attachmentStateManager: createAttachmentStateManagerMock(),
     todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     hooks: createHooksServiceStartMock(),
@@ -431,6 +436,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
@@ -458,6 +464,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
     hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),

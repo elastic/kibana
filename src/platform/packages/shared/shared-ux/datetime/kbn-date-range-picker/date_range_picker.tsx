@@ -77,6 +77,13 @@ export interface DateRangePickerProps {
   onChange: (props: DateRangePickerOnChangeProps) => void;
   /** Additional format string for parsing absolute dates (does not affect display). */
   dateFormat?: string;
+  /**
+   * Locale used to recognise and generate named ranges, natural-language
+   * durations/instants, and delimiters. English is always recognised
+   * alongside the active locale.
+   * @default `i18n.getLocale()`
+   */
+  locale?: string;
   /** Show invalid state */
   isInvalid?: boolean;
   /**
@@ -84,6 +91,14 @@ export interface DateRangePickerProps {
    * @default false
    */
   disabled?: boolean;
+  /**
+   * Shows the current value but prevents changing it: the control and time
+   * window buttons can't be interacted with, but (unlike `disabled`) the
+   * control isn't visually dimmed. The auto-refresh play/pause button is
+   * unaffected.
+   * @default false
+   */
+  readOnly?: boolean;
   /**
    * Called when the editing input text changes.
    * @beta

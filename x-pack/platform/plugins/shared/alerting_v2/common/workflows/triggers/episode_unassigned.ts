@@ -20,6 +20,7 @@ export const episodeUnassignedTriggerCommonDefinition: CommonTriggerDefinition<
   typeof episodeUnassignedPayloadSchema
 > = {
   id: EPISODE_UNASSIGNED_TRIGGER_ID,
+  stability: 'tech_preview',
   eventSchema: episodeUnassignedPayloadSchema,
   title: i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeUnassigned.title', {
     defaultMessage: 'Alerting - Episode unassigned',

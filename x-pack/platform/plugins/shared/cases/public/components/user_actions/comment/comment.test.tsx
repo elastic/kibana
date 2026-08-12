@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { z } from '@kbn/zod/v4';
 import { EuiCommentList } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -37,7 +38,11 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { getCommentAttachmentType } from '../../attachments/comment';
 import { getStackAlertAttachmentType } from '../../attachments/alert';
-import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -108,13 +113,23 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
+      // The `user` comment type resolves to the registered unified `comment` type, whose
+      // removal object drives the (lowercase) row label.
       expect(screen.getByText('removed comment')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a single alert', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
       const userAction = getAlertUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        unifiedAttachmentTypeRegistry,
         attachments: [basicCommentUnified],
         userAction,
       });
@@ -122,13 +137,21 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed comment')).toBeInTheDocument();
+      expect(screen.getByText('removed alert')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting multiple alerts', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        ...getStackAlertAttachmentType(),
+        id: SECURITY_ALERT_ATTACHMENT_TYPE,
+      });
+
       const userAction = getMultipleAlertsUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
+        unifiedAttachmentTypeRegistry,
         attachments: [basicCommentUnified],
         userAction,
       });
@@ -136,7 +159,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed comment')).toBeInTheDocument();
+      expect(screen.getByText('removed 2 alerts')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting an external reference attachment', async () => {
@@ -153,52 +176,72 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting an external reference attachment with getAttachmentRemovalObject defined', async () => {
-      const getAttachmentRemovalObject = jest.fn().mockReturnValue({
-        event: 'removed my own attachment',
+    it('resolves a migrated external reference through the unified registry', async () => {
+      // A legacy external-reference delete payload whose type maps to a unified type
+      // (endpoint -> security.endpoint) picks up the unified type's removal label.
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        displayName: 'Endpoint',
+        icon: 'logoSecurity',
+        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
+        getAttachmentRemovalObject: () => ({ event: 'removed endpoint attachment' }),
+        schema: z.object({}),
       });
 
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      const attachment = getExternalReferenceAttachment();
-      externalReferenceAttachmentTypeRegistry.register({
-        ...attachment,
-        getAttachmentRemovalObject,
+      const userAction = getExternalReferenceUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'externalReference',
+            externalReferenceId: 'my-id',
+            externalReferenceStorage: { type: 'elasticSearchDoc' },
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceMetadata: null,
+            owner: 'securitySolution',
+          },
+        },
       });
-
-      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
-        caseData: {
-          ...builderArgs.caseData,
-          comments: [externalReferenceAttachment],
-        },
       });
 
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
-        caseData: {
-          id: 'basic-case-id',
-          title: 'Another horrible breach!!',
-        },
-        externalReferenceId: 'my-id',
-        externalReferenceMetadata: null,
-      });
+      expect(screen.getByText('removed endpoint attachment')).toBeInTheDocument();
     });
 
-    it('renders correctly when deleting an external reference attachment without getAttachmentRemovalObject defined', async () => {
-      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      const attachment = getExternalReferenceAttachment();
-      externalReferenceAttachmentTypeRegistry.register(attachment);
+    it('falls back to the common label for a registered type without a removal object', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+        displayName: 'Endpoint',
+        icon: 'logoSecurity',
+        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
+        schema: z.object({}),
+      });
 
-      const userAction = getExternalReferenceUserAction({ action: UserActionActions.delete });
+      const userAction = getExternalReferenceUserAction({
+        action: UserActionActions.delete,
+        payload: {
+          comment: {
+            type: 'externalReference',
+            externalReferenceId: 'my-id',
+            externalReferenceStorage: { type: 'elasticSearchDoc' },
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceMetadata: null,
+            owner: 'securitySolution',
+          },
+        },
+      });
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
-        externalReferenceAttachmentTypeRegistry,
+        unifiedAttachmentTypeRegistry,
         userAction,
       });
 
@@ -239,7 +282,7 @@ describe('createCommentUserActionBuilder', () => {
         icon: 'bell',
         getAttachmentViewObject: () => ({ event: 'added an event' }),
         getAttachmentRemovalObject: () => ({ event: 'removed event' }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction({
@@ -253,6 +296,32 @@ describe('createCommentUserActionBuilder', () => {
           },
         },
       });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        unifiedAttachmentTypeRegistry,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+      expect(screen.getByText('removed event')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting a legacy event attachment', async () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
+      unifiedAttachmentTypeRegistry.register({
+        id: 'security.event',
+        displayName: 'Event',
+        icon: 'bell',
+        getAttachmentViewObject: () => ({ event: 'added an event' }),
+        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        schema: z.object({}),
+      });
+
+      const userAction = getEventUserAction({ action: UserActionActions.delete });
 
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
@@ -579,7 +648,7 @@ describe('createCommentUserActionBuilder', () => {
           event: 'added an event',
           timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
-        schemaValidator: () => {},
+        schema: z.object({}),
       });
 
       const userAction = getEventUserAction();
@@ -729,6 +798,7 @@ describe('createCommentUserActionBuilder', () => {
             timelineAvatar: 'lensApp',
             children: React.lazy(SpyLazyFactory),
           }),
+          schema: z.object({}),
         });
 
         const userAction = getPersistableStateUserAction();
@@ -821,6 +891,7 @@ describe('createCommentUserActionBuilder', () => {
             event: 'added an embeddable',
             timelineAvatar: 'lensApp',
           }),
+          schema: z.object({}),
         });
 
         const userAction = getPersistableStateUserAction();

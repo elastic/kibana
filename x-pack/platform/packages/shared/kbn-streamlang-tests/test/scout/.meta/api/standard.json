@@ -1,5 +1,5 @@
 {
-  "sha1": "3a5b36605a7e8aae6bc044902883f06c3c5f06d2",
+  "sha1": "1c609ffc9fea395b77cfdbd514a19e7bbdfba35a",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -7136,6 +7136,22 @@
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/json_extract.spec.ts",
         "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "c2ff3f0c948bea8-0e0ad2593f40ae4",
+      "title": "Streamlang to Ingest Pipeline - JsonExtract Processor (Ingest Pipeline-specific) should write extracted value into a pre-existing parent object so it is readable downstream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/json_extract.spec.ts",
+        "line": 80,
         "column": 12
       }
     },

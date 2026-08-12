@@ -1327,6 +1327,8 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
       expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
+      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenHashField)');
+      expect(args.script.source).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
       expect(args.script.params).toEqual({
         spaceId: 'default',
         ...audit,
@@ -1337,6 +1339,8 @@ describe('WorkflowExecutionQueryService', () => {
           'timed_out',
           'skipped',
         ]),
+        tokenHashField: '_hitlTokenHash',
+        tokenExpiresAtField: '_hitlTokenExpiresAt',
       });
     });
 

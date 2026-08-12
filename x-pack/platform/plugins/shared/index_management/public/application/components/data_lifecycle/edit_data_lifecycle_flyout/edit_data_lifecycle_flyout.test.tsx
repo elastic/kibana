@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import '@testing-library/jest-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render } from '@testing-library/react';
+import type { SerializedPolicy } from '@kbn/index-lifecycle-management-common-shared';
 import {
   EditDataLifecycleFlyout,
   type EditDataLifecycleFlyoutProps,
@@ -116,8 +118,80 @@ describe('EditDataLifecycleFlyout', () => {
         frozenAfter: undefined,
         dataRetention: undefined,
       },
-      failedData: { inheritLifecycle: false, failureStoreEnabled: true },
+      failedData: {
+        inheritLifecycle: false,
+        failureStoreEnabled: true,
+        retentionDisabled: true,
+      },
     });
+  });
+
+  it('forces failed delete phase enabled on serverless when failure store is enabled', () => {
+    const { getByTestId, onApply } = renderFlyout({
+      isServerless: true,
+      initialTabId: 'failed_data',
+    });
+
+    expect(getByTestId('deleteDurationValue')).not.toBeDisabled();
+    expect(getByTestId('deleteDurationUnit')).not.toBeDisabled();
+
+    fireEvent.click(getByTestId('dlmPhasesSelectorDeletePhaseCard'));
+
+    fireEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
+
+    expect(onApply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        failedData: expect.objectContaining({
+          inheritLifecycle: false,
+          failureStoreEnabled: true,
+        }),
+      })
+    );
+  });
+
+  it('hides the failed delete phase toggle on serverless when not inheriting', () => {
+    const { getByTestId } = renderFlyout({
+      isServerless: true,
+      initialTabId: 'failed_data',
+    });
+
+    const deleteCard = getByTestId('dlmPhasesSelectorDeletePhaseCard');
+    expect(deleteCard.getAttribute('role')).toBe('group');
+    expect(deleteCard.querySelector('input[type="checkbox"]')).toBeNull();
+  });
+
+  it('hides the failed delete phase toggle on serverless when the lifecycle is inherited', () => {
+    const { getByTestId } = renderFlyout({
+      isServerless: true,
+      initialTabId: 'failed_data',
+      failedData: { ...BASE_FAILED_DATA, inheritLifecycle: true },
+    });
+
+    const deleteCard = getByTestId('dlmPhasesSelectorDeletePhaseCard');
+    expect(deleteCard.getAttribute('role')).toBe('group');
+    expect(deleteCard.querySelector('input[type="checkbox"]')).toBeNull();
+  });
+
+  it('calls onPolicyInspect when inspect action is clicked', () => {
+    const onPolicyInspect = jest.fn();
+    const serializedPolicy: SerializedPolicy = { name: 'my_policy', phases: {} };
+
+    const { getByTestId } = renderFlyout({
+      successfulData: {
+        ...BASE_SUCCESSFUL_DATA,
+        ilm: {
+          method: 'ilm',
+          onMethodChange: jest.fn(),
+          policies: [{ name: 'my_policy', phases: {}, serializedPolicy }],
+          selectedPolicyName: 'my_policy',
+          onPolicySelect: jest.fn(),
+          onPolicyInspect,
+        },
+      },
+    });
+
+    fireEvent.click(getByTestId('retentionSelectableRowInspect-my_policy'));
+    expect(onPolicyInspect).toHaveBeenCalledWith('my_policy');
   });
 
   it('includes DLM phase durations in onApply when the user configures them', () => {
@@ -148,6 +222,46 @@ describe('EditDataLifecycleFlyout', () => {
       successfulData: { inheritLifecycle: true },
       failedData: { inheritLifecycle: true },
     });
+  });
+
+  it('includes the failed retention the user configures', () => {
+    const { getByTestId, onApply } = renderFlyout({ initialTabId: 'failed_data' });
+
+    fireEvent.click(getByTestId('dlmPhasesSelectorDeletePhaseCard'));
+
+    fireEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
+
+    expect(onApply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        failedData: expect.objectContaining({
+          inheritLifecycle: false,
+          failureStoreEnabled: true,
+          retention: '60d',
+        }),
+      })
+    );
+  });
+
+  it('persists the effective failed retention even when the user does not change it', () => {
+    const { getByTestId, onApply } = renderFlyout({
+      initialTabId: 'failed_data',
+      failedData: {
+        ...BASE_FAILED_DATA,
+        deletePhaseDefaultValue: { enabled: true, value: '30', unit: 'd' },
+      },
+    });
+
+    fireEvent.click(getByTestId('editDataLifecycleFlyoutApplyButton'));
+
+    expect(onApply).toHaveBeenCalledWith(
+      expect.objectContaining({
+        failedData: expect.objectContaining({
+          inheritLifecycle: false,
+          failureStoreEnabled: true,
+          retention: '30d',
+        }),
+      })
+    );
   });
 
   it('disables the Apply button when method is ILM and no policy is selected', () => {

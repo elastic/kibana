@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/275157
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Fix shared API keys invalidated when one referencing task is removed
+description: "Fixes Task Manager invalidating API keys still in use by other tasks when one referencing task is removed, which caused surviving tasks to fail with a `security_exception`."

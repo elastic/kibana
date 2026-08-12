@@ -10,6 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AnomalySummaryEntry } from '../../../../common/api/entity_analytics';
 import { AnomalyTabTableSection } from './anomalies_tab_table';
+import { ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE } from './translations';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -59,6 +60,10 @@ jest.mock('./table/anomaly_score_badge', () => ({
   ),
 }));
 
+jest.mock('./table/anomaly_row_actions_menu', () => ({
+  AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
+}));
+
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
@@ -76,6 +81,7 @@ const makeAnomaly = (overrides: Partial<AnomalySummaryEntry> = {}): AnomalySumma
   partitionFieldName: null,
   partitionFieldValue: null,
   recordScore: 75,
+  recordId: 'record-1',
   timestamp: '2024-01-15T10:00:00.000Z',
   actual: [100],
   typical: [10],
@@ -253,6 +259,39 @@ describe('AnomalyTabTableSection', () => {
           sort: expect.objectContaining({ field: 'timestamp' }),
         })
       );
+    });
+  });
+
+  describe('loading state', () => {
+    it('renders a loading skeleton instead of the table when isLoading is true', () => {
+      const { container } = render(<AnomalyTabTableSection {...defaultProps} isLoading />, {
+        wrapper: Wrapper,
+      });
+      expect(container.querySelector('.euiSkeletonText')).toBeInTheDocument();
+      expect(screen.queryByText('ML job')).not.toBeInTheDocument();
+      expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
+    });
+
+    it('renders the table normally when isLoading is false', () => {
+      const { container } = render(<AnomalyTabTableSection {...defaultProps} isLoading={false} />, {
+        wrapper: Wrapper,
+      });
+      expect(container.querySelector('.euiSkeletonText')).not.toBeInTheDocument();
+      expect(screen.getByText('ML job')).toBeInTheDocument();
+    });
+  });
+
+  describe('empty state', () => {
+    it('shows the empty message when there are no anomalies', () => {
+      render(<AnomalyTabTableSection {...defaultProps} anomalies={[]} total={0} />, {
+        wrapper: Wrapper,
+      });
+      expect(screen.getByText(ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE)).toBeInTheDocument();
+    });
+
+    it('does not show the empty message when there are anomalies', () => {
+      render(<AnomalyTabTableSection {...defaultProps} />, { wrapper: Wrapper });
+      expect(screen.queryByText(ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE)).not.toBeInTheDocument();
     });
   });
 });

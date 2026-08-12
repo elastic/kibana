@@ -29,8 +29,15 @@ jest.mock('../utils/get_esql_query', () => ({
   getEsqlQuery: jest.fn((query: { esql?: string } | undefined) => query?.esql),
 }));
 jest.mock('@kbn/esql-utils', () => ({
-  buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[]) =>
-    dims?.length ? `${esql} | WHERE dim IS NOT NULL | METRICS_INFO` : `${esql} | METRICS_INFO`
+  buildMetricsInfoQuery: jest.fn((esql: string, dims?: string[], postFilter?: string) => {
+    const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
+    const post = postFilter ? ` | WHERE ${postFilter}` : '';
+    return `${esql}${preFilter} | METRICS_INFO${post}`;
+  }),
+  escapeStringValue: jest.fn((val: string) => `"${val}"`),
+  buildJoinedFilter: jest.fn(
+    (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
+      fields?.map(clause).join(separator) ?? ''
   ),
   hasTransformationalCommand: jest.fn(() => false),
 }));
@@ -150,10 +157,18 @@ describe('useFetchMetricsData', () => {
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
-    const { buildMetricsInfoQuery, hasTransformationalCommand } =
+    const { buildMetricsInfoQuery, buildJoinedFilter, hasTransformationalCommand } =
       jest.requireMock('@kbn/esql-utils');
-    buildMetricsInfoQuery.mockImplementation((esql: string, dims?: string[]) =>
-      dims?.length ? `${esql} | WHERE dim IS NOT NULL | METRICS_INFO` : `${esql} | METRICS_INFO`
+    buildMetricsInfoQuery.mockImplementation(
+      (esql: string, dims?: string[], postFilter?: string) => {
+        const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
+        const post = postFilter ? ` | WHERE ${postFilter}` : '';
+        return `${esql}${preFilter} | METRICS_INFO${post}`;
+      }
+    );
+    buildJoinedFilter.mockImplementation(
+      (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
+        fields?.map(clause).join(separator) ?? ''
     );
     hasTransformationalCommand.mockImplementation(() => false);
 
@@ -199,7 +214,7 @@ describe('useFetchMetricsData', () => {
       expect(result.current.allDimensions).toEqual([hostDimension]);
     });
 
-    it('returns sorted metricItems and allDimensions', async () => {
+    it('returns sorted allDimensions', async () => {
       const parsed = createMockParsedMetrics(
         ['system.memory.utilization', 'system.cpu.utilization'],
         [serviceDimension, hostDimension]
@@ -213,8 +228,6 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(result.current.metricItems[0].metricName).toBe('system.cpu.utilization');
-      expect(result.current.metricItems[1].metricName).toBe('system.memory.utilization');
       expect(result.current.allDimensions[0].name).toBe('host.name');
       expect(result.current.allDimensions[1].name).toBe('service.name');
     });
@@ -693,7 +706,7 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', []);
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
       expect(result.current.activeDimensions).toEqual([]);
       // Intent must not be mutated — the caller still sees the original array.
       expect(params.selectedDimensionNames).toEqual([hostDimension]);
@@ -713,7 +726,11 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', ['host.name']);
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
+        'TS metrics-*',
+        ['host.name'],
+        'MV_CONTAINS(dimension_fields, "host.name")'
+      );
       expect(result.current.activeDimensions).toEqual([hostDimension]);
     });
 
@@ -728,10 +745,11 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [
-        'host.name',
-        'service.name',
-      ]);
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
+        'TS metrics-*',
+        ['host.name', 'service.name'],
+        'MV_CONTAINS(dimension_fields, "host.name") AND MV_CONTAINS(dimension_fields, "service.name")'
+      );
       expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
     });
 
@@ -799,7 +817,7 @@ describe('useFetchMetricsData', () => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', []);
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
     });
   });
 

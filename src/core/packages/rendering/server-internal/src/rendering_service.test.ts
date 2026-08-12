@@ -13,7 +13,6 @@ import {
   getSettingValueMock,
   getCommonStylesheetPathsMock,
   getThemeStylesheetPathsMock,
-  getScriptPathsMock,
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
@@ -39,6 +38,7 @@ import type {
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { BehaviorSubject } from 'rxjs';
 
@@ -284,25 +284,6 @@ function renderTestCases(
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledTimes(1);
       expect(getCommonStylesheetPathsMock).toHaveBeenCalledWith({
         baseHref: '/mock-server-basepath',
-      });
-    });
-
-    it('calls `getScriptPaths` with the correct parameters', async () => {
-      getSettingValueMock.mockImplementation((settingName: string) => {
-        if (settingName === 'theme:darkMode') {
-          return true;
-        }
-        return settingName;
-      });
-
-      const [render] = await getRender();
-      await render(createKibanaRequest(), uiSettings);
-
-      expect(getScriptPathsMock).toHaveBeenCalledTimes(1);
-      expect(getScriptPathsMock).toHaveBeenCalledWith({
-        darkMode: true,
-        baseHref: '/mock-server-basepath',
-        themeName: 'borealis',
       });
     });
 
@@ -657,7 +638,6 @@ describe('RenderingService', () => {
     getSettingValueMock.mockImplementation((settingName: string) => settingName);
     getCommonStylesheetPathsMock.mockReturnValue(['/common-1.css']);
     getThemeStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
-    getScriptPathsMock.mockReturnValue(['/script-1.js']);
     getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
     getApmConfigMock.mockReset().mockReturnValue({ stubApmConfig: true });
   });
@@ -767,6 +747,34 @@ describe('RenderingService', () => {
           '/mock-server-basepath/translations/MOCK_FR_HASH/fr.json'
         );
       });
+
+      it('resolves the locale from the Accept-Language header when profile and cookie are absent', async () => {
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        mockRenderingSetupDeps.i18n.getAvailableLocales.mockReturnValueOnce([
+          { id: 'en', label: 'English' },
+          { id: 'fr-FR', label: 'French' },
+        ]);
+        mockRenderingSetupDeps.i18n.getTranslationHashes.mockReturnValueOnce({
+          en: 'MOCK_HASH',
+          'fr-FR': 'MOCK_FR_HASH',
+        });
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+          false
+        );
+
+        const { body: content } = await render(
+          createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),
+          uiSettings
+        );
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        expect(data.i18n.translationsUrl).toEqual(
+          '/mock-server-basepath/translations/MOCK_FR_HASH/fr-FR.json'
+        );
+      });
     });
 
     describe('allowLocaleCookie', () => {
@@ -800,6 +808,36 @@ describe('RenderingService', () => {
         const result = await render(createKibanaRequest(), uiSettings);
 
         expect(result.headers).not.toHaveProperty('set-cookie');
+      });
+
+      it('still resolves the locale from Accept-Language when allowLocaleCookie is false, without setting a cookie', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        mockRenderingSetupDeps.i18n.getAvailableLocales.mockReturnValueOnce([
+          { id: 'en', label: 'English' },
+          { id: 'fr-FR', label: 'French' },
+        ]);
+        mockRenderingSetupDeps.i18n.getTranslationHashes.mockReturnValueOnce({
+          en: 'MOCK_HASH',
+          'fr-FR': 'MOCK_FR_HASH',
+        });
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+          false
+        );
+
+        const { body: content, headers } = await render(
+          createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),
+          uiSettings
+        );
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        expect(data.i18n.translationsUrl).toEqual(
+          '/mock-server-basepath/translations/MOCK_FR_HASH/fr-FR.json'
+        );
+        expect(headers).not.toHaveProperty('set-cookie');
       });
 
       afterEach(() => {
@@ -895,11 +933,12 @@ describe('RenderingService', () => {
       expect(asScoped).toHaveBeenCalledTimes(1);
       expect(getForInjection).toHaveBeenCalledTimes(1);
       expect(await renderAndReadUserStorage(content)).toEqual({
+        available: true,
         values: { 'navigation:layout': { hidden: ['discover'] } },
       });
     });
 
-    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
+    it('injects unavailable/empty values when asScoped() returns null (no profile_uid)', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn().mockReturnValue(null);
@@ -908,10 +947,10 @@ describe('RenderingService', () => {
       const content = await render(createKibanaRequest(), buildUiSettings());
 
       expect(asScoped).toHaveBeenCalledTimes(1);
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
 
-    it('injects empty values for anonymous pages without consulting userStorage', async () => {
+    it('injects unavailable/empty values for anonymous pages without consulting userStorage', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const asScoped = jest.fn();
@@ -922,7 +961,7 @@ describe('RenderingService', () => {
       });
 
       expect(asScoped).not.toHaveBeenCalled();
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
 
     it('throws when getForInjection() rejects', async () => {
@@ -933,6 +972,20 @@ describe('RenderingService', () => {
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
       await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
+    });
+
+    it('injects unavailable/empty values when getForInjection() rejects with a forbidden error', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden')));
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(await renderAndReadUserStorage(content)).toEqual({ available: false, values: {} });
     });
   });
 

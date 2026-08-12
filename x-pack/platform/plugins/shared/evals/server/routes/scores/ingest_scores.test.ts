@@ -17,6 +17,7 @@ import {
 } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WriteResult } from '../../storage/evaluation_score_service';
 import { registerIngestScoresRoute } from './ingest_scores';
 
@@ -71,15 +72,19 @@ const getBasePayload = (): IngestScoresRequestBodyInput => ({
 });
 
 describe('POST /internal/evals/scores', () => {
-  const setup = () => {
+  const setup = (options?: { getSpaceId?: jest.Mock; checkManageEvalsPrivileges?: jest.Mock }) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerIngestScoresRoute({
       router,
       logger,
       canEncrypt: false,
+      evaluatorRegistry: { list: () => [], get: () => undefined },
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+      getSpaceId: options?.getSpaceId,
+      checkManageEvalsPrivileges: options?.checkManageEvalsPrivileges,
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
@@ -121,9 +126,87 @@ describe('POST /internal/evals/scores', () => {
 
     const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
 
-    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload);
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['default']);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ingested: 1, conflicted: 0, failed: [] });
+  });
+
+  it('stamps scores with the active space when no space_ids are provided', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const { handler, context, evaluationScoreService } = setup({ getSpaceId });
+    const payload = getBasePayload();
+
+    await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['marketing']);
+  });
+
+  it('honors explicit space_ids over the active space when the caller is authorized', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(true);
+    const { handler, context, evaluationScoreService } = setup({
+      getSpaceId,
+      checkManageEvalsPrivileges,
+    });
+    const payload = { ...getBasePayload(), space_ids: ['sales', 'ops'] };
+
+    await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    // Only spaces other than the active one need an explicit cross-space privilege check.
+    expect(checkManageEvalsPrivileges).toHaveBeenCalledWith(expect.anything(), ['sales', 'ops']);
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['sales', 'ops']);
+  });
+
+  it('does not run a cross-space privilege check when the only target is the active space', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(true);
+    const { handler, context, evaluationScoreService } = setup({
+      getSpaceId,
+      checkManageEvalsPrivileges,
+    });
+    const payload = { ...getBasePayload(), space_ids: ['marketing'] };
+
+    await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(checkManageEvalsPrivileges).not.toHaveBeenCalled();
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload, ['marketing']);
+  });
+
+  it('returns 403 and does not write when the caller lacks privileges in a target space', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const checkManageEvalsPrivileges = jest.fn().mockResolvedValue(false);
+    const { handler, context, evaluationScoreService } = setup({
+      getSpaceId,
+      checkManageEvalsPrivileges,
+    });
+    const payload = { ...getBasePayload(), space_ids: ['sales', 'ops'] };
+
+    const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(response.status).toBe(403);
+    expect(checkManageEvalsPrivileges).toHaveBeenCalledWith(expect.anything(), ['sales', 'ops']);
+    expect(evaluationScoreService.write).not.toHaveBeenCalled();
+  });
+
+  it('fails closed with 403 for cross-space writes when no privilege checker is wired', async () => {
+    const getSpaceId = jest.fn().mockResolvedValue('marketing');
+    const { handler, context, evaluationScoreService } = setup({ getSpaceId });
+    const payload = { ...getBasePayload(), space_ids: ['sales'] };
+
+    const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(response.status).toBe(403);
+    expect(evaluationScoreService.write).not.toHaveBeenCalled();
+  });
+
+  it('rejects assigning scores to all spaces (*) with 400', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const payload = { ...getBasePayload(), space_ids: ['*'] };
+
+    const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
+
+    expect(response.status).toBe(400);
+    expect(evaluationScoreService.write).not.toHaveBeenCalled();
   });
 
   it('returns 200 with conflicted count when payload is fully idempotent', async () => {
@@ -268,6 +351,8 @@ describe('POST /internal/evals/scores', () => {
       router,
       logger,
       canEncrypt: false,
+      evaluatorRegistry: { list: () => [], get: () => undefined },
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });

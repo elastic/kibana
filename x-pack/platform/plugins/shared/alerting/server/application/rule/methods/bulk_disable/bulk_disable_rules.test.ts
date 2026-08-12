@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '../../../../types';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
@@ -43,10 +30,8 @@ import {
   returnedRuleForBulkDisable1,
   returnedRuleForBulkDisable2,
 } from '../../../../rules_client/tests/test_helpers';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { RecoveredActionGroup } from '../../../../../common';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
@@ -59,51 +44,25 @@ jest.mock('../../../../rules_client/lib/untrack_rule_alerts', () => ({
 
 const { untrackRuleAlerts } = jest.requireMock('../../../../rules_client/lib/untrack_rule_alerts');
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
 const eventLogger = eventLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
+  logger,
   eventLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
@@ -975,30 +934,25 @@ describe('bulkDisableRules', () => {
       );
     });
 
-    test('stamps every change with the time captured immediately before the bulkCreate', async () => {
+    test('stamps every change with updated_at from the saved object', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRuleForBulkDisable1, disabledRuleForBulkDisable2],
+        saved_objects: [
+          { ...disabledRuleForBulkDisable1, updated_at: '2023-03-05T10:30:00.000Z' },
+          { ...disabledRuleForBulkDisable2, updated_at: '2023-03-05T11:00:00.000Z' },
+        ],
       });
 
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
 
-      try {
-        await trackingClient.bulkDisableRules({ filter: 'fake_filter' });
-
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        // All rules share the same operation timestamp.
-        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
-          '2030-06-01T08:00:00.000Z',
-          '2030-06-01T08:00:00.000Z',
-        ]);
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T11:00:00.000Z',
+      ]);
     });
 
     test('skips rules whose saved object update failed (partial bulk failures)', async () => {

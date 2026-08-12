@@ -51,6 +51,7 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 
 export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   ...FetchMonitorQueryArgsCommon,
+  includeHeartbeatMonitors: t.boolean,
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

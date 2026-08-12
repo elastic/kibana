@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
+
+const unknownDatasetLabel = i18n.translate('xpack.infra.logs.analysis.unknownDatasetLabel', {
+  defaultMessage: 'Log entries without dataset',
+});
 
 export const ML_SEVERITY_SCORES = {
   warning: 3,
@@ -45,7 +50,7 @@ export const formatOneDecimalPlace = (number: number) => {
 };
 
 export const getFriendlyNameForPartitionId = (partitionId: string) => {
-  return partitionId !== '' ? partitionId : 'unknown';
+  return partitionId !== '' ? partitionId : unknownDatasetLabel;
 };
 
 export const compareDatasetsByMaximumAnomalyScore = <

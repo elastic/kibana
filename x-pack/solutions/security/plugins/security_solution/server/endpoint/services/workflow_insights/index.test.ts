@@ -392,6 +392,7 @@ describe('SecurityWorkflowInsightsService', () => {
         defendInsights,
         endpointMetadataService: expect.any(Object),
         esClient,
+        ccsEnabled: false,
         options: {
           insightType: workflowInsights[0].type,
           endpointIds: insight.events.map((e) => e.endpointId),

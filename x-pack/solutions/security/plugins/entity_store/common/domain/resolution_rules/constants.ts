@@ -25,6 +25,14 @@
  */
 export const RESOLUTION_RULE_IDS = {
   EMAIL_EXACT_MATCH: 'email_exact_match',
+  RELATED_USER_ALIAS_RESOLUTION: 'related_user_alias_resolution',
 } as const;
 
 export type ResolutionRuleId = (typeof RESOLUTION_RULE_IDS)[keyof typeof RESOLUTION_RULE_IDS];
+
+export const RESOLUTION_RULE_KINDS = {
+  SAME_FIELD: 'same_field',
+  RELATED_USER_ALIAS_RESOLUTION: 'related_user_alias_resolution',
+} as const;
+
+export type ResolutionRuleKind = (typeof RESOLUTION_RULE_KINDS)[keyof typeof RESOLUTION_RULE_KINDS];

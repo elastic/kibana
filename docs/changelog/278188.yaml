@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278188
+issues:
+- https://github.com/elastic/kibana/issues/277820
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix workflow `foreach` failures when step output is evicted"
+description: "Workflow `foreach` steps no longer fail intermittently with \"resolved to undefined\" when a large source step output is evicted between the `if:` guard and loop entry. Outputs are read-pinned for the duration of each node."

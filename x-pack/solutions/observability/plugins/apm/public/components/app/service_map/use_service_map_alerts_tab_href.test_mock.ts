@@ -9,8 +9,6 @@
  * Reusable jest mock for `use_service_map_alerts_tab_href` consumed by graph
  * test files that render `ServiceMapGraph` without a real APM router context.
  * Used inside a `jest.mock(<path>, () => jest.requireActual(<this path>))`
- * factory so all three hook exports are mocked consistently.
+ * factory.
  */
-export const useServiceMapAlertsTabHref = jest.fn(() => '/app/apm/services/Test%20Service/alerts');
-export const useServiceMapAlertsTabNavigate = jest.fn(() => jest.fn());
 export const useServiceMapAlertsNavigateFactory = jest.fn(() => () => jest.fn());

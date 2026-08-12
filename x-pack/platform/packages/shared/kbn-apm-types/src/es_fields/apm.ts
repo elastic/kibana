@@ -128,6 +128,7 @@ export const ERROR_CODE = 'error.code';
 
 // ANOMALY
 export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+export const ANOMALY_TIMESTAMP = 'anomaly.timestamp';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
@@ -185,6 +186,10 @@ export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
+// ECS Gen AI fields — https://www.elastic.co/docs/reference/ecs/ecs-gen_ai
+export const GEN_AI_USAGE_INPUT_TOKENS = 'gen_ai.usage.input_tokens';
+export const GEN_AI_USAGE_OUTPUT_TOKENS = 'gen_ai.usage.output_tokens';
+
 // OpenTelemetry Metrics
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
 export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
@@ -200,6 +205,12 @@ export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 
 // OTel JVM metrics - stable semconv (jvm.*)
 // https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/
+// Unprefixed fields as stored by EDOT / OTel-native ingest and Metrics dashboards.
+export const METRIC_JVM_CPU_RECENT_UTILIZATION = 'jvm.cpu.recent_utilization';
+export const METRIC_JVM_MEMORY_USED = 'jvm.memory.used';
+export const METRIC_JVM_MEMORY_LIMIT = 'jvm.memory.limit';
+export const METRIC_JVM_MEMORY_TYPE = 'jvm.memory.type';
+// Some ingest paths also expose the same metrics under a `metrics.` prefix.
 export const METRIC_OTEL_JVM_CPU_PERCENT = 'metrics.jvm.cpu.recent_utilization';
 export const METRIC_OTEL_JVM_MEMORY_USED = 'metrics.jvm.memory.used';
 export const METRIC_OTEL_JVM_MEMORY_COMMITTED = 'metrics.jvm.memory.committed';

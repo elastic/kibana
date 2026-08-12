@@ -169,13 +169,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
           onConfirm={onBulkActionConfirm}
         />
       )}
-      <EuiText color="subdued">
-        <FormattedMessage
-          id="xpack.fleet.enrollmentTokensList.pageDescription"
-          defaultMessage="Create and revoke enrollment tokens. An enrollment token enables one or more agents to enroll in Fleet and send data."
-        />
-      </EuiText>
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
@@ -248,7 +241,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               })}
               button={{
                 props: {
-                  iconType: 'arrowDown',
+                  iconType: 'chevronSingleDown',
                   iconSide: 'right',
                   color: 'primary',
                   isLoading: isBulkActionInProgress,

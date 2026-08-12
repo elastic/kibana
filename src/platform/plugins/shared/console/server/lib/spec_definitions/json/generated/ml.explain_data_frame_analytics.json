@@ -6,6 +6,267 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "source": {
+        "index": "",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        },
+        "runtime_mappings": {
+          "*": {
+            "fields": {
+              "*": {
+                "type": {
+                  "__one_of": [
+                    "boolean",
+                    "composite",
+                    "date",
+                    "double",
+                    "geo_point",
+                    "geo_shape",
+                    "ip",
+                    "keyword",
+                    "long",
+                    "lookup"
+                  ]
+                }
+              }
+            },
+            "fetch_fields": {
+              "__any_of": [
+                {
+                  "field": "",
+                  "format": ""
+                },
+                ""
+              ]
+            },
+            "format": "",
+            "input_field": "",
+            "target_field": "",
+            "target_index": "",
+            "script": {
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
+            },
+            "on_script_error": {
+              "__one_of": [
+                "fail",
+                "continue"
+              ]
+            },
+            "type": {
+              "__one_of": [
+                "boolean",
+                "composite",
+                "date",
+                "double",
+                "geo_point",
+                "geo_shape",
+                "ip",
+                "keyword",
+                "long",
+                "lookup"
+              ]
+            }
+          }
+        },
+        "_source": {
+          "__one_of": [
+            {
+              "includes": [],
+              "excludes": []
+            },
+            []
+          ]
+        }
+      },
+      "dest": {
+        "index": "",
+        "results_field": ""
+      },
+      "analysis": {
+        "classification": {
+          "alpha": "",
+          "dependent_variable": "",
+          "downsample_factor": "",
+          "early_stopping_enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "eta": "",
+          "eta_growth_rate_per_tree": "",
+          "feature_bag_fraction": "",
+          "feature_processors": [
+            {
+              "frequency_encoding": {
+                "feature_name": "",
+                "field": "",
+                "frequency_map": {
+                  "*": ""
+                }
+              },
+              "multi_encoding": {
+                "processors": []
+              },
+              "n_gram_encoding": {
+                "feature_prefix": "",
+                "field": "",
+                "length": "",
+                "n_grams": [],
+                "start": "",
+                "custom": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              "one_hot_encoding": {
+                "field": "",
+                "hot_map": ""
+              },
+              "target_mean_encoding": {
+                "default_value": "",
+                "feature_name": "",
+                "field": "",
+                "target_map": {}
+              }
+            }
+          ],
+          "gamma": "",
+          "lambda": "",
+          "max_optimization_rounds_per_hyperparameter": "",
+          "max_trees": "",
+          "num_top_feature_importance_values": "",
+          "prediction_field_name": "",
+          "randomize_seed": "",
+          "soft_tree_depth_limit": "",
+          "soft_tree_depth_tolerance": "",
+          "training_percent": "",
+          "class_assignment_objective": "",
+          "num_top_classes": ""
+        },
+        "outlier_detection": {
+          "compute_feature_influence": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "feature_influence_threshold": "",
+          "method": "",
+          "n_neighbors": "",
+          "outlier_fraction": "",
+          "standardization_enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        },
+        "regression": {
+          "alpha": "",
+          "dependent_variable": "",
+          "downsample_factor": "",
+          "early_stopping_enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "eta": "",
+          "eta_growth_rate_per_tree": "",
+          "feature_bag_fraction": "",
+          "feature_processors": [
+            {
+              "frequency_encoding": {
+                "feature_name": "",
+                "field": "",
+                "frequency_map": {
+                  "*": ""
+                }
+              },
+              "multi_encoding": {
+                "processors": []
+              },
+              "n_gram_encoding": {
+                "feature_prefix": "",
+                "field": "",
+                "length": "",
+                "n_grams": [],
+                "start": "",
+                "custom": {
+                  "__one_of": [
+                    true,
+                    false
+                  ]
+                }
+              },
+              "one_hot_encoding": {
+                "field": "",
+                "hot_map": ""
+              },
+              "target_mean_encoding": {
+                "default_value": "",
+                "feature_name": "",
+                "field": "",
+                "target_map": {}
+              }
+            }
+          ],
+          "gamma": "",
+          "lambda": "",
+          "max_optimization_rounds_per_hyperparameter": "",
+          "max_trees": "",
+          "num_top_feature_importance_values": "",
+          "prediction_field_name": "",
+          "randomize_seed": "",
+          "soft_tree_depth_limit": "",
+          "soft_tree_depth_tolerance": "",
+          "training_percent": "",
+          "loss_function": "",
+          "loss_function_parameter": ""
+        }
+      },
+      "description": "",
+      "model_memory_limit": "",
+      "max_num_threads": "",
+      "analyzed_fields": {
+        "__one_of": [
+          {
+            "includes": [],
+            "excludes": []
+          },
+          []
+        ]
+      },
+      "allow_lazy_start": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "GET",
       "POST"

@@ -51,6 +51,7 @@ export function inferStyleTemplate(state: {
   primaryAlign?: string;
   secondaryAlign?: string;
   valueFontMode?: string;
+  density?: string;
   iconAlign?: IconPosition;
   icon?: string;
 }): MetricStyleTemplateId {
@@ -75,6 +76,8 @@ export function inferStyleTemplate(state: {
     const valueFontModeMatch =
       (state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode) ===
       LENS_METRIC_STATE_DEFAULTS.valueFontMode;
+    const densityMatch =
+      (state.density ?? LENS_METRIC_STATE_DEFAULTS.density) === LENS_METRIC_STATE_DEFAULTS.density;
     const iconAlignMatch = effectiveIconAlign === LENS_METRIC_STATE_DEFAULTS.iconAlign;
 
     if (
@@ -83,6 +86,7 @@ export function inferStyleTemplate(state: {
       primaryAlignMatch &&
       secondaryAlignMatch &&
       valueFontModeMatch &&
+      densityMatch &&
       iconAlignMatch
     ) {
       return id;

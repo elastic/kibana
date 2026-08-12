@@ -13,7 +13,6 @@ import { workflowTools } from '../../common/constants';
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',
   name: 'workflow-authoring',
-  experimental: true,
   basePath: 'skills/platform/workflows',
   description:
     'Elastic Workflow knowledge & discovery: deep YAML syntax, Liquid templating, trigger event schemas, step/connector inspection, validation error debugging, and execution debugging. Load when the user asks how workflows work, requests advanced syntax help, debugs an execution, or asks to inspect the step/connector/example libraries. **Not required for creating, editing, or running workflows** — call `platform.core.generate_workflow` or `platform.core.execute_workflow` directly.',
@@ -48,8 +47,8 @@ These tools answer questions about *what's installed* on the user's Kibana. Use 
 
 To list or find existing workflows, use the SML (Semantic Metadata Layer) tools — do NOT use \`${platformCoreTools.search}\` to query internal indices.
 
-1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`chunk_id\` values.
-2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`chunk_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
+1. **${platformCoreTools.smlSearch}**: Search workflows by name, description, or tags. Pass a query like "workflow" or "*" for all. Results include \`entry_id\` values.
+2. **${platformCoreTools.smlAttach}**: Attach a workflow to the conversation by passing \`entry_ids\` from search results. This loads the full workflow YAML as a ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment.
 
 ## Workflow YAML Reference
 
@@ -130,7 +129,25 @@ Every step (regardless of type) supports these properties. They are NOT repeated
 - **console**: Log messages to execution output
 - **elasticsearch.search**: Query Elasticsearch indices
 - **elasticsearch.bulk**: Bulk index documents
-- **ai.agent**: Invoke an AI agent
+- **ai.prompt**: One-shot LLM call
+- **ai.summarize**: Summarize text
+- **ai.classify**: Classify text into one of a set of labels
+- **ai.agent**: Invoke an AI agent (multi-turn, tool-using)
+
+**AI steps: ONLY use the \`ai.*\` step family.** Discovery may also surface
+direct model-connector step types (\`inference.*\`, \`bedrock.*\`, \`gen-ai.*\`,
+\`gemini.*\`); these are deprecated and must NOT be used for new steps. Pick the
+narrowest \`ai.*\` step for the task: \`ai.summarize\` for summarization,
+\`ai.classify\` for classification/routing, \`ai.agent\` for tool-using flows,
+\`ai.prompt\` for everything else.
+
+**AI step example (PREFERRED):**
+\`\`\`yaml
+- name: triage_analysis
+  type: ai.prompt
+  with:
+    prompt: "Analyze the alert: {{ steps.fetch_alert.output }}"
+\`\`\`
 
 #### Connector-Based Step Types (PREFERRED for integrations!)
 

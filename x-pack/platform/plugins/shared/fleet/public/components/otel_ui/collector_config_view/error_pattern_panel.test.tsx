@@ -17,10 +17,17 @@ import { ErrorPatternPanel } from './error_pattern_panel';
 const mockUseErrorPatterns = jest.fn<UseErrorPatternsResult, any>();
 jest.mock('./use_error_patterns', () => ({
   useErrorPatterns: (...args: any[]) => mockUseErrorPatterns(...args),
+  TIME_RANGE_TO_MS: {
+    '5m': 5 * 60 * 1000,
+    '1h': 60 * 60 * 1000,
+    '1d': 24 * 60 * 60 * 1000,
+    '1w': 7 * 24 * 60 * 60 * 1000,
+  },
 }));
 
+const mockUseCollectorContext = jest.fn().mockReturnValue({ serviceInstanceId: 'collector-001' });
 jest.mock('./collector_context', () => ({
-  useCollectorContext: () => ({ serviceInstanceId: 'collector-001' }),
+  useCollectorContext: (...args: any[]) => mockUseCollectorContext(...args),
 }));
 
 const mockGetRedirectUrl = jest.fn().mockReturnValue('http://discover-link');
@@ -155,12 +162,27 @@ describe('ErrorPatternPanel', () => {
     expect(result.queryAllByLabelText('Explore matching logs in Kibana Discover')).toHaveLength(0);
   });
 
-  it('passes serviceInstanceId and default timeRange to the hook', () => {
+  it('passes serviceInstanceId, default timeRange, and enrolledAt to the hook', () => {
     testRenderer.render(<ErrorPatternPanel />);
 
     expect(mockUseErrorPatterns).toHaveBeenCalledWith({
       serviceInstanceId: 'collector-001',
       timeRange: '1h',
+      enrolledAt: undefined,
+    });
+  });
+
+  it('forwards enrolledAt from context to the hook', () => {
+    mockUseCollectorContext.mockReturnValueOnce({
+      serviceInstanceId: 'collector-001',
+      enrolledAt: '2026-06-29T10:00:00.000Z',
+    });
+    testRenderer.render(<ErrorPatternPanel />);
+
+    expect(mockUseErrorPatterns).toHaveBeenCalledWith({
+      serviceInstanceId: 'collector-001',
+      timeRange: '1h',
+      enrolledAt: '2026-06-29T10:00:00.000Z',
     });
   });
 
@@ -172,7 +194,38 @@ describe('ErrorPatternPanel', () => {
     expect(mockUseErrorPatterns).toHaveBeenLastCalledWith({
       serviceInstanceId: 'collector-001',
       timeRange: '1d',
+      enrolledAt: undefined,
     });
+  });
+
+  it('uses enrolledAt as the Discover deep-link lower bound when it is more recent than the time range', () => {
+    const recentEnrolledAt = new Date(Date.now() - 30 * 60 * 1000).toISOString(); // 30 min ago, within 1h
+    mockUseCollectorContext.mockReturnValueOnce({
+      serviceInstanceId: 'collector-001',
+      enrolledAt: recentEnrolledAt,
+    });
+    const result = testRenderer.render(<ErrorPatternPanel />);
+    const [discoverBtn] = result.getAllByLabelText('Explore matching logs in Kibana Discover');
+    fireEvent.click(discoverBtn);
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ timeRange: { from: recentEnrolledAt, to: 'now' } })
+    );
+  });
+
+  it('uses the relative time range as the Discover deep-link lower bound when enrolledAt is older', () => {
+    const oldEnrolledAt = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(); // 3 days ago
+    mockUseCollectorContext.mockReturnValueOnce({
+      serviceInstanceId: 'collector-001',
+      enrolledAt: oldEnrolledAt,
+    });
+    const result = testRenderer.render(<ErrorPatternPanel />);
+    const [discoverBtn] = result.getAllByLabelText('Explore matching logs in Kibana Discover');
+    fireEvent.click(discoverBtn);
+
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ timeRange: { from: 'now-1h', to: 'now' } })
+    );
   });
 
   it('renders loading state', () => {

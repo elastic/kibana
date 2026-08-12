@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { AstFunction } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux-v7';
 
 import type { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';

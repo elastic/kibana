@@ -6,6 +6,7 @@
  */
 
 import type { ApiClientFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
+import { expect } from '@kbn/scout/api';
 
 export const waitForSuccessfulEventLogEntry = async (
   apiClient: ApiClientFixture,
@@ -15,20 +16,25 @@ export const waitForSuccessfulEventLogEntry = async (
   const dateStart = new Date().toISOString();
   // Force an immediate run so we don't depend on the scheduler's poll cadence.
   await apiClient.post(`internal/alerting/rule/${ruleId}/_run_soon`, { headers });
-  const pollIntervalMs = 2000;
-  const maxAttempts = 60; // ~120s; covers MKI/UIAM task-claim latency
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const logResponse = await apiClient.get(
-      `internal/alerting/rule/${ruleId}/_execution_log?date_start=${encodeURIComponent(
-        dateStart
-      )}&per_page=10`,
-      { headers, responseType: 'json' }
-    );
-    const body = logResponse.body as { data: Array<{ status: string }> };
-    if (body.data.some((entry) => entry.status === 'success')) {
-      return body;
-    }
-    await new Promise((r) => setTimeout(r, pollIntervalMs));
-  }
-  throw new Error(`Rule ${ruleId} did not execute successfully within 120s`);
+  let body: { data: Array<{ status: string }> } = { data: [] };
+  await expect
+    .poll(
+      async () => {
+        const logResponse = await apiClient.get(
+          `internal/alerting/rule/${ruleId}/_execution_log?date_start=${encodeURIComponent(
+            dateStart
+          )}&per_page=10`,
+          { headers, responseType: 'json' }
+        );
+        body = logResponse.body as { data: Array<{ status: string }> };
+        return body.data.some((entry) => entry.status === 'success');
+      },
+      {
+        timeout: 30_000,
+        intervals: [2_000],
+        message: `Rule ${ruleId} did not execute successfully`,
+      }
+    )
+    .toBe(true);
+  return body;
 };

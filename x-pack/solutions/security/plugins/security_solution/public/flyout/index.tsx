@@ -6,7 +6,11 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
+import {
+  ExpandableFlyout,
+  useExpandableFlyoutApi,
+  type ExpandableFlyoutProps,
+} from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type {
   FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview,
@@ -16,6 +20,7 @@ import type {
 } from '@kbn/cloud-security-posture';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
 import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
+import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './document_details/preview/constants';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -63,6 +68,7 @@ import {
   WatchlistsFlyoutKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
+import { buildEntityPreviewPanel } from './entity_details/shared/utils/build_entity_preview_panel';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
@@ -133,6 +139,54 @@ const GraphGroupedNodePreviewPanel = React.lazy(() =>
 );
 
 /**
+ * Wraps {@link GraphGroupedNodePreviewPanel} for the legacy expandable flyout registration, supplying
+ * the `onShowDocument` / `onShowEntity` handlers that open previews via the expandable flyout API.
+ * The panel itself is flyout-agnostic; this is the only place the legacy preview behaviour lives.
+ */
+const GraphGroupedNodePreviewPanelForFlyout = (
+  params: Omit<GraphGroupedNodePreviewPanelProps, 'onShowDocument' | 'onShowEntity'>
+) => {
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const onShowDocument = useCallback(
+    (docId: string, indexName?: string, isEvent?: boolean) => {
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id: docId,
+          indexName,
+          scopeId: params.scopeId,
+          banner: isEvent ? EVENT_PREVIEW_BANNER : ALERT_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel, params.scopeId]
+  );
+
+  const onShowEntity = useCallback(
+    (entity: {
+      engineType: string | undefined;
+      entityId: string;
+      entityName: string | undefined;
+    }) => {
+      const panel = buildEntityPreviewPanel({ ...entity, scopeId: params.scopeId });
+      if (panel) {
+        openPreviewPanel(panel);
+      }
+    },
+    [openPreviewPanel, params.scopeId]
+  );
+
+  return (
+    <GraphGroupedNodePreviewPanel
+      {...params}
+      onShowDocument={onShowDocument}
+      onShowEntity={onShowEntity}
+    />
+  );
+};
+
+/**
  * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
  */
@@ -168,8 +222,11 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     key: GraphGroupedNodePreviewPanelKey,
     component: (props) => {
       // TODO Fix typing issue here
-      const params = props.params as unknown as GraphGroupedNodePreviewPanelProps;
-      return <GraphGroupedNodePreviewPanel {...params} />;
+      const params = props.params as unknown as Omit<
+        GraphGroupedNodePreviewPanelProps,
+        'onShowDocument' | 'onShowEntity'
+      >;
+      return <GraphGroupedNodePreviewPanelForFlyout {...params} />;
     },
     'aria-label': GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
   },

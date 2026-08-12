@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnClient } from '@kbn/test';
-import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type { KbnClient, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import {
   SAMPLE_DATA_VIEW_NAME,
   SAMPLE_TAG_NAME,

@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api';
 
 export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as const;
@@ -16,8 +17,7 @@ interface UseAnomalyOverviewParams {
   from?: number;
   to?: number;
   threatTactics?: string[];
-  minScore?: number;
-  maxScore?: number;
+  scoreRanges?: AnomalyScoreRange[];
   enabled?: boolean;
 }
 
@@ -27,8 +27,7 @@ export const useAnomalyOverview = ({
   from,
   to,
   threatTactics,
-  minScore,
-  maxScore,
+  scoreRanges,
   enabled = true,
 }: UseAnomalyOverviewParams) => {
   const { fetchAnomalyOverview } = useEntityAnalyticsRoutes();
@@ -37,24 +36,20 @@ export const useAnomalyOverview = ({
     from !== undefined ||
     to !== undefined ||
     (threatTactics && threatTactics.length > 0) ||
-    minScore !== undefined ||
-    maxScore !== undefined;
+    (scoreRanges && scoreRanges.length > 0);
   const body = hasBody
-    ? { from, to, threat_tactics: threatTactics, min_score: minScore, max_score: maxScore }
+    ? { from, to, threat_tactics: threatTactics, score_ranges: scoreRanges }
     : undefined;
 
   return useQuery(
-    [
-      ...ANOMALY_OVERVIEW_QUERY_KEY,
-      entityType,
-      entityId,
-      from,
-      to,
-      threatTactics,
-      minScore,
-      maxScore,
-    ],
+    [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityId, from, to, threatTactics, scoreRanges],
     ({ signal }) => fetchAnomalyOverview({ entityType, entityId, body, signal }),
-    { enabled: enabled && !!entityId, keepPreviousData: true }
+    {
+      enabled: enabled && !!entityId,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error) =>
+        failureCount < 3 && (error as { response?: { status?: number } })?.response?.status !== 400,
+    }
   );
 };

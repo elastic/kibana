@@ -6,8 +6,9 @@
  */
 
 import { compact } from 'lodash';
-import { getSampleDocumentsEsql } from '@kbn/ai-tools';
-import { LOG_SAMPLES_FEATURE_TYPE, getStreamSamplingSource } from '@kbn/streams-schema';
+import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { LOG_SAMPLES_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
 import { formatRawDocument } from '../utils/format_raw_document';
 
@@ -29,6 +30,7 @@ This is useful for understanding the format of logs, identifying patterns, and s
       start,
       end,
       sampleSize: SAMPLE_SIZE,
+      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
     });
 
     return {

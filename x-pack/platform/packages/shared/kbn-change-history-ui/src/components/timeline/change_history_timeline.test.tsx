@@ -6,12 +6,16 @@
  */
 
 import '@testing-library/jest-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { ChangeHistoryProvider } from '../../provider/change_history_provider';
 import type { ChangeHistoryAdapter } from '../../types/change_history_adapter';
-import { TEST_OBJECT_ID, TEST_OBJECT_TITLE } from '../../test_utils/change_history_test_fixtures';
+import {
+  TEST_OBJECT_ID,
+  TEST_OBJECT_TITLE,
+  TEST_CHANGE_HISTORY_SCOPE,
+} from '../../test_utils/change_history_test_fixtures';
+import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryTimeline } from './change_history_timeline';
 
 class IntersectionObserverMock {
@@ -35,16 +39,16 @@ const adapter: ChangeHistoryAdapter = {
 
 const renderTimeline = (props: React.ComponentProps<typeof ChangeHistoryTimeline>) =>
   render(
-    <I18nProvider>
-      <ChangeHistoryProvider
-        objectId={TEST_OBJECT_ID}
-        adapter={adapter}
-        labels={{ previewTitle: TEST_OBJECT_TITLE }}
-        renderPreview={() => null}
-      >
-        <ChangeHistoryTimeline {...props} />
-      </ChangeHistoryProvider>
-    </I18nProvider>
+    <ChangeHistoryProvider
+      objectId={TEST_OBJECT_ID}
+      adapter={adapter}
+      labels={{ previewTitle: TEST_OBJECT_TITLE }}
+      scope={TEST_CHANGE_HISTORY_SCOPE}
+      renderPreview={() => null}
+    >
+      <ChangeHistoryTimeline {...props} />
+    </ChangeHistoryProvider>,
+    { wrapper: TestProvider }
   );
 
 describe('ChangeHistoryTimeline', () => {
@@ -79,16 +83,17 @@ describe('ChangeHistoryTimeline', () => {
     expect(scrollTo).not.toHaveBeenCalled();
 
     rerender(
-      <I18nProvider>
+      <TestProvider>
         <ChangeHistoryProvider
           objectId={TEST_OBJECT_ID}
           adapter={adapter}
           labels={{ previewTitle: TEST_OBJECT_TITLE }}
+          scope={TEST_CHANGE_HISTORY_SCOPE}
           renderPreview={() => null}
         >
           <ChangeHistoryTimeline items={items} selectedItemId="evt-current" />
         </ChangeHistoryProvider>
-      </I18nProvider>
+      </TestProvider>
     );
 
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' });

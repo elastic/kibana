@@ -11,7 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import { hasNonGlobalStaticItems, type AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { LegacyHeaderActionMenu } from './legacy_action_menu';
-import { useAppHeaderMenu } from './hooks';
+import { useAppHeaderStaticItems } from './hooks';
 
 const AppMenuComponent = lazy(async () => {
   const { AppMenuComponent: Component } = await import('@kbn/core-chrome-app-menu-components');
@@ -19,30 +19,26 @@ const AppMenuComponent = lazy(async () => {
 });
 
 export interface AppMenuProps {
-  menu?: AppMenuConfig & { isCollapsed?: boolean };
+  menu?: AppMenuConfig;
   docLink?: string;
   showAddIntegrations?: boolean;
 }
 
 export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegrations }) => {
-  const { config, staticItems } = useAppHeaderMenu(menu, docLink, showAddIntegrations);
+  const staticItems = useAppHeaderStaticItems({ docLink, showAddIntegrations });
   const hasLegacyActionMenu = useHasLegacyActionMenu();
   const hasStaticItems = hasNonGlobalStaticItems(staticItems);
 
-  if (config || hasStaticItems) {
-    return (
-      <Suspense>
-        <AppMenuComponent
-          config={config}
-          staticItems={staticItems}
-          isCollapsed={menu?.isCollapsed ?? false}
-        />
-      </Suspense>
-    );
+  if (!menu && hasLegacyActionMenu) {
+    return <LegacyHeaderActionMenu />;
   }
 
-  if (hasLegacyActionMenu) {
-    return <LegacyHeaderActionMenu />;
+  if (menu || hasStaticItems) {
+    return (
+      <Suspense>
+        <AppMenuComponent config={menu} staticItems={staticItems} />
+      </Suspense>
+    );
   }
 
   return null;

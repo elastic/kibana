@@ -9,7 +9,12 @@
 
 import { isFunctionExpression, isOptionNode } from '@elastic/esql';
 import { within, Walker } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
+import type {
+  ESQLAst,
+  ESQLAstAllCommands,
+  ESQLAstNode,
+  ESQLSingleAstItem,
+} from '@elastic/esql/types';
 import { Location } from './types';
 import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 
@@ -78,7 +83,11 @@ export function getLocationInfo(
     };
   }
 
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(position, node));
+  // Cast: WalkerProperNode now includes PromQL nodes; isOptionNode expects ESQLAstNode.
+  const option = Walker.find(
+    parentCommand,
+    (node) => isOptionNode(node as ESQLAstNode) && within(position, node)
+  );
 
   if (option) {
     const displayName = option.name;

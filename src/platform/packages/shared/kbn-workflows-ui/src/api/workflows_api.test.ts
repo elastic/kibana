@@ -8,6 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowApi } from './workflows_api';
 
 const VERSION = '2023-10-31';
@@ -309,6 +310,27 @@ describe('WorkflowApi', () => {
     });
   });
 
+  describe('searchExecutions', () => {
+    it('should call GET /api/workflows/workflow/executions with structured params', async () => {
+      const params = {
+        kql: 'status: completed',
+        statuses: [ExecutionStatus.COMPLETED],
+        sortField: 'startedAt',
+        sortOrder: 'desc' as const,
+        startedAfter: 'now-15m',
+        page: 1,
+        size: 25,
+        trackTotalHits: true,
+      };
+      await api.searchExecutions(params);
+
+      expect(http.get).toHaveBeenCalledWith('/api/workflows/workflow/executions', {
+        query: params,
+        version: VERSION,
+      });
+    });
+  });
+
   describe('getWorkflowExecutions', () => {
     it('should call GET /api/workflows/workflow/{id}/executions with query', async () => {
       const params = {
@@ -423,6 +445,61 @@ describe('WorkflowApi', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/workflows/executions/exec-1/children', {
         version: VERSION,
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Workflow Template Library
+  // ---------------------------------------------------------------------------
+
+  describe('getCatalog', () => {
+    it('should call GET /internal/workflows/library/templates without query params', async () => {
+      await api.getCatalog();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/templates', {
+        query: {},
+        version: INTERNAL_VERSION,
+      });
+    });
+
+    it('should call GET /internal/workflows/library/templates with filters', async () => {
+      const params = { solution: 'security', category: 'enrichment', search: 'ip' };
+      await api.getCatalog(params);
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/templates', {
+        query: params,
+        version: INTERNAL_VERSION,
+      });
+    });
+  });
+
+  describe('getTemplate', () => {
+    it('should call GET /internal/workflows/library/templates/{slug}', async () => {
+      await api.getTemplate('ip-reputation-check');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/ip-reputation-check',
+        { version: INTERNAL_VERSION }
+      );
+    });
+
+    it('should encode the slug', async () => {
+      await api.getTemplate('slug/with/slashes');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/workflows/library/templates/slug%2Fwith%2Fslashes',
+        { version: INTERNAL_VERSION }
+      );
+    });
+  });
+
+  describe('getLibraryHealth', () => {
+    it('should call GET /internal/workflows/library/health', async () => {
+      await api.getLibraryHealth();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/workflows/library/health', {
+        version: INTERNAL_VERSION,
       });
     });
   });

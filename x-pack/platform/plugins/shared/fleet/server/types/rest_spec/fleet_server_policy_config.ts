@@ -9,10 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 import { clientAuth } from '../../../common/types';
 
-const secretRefSchema = schema.oneOf([
-  schema.object({
-    id: schema.string(),
-  }),
+// Flat oneOf with null as an explicit alternative — nested oneOf prevents null from
+// matching in @kbn/config-schema, so null must be a sibling alternative, not wrapped.
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({ id: schema.string() }),
   schema.string(),
 ]);
 
@@ -21,14 +22,15 @@ export const FleetServerHostBaseSchema = schema.object({
   host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 })),
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
   proxy_id: schema.nullable(schema.string()),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(
         schema.object({
-          key: schema.maybe(secretRefSchema),
-          es_key: schema.maybe(secretRefSchema),
-          agent_key: schema.maybe(secretRefSchema),
+          key: schema.maybe(nullableSecretRefSchema),
+          es_key: schema.maybe(nullableSecretRefSchema),
+          agent_key: schema.maybe(nullableSecretRefSchema),
         })
       ),
     })

@@ -27,7 +27,7 @@ export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {
         query: schema.object({
           perPage: schema.number({ min: 0, defaultValue: 20 }),
           page: schema.number({ min: 0, defaultValue: 1 }),
-          search: schema.maybe(schema.string()),
+          search: schema.maybe(schema.string({ maxLength: 2048 })),
         }),
       },
     },

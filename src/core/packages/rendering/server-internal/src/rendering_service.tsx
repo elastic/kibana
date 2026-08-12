@@ -45,7 +45,6 @@ import {
   getSettingValue,
   getCommonStylesheetPaths,
   getThemeStylesheetPaths,
-  getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
 import { resolveLocale } from './resolve_locale';
@@ -76,6 +75,7 @@ export class RenderingService {
   private readonly logger: Logger;
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private exposeNavDependencies: boolean = false;
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -121,6 +121,12 @@ export class RenderingService {
     this.isCoreRenderingInReactConcurrentMode = await firstValueFrom(
       this.coreContext.configService.atPath<boolean>('isCoreRenderingInReactConcurrentMode')
     ).catch(() => true);
+
+    this.exposeNavDependencies = await firstValueFrom(
+      this.coreContext.configService.atPath<{ exposeNavDependencies?: boolean }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
+      .catch(() => false);
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -191,6 +197,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
+      exposeNavDependencies: this.exposeNavDependencies,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();
@@ -206,7 +213,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-      userStorageValues = {},
+      userStorageResult = { available: false, values: {} },
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -226,7 +233,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined,
-            Promise<Record<string, unknown>>
+            Promise<{ available: boolean; values: Record<string, unknown> }>
           ])
     );
 
@@ -279,25 +286,17 @@ export class RenderingService {
     });
     const themeName = this.themeName$.getValue();
 
-    const scriptPaths = getScriptPaths({
-      themeName,
-      darkMode,
-      baseHref: staticAssetsHrefBase,
-    });
-
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
     const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
       request,
       userSettingLocale,
       configLocale,
       configuredLocales: availableLocales.map((entry) => entry.id),
       translationHashes,
-      isServerless,
       serverBasePath,
       allowLocaleCookie: i18n.allowLocaleCookie,
     });
@@ -348,7 +347,6 @@ export class RenderingService {
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
-      scriptPaths,
       preloadFonts,
       optimizeFontLoading: useRspack || undefined,
       customBranding: {
@@ -410,7 +408,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: { values: userStorageValues },
+        userStorage: userStorageResult,
       },
     };
 
@@ -426,15 +424,19 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(
+    request: KibanaRequest
+  ): Promise<{ available: boolean; values: Record<string, unknown> }> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return {};
+    if (!userStorage) return { available: false, values: {} };
 
+    // A `null` scoped client means the current user has no `profile_uid` and user storage is not available.
     const client = userStorage.asScoped(request);
-    if (!client) return {};
+    if (!client) return { available: false, values: {} };
 
     try {
-      return await client.getForInjection();
+      const values = await client.getForInjection();
+      return { available: true, values };
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -444,7 +446,7 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return {};
+        return { available: false, values: {} };
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);

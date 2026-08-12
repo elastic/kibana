@@ -9,7 +9,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useChangeHistoryList } from './use_change_history_list';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import { TEST_OBJECT_ID } from '../test_utils/change_history_test_fixtures';
-import { createQueryClientWrapper } from '../test_utils/create_query_client_wrapper';
+import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
 
 describe('useChangeHistoryList', () => {
   it('loads paginated changes and appends on loadMore', async () => {
@@ -33,7 +33,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
@@ -96,7 +96,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result, rerender } = renderHook(
       ({ objectId }) =>
@@ -130,6 +130,66 @@ describe('useChangeHistoryList', () => {
     });
 
     expect(result.current.items[0]?.id).toBe('evt-b');
+  });
+
+  it('applies updatedItems from later pages onto earlier rows', async () => {
+    const listChanges = jest
+      .fn()
+      .mockResolvedValueOnce({
+        items: [
+          { id: 'evt-1', timestamp: '2026-01-01T00:00:00Z', actor: { name: 'a' }, action: 'x' },
+        ],
+        total: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [
+          { id: 'evt-2', timestamp: '2026-01-02T00:00:00Z', actor: { name: 'b' }, action: 'y' },
+        ],
+        total: 2,
+        updatedItems: [
+          {
+            id: 'evt-1',
+            timestamp: '2026-01-01T00:00:00Z',
+            actor: { name: 'a' },
+            action: 'x',
+            changes: { count: 2 },
+          },
+        ],
+      });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: 'obj-1',
+          pageSize: 1,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items[0]?.changes).toBeUndefined();
+
+    result.current.loadMore();
+
+    await waitFor(() => {
+      expect(result.current.items).toHaveLength(2);
+    });
+
+    expect(result.current.items[0]).toMatchObject({
+      id: 'evt-1',
+      changes: { count: 2 },
+    });
   });
 
   it('refetch reloads the first page', async () => {
@@ -174,7 +234,7 @@ describe('useChangeHistoryList', () => {
       getChange: jest.fn(),
     };
 
-    const { wrapper } = createQueryClientWrapper();
+    const { wrapper } = createChangeHistoryHookWrapper({ adapter });
 
     const { result } = renderHook(
       () =>
@@ -198,5 +258,107 @@ describe('useChangeHistoryList', () => {
       expect(result.current.items[0]?.id).toBe('evt-8');
     });
     expect(result.current.total).toBe(8);
+  });
+
+  it('prepends a pending row when unsavedChanges is enabled', async () => {
+    const pendingChange = {
+      id: '__pending__',
+      timestamp: '2026-07-03T12:00:00.000Z',
+      actor: { name: 'You' },
+      action: 'Unsaved changes',
+      snapshot: { content: 'draft' },
+    };
+
+    const listChanges = jest.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'evt-current',
+          timestamp: '2026-06-16T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Updated',
+          isCurrent: true,
+          metadata: { version: 3 },
+        },
+      ],
+      total: 1,
+    });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+      getPendingChange: () => pendingChange,
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({
+      adapter,
+      features: { unsavedChanges: true },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: TEST_OBJECT_ID,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items).toHaveLength(2);
+    expect(result.current.items[0]?.id).toBe('__pending__');
+    expect(result.current.items[0]?.isCurrent).toBe(true);
+    expect(result.current.items[1]?.isCurrent).toBeUndefined();
+  });
+
+  it('ignores getPendingChange when unsavedChanges is disabled', async () => {
+    const listChanges = jest.fn().mockResolvedValue({
+      items: [
+        {
+          id: 'evt-current',
+          timestamp: '2026-06-16T12:00:00.000Z',
+          actor: { name: 'Alice' },
+          action: 'Updated',
+          isCurrent: true,
+          metadata: { version: 3 },
+        },
+      ],
+      total: 1,
+    });
+
+    const adapter: ChangeHistoryAdapter = {
+      listChanges,
+      getChange: jest.fn(),
+      getPendingChange: () => ({
+        id: '__pending__',
+        timestamp: '2026-07-03T12:00:00.000Z',
+        actor: { name: 'You' },
+        action: 'Unsaved changes',
+        snapshot: { content: 'draft' },
+      }),
+    };
+
+    const { wrapper } = createChangeHistoryHookWrapper({
+      adapter,
+      features: { unsavedChanges: false },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useChangeHistoryList({
+          adapter,
+          objectId: TEST_OBJECT_ID,
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.items[0]?.id).toBe('evt-current');
   });
 });
