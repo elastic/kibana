@@ -14,7 +14,6 @@ import type { ChatResponse } from '../../../../common/http_api/chat';
 import type {
   DeleteConversationResponse,
   ListConversationsResponse,
-  SetReadOnlyConversationResponse,
 } from '../../../../common/http_api/conversations';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import {
@@ -23,11 +22,7 @@ import {
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import {
-  API_AGENT_BUILDER,
-  CHAT_CONVERSATIONS_INDEX,
-  INTERNAL_AGENT_BUILDER,
-} from '../fixtures/constants';
+import { API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — conversations API',
@@ -379,44 +374,6 @@ apiTest.describe(
         expect(conversation.rounds).toHaveLength(2);
       }
     );
-
-    apiTest('_set_read_only flips the flag on an existing conversation', async ({ asAdmin }) => {
-      const body = await createConversationWithResponse(
-        asAdmin,
-        'Set read only test',
-        'Set Read Only Test'
-      );
-      const conversationId = encodeURIComponent(body.conversation_id);
-
-      const setRes = await asAdmin.post(
-        `${INTERNAL_AGENT_BUILDER}/conversations/${conversationId}/_set_read_only`,
-        { body: { read_only: true }, responseType: 'json' }
-      );
-      expect(setRes).toHaveStatusCode(200);
-      expect(setRes.body as SetReadOnlyConversationResponse).toMatchObject({
-        id: body.conversation_id,
-        read_only: true,
-      });
-
-      const afterSetRes = await asAdmin.get(
-        `${API_AGENT_BUILDER}/conversations/${conversationId}`,
-        { responseType: 'json' }
-      );
-      expect((afterSetRes.body as Conversation).read_only).toBe(true);
-
-      const clearRes = await asAdmin.post(
-        `${INTERNAL_AGENT_BUILDER}/conversations/${conversationId}/_set_read_only`,
-        { body: { read_only: false }, responseType: 'json' }
-      );
-      expect(clearRes).toHaveStatusCode(200);
-      expect((clearRes.body as SetReadOnlyConversationResponse).read_only).toBe(false);
-
-      const afterClearRes = await asAdmin.get(
-        `${API_AGENT_BUILDER}/conversations/${conversationId}`,
-        { responseType: 'json' }
-      );
-      expect((afterClearRes.body as Conversation).read_only).toBe(false);
-    });
 
     apiTest('GET /conversations/:id returns 404 for missing id', async ({ asAdmin }) => {
       const response = await asAdmin.get(

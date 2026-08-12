@@ -394,24 +394,6 @@ apiTest.describe(
       );
     };
 
-    const setReadOnlyAs = async (
-      apiClient: any,
-      user: { username: string; password: string },
-      conversationId: string,
-      readOnly: boolean
-    ) => {
-      return apiClient.post(
-        `${accessControlInternalBase}/conversations/${encodeURIComponent(
-          conversationId
-        )}/_set_read_only`,
-        {
-          headers: headersFor(user),
-          body: { read_only: readOnly },
-          responseType: 'json',
-        }
-      );
-    };
-
     const deleteAgentAs = async (
       apiClient: any,
       user: { username: string; password: string },
@@ -596,114 +578,72 @@ apiTest.describe(
           }
         );
 
-        await apiTest.step(
-          'Bob cannot rename, delete, or set read_only on Alice public conversation',
-          async () => {
-            const renameResponse = await renameConversationAs(
-              apiClient,
-              bob,
-              publicConversation.conversation_id,
-              'Bob renamed public conversation'
-            );
-            expect(renameResponse).toHaveStatusCode(404);
+        await apiTest.step('Bob cannot rename or delete Alice public conversation', async () => {
+          const renameResponse = await renameConversationAs(
+            apiClient,
+            bob,
+            publicConversation.conversation_id,
+            'Bob renamed public conversation'
+          );
+          expect(renameResponse).toHaveStatusCode(404);
 
-            const setReadOnlyResponse = await setReadOnlyAs(
-              apiClient,
-              bob,
-              publicConversation.conversation_id,
-              true
-            );
-            expect(setReadOnlyResponse).toHaveStatusCode(404);
+          const deleteResponse = await apiClient.delete(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              publicConversation.conversation_id
+            )}`,
+            { headers: headersFor(bob), responseType: 'json' }
+          );
+          expect(deleteResponse).toHaveStatusCode(404);
 
-            const deleteResponse = await apiClient.delete(
-              `${accessControlApiBase}/conversations/${encodeURIComponent(
-                publicConversation.conversation_id
-              )}`,
-              { headers: headersFor(bob), responseType: 'json' }
-            );
-            expect(deleteResponse).toHaveStatusCode(404);
-          }
-        );
+          const getResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              publicConversation.conversation_id
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getResponse).toHaveStatusCode(200);
+          expect((getResponse.body as Conversation).title).toBe('Public Conversation Access Test');
+        });
 
-        await apiTest.step(
-          "Bob's denied mutations left Alice's public conversation unchanged",
-          async () => {
-            const getResponse = await apiClient.get(
-              `${accessControlApiBase}/conversations/${encodeURIComponent(
-                publicConversation.conversation_id
-              )}`,
-              { headers: headersFor(alice), responseType: 'json' }
-            );
-            expect(getResponse).toHaveStatusCode(200);
-            expect((getResponse.body as Conversation).title).toBe(
-              'Public Conversation Access Test'
-            );
-          }
-        );
+        await apiTest.step('Alice can rename and delete her own conversation', async () => {
+          const renamedTitle = 'Alice Renamed Owner Conversation';
+          const renameResponse = await renameConversationAs(
+            apiClient,
+            alice,
+            ownerMutationConversation.conversation_id,
+            renamedTitle
+          );
+          expect(renameResponse).toHaveStatusCode(200);
+          expect(renameResponse.body).toMatchObject({
+            id: ownerMutationConversation.conversation_id,
+            title: renamedTitle,
+          });
 
-        await apiTest.step(
-          'Alice can rename, set read_only, and delete her own conversation',
-          async () => {
-            const renamedTitle = 'Alice Renamed Owner Conversation';
-            const renameResponse = await renameConversationAs(
-              apiClient,
-              alice,
-              ownerMutationConversation.conversation_id,
-              renamedTitle
-            );
-            expect(renameResponse).toHaveStatusCode(200);
-            expect(renameResponse.body).toMatchObject({
-              id: ownerMutationConversation.conversation_id,
-              title: renamedTitle,
-            });
-
-            const getRenamedResponse = await apiClient.get(
-              `${accessControlApiBase}/conversations/${encodeURIComponent(
-                ownerMutationConversation.conversation_id
-              )}`,
-              { headers: headersFor(alice), responseType: 'json' }
-            );
-            expect(getRenamedResponse).toHaveStatusCode(200);
-            expect((getRenamedResponse.body as Conversation).title).toBe(renamedTitle);
-
-            const setReadOnlyResponse = await setReadOnlyAs(
-              apiClient,
-              alice,
-              ownerMutationConversation.conversation_id,
-              true
-            );
-            expect(setReadOnlyResponse).toHaveStatusCode(200);
-            expect(setReadOnlyResponse.body).toMatchObject({
-              id: ownerMutationConversation.conversation_id,
-              read_only: true,
-            });
-
-            const getReadOnlyResponse = await apiClient.get(
-              `${accessControlApiBase}/conversations/${encodeURIComponent(
-                ownerMutationConversation.conversation_id
-              )}`,
-              { headers: headersFor(alice), responseType: 'json' }
-            );
-            expect(getReadOnlyResponse).toHaveStatusCode(200);
-            expect((getReadOnlyResponse.body as Conversation).read_only).toBe(true);
-
-            const deleteResponse = await deleteConversationAs(
-              apiClient,
-              alice,
+          const getRenamedResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
               ownerMutationConversation.conversation_id
-            );
-            expect(deleteResponse).toHaveStatusCode(200);
-            expect(deleteResponse.body).toMatchObject({ success: true });
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getRenamedResponse).toHaveStatusCode(200);
+          expect((getRenamedResponse.body as Conversation).title).toBe(renamedTitle);
 
-            const getDeletedResponse = await apiClient.get(
-              `${accessControlApiBase}/conversations/${encodeURIComponent(
-                ownerMutationConversation.conversation_id
-              )}`,
-              { headers: headersFor(alice), responseType: 'json' }
-            );
-            expect(getDeletedResponse).toHaveStatusCode(404);
-          }
-        );
+          const deleteResponse = await deleteConversationAs(
+            apiClient,
+            alice,
+            ownerMutationConversation.conversation_id
+          );
+          expect(deleteResponse).toHaveStatusCode(200);
+          expect(deleteResponse.body).toMatchObject({ success: true });
+
+          const getDeletedResponse = await apiClient.get(
+            `${accessControlApiBase}/conversations/${encodeURIComponent(
+              ownerMutationConversation.conversation_id
+            )}`,
+            { headers: headersFor(alice), responseType: 'json' }
+          );
+          expect(getDeletedResponse).toHaveStatusCode(404);
+        });
 
         await apiTest.step('Bob cannot list or get Alice private conversations', async () => {
           const bobConversationIds = await listConversationIdsAs(apiClient, bob);

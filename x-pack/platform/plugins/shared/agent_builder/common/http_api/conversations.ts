@@ -47,8 +47,3 @@ export interface MarkPinnedConversationResponse {
   id: string;
   pinned: boolean;
 }
-
-export interface SetReadOnlyConversationResponse {
-  id: string;
-  read_only: boolean;
-}

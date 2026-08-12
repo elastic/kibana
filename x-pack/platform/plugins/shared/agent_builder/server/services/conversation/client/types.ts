@@ -41,21 +41,13 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      | 'title'
-      | 'rounds'
-      | 'attachments'
-      | 'state'
-      | 'status'
-      | 'read'
-      | 'pinned'
-      | 'read_only'
-      | 'workspace_id'
+      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
     >
   >;
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned' | 'read_only'
+  'id' | 'title' | 'attachments' | 'read' | 'pinned'
 >;
 
 /**
