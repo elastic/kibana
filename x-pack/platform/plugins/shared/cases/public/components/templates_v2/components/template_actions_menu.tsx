@@ -6,13 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButtonEmpty, EuiCode, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useToasts } from '../../../common/lib/kibana';
-import { FIELD_DEFAULT_SNIPPETS } from '../utils/template_field_snippets';
+import { useGetFieldDefinitions } from '../../field_library/hooks/use_get_field_definitions';
 import {
   applyFieldBlock,
   buildFieldScaffold,
@@ -25,9 +25,22 @@ import {
   getRootFieldControl,
   replaceRootField,
 } from '../utils/root_field_actions';
-import { getConditionalLogicActions, getValidationActions } from '../utils/field_action_catalog';
+import {
+  getDefinedFieldNames,
+  getFieldItemMaps,
+  parseTemplateDocument,
+} from '../utils/template_yaml_ast';
 import type { FieldRuleAction } from '../utils/field_action_catalog';
-import { FieldLibraryMenuPanel } from './field_library_menu_panel';
+import {
+  ActionsMenuPopover,
+  ConfigureAndAddModal,
+  getActionOptions,
+} from './actions_menu';
+import type {
+  ActionOptionData,
+  ConfigurableFieldAction,
+  ConfigureAndAddResult,
+} from './actions_menu';
 import * as i18n from '../translations';
 
 interface TemplateActionsMenuProps {
@@ -47,63 +60,25 @@ interface TemplateActionsMenuProps {
   mode?: 'template' | 'fieldDefinition';
 }
 
-// The field controls offered by "New field", derived from the same snippet catalog the editor's
-// autocomplete uses (single source of truth for label + description + shape). Only snippets that
-// declare a `control` are field-type scaffolds; the `$ref` snippet is served by the Field library.
-const NEW_FIELD_ITEMS = FIELD_DEFAULT_SNIPPETS.filter(
-  (snippet) => typeof (snippet.body as { control?: unknown }).control === 'string'
-).map((snippet) => ({
-  control: (snippet.body as { control: string }).control,
-  label: snippet.label,
-  description: snippet.description,
-}));
-
-const PANEL_IDS = {
-  root: 'root',
-  newField: 'newField',
-  fieldLibrary: 'fieldLibrary',
-  validation: 'validation',
-  conditional: 'conditional',
-} as const;
-
-// Platform detection comes from the shared util (uses the modern userAgentData API with fallbacks).
+const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
 const SHORTCUT_HINT = isMac ? '⌘K' : 'Ctrl+K';
 
-// Shared width for the popover panels + the field-library selectable, so the menu never resize-jumps
-// between the root panel and the (deeper) library/field-type panels.
-const PANEL_WIDTH = 320;
+const kbdCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    borderColor: euiTheme.colors.borderBaseSubdued,
+    borderRadius: euiTheme.border.radius.small,
+    borderWidth: euiTheme.border.width.thin,
+    borderStyle: 'solid',
+    padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
+  });
 
 /**
- * A two-line menu row (bold title + subdued description). Built from phrasing-content elements only
- * (`span`/`strong`/`small`) because `EuiContextMenuItem` renders `name` inside a `<button>`, where
- * block elements are invalid — this keeps the markup valid for assistive tech. The description is
- * part of the button's accessible name, so a screen reader reads e.g. "New field, Scaffold a custom
- * field of any type". `textSubdued` meets EUI's AA contrast on the menu surface.
- */
-const MenuItemLabel: React.FC<{ title: string; description?: string }> = ({
-  title,
-  description,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <span css={css({ display: 'flex', flexDirection: 'column', gap: euiTheme.size.xxs })}>
-      <strong>{title}</strong>
-      {description ? (
-        <small css={css({ color: euiTheme.colors.textSubdued })}>{description}</small>
-      ) : null}
-    </span>
-  );
-};
-MenuItemLabel.displayName = 'MenuItemLabel';
-
-/**
- * The template editor's Actions menu: a bottom-right trigger (also opened with {@link SHORTCUT_HINT})
- * that drills into New field / Field library / Validation / Conditional logic. Every action composes
- * the existing pure YAML transforms (snippet scaffolds, `$ref` links, validation/display blocks) and
- * writes the result back through `onChange`, so the menu adds discoverability without a second code
- * path for editing the definition.
+ * The template editor's Actions menu: a bottom-right chip over the Monaco editor (also opened with
+ * {@link SHORTCUT_HINT}). Drills into New field / Field library / Validation / Conditional logic
+ * in a Workflows-style two-pane browser. Every action composes the existing pure YAML transforms
+ * and writes the result back through `onChange`.
  *
- * The cursor position and the field it points at are snapshotted when the menu opens; the panels are
+ * The cursor position and the field it points at are snapshotted when the menu opens; the catalog is
  * built from that snapshot, so Validation / Conditional logic offer exactly the rules valid for the
  * field under the cursor (and are disabled with a hint when the cursor is not on a field).
  */
@@ -117,21 +92,14 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   const { euiTheme } = useEuiTheme();
   const toasts = useToasts();
   const [isOpen, setIsOpen] = useState(false);
-  // The field the rule sections act on: the field under the cursor (template mode) or the document
-  // root (fieldDefinition mode), snapshotted when the menu opens.
   const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
-  // Snapshotted when the menu opens: a buffer with YAML errors can't be re-serialized, so every
-  // mutating branch is disabled with a hint rather than silently failing on click.
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
+  const [configureAction, setConfigureAction] = useState<ConfigurableFieldAction | null>(null);
   const cursorLineRef = useRef<number | undefined>(undefined);
 
-  // Test-subj prefix per mode, so a future page/test rendering both editors never has colliding
-  // selectors and the template tour's `templateActionsMenuButton` anchor stays byte-stable.
   const testSubjPrefix =
     mode === 'fieldDefinition' ? 'fieldDefinitionActionsMenu' : 'templateActionsMenu';
 
-  // Keep the latest YAML + change handler in refs so the Monaco keyboard command (registered once)
-  // always reads the current buffer rather than a stale closure.
   const valueRef = useRef(value);
   valueRef.current = value;
   const onChangeRef = useRef(onChange);
@@ -146,7 +114,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     const line = editor?.getPosition()?.lineNumber;
     cursorLineRef.current = line;
     setBufferHasErrors(hasTemplateParseErrors(valueRef.current));
-    // A definition document has exactly one field (the root), so the cursor position is irrelevant.
     setTargetField(
       mode === 'fieldDefinition'
         ? getRootFieldControl(valueRef.current)
@@ -155,10 +122,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     setIsOpen(true);
   }, [editor, mode]);
 
-  // Cmd/Ctrl+K opens the menu from within the editor. Registered as a Monaco editor action (scoped to
-  // the editor and disposed with it) rather than the shared `useKeyboardShortcut` hook: that hook
-  // deliberately ignores keydowns on editable targets, but this shortcut must fire while the author is
-  // typing in the editor (a textarea) — exactly where it would be suppressed.
   useEffect(() => {
     if (!editor) {
       return;
@@ -173,10 +136,41 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     return () => action.dispose();
   }, [editor, openMenu]);
 
+  // Prefetch library fields while the menu can be opened (template mode only).
+  const { data: libraryData, isLoading: isLibraryLoading } = useGetFieldDefinitions({
+    owner: mode === 'template' ? owner : undefined,
+    staleTime: Infinity,
+  });
+
+  const alreadyLinked = useMemo(() => {
+    if (mode !== 'template') return new Set<string>();
+    const doc = parseTemplateDocument(value);
+    return doc ? getDefinedFieldNames(getFieldItemMaps(doc)) : new Set<string>();
+  }, [mode, value]);
+
+  const catalog = useMemo(
+    () =>
+      getActionOptions({
+        mode,
+        bufferHasErrors,
+        hasTargetField: targetField != null,
+        targetControl: targetField?.control,
+        libraryFields: libraryData?.fieldDefinitions ?? [],
+        alreadyLinked,
+        isLibraryLoading: mode === 'template' && isLibraryLoading,
+      }),
+    [
+      mode,
+      bufferHasErrors,
+      targetField,
+      libraryData?.fieldDefinitions,
+      alreadyLinked,
+      isLibraryLoading,
+    ]
+  );
+
   const insertField = useCallback(
     (fieldObject: Record<string, unknown>, displayName: string) => {
-      // In fieldDefinition mode the document root IS the field, so picking a type swaps the whole
-      // definition (create and change-type are the same operation) — there is no "already exists".
       if (mode === 'fieldDefinition') {
         const rootResult = replaceRootField(valueRef.current, fieldObject);
         if (rootResult.status === 'applied') {
@@ -198,11 +192,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       closeAndFocusEditor();
     },
     [closeAndFocusEditor, toasts, mode]
-  );
-
-  const linkLibraryField = useCallback(
-    (fieldName: string) => insertField({ $ref: fieldName }, fieldName),
-    [insertField]
   );
 
   const applyRule = useCallback(
@@ -235,229 +224,113 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     [closeAndFocusEditor, toasts, mode]
   );
 
-  const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-    const isFieldDefinition = mode === 'fieldDefinition';
-    const hasTargetField = targetField != null;
-    const validationActions = hasTargetField ? getValidationActions(targetField.control) : [];
-    const conditionalActions = hasTargetField ? getConditionalLogicActions() : [];
-    // A field can only be added/edited when the buffer is re-serializable.
-    const insertDisabledHint = bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : undefined;
-    // Validation / Conditional need a valid buffer and a target field — the field under the cursor,
-    // or (fieldDefinition mode, where cursor position is meaningless) the root field itself.
-    const ruleDisabledHint = bufferHasErrors
-      ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
-      : isFieldDefinition
-      ? i18n.ACTIONS_MENU_NO_FIELD_YET
-      : i18n.ACTIONS_MENU_SELECT_A_FIELD;
-    // In fieldDefinition mode picking a type replaces the whole (single-field) document, so once a
-    // field exists the section reads "Change field type" instead of "New field".
-    const newFieldTitle =
-      isFieldDefinition && hasTargetField
-        ? i18n.ACTION_CHANGE_FIELD_TYPE_TITLE
-        : i18n.ACTION_NEW_FIELD_TITLE;
-    const newFieldDesc =
-      isFieldDefinition && hasTargetField
-        ? i18n.ACTION_CHANGE_FIELD_TYPE_DESC
-        : i18n.ACTION_NEW_FIELD_DESC;
+  const handleActionSelected = useCallback(
+    (action: ActionOptionData) => {
+      if (action.disabled) return;
+      if (action.kind === 'fieldType') {
+        const scaffold = buildFieldScaffold(action.control) ?? action.scaffold;
+        insertField(scaffold, action.label);
+        return;
+      }
+      if (action.kind === 'libraryField') {
+        insertField({ $ref: action.fieldName }, action.fieldName);
+        return;
+      }
+      if (action.kind === 'rule') {
+        applyRule(action.rule);
+      }
+    },
+    [insertField, applyRule]
+  );
 
-    return [
-      {
-        id: PANEL_IDS.root,
-        title: i18n.ACTIONS_MENU_ROOT_TITLE,
-        items: [
-          {
-            name: (
-              <MenuItemLabel
-                title={newFieldTitle}
-                description={bufferHasErrors ? i18n.ACTIONS_MENU_FIX_YAML_FIRST : newFieldDesc}
-              />
-            ),
-            panel: PANEL_IDS.newField,
-            disabled: bufferHasErrors,
-            toolTipContent: insertDisabledHint,
-            'data-test-subj': `${testSubjPrefix}-newField`,
-          },
-          // A definition cannot reference another definition (no `$ref` at the field-library root),
-          // so the Field library section only exists for templates.
-          ...(isFieldDefinition
-            ? []
-            : [
-                {
-                  name: (
-                    <MenuItemLabel
-                      title={i18n.ACTION_FIELD_LIBRARY_TITLE}
-                      description={
-                        bufferHasErrors
-                          ? i18n.ACTIONS_MENU_FIX_YAML_FIRST
-                          : i18n.ACTION_FIELD_LIBRARY_DESC
-                      }
-                    />
-                  ),
-                  panel: PANEL_IDS.fieldLibrary,
-                  disabled: bufferHasErrors,
-                  toolTipContent: insertDisabledHint,
-                  'data-test-subj': `${testSubjPrefix}-fieldLibrary`,
-                },
-              ]),
-          {
-            // When disabled, the reason replaces the description so it is both visible AND part of
-            // the item's accessible name (a hover-only tooltip is unreachable by keyboard/SR users).
-            name: (
-              <MenuItemLabel
-                title={i18n.ACTION_VALIDATION_TITLE}
-                description={hasTargetField ? i18n.ACTION_VALIDATION_DESC : ruleDisabledHint}
-              />
-            ),
-            panel: PANEL_IDS.validation,
-            disabled: !hasTargetField,
-            toolTipContent: hasTargetField ? undefined : ruleDisabledHint,
-            'data-test-subj': `${testSubjPrefix}-validation`,
-          },
-          // Conditional rules reference sibling fields, which only exist once the field is placed in
-          // a template — so the section is omitted for a standalone definition.
-          ...(isFieldDefinition
-            ? []
-            : [
-                {
-                  name: (
-                    <MenuItemLabel
-                      title={i18n.ACTION_CONDITIONAL_TITLE}
-                      description={hasTargetField ? i18n.ACTION_CONDITIONAL_DESC : ruleDisabledHint}
-                    />
-                  ),
-                  panel: PANEL_IDS.conditional,
-                  disabled: !hasTargetField,
-                  toolTipContent: hasTargetField ? undefined : ruleDisabledHint,
-                  'data-test-subj': `${testSubjPrefix}-conditional`,
-                },
-              ]),
-        ],
-      },
-      {
-        id: PANEL_IDS.newField,
-        title: newFieldTitle,
-        items: NEW_FIELD_ITEMS.map((item) => ({
-          name: <MenuItemLabel title={item.label} description={item.description} />,
-          onClick: () => {
-            const scaffold = buildFieldScaffold(item.control);
-            if (scaffold) {
-              insertField(scaffold, item.label);
-            }
-          },
-          'data-test-subj': `${testSubjPrefix}-newField-${item.control}`,
-        })),
-      },
-      ...(isFieldDefinition
-        ? []
-        : [
-            {
-              id: PANEL_IDS.fieldLibrary,
-              title: i18n.ACTION_FIELD_LIBRARY_TITLE,
-              // Rendered lazily (the whole menu only mounts while open), so the library query does
-              // not run until the author opens the Actions menu.
-              content: (
-                <FieldLibraryMenuPanel
-                  owner={owner}
-                  existingYaml={value}
-                  onSelect={linkLibraryField}
-                  width={PANEL_WIDTH}
-                />
-              ),
-            },
-          ]),
-      {
-        id: PANEL_IDS.validation,
-        title: i18n.ACTION_VALIDATION_TITLE,
-        items: validationActions.map((action) => ({
-          name: action.label,
-          onClick: () => applyRule(action),
-          'data-test-subj': `${testSubjPrefix}-validation-${action.id}`,
-        })),
-      },
-      ...(isFieldDefinition
-        ? []
-        : [
-            {
-              id: PANEL_IDS.conditional,
-              title: i18n.ACTION_CONDITIONAL_TITLE,
-              items: conditionalActions.map((action) => ({
-                name: action.label,
-                onClick: () => applyRule(action),
-                'data-test-subj': `${testSubjPrefix}-conditional-${action.id}`,
-              })),
-            },
-          ]),
-    ];
-  }, [
-    mode,
-    testSubjPrefix,
-    targetField,
-    bufferHasErrors,
-    owner,
-    value,
-    linkLibraryField,
-    insertField,
-    applyRule,
-  ]);
+  const handleConfigureAndAdd = useCallback(
+    (action: ConfigurableFieldAction) => {
+      setIsOpen(false);
+      setConfigureAction(action);
+    },
+    []
+  );
 
+  const handleConfigureConfirm = useCallback(
+    (result: ConfigureAndAddResult) => {
+      setConfigureAction(null);
+      insertField(result.fieldObject, result.displayName);
+    },
+    [insertField]
+  );
+
+  // Rendered as an absolute chip over the bottom-right of the Monaco editor. The palette
+  // itself portals above the page.
   return (
-    <div
-      css={css({
-        position: 'absolute',
-        bottom: euiTheme.size.s,
-        // Clear Monaco's vertical scrollbar so the trigger never sits on top of it.
-        right: euiTheme.size.l,
-        zIndex: 1,
-      })}
-    >
-      <EuiPopover
-        aria-label={i18n.ACTIONS_MENU_ROOT_TITLE}
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="upRight"
-        button={
-          // A bordered, filled chip (matching the editor's "Draft saved" indicator) so the trigger
-          // reads as clickable over the code rather than as inline text.
-          <EuiButtonEmpty
+    <>
+      <div
+        css={css({
+          position: 'absolute',
+          bottom: euiTheme.size.base,
+          // 16px base + 12px to clear Monaco's scrollbar / panel edge.
+          right: `calc(${euiTheme.size.base} + ${euiTheme.size.m})`,
+          zIndex: 1,
+        })}
+      >
+        <EuiButtonEmpty
+          size="s"
+          color="text"
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={() => (isOpen ? closeAndFocusEditor() : openMenu())}
+          aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}
+          data-test-subj={`${testSubjPrefix}Button`}
+          css={css({
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+            borderRadius: euiTheme.border.radius.medium,
+          })}
+        >
+          <EuiText
             size="xs"
-            color="text"
-            iconType="plusInCircle"
-            iconSide="left"
-            onClick={() => (isOpen ? setIsOpen(false) : openMenu())}
-            aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}
-            data-test-subj={`${testSubjPrefix}Button`}
             css={css({
-              backgroundColor: euiTheme.colors.backgroundBasePlain,
-              border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-              borderRadius: euiTheme.border.radius.medium,
+              display: 'flex',
+              alignItems: 'center',
+              gap: euiTheme.size.s,
             })}
           >
-            {i18n.ACTIONS_MENU_BUTTON}
-            <EuiCode
-              transparentBackground
+            <strong>{i18n.ACTIONS_MENU_BUTTON}</strong>
+            <EuiTextColor
+              color="subdued"
               css={css({
-                marginInlineStart: euiTheme.size.s,
-                color: euiTheme.colors.textSubdued,
+                display: 'flex',
+                gap: 2,
+                '& kbd': kbdCss({ euiTheme }),
               })}
             >
-              {SHORTCUT_HINT}
-            </EuiCode>
-          </EuiButtonEmpty>
-        }
-      >
-        {isOpen ? (
-          <EuiContextMenu
-            initialPanelId={PANEL_IDS.root}
-            panels={panels}
-            data-test-subj={`${testSubjPrefix}Panels`}
-            // Cap the height so long panels (e.g. the 10 field types) scroll instead of running past
-            // the viewport; the shared width stops the panels resize-jumping as you drill in.
-            css={css({ width: PANEL_WIDTH, maxHeight: '60vh', overflowY: 'auto' })}
-          />
-        ) : null}
-      </EuiPopover>
-    </div>
+              <kbd>{COMMAND_KEY}</kbd>
+              <kbd>K</kbd>
+            </EuiTextColor>
+          </EuiText>
+        </EuiButtonEmpty>
+      </div>
+
+      <ActionsMenuPopover
+        isOpen={isOpen}
+        closePopover={closeAndFocusEditor}
+        options={catalog}
+        testSubjPrefix={testSubjPrefix}
+        onActionSelected={handleActionSelected}
+        onConfigureAndAdd={handleConfigureAndAdd}
+      />
+
+      {configureAction && (
+        <ConfigureAndAddModal
+          action={configureAction}
+          allowConditional={mode === 'template'}
+          onCancel={() => {
+            setConfigureAction(null);
+            editor?.focus();
+          }}
+          onConfirm={handleConfigureConfirm}
+        />
+      )}
+    </>
   );
 };
 

@@ -39,13 +39,13 @@ export interface TemplateYamlEditorProps {
 }
 
 const styles = {
-  // Full-height flex column: editor fills the space, validation footer sits inline
-  // at the bottom so it always tracks the panel width (no fixed positioning).
+  // Full-height flex column: Monaco fills remaining space; validation footer sits beneath.
   editorColumn: css({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     minHeight: 0,
+    overflow: 'hidden',
   }),
   editorContainer: css({
     flex: '1 1 0',
@@ -54,10 +54,16 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
   }),
-  validationFooter: css({
-    flexShrink: 0,
-    overflow: 'hidden',
-  }),
+  validationFooter: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      overflow: 'hidden',
+      // Stick to the bottom of the editor panel / window so YAML scroll never hides it.
+      position: 'sticky',
+      bottom: 0,
+      zIndex: 2,
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    }),
   statusIndicator: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',
@@ -160,7 +166,7 @@ export const TemplateYamlEditor = ({
           />
         ) : null}
       </div>
-      <div css={styles.validationFooter}>
+      <div css={styles.validationFooter(euiTheme)}>
         <TemplateYamlValidationAccordion
           isMounted={isEditorMounted}
           validationErrors={validationErrors}

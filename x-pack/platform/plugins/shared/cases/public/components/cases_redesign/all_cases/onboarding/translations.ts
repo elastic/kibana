@@ -69,20 +69,6 @@ export const STEP_FIELDS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const STEP_TEMPLATES_TITLE = i18n.translate(
-  'xpack.cases.casesRedesign.onboarding.tour.templates.title',
-  {
-    defaultMessage: 'Templates and custom fields',
-  }
-);
-
-export const STEP_TEMPLATES_DESCRIPTION = i18n.translate(
-  'xpack.cases.casesRedesign.onboarding.tour.templates.description',
-  {
-    defaultMessage: 'Create templates and reusable custom fields to standardize new cases.',
-  }
-);
-
 export const STEP_SETTINGS_TITLE = i18n.translate(
   'xpack.cases.casesRedesign.onboarding.tour.settings.title',
   {

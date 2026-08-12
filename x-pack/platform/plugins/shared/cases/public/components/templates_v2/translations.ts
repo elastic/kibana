@@ -1187,6 +1187,54 @@ export const ACTIONS_MENU_INVALID_YAML = i18n.translate(
   { defaultMessage: 'Fix the YAML errors in the editor before adding to the template' }
 );
 
+export const ACTIONS_MENU_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.actionsMenu.searchPlaceholder',
+  { defaultMessage: 'Search field, rule, or library…' }
+);
+
+export const ACTIONS_MENU_SECTION_FIELDS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.section.fields',
+  { defaultMessage: 'Add field' }
+);
+
+export const ACTIONS_MENU_SECTION_RULES = i18n.translate(
+  'xpack.cases.templates.actionsMenu.section.rules',
+  { defaultMessage: 'Field rules' }
+);
+
+export const ACTIONS_MENU_BREADCRUMB_ALL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.breadcrumb.allActions',
+  { defaultMessage: 'All actions' }
+);
+
+export const ACTIONS_MENU_BREADCRUMB_SEARCH = i18n.translate(
+  'xpack.cases.templates.actionsMenu.breadcrumb.searchResults',
+  { defaultMessage: 'Search results' }
+);
+
+export const ACTIONS_MENU_BREADCRUMB_ARIA = i18n.translate(
+  'xpack.cases.templates.actionsMenu.breadcrumb.ariaLabel',
+  { defaultMessage: 'Actions menu navigation' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_AND_ADD_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.desc',
+  {
+    defaultMessage:
+      'Optionally set a name and pick validation or conditional rules. Selected rules are scaffolded onto the field before it is inserted — you can edit the YAML afterward.',
+  }
+);
+
+export const ACTIONS_MENU_CONFIGURE_NAME_LABEL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.nameLabel',
+  { defaultMessage: 'Field name' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LABEL_LABEL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.labelLabel',
+  { defaultMessage: 'Label' }
+);
+
 // Validation rule labels
 export const VALIDATION_RULE_REQUIRED = i18n.translate(
   'xpack.cases.templates.actionsMenu.rule.required',

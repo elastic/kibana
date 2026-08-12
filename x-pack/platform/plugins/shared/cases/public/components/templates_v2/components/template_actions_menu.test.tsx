@@ -91,8 +91,15 @@ describe('TemplateActionsMenu', () => {
     renderMenu({ lineNumber: 1 });
     await user.click(screen.getByTestId('templateActionsMenuButton'));
 
-    expect(await screen.findByTestId('templateActionsMenu-validation')).toBeDisabled();
-    expect(screen.getByTestId('templateActionsMenu-conditional')).toBeDisabled();
+    // EuiSelectable marks disabled options with aria-disabled on the <li role="option">.
+    expect(await screen.findByTestId('templateActionsMenu-validation')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByTestId('templateActionsMenu-conditional')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('exposes the disabled reason in the item text (reachable without hover) for a11y', async () => {
@@ -118,9 +125,18 @@ describe('TemplateActionsMenu', () => {
     renderMenu({ value: 'name: T\nfields: [ {name: a', lineNumber: 1 });
     await user.click(screen.getByTestId('templateActionsMenuButton'));
 
-    expect(await screen.findByTestId('templateActionsMenu-newField')).toBeDisabled();
-    expect(screen.getByTestId('templateActionsMenu-fieldLibrary')).toBeDisabled();
-    expect(screen.getByTestId('templateActionsMenu-validation')).toBeDisabled();
+    expect(await screen.findByTestId('templateActionsMenu-newField')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByTestId('templateActionsMenu-fieldLibrary')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+    expect(screen.getByTestId('templateActionsMenu-validation')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
   });
 
   it('links a library field as a $ref via Field library', async () => {
@@ -161,7 +177,10 @@ type: keyword
       expect(await screen.findByText('New field')).toBeInTheDocument();
       expect(screen.queryByText('Field library')).not.toBeInTheDocument();
       expect(screen.queryByText('Conditional logic')).not.toBeInTheDocument();
-      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeDisabled();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
       expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toHaveTextContent(
         'Create a field to enable this action'
       );
@@ -185,7 +204,10 @@ type: keyword
 
       expect(await screen.findByText('Change field type')).toBeInTheDocument();
       expect(screen.queryByText('New field')).not.toBeInTheDocument();
-      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeEnabled();
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).not.toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     it('replaces the whole definition when changing the field type', async () => {
@@ -214,8 +236,14 @@ type: keyword
       renderFieldDefinitionMenu({ value: 'name: a\n\tcontrol: INPUT_TEXT' });
       await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
 
-      expect(await screen.findByTestId('fieldDefinitionActionsMenu-newField')).toBeDisabled();
-      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toBeDisabled();
+      expect(await screen.findByTestId('fieldDefinitionActionsMenu-newField')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
   });
 });
