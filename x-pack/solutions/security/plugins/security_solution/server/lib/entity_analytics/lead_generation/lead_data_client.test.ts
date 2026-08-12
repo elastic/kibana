@@ -156,7 +156,7 @@ describe('LeadDataClient', () => {
     });
 
     it('dedups when an active lead with the same content hash exists', async () => {
-      const lead = makeTestLead({ id: 'new-run-uuid' });
+      const lead = makeTestLead();
       const entityKey = computeEntityIdentityKey({ entities: lead.entities });
       const contentHash = computeContentHash({ observations: lead.observations });
 
@@ -301,7 +301,6 @@ describe('LeadDataClient', () => {
 
     it('versions an existing active lead when the content hash differs', async () => {
       const lead = makeTestLead({
-        id: 'new-run-uuid',
         title: 'Updated narrative',
         observations: [
           {
@@ -375,7 +374,7 @@ describe('LeadDataClient', () => {
     });
 
     it('skips creation when a dismissed lead has the same content hash', async () => {
-      const lead = makeTestLead({ id: 'new-run-uuid' });
+      const lead = makeTestLead();
       const entityKey = computeEntityIdentityKey({ entities: lead.entities });
       const contentHash = computeContentHash({ observations: lead.observations });
 
@@ -405,7 +404,6 @@ describe('LeadDataClient', () => {
 
     it('reactivates a dismissed lead when the content hash differs', async () => {
       const lead = makeTestLead({
-        id: 'new-run-uuid',
         observations: [
           {
             entityId: 'user:admin',
@@ -545,6 +543,69 @@ describe('LeadDataClient', () => {
       await expect(classifyAndPersist([lead], 'exec-4')).resolves.toBeUndefined();
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to persist leads'));
+    });
+
+    it('returns the failed item count when bulk has errors', async () => {
+      const leadOk = makeTestLead({
+        entities: [{ type: 'user', name: 'a', id: 'user:a' }],
+      });
+      const leadFail = makeTestLead({
+        entities: [{ type: 'user', name: 'b', id: 'user:b' }],
+      });
+      const okKey = computeEntityIdentityKey({ entities: leadOk.entities });
+      const failKey = computeEntityIdentityKey({ entities: leadFail.entities });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: true,
+        took: 1,
+        items: [
+          {
+            update: {
+              _id: okKey,
+              _index: indexName,
+              status: 200,
+            },
+          },
+          {
+            update: {
+              _id: failKey,
+              _index: indexName,
+              status: 500,
+              error: { type: 'illegal_argument_exception', reason: 'boom' },
+            },
+          },
+        ],
+      });
+
+      const result = await client.persistLeads({
+        executionId: 'exec-partial',
+        sourceType: 'adhoc',
+        timestamp: leadOk.timestamp,
+        dedups: [],
+        creates: [leadOk, leadFail],
+        versions: [],
+      });
+
+      expect(result).toBe(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Bulk update had 1/2 failures')
+      );
+    });
+
+    it('returns the action count when the bulk call throws a non-security error', async () => {
+      esClient.bulk.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const lead = makeTestLead();
+      const result = await client.persistLeads({
+        executionId: 'exec-throw',
+        sourceType: 'adhoc',
+        timestamp: lead.timestamp,
+        dedups: [],
+        creates: [lead],
+        versions: [],
+      });
+
+      expect(result).toBe(1);
     });
 
     it('re-throws when ES returns security_exception so callers can surface the 403', async () => {

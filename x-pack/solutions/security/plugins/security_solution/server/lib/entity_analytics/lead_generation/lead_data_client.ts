@@ -74,7 +74,7 @@ export interface LeadDataClient {
   classifyLeadCandidates<T extends LeadActionCandidate>(
     candidates: ReadonlyArray<T>
   ): Promise<ReadonlyArray<LeadActionDecision<T>>>;
-  persistLeads(params: PersistLeadsParams): Promise<void>;
+  persistLeads(params: PersistLeadsParams): Promise<number>;
   findLeads(params: FindLeadsParams): Promise<FindLeadsResult>;
   updateLead(id: string, updates: Partial<Pick<Lead, 'status'>>): Promise<boolean>;
   dismissLead(id: string): Promise<boolean>;
@@ -398,9 +398,10 @@ export const createLeadDataClient = ({
     dedups,
     creates,
     versions,
-  }: PersistLeadsParams): Promise<void> => {
-    if (dedups.length === 0 && creates.length === 0 && versions.length === 0) {
-      return;
+  }: PersistLeadsParams): Promise<number> => {
+    const actionCount = dedups.length + creates.length + versions.length;
+    if (actionCount === 0) {
+      return 0;
     }
 
     try {
@@ -478,11 +479,6 @@ export const createLeadDataClient = ({
         );
       }
 
-      if (bulkBody.length === 0) {
-        return;
-      }
-
-      const actionCount = dedups.length + creates.length + versions.length;
       const bulkResp = await esClient.bulk({ body: bulkBody, refresh: 'wait_for' });
 
       if (bulkResp.errors) {
@@ -492,17 +488,19 @@ export const createLeadDataClient = ({
           `[LeadGeneration] Bulk update had ${failedItems.length}/${actionCount} failures ` +
             `(executionId=${executionId}, index=${indexName}): ${JSON.stringify(failedIds)}`
         );
-        return;
+        return failedItems.length;
       }
 
       logger.debug(
         `[LeadGeneration] Persisted leads to "${indexName}" (executionId=${executionId})`
       );
+      return 0;
     } catch (e) {
       if (isEsSecurityException(e)) {
         throw e;
       }
       logger.warn(`[LeadGeneration] Failed to persist leads to "${indexName}": ${e}`);
+      return actionCount;
     }
   };
 

@@ -177,8 +177,19 @@ export const runLeadGenerationPipeline = async ({
     }
   }
 
+  const newLeads = creates.length;
+  const revisedLeads = versions.length;
+  const resurfacedLeads = dedups.length;
+  const skippedLeads = decisions.filter((item) => item.decision.type === 'skip').length;
+  const persistAttempted = newLeads + revisedLeads + resurfacedLeads;
+
+  logger.info(
+    `[LeadGeneration][Telemetry] Prepared actions: ` +
+      `new=${newLeads}, revised=${revisedLeads}, resurfaced=${resurfacedLeads}, skipped=${skippedLeads}`
+  );
+
   const persistStart = Date.now();
-  await leadDataClient.persistLeads({
+  const failedLeads = await leadDataClient.persistLeads({
     executionId,
     sourceType,
     timestamp: runTimestamp,
@@ -186,11 +197,9 @@ export const runLeadGenerationPipeline = async ({
     creates,
     versions,
   });
-
-  const persistedCount = dedups.length + creates.length + versions.length;
   logger.info(
     `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms ` +
-      `(dedup=${dedups.length}, create=${creates.length}, version=${versions.length})`
+      `(failed=${failedLeads}/${persistAttempted})`
   );
   logger.info(
     `[LeadGeneration][Telemetry] Total pipeline: ${
@@ -198,11 +207,18 @@ export const runLeadGenerationPipeline = async ({
     }ms (executionId=${executionId})`
   );
 
+  const totalLeads = newLeads + revisedLeads + resurfacedLeads + skippedLeads;
+
   analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
     spaceId,
-    leadsGenerated: persistedCount,
+    leadsGenerated: totalLeads,
+    newLeads,
+    revisedLeads,
+    resurfacedLeads,
+    skippedLeads,
+    failedLeads,
     sourceType,
   });
 
-  return { total: persistedCount };
+  return { total: totalLeads };
 };

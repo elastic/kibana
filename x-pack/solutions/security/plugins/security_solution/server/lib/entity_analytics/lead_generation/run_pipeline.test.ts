@@ -62,7 +62,7 @@ describe('runLeadGenerationPipeline', () => {
 
   beforeEach(() => {
     mockSynthesizeLeads.mockResolvedValue([]);
-    mockPersistLeads.mockResolvedValue(undefined);
+    mockPersistLeads.mockResolvedValue(0);
   });
 
   it('returns zero counts when no entities are found', async () => {
@@ -317,7 +317,7 @@ describe('runLeadGenerationPipeline', () => {
       chatModel: fakeChatModel,
     });
 
-    expect(result).toEqual({ total: 0 });
+    expect(result).toEqual({ total: 1 });
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
     expect(mockPersistLeads).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -326,5 +326,89 @@ describe('runLeadGenerationPipeline', () => {
         versions: [],
       })
     );
+  });
+
+  it('reports telemetry from successful persist counts', async () => {
+    const mockEntity = {
+      record: {
+        entity: { type: 'user', name: 'telemetry', id: 'euid-t' },
+      },
+      type: 'user',
+      name: 'telemetry',
+      id: 'user:telemetry',
+    };
+    mockListEntities.mockResolvedValueOnce([mockEntity]);
+
+    const createCandidate = {
+      entity: mockEntity,
+      priority: 5,
+      observations: [],
+      entityIdentityKey: computeEntityIdentityKey({ entities: [mockEntity] }),
+      contentHash: 'hash-create',
+    };
+    const skipCandidate = {
+      ...createCandidate,
+      entityIdentityKey: 'entity-key-skip',
+      contentHash: 'hash-skip',
+    };
+    const resurfaceCandidate = {
+      ...createCandidate,
+      entityIdentityKey: 'entity-key-resurface',
+      contentHash: 'hash-resurface',
+    };
+
+    mockPrepareLeadCandidates.mockResolvedValueOnce([
+      createCandidate,
+      skipCandidate,
+      resurfaceCandidate,
+    ]);
+    mockClassifyLeadCandidates.mockResolvedValueOnce([
+      { candidate: createCandidate, decision: { type: 'create' } },
+      { candidate: skipCandidate, decision: { type: 'skip' } },
+      {
+        candidate: resurfaceCandidate,
+        decision: { type: 'dedup', existingId: 'existing-resurface' },
+      },
+    ]);
+    mockSynthesizeLeads.mockResolvedValueOnce([
+      {
+        id: 'lead-1',
+        title: 'Test Lead',
+        byline: '',
+        description: '',
+        entities: [mockEntity],
+        tags: [],
+        priority: 5,
+        chatRecommendations: [],
+        timestamp: '2026-03-10T00:00:00.000Z',
+        staleness: 'fresh',
+        observations: [],
+      },
+    ]);
+
+    const analytics = { reportEvent: jest.fn() };
+
+    const result = await runLeadGenerationPipeline({
+      listEntities: mockListEntities,
+      esClient,
+      logger,
+      spaceId: 'default',
+      riskScoreDataClient,
+      sourceType: 'scheduled',
+      chatModel: fakeChatModel,
+      analytics: analytics as never,
+    });
+
+    expect(result).toEqual({ total: 3 });
+    expect(analytics.reportEvent).toHaveBeenCalledWith('lead_generation_execution', {
+      spaceId: 'default',
+      leadsGenerated: 3,
+      newLeads: 1,
+      revisedLeads: 0,
+      resurfacedLeads: 1,
+      skippedLeads: 1,
+      failedLeads: 0,
+      sourceType: 'scheduled',
+    });
   });
 });
