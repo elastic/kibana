@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart } from '@kbn/react-component-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import type { SkeletonOutput } from '../../skeleton/descriptor';
 import type { ColumnBuilderContext } from '../types';

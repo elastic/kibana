@@ -377,6 +377,7 @@ src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
+src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/kbn-ui/storybook-config @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
@@ -661,7 +662,6 @@ src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
-src/platform/packages/shared/kbn-react-component-assembly @elastic/appex-sharedux
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/streams-ui
 src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux

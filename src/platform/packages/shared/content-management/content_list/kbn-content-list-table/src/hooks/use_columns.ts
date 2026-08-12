@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useEuiTheme, type EuiBasicTableColumn } from '@elastic/eui';
 import { useContentListConfig, type ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart } from '@kbn/react-component-assembly';
+import type { ParsedPart } from '@kbn/ui-react-assembly';
 import type { SkeletonOutput } from '../skeleton/descriptor';
 import type { ColumnBuilderContext } from '../column/types';
 import { column } from '../column/part';

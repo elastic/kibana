@@ -8174,10 +8174,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/react-component-assembly@link:src/platform/packages/shared/kbn-react-component-assembly":
-  version "0.0.0"
-  uid ""
-
 "@kbn/react-env@link:src/platform/packages/shared/react/env":
   version "0.0.0"
   uid ""
@@ -9615,6 +9611,10 @@
   uid ""
 
 "@kbn/ui-feedback@link:src/platform/kbn-ui/feedback":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-react-assembly@link:src/platform/kbn-ui/react-assembly":
   version "0.0.0"
   uid ""
 

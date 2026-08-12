@@ -24,7 +24,7 @@ Before defining any parts, create the assembly itself. This is the root that all
 
 ```typescript
 // action_bar/assembly.ts
-import { defineAssembly } from '@kbn/react-component-assembly';
+import { defineAssembly } from '@kbn/ui-react-assembly';
 
 export const actionBar = defineAssembly({ name: 'ActionBar' });
 ```
@@ -544,7 +544,7 @@ Use `tagComponent` when a component is **defined in another module** and you nee
 
 ```typescript
 // @kbn/shared-filters/sort.ts -- defined once, used by multiple assemblies.
-import type { DeclarativeReturn } from '@kbn/react-component-assembly';
+import type { DeclarativeReturn } from '@kbn/ui-react-assembly';
 
 export interface SortProps {
   field: string;
