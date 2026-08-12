@@ -51,18 +51,18 @@ export function extractAgentConversationIds(
   for (const step of steps) {
     const conversationId = (step.output as { conversation_id?: unknown } | undefined)
       ?.conversation_id;
-    if (typeof conversationId !== 'string' || conversationId.length === 0) {
-      continue;
+    if (
+      typeof conversationId === 'string' &&
+      conversationId.length > 0 &&
+      !seen.has(conversationId)
+    ) {
+      seen.add(conversationId);
+      result.push({
+        stepId: step.stepId,
+        conversationId,
+        ...(step.stepType !== undefined ? { stepType: step.stepType } : {}),
+      });
     }
-    if (seen.has(conversationId)) {
-      continue;
-    }
-    seen.add(conversationId);
-    result.push({
-      stepId: step.stepId,
-      conversationId,
-      ...(step.stepType !== undefined ? { stepType: step.stepType } : {}),
-    });
   }
 
   return result;
