@@ -54,4 +54,8 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./disable_rule_step/disable_rule_step').then((m) => m.disableRuleStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./delete_note_step/delete_note_step').then((m) => m.deleteNoteStepDefinition)
+  );
 };

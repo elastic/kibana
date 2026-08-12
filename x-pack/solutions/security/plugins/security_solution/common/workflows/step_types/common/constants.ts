@@ -32,3 +32,10 @@ export const MAX_USER_ID_LENGTH = 256;
  * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
  */
 export const MAX_ATTACK_ID_LENGTH = 256;
+
+/**
+ * Maximum length for note IDs.
+ * Note IDs are `savedObjectId` values (typically UUIDs, ~36 characters).
+ * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
+ */
+export const MAX_NOTE_ID_LENGTH = 256;

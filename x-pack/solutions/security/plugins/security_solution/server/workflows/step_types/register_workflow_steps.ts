@@ -16,6 +16,7 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
@@ -32,4 +33,5 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(setAttackTagsStepDefinition);
   workflowsExtensions.registerStepDefinition(enableRuleStepDefinition);
   workflowsExtensions.registerStepDefinition(disableRuleStepDefinition);
+  workflowsExtensions.registerStepDefinition(deleteNoteStepDefinition);
 };
