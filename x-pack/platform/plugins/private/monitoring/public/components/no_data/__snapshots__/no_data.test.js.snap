@@ -104,12 +104,12 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         id="generated-id_euiToolTipAnchor"
+        style="position:absolute;top:8px;inset-inline-end:8px"
       >
         <button
           aria-label="Dismiss AutoOps promotion"
           class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="autoOpsPromotionCallout-dismiss"
-          style="position:absolute;top:8px;inset-inline-end:8px"
           type="button"
         >
           <span
@@ -326,12 +326,12 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
         id="generated-id_euiToolTipAnchor"
+        style="position:absolute;top:8px;inset-inline-end:8px"
       >
         <button
           aria-label="Dismiss AutoOps promotion"
           class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
           data-test-subj="autoOpsPromotionCallout-dismiss"
-          style="position:absolute;top:8px;inset-inline-end:8px"
           type="button"
         >
           <span
