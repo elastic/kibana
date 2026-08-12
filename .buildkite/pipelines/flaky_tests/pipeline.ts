@@ -102,7 +102,7 @@ interface CommandTestSuite {
   scoutLabel?: string;
   agentQueue?: string;
   diskSizeGb?: number;
-  /** Package path (repo-relative) where `yarn junit:merge` should run when it differs from `workingDirectory`. */
+  /** Package path (repo-relative) where `pnpm junit:merge` should run when it differs from `workingDirectory`. */
   junitMergeWorkingDirectory?: string;
 }
 
@@ -286,7 +286,7 @@ steps.push({
 if (hasScoutSuites) {
   // Single step that bootstraps Kibana, resolves ONLY the requested Scout configs, and
   // dynamically uploads one BK step per (scoutConfig x arch x domain) mode (parallelism: count).
-  // Resolving requested configs requires a full `yarn kbn bootstrap`, which is too heavy to
+  // Resolving requested configs requires a full `pnpm kbn bootstrap`, which is too heavy to
   // run inside pipeline.ts itself; combining resolution + planning here avoids paying for an
   // extra agent boot and an artifact round-trip just to hand the manifest between
   // two otherwise-coupled steps.

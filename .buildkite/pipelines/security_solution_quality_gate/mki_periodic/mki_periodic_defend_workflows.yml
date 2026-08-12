@@ -6,7 +6,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
         key: test_defend_workflows
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -26,7 +26,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows_osquery.sh cypress:qa:serverless:run
         key: test_osquery_defend_workflows
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -46,7 +46,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
         key: edr_workflows:artifacts:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -66,7 +66,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
         key: edr_workflows:authentication:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -86,7 +86,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
         key: edr_workflows:metadata:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -106,7 +106,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
         key: edr_workflows:package:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -126,7 +126,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy:qa:serverless
         key: edr_workflows:policy:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -146,7 +146,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
         key: edr_workflows:resolver:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -166,7 +166,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
         key: edr_workflows:response_actions:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -186,7 +186,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:role_migrations:qa:serverless
         key: edr_workflows:role_migrations:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -206,7 +206,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:scripts_library:qa:serverless
         key: edr_workflows:scripts_library:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
@@ -226,7 +226,7 @@ steps:
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:spaces:qa:serverless
         key: edr_workflows:spaces:qa:serverless
         env:
-          CLEAR_YARN_CACHE: '1'
+          CLEAR_INSTALL_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

@@ -65,7 +65,7 @@ compare_with_baseline() {
   echo "Run name: $RUN_NAME"
 
   # Build comparison command
-  COMPARISON_CMD="yarn start compare-metrics \"$RUN_NAME\" \
+  COMPARISON_CMD="pnpm start compare-metrics \"$RUN_NAME\" \
     -e \"$PERF_ENTITY_COUNT\" \
     -l \"$PERF_LOGS_PER_ENTITY\" \
     --degradation-threshold \"$PERF_DEGRADATION_THRESHOLD\" \

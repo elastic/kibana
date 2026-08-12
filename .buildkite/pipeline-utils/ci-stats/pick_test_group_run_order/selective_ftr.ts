@@ -65,7 +65,7 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_tests_server.js',
   'scripts/functional_test_runner.js',
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   '.node-version',
   '.nvmrc',
 ];

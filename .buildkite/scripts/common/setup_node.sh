@@ -69,3 +69,13 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
+
+# Pin pnpm through Corepack (bundled with Node). We intentionally omit
+# package.json "packageManager" so yarn classic remains usable as a BYO script
+# runner; the version comes from engines.pnpm instead.
+echo " -- enabling corepack-managed pnpm"
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+PNPM_VERSION="$(node -p "require('${KIBANA_DIR}/package.json').engines.pnpm.replace(/^[^\d]*/, '')")"
+corepack enable
+corepack prepare "pnpm@${PNPM_VERSION}" --activate
+echo " -- pnpm: version=$(pnpm --version)"

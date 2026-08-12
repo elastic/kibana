@@ -85,12 +85,12 @@ run_performance_tests() {
   # Generate performance data file
   echo "--- Generate Performance Data File"
   echo "Creating performance data file: $PERF_DATA_FILE with $PERF_ENTITY_COUNT entities, $PERF_LOGS_PER_ENTITY logs per entity"
-  yarn start create-perf-data "$PERF_DATA_FILE" "$PERF_ENTITY_COUNT" "$PERF_LOGS_PER_ENTITY"
+  pnpm start create-perf-data "$PERF_DATA_FILE" "$PERF_ENTITY_COUNT" "$PERF_LOGS_PER_ENTITY"
 
   # Run the performance test
   TEST_START_TIME=$(date +%s)
   set +e
-  YARN_CMD="yarn start upload-perf-data-interval \"$PERF_DATA_FILE\" \
+  YARN_CMD="pnpm start upload-perf-data-interval \"$PERF_DATA_FILE\" \
     --deleteData \
     --interval \"$PERF_INTERVAL\" \
     --count \"$PERF_COUNT\" \
