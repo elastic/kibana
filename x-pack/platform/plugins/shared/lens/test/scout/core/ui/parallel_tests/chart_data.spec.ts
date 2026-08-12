@@ -21,6 +21,21 @@ function barXLabels(state: DebugState | undefined): string[] {
   return state?.bars?.[0]?.bars.map((bar) => String(bar.x)) ?? [];
 }
 
+// FTR chart_data.ts category names (logstash archive); skip exact aggregation floats in UI.
+const EXPECTED_XY_CATEGORIES = [
+  '97.220.3.248',
+  '169.228.188.120',
+  '78.83.247.30',
+  '226.82.228.233',
+  '93.28.27.24',
+  'Other',
+];
+
+// Partition charts use __other__ instead of Other; partitionNames() sorts alphabetically.
+const EXPECTED_PARTITION_CATEGORIES = EXPECTED_XY_CATEGORIES.map((name) =>
+  name === 'Other' ? '__other__' : name
+).sort((a, b) => a.localeCompare(b));
+
 spaceTest.describe(
   'Lens chart data across visualization types',
   { tag: '@local-stateful-classic' },
@@ -36,14 +51,13 @@ spaceTest.describe(
     spaceTest.afterAll(suiteSetup.afterAll);
 
     // One journey: chart-type switches share the same dimension config (FTR chart_data.ts).
-    // Exact aggregation floats belong off UI; assert structural render parity across types.
+    // Assert known category names; exact aggregation floats belong off UI.
     spaceTest(
       'renders the same terms + average config across chart types',
       async ({ pageObjects }) => {
         // Multi-visualization switches exceed the default 60s parallel timeout under load.
         spaceTest.setTimeout(120_000);
         const { lens } = pageObjects;
-        let baselineXLabels: string[] = [];
 
         await spaceTest.step('configure terms of ip and average of bytes', async () => {
           await lens.configureDimension({
@@ -63,9 +77,7 @@ spaceTest.describe(
 
         await spaceTest.step('xy bar chart', async () => {
           const data = await lens.workspace.getCurrentChartDebugState('xyVisChart');
-          baselineXLabels = barXLabels(data);
-          expect(baselineXLabels).toHaveLength(6);
-          expect(baselineXLabels).toContain('Other');
+          expect(barXLabels(data)).toStrictEqual(EXPECTED_XY_CATEGORIES);
           expect(data.bars?.[0]?.bars.every((bar) => typeof bar.y === 'number' && bar.y > 0)).toBe(
             true
           );
@@ -74,18 +86,16 @@ spaceTest.describe(
         await spaceTest.step('pie chart', async () => {
           await lens.switchToVisualization('pie');
           await lens.waitForVisualization('partitionVisChart');
-          const names = partitionNames(
-            await lens.workspace.getCurrentChartDebugState('partitionVisChart')
-          );
-          expect(names).toHaveLength(6);
-          // Partition "other" uses __other__; XY uses Other — compare non-other cardinality.
-          expect(names.filter((name) => name !== '__other__')).toHaveLength(5);
+          expect(
+            partitionNames(await lens.workspace.getCurrentChartDebugState('partitionVisChart'))
+          ).toStrictEqual(EXPECTED_PARTITION_CATEGORIES);
         });
 
         await spaceTest.step('donut chart', async () => {
           await lens.style.setDonutHoleSize('Large');
-          const data = await lens.workspace.getCurrentChartDebugState('partitionVisChart');
-          expect(partitionNames(data)).toHaveLength(6);
+          expect(
+            partitionNames(await lens.workspace.getCurrentChartDebugState('partitionVisChart'))
+          ).toStrictEqual(EXPECTED_PARTITION_CATEGORIES);
           expect(await lens.style.getDonutHoleSize()).toBe('Large');
           await lens.style.closeFlyoutWithBackButton();
           // Style flyout close can remount the partition chart; wait before chart-type switch.
@@ -97,14 +107,14 @@ spaceTest.describe(
           await lens.waitForVisualization('partitionVisChart');
           expect(
             partitionNames(await lens.workspace.getCurrentChartDebugState('partitionVisChart'))
-          ).toHaveLength(6);
+          ).toStrictEqual(EXPECTED_PARTITION_CATEGORIES);
         });
 
         await spaceTest.step('heatmap chart', async () => {
           await lens.switchToVisualization('heatmap', { search: 'heat' });
           await lens.waitForVisualization('heatmapChart');
           const debugState = await lens.workspace.getCurrentChartDebugState('heatmapChart');
-          expect(debugState.axes?.x[0].labels).toStrictEqual(baselineXLabels);
+          expect(debugState.axes?.x[0].labels).toStrictEqual(EXPECTED_XY_CATEGORIES);
           expect(debugState.axes?.y[0].labels).toStrictEqual(['']);
           expect(debugState.heatmap?.cells.length).toBe(6);
           expect(debugState.legend?.items?.length).toBeGreaterThan(0);
@@ -120,7 +130,7 @@ spaceTest.describe(
             const raw = await lens.datatable.getCellText(index, 1);
             values.push(Number(raw.replace(/,/g, '')));
           }
-          expect(terms).toStrictEqual(baselineXLabels);
+          expect(terms).toStrictEqual(EXPECTED_XY_CATEGORIES);
           expect(values.every((value) => Number.isFinite(value) && value > 0)).toBe(true);
         });
 
