@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ConversationTemplate, ConversationTemplateInputType } from '@kbn/agent-builder-common';
+import type {
+  ConversationTemplate,
+  ConversationTemplateInputType,
+} from '@kbn/agent-builder-common';
 
 /**
  * Normalizes a template field value to a string or string array for storage.

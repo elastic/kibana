@@ -241,9 +241,7 @@ class ConversationClientImpl implements ConversationClient {
 
     try {
       return withDeserializedMetadata(
-        fromEs(
-          await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })
-        )
+        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {

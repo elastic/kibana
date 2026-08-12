@@ -111,9 +111,7 @@ describe('deserializeMetadataValue', () => {
     });
 
     it('returns the value unchanged for DATE', () => {
-      expect(deserializeMetadataValue('2024-01-15T00:00:00Z', 'DATE')).toBe(
-        '2024-01-15T00:00:00Z'
-      );
+      expect(deserializeMetadataValue('2024-01-15T00:00:00Z', 'DATE')).toBe('2024-01-15T00:00:00Z');
     });
 
     it('returns the value unchanged for USER', () => {
