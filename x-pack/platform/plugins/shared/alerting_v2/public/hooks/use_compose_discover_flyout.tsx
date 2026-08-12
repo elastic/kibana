@@ -66,6 +66,7 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
@@ -205,21 +206,18 @@ export const useComposeDiscoverFlyout = ({
           },
         })
       }
-      onUpdateRule={(id, payload, ruleNotifications, notificationsDirty) =>
+      onUpdateRule={(id, payload, ruleNotifications) =>
         updateRuleMutation.mutate(
           { id, payload },
           {
             onSuccess: (rule) => {
-              if (!notificationsDirty) {
+              const actions = ruleNotifications?.workflows ?? [];
+              if (actions.length === 0) {
                 closeFlyout();
                 return;
               }
-              const actions = ruleNotifications?.workflows ?? [];
               // Only close the flyout once notification setup also succeeds
-              setupNotificationsMutation.mutate(
-                { rule, actions, onUpdate: true },
-                { onSuccess: closeFlyout }
-              );
+              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
             },
           }
         )

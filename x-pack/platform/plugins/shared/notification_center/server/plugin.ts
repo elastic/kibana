@@ -13,8 +13,13 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
-import { registerNotificationDataStream } from './data_stream/notification_data_stream';
-import { registerNotificationUserStorage } from './user_storage';
+import {
+  registerNotificationCleanupTask,
+  scheduleNotificationCleanupTask,
+} from './cleanup_task/cleanup_task';
+import { registerNotificationDataStream } from './storage/notification_data_stream';
+import { buildForType } from './lib/submit';
+import { registerNotificationUserStorage } from './storage/user_storage';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -38,18 +43,29 @@ export class NotificationCenterPlugin
   }
 
   public setup(
-    core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
+    core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>,
+    plugins: NotificationCenterSetupDependencies
   ): NotificationCenterPluginSetup {
     // core gates the plugin on xpack.notificationCenter.enabled;
     this.logger.debug('Setting up Notification Center plugin');
 
     registerNotificationDataStream(core.dataStreams);
     registerNotificationUserStorage(core.userStorage);
+    registerNotificationCleanupTask(core, plugins.taskManager, this.logger);
 
-    return {};
+    return {
+      forType: buildForType(core),
+    };
   }
 
-  public start(core: CoreStart): NotificationCenterPluginStart {
+  public start(
+    _core: CoreStart,
+    plugins: NotificationCenterStartDependencies
+  ): NotificationCenterPluginStart {
+    scheduleNotificationCleanupTask(plugins.taskManager).catch((err) => {
+      this.logger.error(`Failed to schedule Notification Center cleanup task: ${err.message}`);
+    });
+
     return {};
   }
 

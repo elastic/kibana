@@ -7,12 +7,17 @@
 
 export {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
+  ConversationOriginType,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -20,7 +25,9 @@ export {
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
-  type ConversationSource,
+  type ConversationOrigin,
+  type ConversationRoundAuthor,
+  type ConversationRoundOrigin,
   type ConversationInternalState,
   type TodoItem,
   type TodoStatus,
@@ -48,7 +55,6 @@ export {
   type CompactionToolCallSummary,
   type CompactionEntity,
   ConversationRoundStepType,
-  ConversationSourceType,
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
@@ -56,6 +62,11 @@ export {
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
   isAskUserQuestionStep,
+  type RelevantSkill,
+  type RelevantSkillsStep,
+  type RelevantSkillsStepData,
+  createRelevantSkillsStep,
+  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,

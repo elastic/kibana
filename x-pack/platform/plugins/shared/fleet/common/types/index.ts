@@ -49,6 +49,20 @@ export interface FleetConfigType {
     customIntegrations?: {
       enabled?: boolean;
     };
+    managedBulk?: {
+      enabled: boolean;
+    };
+  };
+  iacProvisioner?: {
+    enabled: boolean;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
+      };
+    };
   };
   spaceSettings?: Array<{
     space_id: string;

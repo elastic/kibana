@@ -19,6 +19,12 @@ import { DISCOVER_APP_LOCATOR } from './app_locator';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { appLocatorGetLocationCommon } from './app_locator_get_location';
+import { createProfileStateRegistry } from './context_awareness';
+import {
+  type ProfileStateDefinition,
+  ProfileStateRegistry,
+  ProfileStateType,
+} from './context_awareness';
 import { NEW_TAB_ID } from './constants';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
@@ -26,13 +32,20 @@ const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
 interface SetupParams {
   useHash?: boolean;
+  profileStateRegistry?: ProfileStateRegistry;
 }
 
-const setup = async ({ useHash = false }: SetupParams = {}) => {
+const setup = async ({
+  useHash = false,
+  profileStateRegistry = createProfileStateRegistry(),
+}: SetupParams = {}) => {
   const locator = {
     id: DISCOVER_APP_LOCATOR,
     getLocation: (params: DiscoverAppLocatorParams) => {
-      return appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
+      return appLocatorGetLocationCommon(
+        { useHash, setStateToKbnUrl, profileStateRegistry },
+        params
+      );
     },
   };
 
@@ -47,12 +60,14 @@ beforeEach(() => {
 describe('Discover url generator', () => {
   test('can create a link to Discover with no state and no saved search', async () => {
     const { locator } = await setup();
-    const { app, path } = await locator.getLocation({});
-    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
+    const { app, path, state } = await locator.getLocation({});
+    const { _a, _g, _p } = getStatesFromKbnUrl(path, ['_a', '_g', '_p']);
 
     expect(app).toBe('discover');
     expect(_a).toEqual(undefined);
     expect(_g).toEqual(undefined);
+    expect(_p).toEqual(undefined);
+    expect(state).toEqual({});
   });
 
   test('can create a link to a saved search in Discover', async () => {
@@ -313,6 +328,112 @@ describe('Discover url generator', () => {
     const { state } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
 
     expect((state as Record<string, unknown>).dataViewSpec).toEqual(dataViewSpecMock);
+  });
+
+  test('partitions profile state by lifetime without stripping explicit defaults', async () => {
+    const { locator } = await setup();
+    const { path, state } = await locator.getLocation({
+      profileState: {
+        exampleProfileState: {
+          timestampColor: 'danger',
+          rowControlColor: 'text',
+          boxColor: 'transparent',
+          unknownValue: 'ignored',
+        },
+        metricsGridSettings: {
+          counterAggregation: 'max',
+          gaugeAggregation: 'last_value',
+          histogramPercentile: 'p90',
+        },
+        unknownProfileState: {
+          boxColor: 'ignored',
+        },
+      },
+    });
+    const { _p } = getStatesFromKbnUrl(path, ['_p']);
+
+    expect(_p).toEqual({
+      exampleProfileState: {
+        boxColor: 'transparent',
+      },
+    });
+    expect(state).toEqual({
+      profileState: {
+        exampleProfileState: {
+          rowControlColor: 'text',
+        },
+        metricsGridSettings: {
+          counterAggregation: 'max',
+          gaugeAggregation: 'last_value',
+          histogramPercentile: 'p90',
+        },
+      },
+    });
+  });
+
+  test('omits empty profile state partitions', async () => {
+    const { locator } = await setup();
+    const { path, state } = await locator.getLocation({
+      profileState: {
+        exampleProfileState: {},
+      },
+    });
+    const { _p } = getStatesFromKbnUrl(path, ['_p']);
+
+    expect(_p).toBeUndefined();
+    expect(state).toEqual({});
+  });
+
+  test('supports hashed profile URL state', async () => {
+    const { locator } = await setup({ useHash: true });
+    const { path } = await locator.getLocation({
+      profileState: {
+        exampleProfileState: {
+          boxColor: 'subdued',
+        },
+      },
+    });
+    const { _p } = getStatesFromKbnUrl(path, ['_p']);
+
+    expect(path).not.toContain('subdued');
+    expect(_p).toEqual({
+      exampleProfileState: {
+        boxColor: 'subdued',
+      },
+    });
+  });
+
+  test('preserves an explicit value that matched a previous registered default', async () => {
+    interface ChangedDefaultProfileState extends SerializableRecord {
+      urlValue: string;
+    }
+
+    const definition: ProfileStateDefinition<ChangedDefaultProfileState> = {
+      key: 'changedDefaultProfileState',
+      descriptor: {
+        urlValue: { type: ProfileStateType.Url },
+      },
+      defaultState: {
+        urlValue: 'newDefault',
+      },
+    };
+    const profileStateRegistry = new ProfileStateRegistry();
+    profileStateRegistry.registerDefinition(definition);
+    const { locator } = await setup({ profileStateRegistry });
+    const { path } = await locator.getLocation({
+      profileState: {
+        [definition.key]: {
+          urlValue: 'oldDefault',
+        },
+      },
+    });
+    const { _p } = getStatesFromKbnUrl(path, ['_p']);
+
+    expect(_p).toEqual({
+      [definition.key]: {
+        urlValue: 'oldDefault',
+      },
+    });
   });
 
   describe('when esqlControls is used', () => {

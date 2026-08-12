@@ -1,0 +1,15 @@
+prs:
+- https://github.com/elastic/kibana/pull/279533
+issues:
+- https://github.com/elastic/kibana/issues/274126
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Search and data
+title: Improve Fleet Elastic Package Registry connection error details
+description: Fleet connection errors to the Elastic Package Registry now include a
+  categorized type (timeout, DNS, connection, HTTP, or unknown) and a reason (Node
+  error code or HTTP status) in server logs and API responses.

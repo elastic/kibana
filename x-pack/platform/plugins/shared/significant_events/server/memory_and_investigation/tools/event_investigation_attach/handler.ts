@@ -10,20 +10,20 @@ import type { EventClient } from '../../../lib/significant_events/events';
 
 export const attachEventInvestigationToolHandler = async ({
   eventClient,
-  eventId,
+  eventUuid,
   workflowExecutionId,
   startedAt,
   completedAt,
 }: {
   eventClient: EventClient;
-  eventId: string;
+  eventUuid: string;
   workflowExecutionId: string;
   startedAt: string;
   completedAt?: string;
-}): Promise<{ event_id: string; updated: number; ignored: number }> => {
+}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   return attachInvestigationToEvent({
     eventClient,
-    eventId,
+    eventUuid,
     investigation: {
       workflow_execution_id: workflowExecutionId,
       started_at: startedAt,

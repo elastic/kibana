@@ -6,29 +6,21 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import type { EuiCallOutProps, IconType } from '@elastic/eui';
-import { useCardCallOutStyles } from './card_callout.styles';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
 
 export interface CardCallOutProps {
   text: React.ReactNode;
   color?: EuiCallOutProps['color'];
-  icon?: IconType;
   action?: React.ReactNode;
 }
 
-export const CardCallOut = React.memo<CardCallOutProps>(({ text, color, icon, action }) => {
-  const styles = useCardCallOutStyles();
+export const CardCallOut = React.memo<CardCallOutProps>(({ text, color, action }) => {
   return (
-    <EuiCallOut color={color} className={styles}>
+    <EuiCallOut color={color} size="s">
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            {icon && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={icon} aria-hidden={true} />
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiText size="xs">{text}</EuiText>
             </EuiFlexItem>

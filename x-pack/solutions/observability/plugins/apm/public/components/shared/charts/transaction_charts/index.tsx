@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { unit } from '@kbn/apm-common';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -24,7 +25,7 @@ import {
   isRumAgentName,
 } from '../../../../../common/agent_name';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
-import { unit } from '../../../../utils/style';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../../../common/es_fields/apm';
 
 /** Shared outer height for failed-rate and service-map panels on transaction details row 2. */
 const TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT = unit * 24;
@@ -56,7 +57,7 @@ export function TransactionCharts({
 }) {
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200
   const { isLarge } = useBreakpoints();
-  const { agentName } = useApmServiceContext();
+  const { agentName, transactionType } = useApmServiceContext();
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isRumAgent = isRumAgentName(agentName as AgentName);
   const isMobileAgent = isMobileAgentName(agentName as AgentName);
@@ -64,6 +65,17 @@ export function TransactionCharts({
   const showTopErrors = !isOpenTelemetryAgent && !isRumAgent;
   const showTransactionDetailsServiceMap =
     Boolean(transactionName) && Boolean(rangeFrom) && Boolean(rangeTo) && Boolean(serviceName);
+
+  const transactionFilterPills = useMemo(() => {
+    const pills: Array<{ field: string; value: string }> = [];
+    if (transactionType) {
+      pills.push({ field: TRANSACTION_TYPE, value: transactionType });
+    }
+    if (transactionName) {
+      pills.push({ field: TRANSACTION_NAME, value: transactionName });
+    }
+    return pills;
+  }, [transactionName, transactionType]);
 
   const latencyChart = (
     <EuiFlexItem data-cy={`transaction-duration-charts`}>
@@ -120,6 +132,7 @@ export function TransactionCharts({
         rangeTo={rangeTo!}
         environment={environment}
         kuery={kuery}
+        filterPills={transactionFilterPills}
         sectionHeight={TRANSACTION_DETAILS_ROW_TWO_SECTION_HEIGHT}
         embeddableMinHeight={0}
         sectionTestSubj="apmTransactionDetailsServiceMapSection"

@@ -16,7 +16,8 @@
     "package.json",
     "../../../../../typings/**/*",
     "test/scout/**/*",
-    "test/scout_automatic_import/**/*"
+    "test/scout_automatic_import/**/*",
+    "test/scout_iac_provisioner/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -77,6 +78,7 @@
     "@kbn/test",
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
+    "@kbn/apm-types",
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-server",
@@ -142,6 +144,7 @@
     "@kbn/search-types",
     "@kbn/human-readable-id",
     "@kbn/elastic-agent-condition-language",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/core-http-browser"
   ]
 }

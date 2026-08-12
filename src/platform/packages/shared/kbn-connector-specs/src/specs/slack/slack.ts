@@ -20,7 +20,6 @@ import {
   SlackGetFileInfoInputSchema,
   SlackInviteToConversationInputSchema,
   SlackListChannelsInputSchema,
-  SlackListUsersInputSchema,
   SlackListFilesInputSchema,
   SlackListUserConversationsInputSchema,
   SlackListUsersInputSchema,
@@ -209,7 +208,7 @@ export const Slack: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/slack-v2-action-type`,
   },
 
@@ -242,14 +241,27 @@ export const Slack: ConnectorSpec = {
         },
       },
       {
-        type: 'ears',
+        type: 'bearer',
+        defaults: {},
         overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'slack',
-          scope:
-            'channels:history channels:read chat:write files:read groups:history groups:read im:history im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.label', {
+            defaultMessage: 'Bot Token',
+          }),
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.bearer.token.label', {
+                defaultMessage: 'Slack Bot Token',
+              }),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.slack.auth.bearer.token.helpText',
+                {
+                  defaultMessage:
+                    'A Slack bot token starting with xoxb-. Create one at api.slack.com/apps.',
+                }
+              ),
+            },
+          },
         },
       },
     ],
@@ -266,6 +278,15 @@ export const Slack: ConnectorSpec = {
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
+        if (ctx.secrets?.authType === 'bearer') {
+          throw new Error(
+            i18n.translate('core.kibanaConnectorSpecs.slack.searchMessages.botTokenError', {
+              defaultMessage:
+                'searchMessages is not supported with bot token auth — Slack search APIs require a user token. Use getConversationHistory to read messages from a specific channel instead.',
+            })
+          );
+        }
+
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
 
         const queryParts: string[] = [typedInput.query];
@@ -483,7 +504,9 @@ export const Slack: ConnectorSpec = {
     },
 
     // https://api.slack.com/methods/users.list
-    listUsers: {
+    // Ingest-oriented variant of listUsers (isTool: false). Kept separate from the
+    // agent-facing listUsers action, matching the listFiles / listFilesIngest pattern.
+    listUsersIngest: {
       isTool: false,
       description:
         'List workspace users with cursor pagination for ingest workflows. Returns compact user records and nextCursor.',
@@ -499,7 +522,7 @@ export const Slack: ConnectorSpec = {
 
         const response = await slackRequestWithRateLimitRetry<SlackUsersListResponse>({
           ctx,
-          action: 'listUsers',
+          action: 'listUsersIngest',
           maxRetries: SLACK_MAX_RETRIES,
           request: () =>
             ctx.client.get(`${SLACK_API_BASE}/users.list`, {
@@ -510,7 +533,7 @@ export const Slack: ConnectorSpec = {
         if (!response.data.ok) {
           throw new Error(
             formatSlackApiErrorMessage({
-              action: 'listUsers',
+              action: 'listUsersIngest',
               responseData: response.data,
               responseHeaders: response.headers,
             })
@@ -1263,39 +1286,25 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
-
-      try {
-        // Test connection by calling auth.test which validates the token
-        const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
-
-        if (!response.data.ok) {
-          return {
-            ok: false,
-            message: formatSlackApiErrorMessage({
-              action: 'test',
-              responseData: response.data,
-              responseHeaders: response.headers,
-            }),
-          };
-        }
-
-        const teamName = response.data.team || 'Unknown';
-        return {
-          ok: true,
-          message: i18n.translate('core.kibanaConnectorSpecs.slack.test.successMessage', {
-            defaultMessage: 'Successfully connected to Slack workspace: {teamName}',
-            values: { teamName },
-          }),
-        };
-      } catch (error) {
-        const err = error as { message?: string };
-        return { ok: false, message: err.message ?? 'Unknown error' };
+      // Test connection by calling auth.test which validates the token
+      const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
+      if (!response.data.ok) {
+        throw new Error(
+          formatSlackApiErrorMessage({
+            action: 'test',
+            responseData: response.data,
+            responseHeaders: response.headers,
+          })
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
     'Use whoAmI before any write or "as me" action to confirm the authenticated workspace/user. It is also the cheapest way to translate the implicit "me" to a concrete user_id for listUserConversations or message attribution.',
+    'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',

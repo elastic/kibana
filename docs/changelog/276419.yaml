@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276419
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- AI and machine Learning
+title: "Fix clear audit messages API accepting non-notification indices"
+description: "The clear audit messages API now verifies that requested indices are notification indices and that the user can access the specified job."

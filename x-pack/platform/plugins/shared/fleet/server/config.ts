@@ -50,6 +50,9 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
+    iacProvisioner: {
+      enabled: true,
+    },
     enableExperimental: true,
     experimentalFeatures: true,
     developer: {
@@ -264,6 +267,30 @@ export const config: PluginConfigDescriptor = {
               enabled: schema.boolean({ defaultValue: true }),
               dryRun: schema.boolean({ defaultValue: false }),
               interval: schema.maybe(schema.string({ defaultValue: '10m' })),
+            })
+          ),
+          // Routes agentless policies through the managed `_bulk` endpoint instead of
+          // writing directly to Elasticsearch.
+          managedBulk: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: false }),
+            })
+          ),
+        })
+      ),
+      iacProvisioner: schema.maybe(
+        schema.object({
+          enabled: schema.boolean({ defaultValue: false }),
+          api: schema.maybe(
+            schema.object({
+              url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+              tls: schema.maybe(
+                schema.object({
+                  certificate: schema.maybe(schema.string()),
+                  key: schema.maybe(schema.string()),
+                  ca: schema.maybe(schema.string()),
+                })
+              ),
             })
           ),
         })

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
@@ -66,7 +66,7 @@ describe('LibraryTemplateDetailPage', () => {
     mockShowGraphPreview = undefined;
   });
 
-  it('resets breadcrumbs to Library when the route slug changes', async () => {
+  it('resets breadcrumbs to Library when the route slug changes', () => {
     const services = buildEnabledServices();
     const { rerender } = render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -78,19 +78,15 @@ describe('LibraryTemplateDetailPage', () => {
       } as TemplateBody);
     });
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
-        expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
-      );
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
+      expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
+    );
 
     rerender(<LibraryTemplateDetailPage {...routeProps('second-template')} />);
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-        expect.objectContaining({ text: 'Library' }),
-      ]);
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
+      expect.objectContaining({ text: 'Template Library' }),
+    ]);
   });
 
   it('passes the visual editor flag through to the template detail preview', () => {

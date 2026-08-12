@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields, ToastOptions } from '@kbn/core/public';
 import { useMemo } from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { AttachmentType } from '../../common/types/domain';
@@ -113,8 +114,8 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { application } = useKibana().services;
-  const { getUrlForApp, navigateToUrl } = application;
+  const services = useKibana().services;
+  const { getUrlForApp, navigateToUrl } = services.application;
 
   const toasts = useToasts();
 
@@ -181,17 +182,31 @@ export const useCasesToast = () => {
       ) => {
         toasts.addSuccess({ title, text, actionProps, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string, text?: string) => {
-        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: React.ReactNode) => {
+        // Rich (non-string) content must be rendered via a mount point.
+        const mountedText =
+          text != null && typeof text !== 'string'
+            ? toMountPoint(text, services.rendering)
+            : text ?? undefined;
+        toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
-      showInfoToast: (title: string, text?: string) => {
-        toasts.addInfo({
-          title,
-          text,
-          className: 'eui-textBreakWord',
-        });
+      showInfoToast: (
+        title: string,
+        text?: string,
+        actionProps?: ToastInputFields['actionProps'],
+        options?: ToastOptions
+      ) => {
+        return toasts.addInfo(
+          {
+            title,
+            text,
+            actionProps,
+            className: 'eui-textBreakWord',
+          },
+          options
+        );
       },
     }),
-    [appId, getUrlForApp, navigateToUrl, toasts]
+    [appId, getUrlForApp, navigateToUrl, toasts, services.rendering]
   );
 };

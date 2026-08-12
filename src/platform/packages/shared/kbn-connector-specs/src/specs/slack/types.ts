@@ -433,6 +433,12 @@ export const SlackListUsersInputSchema = lazySchema(() =>
         'Pagination cursor from a previous listUsers response (nextCursor). Omit for the first page.'
       ),
     includeLocale: z.boolean().optional().describe('Set to true to include the user locale.'),
+    includeDeleted: z
+      .boolean()
+      .default(false)
+      .describe(
+        'Include deleted/deactivated users and bots. Used by listUsersIngest; ignored by listUsers. Defaults to false.'
+      ),
     raw: z
       .boolean()
       .optional()
@@ -652,8 +658,6 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 
-const SLACK_MAX_USERS_LIST_LIMIT = 200;
-const SLACK_DEFAULT_USERS_LIST_LIMIT = 200;
 const SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT = 200;
 const SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT = 200;
 
@@ -675,53 +679,12 @@ export interface SlackUsersListResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
-export interface SlackConversationHistoryMessage {
-  type?: string;
-  user?: string;
-  text?: string;
-  ts?: string;
-  thread_ts?: string;
-  reply_count?: number;
-}
-
 export interface SlackConversationsRepliesResponse extends SlackErrorFields {
   ok: boolean;
   messages?: Array<Record<string, unknown>>;
   has_more?: boolean;
   response_metadata?: { next_cursor?: string };
 }
-
-export interface SlackConversationsHistoryResponse extends SlackErrorFields {
-  ok: boolean;
-  messages?: SlackConversationHistoryMessage[];
-  has_more?: boolean;
-  response_metadata?: { next_cursor?: string };
-}
-
-export const SlackListUsersInputSchema = lazySchema(() =>
-  z.object({
-    cursor: z
-      .string()
-      .optional()
-      .describe('Pagination cursor from a previous listUsers response (nextCursor).'),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(SLACK_MAX_USERS_LIST_LIMIT)
-      .default(SLACK_DEFAULT_USERS_LIST_LIMIT)
-      .describe(`Users per page (1-${SLACK_MAX_USERS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_USERS_LIST_LIMIT}.`),
-    includeDeleted: z
-      .boolean()
-      .default(false)
-      .describe('Include deleted/deactivated users. Defaults to false.'),
-    raw: z
-      .boolean()
-      .optional()
-      .describe('Return the full raw Slack API response instead of a compact ingest result.'),
-  })
-);
-export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
 
 export const SlackGetChannelHistoryInputSchema = lazySchema(() =>
   z.object({

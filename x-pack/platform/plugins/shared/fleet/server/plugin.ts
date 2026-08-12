@@ -126,6 +126,7 @@ import {
   type FleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
+import { setupIacProvisionerTelemetry } from './services/telemetry/iac_provisioner_telemetry';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -242,7 +243,7 @@ export interface FleetAppContext {
   agentStatusChangeTask?: AgentStatusChangeTask;
   fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
-  fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
@@ -364,7 +365,7 @@ export class FleetPlugin
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
-  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -685,13 +686,12 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    this.fetchUsage = async (abortController: AbortController) =>
-      await fetchFleetUsage(core, config, abortController);
+    this.fetchUsage = async (signal: AbortSignal) => await fetchFleetUsage(core, config, signal);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
+    setupIacProvisionerTelemetry(core.analytics);
 
-    const fetchAgents = async (abortController: AbortController) =>
-      await fetchAgentMetrics(core, abortController);
+    const fetchAgents = async (signal: AbortSignal) => await fetchAgentMetrics(core, signal);
     this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();

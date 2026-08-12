@@ -546,11 +546,13 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = GithubConnector.test;
+
     it('returns ok with MCP and GraphQL connectivity details', async () => {
-      if (!GithubConnector.test) {
+      if (!testSpec) {
         throw new Error('test handler not defined');
       }
-      const result = await GithubConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
       expect(mockExecuteGitHubGraphQL).toHaveBeenCalled();
@@ -567,11 +569,11 @@ describe('GithubConnector', () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
-      if (!GithubConnector.test) {
+      if (!testSpec) {
         throw new Error('test handler not defined');
       }
 
-      await expect(GithubConnector.test.handler(mockContext)).rejects.toThrow('connection refused');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });
 });

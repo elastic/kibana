@@ -33,6 +33,7 @@ import { noop } from 'lodash/fp';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { HuntingLead } from './types';
+import { GeneratedOnLabel } from './generated_on_label';
 import { LeadCard } from './lead_card';
 import { LeadsBanner } from './leads_banner';
 import * as i18n from './translations';
@@ -104,8 +105,11 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   const toggleOptions = useCallback(() => setIsOptionsOpen((prev) => !prev), []);
   const closeOptions = useCallback(() => setIsOptionsOpen(false), []);
   const toggleOpen = useCallback(
-    () => setStoredIsOpen((prev) => !(prev ?? true)),
-    [setStoredIsOpen]
+    // `react-use`'s `useLocalStorage` setter closes over a stale `state` value
+    // (its deps omit `state`), so a functional updater like `prev => !prev` only
+    // flips correctly on the first click. Pass the current value explicitly.
+    () => setStoredIsOpen(!(storedIsOpen ?? true)),
+    [setStoredIsOpen, storedIsOpen]
   );
 
   const { getUrlForApp } = useKibana().services.application;
@@ -125,7 +129,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     <EuiButton
       size="s"
       fill
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       href={genAiSettingsUrl}
       target="_blank"
@@ -264,7 +268,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={isOpen ? i18n.COLLAPSE : i18n.EXPAND} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggleOpen}
               aria-label={isOpen ? i18n.COLLAPSE : i18n.EXPAND}
               color="text"
@@ -304,7 +308,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             {leads.length > 0 && lastRunTimestamp && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="leadsGeneratedTimestamp">
-                  {i18n.getGeneratedOnLabel(lastRunTimestamp)}
+                  <GeneratedOnLabel timestamp={lastRunTimestamp} />
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -328,7 +332,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
-                  iconType="list"
+                  iconType="listBullet"
                   onClick={onSeeAll}
                   data-test-subj="seeAllLeadsButton"
                 >
@@ -370,7 +374,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
                       <EuiSkeletonTitle size="xs" />
                       <EuiSpacer size="s" />
-                      <EuiSkeletonText lines={3} size="s" />
+                      <EuiSkeletonText lines={4} size="s" />
                     </EuiPanel>
                   </EuiFlexItem>
                 ))}

@@ -124,6 +124,7 @@ export const spacesManagementApp = Object.freeze({
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               eventTracker={eventTracker}
+              isCpsTierEligible={cps?.isTierEligible ?? false}
             />
           );
         };

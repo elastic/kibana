@@ -689,7 +689,7 @@ describe('DateRangePickerControl', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith(
-        expect.objectContaining({ start: 'now-15m/m', end: 'now' })
+        expect.objectContaining({ start: 'now-15m/s', end: 'now' })
       );
       await waitForPopoverClose();
     });

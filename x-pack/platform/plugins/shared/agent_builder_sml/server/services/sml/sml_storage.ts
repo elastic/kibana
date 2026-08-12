@@ -8,10 +8,9 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import { chatSystemIndex } from '../../../common/indices';
 import type { SmlDocument } from './types';
 
-export const smlIndexName = chatSystemIndex('sml-data');
+export const smlIndexName = 'ai-index-idx-sml-data';
 
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),
@@ -88,6 +87,10 @@ const smlStorageSchemaProperties = {
 
 export const storageSettings = {
   name: smlIndexName,
+  /**
+   * Ensure the SML backing index name has a higher priority than built-in AI index templates.
+   */
+  priority: 600,
   schema: {
     properties: smlStorageSchemaProperties,
   },

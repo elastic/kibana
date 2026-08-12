@@ -182,6 +182,59 @@ steps:
 `;
 
 /**
+ * Workflow exercising several step types whose icons were previously broken in dark mode
+ * (bare EUI glyph names used in CSS url()). Each type appears as a decorated step so that
+ * the `type-inline-highlight type-<type>` CSS class is emitted by Monaco and can be inspected
+ * in scout tests.
+ *
+ * Types included: console, if, foreach, http, loop.continue, workflow.fail
+ */
+export const getMultiStepTypeWorkflowYaml = (name: string) => `
+name: ${name}
+description: Multi-step-type workflow for icon regression tests
+enabled: true
+
+triggers:
+  - type: manual
+    inputs:
+      - name: items
+        type: string
+        default: "a,b"
+steps:
+  - name: log_start
+    type: console
+    with:
+      message: "starting"
+  - name: check_condition
+    type: if
+    condition: "true"
+    steps:
+      - name: log_true
+        type: console
+        with:
+          message: "condition was true"
+  - name: loop_items
+    type: foreach
+    foreach: "[1, 2]"
+    steps:
+      - name: log_item
+        type: console
+        with:
+          message: "item"
+      - name: skip_item
+        type: loop.continue
+  - name: call_api
+    type: http
+    with:
+      url: "https://example.com"
+      method: GET
+  - name: stop_here
+    type: workflow.fail
+    with:
+      message: "boom"
+`;
+
+/**
  * Invalid workflow YAML missing the required "steps" property.
  * Used for validation error tests.
  */

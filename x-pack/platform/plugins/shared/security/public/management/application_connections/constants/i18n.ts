@@ -12,17 +12,6 @@ export const labels = {
     title: i18n.translate('xpack.security.management.applicationConnectionsTitle', {
       defaultMessage: 'Application connections',
     }),
-    techPreviewBadgeLabel: i18n.translate(
-      'xpack.security.management.applicationConnections.techPreviewBadgeLabel',
-      { defaultMessage: 'Technical preview' }
-    ),
-    techPreviewBadgeTooltip: i18n.translate(
-      'xpack.security.management.applicationConnections.techPreviewBadgeTooltip',
-      {
-        defaultMessage:
-          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-      }
-    ),
     pageCallout: i18n.translate('xpack.security.management.applicationConnectionsPageCallout', {
       defaultMessage:
         'Manage connections for OAuth-based applications. Currently, only MCP clients are supported.',
@@ -49,6 +38,10 @@ export const labels = {
     statusConnected: i18n.translate(
       'xpack.security.management.applicationConnections.filters.statusConnected',
       { defaultMessage: 'Connected' }
+    ),
+    statusExpired: i18n.translate(
+      'xpack.security.management.applicationConnections.filters.statusExpired',
+      { defaultMessage: 'Expired' }
     ),
     statusRevoked: i18n.translate(
       'xpack.security.management.applicationConnections.filters.statusRevoked',
@@ -80,6 +73,9 @@ export const labels = {
           'This connection is authorized. Sessions expire after 30 days of inactivity.',
       }
     ),
+    expired: i18n.translate('xpack.security.management.applicationConnections.status.expired', {
+      defaultMessage: 'Expired',
+    }),
     revoked: i18n.translate('xpack.security.management.applicationConnections.status.revoked', {
       defaultMessage: 'Revoked',
     }),

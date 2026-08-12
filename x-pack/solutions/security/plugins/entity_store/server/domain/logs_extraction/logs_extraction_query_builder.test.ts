@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  buildLogsExtractionEsqlQuery,
-  buildRemainingLogsCountQuery,
-} from './logs_extraction_query_builder';
+import { buildLogsExtractionEsqlQuery } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { validateQuery } from '@kbn/esql-language';
 
 describe('buildLogsExtractionEsqlQuery', () => {
@@ -127,19 +124,5 @@ describe('buildLogsExtractionEsqlQuery', () => {
     expect(lookupIdx).toBeGreaterThan(statsIdx);
     expect(afterStatsEvalIdx).toBeGreaterThan(lookupIdx);
     expect(mergeCoalesceIdx).toBeGreaterThan(afterStatsEvalIdx);
-  });
-});
-
-describe('buildRemainingLogsCountQuery', () => {
-  ALL_ENTITY_TYPES.forEach((type) => {
-    it(`generates the expected query for ${type} entity type`, () => {
-      const query = buildRemainingLogsCountQuery({
-        indexPatterns: ['test-index-*'],
-        type,
-        fromDateISO: '2022-01-01T00:00:00.000Z',
-        toDateISO: '2022-01-01T23:59:59.999Z',
-      });
-      expect(query).toMatchSnapshot();
-    });
   });
 });

@@ -6,17 +6,23 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
+import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
-import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { flyoutProviders } from '../shared/components/flyout_provider';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
+import type { FlyoutOrigin, FlyoutSessionKind } from '../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TYPE } from '../../common/lib/telemetry';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
+import { RULE_TITLE } from '../shared/constants/flyout_titles';
+import { useFlyoutSessionContext } from '../session_context';
+import { useFlyoutV2UrlWriter } from '../shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  decodeFlyoutV2UrlParam,
+  urlParamKeyForHistoryKey,
+} from '../shared/url_state/flyout_v2_url_param';
+import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the rule flyout graph into their
 // bundle; the chunk only loads when the flyout is actually opened.
@@ -25,6 +31,13 @@ const RuleDetails = lazy(() => import('./main').then((m) => ({ default: m.RuleDe
 export interface OpenRuleFlyoutParams {
   /** The unique identifier of the rule to display. */
   ruleId: string;
+  /** Which UI trigger opened this flyout, when known. */
+  origin?: FlyoutOrigin;
+  /**
+   * Flyout-history title to use for this open, e.g. `formatFlyoutTitle(RULE_TITLE, ruleName)`.
+   * Omitted falls back to the bare "Rule" title.
+   */
+  title?: string;
 }
 
 export interface RuleFlyoutApi {
@@ -54,49 +67,68 @@ export interface RuleFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useRuleFlyoutApi = (): RuleFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
   const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const openFlyout = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
-  // `session` is the only thing that differs between a main and a child flyout. It is kept private
-  // here so callers never have to reason about it: they pick `openRuleFlyout` (main) or
-  // `openRuleFlyoutAsChild` (child) and this helper maps that to the right session.
+  const readFirstDescriptor = useCallback((): FlyoutDescriptor | null => {
+    if (!history?.location) return null;
+    const raw = new URLSearchParams(history.location.search).get(urlParamKey);
+    const stack = decodeFlyoutV2UrlParam(raw);
+    return stack?.[0] ?? null;
+  }, [history, urlParamKey]);
+
   const open = useCallback(
-    (children: ReactNode, session: OverlaySystemFlyoutOpenOptions['session']) => {
+    (
+      children: ReactNode,
+      session: FlyoutSessionKind,
+      title: OverlaySystemFlyoutOpenOptions['title'],
+      onClose: (() => void) | undefined,
+      origin?: FlyoutOrigin
+    ) => {
       const properties: OverlaySystemFlyoutOpenOptions = {
         ...defaultDocumentFlyoutProperties,
         historyKey,
         session,
+        title,
+        onClose,
       };
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>,
-        }),
-        properties
+      openFlyout(
+        children,
+        properties,
+        { surface: FLYOUT_SURFACE.FLYOUT, flyoutType: FLYOUT_TYPE.RULE, session, origin },
+        session === FLYOUT_SESSION_KIND.INHERIT ? FLYOUT_SESSION_KIND.INHERIT : sessionMode
       );
     },
-    [overlays, services, store, history, defaultDocumentFlyoutProperties, historyKey]
+    [openFlyout, defaultDocumentFlyoutProperties, historyKey, sessionMode]
   );
 
   const openRuleFlyout = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'start');
+    ({ ruleId, title, origin }: OpenRuleFlyoutParams) => {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId });
+      const onClose = buildOnClose(null);
+      open(<RuleDetails ruleId={ruleId} />, sessionMode, title ?? RULE_TITLE, onClose, origin);
     },
-    [open]
+    [open, sessionMode, writeOnOpen, buildOnClose]
   );
 
   const openRuleFlyoutAsChild = useCallback(
-    ({ ruleId }: OpenRuleFlyoutParams) => {
-      open(<RuleDetails ruleId={ruleId} />, 'inherit');
+    ({ ruleId, title, origin }: OpenRuleFlyoutParams) => {
+      const parentDescriptor = readFirstDescriptor();
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId }, 'inherit');
+      const onClose = buildOnClose(parentDescriptor);
+      open(
+        <RuleDetails ruleId={ruleId} />,
+        FLYOUT_SESSION_KIND.INHERIT,
+        buildFlyoutNavTitle(title ?? RULE_TITLE),
+        onClose,
+        origin
+      );
     },
-    [open]
+    [open, readFirstDescriptor, writeOnOpen, buildOnClose]
   );
 
   return useMemo(

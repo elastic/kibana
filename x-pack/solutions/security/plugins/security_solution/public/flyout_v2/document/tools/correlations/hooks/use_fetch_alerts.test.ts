@@ -77,6 +77,41 @@ describe('useFetchAlerts', () => {
     expect(result.current.data).toEqual([]);
   });
 
+  it('clears stale data once alertIds becomes empty (e.g. after narrowing the date range)', async () => {
+    jest
+      .mocked(createFindAlerts)
+      .mockReturnValue(
+        jest.fn().mockResolvedValue({ hits: { total: 3, hits: ['alert1', 'alert2', 'alert3'] } })
+      );
+
+    const { result, rerender } = renderHook(
+      (params: UseAlertsQueryParams) => useFetchAlerts(params),
+      {
+        wrapper: createReactQueryWrapper(),
+        initialProps: {
+          alertIds: ['id1', 'id2'],
+          from: 0,
+          size: 10,
+          sort: [{ '@timestamp': 'desc' }],
+        },
+      }
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.data).toEqual(['alert1', 'alert2', 'alert3']);
+
+    rerender({
+      alertIds: [],
+      from: 0,
+      size: 10,
+      sort: [{ '@timestamp': 'desc' }],
+    });
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.data).toEqual([]);
+    expect(result.current.totalItemCount).toBe(0);
+  });
+
   it('handles error state', async () => {
     // hide console error due to the line after
     jest.spyOn(console, 'error').mockImplementation(() => {});
