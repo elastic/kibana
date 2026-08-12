@@ -108,23 +108,33 @@ export const comboBoxFieldOptionMatcher = ({
 }) => fieldNameWildcardMatcher({ name: name || label, displayName: label }, searchValue);
 
 /**
- * Get `highlight` string to be used together with `EuiHighlight`
+ * Get the matching strings to highlight with `EuiHighlight`.
  * @param displayName
  * @param fieldSearchHighlight
  */
 export function getFieldSearchMatchingHighlight(
   displayName: string,
   fieldSearchHighlight?: string
-): string {
-  if (!fieldSearchHighlight) {
-    return '';
+): string[] {
+  const searchHighlight = fieldSearchHighlight?.trim().toLowerCase();
+  if (!searchHighlight) {
+    return [];
   }
-  const searchHighlight = (fieldSearchHighlight || '').trim();
-  if (displayName.toLowerCase().indexOf(searchHighlight.toLowerCase()) > -1) {
-    return searchHighlight;
-  }
-  return (
-    testFuzzySearchForString(displayName.toLowerCase(), searchHighlight.toLowerCase()) ||
-    displayName
-  );
+
+  const displayNameLower = displayName.toLowerCase();
+  const matches = searchHighlight
+    .split(/[* ]+/)
+    .filter(Boolean)
+    .map((searchTerm) => {
+      if (displayNameLower.includes(searchTerm)) {
+        return searchTerm;
+      }
+      if (searchTerm.length < FUZZY_STRING_MIN_LENGTH) {
+        return undefined;
+      }
+      return testFuzzySearchForString(displayNameLower, searchTerm) || undefined;
+    })
+    .filter((match): match is string => Boolean(match));
+
+  return [...new Set(matches)];
 }

@@ -171,6 +171,21 @@ describe('MetricsGrid', () => {
     });
   });
 
+  it.each([
+    ['system util', ['system', 'util']],
+    ['system*util', ['system', 'util']],
+    ['utilizaton', ['utilization']],
+    ['not-a-match', []],
+  ])('passes precise title highlights for the search term %s', (searchTerm, titleHighlight) => {
+    renderMetricsGrid({ searchTerm });
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ titleHighlight }),
+      expect.anything()
+    );
+  });
+
   it('passes the correct size prop', () => {
     const { rerender } = render(
       <MetricsExperienceStateProvider profileId="test-profile">

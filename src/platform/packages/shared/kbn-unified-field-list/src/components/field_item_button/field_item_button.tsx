@@ -244,6 +244,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       fieldName={
         <EuiHighlight
           search={getFieldSearchMatchingHighlight(displayName, fieldSearchHighlight)}
+          highlightAll
           title={title}
           data-test-subj={`field-${field.name}`}
         >
