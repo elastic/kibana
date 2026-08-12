@@ -151,20 +151,37 @@ export const resolveExtendedFieldFilters = (
 ): ResolvedExtendedFieldFilter[][] => {
   const labelToMetas = buildLabelToMetasIndex(templates, globalFields);
 
-  // One entry per input filter — including an empty group `[]` for a label that didn't resolve
+  // Group by label (case-insensitive) so multiple values for the same field (e.g. toggle On+Off)
+  // land in one group and are OR'd by buildExtendedFieldFilterClauses. Distinct labels stay
+  // as separate groups and are AND'd by the caller. Duplicate labels across different
+  // storage keys (global + template, or renamed fields) also OR together under one group.
+  const valuesByLabel = new Map<string, string[]>();
+  for (const { label, value } of extendedFieldFilters) {
+    const labelKey = label.toLowerCase();
+    const values = valuesByLabel.get(labelKey);
+    if (values == null) {
+      valuesByLabel.set(labelKey, [value]);
+    } else {
+      values.push(value);
+    }
+  }
+
+  // One entry per unique label — including an empty group `[]` for a label that didn't resolve
   // to any known field. Preserving the (empty) group lets buildExtendedFieldFilterClauses turn it
   // into a `match_none` clause instead of the filter being silently dropped (see that function).
-  return extendedFieldFilters.map(({ label, value }) => {
-    const metas = labelToMetas.get(label.toLowerCase());
+  return [...valuesByLabel.entries()].map(([labelKey, values]) => {
+    const metas = labelToMetas.get(labelKey);
     if (metas == null) return [];
-    return [...metas.values()].map((meta) => ({
-      storageKey: meta.storageKey,
-      value,
-      esType: meta.esType,
-      control: meta.control,
-      templateVersions: meta.templateVersions,
-      isGlobal: meta.isGlobal,
-    }));
+    return [...metas.values()].flatMap((meta) =>
+      values.map((value) => ({
+        storageKey: meta.storageKey,
+        value,
+        esType: meta.esType,
+        control: meta.control,
+        templateVersions: meta.templateVersions,
+        isGlobal: meta.isGlobal,
+      }))
+    );
   });
 };
 

@@ -81,6 +81,54 @@ describe('useCloudConnectStatus', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('should expose autoOpsServiceUrl and autoOpsDocsUrl when AutoOps metadata is present', async () => {
+    const clusterDetails = createMockClusterDetails({
+      services: {
+        auto_ops: {
+          enabled: true,
+          metadata: {
+            service_url: 'https://cloud.elastic.co/performance/abc123',
+            documentation_url: 'https://www.elastic.co/docs/current/en/autoops',
+          },
+        },
+      },
+    });
+    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const http = createMockHttp(mockGet);
+    const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
+
+    const { result } = renderHook(() => useCloudConnectStatus());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isCloudConnectAutoopsEnabled).toBe(true);
+    expect(result.current.autoOpsServiceUrl).toBe('https://cloud.elastic.co/performance/abc123');
+    expect(result.current.autoOpsDocsUrl).toBe('https://www.elastic.co/docs/current/en/autoops');
+  });
+
+  it('should return undefined autoOpsServiceUrl and autoOpsDocsUrl when AutoOps metadata is absent', async () => {
+    const clusterDetails = createMockClusterDetails({
+      services: {
+        auto_ops: { enabled: true },
+      },
+    });
+    const mockGet = jest.fn().mockResolvedValue(clusterDetails);
+    const http = createMockHttp(mockGet);
+    const useCloudConnectStatus = createUseCloudConnectStatusHook({ http });
+
+    const { result } = renderHook(() => useCloudConnectStatus());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.isCloudConnectAutoopsEnabled).toBe(true);
+    expect(result.current.autoOpsServiceUrl).toBeUndefined();
+    expect(result.current.autoOpsDocsUrl).toBeUndefined();
+  });
+
   it('should return error state on errors', async () => {
     const error500 = new Error('Internal server error');
     (error500 as any).response = { status: 500 };
