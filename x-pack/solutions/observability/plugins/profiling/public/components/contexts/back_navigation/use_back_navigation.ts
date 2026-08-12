@@ -36,8 +36,9 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
     return undefined;
   }
 
-  // If the user is on the add data instructions page and has no data, don't show a back button.
-  if (pathname === '/add-data-instructions' && status.profilingSetupStatus?.has_data === false) {
+  // No back button on the add data page unless we positively know there is data. While the setup
+  // status is unresolved the button would otherwise render and then vanish once has_data: false lands.
+  if (pathname === '/add-data-instructions' && status.profilingSetupStatus?.has_data !== true) {
     return undefined;
   }
 
