@@ -39,6 +39,11 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
+export interface CollectionStateRef {
+  groupId: string;
+  title: string;
+}
+
 export interface IntegrationCardItem {
   categories: string[];
   description: string;
@@ -46,7 +51,7 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
-  fromCollection?: { groupId: string; title: string };
+  fromCollection?: CollectionStateRef;
   hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;

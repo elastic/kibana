@@ -31,8 +31,11 @@ export function BackLink({ queryParams, integrationsPath, collectionTitle }: Pro
     };
   }, [queryParams]);
 
-  const appId = returnAppId && returnPath ? returnAppId : 'integrations';
-  const path = returnAppId && returnPath ? returnPath : integrationsPath;
+  // collectionTitle takes full priority: suppress the returnPath/returnAppId override so the
+  // label ("Back to X collection") and the click destination always agree.
+  const useReturnPath = !collectionTitle && returnAppId && returnPath;
+  const appId = useReturnPath ? returnAppId : 'integrations';
+  const path = useReturnPath ? returnPath : integrationsPath;
 
   // Maintain 'Back to integrations' for the AI4SOC integrations page
   const message = collectionTitle

@@ -10,10 +10,11 @@ import React, { createContext, useContext, useRef, useCallback } from 'react';
 
 import type { IntegrationsAppBrowseRouteState } from '../../../types';
 import { useIntraAppState } from '../../../hooks';
+import type { CollectionStateRef } from '../sections/epm/screens/home/card_utils';
 
 interface IntegrationsStateContextValue {
   getFromIntegrations(): string | undefined;
-  getFromCollection(): { groupId: string; title: string } | undefined;
+  getFromCollection(): CollectionStateRef | undefined;
 }
 
 const IntegrationsStateContext = createContext<IntegrationsStateContextValue>({
@@ -25,13 +26,10 @@ export const IntegrationsStateContextProvider: FunctionComponent<{
   children?: React.ReactNode;
 }> = ({ children }) => {
   const maybeState = useIntraAppState<
-    | undefined
-    | (IntegrationsAppBrowseRouteState & { fromCollection?: { groupId: string; title: string } })
+    undefined | (IntegrationsAppBrowseRouteState & { fromCollection?: CollectionStateRef })
   >();
   const fromIntegrationsRef = useRef<undefined | string>(maybeState?.fromIntegrations);
-  const fromCollectionRef = useRef<{ groupId: string; title: string } | undefined>(
-    maybeState?.fromCollection
-  );
+  const fromCollectionRef = useRef<CollectionStateRef | undefined>(maybeState?.fromCollection);
 
   const getFromIntegrations = useCallback(() => {
     return fromIntegrationsRef.current;
