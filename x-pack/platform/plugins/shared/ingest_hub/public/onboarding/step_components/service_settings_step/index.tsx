@@ -250,6 +250,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               }
               isOpen={isOpen}
               closePopover={() => setOpenMenuInstanceId(null)}
+              aria-label={i18n.translate(
+                'xpack.ingestHub.serviceSettingsStep.table.actionsPopover',
+                {
+                  defaultMessage: 'Actions for {name}',
+                  values: { name: inst.name },
+                }
+              )}
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
@@ -471,7 +478,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
           suggestedName={buildDuplicateName(duplicateSourceService.name, allInstanceNames)}
           existingNames={allInstanceNames}
-          globalRegion={globalRegion}
           onAdd={handleDuplicateAdd}
           onCancel={() => setDuplicateSourceInstanceId(null)}
         />

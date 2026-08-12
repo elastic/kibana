@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceVars } from './use_service_settings';
 import type { TransportType } from './field_config';
-import { AWS_REGION_OPTIONS, getRegionFieldName, getRequiredTextFields } from './field_config';
+import { getRequiredTextFields } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
 
@@ -39,8 +38,6 @@ interface DuplicateServiceModalProps {
   suggestedName: string;
   /** All existing instance names — used for collision detection. */
   existingNames: string[];
-  /** Global region — used as the default value for the per-instance region field. */
-  globalRegion: string;
   onAdd: (name: string, fields: Record<string, string>, transport: TransportType | null) => void;
   onCancel: () => void;
 }
@@ -50,7 +47,6 @@ export function DuplicateServiceModal({
   sourceConfig,
   suggestedName,
   existingNames,
-  globalRegion,
   onAdd,
   onCancel,
 }: DuplicateServiceModalProps) {
@@ -59,11 +55,6 @@ export function DuplicateServiceModal({
 
   const [draft, setDraft] = useState<Record<string, string>>({ ...sourceConfig.vars });
   const [draftTransport, setDraftTransport] = useState<TransportType | null>(sourceConfig.trigger);
-
-  // Derived from draftTransport so it stays in sync when the transport toggle changes.
-  const regionFieldName = getRegionFieldName(service, draftTransport);
-  const regionValue = draft[regionFieldName]?.trim() || globalRegion;
-  const selectedRegionOption = regionValue ? [{ label: regionValue }] : [];
 
   const [regionsRows, setRegionsRows] = useState<string[]>(() => {
     const parts = (sourceConfig.vars.regions ?? '')
@@ -171,42 +162,6 @@ export function DuplicateServiceModal({
             data-test-subj="duplicateServiceModal-nameField"
           />
         </EuiFormRow>
-
-        <EuiSpacer size="m" />
-
-        {regionFieldName && (
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.ingestHub.serviceSettingsStep.duplicateModal.region.label',
-              { defaultMessage: 'AWS Region' }
-            )}
-            helpText={i18n.translate(
-              'xpack.ingestHub.serviceSettingsStep.duplicateModal.region.helpText',
-              { defaultMessage: 'Region for this instance. Defaults to the global region.' }
-            )}
-          >
-            <EuiComboBox
-              singleSelection={{ asPlainText: true }}
-              options={AWS_REGION_OPTIONS}
-              selectedOptions={selectedRegionOption}
-              onChange={(selected) =>
-                setDraft((prev) => ({ ...prev, [regionFieldName]: selected[0]?.label ?? '' }))
-              }
-              onCreateOption={(searchValue) =>
-                setDraft((prev) => ({ ...prev, [regionFieldName]: searchValue }))
-              }
-              customOptionText='Use "{searchValue}" as region'
-              placeholder={
-                globalRegion ||
-                i18n.translate(
-                  'xpack.ingestHub.serviceSettingsStep.duplicateModal.region.placeholder',
-                  { defaultMessage: 'Select or enter a region' }
-                )
-              }
-              data-test-subj="duplicateServiceModal-regionField"
-            />
-          </EuiFormRow>
-        )}
 
         <EuiSpacer size="m" />
 
