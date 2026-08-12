@@ -112,8 +112,6 @@ export class AgentBuilderPlugin
 
     registerFeatures({ features: setupDeps.features });
 
-    // Register the per-space Agent Builder settings saved object type so
-    // scoped SO clients (with the hidden type included) can read and write it.
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
