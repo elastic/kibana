@@ -6,7 +6,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-launchpad nav-item-id-launchpad",
     "href": "/jom/app/security/get_started",
-    "iconType": "launch",
+    "iconType": "rocket",
     "id": "launchpad",
     "label": "Launchpad",
     "sections": Array [
@@ -60,7 +60,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-dev_tools nav-item-deepLinkId-undefined nav-item-id-dev_tools",
     "href": "/jom/app/dev_tools",
-    "iconType": "editorCodeBlock",
+    "iconType": "code",
     "id": "dev_tools",
     "label": "Developer Tools",
     "sections": undefined,
@@ -546,7 +546,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-securityGroup:rules nav-item-id-securityGroup:rules",
     "href": "/jom/app/security/rules",
-    "iconType": "securitySignal",
+    "iconType": "radar",
     "id": "securityGroup:rules",
     "label": "Rules",
     "sections": Array [
