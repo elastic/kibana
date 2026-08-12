@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readYarnLock } from './src/yarn_lock';
-export type { YarnLock } from './src/yarn_lock';
-export { validateDependencies } from './src/validate_yarn_lock';
+export { readPnpmLock } from './src/pnpm_lock';
+export type { PnpmLock } from './src/pnpm_lock';
+export { validateDependencies } from './src/validate_lock';
 export { findProductionDependencies } from './src/find_production_dependencies';

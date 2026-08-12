@@ -62,12 +62,12 @@ export const command = {
       const cwd = Path.resolve(REPO_ROOT, normalizedRepoRelativeDir);
 
       if (args.getBooleanValue('quiet')) {
-        await run('yarn', ['run', scriptName, ...scriptArgs], {
+        await run('pnpm', ['run', scriptName, ...scriptArgs], {
           cwd,
           description: `${scriptName} in ${pkg.name}`,
         });
       } else {
-        await spawnStreaming('yarn', ['run', scriptName, ...scriptArgs], {
+        await spawnStreaming('pnpm', ['run', scriptName, ...scriptArgs], {
           cwd: cwd,
           logPrefix: '    ',
         });

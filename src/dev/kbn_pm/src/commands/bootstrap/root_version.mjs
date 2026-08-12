@@ -7,20 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { createFailError } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '../../lib/paths.mjs';
 
-import type { InstallScriptsConfig } from './types';
-
-export function loadConfig(): InstallScriptsConfig {
-  const configPath = Path.resolve(__dirname, '../config.json');
-
-  try {
-    const content = Fs.readFileSync(configPath, 'utf8');
-    return JSON.parse(content) as InstallScriptsConfig;
-  } catch (error) {
-    throw createFailError(`Failed to load configuration file: ${configPath}`);
-  }
+/** @returns {Promise<string>} */
+export async function getRootVersion() {
+  const json = JSON.parse(await Fsp.readFile(Path.resolve(REPO_ROOT, 'package.json'), 'utf8'));
+  return json.version;
 }

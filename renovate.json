@@ -505,6 +505,14 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "markdown AST types",
+      "matchDepNames": ["@types/mdast", "@types/unist"],
+      "reviewers": ["team:kibana-cases", "team:security-solution"],
+      "matchBaseBranches": ["main"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "use-resize-observer",
       "matchDepNames": ["use-resize-observer"],
       "reviewers": ["team:kibana-presentation", "team:security-solution"],
@@ -1355,8 +1363,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/yarn.lock utils",
-      "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
+      "groupName": "package.json/pnpm-lock.yaml utils",
+      "matchDepNames": ["sort-package-json"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2206,7 +2214,13 @@
     },
     {
       "groupName": "esql-js",
-      "matchDepNames": ["@elastic/esql"],
+      "matchDepNames": [
+        "@elastic/esql",
+        "@elastic/esql-grammar",
+        "@elastic/esql-promql-grammar",
+        "@elastic/esql-types",
+        "@elastic/pretty-printer"
+      ],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
