@@ -24,7 +24,7 @@ import {
   NAV_STREAMS,
 } from './components/app_chrome/translations';
 import type { PndClientConfig, PndStartDependencies } from './types';
-import { BriefPage } from './pages/brief';
+import { ConversationsPage } from './pages/conversations';
 import { ChatsPage } from './pages/chats';
 import { SettingsPage } from './pages/settings';
 import { WatchesPage } from './pages/watches';
@@ -67,7 +67,7 @@ export const renderApp = ({ coreStart, startDeps, params, config: _config }: Ren
             <Router history={params.history}>
               <AppChromeLayout>
                 <Routes>
-                  <Route path="/" exact component={BriefPage} />
+                  <Route path="/" exact component={ConversationsPage} />
                   <Route path="/chats" component={ChatsPage} />
                   <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
                   <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />

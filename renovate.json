@@ -7,7 +7,7 @@
   ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
-  "baseBranches": ["main", "9.4", "9.3", "8.19"],
+  "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -120,7 +121,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/appex-ai-infra dependencies",
+      "groupName": "@elastic/search-ml-ux dependencies",
       "matchDepNames": [
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
@@ -140,7 +141,7 @@
         "keyv",
         "@types/cache-manager-fs-hash"
       ],
-      "reviewers": ["team:appex-ai-infra"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:AI Infra"],
       "enabled": true,
@@ -148,7 +149,7 @@
     },
     {
       "groupName": "@elastic/nightshift-context-and-research-team dependencies",
-      "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
+      "matchDepNames": ["simple-statistics"],
       "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:nightshift-context-and-research"],
@@ -452,7 +453,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/ml-ui dependencies",
+      "groupName": "@elastic/search-ml-ux dependencies",
       "matchDepNames": [
         "@types/async",
         "@types/he",
@@ -461,7 +462,7 @@
         "icalendar",
         "react-popper-tooltip"
       ],
-      "reviewers": ["team:ml-ui"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ML", ":ml"],
       "enabled": true,
@@ -953,14 +954,14 @@
         "eslint-plugin-ban",
         "eslint-plugin-cypress",
         "eslint-plugin-depend",
-        "eslint-plugin-eslint-comments",
+        "@eslint-community/eslint-plugin-eslint-comments",
         "eslint-plugin-formatjs",
         "eslint-plugin-import",
         "eslint-plugin-jest",
         "eslint-plugin-jsx-a11y",
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
-        "eslint-plugin-node",
+        "eslint-plugin-n",
         "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
@@ -1275,7 +1276,7 @@
         "@elastic/search-ui-app-search-connector",
         "@elastic/search-ui-engines-connector"
       ],
-      "reviewers": ["team:search-kibana"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
@@ -1284,7 +1285,7 @@
     {
       "groupName": "search-ui ai dependency",
       "matchDepNames": ["ai", "@ai-sdk/langchain"],
-      "reviewers": ["team:search-kibana"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
@@ -1293,7 +1294,7 @@
     {
       "groupName": "search-ui kea dependency",
       "matchDepNames": ["kea"],
-      "reviewers": ["team:search-kibana"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search", "effort:high", "upgrade-risk:medium"],
       "minimumReleaseAge": "14 days",
@@ -1302,7 +1303,7 @@
     {
       "groupName": "search-ui swr dependency",
       "matchDepNames": ["swr"],
-      "reviewers": ["team:search-kibana"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
@@ -1311,7 +1312,7 @@
     {
       "groupName": "workplace_ai gen-ai dependencies",
       "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
-      "reviewers": ["team:search-kibana"],
+      "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
       "minimumReleaseAge": "14 days",
@@ -1881,15 +1882,6 @@
       "enabled": true
     },
     {
-      "groupName": "@kayahr/text-encoding",
-      "matchDepNames": ["@kayahr/text-encoding"],
-      "reviewers": ["team:kibana-security"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "uuid",
       "matchDepNames": ["uuid"],
       "reviewers": ["team:kibana-security"],
@@ -2091,7 +2083,7 @@
         "reselect-v4"
       ],
       "reviewers": [
-        "team:search-kibana",
+        "team:search-ml-ux",
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:kibana-management",
@@ -2296,7 +2288,7 @@
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [
-        "team:appex-ai-infra",
+        "team:search-ml-ux",
         "team:kibana-core",
         "team:kibana-security",
         "team:stack-monitoring"
@@ -2394,8 +2386,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "express",
-      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
+      "groupName": "zod-to-json-schema",
+      "matchDepNames": ["zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],

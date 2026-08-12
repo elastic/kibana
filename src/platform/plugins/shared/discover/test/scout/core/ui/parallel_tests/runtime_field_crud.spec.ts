@@ -28,7 +28,7 @@ spaceTest.describe('Discover runtime field editor CRUD', { tag: '@local-stateful
     const { discover, unifiedFieldList } = pageObjects;
     const fieldName = '_runtimefield';
 
-    await discover.createRuntimeField(fieldName, RUNTIME_FIELD_SCRIPT);
+    await discover.createRuntimeField({ fieldName, script: RUNTIME_FIELD_SCRIPT });
     await unifiedFieldList.searchField(fieldName);
 
     await expect(unifiedFieldList.getAvailableField(fieldName)).toBeVisible();
@@ -39,7 +39,7 @@ spaceTest.describe('Discover runtime field editor CRUD', { tag: '@local-stateful
     const fieldName = '_runtimefield_before_edit';
     const newFieldName = '_runtimefield_after_edit';
 
-    await discover.createRuntimeField(fieldName, RUNTIME_FIELD_SCRIPT);
+    await discover.createRuntimeField({ fieldName, script: RUNTIME_FIELD_SCRIPT });
     await unifiedFieldList.openFieldEditor(fieldName);
     await discover.renameRuntimeField(newFieldName);
 
@@ -54,7 +54,7 @@ spaceTest.describe('Discover runtime field editor CRUD', { tag: '@local-stateful
     const fieldName = '_runtimefield_saved_search';
     const savedSearchName = `Saved Search with runtime field ${Date.now()}`;
 
-    await discover.createRuntimeField(fieldName, RUNTIME_FIELD_SCRIPT);
+    await discover.createRuntimeField({ fieldName, script: RUNTIME_FIELD_SCRIPT });
     await unifiedFieldList.clickFieldListItemAdd(fieldName);
     expect(await discover.getDocHeader()).toContain(fieldName);
 
@@ -71,7 +71,7 @@ spaceTest.describe('Discover runtime field editor CRUD', { tag: '@local-stateful
     const { discover, unifiedFieldList } = pageObjects;
     const fieldName = '_runtimefield_to_delete';
 
-    await discover.createRuntimeField(fieldName, RUNTIME_FIELD_SCRIPT);
+    await discover.createRuntimeField({ fieldName, script: RUNTIME_FIELD_SCRIPT });
     await discover.deleteRuntimeField(fieldName);
 
     await unifiedFieldList.searchField(fieldName);
@@ -82,7 +82,7 @@ spaceTest.describe('Discover runtime field editor CRUD', { tag: '@local-stateful
     const { discover, docViewer } = pageObjects;
     const fieldName = '_runtimefield_doc_view';
 
-    await discover.createRuntimeField(fieldName, RUNTIME_FIELD_SCRIPT);
+    await discover.createRuntimeField({ fieldName, script: RUNTIME_FIELD_SCRIPT });
     await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
     await docViewer.openTab('doc_view_table');
 
