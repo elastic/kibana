@@ -100,10 +100,13 @@ const TabActions = ({ actions }: { actions: AppHeaderTabActions }) => {
   );
 };
 
-// A tab's actions button stays mounted and animates its width open/closed as the
-// tab is selected/deselected, rather than snapping in — which shifts every tab to
-// its right. The label→actions gap is collapsed along with the button so a
-// deselected tab leaves no residual whitespace (see `tabWithActionsStyles`).
+// The actions button stays mounted and always occupies its slot in layout, so
+// selecting/deselecting a tab never reflows the strip. Only `opacity` animates it in
+// and out — a compositor property, so the fade stays smooth even while a tab switch
+// blocks the main thread rendering the next view. A layout animation (width/margin)
+// can't: it needs the main thread every frame, gets starved by that work, and snaps.
+// The empty slot a deselected tab leaves is hidden by sliding the trailing tabs over
+// it — see AppTabs.
 const TabActionsSlot = ({
   actions,
   isSelected,
@@ -115,7 +118,7 @@ const TabActionsSlot = ({
   const collapseRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    // Keep the collapsed actions out of the tab order and the a11y tree.
+    // Keep the hidden actions out of the tab order and the a11y tree.
     collapseRef.current?.toggleAttribute('inert', !isSelected);
   }, [isSelected]);
 
@@ -124,59 +127,37 @@ const TabActionsSlot = ({
       ref={collapseRef}
       css={css`
         display: flex;
-        align-items: center;
-        overflow: hidden;
-        // Animate a concrete width — the xs actions button is euiTheme.size.l square
-        // — rather than the grid 0fr↔1fr trick. In an auto-width (content-sized)
-        // container a single fr track interpolates non-linearly and rushes to zero at
-        // the very end; a fixed px length interpolates linearly, so the collapse stays
-        // smooth all the way to the finish. The gap rides along as a margin (no padding
-        // floor) so it animates out cleanly too.
-        inline-size: ${isSelected ? euiTheme.size.l : '0px'};
-        margin-inline-start: ${isSelected ? euiTheme.size.s : '0px'};
         opacity: ${isSelected ? 1 : 0};
-        transition: inline-size ${euiTheme.animation.fast} ease,
-          margin-inline-start ${euiTheme.animation.fast} ease,
-          opacity ${euiTheme.animation.fast} ease;
+        transition: opacity ${euiTheme.animation.fast} ease;
         @media (prefers-reduced-motion: reduce) {
           transition: none;
         }
       `}
     >
-      <span
-        css={css`
-          flex: 0 0 auto;
-        `}
-      >
-        <TabActions actions={actions} />
-      </span>
+      <TabActions actions={actions} />
     </span>
   );
 };
 
-const TabAppend = ({ tab }: { tab: AppHeaderTab }) => {
+const TabAppend = ({ tab, actions }: { tab: AppHeaderTab; actions: AppHeaderTabActions }) => {
   const { euiTheme } = useEuiTheme();
   const badge = renderTabBadge(tab.badge);
+  const slot = <TabActionsSlot actions={actions} isSelected={Boolean(tab.isSelected)} />;
+
+  if (badge === undefined) {
+    return slot;
+  }
 
   return (
     <span
       css={css`
         display: flex;
         align-items: center;
+        gap: ${euiTheme.size.xs};
       `}
     >
-      {badge !== undefined && (
-        <span
-          css={css`
-            margin-inline-start: ${euiTheme.size.s};
-          `}
-        >
-          {badge}
-        </span>
-      )}
-      {tab.actions !== undefined && (
-        <TabActionsSlot actions={tab.actions} isSelected={Boolean(tab.isSelected)} />
-      )}
+      {badge}
+      {slot}
     </span>
   );
 };
@@ -187,44 +168,68 @@ const renderTabAppend = (tab: AppHeaderTab) => {
     return renderTabBadge(tab.badge);
   }
 
-  return <TabAppend tab={tab} />;
+  return <TabAppend tab={tab} actions={tab.actions} />;
 };
 
-// Collapse EuiTab's flex `gap` for tabs that carry actions; the label→actions
-// spacing is re-added inside TabActionsSlot so it animates away with the button,
-// leaving no residual gap when deselected. `&&` raises specificity above EuiTab's
-// own emotion styles.
-const tabWithActionsStyles = css`
-  && {
-    gap: 0;
-  }
-`;
-
 export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!tabs?.length) return null;
+
+  // An action tab always reserves room for its actions button (the xs button,
+  // euiTheme.size.l, plus the label→button gap, euiTheme.size.s) so the strip never
+  // reflows on selection. While such a tab is deselected its button is hidden, so
+  // every tab after it slides left by that reserved width to close the gap. The slide
+  // is a `transform` (compositor), so it stays smooth even while a tab switch blocks
+  // the main thread — which is exactly why a width/layout animation couldn't. Assumes
+  // an actions-only slot (no badge), the only current usage.
+  const reservedWidth = `(${euiTheme.size.l} + ${euiTheme.size.s})`;
+
+  let actionTabsBefore = 0; // action tabs preceding the current tab
+  let hiddenActionTabsBefore = 0; // ...of those, how many are deselected (button hidden)
 
   return (
     <EuiTabs size="m" bottomBorder={false}>
-      {tabs.map((tab) => (
-        <EuiTab
-          key={tab.id}
-          isSelected={tab.isSelected}
-          onClick={tab.onClick}
-          href={tab.href}
-          data-test-subj={tab['data-test-subj']}
-          disabled={tab.disabled}
-          append={renderTabAppend(tab)}
-          css={tab.actions !== undefined ? tabWithActionsStyles : undefined}
-        >
-          {tab.toolTipContent !== undefined ? (
-            <EuiToolTip content={tab.toolTipContent} position="bottom">
-              <span tabIndex={0}>{tab.label}</span>
-            </EuiToolTip>
-          ) : (
-            tab.label
-          )}
-        </EuiTab>
-      ))}
+      {tabs.map((tab) => {
+        const isTrailing = actionTabsBefore > 0;
+        const shift = hiddenActionTabsBefore;
+
+        if (tab.actions !== undefined) {
+          actionTabsBefore += 1;
+          if (!tab.isSelected) hiddenActionTabsBefore += 1;
+        }
+
+        return (
+          <EuiTab
+            key={tab.id}
+            isSelected={tab.isSelected}
+            onClick={tab.onClick}
+            href={tab.href}
+            data-test-subj={tab['data-test-subj']}
+            disabled={tab.disabled}
+            append={renderTabAppend(tab)}
+            css={
+              isTrailing
+                ? css`
+                    transform: translateX(calc(${reservedWidth} * ${-shift}));
+                    transition: transform ${euiTheme.animation.fast} ease;
+                    @media (prefers-reduced-motion: reduce) {
+                      transition: none;
+                    }
+                  `
+                : undefined
+            }
+          >
+            {tab.toolTipContent !== undefined ? (
+              <EuiToolTip content={tab.toolTipContent} position="bottom">
+                <span tabIndex={0}>{tab.label}</span>
+              </EuiToolTip>
+            ) : (
+              tab.label
+            )}
+          </EuiTab>
+        );
+      })}
     </EuiTabs>
   );
 });

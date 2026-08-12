@@ -205,10 +205,6 @@ function WiredStreamDetailManagementContent({
             label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Data lifecycle',
             }),
-            toolTipContent: i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-              defaultMessage:
-                'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-            }),
             'data-test-subj': 'retentionTab',
             actions: buildLifecycleTabActions({
               definition,
@@ -265,12 +261,6 @@ function WiredStreamDetailManagementContent({
             label: i18n.translate('xpack.streams.streamDetailView.qualityTab', {
               defaultMessage: 'Data quality',
             }),
-            toolTipContent: i18n.translate(
-              'xpack.streams.managementTab.dataQuality.wired.tooltip',
-              {
-                defaultMessage: "View details about this stream's data quality",
-              }
-            ),
             'data-test-subj': 'dataQualityTab',
           },
         }
