@@ -21,7 +21,7 @@ import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
+import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
@@ -84,7 +84,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
         request,
         PrivilegeChecker
       ).canWrite('alerts');
-    registerStepDefinitions(
+    registerCreateAlertEventStep(
       workflowsExtensionsSetup,
       getAlertEventsClient,
       checkAlertWritePrivilege
