@@ -583,7 +583,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                   total_memory_size: 53_000_000,
                   total_bytes_captured: 52_000_000,
                   success_ratio: 52_000_000 / 53_000_000,
+                }
+              : {}),
+            ...(details.parameters?.type === 'kernel'
+              ? {
                   dump_executed_from_driver: this.randomChoice([true, false]),
+                  user_space_included: this.randomChoice([true, false]),
                 }
               : {}),
           },
