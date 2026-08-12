@@ -24,8 +24,8 @@ jest.mock('../../state', () => ({
 const createState = (
   filteredProjectsCount: number,
   totalProjectsCount: number
-): Pick<ProjectPickerState, 'selectedProjects' | 'availableProjects'> => ({
-  selectedProjects: Array.from({ length: filteredProjectsCount }, (_, index) => `p${index}`),
+): Pick<ProjectPickerState, 'selectedProjectIds' | 'availableProjects'> => ({
+  selectedProjectIds: Array.from({ length: filteredProjectsCount }, (_, index) => `p${index}`),
   availableProjects: new Map(
     Array.from({ length: totalProjectsCount }, (_, index) => [
       `p${index}`,

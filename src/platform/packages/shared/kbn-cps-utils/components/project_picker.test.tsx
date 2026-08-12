@@ -18,6 +18,7 @@ import { of, Subject } from 'rxjs';
 import { ProjectPicker, type ProjectPickerProps } from './project_picker';
 import { ProjectPickerContent } from './project_picker_content';
 import type { CPSProject, ProjectsData } from '../types';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 const TOUR_STORAGE_KEY = 'cps:projectPicker:tourShown';
 
@@ -229,24 +230,7 @@ describe('ProjectPicker', () => {
 
 describe('ProjectPickerContent', () => {
   const mockFetchProjectsByRouting = jest.fn().mockResolvedValue(mockProjectsData);
-  const mockProjects = {
-    originProject: {
-      _id: 'origin',
-      _alias: 'Origin CPSProject',
-      _type: 'observability',
-      _organisation: 'test-org',
-    },
-    linkedProjects: [
-      {
-        _id: 'linked1',
-        _alias: 'Linked CPSProject 1',
-        _type: 'security',
-        _organisation: 'test-org',
-      },
-    ],
-    isLoading: false,
-    error: null,
-  };
+  const mockProjectRouting: ProjectRouting = '_id:*';
 
   it('can hide project routing controls and show only the project list', async () => {
     await act(async () => {
@@ -254,7 +238,7 @@ describe('ProjectPickerContent', () => {
         <I18nProvider>
           <EuiThemeProvider>
             <ProjectPickerContent
-              projects={mockProjects}
+              projectRouting={mockProjectRouting}
               fetchProjectsByRouting={mockFetchProjectsByRouting}
               controlsState="hidden"
             />
@@ -268,15 +252,25 @@ describe('ProjectPickerContent', () => {
   });
 
   it('can render a linked-only project list', async () => {
+    mockFetchProjectsByRouting.mockImplementation((projectRouting) => {
+      return new Promise((resolve) => {
+        if (projectRouting === PROJECT_ROUTING.ALL) {
+          resolve(mockProjectsData);
+        }
+
+        resolve({
+          origin: null,
+          linkedProjects,
+        });
+      });
+    });
+
     await act(async () => {
       render(
         <I18nProvider>
           <EuiThemeProvider>
             <ProjectPickerContent
-              projects={{
-                ...mockProjects,
-                originProject: null,
-              }}
+              projectRouting={mockProjectRouting}
               fetchProjectsByRouting={mockFetchProjectsByRouting}
               controlsState="hidden"
             />
@@ -289,17 +283,20 @@ describe('ProjectPickerContent', () => {
   });
 
   it('shows loading state without projects', async () => {
+    mockFetchProjectsByRouting.mockImplementation((projectRouting) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(mockProjectsData);
+        }, 1000);
+      });
+    });
+
     await act(async () => {
       render(
         <I18nProvider>
           <EuiThemeProvider>
             <ProjectPickerContent
-              projects={{
-                originProject: null,
-                linkedProjects: [],
-                isLoading: true,
-                error: null,
-              }}
+              projectRouting={mockProjectRouting}
               fetchProjectsByRouting={mockFetchProjectsByRouting}
               controlsState="hidden"
             />

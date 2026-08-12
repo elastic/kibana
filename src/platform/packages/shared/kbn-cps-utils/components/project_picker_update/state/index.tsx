@@ -24,13 +24,12 @@ import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
 import {
   collectProjectIdsFromProjectsData,
-  getEnabledFilterExpressions,
+  getEnabledFiltersIdentity,
   intersectServerMatchIds,
 } from '../utils/state_utils';
 import { type CPSProject, type ProjectsData } from '../../../types';
 import {
   createFilterExpressionsMap,
-  encodeFilterOnlyRouting,
   parseDefaultProjectRouting,
   type ProjectRoutingStrategy,
 } from '../utils';
@@ -145,13 +144,6 @@ const createInitialPickerState = ({
   };
 };
 
-/**
- * Stable serialization of enabled filter expressions for effect deps / race tokens.
- */
-const getEnabledFiltersIdentity = (state: ProjectPickerState): string => {
-  return encodeFilterOnlyRouting(getEnabledFilterExpressions(state.filterExpressions)) ?? '';
-};
-
 export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
@@ -202,7 +194,7 @@ export const ProjectPickerStateProvider = ({
     store.actions._setControlsState({ controlsState });
   }, [controlsState, store.actions]);
 
-  const enabledFiltersIdentity = getEnabledFiltersIdentity(store.state);
+  const enabledFiltersIdentity = getEnabledFiltersIdentity(store.state.filterExpressions);
 
   const runFilterSearch = useCallback(
     async (filterIdentity: string, availableProjectsMap: Map<string, CPSProject>) => {

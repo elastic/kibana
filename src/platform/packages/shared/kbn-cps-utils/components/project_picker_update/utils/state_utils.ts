@@ -11,6 +11,7 @@ import type { CPSProject, ProjectsData } from '../../../types';
 import type { FilterEntry } from '../state/reducers';
 import type { FilterExpressionDraft, FilterExpressionValue } from './filter_input_codec';
 import { getFilterExpressionLookupKey, isValidFilterExpression } from './filter_input_codec';
+import { encodeFilterOnlyRouting } from './project_routing_codec';
 
 export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
 
@@ -96,4 +97,12 @@ export const getEnabledFilterExpressions = (
     }
   }
   return enabled;
+};
+
+/**
+ * Serialization of a filter map's enabled expressions, used to detect whether the
+ * effective filter (and therefore any server-side filter-search results) actually changed.
+ */
+export const getEnabledFiltersIdentity = (filterExpressions: Map<string, FilterEntry>): string => {
+  return encodeFilterOnlyRouting(getEnabledFilterExpressions(filterExpressions)) ?? '';
 };

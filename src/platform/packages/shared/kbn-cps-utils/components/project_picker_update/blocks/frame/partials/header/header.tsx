@@ -66,11 +66,13 @@ const getContextMenuItems = (
 ];
 
 interface ProjectPickerFrameHeaderProps {
+  customHeaderText?: React.ReactNode;
   customContextMenuItems?: HeaderContextMenuItemProps[];
 }
 
 export function ProjectPickerFrameHeader({
   customContextMenuItems,
+  customHeaderText,
 }: ProjectPickerFrameHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   const actions = useProjectPickerActions();
@@ -91,13 +93,15 @@ export function ProjectPickerFrameHeader({
   return (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow>
-        <EuiTitle size="xxs">
-          <h3>
-            {i18n.translate('cpsUtils.projectPicker.frameHeader.title', {
-              defaultMessage: 'Cross-project search',
-            })}
-          </h3>
-        </EuiTitle>
+        {customHeaderText ?? (
+          <EuiTitle size="xxs">
+            <h3>
+              {i18n.translate('cpsUtils.projectPicker.frameHeader.title', {
+                defaultMessage: 'Cross-project search',
+              })}
+            </h3>
+          </EuiTitle>
+        )}
       </EuiFlexItem>
       {state.controlsState === 'hidden' ? null : (
         <EuiFlexItem grow={false}>

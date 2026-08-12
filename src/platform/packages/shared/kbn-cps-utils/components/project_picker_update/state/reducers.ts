@@ -22,6 +22,7 @@ import {
   parseDefaultProjectRouting,
   PROJECT_SELECTION_DIMENSION,
 } from '../utils';
+import { getEnabledFiltersIdentity } from '../utils/state_utils';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 
 export interface FilterEntry {
@@ -102,19 +103,28 @@ export function createStoreReducers() {
               availableProjectIds
             );
 
+      const filterExpressions = createFilterExpressionsMap(parsed.filterExpressions);
+
+      // filteredProjectIds is only valid for the filter set that produced it, and nothing
+      // re-fetches it unless the enabled-filter identity changes — so only reset it here when
+      // the filter set is actually changing, not on every rehydration.
+      const filtersUnchanged =
+        getEnabledFiltersIdentity(_state.filterExpressions) ===
+        getEnabledFiltersIdentity(filterExpressions);
+
       return {
         ..._state,
         availableProjects: payload.availableProjects,
         ...(payload.defaultProjectRouting !== undefined
           ? { defaultProjectRouting: payload.defaultProjectRouting }
           : {}),
-        filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
+        filterExpressions,
         excludedOverrides: [...parsed.excludedOverrides],
         // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
         filteringDimensions: [],
-        filteredProjectIds: [],
-        isFilterSearchLoading: false,
-        filterSearchError: null,
+        ...(filtersUnchanged
+          ? {}
+          : { filteredProjectIds: [], isFilterSearchLoading: false, filterSearchError: null }),
         selectedProjectIds: [],
         visibleProjectIds: [],
         currentProjectRouting: '',

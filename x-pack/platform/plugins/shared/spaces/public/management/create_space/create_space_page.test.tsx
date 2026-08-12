@@ -475,7 +475,7 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const mockFetchProjects = jest.fn().mockResolvedValue({
+    const mockProjectRoutingFetchResult = {
       origin: {
         _alias: 'local_project',
         _id: 'abcde1234567890',
@@ -492,7 +492,9 @@ describe('ManageSpacePage', () => {
           env: 'local',
         },
       ],
-    });
+    };
+
+    const mockFetchProjects = jest.fn().mockResolvedValue(mockProjectRoutingFetchResult);
 
     renderWithIntl(
       <KibanaContextProvider
@@ -548,7 +550,11 @@ describe('ManageSpacePage', () => {
     await updateSolutionView('oblt');
 
     // Click "This project" (sets routing to _alias:_origin)
-    await userEvent.click(screen.getByRole('button', { name: /this project/i }));
+    await userEvent.click(
+      screen.getByTestId(
+        `projectPickerListItemSwitch-${mockProjectRoutingFetchResult.linkedProjects[0]._id}`
+      )
+    );
 
     await userEvent.click(screen.getByTestId('save-space-button'));
 
@@ -562,7 +568,7 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
-      projectRouting: '_alias:_origin',
+      projectRouting: '_alias:* AND _id:* AND NOT _id:badce1234567890',
     });
   }, 10000);
 
