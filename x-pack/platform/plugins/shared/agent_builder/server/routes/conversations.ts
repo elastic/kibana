@@ -247,6 +247,7 @@ export function registerConversationRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: 256,
                 meta: {
                   description:
                     'The unique identifier of the conversation whose access control to retrieve.',
@@ -298,6 +299,7 @@ export function registerConversationRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
+                maxLength: 256,
                 meta: {
                   description:
                     'The unique identifier of the conversation whose access control to update.',
