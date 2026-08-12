@@ -45,8 +45,6 @@ const makeError = (
     endColumn: 80,
     message: 'test error',
     hoverMessage: null,
-    yamlPath: [],
-    key: null,
   } satisfies Extract<YamlValidationResult, { owner: 'yaml' }>);
 
 // ── getStepSeverity ───────────────────────────────────────────────────────────
