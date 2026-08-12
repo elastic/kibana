@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isPlainObject } from 'lodash';
 import type { Query } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
 import { dump, load } from 'js-yaml';
@@ -30,16 +31,16 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   if (!Array.isArray(artifacts)) return undefined;
 
   const parsedArtifacts = artifacts.flatMap((artifact) => {
-    if (!artifact || typeof artifact !== 'object' || Array.isArray(artifact)) {
+    if (!isPlainObject(artifact)) {
       return [];
     }
 
-    const { id, type, value } = artifact as Record<string, unknown>;
-    if (typeof id !== 'string' || typeof type !== 'string' || typeof value !== 'string') {
+    const { id, type, data } = artifact as Record<string, unknown>;
+    if (typeof id !== 'string' || typeof type !== 'string' || !isPlainObject(data)) {
       return [];
     }
 
-    return [{ id, type, value }];
+    return [{ id, type, data: data as Record<string, any> }];
   });
 
   return parsedArtifacts.length ? parsedArtifacts : undefined;
@@ -62,7 +63,7 @@ interface YamlRuleObject {
   no_data_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
-  artifacts?: Array<{ id: string; type: string; value: string }>;
+  artifacts?: Array<{ id: string; type: string; data: Record<string, any> }>;
 }
 
 const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
