@@ -9,7 +9,7 @@ description: Review Scout UI/API tests (including Scout test migrations) for bes
 
 Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
-**Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<plugin>/.agents/skills/security-scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
+**Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<security_solution plugin>/.agents/skills/scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
 
 Important: Do not post GitHub comments unless explicitly stated.
 
@@ -121,7 +121,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
-- **EUI Component Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors or legacy `Eui*Wrapper` classes. An existing wrapper is acceptable only when no equivalent Component Object exists. Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `scout-ui-testing` skill for details.
+- **EUI Test Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors. Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
 
 ## Output
 

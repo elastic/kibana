@@ -9,7 +9,7 @@
 - [Parallelization](#parallelization)
 - [Fixtures](#fixtures)
 - [Package Organization](#package-organization)
-- [EUI Component Objects](#eui-component-objects)
+- [EUI Test Helpers](#eui-test-helpers)
 
 ## Testing Layer Priority
 
@@ -195,7 +195,7 @@ export const test = baseTest.extend<{}, MyWorkerFixtures>({
 
 Put shared code in `@kbn/scout`, security-specific code in `@kbn/scout-security`.
 
-## EUI Component Objects
+## EUI Test Helpers
 
 For EUI components that are non-trivial to drive, prefer the published `@elastic/eui-test-helpers` Component Objects exposed pre-bound to the page through `page.components.*`:
 
@@ -205,7 +205,7 @@ await page.components.comboBox('fieldSelectorComboBox').setSelectedOptions(['hos
 
 Available factories include `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, and `page.components.globalToastList()`. For simple, native-like components such as text fields and checkboxes, use plain Playwright locators.
 
-Existing `Eui*Wrapper` classes exported by `@kbn/scout` are compatibility fallbacks only when no equivalent Component Object exists. Do not add or extend wrappers in a test suite.
+Use locators when no equivalent EUI test helpers exist. Do not add or extend component objects in a test suite.
 
 ## Kibana Component Interaction Patterns
 
