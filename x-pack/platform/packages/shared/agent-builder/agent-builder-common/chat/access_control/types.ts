@@ -46,17 +46,12 @@ export const normalizeConversationAccessControl = (
 
 export const CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES = 100;
 
-/**
- * Bounds the stable user id carried by an entry. Entries have no `name`, so the id
- * is the only free-form field and the only one that needs a length cap.
- */
 export const CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH = 1024;
 
 const CONVERSATION_ACCESS_CONTROL_ROLES: readonly string[] = Object.values(
   ConversationAccessControlRole
 );
 
-/** Narrows untrusted route input to a known conversation access-control role. */
 export const isConversationAccessControlRole = (
   value: unknown
 ): value is ConversationAccessControlRole =>

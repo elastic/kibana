@@ -53,7 +53,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
     role: schema.oneOf([schema.literal(ConversationAccessControlRole.Member)], {
       meta: {
         description:
-          'Role granted to the principal. `member` is the only role: members can read and continue the conversation, but never rename, delete, or re-share it.',
+          'Role granted to the principal. `member` is the only role: it grants read and converse access to the conversation.',
       },
     }),
   }),
