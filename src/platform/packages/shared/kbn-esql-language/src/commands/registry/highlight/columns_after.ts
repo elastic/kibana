@@ -6,23 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import uniqBy from 'lodash/uniqBy';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand } from '@elastic/esql/types';
+import type { ESQLAstHighlightCommand, ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
-
-export const HIGHLIGHT_CONTENT_COLUMN = 'highlight_content';
+import { getHighlightColumnNames } from './utils';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
-  return uniqBy(
-    [
-      ...previousColumns,
-      {
-        name: HIGHLIGHT_CONTENT_COLUMN,
-        type: 'keyword' as const,
-        userDefined: false,
-      } as ESQLFieldWithMetadata,
-    ],
-    'name'
-  );
+  const highlightCommand = command as ESQLAstHighlightCommand;
+  const highlightColumnNames = getHighlightColumnNames(highlightCommand);
+
+  // Build a map from previous columns so we can replace on collision.
+  // ES replaces same-named columns: empty prefix (`prefix = ""`) overwrites the source column.
+  const columnMap = new Map<string, ESQLColumnData>(previousColumns.map((c) => [c.name, c]));
+
+  for (const name of highlightColumnNames) {
+    columnMap.set(name, {
+      name,
+      type: 'keyword' as const,
+      userDefined: false,
+    } as ESQLFieldWithMetadata);
+  }
+
+  return [...columnMap.values()];
 };
