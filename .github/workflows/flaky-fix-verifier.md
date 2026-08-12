@@ -30,12 +30,9 @@ permissions:
 # Activation rules:
 # - Manual runs always activate.
 # - `kickoff`: a PR is labeled `flaky-test-fixer`. Applying that label requires
-#   write access, so this is the gate — the PR author is not checked.
-#   The `labeled` event alone is the trigger: labels can't be attached atomically
-#   at PR creation, so the fixer's label always fires it. Also activating on
-#   `opened` (when the payload happens to already carry the label) would double
-#   up with the `labeled` run in the same `verify` lane and burn a full agent
-#   run on a no-op.
+#   write access, so this is the gate — the PR author is not checked. `labeled`
+#   only: also matching `opened` used to duplicate kickoff when the payload
+#   already carried the label.
 #   NOTE: not checking the author is a temporary measure for testing; tighten it
 #   back (e.g. to the `kibanamachine` fixer identity) once the flow is validated.
 # - `process_results`: the Flaky Test Runner posts its `## Flaky Test Runner Stats`
