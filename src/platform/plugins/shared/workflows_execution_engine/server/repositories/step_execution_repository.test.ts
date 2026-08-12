@@ -38,6 +38,7 @@ describe('StepExecutionRepository', () => {
         items: stepExecutions.map((stepExecution) => ({
           operation: 'upsert',
           document: stepExecution,
+          retryOnConflict: 3,
         })),
         refresh: false,
       });
@@ -65,7 +66,7 @@ describe('StepExecutionRepository', () => {
       await underTest.bulkUpsert(stepExecutions as any);
 
       expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith({
-        items: [{ operation: 'upsert', document: stepExecutions[0] }],
+        items: [{ operation: 'upsert', document: stepExecutions[0], retryOnConflict: 3 }],
         refresh: false,
       });
     });
@@ -85,7 +86,7 @@ describe('StepExecutionRepository', () => {
       await underTest.bulkUpsert(stepExecutions as any);
 
       expect(stepExecutionsDataClient.bulk).toHaveBeenCalledWith({
-        items: [{ operation: 'upsert', document: stepExecutions[0] }],
+        items: [{ operation: 'upsert', document: stepExecutions[0], retryOnConflict: 3 }],
         refresh: false,
       });
     });

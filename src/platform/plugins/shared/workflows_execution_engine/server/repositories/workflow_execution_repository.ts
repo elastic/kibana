@@ -16,6 +16,17 @@ import {
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
 
+/**
+ * An execution document is written by several independent writers while the run is in flight:
+ * the run's own periodic state flush, inline flushes from the execution loop, and out-of-band
+ * writers such as the concurrency manager (`cancel-in-progress`), the cancel API and task
+ * recovery. Partial-doc updates are last-writer-wins per field, so letting Elasticsearch re-read
+ * and re-apply the merge is safe — and necessary, since an unretried 409 surfaces as a
+ * `version_conflict_engine_exception` that fails the workflow. `retryTransientEsErrors` does not
+ * cover 409, so the retry has to happen server-side.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
+
 export class WorkflowExecutionRepository {
   constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
@@ -151,6 +162,7 @@ export class WorkflowExecutionRepository {
         {
           operation: 'update',
           document: workflowExecution as Partial<EsWorkflowExecution> & { id: string },
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
         },
       ],
       refresh: options.refresh ?? false,
@@ -194,6 +206,7 @@ export class WorkflowExecutionRepository {
       items: updates.map((update) => ({
         operation: 'update',
         document: update as Partial<EsWorkflowExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
       })),
       refresh: true,
     });

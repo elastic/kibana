@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ATTACKS_PAGE_LOADING_TEST_ID, AttacksPage } from './attacks';
 import { useUserData } from '../../components/user_info';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { useSignalHelpers } from '../../hooks/use_signal_helpers';
 import { TestProviders } from '../../../common/mock';
 import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
@@ -23,7 +23,10 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 jest.mock('../../components/user_info');
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../sourcerer/containers/use_signal_helpers');
+jest.mock('../../hooks/use_signal_helpers');
+jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
+}));
 jest.mock('../../../common/hooks/use_missing_privileges');
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../components/attacks/wrapper', () => ({

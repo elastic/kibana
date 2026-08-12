@@ -231,9 +231,19 @@ describe('WorkflowExecutionRepository', () => {
       const workflowExecution = { id: '1', status: ExecutionStatus.RUNNING };
       await repository.updateWorkflowExecution(workflowExecution);
       expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith({
-        items: [{ operation: 'update', document: workflowExecution }],
+        items: [{ operation: 'update', document: workflowExecution, retryOnConflict: 3 }],
         refresh: false,
       });
+    });
+
+    it('retries version conflicts so a concurrent writer cannot fail the update', async () => {
+      await repository.updateWorkflowExecution({ id: '1', status: ExecutionStatus.RUNNING });
+
+      expect(workflowExecutionsDataClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: expect.arrayContaining([expect.objectContaining({ retryOnConflict: 3 })]),
+        })
+      );
     });
 
     it('should throw an error if ID is missing during update', async () => {
@@ -792,6 +802,7 @@ describe('WorkflowExecutionRepository', () => {
               status: ExecutionStatus.CANCELLED,
               cancelRequested: true,
             },
+            retryOnConflict: 3,
           },
           {
             operation: 'update',
@@ -800,6 +811,7 @@ describe('WorkflowExecutionRepository', () => {
               status: ExecutionStatus.CANCELLED,
               cancelRequested: true,
             },
+            retryOnConflict: 3,
           },
         ],
       });

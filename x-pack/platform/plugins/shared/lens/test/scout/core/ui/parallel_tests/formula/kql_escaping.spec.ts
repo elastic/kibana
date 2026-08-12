@@ -35,13 +35,13 @@ spaceTest.describe('Lens formula KQL escaping', { tag: '@local-stateful-classic'
     await lens.typeInFormula(`Men's Clothing`, { focus: false });
     // Monaco model + KQL autocomplete debounce — no locator auto-wait for editor contents.
     await expect
-      .poll(async () => lens.getFormulaText(), { timeout: 15_000 })
+      .poll(async () => lens.workspace.getFormulaText(), { timeout: 15_000 })
       .toBe(`count(kql='Men\\'s Clothing ')`);
 
     await lens.typeInFormula('count(kql=', { replace: true });
     await lens.typeInFormula(`Men's Clothing`, { focus: false });
     await expect
-      .poll(async () => lens.getFormulaText(), { timeout: 15_000 })
+      .poll(async () => lens.workspace.getFormulaText(), { timeout: 15_000 })
       .toBe(`count(kql='Men\\'s Clothing')`);
   });
 
@@ -57,12 +57,16 @@ spaceTest.describe('Lens formula KQL escaping', { tag: '@local-stateful-classic'
     });
     await lens.switchToFormula();
     // Monaco model value — no locator auto-wait for editor contents.
-    await expect.poll(async () => lens.getFormulaText()).toBe(`unique_count('ab\\' "\\'')`);
+    await expect
+      .poll(async () => lens.workspace.getFormulaText())
+      .toBe(`unique_count('ab\\' "\\'')`);
 
     // Re-type and accept field autocomplete (FTR presses Enter on suggestion).
     await lens.typeInFormula('unique_count(', { replace: true });
     await lens.typeInFormula('ab', { focus: false });
     await page.keyboard.press('Enter');
-    await expect.poll(async () => lens.getFormulaText()).toBe(`unique_count('ab\\' "\\'')`);
+    await expect
+      .poll(async () => lens.workspace.getFormulaText())
+      .toBe(`unique_count('ab\\' "\\'')`);
   });
 });
