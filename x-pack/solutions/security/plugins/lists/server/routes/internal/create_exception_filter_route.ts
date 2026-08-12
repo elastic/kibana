@@ -15,6 +15,8 @@ import { INTERNAL_EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants'
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
 import { buildExceptionFilter } from '../../services/exception_lists/build_exception_filter';
+
+const MAX_EXCEPTION_LIST_IDS = 10_000;
 import type { ListsPluginRouter } from '../../types';
 import { getExceptionFilterRequest } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
@@ -67,10 +69,27 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             chunk_size: chunkSize = 10,
           } = request.body;
           if (type === 'exception_list_ids') {
-            const listIds = request.body.exception_list_ids.map(
+            if (request.body.exception_list_ids.length > MAX_EXCEPTION_LIST_IDS) {
+              return siemResponse.error({
+                body: `exception_list_ids cannot contain more than ${MAX_EXCEPTION_LIST_IDS} items`,
+                statusCode: 400,
+              });
+            }
+
+            const seen = new Set<string>();
+            const dedupedExceptionListIds = request.body.exception_list_ids.filter(
+              ({ exception_list_id: listId, namespace_type: namespaceType }) => {
+                const key = `${listId}:${namespaceType}`;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              }
+            );
+
+            const listIds = dedupedExceptionListIds.map(
               ({ exception_list_id: listId }) => listId
             );
-            const namespaceTypes = request.body.exception_list_ids.map(
+            const namespaceTypes = dedupedExceptionListIds.map(
               ({ namespace_type: namespaceType }) => namespaceType
             );
 
