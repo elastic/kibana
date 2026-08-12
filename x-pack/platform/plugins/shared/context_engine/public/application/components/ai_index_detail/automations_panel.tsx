@@ -134,7 +134,7 @@ export const AutomationsPanel = ({
                 <EuiFlexItem grow={false}>
                   <AiButton
                     size="s"
-                    iconType="sparkles"
+                    iconType="productAgent"
                     onClick={suggestAutomation}
                     data-test-subj="contextSuggestAutomationButton"
                   >
