@@ -113,6 +113,7 @@ export function cleanupUrlState(
   ) {
     appStateFromUrl.esqlApproximation = appStateFromUrl.isApproximate;
   }
+  delete appStateFromUrl.isApproximate;
 
   return appStateFromUrl as DiscoverAppState;
 }
