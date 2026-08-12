@@ -11,7 +11,7 @@
 export const VEGA_EMBEDDABLE_TYPE = 'vega';
 
 /**
- * Feature flag gating the standalone Vega embeddable (UI creation actions + public API schema
- * participation). Off by default.
+ * Feature flag gating the standalone Vega embeddable (UI creation actions, public API schema
+ * participation, and panel JSON export). Off by default.
  */
 export const VEGA_STANDALONE_EMBEDDABLE_FLAG = 'vega.standaloneEmbeddable';

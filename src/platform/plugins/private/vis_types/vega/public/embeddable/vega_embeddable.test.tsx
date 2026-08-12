@@ -19,7 +19,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
 import type { VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
@@ -104,8 +104,14 @@ describe('vegaEmbeddableFactory', () => {
 
   const visData = { isVegaLite: false, useMap: false } as unknown as VegaParser;
 
-  const buildEmbeddable = async () => {
-    const factory = vegaEmbeddableFactory(coreMock.createStart(), {
+  const buildEmbeddable = async ({
+    standaloneEmbeddableEnabled = false,
+  }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
+    const coreStart = coreMock.createStart();
+    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
+      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
+    );
+    const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
       visualizationDependencies,
     });
@@ -167,10 +173,16 @@ describe('vegaEmbeddableFactory', () => {
     );
   });
 
-  it('supports JSON export', async () => {
-    const { api } = await buildEmbeddable();
-    expect(api.supportsJsonExport).toBe(true);
-  });
+  it.each([
+    [true, true],
+    [false, false],
+  ] as const)(
+    'gates JSON export on the standalone embeddable flag (enabled=%s)',
+    async (standaloneEmbeddableEnabled, supportsJsonExport) => {
+      const { api } = await buildEmbeddable({ standaloneEmbeddableEnabled });
+      expect(api.supportsJsonExport).toBe(supportsJsonExport);
+    }
+  );
 
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();

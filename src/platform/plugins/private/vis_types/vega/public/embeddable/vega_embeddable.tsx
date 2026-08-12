@@ -48,7 +48,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
@@ -228,7 +228,9 @@ export const vegaEmbeddableFactory = (
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
-      supportsJsonExport: true,
+      // Only when the flag is on: the public dashboards-as-code schema is registered then, so
+      // exported JSON can be round-tripped through the REST API.
+      supportsJsonExport: core.featureFlags.getBooleanValue(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
     });
 
     const getExecutionContext = () => ({
