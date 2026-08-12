@@ -116,7 +116,7 @@ export function Onboarding() {
   const ObservabilityPageTemplate = observabilityShared.navigation.PageTemplate;
   return (
     <ObservabilityPageTemplate>
-      <Introduction isBeta={false} guideLink={guideLink} />
+      <Introduction guideLink={guideLink} />
       <EuiSpacer />
       {instructionsExists && <InstructionsSet instructions={instructions} />}
       <EuiSpacer />
