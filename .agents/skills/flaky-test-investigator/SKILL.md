@@ -92,7 +92,7 @@ Work through all of these questions:
 
 ### Does the test follow best practices?
 
-Check the test against these best practices — the ones flaky tests most often violate. A violated practice is frequently the root cause, and bringing the test in line with it is the fix:
+Check the test against these best practices — the ones flaky tests most often violate. A violation you find is a lead worth investigating, not proof of the root cause:
 
 - **Pick the right test type** (`docs/extend/testing/scout-best-practices#pick-the-right-test-type`): UI tests are notoriously more flaky than component, API, and Jest unit/integration tests — a test that doesn't need a browser shouldn't use one.
 - **Prefer APIs for setup and teardown** (`docs/extend/testing/ui-best-practices#prefer-kibana-apis-over-ui-for-setup-and-teardown`): driving setup/teardown through the UI is slower and flakier.
