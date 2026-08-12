@@ -12,6 +12,7 @@ import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public'
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { matchers } from '@emotion/jest';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
@@ -20,6 +21,8 @@ import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { createCallApi } from '../../services/rest/create_call_api';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 import { LandingPage } from './landing';
+
+expect.extend(matchers);
 
 jest.mock('../onboarding_flow_form/onboarding_flow_form', () => ({
   OnboardingFlowForm: () => <div data-test-subj="onboardingFlowFormStub" />,
@@ -233,5 +236,14 @@ describe('LandingPage search (V2, Variant A)', () => {
     const searchBar = screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch');
     const heading = screen.getByRole('heading', { name: 'All integrations' });
     expect(searchBar.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+});
+
+describe('LandingPage integrations section header spacing (V2)', () => {
+  it('matches the design spec 12px gap between the title and subtitle', () => {
+    renderWithFlag(true);
+    const heading = screen.getByRole('heading', { level: 2, name: 'All integrations' });
+    const spacer = heading.nextElementSibling;
+    expect(spacer).toHaveStyleRule('block-size', '12px');
   });
 });

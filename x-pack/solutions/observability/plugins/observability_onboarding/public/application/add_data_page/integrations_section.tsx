@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CuratedGrid, MiniTilesRow } from '../add_data_grid';
 import { BrowseAllIntegrationsTile } from './browse_all_integrations_tile';
@@ -33,7 +34,13 @@ export const ObservabilityIntegrationsSection = () => {
           })}
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      {/* Design spec calls for 12px here, between EuiSpacer's 8px ("s") and 16px ("m") steps. */}
+      <EuiSpacer
+        size="s"
+        css={css`
+          block-size: 12px;
+        `}
+      />
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate('xpack.observability_onboarding.integrationsGrid.subtitle', {
