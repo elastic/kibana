@@ -75,7 +75,13 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
 
   // MATCH and QSTR have limited support for WHERE, STATS_WHERE, and JOIN commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    locationsAvailable = [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL];
+    locationsAvailable = [
+      Location.WHERE,
+      Location.STATS_WHERE,
+      Location.JOIN,
+      Location.EVAL,
+      Location.HIGHLIGHT_QUERY,
+    ];
   }
 
   if (ESFunctionDefinition.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {

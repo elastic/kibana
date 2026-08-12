@@ -6866,7 +6866,13 @@ const kqlDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE KQL("author: Faulkner")',
     'FROM employees\n| WHERE KQL("mary", {"case_insensitive": true, "default_field": "first_name", "boost": 1.5})',
@@ -8919,7 +8925,13 @@ const matchDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")',
     'FROM books\n| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})\n| KEEP title;',
@@ -9004,7 +9016,13 @@ const matchPhraseDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: ['FROM books\n| WHERE MATCH_PHRASE(author, "William Faulkner")'],
 };
 

@@ -2139,7 +2139,13 @@ const qstrDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
     'FROM books\n| WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})',
