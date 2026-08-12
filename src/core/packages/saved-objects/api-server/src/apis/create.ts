@@ -81,4 +81,19 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * as that is set during the operation using the current user's profile ID.
    */
   accessControl?: Pick<SavedObjectAccessControl, 'accessMode'>;
+  /**
+   * Per-request override for the embedding timing declared by the type's
+   * {@link SavedObjectsTypeSemanticSearchDefinition.embedding | semanticSearch.embedding} setting.
+   *
+   * When `true`, shadow semantic fields are omitted from the raw document so that Elasticsearch
+   * performs no inference during indexing. The object is immediately findable via `find()`/BM25
+   * and becomes semantically searchable only after a background reconciliation cycle (eventual
+   * consistency for semantic search only). Only meaningful for types that declare
+   * {@link SavedObjectsType.semanticSearch | semanticSearch}; silently ignored for all other types.
+   *
+   * Typical use: pass `deferEmbeddings: true` from bulk-install code paths (e.g. prebuilt-rule
+   * import, package installation) to keep write latency independent of ML capacity, even when the
+   * type's default is `'sync'`.
+   */
+  deferEmbeddings?: boolean;
 }

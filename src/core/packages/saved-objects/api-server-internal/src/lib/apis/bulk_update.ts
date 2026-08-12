@@ -87,6 +87,7 @@ export const performBulkUpdate = async <T>(
   const {
     common: commonHelper,
     encryption: encryptionHelper,
+    embedding: embeddingHelper,
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
@@ -315,11 +316,16 @@ export const performBulkUpdate = async <T>(
 
         const typeDefinition = registry.getType(type)!;
 
+        // Do NOT add shadow semantic keys to the partial before encryption/merge: migration
+        // transforms may silently drop unknown keys.  Instead, compute shadow keys from the
+        // original partial attributes and overlay them after migrateInputDocument.
+        // No per-request deferEmbeddings override for bulk updates — use per-type default.
+        const partialAttrs = documentToSave[type];
         const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
           type,
           id,
           objectNamespace || namespace,
-          documentToSave[type]
+          partialAttrs
         );
 
         const updatedAttributes = mergeAttributes
@@ -346,9 +352,24 @@ export const performBulkUpdate = async <T>(
             references: documentToSave.references,
           }),
         });
-        const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
-          migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
-        );
+
+        // Overlay shadow semantic fields derived from the ORIGINAL partial attributes, after
+        // merge and migration.  Only fields present in the partial update get a shadow key;
+        // absent fields preserve the stored shadow that survived mergeForUpdate.
+        const shadowOverlay = embeddingHelper.shadowFieldsForUpdate(type, partialAttrs);
+        const docForSerialization =
+          Object.keys(shadowOverlay).length > 0
+            ? ({
+                ...migratedUpdatedSavedObjectDoc,
+                attributes: {
+                  ...((migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc)
+                    .attributes as Record<string, unknown>),
+                  ...shadowOverlay,
+                },
+              } as SavedObjectSanitizedDoc)
+            : (migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc);
+
+        const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(docForSerialization);
 
         const namespaces =
           savedObjectNamespaces ?? (savedObjectNamespace ? [savedObjectNamespace] : []);

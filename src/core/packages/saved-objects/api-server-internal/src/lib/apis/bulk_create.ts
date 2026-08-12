@@ -75,6 +75,7 @@ export const performBulkCreate = async <T>(
     common: commonHelper,
     validation: validationHelper,
     encryption: encryptionHelper,
+    embedding: embeddingHelper,
     preflight: preflightHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
@@ -328,10 +329,23 @@ export const performBulkCreate = async <T>(
           });
         }
 
+        // Populate shadow semantic fields AFTER migration and schema validation.
+        // Shadow keys must not enter migration transforms (they may silently drop unknown keys)
+        // and must not be seen by validateObjectForCreate (strict model-version schemas reject
+        // unknown keys, failing every bulkCreate for opted-in types that register a create schema).
+        const migratedWithSemantics: SavedObjectSanitizedDoc<T> = {
+          ...migrated,
+          attributes: embeddingHelper.populateSemanticFields(
+            object.type,
+            migrated.attributes,
+            options.deferEmbeddings
+          ),
+        };
+
         const expectedResult = {
           esRequestIndex: bulkRequestIndexCounter++,
           requestedId: object.id,
-          rawMigratedDoc: serializer.savedObjectToRaw(migrated),
+          rawMigratedDoc: serializer.savedObjectToRaw(migratedWithSemantics),
         };
 
         bulkCreateParams.push(

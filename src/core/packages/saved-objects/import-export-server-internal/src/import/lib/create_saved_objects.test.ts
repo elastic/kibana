@@ -434,4 +434,29 @@ describe('#createSavedObjects', () => {
       await testReturnValue({ namespace, compatibilityMode: true });
     });
   });
+
+  describe('deferEmbeddings option', () => {
+    test('passes deferEmbeddings: true to bulkCreate when set', async () => {
+      const baseOptions = setupParams({ objects: [obj1] });
+      const options = { ...baseOptions, deferEmbeddings: true as const };
+      bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, baseOptions)] });
+
+      await createSavedObjects(options);
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+      expect(bulkCreate).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ deferEmbeddings: true })
+      );
+    });
+
+    test('does not pass deferEmbeddings: true when omitted from params', async () => {
+      const options = setupParams({ objects: [obj1] });
+      bulkCreate.mockResolvedValue({ saved_objects: [getResultMock.success(obj1, options)] });
+
+      await createSavedObjects(options);
+      expect(bulkCreate).toHaveBeenCalledTimes(1);
+      const callOptions = bulkCreate.mock.calls[0][1];
+      expect(callOptions).not.toHaveProperty('deferEmbeddings', true);
+    });
+  });
 });

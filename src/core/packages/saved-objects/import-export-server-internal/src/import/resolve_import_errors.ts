@@ -66,6 +66,12 @@ export interface ResolveSavedObjectsImportErrorsOptions {
    * This property allows plugin authors to implement read-only UI's
    */
   managed?: boolean;
+  /**
+   * When `true`, shadow semantic fields are omitted from the raw documents written by `bulkCreate`,
+   * so that Elasticsearch performs no inference during indexing. See
+   * {@link SavedObjectsResolveImportErrorsOptions.deferEmbeddings} for full semantics.
+   */
+  deferEmbeddings?: boolean;
   /** The factory function for creating the access control import transforms */
   createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
 }
@@ -87,6 +93,7 @@ export async function resolveSavedObjectsImportErrors({
   createNewCopies,
   compatibilityMode,
   managed,
+  deferEmbeddings,
   createAccessControlImportTransforms,
 }: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
@@ -227,6 +234,7 @@ export async function resolveSavedObjectsImportErrors({
       overwrite,
       compatibilityMode,
       managed,
+      deferEmbeddings,
     };
     const { createdObjects, errors: bulkCreateErrors } = await createSavedObjects(
       createSavedObjectsParams

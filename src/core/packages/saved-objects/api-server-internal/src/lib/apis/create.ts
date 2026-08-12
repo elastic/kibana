@@ -49,6 +49,7 @@ export const performCreate = async <T>(
     common: commonHelper,
     validation: validationHelper,
     encryption: encryptionHelper,
+    embedding: embeddingHelper,
     preflight: preflightHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
@@ -188,7 +189,19 @@ export const performCreate = async <T>(
    */
   validationHelper.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
 
-  const raw = serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
+  // Populate shadow semantic fields AFTER migration and schema validation.
+  // Shadow keys must not enter migration transforms (they may silently drop unknown keys)
+  // and must not be seen by validateObjectForCreate (strict model-version schemas reject
+  // unknown keys, failing every create for opted-in types that register a create schema).
+  const migratedDoc = migrated as SavedObjectSanitizedDoc<T>;
+  const raw = serializer.savedObjectToRaw({
+    ...migratedDoc,
+    attributes: embeddingHelper.populateSemanticFields(
+      type,
+      migratedDoc.attributes,
+      options.deferEmbeddings
+    ),
+  });
 
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,

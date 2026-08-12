@@ -66,6 +66,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     refresh,
     compatibilityMode,
     managed,
+    deferEmbeddings,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -79,6 +80,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      deferEmbeddings,
       log: this.#log,
       createAccessControlImportTransforms: this.#createAccessControlImportTransforms,
     });
@@ -91,6 +93,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     namespace,
     retries,
     managed,
+    deferEmbeddings,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     this.#log.debug('Resolving import errors');
     return resolveSavedObjectsImportErrors({
@@ -104,6 +107,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      deferEmbeddings,
       createAccessControlImportTransforms: this.#createAccessControlImportTransforms,
     });
   }

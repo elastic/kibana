@@ -12,6 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CommonHelper,
   EncryptionHelper,
+  EmbeddingHelper,
   ValidationHelper,
   PreflightCheckHelper,
   SerializerHelper,
@@ -68,6 +69,17 @@ const createEncryptionHelperMock = (): EncryptionHelperMock => {
   return mock;
 };
 
+export type EmbeddingHelperMock = jest.Mocked<PublicMethodsOf<EmbeddingHelper>>;
+
+const createEmbeddingHelperMock = (): EmbeddingHelperMock => {
+  const mock: EmbeddingHelperMock = {
+    populateSemanticFields: jest.fn().mockImplementation((_type, attributes) => attributes),
+    shadowFieldsForUpdate: jest.fn().mockReturnValue({}),
+  };
+
+  return mock;
+};
+
 export type ValidationHelperMock = jest.Mocked<PublicMethodsOf<ValidationHelper>>;
 
 const createValidationHelperMock = (): ValidationHelperMock => {
@@ -119,6 +131,7 @@ const createUserHelperMock = (): UserHelperMock => {
 export interface RepositoryHelpersMock {
   common: CommonHelperMock;
   encryption: EncryptionHelperMock;
+  embedding: EmbeddingHelperMock;
   validation: ValidationHelperMock;
   preflight: PreflightCheckHelperMock;
   serializer: SerializerHelperMock;
@@ -130,6 +143,7 @@ const createRepositoryHelpersMock = (): RepositoryHelpersMock => {
   return {
     common: createCommonHelperMock(),
     encryption: createEncryptionHelperMock(),
+    embedding: createEmbeddingHelperMock(),
     validation: createValidationHelperMock(),
     preflight: createPreflightCheckHelperMock(),
     serializer: createSerializerHelperMock(),
@@ -142,6 +156,7 @@ export const apiHelperMocks = {
   create: createRepositoryHelpersMock,
   createCommonHelper: createCommonHelperMock,
   createEncryptionHelper: createEncryptionHelperMock,
+  createEmbeddingHelper: createEmbeddingHelperMock,
   createValidationHelper: createValidationHelperMock,
   createSerializerHelper: createSerializerHelperMock,
   createPreflightCheckHelper: createPreflightCheckHelperMock,

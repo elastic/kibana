@@ -8,12 +8,19 @@
  */
 
 import type {
+  ISavedObjectsEmbeddingExtension,
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
 } from '@kbn/core-saved-objects-server';
 import type { Either } from '@kbn/core-saved-objects-api-server';
 import type { Payload } from '@hapi/boom';
+
+const createEmbeddingExtension = (): jest.Mocked<ISavedObjectsEmbeddingExtension> => ({
+  isEmbeddableType: jest.fn(),
+  embedAttributes: jest.fn(),
+  acceptsPrecomputedEmbeddings: jest.fn(),
+});
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> => ({
   isEncryptableType: jest.fn(),
@@ -68,6 +75,7 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => (
 });
 
 const create = () => ({
+  embeddingExtension: createEmbeddingExtension(),
   encryptionExtension: createEncryptionExtension(),
   securityExtension: createSecurityExtension(),
   spacesExtension: createSpacesExtension(),
@@ -75,6 +83,7 @@ const create = () => ({
 
 export const savedObjectsExtensionsMock = {
   create,
+  createEmbeddingExtension,
   createEncryptionExtension,
   createSecurityExtension,
   createSpacesExtension,

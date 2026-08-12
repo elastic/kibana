@@ -43,6 +43,12 @@ export interface CreateSavedObjectsParams<T> {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /**
+   * When `true`, shadow semantic fields are omitted from the raw documents written by `bulkCreate`,
+   * so that Elasticsearch performs no inference during indexing. Only meaningful for types that
+   * declare {@link SavedObjectsType.semanticSearch | semanticSearch}; silently ignored otherwise.
+   */
+  deferEmbeddings?: boolean;
 }
 
 export interface CreateSavedObjectsResult<T> {
@@ -64,6 +70,7 @@ export const createSavedObjects = async <T>({
   refresh,
   compatibilityMode,
   managed,
+  deferEmbeddings,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -129,6 +136,7 @@ export const createSavedObjects = async <T>({
       namespace,
       overwrite,
       refresh,
+      deferEmbeddings,
     });
     expectedResults = bulkCreateResponse.saved_objects;
   }

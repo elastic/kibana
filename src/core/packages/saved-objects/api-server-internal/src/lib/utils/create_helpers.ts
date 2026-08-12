@@ -20,6 +20,7 @@ import type { RepositoryHelpers } from '../apis/helpers';
 import {
   CommonHelper,
   EncryptionHelper,
+  EmbeddingHelper,
   ValidationHelper,
   PreflightCheckHelper,
   SerializerHelper,
@@ -62,6 +63,7 @@ export const createRepositoryHelpers = ({
     encryptionExtension: extensions?.encryptionExtension,
     securityExtension: extensions?.securityExtension,
   });
+  const embeddingHelper = new EmbeddingHelper({ registry: typeRegistry });
   const validationHelper = new ValidationHelper({
     registry: typeRegistry,
     logger,
@@ -91,6 +93,7 @@ export const createRepositoryHelpers = ({
     preflight: preflightCheckHelper,
     validation: validationHelper,
     encryption: encryptionHelper,
+    embedding: embeddingHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
     user: userHelper,

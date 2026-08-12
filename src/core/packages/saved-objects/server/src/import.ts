@@ -79,6 +79,17 @@ export interface SavedObjectsImportOptions {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /**
+   * When `true`, shadow semantic fields are omitted from the raw documents written by
+   * `bulkCreate` during import, so that Elasticsearch performs no inference during indexing.
+   * Imported objects are immediately findable via `find()`/BM25 and become semantically
+   * searchable only after a background reconciliation cycle.
+   *
+   * Use this for large-scale bulk imports (e.g. 10k prebuilt detection rules) where synchronous
+   * ML inference per write would be prohibitively slow. Only meaningful for types that declare
+   * {@link SavedObjectsType.semanticSearch | semanticSearch}; silently ignored otherwise.
+   */
+  deferEmbeddings?: boolean;
 }
 
 /**
@@ -107,6 +118,16 @@ export interface SavedObjectsResolveImportErrorsOptions {
    * make their edits to the copy.
    */
   managed?: boolean;
+  /**
+   * When `true`, shadow semantic fields are omitted from the raw documents written by `bulkCreate`
+   * during the retry, so that Elasticsearch performs no inference during indexing. Retried objects
+   * are immediately findable via BM25 and become semantically searchable only after a background
+   * reconciliation cycle.
+   *
+   * Only meaningful for types that declare {@link SavedObjectsType.semanticSearch | semanticSearch};
+   * silently ignored otherwise.
+   */
+  deferEmbeddings?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

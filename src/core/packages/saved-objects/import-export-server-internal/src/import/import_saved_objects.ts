@@ -61,6 +61,12 @@ export interface ImportSavedObjectsOptions {
    * If provided, Kibana will apply the given option to the `managed` property.
    */
   managed?: boolean;
+  /**
+   * When `true`, shadow semantic fields are omitted from the raw documents written by `bulkCreate`,
+   * so that Elasticsearch performs no inference during indexing. See
+   * {@link SavedObjectsImportOptions.deferEmbeddings} for full semantics.
+   */
+  deferEmbeddings?: boolean;
   /** The factory function for creating the access control import transforms */
   createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
   /** The logger to use during the import operation */
@@ -85,6 +91,7 @@ export async function importSavedObjectsFromStream({
   refresh,
   compatibilityMode,
   managed,
+  deferEmbeddings,
   log,
   createAccessControlImportTransforms,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
@@ -180,6 +187,7 @@ export async function importSavedObjectsFromStream({
     refresh,
     compatibilityMode,
     managed,
+    deferEmbeddings,
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

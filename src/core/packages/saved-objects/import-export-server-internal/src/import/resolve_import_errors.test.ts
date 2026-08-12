@@ -94,6 +94,7 @@ describe('#importSavedObjectsFromStream', () => {
       } as any),
     importHooks = {},
     managed,
+    deferEmbeddings,
   }: {
     retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
@@ -101,6 +102,7 @@ describe('#importSavedObjectsFromStream', () => {
     getTypeImpl?: (name: string) => any;
     importHooks?: Record<string, SavedObjectsImportHook[]>;
     managed?: boolean;
+    deferEmbeddings?: boolean;
   } = {}): ResolveSavedObjectsImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -119,6 +121,7 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
       compatibilityMode,
       managed,
+      deferEmbeddings,
     };
   };
 
@@ -492,6 +495,34 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap: new Map(),
           namespace,
           compatibilityMode: true,
+        };
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
+          ...partialCreateSavedObjectsParams,
+          objects: objectsToOverwrite,
+          overwrite: true,
+        });
+        expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(2, {
+          ...partialCreateSavedObjectsParams,
+          objects: objectsToNotOverwrite,
+        });
+      });
+
+      test('passes `deferEmbeddings` to both createSavedObjects calls when specified', async () => {
+        const objectsToOverwrite = [createObject()];
+        const objectsToNotOverwrite = [createObject()];
+        mockSplitOverwrites.mockReturnValue({ objectsToOverwrite, objectsToNotOverwrite });
+        mockCreateSavedObjects.mockResolvedValueOnce({
+          errors: [],
+          createdObjects: [],
+        });
+
+        await resolveSavedObjectsImportErrors(setupOptions({ deferEmbeddings: true }));
+        const partialCreateSavedObjectsParams = {
+          accumulatedErrors: [],
+          savedObjectsClient,
+          importStateMap: new Map(),
+          namespace,
+          deferEmbeddings: true,
         };
         expect(mockCreateSavedObjects).toHaveBeenNthCalledWith(1, {
           ...partialCreateSavedObjectsParams,

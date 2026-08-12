@@ -84,6 +84,7 @@ export {
 } from './src/saved_objects_length_limits';
 export type {
   SavedObjectsType,
+  SavedObjectsTypeSemanticSearchDefinition,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectTypeVersionGuesser,
 } from './src/saved_objects_type';
@@ -97,6 +98,7 @@ export type {
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
+export type { ISavedObjectsEmbeddingExtension } from './src/extensions/embedding';
 export type {
   ISavedObjectsEncryptionExtension,
   EncryptedObjectDescriptor,
@@ -135,6 +137,7 @@ export type {
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
 export {
+  EMBEDDING_EXTENSION_ID,
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,

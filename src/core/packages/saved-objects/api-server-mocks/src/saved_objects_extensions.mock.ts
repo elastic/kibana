@@ -8,12 +8,20 @@
  */
 
 import type {
+  ISavedObjectsEmbeddingExtension,
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import { lazyObject } from '@kbn/lazy-object';
+
+const createEmbeddingExtension = (): jest.Mocked<ISavedObjectsEmbeddingExtension> =>
+  lazyObject({
+    isEmbeddableType: jest.fn(),
+    embedAttributes: jest.fn(),
+    acceptsPrecomputedEmbeddings: jest.fn(),
+  });
 
 const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtension> =>
   lazyObject({
@@ -61,6 +69,7 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>
 
 const create = (): jest.Mocked<SavedObjectsExtensions> =>
   lazyObject({
+    embeddingExtension: createEmbeddingExtension(),
     encryptionExtension: createEncryptionExtension(),
     securityExtension: createSecurityExtension(),
     spacesExtension: createSpacesExtension(),
@@ -68,6 +77,7 @@ const create = (): jest.Mocked<SavedObjectsExtensions> =>
 
 export const savedObjectsExtensionsMock = {
   create,
+  createEmbeddingExtension,
   createEncryptionExtension,
   createSecurityExtension,
   createSpacesExtension,

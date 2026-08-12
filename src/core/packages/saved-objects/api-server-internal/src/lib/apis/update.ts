@@ -82,6 +82,7 @@ export const executeUpdate = async <T>(
   const {
     common: commonHelper,
     encryption: encryptionHelper,
+    embedding: embeddingHelper,
     preflight: preflightHelper,
     migration: migrationHelper,
     validation: validationHelper,
@@ -204,7 +205,14 @@ export const executeUpdate = async <T>(
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       attributes: {
-        ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
+        ...(await encryptionHelper.optionallyEncryptAttributes(
+          type,
+          id,
+          namespace,
+          // Do NOT include shadow semantic keys here: they must be added after migration and
+          // validation so they never enter transform functions or schema validation.
+          upsert
+        )),
       },
       created_at: time,
       updated_at: time,
@@ -213,7 +221,15 @@ export const executeUpdate = async <T>(
       ...(accessControlToWrite && { accessControl: accessControlToWrite }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
-    const rawUpsert = serializer.savedObjectToRaw(migratedUpsert);
+
+    // Populate shadow semantic fields AFTER migration and schema validation.
+    // Upsert uses full attributes; embedding mode from the per-type default (no per-request
+    // deferEmbeddings on update — foundation decision).
+    const migratedUpsertWithSemantics: SavedObjectSanitizedDoc<T> = {
+      ...migratedUpsert,
+      attributes: embeddingHelper.populateSemanticFields(type, migratedUpsert.attributes),
+    };
+    const rawUpsert = serializer.savedObjectToRaw(migratedUpsertWithSemantics);
 
     const createRequestParams: CreateRequest = {
       id: rawUpsert._id,
@@ -282,6 +298,10 @@ export const executeUpdate = async <T>(
     // therefor we can safely process with the "standard" update sequence.
 
     const mergeAttributes = options.mergeAttributes ?? true;
+    // Do NOT add shadow semantic keys to the partial before encryption/merge: migration
+    // transforms may silently drop unknown keys, and including them here would also cause
+    // mergeForUpdate to conflict with the stored shadow on the target doc.  Instead, compute
+    // shadow keys from the original partial attributes and overlay them after migrateInputDocument.
     const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
       type,
       id,
@@ -313,9 +333,28 @@ export const executeUpdate = async <T>(
       ...(Array.isArray(references) && { references }),
     });
 
-    const docToSend = serializer.savedObjectToRaw(
-      migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
-    );
+    // Overlay shadow semantic fields derived from the ORIGINAL partial attributes, after
+    // merge and migration.  Using the original partial (not the merged/migrated doc) ensures
+    // the staleness rule: only fields present in THIS partial update get a shadow key;
+    // absent fields preserve the stored shadow value that survived mergeForUpdate, or get
+    // re-populated by the reconciler if a transform dropped them.
+    // No per-request deferEmbeddings override for updates — the per-type default applies.
+    const shadowOverlay = embeddingHelper.shadowFieldsForUpdate(type, attributes);
+    const docForSerialization =
+      Object.keys(shadowOverlay).length > 0
+        ? ({
+            ...migratedUpdatedSavedObjectDoc,
+            attributes: {
+              ...((migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc).attributes as Record<
+                string,
+                unknown
+              >),
+              ...shadowOverlay,
+            },
+          } as SavedObjectSanitizedDoc)
+        : (migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc);
+
+    const docToSend = serializer.savedObjectToRaw(docForSerialization);
 
     // implement creating the call params
     const indexRequestParams: IndexRequest = {

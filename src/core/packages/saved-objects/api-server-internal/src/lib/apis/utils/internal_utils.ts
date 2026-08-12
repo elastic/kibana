@@ -22,6 +22,7 @@ import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-object
 import {
   decodeRequestVersion,
   encodeHitVersion,
+  SEMANTIC_FIELD_SUFFIX,
 } from '@kbn/core-saved-objects-base-server-internal';
 
 export interface GetBulkOperationErrorRawResponse {
@@ -130,6 +131,18 @@ export function getSavedObjectFromSource<T>(
     ];
   }
 
+  // Strip shadow semantic keys for opted-in types so that the platform-internal
+  // `{field}_semantic` convention never leaks through get() / bulkGet() / resolve().
+  // This mirrors the strip in rawToSavedObject() for find() / create() responses.
+  const rawTypeAttrs = doc._source[type];
+  const attributes: T =
+    rawTypeAttrs !== null &&
+    rawTypeAttrs !== undefined &&
+    typeof rawTypeAttrs === 'object' &&
+    registry.getSemanticSearchDefinition(type) !== undefined
+      ? (stripSemanticAttributes(rawTypeAttrs as Record<string, unknown>) as T)
+      : (rawTypeAttrs as T);
+
   return {
     id,
     type,
@@ -143,7 +156,7 @@ export function getSavedObjectFromSource<T>(
     ...(createdBy && { created_by: createdBy }),
     ...(updatedBy && { updated_by: updatedBy }),
     version: encodeHitVersion(doc),
-    attributes: doc._source[type],
+    attributes,
     references: doc._source.references || [],
     managed,
     accessControl,
@@ -315,4 +328,17 @@ export function setAccessControl({
         accessMode: accessMode ?? 'default',
       }
     : undefined;
+}
+
+// Returns a shallow copy of attrs with every key ending in SEMANTIC_FIELD_SUFFIX removed.
+// Used in getSavedObjectFromSource to keep the platform-internal shadow-field convention
+// from leaking through get() / bulkGet() / resolve() responses.
+function stripSemanticAttributes(attrs: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(attrs)) {
+    if (!key.endsWith(SEMANTIC_FIELD_SUFFIX)) {
+      result[key] = attrs[key];
+    }
+  }
+  return result;
 }
