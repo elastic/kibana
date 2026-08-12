@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -185,6 +186,22 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                )}
+                {agentActionResult?.content.dump_executed_from_driver === false && (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup gutterSize="m" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="warning" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <FormattedMessage
+                          id="xpack.securitySolution.consoleCommands.memoryDump.resultDumpNotExecutedFromDriver"
+                          defaultMessage="This kernel memory dump was collected from user mode. It does not include user-mode memory and may be subject to OS restrictions that limit coverage on some systems. If a full process memory for forensics is needed execute a `memory-dump --raw` instead"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
                 )}
               </div>
             ) : (
