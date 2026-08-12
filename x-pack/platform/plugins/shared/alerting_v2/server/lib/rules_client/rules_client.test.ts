@@ -30,6 +30,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -180,6 +181,35 @@ describe('RulesClient', () => {
       ).rejects.toThrow('schedule failed');
 
       expect(rulesSavedObjectService.delete).toHaveBeenCalledWith({ id: 'rule-id-3' });
+    });
+
+    it('logs RULE_CREATE_ROLLBACK_FAILED when the compensating delete also fails', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-orphan' });
+      ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
+      rulesSavedObjectService.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-orphan' },
+        })
+      ).rejects.toThrow('schedule failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to roll back rule creation after task scheduling failed',
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+            rule_id: 'rule-id-orphan',
+            space_id: 'space-1',
+          },
+          error: expect.objectContaining({
+            message: 'Failed to roll back rule creation after task scheduling failed',
+            stack_trace: expect.stringContaining('delete failed'),
+          }),
+        })
+      );
     });
 
     it('throws 409 conflict when id already exists', async () => {
