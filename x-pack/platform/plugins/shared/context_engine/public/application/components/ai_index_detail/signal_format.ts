@@ -42,6 +42,32 @@ export const humanizeTagType = (tag: string): string => {
     .join(' ');
 };
 
+/** A one-line, human explanation of what a tag/group means, shown on the group row and flyout. */
+const KNOWN_TAG_DESCRIPTIONS: Record<string, string> = {
+  query_error: i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.signals.tagDescription.queryError',
+    {
+      defaultMessage: 'The agent’s ES|QL tool call failed against the target index.',
+    }
+  ),
+  empty_retrieval: i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.signals.tagDescription.emptyRetrieval',
+    { defaultMessage: 'A query ran successfully but returned no rows.' }
+  ),
+  coverage_gap: i18n.translate(
+    'xpack.contextEngine.aiIndexDetail.signals.tagDescription.coverageGap',
+    { defaultMessage: 'The agent used raw index access instead of a knowledge indicator.' }
+  ),
+};
+
+/** Explains a tag group in one sentence; falls back to a generic description for unknown tags. */
+export const tagDescription = (tag: string): string =>
+  KNOWN_TAG_DESCRIPTIONS[tag] ??
+  i18n.translate('xpack.contextEngine.aiIndexDetail.signals.tagDescription.fallback', {
+    defaultMessage: 'Signals classified as “{label}”.',
+    values: { label: humanizeTagType(tag) },
+  });
+
 const NO_TARGET = i18n.translate('xpack.contextEngine.aiIndexDetail.signals.noTarget', {
   defaultMessage: 'unknown target',
 });

@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-import { humanizeTagType, signalSummary } from './signal_format';
+import { humanizeTagType, signalSummary, tagDescription } from './signal_format';
 import { buildSignal } from './signal_test_fixtures';
+
+describe('tagDescription', () => {
+  it('returns a curated one-line description for a known tag', () => {
+    expect(tagDescription('query_error')).toMatch(/failed/i);
+    expect(tagDescription('empty_retrieval')).toMatch(/no rows/i);
+    expect(tagDescription('coverage_gap')).toMatch(/raw index access/i);
+  });
+
+  it('falls back to a generic description (with the humanized label) for an unknown tag', () => {
+    expect(tagDescription('some_new_tag')).toContain('Some New Tag');
+  });
+});
 
 describe('humanizeTagType', () => {
   it('uses the curated label for a known tag', () => {
