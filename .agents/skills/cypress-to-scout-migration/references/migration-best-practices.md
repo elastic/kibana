@@ -195,7 +195,7 @@ export const test = baseTest.extend<{}, MyWorkerFixtures>({
 
 Put shared code in `@kbn/scout`, security-specific code in `@kbn/scout-security`.
 
-## EUI Component Objects
+## EUI Test Helpers
 
 For EUI components that are non-trivial to drive, prefer the published `@elastic/eui-test-helpers` Component Objects exposed pre-bound to the page through `page.components.*`:
 
