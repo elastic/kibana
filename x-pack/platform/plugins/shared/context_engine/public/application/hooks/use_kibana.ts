@@ -16,9 +16,9 @@ export interface ContextEngineServices extends CoreStart {
   console?: ContextEngineStartDependencies['console'];
   spaces?: ContextEngineStartDependencies['spaces'];
   /**
-   * Resolves the registered "Analyze & improve" chat opener at call time (or `undefined` if none is
-   * registered yet). A getter — not the resolved value — so the button reacts to an opener that
-   * #15593 registers after this app has mounted.
+   * Getter for the registered "Analyze & improve" chat opener, resolved at call time (`undefined`
+   * when none is registered). A getter rather than the resolved value so an opener registered after
+   * mount is picked up on the next render.
    */
   getChatOpener?: () => ChatOpener | undefined;
 }

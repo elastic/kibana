@@ -32,10 +32,8 @@ interface SignalGroupRowProps {
  */
 export const SignalGroupRow = ({ group, onView }: SignalGroupRowProps) => (
   <EuiPanel
-    // `element="div"` keeps the clickable card a <div>: without it, EuiPanel + onClick renders a
-    // native <button> (and spreads role="listitem" onto it), which both invalidates the DOM (the
-    // inner "View details" <button> would nest inside a <button>) and clobbers the list semantics.
-    // Keyboard users activate the card via the inner "View details" button.
+    // Keep the clickable card a <div>; with onClick, EuiPanel otherwise renders a <button>, which
+    // would nest the inner "View details" <button> and clobber role="listitem".
     element="div"
     role="listitem"
     hasBorder

@@ -14,9 +14,9 @@ import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
- * optionally, the tag/group they are scoped to. The opener (registered by a separate PR,
- * search-team #15593) fetches the signals server-side; the materialized signals are intentionally
- * NOT passed so the opener always works from the authoritative, complete set.
+ * optionally, the tag/group they are scoped to. The opener fetches the signals server-side; the
+ * materialized signals are intentionally NOT passed so the opener always works from the
+ * authoritative, complete set.
  */
 export interface AnalyzeAndImproveContext {
   aiIndex: AiIndexHttpItem;
@@ -33,7 +33,7 @@ export interface ContextEnginePluginSetup {}
 export interface ContextEnginePluginStart {
   /**
    * Registers the opener used by the "Analyze & improve" button. Until an opener is registered
-   * the button is hidden. Implemented by search-team #15593.
+   * the button is hidden.
    */
   registerChatOpener: (opener: ChatOpener) => void;
 }

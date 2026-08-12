@@ -42,8 +42,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
     services: { getChatOpener },
   } = useKibana();
-  // Resolve at render time so the button appears as soon as an opener is registered (#15593),
-  // rather than being frozen to whatever existed at mount.
+  // Resolved at render time rather than captured once at mount.
   const chatOpener = getChatOpener?.();
 
   // Signals (generation + this panel) are gated on the global feedback-loop setting. Without this
