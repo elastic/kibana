@@ -288,12 +288,7 @@ describe('EvalsClient', () => {
 
     await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
 
-    expect(log.error).toHaveBeenCalledWith(
-      'Failed to retrieve scores for experiment ID experiment-123:',
-      expect.objectContaining({
-        message: expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'),
-      })
-    );
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
   });
 
   it('upsertDataset posts to the upsert route', async () => {
@@ -324,6 +319,34 @@ describe('EvalsClient', () => {
           examples: dataset.examples,
         },
         retries: 0,
+      })
+    );
+  });
+
+  it('upsertDataset sends tags and maturity only when the suite declares them', async () => {
+    const kbnClient = createMockKbnClient();
+    kbnClient.request.mockResolvedValue(
+      asKbnResponse({ dataset_id: 'ds-1', added: 0, removed: 0, unchanged: 0 })
+    );
+    const client = new EvalsClient(kbnClient, createLog());
+
+    await client.upsertDataset({
+      name: 'My Dataset',
+      description: 'Test dataset',
+      tags: ['esql', 'golden'],
+      maturity: 'golden',
+      examples: [],
+    });
+
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
+          name: 'My Dataset',
+          description: 'Test dataset',
+          tags: ['esql', 'golden'],
+          maturity: 'golden',
+          examples: [],
+        },
       })
     );
   });
