@@ -30,6 +30,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -180,6 +181,35 @@ describe('RulesClient', () => {
       ).rejects.toThrow('schedule failed');
 
       expect(rulesSavedObjectService.delete).toHaveBeenCalledWith({ id: 'rule-id-3' });
+    });
+
+    it('logs RULE_CREATE_ROLLBACK_FAILED when the compensating delete also fails', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-orphan' });
+      ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
+      rulesSavedObjectService.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-orphan' },
+        })
+      ).rejects.toThrow('schedule failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to roll back rule creation after task scheduling failed',
+        expect.objectContaining({
+          labels: {
+            code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+            rule_id: 'rule-id-orphan',
+            space_id: 'space-1',
+          },
+          error: expect.objectContaining({
+            message: 'Failed to roll back rule creation after task scheduling failed',
+            stack_trace: expect.stringContaining('delete failed'),
+          }),
+        })
+      );
     });
 
     it('throws 409 conflict when id already exists', async () => {
@@ -575,7 +605,7 @@ describe('RulesClient', () => {
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
-        artifacts: [{ id: 'runbook-id', type: 'runbook', value: 'Persisted runbook' }],
+        artifacts: [{ id: 'runbook-id', type: 'runbook', data: { content: 'Persisted runbook' } }],
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1418,7 +1448,7 @@ describe('RulesClient', () => {
   });
 
   describe('getTags', () => {
-    it('returns the aggregated tags without a filter', async () => {
+    it('returns the aggregated tags without a filter or search', async () => {
       const client = createClient();
 
       rulesSavedObjectService.findTags.mockResolvedValueOnce(['cpu', 'memory']);
@@ -1426,18 +1456,66 @@ describe('RulesClient', () => {
       const tags = await client.getTags();
 
       expect(tags).toEqual(['cpu', 'memory']);
-      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({ filter: undefined });
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
+        filter: undefined,
+        size: undefined,
+      });
     });
 
-    it('translates a clean API filter to an SO filter before aggregating', async () => {
+    it('translates kind: alert to an SO filter', async () => {
       const client = createClient();
 
       rulesSavedObjectService.findTags.mockResolvedValueOnce(['cpu']);
 
-      await client.getTags({ filter: 'kind:alert' });
+      await client.getTags({ kind: 'alert' });
 
       expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
+        size: undefined,
+      });
+    });
+
+    it('translates kind: signal to an SO filter', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['sig']);
+
+      await client.getTags({ kind: 'signal' });
+
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: undefined,
+        filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: signal`,
+        size: undefined,
+      });
+    });
+
+    it('forwards search to the saved-object service', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['production']);
+
+      await client.getTags({ search: 'pro' });
+
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 'pro',
+        filter: undefined,
+        size: undefined,
+      });
+    });
+
+    it('forwards size to the saved-object service', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.findTags.mockResolvedValueOnce(['a']);
+
+      await client.getTags({ search: 'sigevents:stream:', size: 10000 });
+
+      expect(rulesSavedObjectService.findTags).toHaveBeenCalledWith({
+        search: 'sigevents:stream:',
+        filter: undefined,
+        size: 10000,
       });
     });
   });
