@@ -70,22 +70,49 @@ export class LensApp {
    * @param options.search Optional filter text when the target chart is easier to find by label.
    */
   async switchToVisualization(visType: string, options?: { search?: string }) {
-    await this.openChartSwitchPopover();
+    await this.openChartSwitchPopover(options);
+    await this.selectChartSwitchOption(visType);
+  }
+
+  /**
+   * Opens the chart switcher popover, optionally filtering its list.
+   * Prefer `switchToVisualization` to switch; open the popover directly only to assert on
+   * its contents (e.g. the warning badge of a chart type), then close it or pick an option.
+   *
+   * @param options.search Filter text, needed when the target chart is not rendered by the
+   * virtualized list until it is filtered.
+   */
+  async openChartSwitchPopover(options?: { search?: string }) {
+    await this.chartSwitchPopover.click();
+    await this.chartSwitchList.waitFor({ state: 'visible' });
     if (options?.search) {
       const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
       await searchInput.waitFor({ state: 'visible' });
       await searchInput.fill(options.search);
     }
-    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+  }
+
+  /** Locator for a chart type's row in the open chart switcher popover. */
+  getChartSwitchOption(visType: string) {
+    return this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+  }
+
+  /**
+   * Locator for the badge warning that switching to this chart type would change the current
+   * configuration. Resolves only while the popover is open and the option is rendered, so
+   * assert the option itself is visible before asserting the badge is absent.
+   */
+  getChartSwitchWarning(visType: string) {
+    return this.getChartSwitchOption(visType).getByTestId(`lnsChartSwitchPopoverAlert_${visType}`);
+  }
+
+  /** Picks a chart type from the open chart switcher popover. */
+  async selectChartSwitchOption(visType: string) {
+    const option = this.getChartSwitchOption(visType);
     await option.waitFor({ state: 'visible' });
     await option.click();
     // Popover should close after selection; waiting avoids racing with subsequent assertions.
     await this.chartSwitchList.waitFor({ state: 'hidden' });
-  }
-
-  private async openChartSwitchPopover() {
-    await this.chartSwitchPopover.click();
-    await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
   /** Returns the chart type label shown in the chart switcher popover. */
