@@ -69,4 +69,5 @@ export {
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
 } from './tuning_config';
