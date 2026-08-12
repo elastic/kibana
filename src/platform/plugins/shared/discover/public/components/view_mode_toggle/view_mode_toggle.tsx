@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
-import React, { useMemo, useEffect, useState, useCallback } from 'react';
+import type { MutableRefObject, ReactElement } from 'react';
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
+import useMount from 'react-use/lib/useMount';
 import type { SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { VIEW_MODE } from '../../../common/constants';
@@ -51,6 +52,7 @@ export const DocumentViewModeToggle = ({
   fieldsCount,
   hitsCounterVariant,
   dataView,
+  focusOnMountRef,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
@@ -60,6 +62,7 @@ export const DocumentViewModeToggle = ({
   fieldsCount?: number;
   hitsCounterVariant?: HitsCounterVariant;
   dataView: DataView;
+  focusOnMountRef: MutableRefObject<boolean>;
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -78,8 +81,8 @@ export const DocumentViewModeToggle = ({
       (!isEsqlMode && uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined),
     [dataVisualizerService, uiSettings, isEsqlMode, viewMode]
   );
-  const isMounted = useMountedState();
 
+  const isMounted = useMountedState();
   const setShowPatternAnalysisTabWrapper = useCallback(
     (value: boolean) => {
       if (isMounted()) {
@@ -120,7 +123,6 @@ export const DocumentViewModeToggle = ({
   }, [viewMode, isEsqlMode, setDiscoverViewMode]);
 
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL;
-
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
   const containerCss = css`
     padding: ${containerPadding} ${containerPadding} 0 ${containerPadding};
@@ -263,6 +265,7 @@ export const DocumentViewModeToggle = ({
               data-selected-value={viewMode}
               options={options}
               onChange={onChange}
+              focusOnMountRef={focusOnMountRef}
             />
           </EuiFlexItem>
         </>
@@ -311,25 +314,30 @@ const ViewModeSelector = ({
   'data-selected-value': dataSelectedValue,
   options,
   onChange,
+  focusOnMountRef,
 }: {
   'data-test-subj': string;
   'data-selected-value': string;
   options: SelectableEntry[];
   onChange: (chosen?: SelectableEntry) => void;
+  focusOnMountRef: MutableRefObject<boolean>;
 }) => {
   const { euiTheme } = useEuiTheme();
   const popoverTitleId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((wasOpen) => !wasOpen), []);
+  const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement | null>(null);
 
   const onSelectionChange = useCallback(
     (newOptions: SelectableEntry[]) => {
       const chosenOption = newOptions.find(({ checked }) => checked === 'on');
       onChange(chosenOption);
       closePopover();
+      // a view swap may unmount this button; flag the next one to take over focus
+      focusOnMountRef.current = true;
     },
-    [closePopover, onChange]
+    [closePopover, onChange, focusOnMountRef]
   );
 
   // widen the panel to fit the longest option label, rather than truncating it
@@ -338,6 +346,13 @@ const ViewModeSelector = ({
       paddingsWidth: 2 * euiTheme.base,
     });
   }, [euiTheme.base, options]);
+
+  useMount(() => {
+    if (focusOnMountRef.current) {
+      focusOnMountRef.current = false;
+      buttonRef.current?.focus();
+    }
+  });
 
   return (
     <EuiPopover
@@ -351,6 +366,7 @@ const ViewModeSelector = ({
         <EuiButtonEmpty
           size="s"
           flush="both"
+          buttonRef={buttonRef}
           data-test-subj={`${dataTestSubj}Button`}
           data-selected-value={dataSelectedValue}
           iconType="arrowDown"

@@ -9,6 +9,7 @@
 
 import { VIEW_MODE } from '../../../common/constants';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import type { MutableRefObject } from 'react';
 import React from 'react';
 import { act, screen, waitFor } from '@testing-library/react';
 import { DocumentViewModeToggle } from './view_mode_toggle';
@@ -25,6 +26,7 @@ describe('Document view mode toggle component', () => {
     isEsqlMode = false,
     setDiscoverViewMode = jest.fn(),
     useDataViewWithTextFields = true,
+    focusOnMountRef = { current: false },
   } = {}) => {
     const services = createDiscoverServicesMock();
 
@@ -48,13 +50,14 @@ describe('Document view mode toggle component', () => {
       result: 10,
     });
 
-    renderWithKibanaRenderContext(
+    const { unmount } = renderWithKibanaRenderContext(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
           setDiscoverViewMode={setDiscoverViewMode}
           dataView={dataView}
+          focusOnMountRef={focusOnMountRef}
         />
       </DiscoverToolkitTestProvider>
     );
@@ -66,7 +69,7 @@ describe('Document view mode toggle component', () => {
       ).toBeVisible();
     });
 
-    return { setDiscoverViewMode };
+    return { setDiscoverViewMode, unmount };
   };
 
   const openSelector = () => {
@@ -194,6 +197,24 @@ describe('Document view mode toggle component', () => {
     expect(screen.getByText('patterns')).toBeVisible();
   });
 
+  it('should flag focusOnMountRef when an option is selected, and focus the button that consumes it on mount', async () => {
+    const focusOnMountRef: MutableRefObject<boolean> = { current: false };
+    const { unmount } = await renderComponent({ focusOnMountRef });
+
+    openSelector();
+    act(() => {
+      screen.getByRole('option', { name: /Patterns/ }).click();
+    });
+
+    expect(focusOnMountRef.current).toBe(true);
+
+    unmount();
+    await renderComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL, focusOnMountRef });
+
+    expect(screen.getByTestId('dscViewModeToggleButton')).toHaveFocus();
+    expect(focusOnMountRef.current).toBe(false);
+  });
+
   it('should switch to document and hide pattern option when there are no text fields', async () => {
     const setDiscoverViewMode = jest.fn();
 
@@ -240,6 +261,7 @@ describe('Document view mode toggle component', () => {
           isEsqlMode={false}
           setDiscoverViewMode={jest.fn()}
           dataView={dataView}
+          focusOnMountRef={{ current: false }}
         />
       </DiscoverToolkitTestProvider>
     );

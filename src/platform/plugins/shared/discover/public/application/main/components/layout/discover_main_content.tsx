@@ -9,7 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -119,6 +119,7 @@ export const DiscoverMainContent = ({
   const showChart = useAppStateSelector((state) => !state.hideChart);
   const showPanelsToggle = !isChartAvailable || !showChart;
   const [fieldsCount, setFieldsCount] = useState<number>();
+  const viewModeFocusOnMountRef = useRef(false);
 
   const renderViewModeToggle = useCallback<RenderViewModeToggle>(
     ({ patternCount, hitsCounterVariant } = {}) => {
@@ -131,6 +132,7 @@ export const DiscoverMainContent = ({
           fieldsCount={fieldsCount}
           hitsCounterVariant={hitsCounterVariant}
           dataView={dataView}
+          focusOnMountRef={viewModeFocusOnMountRef}
           prepend={
             showPanelsToggle ? (
               <PanelsToggle
