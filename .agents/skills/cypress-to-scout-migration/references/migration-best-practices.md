@@ -205,7 +205,7 @@ await page.components.comboBox('fieldSelectorComboBox').setSelectedOptions(['hos
 
 Available factories include `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`, `page.components.superSelect(testSubj)`, and `page.components.globalToastList()`. For simple, native-like components such as text fields and checkboxes, use plain Playwright locators.
 
-Existing `Eui*Wrapper` classes exported by `@kbn/scout` are compatibility fallbacks only when no equivalent Component Object exists. Do not add or extend wrappers in a test suite.
+Use locators when no equivalent EUI test helpers exist. Do not add or extend component objects in a test suite.
 
 ## Kibana Component Interaction Patterns
 
