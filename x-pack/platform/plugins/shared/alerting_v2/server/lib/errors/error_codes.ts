@@ -157,6 +157,13 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  *   `_INVALID`, `_UNRECOVERABLE`.
  */
 export const ALERTING_LOG_CODES = {
+  // ─────────────────────────────── Dispatcher steps ──────────────────────
+  /**
+   * Hydrate episode data step: some episodes had no matching .rule-events row;
+   * data will be absent for those episodes
+   */
+  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
