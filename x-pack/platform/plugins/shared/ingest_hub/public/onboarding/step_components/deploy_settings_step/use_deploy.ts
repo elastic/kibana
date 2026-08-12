@@ -377,15 +377,21 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         )
       );
 
+      // Derive targets from instancesToDeploy so results[i] and deployedTargets[i]
+      // are guaranteed to be in the same order (Promise.allSettled preserves it).
+      // Using the caller-supplied `targets` for the retry branch would be unsafe
+      // if the caller order ever differs from agentlessInstances order.
+      const deployedTargets = instancesToDeploy.map(({ instance }) => instance.instanceId);
       const {
         policyIdsByInstance,
         failedInstances: newFailed,
         errorsByInstance,
-      } = collectDeployResults(results, targets);
-      const newServiceStatuses = buildInstanceStatuses(targets, newFailed, 'receiving');
+      } = collectDeployResults(results, deployedTargets);
+      const newServiceStatuses = buildInstanceStatuses(deployedTargets, newFailed, 'receiving');
 
       // Merge with instances that failed in a prior run but weren't retried in this one.
-      const previouslyFailed = getLatestFailedInstances().filter((id) => !targets.includes(id));
+      const deployedSet = new Set(deployedTargets);
+      const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
       setIsDeploying(false);
