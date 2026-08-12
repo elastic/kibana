@@ -12,6 +12,7 @@ import { RulesApi, type BulkResponse } from '../services/rules_api';
 import type { BulkSelection } from './use_bulk_select';
 import { addBulkMutationDangerToast } from './bulk_mutation_toasts';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesListView } from './invalidate_rules_content_list';
 
 /** Dispatches to the by-ID or by-query enable endpoint based on the selection mode. */
 const dispatchBulkEnable = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
@@ -56,6 +57,7 @@ export const useBulkEnableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
     },
     onError: (error) => {
@@ -95,6 +97,7 @@ export const useBulkDisableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
     },
     onError: (error) => {

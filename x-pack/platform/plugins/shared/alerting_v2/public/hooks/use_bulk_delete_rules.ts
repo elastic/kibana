@@ -12,6 +12,7 @@ import { RulesApi, type BulkResponse } from '../services/rules_api';
 import type { BulkSelection } from './use_bulk_select';
 import { addBulkMutationDangerToast } from './bulk_mutation_toasts';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 
 /**
  * Dispatches the mutation to the by-ID or by-query endpoint based on the
@@ -52,6 +53,7 @@ export const useBulkDeleteRules = () => {
           })
         );
       }
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
     },

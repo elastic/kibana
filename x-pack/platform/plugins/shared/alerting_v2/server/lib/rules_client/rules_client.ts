@@ -370,7 +370,16 @@ export class RulesClient {
         scheduleEvery: ruleAttributes.schedule.every,
       });
     } catch (e) {
-      await this.rulesSavedObjectService.delete({ id }).catch(() => {});
+      try {
+        await this.rulesSavedObjectService.delete({ id });
+      } catch (rollbackError) {
+        this.logger.error({
+          message: 'Failed to roll back rule creation after task scheduling failed',
+          error: rollbackError,
+          code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+          labels: { rule_id: id, space_id: spaceId },
+        });
+      }
       throw e;
     }
 
