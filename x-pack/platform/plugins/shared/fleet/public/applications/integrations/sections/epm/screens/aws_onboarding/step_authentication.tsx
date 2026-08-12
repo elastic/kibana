@@ -8,6 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -64,23 +65,45 @@ export const DEPLOYMENT_METHOD_META: Record<
 // Shaded header band (icon + title + "N services"), bled to the panel's
 // edges via negative margins so the parent EuiPanel can keep its normal
 // paddingSize="l" — parent must set `style={{ overflow: 'hidden' }}` so the
-// square-cornered tint clips to the panel's rounded corners.
+// square-cornered tint clips to the panel's rounded corners. When `onToggle`
+// is passed, the whole header becomes a collapse/expand control: a "Done"
+// badge appears once the card is complete, with a chevron on the far right.
 const PanelHeader: React.FunctionComponent<{
   iconType: string;
   title: string;
   servicesCount: number;
-}> = ({ iconType, title, servicesCount }) => {
+  isComplete?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
+  'data-test-subj'?: string;
+}> = ({ iconType, title, servicesCount, isComplete, isOpen, onToggle, ...rest }) => {
   const { euiTheme } = useEuiTheme();
+  const collapsible = onToggle !== undefined;
   return (
     <div
+      role={collapsible ? 'button' : undefined}
+      tabIndex={collapsible ? 0 : undefined}
+      onClick={collapsible ? onToggle : undefined}
+      onKeyDown={
+        collapsible
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onToggle?.();
+              }
+            }
+          : undefined
+      }
       style={{
         margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
         padding: euiTheme.size.l,
         background: HEADER_TINT,
         borderBottom: euiTheme.border.thin,
+        cursor: collapsible ? 'pointer' : undefined,
       }}
+      data-test-subj={rest['data-test-subj']}
     >
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" />
         </EuiFlexItem>
@@ -89,13 +112,35 @@ const PanelHeader: React.FunctionComponent<{
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
+        {isComplete && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="success" iconType="check">
+              Done
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiLink>{`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}</EuiLink>
         </EuiFlexItem>
+        {collapsible && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );
 };
+
+// Drives a card's collapsed/expanded state: open while incomplete, auto-
+// collapsed once complete, always overridable by an explicit user click so
+// a finished card can still be reopened for review or edits.
+function useCollapsibleCard(isComplete: boolean) {
+  const [manualOverride, setManualOverride] = useState<boolean | null>(null);
+  const isOpen = manualOverride ?? !isComplete;
+  const toggle = () => setManualOverride(!isOpen);
+  return { isOpen, toggle };
+}
 
 // Every field on this step is constrained to half the card's content width.
 const HALF_WIDTH: React.CSSProperties = { maxWidth: '50%' };
@@ -180,10 +225,22 @@ const CloudFormationWidget: React.FunctionComponent<{
   onStackVersionChange,
 }) => {
   const allReceived = services.length > 0 && receivedCount >= services.length;
+  const isComplete = allReceived && stackName.trim().length > 0;
+  const { isOpen, toggle } = useCollapsibleCard(isComplete);
 
   return (
     <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-      <PanelHeader iconType="rocket" title="Elastic Cloud Forwarder" servicesCount={services.length} />
+      <PanelHeader
+        iconType="rocket"
+        title="Elastic Cloud Forwarder"
+        servicesCount={services.length}
+        isComplete={isComplete}
+        isOpen={isOpen}
+        onToggle={toggle}
+        data-test-subj="awsOnboardingCloudFormationCollapseToggle"
+      />
+      {isOpen && (
+        <>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
@@ -310,6 +367,8 @@ const CloudFormationWidget: React.FunctionComponent<{
           </EuiFormRow>
         </>
       )}
+        </>
+      )}
     </EuiPanel>
   );
 };
@@ -359,6 +418,8 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   }, [isValid, onValidityChange]);
 
   const allReceived = receivedCount >= MANAGED_INTEGRATION_EXAMPLES.length;
+  const isComplete = isDeployed && allReceived;
+  const { isOpen, toggle } = useCollapsibleCard(isComplete);
 
   return (
     <EuiPanel
@@ -367,7 +428,17 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
       style={{ overflow: 'hidden' }}
       data-test-subj="awsOnboardingManagedIntegrationsPanel"
     >
-      <PanelHeader iconType="package" title="Managed Integrations" servicesCount={servicesCount} />
+      <PanelHeader
+        iconType="package"
+        title="Managed Integrations"
+        servicesCount={servicesCount}
+        isComplete={isComplete}
+        isOpen={isOpen}
+        onToggle={toggle}
+        data-test-subj="awsOnboardingManagedIntegrationsCollapseToggle"
+      />
+      {isOpen && (
+        <>
       <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
@@ -526,6 +597,8 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           </EuiFlexGrid>
         </>
       )}
+        </>
+      )}
     </EuiPanel>
   );
 };
@@ -551,6 +624,9 @@ const WhereToAddCard: React.FunctionComponent<{
   const enrollTimer = useRef<number | null>(null);
   const servicesCount = services.length;
   const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
+  const isComplete = hostMode === 'new_hosts' && isEnrolled && allReceived;
+  const { isOpen, toggle } = useCollapsibleCard(isComplete);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (isEnrolled || hostMode !== 'new_hosts') return;
@@ -571,7 +647,13 @@ const WhereToAddCard: React.FunctionComponent<{
         iconType="compute"
         title="Where to add this integration?"
         servicesCount={servicesCount}
+        isComplete={isComplete}
+        isOpen={isOpen}
+        onToggle={toggle}
+        data-test-subj="awsOnboardingWhereToAddCollapseToggle"
       />
+      {isOpen && (
+        <>
       <EuiSpacer size="m" />
       <EuiRadioGroup
         options={[
@@ -596,6 +678,11 @@ const WhereToAddCard: React.FunctionComponent<{
             </p>
           </EuiText>
           <EuiSpacer size="m" />
+          {/* EuiSteps pads every step's content by size.xxl for the
+              connecting line to the next step — for the last step that
+              padding has nothing to connect to and just reads as a big
+              trailing gap, so cancel it here. */}
+          <div style={{ marginBottom: `-${euiTheme.size.xxl}` }}>
           <EuiSteps
             titleSize="xs"
             steps={[
@@ -730,6 +817,7 @@ const WhereToAddCard: React.FunctionComponent<{
               },
             ]}
           />
+          </div>
         </>
       ) : (
         <>
@@ -751,8 +839,15 @@ const WhereToAddCard: React.FunctionComponent<{
             />
           </EuiFormRow>
           <EuiText size="xs" color="subdued">
-            <p>There aren&apos;t any options available</p>
+            <p>
+              There aren&apos;t any options available.{' '}
+              <EuiLink href="#" target="_blank" external data-test-subj="awsOnboardingAddNewPolicy">
+                Add a new policy
+              </EuiLink>
+            </p>
           </EuiText>
+        </>
+      )}
         </>
       )}
     </EuiPanel>
@@ -824,6 +919,11 @@ export const StepAuthentication: React.FunctionComponent<{
   const [managedIntegrationsValid, setManagedIntegrationsValid] = useState(false);
 
   const servicesCount = services.length;
+
+  const isAgentSetupAccessComplete =
+    agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0;
+  const { isOpen: isAgentSetupAccessOpen, toggle: toggleAgentSetupAccess } =
+    useCollapsibleCard(isAgentSetupAccessComplete);
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -911,7 +1011,17 @@ export const StepAuthentication: React.FunctionComponent<{
         />
         <EuiSpacer size="m" />
         <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-          <PanelHeader iconType="rocket" title="Setup access" servicesCount={servicesCount} />
+          <PanelHeader
+            iconType="rocket"
+            title="Setup access"
+            servicesCount={servicesCount}
+            isComplete={isAgentSetupAccessComplete}
+            isOpen={isAgentSetupAccessOpen}
+            onToggle={toggleAgentSetupAccess}
+            data-test-subj="awsOnboardingAgentSetupAccessCollapseToggle"
+          />
+          {isAgentSetupAccessOpen && (
+            <>
           <EuiSpacer size="m" />
           <EuiFormRow
             label={
@@ -957,6 +1067,8 @@ export const StepAuthentication: React.FunctionComponent<{
               data-test-subj="awsOnboardingAgentSecretAccessKey"
             />
           </EuiFormRow>
+            </>
+          )}
         </EuiPanel>
         </>
       ) : (
