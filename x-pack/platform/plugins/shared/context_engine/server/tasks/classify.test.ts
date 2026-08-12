@@ -67,7 +67,21 @@ describe('classify', () => {
     expect(classify(buildSignal({ query_kind: 'raw_access' }))).toContain('coverage_gap');
   });
 
-  it('produces multiple tags for a signal that matches several rules', () => {
+  it('does not also tag a failed query as empty_retrieval (outcome tags are mutually exclusive)', () => {
+    const tags = classify(
+      buildSignal({
+        status: 'Error',
+        query_kind: 'ki_retrieval',
+        returned: { columns: [], row_count: 0 },
+      })
+    );
+    expect(tags).toContain('query_error');
+    expect(tags).not.toContain('empty_retrieval');
+  });
+
+  it('combines an outcome tag with the orthogonal coverage_gap tag', () => {
+    // A failed raw-access query: one outcome tag (query_error) + the "how" tag (coverage_gap),
+    // but NOT empty_retrieval — the 0 rows are a consequence of the error, not an empty result.
     const tags = classify(
       buildSignal({
         status: 'Error',
@@ -75,7 +89,7 @@ describe('classify', () => {
         returned: { columns: [], row_count: 0 },
       })
     );
-    expect([...tags].sort()).toEqual(['coverage_gap', 'empty_retrieval', 'query_error'].sort());
+    expect([...tags].sort()).toEqual(['coverage_gap', 'query_error'].sort());
   });
 
   it('leaves a clean signal untagged', () => {

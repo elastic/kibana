@@ -17,14 +17,18 @@ export const classify = (signal: EsqlToolCallSignal): string[] => {
 
   const tags: string[] = [];
 
+  // Outcome tags are mutually exclusive: a query either failed, or ran and returned
+  // nothing, or returned rows. A failed query reports 0 rows *because* it errored, so
+  // tagging it `empty_retrieval` too would conflate "the query failed" with "the query
+  // ran fine but found nothing" — two different problems that must land in different
+  // groups. `empty_retrieval` therefore only applies when the query actually ran.
   if (data.status === 'Error') {
     tags.push('query_error');
-  }
-
-  if (data.query_kind !== 'other' && data.returned.row_count === 0) {
+  } else if (data.query_kind !== 'other' && data.returned.row_count === 0) {
     tags.push('empty_retrieval');
   }
 
+  // Orthogonal "how" axis: the agent used raw data rather than a knowledge indicator.
   if (data.query_kind === 'raw_access') {
     tags.push('coverage_gap');
   }
