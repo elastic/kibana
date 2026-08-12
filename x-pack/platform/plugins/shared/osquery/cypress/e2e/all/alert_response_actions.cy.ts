@@ -18,7 +18,6 @@ import {
 } from '../../tasks/api_fixtures';
 import {
   checkResults,
-  clickRuleName,
   inputQuery,
   inputQueryInFlyout,
   loadRuleAlerts,
@@ -160,8 +159,7 @@ describe(
       });
 
       const openRuleActionsTab = () => {
-        cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('editRuleSettingsLink').click();
+        cy.visit(`/app/security/rules/id/${ruleId}/edit`);
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         closeDateTabIfVisible();
         cy.getBySel('edit-rule-actions-tab').click();
@@ -170,8 +168,6 @@ describe(
 
       it('persists pack response actions across save/reopen and handles pack swap', () => {
         cy.login(ServerlessRoleName.SOC_MANAGER, false);
-        cy.visit('/app/security/rules');
-        clickRuleName(ruleName);
         openRuleActionsTab();
         cy.contains('Response actions are run on each rule execution.');
 
