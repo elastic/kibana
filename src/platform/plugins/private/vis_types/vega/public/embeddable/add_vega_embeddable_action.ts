@@ -13,9 +13,10 @@ import { apiCanAddNewPanel, type EmbeddableApiContext } from '@kbn/presentation-
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { VegaByValueState } from '../../server';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
-import type { VegaByValueState, VegaEmbeddableApi } from './vega_embeddable';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,

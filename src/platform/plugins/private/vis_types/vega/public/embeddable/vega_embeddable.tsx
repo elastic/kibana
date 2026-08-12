@@ -60,8 +60,6 @@ import { reportVegaRender } from '../lib/vega_render_telemetry';
 import { createInspectorAdapters } from '../vega_inspector';
 import type { VegaByValueState } from '../../server';
 
-export type { VegaByValueState };
-
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
