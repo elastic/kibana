@@ -3,7 +3,7 @@ idiomatic_version_file_enable_tools = ["node"]
 
 [tools]
 # Keep in sync with package.json engines.pnpm (and corepack prepare elsewhere).
-pnpm = "11.17.0"
+pnpm = "11.21.0"
 
 [tasks.bootstrap]
 description = "Install and link Kibana dependencies"

@@ -76,7 +76,7 @@
   },
   "engines": {
     "node": "24.19.0",
-    "pnpm": "~11.17.0",
+    "pnpm": "~11.21.0",
     "yarn": "1.22.22"
   },
   "resolutions": {
@@ -1677,7 +1677,6 @@
     "@jest/reporters": "29.7.0",
     "@jest/transform": "29.7.0",
     "@jest/types": "29.6.3",
-    "@kayahr/text-encoding": "1.3.0",
     "@kbn/ai-tools-cli": "workspace:*",
     "@kbn/alerting-api-integration-helpers": "workspace:*",
     "@kbn/ambient-common-types": "workspace:*",
@@ -2039,7 +2038,6 @@
     "@types/lodash": "4.17.20",
     "@types/mapbox__vector-tile": "1.3.4",
     "@types/markdown-it": "14.1.2",
-    "@types/mdast": "3.0.3",
     "@types/mime": "2.0.1",
     "@types/mime-types": "2.1.0",
     "@types/minimist": "1.2.5",
@@ -2082,7 +2080,6 @@
     "@types/styled-components": "5.1.0",
     "@types/supertest": "7.2.0",
     "@types/type-detect": "4.0.3",
-    "@types/unist": "2.0.3",
     "@types/vinyl": "2.0.12",
     "@types/vinyl-fs": "3.0.6",
     "@types/watchpack": "1.1.5",

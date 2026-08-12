@@ -8,7 +8,7 @@
  */
 
 (() => {
-  // npm_config_user_agent looks like `pnpm/11.17.0 npm/? node/v24 ...` for pnpm,
+  // npm_config_user_agent looks like `pnpm/11.21.0 npm/? node/v24 ...` for pnpm,
   // `npm/10 ...` for npm, `yarn/1.22 ...` for yarn classic.
   const userAgent = process.env.npm_config_user_agent || '';
 

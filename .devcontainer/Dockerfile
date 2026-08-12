@@ -64,7 +64,7 @@ RUN mkdir -p $NVM_DIR && \
   nvm use ${NODE_VERSION} && \
   nvm alias default ${NODE_VERSION} && \
   corepack enable && \
-  corepack prepare pnpm@11.17.0 --activate && \
+  corepack prepare pnpm@11.21.0 --activate && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.bashrc && \
   echo "source $NVM_DIR/nvm.sh" >> ${HOME}/.zshrc  && \
   chown -R 1000:1000 "${HOME}/.npm"
