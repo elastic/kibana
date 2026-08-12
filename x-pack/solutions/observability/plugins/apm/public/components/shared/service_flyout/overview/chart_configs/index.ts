@@ -41,6 +41,7 @@ export function getChartDefinitions({
   transactionType,
   latencyAggregationType,
   latencyTitleAction,
+  projectRouting,
 }: {
   indices: APMIndices | undefined;
   schema: ServiceSchemaType | undefined;
@@ -49,6 +50,7 @@ export function getChartDefinitions({
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   latencyTitleAction?: ReactNode;
+  projectRouting?: string;
 }): {
   keyMetrics: FlyoutLensChartConfigDefinition[];
   infrastructureMetrics: FlyoutLensChartConfigDefinition[];
@@ -71,6 +73,7 @@ export function getChartDefinitions({
         buildQuery: isOtel
           ? (idx, agg) => buildOtelLatencyQuery(idx, otelScope, agg)
           : (idx, agg) => buildApmLatencyQuery(idx, ecsScope, agg),
+        projectRouting,
       }),
       getErrorRateChart({
         indices: chartIndices,
@@ -78,17 +81,19 @@ export function getChartDefinitions({
         buildQuery: isOtel
           ? (idx) => buildOtelErrorRateQuery(idx, otelScope)
           : (idx) => buildApmErrorRateQuery(idx, ecsScope),
+        projectRouting,
       }),
       getThroughputChart({
         indices: chartIndices,
         buildQuery: isOtel
           ? (idx) => buildOtelThroughputQuery(idx, otelScope)
           : (idx) => buildApmThroughputQuery(idx, ecsScope),
+        projectRouting,
       }),
     ],
     infrastructureMetrics: [
-      getCpuUsageChart(metricIndexes, metricScope),
-      getMemoryUsageChart(metricIndexes, metricScope),
+      getCpuUsageChart(metricIndexes, metricScope, projectRouting),
+      getMemoryUsageChart(metricIndexes, metricScope, projectRouting),
     ],
   };
 }
