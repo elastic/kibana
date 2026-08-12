@@ -90,7 +90,13 @@ export interface DocView<TState extends object = object> {
   enabled?: boolean;
   /** Optional element rendered before the tab title (e.g. a technical preview badge). */
   prepend?: ReactElement;
-  /** Optional EBT click attributes (`data-ebt-*`) added to the rendered tab button. */
+  /**
+   * Optional EBT click attributes (`data-ebt-*`) for the rendered tab button.
+   * Every tab gets auto-generated attributes (`data-ebt-action` derived from the
+   * tab id, e.g. `doc_view_table` -> `viewTable`); set this field only to
+   * override them (e.g. to share an action name with equivalent tabs on other
+   * surfaces).
+   */
   ebt?: EbtClickAttrs;
   render: DocViewRenderFunction<TState>;
 }

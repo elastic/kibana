@@ -289,12 +289,7 @@ describe('EvalsClient', () => {
 
     await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
 
-    expect(log.error).toHaveBeenCalledWith(
-      'Failed to retrieve scores for experiment ID experiment-123:',
-      expect.objectContaining({
-        message: expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'),
-      })
-    );
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'));
   });
 
   it('upsertDataset posts to the upsert route', async () => {

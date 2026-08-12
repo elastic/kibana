@@ -198,7 +198,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(buildExecutionHistoryItem(event, EMPTY_NAME_MAPS)).toMatchObject({
       policy: { id: 'policy-1' },
       rules: [],
-      totalRuleCount: 0,
+      total_rule_count: 0,
     });
   });
 
@@ -420,7 +420,7 @@ describe('buildExecutionHistoryItem', () => {
     it('sets totalRuleCount = relevant rules and does not truncate below the cap', () => {
       const event = eventWithNRules(5);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-      expect(historyItem?.totalRuleCount).toBe(5);
+      expect(historyItem?.total_rule_count).toBe(5);
       expect(historyItem?.rules).toHaveLength(5);
     });
 
@@ -428,7 +428,7 @@ describe('buildExecutionHistoryItem', () => {
       const total = MAX_EMBEDDED_RULES_PER_ITEM + 15;
       const event = eventWithNRules(total);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-      expect(historyItem?.totalRuleCount).toBe(total);
+      expect(historyItem?.total_rule_count).toBe(total);
       expect(historyItem?.rules).toHaveLength(MAX_EMBEDDED_RULES_PER_ITEM);
       expect(historyItem?.rules[0]?.id).toBe('rule-0');
     });
@@ -451,7 +451,7 @@ describe('buildExecutionHistoryItem', () => {
         hasMatches: true,
         matches: null,
       });
-      expect(historyItem?.totalRuleCount).toBe(2);
+      expect(historyItem?.total_rule_count).toBe(2);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-c']);
     });
   });
@@ -476,7 +476,7 @@ describe('buildExecutionHistoryItem', () => {
         'rule-nonexistent',
       ]);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b', 'rule-d']);
-      expect(historyItem?.totalRuleCount).toBe(2);
+      expect(historyItem?.total_rule_count).toBe(2);
     });
 
     it('returns null when no event rule matches mandatoryRuleIds', () => {
@@ -515,7 +515,7 @@ describe('buildExecutionHistoryItem', () => {
       );
       // Union of search-scoped {a,b,c} with mandatory {b,d} = {a,b,c,d}
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-a', 'rule-b', 'rule-c', 'rule-d']);
-      expect(historyItem?.totalRuleCount).toBe(4);
+      expect(historyItem?.total_rule_count).toBe(4);
     });
   });
 
@@ -535,7 +535,7 @@ describe('buildExecutionHistoryItem', () => {
       const event = eventWithRules(['rule-a', 'rule-b', 'rule-c']);
       const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS, undefined, ['rule-b']);
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
-      expect(historyItem?.totalRuleCount).toBe(1);
+      expect(historyItem?.total_rule_count).toBe(1);
     });
 
     it('narrows to mandatoryRuleIds when search matches the policy but not any rules', () => {
@@ -547,7 +547,7 @@ describe('buildExecutionHistoryItem', () => {
         ['rule-b']
       );
       expect(historyItem?.rules.map((r) => r.id)).toEqual(['rule-b']);
-      expect(historyItem?.totalRuleCount).toBe(1);
+      expect(historyItem?.total_rule_count).toBe(1);
     });
 
     it('returns all rules when policy is search-matched and no mandatoryRuleIds is provided', () => {

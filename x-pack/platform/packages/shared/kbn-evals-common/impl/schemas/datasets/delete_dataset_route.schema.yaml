@@ -18,6 +18,7 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
         - name: intent
           in: query
           required: false
