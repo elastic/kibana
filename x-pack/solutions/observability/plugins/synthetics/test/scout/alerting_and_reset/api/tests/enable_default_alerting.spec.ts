@@ -15,7 +15,7 @@ import { addMonitor, enableSynthetics } from '../../../common/fixtures/monitors'
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
-const TEST_INDEX_CONNECTOR_NAME = 'synthetics-default-alerting-test'; // temp comment
+const TEST_INDEX_CONNECTOR_NAME = 'synthetics-default-alerting-test';
 
 const STATUS_RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 const TLS_RULE_TYPE_ID = 'xpack.synthetics.alerts.tls';
