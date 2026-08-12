@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import * as esKuery from '@kbn/es-query';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
@@ -14,7 +15,11 @@ import {
   ALL_NAMESPACES_STRING,
   DEFAULT_NAMESPACE_STRING,
 } from '@kbn/core-saved-objects-utils-server';
-import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  getProperty,
+  getSemanticFieldName,
+  type IndexMapping,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { estypes } from '@elastic/elasticsearch';
 import { getReferencesFilter } from './references_filter';
 
@@ -485,4 +490,70 @@ const getSimpleQueryStringClause = ({
       },
     },
   ];
+};
+
+/**
+ * Builds an ES `semantic` bool-should clause for the given types, query text, and optional field
+ * subset. Shadow field paths follow the platform convention `{type}.{field}_semantic` (never
+ * exposed to callers — field names here are source attribute names resolved via the registry).
+ *
+ * @throws Boom.badRequest when `fields` contains a name not declared on any of the requested types.
+ */
+export const getSemanticClause = (
+  registry: ISavedObjectTypeRegistry,
+  types: string[],
+  queryText: string,
+  fields?: string[]
+): estypes.QueryDslQueryContainer => {
+  // Collect all declared semantic fields across all requested types that have semanticSearch enabled.
+  const allDeclaredFields = new Set<string>();
+  for (const typeName of types) {
+    const def = registry.getSemanticSearchDefinition(typeName);
+    if (def) {
+      for (const f of def.fields) {
+        allDeclaredFields.add(f);
+      }
+    }
+  }
+
+  // Validate: every caller-supplied field must be declared on at least one of the requested types.
+  if (fields && fields.length > 0) {
+    for (const f of fields) {
+      if (!allDeclaredFields.has(f)) {
+        throw Boom.badRequest(
+          `semanticSearch.fields contains '${f}', which is not declared as a semantic search ` +
+            `field on any of the requested types`
+        );
+      }
+    }
+  }
+
+  // Build one `semantic` query per type×field combination using the platform shadow field name.
+  const should: estypes.QueryDslQueryContainer[] = [];
+  for (const typeName of types) {
+    const def = registry.getSemanticSearchDefinition(typeName);
+    if (!def) continue;
+
+    // Intersection of requested fields with this type's declared fields; default: all declared.
+    const effectiveFields =
+      fields && fields.length > 0 ? def.fields.filter((f) => fields.includes(f)) : def.fields;
+
+    for (const field of effectiveFields) {
+      should.push({
+        semantic: { field: `${typeName}.${getSemanticFieldName(field)}`, query: queryText },
+      });
+    }
+  }
+
+  // Defense-in-depth: performFind already rejects when no type declares semanticSearch, but guard
+  // here too so the caller can never accidentally receive a `bool.should: []` clause which ES
+  // treats as match-all (namespace-filtered, so not a security leak — but a latent correctness trap).
+  if (should.length === 0) {
+    throw Boom.badRequest(
+      `semanticSearch was requested but none of the requested types declare semanticSearch — ` +
+        `types: [${types.join(', ')}]`
+    );
+  }
+
+  return { bool: { should, minimum_should_match: 1 } };
 };

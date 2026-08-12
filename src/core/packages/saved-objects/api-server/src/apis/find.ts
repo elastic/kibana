@@ -42,6 +42,60 @@ export interface SavedObjectsPitParams {
 }
 
 /**
+ * Semantic (vector) search options for {@link SavedObjectsFindOptions}.
+ *
+ * **Server-side only** — never expose over the public `/api/saved_objects/_find`
+ * HTTP route; doing so would be a compatibility commitment to make deliberately later.
+ *
+ * @remarks
+ * - `mode` defaults to `'hybrid'` (RRF over BM25 + semantic leaves).
+ * - `fields` are **source attribute names** (e.g., `'title'`, `'description'`), never
+ *   internal shadow field names. The platform maps them to shadow fields via the type
+ *   registry.
+ * - Types without a `semanticSearch` declaration in their registration contribute no
+ *   semantic clause. If *no* requested type has `semanticSearch` configured, `find()`
+ *   rejects with a bad-request error naming the types.
+ *
+ * **Paging semantics (hybrid mode)**:
+ * ES enforces `rank_window_size >= size`, so `perPage` must not exceed `rankWindowSize`.
+ * Additionally, `(page - 1) * perPage` must be less than `rankWindowSize`; pages beyond
+ * this range silently return no results (ES 200 with empty hits). `find()` pre-validates
+ * both constraints and rejects violating requests with a bad-request error.
+ *
+ * Semantic mode uses standard `from`/`size` pagination and has no window constraint.
+ *
+ * @public
+ */
+export interface SavedObjectsFindOptionsSemanticSearch {
+  /** Natural-language query text forwarded to the ES `semantic` query. */
+  query: string;
+  /**
+   * Subset of the type's declared semantic fields to target (source attribute names).
+   * Defaults to all declared semantic fields across the requested types.
+   */
+  fields?: string[];
+  /**
+   * Search mode:
+   * - `'semantic'`: a single standard retriever wrapping the semantic query (normal
+   *   `from`/`size` pagination; no rank-window constraint).
+   * - `'hybrid'` (default): RRF over BM25 + semantic leaves, with pagination bounded
+   *   by `rankWindowSize`.
+   */
+  mode?: 'semantic' | 'hybrid';
+  /**
+   * RRF `rank_window_size` — positive integer, 1–1000.
+   * Defaults to `Math.min(Math.max(perPage * 10, 100), 1000)`.
+   * Only meaningful in hybrid mode.
+   */
+  rankWindowSize?: number;
+  /**
+   * RRF `rank_constant` — positive integer ≥ 1 (default 60).
+   * Only meaningful in hybrid mode.
+   */
+  rankConstant?: number;
+}
+
+/**
  * Options for finding saved objects
  *
  * @public
@@ -172,6 +226,23 @@ export interface SavedObjectsFindOptions {
   pit?: SavedObjectsPitParams;
   /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
   migrationVersionCompatibility?: 'compatible' | 'raw';
+  /**
+   * Semantic (vector) search options. When present, `find()` emits an ES `retriever`
+   * instead of a bare `query` and routes through the platform's semantic-search layer.
+   *
+   * **Server-side only** — do not pass this option over the public HTTP route.
+   *
+   * **Filter scoping in hybrid mode**: in `mode: 'hybrid'` the KQL `filter`,
+   * `hasReference`, and `hasNoReference` options are applied only to the BM25 leaf of the
+   * RRF retriever — they do NOT narrow the semantic leaf. The semantic leaf carries only
+   * the namespace/type filter that is always injected. As a result, documents matched
+   * solely by the semantic leaf may appear in results even when they would be excluded by
+   * a KQL filter. Callers that require both filters to apply must use `mode: 'semantic'`
+   * (single leaf, no BM25) or add the equivalent clause to `semanticSearch.query` text.
+   *
+   * {@link SavedObjectsFindOptionsSemanticSearch}
+   */
+  semanticSearch?: SavedObjectsFindOptionsSemanticSearch;
 }
 
 /**

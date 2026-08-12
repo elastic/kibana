@@ -50,6 +50,7 @@ export type { SavedObjectsDeleteByNamespaceOptions } from './delete_by_namespace
 export type {
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindOptionsSemanticSearch,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsPitParams,

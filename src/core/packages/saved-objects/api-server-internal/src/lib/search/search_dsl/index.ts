@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getSearchDsl } from './search_dsl';
-export { getNamespacesBoolFilter } from './query_params';
+export { getSearchDsl, type GetSearchDslOptions } from './search_dsl';
+export { getNamespacesBoolFilter, getSemanticClause } from './query_params';

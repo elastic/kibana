@@ -92,6 +92,7 @@ export const performFind = async <T = unknown, A = unknown>(
     preference,
     aggs,
     migrationVersionCompatibility,
+    semanticSearch,
   } = options;
 
   if (!type) {
@@ -116,6 +117,86 @@ export const performFind = async <T = unknown, A = unknown>(
 
   if (fields && !Array.isArray(fields)) {
     throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
+  }
+
+  // semanticSearch option validation — all checks are pre-flight to avoid a round-trip
+  // to ES for options that are structurally incompatible with retriever DSL.
+  let resolvedSemanticSearch = semanticSearch;
+  if (semanticSearch) {
+    if (!semanticSearch.query?.trim()) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch.query must be a non-empty string'
+      );
+    }
+    if (searchAfter) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch cannot be combined with options.searchAfter'
+      );
+    }
+    if (pit) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch cannot be combined with options.pit'
+      );
+    }
+    if (sortField) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch cannot be combined with options.sortField (ES rejects top-level sort with a retriever)'
+      );
+    }
+    if (
+      semanticSearch.rankWindowSize !== undefined &&
+      (!Number.isInteger(semanticSearch.rankWindowSize) ||
+        semanticSearch.rankWindowSize < 1 ||
+        semanticSearch.rankWindowSize > 1000)
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch.rankWindowSize must be a positive integer between 1 and 1000'
+      );
+    }
+    if (
+      semanticSearch.rankConstant !== undefined &&
+      (!Number.isInteger(semanticSearch.rankConstant) || semanticSearch.rankConstant < 1)
+    ) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        'options.semanticSearch.rankConstant must be a positive integer (minimum 1)'
+      );
+    }
+    // At least one requested type must declare semanticSearch in its registration.
+    const typesWithSemantic = allowedTypes.filter(
+      (t) => registry.getSemanticSearchDefinition(t) !== undefined
+    );
+    if (typesWithSemantic.length === 0) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `options.semanticSearch requires at least one of the requested types to have semanticSearch ` +
+          `declared in registration; none of [${allowedTypes.join(
+            ', '
+          )}] have semanticSearch configured`
+      );
+    }
+    // Resolve the effective rank_window_size so pagination validation and the ES query agree.
+    // The perPage-relative default (max(perPage*10, 100)) is resolved here and passed
+    // to getSearchDsl so it uses the same value.
+    const effectiveRankWindowSize =
+      semanticSearch.rankWindowSize ?? Math.min(Math.max(perPage * 10, 100), 1000);
+    resolvedSemanticSearch = { ...semanticSearch, rankWindowSize: effectiveRankWindowSize };
+    // Hybrid mode: validate that from/size fall inside the rank window.
+    // ES silently returns empty results when from >= rank_window_size (no 400), so we
+    // pre-flight reject to avoid confusing silent empty pages.
+    const semanticMode = semanticSearch.mode ?? 'hybrid';
+    if (semanticMode === 'hybrid') {
+      if (perPage > effectiveRankWindowSize) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `options.perPage (${perPage}) must not exceed rankWindowSize (${effectiveRankWindowSize}) in hybrid semantic search mode`
+        );
+      }
+      const from = perPage * (page - 1);
+      if (from >= effectiveRankWindowSize) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `options.page (${page}) with perPage ${perPage} exceeds the rank window (${effectiveRankWindowSize}); ` +
+            `start offset ${from} must be less than rankWindowSize in hybrid semantic search mode`
+        );
+      }
+    }
   }
 
   let kueryNode;
@@ -214,6 +295,7 @@ export const performFind = async <T = unknown, A = unknown>(
       hasNoReference,
       hasNoReferenceOperator,
       kueryNode,
+      semanticSearch: resolvedSemanticSearch,
     }),
   };
 

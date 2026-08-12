@@ -36,6 +36,7 @@ export type {
   SavedObjectsCheckConflictsResponse,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindOptionsSemanticSearch,
   SavedObjectsFindResult,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsDeleteOptions,

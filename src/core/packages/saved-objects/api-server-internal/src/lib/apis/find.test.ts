@@ -243,6 +243,173 @@ describe('find', () => {
         expect(mockGetSearchDsl).not.toHaveBeenCalled();
         expect(client.search).not.toHaveBeenCalled();
       });
+
+      describe('semanticSearch option', () => {
+        // Spy helper: makes the module-level registry report that `type` (='index-pattern')
+        // has a semanticSearch definition, so validation checks that fire AFTER the
+        // registration check can be reached.
+        const withSemanticType = () =>
+          jest
+            .spyOn(registry, 'getSemanticSearchDefinition')
+            .mockImplementation((typeName) =>
+              typeName === type
+                ? { fields: ['title'], inferenceId: '.elser-2-elasticsearch', embedding: 'sync' }
+                : undefined
+            );
+
+        afterEach(() => {
+          jest.restoreAllMocks();
+        });
+
+        it(`throws when semanticSearch.query is an empty string`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: '' } })
+          ).rejects.toThrowError('options.semanticSearch.query must be a non-empty string');
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when semanticSearch.query is a whitespace-only string`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: '   ' } })
+          ).rejects.toThrowError('options.semanticSearch.query must be a non-empty string');
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when semanticSearch is combined with searchAfter`, async () => {
+          await expect(
+            repository.find({
+              type,
+              semanticSearch: { query: 'test' },
+              searchAfter: ['1', 'a'],
+            })
+          ).rejects.toThrowError(
+            'options.semanticSearch cannot be combined with options.searchAfter'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when semanticSearch is combined with pit`, async () => {
+          await expect(
+            repository.find({
+              type,
+              semanticSearch: { query: 'test' },
+              pit: { id: 'abc123' },
+            })
+          ).rejects.toThrowError('options.semanticSearch cannot be combined with options.pit');
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when semanticSearch is combined with sortField`, async () => {
+          await expect(
+            repository.find({
+              type,
+              semanticSearch: { query: 'test' },
+              sortField: 'updated_at',
+            })
+          ).rejects.toThrowError(
+            'options.semanticSearch cannot be combined with options.sortField'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when rankWindowSize is 0`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'test', rankWindowSize: 0 } })
+          ).rejects.toThrowError(
+            'options.semanticSearch.rankWindowSize must be a positive integer between 1 and 1000'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when rankWindowSize exceeds 1000`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'test', rankWindowSize: 1001 } })
+          ).rejects.toThrowError(
+            'options.semanticSearch.rankWindowSize must be a positive integer between 1 and 1000'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when rankWindowSize is a non-integer`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'test', rankWindowSize: 1.5 } })
+          ).rejects.toThrowError(
+            'options.semanticSearch.rankWindowSize must be a positive integer between 1 and 1000'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when rankConstant is 0`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'test', rankConstant: 0 } })
+          ).rejects.toThrowError(
+            'options.semanticSearch.rankConstant must be a positive integer (minimum 1)'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when rankConstant is negative`, async () => {
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'test', rankConstant: -1 } })
+          ).rejects.toThrowError(
+            'options.semanticSearch.rankConstant must be a positive integer (minimum 1)'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws when no requested type has semanticSearch in registration`, async () => {
+          // registry has no semantic types by default — no spy needed
+          await expect(
+            repository.find({ type, semanticSearch: { query: 'find dashboards' } })
+          ).rejects.toThrowError(
+            'options.semanticSearch requires at least one of the requested types to have semanticSearch declared in registration'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws in hybrid mode when perPage exceeds rankWindowSize`, async () => {
+          withSemanticType();
+          await expect(
+            repository.find({
+              type,
+              perPage: 50,
+              semanticSearch: { query: 'test', mode: 'hybrid', rankWindowSize: 20 },
+            })
+          ).rejects.toThrowError(
+            'options.perPage (50) must not exceed rankWindowSize (20) in hybrid semantic search mode'
+          );
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws in hybrid mode when page offset reaches the rank window boundary`, async () => {
+          withSemanticType();
+          // perPage=10, page=11, rankWindowSize=100 → from=100 >= rws=100 → reject
+          await expect(
+            repository.find({
+              type,
+              perPage: 10,
+              page: 11,
+              semanticSearch: { query: 'test', mode: 'hybrid', rankWindowSize: 100 },
+            })
+          ).rejects.toThrowError('options.page (11) with perPage 10 exceeds the rank window (100)');
+          expect(client.search).not.toHaveBeenCalled();
+        });
+
+        it(`throws in hybrid mode when page offset exceeds default rank window`, async () => {
+          withSemanticType();
+          // perPage=20 (default), page=6, effectiveRws=max(200,100)=200 → from=100 < 200 OK
+          // perPage=20, page=11, effectiveRws=200 → from=200 >= 200 → reject
+          await expect(
+            repository.find({
+              type,
+              perPage: 20,
+              page: 11,
+              semanticSearch: { query: 'test' }, // mode defaults to hybrid
+            })
+          ).rejects.toThrowError('options.page (11) with perPage 20 exceeds the rank window (200)');
+          expect(client.search).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('returns', () => {
@@ -544,6 +711,76 @@ describe('find', () => {
             type: ['config', 'index-pattern'],
           })
         );
+      });
+
+      describe('semanticSearch option', () => {
+        afterEach(() => {
+          jest.restoreAllMocks();
+        });
+
+        it(`passes semanticSearch option to getSearchDsl with resolved rankWindowSize`, async () => {
+          // Make the registry report that `type` (='index-pattern') has semanticSearch
+          // so the registration check passes.
+          jest
+            .spyOn(registry, 'getSemanticSearchDefinition')
+            .mockImplementation((typeName) =>
+              typeName === type
+                ? { fields: ['title'], inferenceId: '.elser-2-elasticsearch', embedding: 'sync' }
+                : undefined
+            );
+
+          const semanticSearch = {
+            query: 'find relevant dashboards',
+            mode: 'hybrid' as const,
+            rankConstant: 30,
+          };
+
+          await findSuccess(client, repository, { type, semanticSearch });
+
+          // The option must be forwarded with the effective rankWindowSize resolved:
+          // perPage=FIND_DEFAULT_PER_PAGE (20), effectiveRws=max(200,100)=200.
+          expect(mockGetSearchDsl).toHaveBeenCalledWith(
+            mappings,
+            registry,
+            expect.objectContaining({
+              semanticSearch: expect.objectContaining({
+                query: 'find relevant dashboards',
+                mode: 'hybrid',
+                rankConstant: 30,
+                rankWindowSize: 200, // resolved from max(perPage*10, 100)
+              }),
+            })
+          );
+        });
+
+        it(`passes explicit rankWindowSize to getSearchDsl unchanged`, async () => {
+          jest
+            .spyOn(registry, 'getSemanticSearchDefinition')
+            .mockImplementation((typeName) =>
+              typeName === type
+                ? { fields: ['title'], inferenceId: '.elser-2-elasticsearch', embedding: 'sync' }
+                : undefined
+            );
+
+          const semanticSearch = {
+            query: 'find relevant dashboards',
+            mode: 'semantic' as const,
+            rankWindowSize: 500,
+          };
+
+          await findSuccess(client, repository, { type, semanticSearch });
+
+          expect(mockGetSearchDsl).toHaveBeenCalledWith(
+            mappings,
+            registry,
+            expect.objectContaining({
+              semanticSearch: expect.objectContaining({
+                mode: 'semantic',
+                rankWindowSize: 500,
+              }),
+            })
+          );
+        });
       });
     });
   });

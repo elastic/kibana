@@ -18,7 +18,7 @@ import {
   SavedObjectTypeRegistry,
   type IndexMapping,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { getQueryParams } from './query_params';
+import { getQueryParams, getSemanticClause } from './query_params';
 import type {
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
@@ -1035,6 +1035,179 @@ describe('#getQueryParams', () => {
           })
         ).toThrowError('cannot specify empty namespaces array');
       });
+    });
+  });
+});
+
+// ─── getSemanticClause ────────────────────────────────────────────────────────
+
+describe('#getSemanticClause', () => {
+  let semanticRegistry: SavedObjectTypeRegistry;
+
+  beforeEach(() => {
+    semanticRegistry = new SavedObjectTypeRegistry();
+
+    // typeA: declares two semantic fields
+    semanticRegistry.registerType({
+      name: 'typeA',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          description: { type: 'text' },
+        },
+      },
+      semanticSearch: { fields: ['title', 'description'] },
+    });
+
+    // typeB: single semantic field, different name
+    semanticRegistry.registerType({
+      name: 'typeB',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          name: { type: 'text' },
+        },
+      },
+      semanticSearch: { fields: ['name'] },
+    });
+
+    // typeC: no semanticSearch declaration
+    semanticRegistry.registerType({
+      name: 'typeC',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        properties: {
+          body: { type: 'text' },
+        },
+      },
+    });
+  });
+
+  describe('shadow field name mapping', () => {
+    it('maps source field to {type}.{field}_semantic shadow path', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'my query');
+      const should: any[] = (result as any).bool.should;
+      expect(should).toEqual(
+        expect.arrayContaining([
+          { semantic: { field: 'typeA.title_semantic', query: 'my query' } },
+          { semantic: { field: 'typeA.description_semantic', query: 'my query' } },
+        ])
+      );
+    });
+  });
+
+  describe('field resolution', () => {
+    it('uses all declared fields when fields option is undefined', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'q');
+      const should: any[] = (result as any).bool.should;
+      expect(should).toHaveLength(2);
+      expect(should.map((c: any) => c.semantic.field)).toEqual(
+        expect.arrayContaining(['typeA.title_semantic', 'typeA.description_semantic'])
+      );
+    });
+
+    it('uses all declared fields when fields option is an empty array', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'q', []);
+      const should: any[] = (result as any).bool.should;
+      expect(should).toHaveLength(2);
+    });
+
+    it('restricts to the intersection of requested and declared fields', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'q', ['title']);
+      const should: any[] = (result as any).bool.should;
+      expect(should).toHaveLength(1);
+      expect(should[0]).toEqual({ semantic: { field: 'typeA.title_semantic', query: 'q' } });
+    });
+
+    it('throws Boom.badRequest when a requested field is not declared on any type', () => {
+      expect(() =>
+        getSemanticClause(semanticRegistry, ['typeA', 'typeB'], 'q', ['nonExistent'])
+      ).toThrow("semanticSearch.fields contains 'nonExistent'");
+    });
+
+    it('throws when a field is declared on one type but not on any of the requested types', () => {
+      // 'name' is only on typeB; requesting it against typeA alone is invalid
+      expect(() => getSemanticClause(semanticRegistry, ['typeA'], 'q', ['name'])).toThrow(
+        "semanticSearch.fields contains 'name'"
+      );
+    });
+
+    it('does not throw when a requested field is declared on at least one requested type', () => {
+      // 'name' is declared on typeB — should succeed when typeB is included
+      expect(() =>
+        getSemanticClause(semanticRegistry, ['typeA', 'typeB'], 'q', ['name'])
+      ).not.toThrow();
+    });
+  });
+
+  describe('multi-type', () => {
+    it('combines clauses from multiple types with semanticSearch', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA', 'typeB'], 'hello');
+      const should: any[] = (result as any).bool.should;
+      // typeA contributes title + description; typeB contributes name => 3 clauses total
+      expect(should).toHaveLength(3);
+      expect(should.map((c: any) => c.semantic.field)).toEqual(
+        expect.arrayContaining([
+          'typeA.title_semantic',
+          'typeA.description_semantic',
+          'typeB.name_semantic',
+        ])
+      );
+    });
+
+    it('skips types without a semanticSearch declaration', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA', 'typeC'], 'hello');
+      const should: any[] = (result as any).bool.should;
+      // typeC has no semanticSearch — only typeA's fields
+      expect(should.every((c: any) => c.semantic.field.startsWith('typeA.'))).toBe(true);
+    });
+
+    it('produces only the intersection of requested fields across types', () => {
+      // 'title' exists on typeA only; typeB has 'name' only => intersection for typeB is empty
+      const result = getSemanticClause(semanticRegistry, ['typeA', 'typeB'], 'q', ['title']);
+      const should: any[] = (result as any).bool.should;
+      expect(should).toHaveLength(1);
+      expect(should[0]).toEqual({ semantic: { field: 'typeA.title_semantic', query: 'q' } });
+    });
+  });
+
+  describe('multi-field', () => {
+    it('returns bool.should with minimum_should_match: 1', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'q') as any;
+      expect(result.bool.minimum_should_match).toBe(1);
+      expect(Array.isArray(result.bool.should)).toBe(true);
+    });
+
+    it('creates one clause per declared field', () => {
+      const result = getSemanticClause(semanticRegistry, ['typeA'], 'search text');
+      const should: any[] = (result as any).bool.should;
+      expect(should).toHaveLength(2);
+      should.forEach((clause: any) => {
+        expect(clause.semantic.query).toBe('search text');
+        expect(typeof clause.semantic.field).toBe('string');
+        expect(clause.semantic.field).toMatch(/_semantic$/);
+      });
+    });
+  });
+
+  describe('defense-in-depth: empty should guard', () => {
+    it('throws Boom.badRequest when no requested type declares semanticSearch (only non-semantic types)', () => {
+      // typeC has no semanticSearch declaration; the resulting should[] would be empty.
+      // performFind already rejects before this point, but getSemanticClause must also throw
+      // to prevent a `bool.should: []` clause (ES match-all) from ever being emitted.
+      expect(() => getSemanticClause(semanticRegistry, ['typeC'], 'q')).toThrow(
+        /semanticSearch was requested but none of the requested types declare semanticSearch/
+      );
+    });
+
+    it('throws Boom.badRequest when all requested types are unknown to the registry', () => {
+      expect(() => getSemanticClause(semanticRegistry, ['nonExistentType'], 'q')).toThrow(
+        /semanticSearch was requested but none of the requested types declare semanticSearch/
+      );
     });
   });
 });
