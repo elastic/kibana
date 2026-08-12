@@ -103,6 +103,17 @@ const createLogger = (): Logger =>
 const createSavedObjectsClient = () => ({} as never);
 
 describe('dashboardSmlType', () => {
+  it('uses the KI type id the dashboard feature privilege grants (see oss_features.ts)', () => {
+    // `features` cannot depend on this plugin, so `aiIndex: { read: ['dashboard'] }` there is a
+    // literal — renaming DASHBOARD_SML_TYPE without updating it would silently drop AI Index
+    // visibility rather than fail to compile.
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    expect(dashboardSmlType.id).toBe('dashboard');
+  });
+
   it('lists dashboards across all spaces', async () => {
     const finder = {
       find: jest.fn().mockReturnValue(

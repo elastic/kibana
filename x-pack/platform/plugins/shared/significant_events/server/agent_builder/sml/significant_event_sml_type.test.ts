@@ -61,6 +61,19 @@ describe('createSignificantEventSmlType', () => {
     );
   });
 
+  it('uses the KI type id the streams feature privilege grants (see streams/server/plugin.ts)', () => {
+    // `aiIndex: { read: ['significant_event'] }` on the Streams feature is a literal rather than an
+    // import of SIGNIFICANT_EVENT_SML_TYPE, because `significant_events` already requires `streams`
+    // and importing back would be a circular plugin dependency. Renaming the constant without
+    // updating that literal would silently drop AI Index visibility rather than fail to compile.
+    const smlType = createSignificantEventSmlType({
+      getScopedClients: createGetScopedClients([]),
+    });
+
+    expect(smlType.id).toBe(SIGNIFICANT_EVENT_SML_TYPE);
+    expect(SIGNIFICANT_EVENT_SML_TYPE).toBe('significant_event');
+  });
+
   it('lists significant events for SML indexing', async () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({

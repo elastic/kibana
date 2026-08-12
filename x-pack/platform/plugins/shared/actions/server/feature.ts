@@ -55,6 +55,9 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           'triggersActionsConnectors',
         ],
       },
+      // Must match CONNECTOR_SML_TYPE in
+      // x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/connector.ts
+      aiIndex: { read: ['connector'] },
       savedObject: {
         all: [
           ACTION_SAVED_OBJECT_TYPE,
@@ -78,6 +81,9 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
           'triggersActionsConnectors',
         ],
       },
+      // Must match CONNECTOR_SML_TYPE in
+      // x-pack/platform/plugins/shared/agent_builder_platform/server/sml_types/connector.ts
+      aiIndex: { read: ['connector'] },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`
         all: [

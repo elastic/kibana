@@ -7,6 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { ACTION_POLICY_SML_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
 
 import { registerFeaturePrivileges } from './privileges';
 import { ALERTING_V2_FEATURES } from '../../../common/feature_privileges';
@@ -55,6 +56,31 @@ describe('registerFeaturePrivileges', () => {
 
     expect(rulesFeature.privileges?.all.alerts).toBeUndefined();
     expect(rulesFeature.privileges?.read.alerts).toBeUndefined();
+  });
+
+  it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the rules feature', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.privileges?.all.aiIndex).toEqual({ read: [RULE_SML_TYPE] });
+    expect(rulesFeature.privileges?.read.aiIndex).toEqual({ read: [RULE_SML_TYPE] });
+  });
+
+  it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the action policies feature', () => {
+    const actionPoliciesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id);
+
+    expect(actionPoliciesFeature.privileges?.all.aiIndex).toEqual({
+      read: [ACTION_POLICY_SML_TYPE],
+    });
+    expect(actionPoliciesFeature.privileges?.read.aiIndex).toEqual({
+      read: [ACTION_POLICY_SML_TYPE],
+    });
+  });
+
+  it('does not set the `aiIndex` privilege for features that do not request it', () => {
+    const executionHistoryFeature = getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id);
+
+    expect(executionHistoryFeature.privileges?.all.aiIndex).toBeUndefined();
+    expect(executionHistoryFeature.privileges?.read.aiIndex).toBeUndefined();
   });
 
   describe('management app gating', () => {

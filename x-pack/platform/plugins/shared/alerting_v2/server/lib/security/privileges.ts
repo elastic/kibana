@@ -43,6 +43,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.all.aiIndex
+          ? { aiIndex: { ...feature.privileges.all.aiIndex } }
+          : {}),
         ...(feature.privileges.all.alerts ? { alerts: { ...feature.privileges.all.alerts } } : {}),
         savedObject: {
           all: [...feature.privileges.all.savedObject.all],
@@ -56,6 +59,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.read.aiIndex
+          ? { aiIndex: { ...feature.privileges.read.aiIndex } }
+          : {}),
         ...(feature.privileges.read.alerts
           ? { alerts: { ...feature.privileges.read.alerts } }
           : {}),

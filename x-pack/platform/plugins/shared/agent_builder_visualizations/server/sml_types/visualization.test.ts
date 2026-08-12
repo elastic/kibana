@@ -41,6 +41,10 @@ describe('visualizationSmlType', () => {
   });
 
   describe('id', () => {
+    // Also the KI type id the visualize feature privilege grants. `features` cannot depend on this
+    // plugin, so `aiIndex: { read: ['visualization'] }` in oss_features.ts is a literal — renaming
+    // VISUALIZATION_SML_TYPE without updating it would silently drop AI Index visibility rather
+    // than fail to compile.
     it('equals visualization', () => {
       expect(visualizationSmlType.id).toBe('visualization');
     });
