@@ -286,6 +286,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'workflow.yaml',
   'workflow.yaml.diff',
 
+  // Platform – Context Engine (feedback loop)
+  'platform.context_engine.ai_index',
+
   // Platform – Cases
   'case',
   'cases',

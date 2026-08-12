@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
 
 /**
@@ -27,6 +28,23 @@ export interface AnalyzeAndImproveContext {
 /** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
 export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
 
+/**
+ * Agent Builder `openChat` options for an "Analyze & improve" hand-off, built by
+ * {@link ContextEnginePluginStart.buildAnalyzeChat}. Context Engine owns this translation (the
+ * attachment type/id and the per-index conversation scoping) so the `agent_builder_platform` bridge
+ * stays pure forwarding and there is a single source of truth for the wire contract.
+ */
+export interface AnalyzeChatOptions {
+  /** The AI index's configured feedback agent, or `undefined` when none is set. */
+  agentId?: string;
+  /** Always start a fresh conversation for the hand-off. */
+  newConversation: boolean;
+  /** Per-index session so each AI index's analysis is its own conversation, not a shared one. */
+  sessionTag: string;
+  /** The AI index attached by value (grants only the read-only `get_ai_index_automations` tool). */
+  attachments: ConversationAttachment[];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
 
@@ -36,6 +54,13 @@ export interface ContextEnginePluginStart {
    * the button is hidden.
    */
   registerChatOpener: (opener: ChatOpener) => void;
+  /**
+   * Translates an "Analyze & improve" context into Agent Builder `openChat` options. The
+   * `agent_builder_platform` bridge calls this and forwards the result to `openChat`, so the
+   * attachment wire contract lives here (in Context Engine) rather than being duplicated in the
+   * bridge.
+   */
+  buildAnalyzeChat: (context: AnalyzeAndImproveContext) => AnalyzeChatOptions;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

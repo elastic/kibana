@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { registerContextEngineAgentBuilder } from '@kbn/context-engine-plugin/server';
 import type { PluginConfig } from './config';
 import type {
   PluginSetupDependencies,
@@ -48,6 +49,24 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
+
+    // Context Engine ↔ Agent Builder bridge (server half): register the CE `ai_index` attachment +
+    // its read-only tool. `context_engine` never imports `agentBuilder`; we pull its setup contract
+    // here. Reads the caller's capabilities so the tool can enforce the workflows-read privilege.
+    if (setupDeps.contextEngine) {
+      const { contextEngine } = setupDeps;
+      registerContextEngineAgentBuilder({
+        agentBuilder: setupDeps.agentBuilder,
+        getWorkflowsApi: () => contextEngine.getWorkflowsApi(),
+        getCapabilities: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.capabilities.resolveCapabilities(request, {
+            capabilityPath: ['workflowsManagement.readWorkflow'],
+          });
+        },
+      });
+      this.logger.debug('Registered Context Engine ai_index attachment + read tool');
+    }
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;

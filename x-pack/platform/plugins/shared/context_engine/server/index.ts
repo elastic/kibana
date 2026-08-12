@@ -13,7 +13,18 @@ import type {
   ContextEngineStartDependencies,
 } from './types';
 
-export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type {
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+  WorkflowsManagementApiLike,
+} from './types';
+
+/**
+ * Server half of the Agent Builder hand-off bridge, called from `agent_builder_platform`'s
+ * `setup()`. Registers only the `ai_index` attachment + its read tool (no agent, no skills).
+ * Safe to export here: `./agent_builder` never imports `./plugin`.
+ */
+export { registerContextEngineAgentBuilder } from './agent_builder';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

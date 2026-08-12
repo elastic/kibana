@@ -22,6 +22,7 @@ import type {
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
+  WorkflowsManagementApiLike,
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
@@ -46,6 +47,9 @@ export class ContextEnginePlugin
   private signalsService?: SignalsService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
+  // Assigned in start() from the (optional) Workflows Management plugin; exposed via the setup
+  // contract's `getWorkflowsApi` for the Agent Builder bridge's `ai_index` attachment read tool.
+  private workflowsApi?: WorkflowsManagementApiLike;
   private readonly aiIndexRegistry = new AiIndexRegistry();
 
   constructor(context: PluginInitializerContext) {
@@ -121,11 +125,15 @@ export class ContextEnginePlugin
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      // Reads the current value at request time (assigned in start(), after this setup() runs).
+      getWorkflowsApi: () => this.workflowsApi,
     };
   }
 
   start(coreStart: CoreStart, startDeps: ContextEngineStartDependencies): ContextEnginePluginStart {
     const aiIndexLogger = this.logger.get('ai_indices');
+
+    this.workflowsApi = startDeps.workflowsManagement?.management;
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;
 

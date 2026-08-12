@@ -35,6 +35,11 @@ export interface AiIndexProperties {
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
+  /**
+   * Agent Builder agent id that runs this index's feedback-loop analysis ("Analyze & improve").
+   * The analysis agent is the user's own; the Signals panel selects it and the chat bridge opens it.
+   */
+  feedback_agent_id?: string;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {

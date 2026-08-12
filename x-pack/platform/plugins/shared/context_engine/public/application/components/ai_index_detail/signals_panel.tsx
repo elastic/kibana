@@ -24,6 +24,7 @@ import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
+import { FeedbackAgentSelector } from './feedback_agent_selector';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { SignalGroupRow } from './signal_group_row';
 import { SignalsErrorPrompt } from './signals_error_prompt';
@@ -59,8 +60,13 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const loading = isLoading || isLoadingGroups;
 
+  // "Analyze & improve" is pure plumbing: it can only open a chat once a chat opener is registered
+  // (the Agent Builder bridge) AND the index has a feedback agent configured to open it against.
+  const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
+
   const handleAnalyze = () => {
     if (aiIndex) {
+      // `tag` is reserved for future group-scoped analysis; the panel-level action is index-wide.
       analyzeAndImprove(getChatOpener, { aiIndex, tag: undefined });
     }
   };
@@ -88,7 +94,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               size="s"
               iconType="sparkles"
               onClick={handleAnalyze}
-              isDisabled={aiIndex === undefined}
+              isDisabled={aiIndex === undefined || !hasFeedbackAgent}
               data-test-subj="contextSignalsAnalyzeButton"
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analyzeButton', {
@@ -98,6 +104,28 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+
+      {chatOpener && aiIndex && !aiIndex.managed && (
+        <>
+          <EuiSpacer size="m" />
+          <FeedbackAgentSelector aiIndex={aiIndex} />
+          {!hasFeedbackAgent && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued" data-test-subj="contextSignalsFeedbackAgentPrompt">
+                <p>
+                  {i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt',
+                    {
+                      defaultMessage: 'Select an analysis agent to enable "Analyze & improve".',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </>
+          )}
+        </>
+      )}
 
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
