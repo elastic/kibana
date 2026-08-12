@@ -1,3 +1,4 @@
+@kayahr/text-encoding
 @types/mdast
 @types/unist
 eslint-plugin-n
