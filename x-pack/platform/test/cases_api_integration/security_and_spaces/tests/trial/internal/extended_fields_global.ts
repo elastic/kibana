@@ -199,20 +199,23 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({ risk_score_as_keyword: '' });
       });
 
-      it('creates the case when a required global field has no default and no caller value', async () => {
-        // Backward compatibility: defaults injection must be invisible to callers that never
-        // engaged with extended_fields — `required` stays a UI submit-time gate here.
+      it('rejects when a required global field has no default and no caller value', async () => {
+        // With templates enabled, required global fields are enforced at create time against
+        // effective values (request + injected defaults + legacy customFields mirror) — the
+        // same contract as required v1 custom fields, not a UI-only submit gate.
         await supertest
           .post(`${FIELD_DEFINITIONS_URL}`)
           .set('kbn-xsrf', 'true')
           .send(buildFieldDef('risk_score', { required: true }))
           .expect(200);
 
-        const createdCase = await createCase(supertest, {
-          ...getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-        });
+        const body = await createCase(
+          supertest,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          400
+        );
 
-        expect(createdCase[CASE_EXTENDED_FIELDS]).to.be(undefined);
+        expect(body.message).to.contain('Field "risk_score" is required');
       });
 
       it('rejects when the caller sends extended_fields but omits a required global field', async () => {
@@ -241,7 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('legacy customFields-only creates keep succeeding when a required custom field is mirrored into a required global definition', async () => {
         // Posting a configuration mirrors its custom fields into global field definitions,
         // preserving `required`. A create that satisfies the field through the legacy
-        // customFields array (or omits it entirely) must not be rejected by the v2 surface.
+        // customFields array must not be rejected by the v2 surface.
         await createConfiguration(
           supertest,
           getConfigurationRequest({
