@@ -98,7 +98,7 @@ mapped_pages:
 | [visTypeTagcloud](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/tagcloud) | WARNING: Missing or empty README. |
 | [visTypeTimelion](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/timelion/README.md) | Contains the timelion visualization and the timelion backend. |
 | [visTypeTimeseries](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/vis_types/timeseries) | WARNING: Missing or empty README. |
-| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
+| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega/README.md) | Dashboard supports a dedicated by-value vega panel. Its stored config holds a spec string (JSON or HJSON); title, time range, and drilldown fields are optional. The string is preserved exactly, so comments and formatting round-trip. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
@@ -201,6 +201,7 @@ mapped_pages:
 | [ml](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ml/readme.md) | This plugin provides access to the machine learning features provided by Elastic. |
 | [monitoring](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring/readme.md) | This plugin provides the Stack Monitoring kibana application. |
 | [monitoringCollection](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/monitoring_collection/README.md) | This plugin allows for other plugins to add data to Kibana stack monitoring documents. |
+| [nightshift](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/nightshift/README.md) | Owner: @elastic/nightshift-context-and-research-team, @elastic/nightshift-sre-agent-team |
 | [notificationCenter](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/notification_center/README.md) | The Notification Center is the in-product surface for notifications within search solution, such as inference model status updates. It is a presentation + ingestion layer: consumers evaluate their own state and push notifications to the center through submitter helper; this plugin builds the idempotency key, stores and queries notifications for users, and renders them. |
 | [notifications](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/notifications/README.mdx) | The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users. |
 | [observability](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/observability/README.md) | This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI. |

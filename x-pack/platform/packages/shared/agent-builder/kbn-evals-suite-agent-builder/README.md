@@ -121,7 +121,7 @@ node scripts/playwright test --config x-pack/platform/packages/shared/agent-buil
 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Run only selected evaluators
 SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
@@ -136,26 +136,26 @@ SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 no
 RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 # Retrieve traces from another (monitoring) cluster
-TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVAL_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```
 
 > **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
 
-### External Phoenix dataset evaluations
+### External dataset evaluations
 
-If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
+If you want to run evaluations against a dataset that already exists in Elasticsearch (for ad-hoc testing), set `DATASET_NAME` to match the name of the stored dataset and run:
 
 ```bash
-DATASET_NAME="my-phoenix-dataset" \
+DATASET_NAME="my-dataset" \
 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
 ```
 
 Notes:
 
-- The external dataset **must already exist in Phoenix**. If it doesn't, the run will fail with a clear error.
-- In this mode, the suite **does not** create or upsert datasets/examples- Phoenix dataset is the source of truth.
-- Dataset examples must match the example schema already using in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
+- The dataset **must already exist in Elasticsearch**. If it doesn't, the run will fail with a clear error.
+- In this mode, the suite **does not** create or upsert datasets/examples — the stored dataset is the source of truth.
+- Dataset examples must match the example schema used in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
 ### Evaluation comparisons
 
@@ -165,10 +165,10 @@ Run the suite twice and capture the two execution IDs (via `TEST_RUN_ID`). Scout
 
 ```bash
 # This must point at the Kibana instance where eval scores are ingested/read.
-export EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601/dev
+export EVAL_KBN_URL=http://elastic:changeme@localhost:5601/dev
 
 # LLM-as-a-judge connector (required by @kbn/evals)
-export EVALUATION_CONNECTOR_ID=<llm-judge-connector-id>
+export EVAL_CONNECTOR_ID=<llm-judge-connector-id>
 
 # Run A
 TEST_RUN_ID=agent-builder-baseline \
@@ -184,11 +184,11 @@ Tip: the execution id is also printed at the end of the run in the export messag
 Then compare:
 
 ```bash
-export EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601/dev
+export EVAL_KBN_URL=http://elastic:changeme@localhost:5601/dev
 node scripts/evals compare agent-builder-baseline agent-builder-change
 ```
 
 Notes:
 
-- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
-- `compare` reads through `EVALUATIONS_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).
+- The two runs must use the same connector and configuration.
+- `compare` reads through `EVAL_KBN_URL` (defaults to `http://elastic:changeme@localhost:5601/dev`).

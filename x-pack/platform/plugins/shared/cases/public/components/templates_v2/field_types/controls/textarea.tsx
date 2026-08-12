@@ -25,7 +25,10 @@ import {
 } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type TextareaProps = z.infer<typeof TextareaFieldSchema> & ConditionRenderProps;
+type TextareaProps = z.infer<typeof TextareaFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const Textarea = ({
   label,
@@ -40,6 +43,7 @@ export const Textarea = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: TextareaProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -47,7 +51,8 @@ export const Textarea = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};
