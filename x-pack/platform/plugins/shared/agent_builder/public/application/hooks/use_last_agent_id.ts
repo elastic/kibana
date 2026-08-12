@@ -33,17 +33,17 @@ export const getLastAgentId = (): string => {
 export const useLastAgentId = (): { agentId: string; isReady: boolean } => {
   const spaceId = useActiveSpaceId();
   const [agentIdStorage] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
-  const { effectiveDefaultAgentId, isReady } = useEffectiveSpaceDefaultAgent();
+  const { effectiveDefaultAgentId, isReady, isRestricted } = useEffectiveSpaceDefaultAgent();
   const validateAgentId = useValidateAgentId();
 
   let agentId: string;
   if (isReady) {
-    if (effectiveDefaultAgentId) {
+    if (isRestricted && effectiveDefaultAgentId) {
       agentId = effectiveDefaultAgentId;
     } else if (validateAgentId(agentIdStorage)) {
       agentId = agentIdStorage;
     } else {
-      agentId = agentBuilderDefaultAgentId;
+      agentId = effectiveDefaultAgentId ?? agentBuilderDefaultAgentId;
     }
   } else {
     agentId = agentIdStorage ?? agentBuilderDefaultAgentId;

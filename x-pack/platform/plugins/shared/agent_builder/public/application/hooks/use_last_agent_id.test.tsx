@@ -82,6 +82,37 @@ describe('use_last_agent_id', () => {
     expect(result.current.agentId).toBe('siemens-agent');
   });
 
+  it('keeps a validated localStorage agent for unrestricted users even when a space default is assigned', () => {
+    localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('agent-a'));
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: 'siemens-agent',
+      isReady: true,
+      isRestricted: false,
+    });
+    mockValidateAgentId.mockReturnValue(true);
+
+    const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
+
+    expect(result.current.agentId).toBe('agent-a');
+  });
+
+  // When an unrestricted user's localStorage id is invalid we still prefer the
+  // space default over the platform default so a fresh/wiped browser lands on
+  // the assignment rather than the built-in agent.
+  it('falls back to the effective space default when localStorage is invalid for unrestricted users', () => {
+    localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('deleted-agent'));
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: 'siemens-agent',
+      isReady: true,
+      isRestricted: false,
+    });
+    mockValidateAgentId.mockReturnValue(false);
+
+    const { result } = renderHook(() => useLastAgentId(), { wrapper: wrapperFor('default') });
+
+    expect(result.current.agentId).toBe('siemens-agent');
+  });
+
   it('degrades to the platform default when the stored id no longer resolves in the agents list', () => {
     localStorage.setItem(storageKeys.getAgentIdKey('default'), JSON.stringify('deleted-agent'));
     mockValidateAgentId.mockReturnValue(false);
