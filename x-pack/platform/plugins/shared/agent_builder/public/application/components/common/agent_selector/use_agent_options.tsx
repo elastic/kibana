@@ -91,9 +91,6 @@ export const useAgentOptions = ({
   agents: AgentDefinition[];
   selectedAgentId?: string;
 }) => {
-  // Restricted users (no `manageAgents`) in a space with a default agent only
-  // see that agent; admins and unconfigured spaces see the full list. Filtering
-  // here means every selector built on these options inherits the restriction.
   const { effectiveDefaultAgentId, isRestricted } = useEffectiveSpaceDefaultAgent();
   const agentOptions = useMemo(() => {
     const visibleAgents = isRestricted
