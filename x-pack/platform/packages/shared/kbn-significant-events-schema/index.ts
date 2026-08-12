@@ -60,6 +60,7 @@ export {
   isComputedFeature,
   isDuplicateFeature,
   isFeatureWithFilter,
+  MAX_FEATURE_ARRAY_ITEMS,
   mergeFeature,
   normalizeFeatureSlug,
   normalizeFeatureSlugForMatching,

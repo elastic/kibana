@@ -115,7 +115,7 @@ spaceTest.describe(
           await network.countMatchingRequests(
             { endpoint: FIELDS_FOR_WILDCARD_ENDPOINT },
             async () => {
-              await discover.createRuntimeField(field, `emit('test')`);
+              await discover.createRuntimeField({ fieldName: field, script: `emit('test')` });
               await unifiedFieldList.expectAvailableFieldCount(50);
               await unifiedFieldList.searchField(field);
               await expect(unifiedFieldList.getAvailableField(field)).toBeVisible();
