@@ -37,12 +37,14 @@ jest.mock('../../../shared/ui/yaml_editor', () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createElement } = require('react');
   return {
     YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
-      return React.createElement(
+      return createElement(
         'div',
         { 'data-testid': 'yaml-editor' },
-        React.createElement('textarea', {
+        createElement('textarea', {
           ref: (el: HTMLTextAreaElement | null): void => {
             if (el) {
               // getModel returns undefined so handleEditorDidMount skips provider
