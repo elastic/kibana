@@ -149,12 +149,6 @@ Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or 
 
 ::::::::::
 
-::::::::::{step} Update test config manifests
-
-After adding or changing specs, run `node scripts/scout update-test-config-manifests`. Commit the generated `.meta` files, but do not edit them by hand.
-
-::::::::::
-
 :::::::::
 
 ## Organize large plugins with namespaces [scout-namespaces]
