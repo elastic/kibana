@@ -73,7 +73,7 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
       await lens.workspace.openEditor(xyVisId, 'xyVisChart');
 
       await spaceTest.step('switch to pie, which warns it will change the config', async () => {
-        await lens.openChartSwitchPopover({ search: 'pie' });
+        await lens.openChartSwitchPopover({ visType: 'pie', search: 'pie' });
         await expect(lens.getChartSwitchOption('pie')).toBeVisible();
         await expect(lens.getChartSwitchWarning('pie')).toBeVisible();
         await lens.selectChartSwitchOption('pie');
@@ -89,7 +89,7 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('switch to bar, which maps the config without warning', async () => {
-        await lens.openChartSwitchPopover({ search: 'bar' });
+        await lens.openChartSwitchPopover({ visType: 'bar', search: 'bar' });
         await expect(lens.getChartSwitchOption('bar')).toBeVisible();
         await expect(lens.getChartSwitchWarning('bar')).toBeHidden();
         await lens.selectChartSwitchOption('bar');
@@ -136,7 +136,7 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
 
       await lens.workspace.openEditor(pieVisId, 'partitionVisChart');
 
-      await lens.openChartSwitchPopover({ search: 'treemap' });
+      await lens.openChartSwitchPopover({ visType: 'treemap', search: 'treemap' });
       await expect(lens.getChartSwitchOption('treemap')).toBeVisible();
       await expect(lens.getChartSwitchWarning('treemap')).toBeHidden();
       await lens.selectChartSwitchOption('treemap');

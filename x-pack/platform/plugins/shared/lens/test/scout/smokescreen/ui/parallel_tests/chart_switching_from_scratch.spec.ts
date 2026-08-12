@@ -41,7 +41,7 @@ spaceTest.describe('Lens chart switching from scratch', { tag: '@local-stateful-
       field: 'bytes',
     });
 
-    await lens.openChartSwitchPopover({ search: 'table' });
+    await lens.openChartSwitchPopover({ visType: 'lnsDatatable', search: 'table' });
     await expect(lens.getChartSwitchOption('lnsDatatable')).toBeVisible();
     await expect(lens.getChartSwitchWarning('lnsDatatable')).toBeHidden();
     await lens.selectChartSwitchOption('lnsDatatable');
@@ -84,7 +84,7 @@ spaceTest.describe('Lens chart switching from scratch', { tag: '@local-stateful-
       field: 'bytes',
     });
 
-    await lens.openChartSwitchPopover({ search: 'bar' });
+    await lens.openChartSwitchPopover({ visType: 'bar', search: 'bar' });
     await expect(lens.getChartSwitchOption('bar')).toBeVisible();
     await expect(lens.getChartSwitchWarning('bar')).toBeHidden();
     await lens.selectChartSwitchOption('bar');

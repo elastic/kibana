@@ -76,6 +76,7 @@ export class LensWorkspace {
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
     await this.deps.waitForLensApp();
   }
 
@@ -110,6 +111,7 @@ export class LensWorkspace {
    */
   async openEditor(id: string, chartTestSubj: string) {
     await this.page.gotoApp('lens', { hash: `/edit/${id}` });
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
     await this.deps.waitForVisualization(chartTestSubj);
   }
 
