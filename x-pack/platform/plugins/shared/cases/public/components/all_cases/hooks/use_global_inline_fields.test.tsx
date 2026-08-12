@@ -31,6 +31,7 @@ describe('useGlobalInlineFields', () => {
         ],
       },
       isFetching: false,
+      isSuccess: true,
     });
 
     const { result } = renderHook(() => useGlobalInlineFields(), {
@@ -38,5 +39,34 @@ describe('useGlobalInlineFields', () => {
     });
 
     expect(result.current.globalInlineFields.map((f) => f.name)).toEqual(['priority']);
+    expect(result.current.isLoaded).toBe(true);
+  });
+
+  it('does not report fields as loaded while fetching', () => {
+    useGetFieldDefinitionsMock.mockReturnValue({
+      data: undefined,
+      isFetching: true,
+      isSuccess: false,
+    });
+
+    const { result } = renderHook(() => useGlobalInlineFields(), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isLoaded).toBe(false);
+  });
+
+  it('does not report fields as loaded after a failed request', () => {
+    useGetFieldDefinitionsMock.mockReturnValue({
+      data: undefined,
+      isFetching: false,
+      isSuccess: false,
+    });
+
+    const { result } = renderHook(() => useGlobalInlineFields(), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.isLoaded).toBe(false);
   });
 });
