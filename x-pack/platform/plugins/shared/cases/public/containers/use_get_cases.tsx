@@ -56,10 +56,12 @@ export const useGetCases = (
     if (Object.keys(overrides).length > 0) {
       return {};
     }
-    const { extendedFieldFilters: searchFilters, freeText } = parseExtendedFieldSearch(rawSearch);
-    if (searchFilters.length === 0) {
+    const { extendedFieldFilters: parsedSearchFilters, freeText } =
+      parseExtendedFieldSearch(rawSearch);
+    if (parsedSearchFilters.length === 0) {
       return {};
     }
+    const searchFilters = parsedSearchFilters.filter(({ value }) => value.length > 0);
     const pickerFilters = params.filterOptions?.extendedFieldFilters ?? [];
     const seen = new Set(
       pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)

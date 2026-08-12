@@ -230,6 +230,68 @@ describe('useGetCases', () => {
     });
   });
 
+  it('ignores search-bar extendedFieldFilters with empty values', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:"" free text',
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'free text',
+        extendedFieldFilters: [],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
+  it('retains valid search-bar extendedFieldFilters alongside empty values', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getCases');
+
+    renderHook(
+      () =>
+        useGetCases({
+          filterOptions: {
+            search: 'Escalate:"" Customer:true free text',
+          },
+        }),
+      {
+        wrapper: (props) => <TestProviders {...props} />,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toBeCalledWith({
+      filterOptions: {
+        ...DEFAULT_FILTER_OPTIONS,
+        search: 'free text',
+        extendedFieldFilters: [{ label: 'Customer', value: 'true' }],
+        owner: ['securitySolution'],
+      },
+      queryParams: DEFAULT_QUERY_PARAMS,
+      signal: abortCtrl.signal,
+    });
+  });
+
   it('dedupes overlapping search-bar and picker extendedFieldFilters', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
