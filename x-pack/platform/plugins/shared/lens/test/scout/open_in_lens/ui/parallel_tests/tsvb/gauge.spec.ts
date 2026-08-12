@@ -83,7 +83,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
     // Open the primary metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanelFlyout();
-    const colorStops = await lens.getPaletteColorStops(4);
+    const colorStops = await lens.style.getPaletteColorStops(4);
     // First entry: default series color with no minimum, followed by converted TSVB gauge_color_rules
     expect(colorStops).toStrictEqual([
       { stop: '', color: 'rgba(104, 188, 0, 1)' },
@@ -92,7 +92,7 @@ spaceTest.describe('TSVB Gauge - Open in Lens', { tag: tags.deploymentAgnostic }
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(

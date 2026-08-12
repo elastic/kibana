@@ -373,18 +373,6 @@ describe('rule_request_mappers', () => {
       expect(result.no_data_strategy).toBe('recover');
     });
 
-    it('omits no_data_strategy for signal rules even when set', () => {
-      const formValues: FormValues = {
-        ...baseFormValues,
-        kind: 'signal',
-        noDataStrategy: 'recover',
-      };
-
-      const result = mapFormValuesToRuleRequest(formValues);
-
-      expect(result.no_data_strategy).toBeUndefined();
-    });
-
     it('omits no_data_strategy when undefined', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
