@@ -190,6 +190,11 @@ export const getSearchQueryByCloudSecuritySolution = (
  * request, and the callers of that search swallow errors (log-only), so a single malformed doc
  * would otherwise silently zero all CSPM usage reporting for the run. A doc that fails to parse
  * simply emits nothing and is not counted.
+ *
+ * Stopped instances are only counted during the sampling window in which they actually stopped
+ * (lastStopTimestamp >= lookbackStartMs). Without this, an instance whose historical run was
+ * >=24h would keep passing the filter on every subsequent day it still appears in scans —
+ * re-billing a stopped instance indefinitely. It already had its billing day when it stopped.
  */
 export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
   [GCP_COMPUTE_DURATION_RUNTIME_FIELD]: {
@@ -224,7 +229,12 @@ export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
           } else {
             def lastStopStr = (String) data.get('lastStopTimestamp');
             if (lastStopStr == null || lastStopStr.length() == 0) return;
-            duration = ZonedDateTime.parse(lastStopStr).toInstant().toEpochMilli() - lastStartMs;
+            long lastStopMs = ZonedDateTime.parse(lastStopStr).toInstant().toEpochMilli();
+            // Only count a stopped instance during the window in which it actually
+            // stopped. A stop event older than the look-back window was already billed
+            // on its stop day — don't re-bill it on every later day it appears in scans.
+            if (lastStopMs < params['lookbackStartMs']) return;
+            duration = lastStopMs - lastStartMs;
           }
 
           emit(duration);
@@ -236,6 +246,9 @@ export const getGcpComputeDurationRuntimeMapping = (nowMillis: number) => ({
       `,
       params: {
         nowMillis,
+        // Start of the metering sampling window — must stay aligned with the
+        // now-${ASSETS_SAMPLE_GRANULARITY} range filter the query applies on @timestamp.
+        lookbackStartMs: nowMillis - 24 * 60 * 60 * 1000,
         subType: GCP_COMPUTE_INSTANCE_SUB_TYPE,
       },
     },

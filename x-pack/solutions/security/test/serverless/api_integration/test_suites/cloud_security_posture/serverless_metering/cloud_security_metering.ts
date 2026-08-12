@@ -161,11 +161,21 @@ export default function (providerContext: FtrProviderContext) {
         status: 'TERMINATED',
       });
 
+      // Not billable: >=24h historical run, but the stop event is older than the
+      // look-back window — already billed on its stop day, must not be re-billed.
+      const staleTerminatedInstances = getMockGcpComputeFindings({
+        numberOfFindings: 2,
+        runningDurationHours: 30,
+        status: 'TERMINATED',
+        stoppedHoursAgo: 48,
+      });
+
       await findingsIndex.addBulk([
         ...longRunningInstances,
         ...longTerminatedInstances,
         ...shortRunningInstances,
         ...shortTerminatedInstances,
+        ...staleTerminatedInstances,
       ]);
 
       let interceptedRequestBody: UsageRecord[] = [];
@@ -175,7 +185,9 @@ export default function (providerContext: FtrProviderContext) {
         const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
         expect(usageSubTypes).to.contain('cspm');
         expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-        // Only the 3 instances with >=24h running time are billable
+        // Only the 3 instances with >=24h running time whose run is current (running now,
+        // or stopped within the look-back window) are billable — ephemeral and
+        // stale-stopped instances are not.
         expect(interceptedRequestBody[0].usage.quantity).to.be(
           longRunningInstances.length + longTerminatedInstances.length
         );
