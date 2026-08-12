@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -38,20 +38,18 @@ export function AlertActions(
     services,
   } = props;
   const {
-    http,
+    http: {
+      basePath: { prepend },
+    },
     cases,
-    notifications,
   } = services;
-  const {
-    basePath: { prepend },
-  } = http;
 
   const canModifyAlerts = useCanModifyAlerts();
 
   const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
 
   const canReadAlertRule = authorizedToReadRuleForAlert(alert);
-  const { telemetryClient, nightshiftInvestigations } = useKibana().services;
+  const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
@@ -110,76 +108,7 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const [isInvestigating, setIsInvestigating] = useState(false);
-
-  const handleInvestigate = useCallback(async () => {
-    const rawRuleName = observabilityAlert.fields['kibana.alert.rule.name'];
-    const rawReason = observabilityAlert.fields['kibana.alert.reason'];
-    const ruleName = Array.isArray(rawRuleName)
-      ? String(rawRuleName[0] ?? 'Unknown rule')
-      : String(rawRuleName ?? 'Unknown rule');
-    const reason = Array.isArray(rawReason)
-      ? String(rawReason[0] ?? '')
-      : String(rawReason ?? '');
-    const message = reason ? `${ruleName}\n\n${reason}` : ruleName;
-
-    setIsInvestigating(true);
-    closeActionsPopover();
-
-    try {
-      await nightshiftInvestigations?.investigationsClient.fetch(
-        'POST /internal/nightshift/investigations',
-        {
-          params: {
-            body: {
-              subject: { type: 'alert', id: alert._id },
-              concurrency_key: alert._id,
-              context: {
-                message,
-                rule_type_id: observabilityAlert.fields['kibana.alert.rule.rule_type_id'],
-              },
-            },
-          },
-          signal: null,
-        }
-      );
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.observability.alertsTable.investigateSuccessTitle', {
-          defaultMessage: 'Investigation started',
-        }),
-        text: ruleName,
-      });
-    } catch (err) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observability.alertsTable.investigateErrorTitle', {
-          defaultMessage: 'Failed to start investigation',
-        }),
-        text: err instanceof Error ? err.message : String(err),
-      });
-    } finally {
-      setIsInvestigating(false);
-    }
-  }, [alert._id, nightshiftInvestigations, notifications, observabilityAlert.fields, closeActionsPopover]);
-
-  const investigateMenuItem = useMemo(
-    () => (
-      <EuiContextMenuItem
-        key="investigate"
-        icon="inspect"
-        disabled={isInvestigating}
-        onClick={handleInvestigate}
-        data-test-subj="o11yAlertActionsInvestigate"
-      >
-        {i18n.translate('xpack.observability.alertsTable.investigateTextLabel', {
-          defaultMessage: 'Investigate',
-        })}
-      </EuiContextMenuItem>
-    ),
-    [isInvestigating, handleInvestigate]
-  );
-
   const actionsMenuItems = [
-    investigateMenuItem,
     ...caseAlertActionItems,
 
     useMemo(

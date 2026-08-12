@@ -44,7 +44,6 @@
       "kql"
     ],
     "optionalPlugins": [
-      "nightshiftInvestigations",
       "observabilityAgentBuilder",
       "agentBuilder",
       "aiops",
