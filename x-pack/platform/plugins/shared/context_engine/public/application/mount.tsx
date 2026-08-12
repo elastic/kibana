@@ -11,7 +11,11 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { ChatOpener, ContextEnginePluginStart, ContextEngineStartDependencies } from '../types';
+import type {
+  ChatOpener,
+  ContextEnginePluginStart,
+  ContextEngineStartDependencies,
+} from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
 import { resolveAgentBuilderStart } from './resolve_agent_builder';
 import { ContextEngineRoutes } from './routes';

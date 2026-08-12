@@ -63,12 +63,10 @@ export const hasWorkflowExecutePrivilege = (
     actions: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
   });
 
-
 export const hasWorkflowCreatePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>
   hasAllApiPrivileges({ ...params, actions: [WorkflowsManagementApiActions.create] });
-
 
 export const hasWorkflowUpdatePrivilege = (
   params: CheckWorkflowPrivilegeParams
