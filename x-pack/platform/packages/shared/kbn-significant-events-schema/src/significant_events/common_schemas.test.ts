@@ -16,20 +16,8 @@ describe('signalEvidenceSchema', () => {
     result: 'found' as const,
   };
 
-  it('accepts a valid evidence object without time_range', () => {
+  it('accepts a valid evidence object', () => {
     expect(signalEvidenceSchema.safeParse(baseEvidence).success).toBe(true);
-  });
-
-  it('accepts a valid evidence object with absolute time_range', () => {
-    expect(
-      signalEvidenceSchema.safeParse({
-        ...baseEvidence,
-        time_range: {
-          from: '2026-06-11T15:03:00.000Z',
-          to: '2026-06-11T15:10:00.000Z',
-        },
-      }).success
-    ).toBe(true);
   });
 
   it('rejects a query that contains the grounding projection tail (| KEEP @timestamp)', () => {

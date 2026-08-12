@@ -155,7 +155,7 @@ Request:
       "confidence": "...",
       "stream_names": ["..."],
       "signals": [
-        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "time_range": { "from": "...", "to": "..." }, "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
+        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
         ...
       ],
       "blast_radius": [

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
 import { SignificantEventDetails } from './significant_event_details';
 
 jest.mock('@kbn/esql-datagrid/public', () => ({
@@ -48,29 +48,23 @@ const baseEvent: SignificantEvent = {
   blast_radius: [],
 };
 
-const detectionSignal = {
-  type: 'detection' as const,
+const detectionSignal: SignalEntry = {
+  type: 'detection',
   stream_name: 'logs.checkout',
   description: 'Found: connection refused. Impact: checkout blocked. Verdict: confirms.',
   confirmed: true,
   collected_at: '2026-06-11T15:10:00.000Z',
   evidence: {
     esql_query: ESQL_QUERY,
-    result: 'found' as const,
-    time_range: {
-      from: '2026-06-11T15:03:00.000Z',
-      to: '2026-06-11T15:10:00.000Z',
-    },
+    result: 'found',
   },
   metadata: {
     rule_name: 'Connection refused in checkout',
     rule_uuid: 'rule-1',
     detection_id: 'det-1',
-    change_point_type: 'spike' as const,
+    change_point_type: 'spike',
     p_value: 0.001,
   },
-  causal_features: [],
-  blast_radius: [],
 };
 
 const renderDetails = (event: SignificantEvent) =>
