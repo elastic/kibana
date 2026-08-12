@@ -20,6 +20,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { ALERT_FLAPPING } from '@kbn/rule-data-utils';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { createTelemetryClientMock } from '../../services/telemetry/telemetry_client.mock';
@@ -54,6 +55,7 @@ jest.mock('../../hooks/use_investigation_availability', () => ({
 }));
 
 const refresh = jest.fn();
+const caseForCallback = { id: 'case-id' } as CaseUI;
 const caseHooksReturnedValue = {
   open: () => {
     refresh();
@@ -356,10 +358,10 @@ describe('ObservabilityActions component', () => {
   it('should refresh when the add-to-case modal succeeds', async () => {
     await setup('nothing');
 
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
-      updatedAt: null,
-    });
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, false);
 
     expect(refresh).toHaveBeenCalled();
   });
@@ -367,10 +369,10 @@ describe('ObservabilityActions component', () => {
   it('should report telemetry when creating a case from the modal', async () => {
     await setup('nothing');
 
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
-      updatedAt: null,
-    });
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, true);
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       true,
@@ -382,10 +384,10 @@ describe('ObservabilityActions component', () => {
   it('should report telemetry when selecting an existing case', async () => {
     await setup('nothing');
 
-    // @ts-expect-error: The object will always be defined
-    mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess({
-      updatedAt: '2026-08-11T00:00:00.000Z',
-    });
+    const onSuccess =
+      mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0]?.[0]?.onSuccess;
+    expect(onSuccess).toBeDefined();
+    onSuccess?.(caseForCallback, false);
 
     expect(mockTelemetryClient.reportAlertAddedToCase).toHaveBeenCalledWith(
       false,
