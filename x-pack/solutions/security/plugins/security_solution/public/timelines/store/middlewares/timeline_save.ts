@@ -93,7 +93,10 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     const savedSearch =
       timeline.title && timeline.savedSearch
-        ? { ...timeline.savedSearch, title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(timeline.title) }
+        ? {
+            ...timeline.savedSearch,
+            title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(timeline.title),
+          }
         : timeline.savedSearch;
 
     try {
