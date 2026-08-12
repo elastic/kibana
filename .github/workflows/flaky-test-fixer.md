@@ -125,9 +125,9 @@ safe-outputs:
         'v9.*',
         'v8.*',
       ]
-    # Request whoever triggered the fix as reviewer. A bot actor (rare) can't be a
-    # reviewer, so the handler just logs a warning and the PR is still created.
-    reviewers: ${{ github.actor }}
+    # No `reviewers` here on purpose: review requests are made by the Flaky Fix
+    # Verifier once verification clears the fix (passed/skipped), so nobody is
+    # asked to review a patch that may still fail verification.
     base-branch: main
     # `main` only: any other base makes the handler run an unbounded `git fetch` that
     # can't finish on a repo Kibana's size. Version-branch fixes are handed over in the
@@ -190,50 +190,6 @@ safe-outputs:
               }
               await github.rest.issues.updateComment({ owner, repo, comment_id: commentId, body: updated });
               core.info(`Filled fix-PR placeholders for #${prNumber} in comment ${commentId}.`);
-    # Requests the author of the PR that introduced the flaky test as a reviewer on the fix PR
-    request-fix-review:
-      description: 'Request a review on the fix PR from the author of the PR that introduced the flaky test. Only pass a real, non-bot GitHub login.'
-      runs-on: ubuntu-latest
-      needs: safe_outputs
-      if: needs.safe_outputs.outputs.created_pr_number != ''
-      permissions:
-        pull-requests: write
-      inputs:
-        author:
-          description: "GitHub login (no leading @) of the introducing PR's author to request as a reviewer on the fix PR."
-          required: true
-          type: string
-      env:
-        GH_AW_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
-      steps:
-        - name: Request review from the introducing PR author
-          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-          with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-            script: |
-              const fs = require('fs');
-              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
-              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
-              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
-                core.info('Missing PR number or agent output; nothing to do.');
-                return;
-              }
-              // The agent's `author` tool parameter is delivered here (custom safe-jobs read inputs
-              // from GH_AW_AGENT_OUTPUT, not from the job's inputs context).
-              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-              const author = items.find((entry) => entry.type === 'request_fix_review')?.author?.trim().replace(/^@/, '');
-              if (!author) {
-                core.info('No reviewer supplied; nothing to do.');
-                return;
-              }
-              const { owner, repo } = context.repo;
-              try {
-                await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [author] });
-                core.info(`Requested review from @${author} on #${prNumber}.`);
-              } catch (err) {
-                // Non-fatal: GitHub 422s if the user can't review (not a collaborator, is the PR author, etc.).
-                core.warning(`Could not request review from @${author} on #${prNumber}: ${err.status || ''} ${err.message}`);
-              }
 
 strict: false
 timeout-minutes: 90
@@ -268,7 +224,8 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
 9. **Only if you opened a PR in step 6**, call the `link_fix_pr` tool with `confirm: true`. It runs after the PR and your comment exist and replaces the `%%FIX_PR_URL%%` and `%%FIX_PR_BADGE%%` placeholders in your outcome comment with the PR link and a live PR-state badge. You cannot know the PR number while running (the PR is created afterwards), so leave the placeholders in place and never write the URL, number, or badge yourself — this tool is how they get filled.
-10. **Only if you opened a PR in step 6 and confidently identified a real, non-bot introducing PR author** (the same person you `cc`'d on the `Fixes` line), call the `request_fix_review` tool with their GitHub login in `author` (no leading `@`) to request them as a reviewer on the fix PR. Skip this otherwise — you couldn't identify the author, or it's a bot (includes `kibanamachine`). Like `link_fix_pr` it runs after the PR is created.
+
+Do **not** request reviewers on the PR — the Flaky Fix Verifier requests them (the requester and the introducing PR's author, from the PR body's "Requested by" note and the `cc` on the `Fixes` line) once verification clears the fix, so nobody is asked to review a patch that may still fail verification.
 
 ## Fix guardrails
 
@@ -361,7 +318,7 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
 The first line attributes the flake:
 - **Introducing PR** (`#<introducing-pr>`): the PR you believe introduced the flake — find the PR that first added the failing test with `git log` / `git blame` on the test file, or prefer a specific PR/commit the investigator implicated as the cause. The `likely` hedge is intentional: this is an informed suspicion, not a proven cause, so keep it. If you can't identify a well-supported candidate, omit the whole `- likely introduced by …` clause and keep just `Fixes #<issue-number>` — never guess.
-- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). Request this same person as a reviewer via the `request_fix_review` tool (see Steps).
+- **cc** (`@<introducing-pr-author>`): `@`-mention that PR's author so they're looped in on the fix; drop the `(cc @…)` if the author is a bot (includes `kibanamachine`). The verifier reads this mention to request them as a reviewer once verification clears the fix.
 - Add more `Fixes #<issue-number>` references if this fix resolves multiple issues.
 
 Add the following at the very end of the PR description (and outside of the details block):

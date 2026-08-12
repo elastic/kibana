@@ -207,7 +207,7 @@ safe-outputs:
   # Custom safe-job: take the draft fix PR out of draft once verification clears it.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating — the job re-reads the labels and leaves the PR as a draft unless one of those two is set.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review), request its reviewers, and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating — the job re-reads the labels and leaves the PR as a draft unless one of those two is set.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
@@ -217,6 +217,10 @@ safe-outputs:
           description: 'Set to true to mark the PR ready for review. Only pass true once verification has passed or been skipped.'
           required: true
           type: boolean
+        reviewers:
+          description: "Comma-separated GitHub logins (no leading @) to request as reviewers once the PR is out of draft: the fix requester (the PR body's \"Requested by\" note) and the introducing PR's author (the `cc` on the `Fixes` line). Skip bots (logins ending in `[bot]`, and `kibanamachine`); omit the field when nobody qualifies."
+          required: false
+          type: string
       env:
         GH_AW_PR_NUMBER: *pr_number
       steps:
@@ -225,6 +229,7 @@ safe-outputs:
           with:
             github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
             script: |
+              const fs = require('fs');
               const prNumber = Number(process.env.GH_AW_PR_NUMBER);
               if (!Number.isInteger(prNumber)) {
                 core.info('Missing PR number; nothing to do.');
@@ -259,8 +264,32 @@ safe-outputs:
                 core.info(`PR #${prNumber} is already out of draft.`);
               }
               if (pr.state !== 'open' || pr.merged) {
-                core.info(`PR #${prNumber} is not open; skipping auto-merge.`);
+                core.info(`PR #${prNumber} is not open; skipping reviewers and auto-merge.`);
                 return;
+              }
+              // Request the reviewers the agent supplied (custom safe-jobs read tool inputs from
+              // GH_AW_AGENT_OUTPUT, not from the job's inputs context). Reviews are requested here —
+              // not by the fixer at PR creation — so nobody is asked to review an unverified fix.
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              const { items = [] } =
+                outputPath && fs.existsSync(outputPath) ? JSON.parse(fs.readFileSync(outputPath, 'utf8')) : {};
+              const reviewers = (items.find((entry) => entry.type === 'mark_pr_ready')?.reviewers || '')
+                .split(',')
+                .map((login) => login.trim().replace(/^@/, ''))
+                .filter((login) => login && !login.endsWith('[bot]') && login !== 'kibanamachine');
+              if (!reviewers.length) {
+                core.info('No eligible reviewers supplied; not requesting a review.');
+              }
+              // One request per login: a single call 422s in full if any login can't review
+              // (not a collaborator, is the PR author, etc.), which would drop the valid ones too.
+              for (const login of reviewers) {
+                try {
+                  await github.rest.pulls.requestReviewers({ owner, repo, pull_number: prNumber, reviewers: [login] });
+                  core.info(`Requested review from @${login} on #${prNumber}.`);
+                } catch (err) {
+                  // Non-fatal: a failed review request must not fail the verification run.
+                  core.warning(`Could not request review from @${login} on #${prNumber}: ${err.status || ''} ${err.message}`);
+                }
               }
               try {
                 await github.graphql(
@@ -334,6 +363,7 @@ Exactly one of these should apply at a time. When you reach a terminal verdict (
 
 The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label.
 
+- **Request the reviewers in the same call.** The fixer deliberately requests no reviewers when it opens the PR — asking someone to review an unverified fix wastes their attention — so this call is where reviewers are requested. Pass `reviewers` as a comma-separated list of the GitHub logins named in the PR body: the fix requester from the `Requested by @…` note, and the introducing PR's author from the `(cc @…)` on the `Fixes` line. Skip bots (logins ending in `[bot]`, and `kibanamachine`) and omit the field when neither is named.
 - **Red verdicts stay a draft.** On `failed` or `inconclusive` the fix isn't trusted, so don't call `mark_pr_ready`: a patch we can't vouch for shouldn't cost a reviewer their time, let alone arm auto-merge behind it. The terminal label and your verdict comment are what hand it to the owning team — say in that comment that the PR is left as a draft, so nobody reads the draft state as "still running". The job re-reads the labels and refuses to act without `passed` or `skipped`, so a mistaken call is a no-op rather than a premature review request.
 - **Terminal only.** Never call `mark_pr_ready` while you are still iterating — i.e. whenever you leave `flaky-fix-check:started` in place to trigger another `/flaky` run. Marking a PR ready fires the downstream review and CI automation, which would be wasted on a commit you are about to replace.
 
