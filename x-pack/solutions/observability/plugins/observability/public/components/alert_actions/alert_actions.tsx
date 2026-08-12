@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuItem, EuiFlexItem, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -24,6 +24,11 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
 
+// Workflow id for the managed investigation workflow. Hardcoded to avoid importing
+// @kbn/workflows/managed in the browser bundle (that module loads YAML via webpack,
+// which the observability bundle does not configure).
+const INVESTIGATION_WORKFLOW_ID = 'system-significant-events-investigation';
+
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
 ) {
@@ -38,10 +43,12 @@ export function AlertActions(
     services,
   } = props;
   const {
+    http,
     http: {
       basePath: { prepend },
     },
     cases,
+    notifications,
   } = services;
 
   const canModifyAlerts = useCanModifyAlerts();
@@ -108,7 +115,80 @@ export function AlertActions(
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
+  const [isInvestigating, setIsInvestigating] = useState(false);
+
+  const handleInvestigate = useCallback(async () => {
+    const rawRuleName = observabilityAlert.fields['kibana.alert.rule.name'];
+    const rawReason = observabilityAlert.fields['kibana.alert.reason'];
+    const ruleName = Array.isArray(rawRuleName)
+      ? String(rawRuleName[0] ?? 'Unknown rule')
+      : String(rawRuleName ?? 'Unknown rule');
+    const reason = Array.isArray(rawReason)
+      ? String(rawReason[0] ?? '')
+      : String(rawReason ?? '');
+    // `message` must be top-level (not nested in `context`) — the workflow YAML feeds
+    // {{ inputs.message }} directly into the agent prompt. Anything in `context` is only
+    // appended as JSON and produces lower-quality conclusions.
+    const message = reason ? `${ruleName}\n\n${reason}` : ruleName;
+
+    setIsInvestigating(true);
+    closeActionsPopover();
+
+    try {
+      await http.post(`/api/workflows/workflow/${INVESTIGATION_WORKFLOW_ID}/run`, {
+        version: '2023-10-31',
+        body: JSON.stringify({
+          inputs: {
+            message,
+            concurrency_key: alert._id,
+            // Do NOT include event_id: two workflow steps are gated on
+            // inputs.context.event_id != null and would error trying to attach
+            // to a nonexistent significant event.
+            context: {
+              source: 'alert',
+              alert_id: alert._id,
+              rule_type_id: observabilityAlert.fields['kibana.alert.rule.rule_type_id'],
+            },
+          },
+        }),
+      });
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.observability.alertsTable.investigateSuccessTitle', {
+          defaultMessage: 'Investigation started',
+        }),
+        text: ruleName,
+      });
+    } catch (err) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.observability.alertsTable.investigateErrorTitle', {
+          defaultMessage: 'Failed to start investigation',
+        }),
+        text: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setIsInvestigating(false);
+    }
+  }, [alert._id, closeActionsPopover, http, notifications, observabilityAlert.fields]);
+
+  const investigateMenuItem = useMemo(
+    () => (
+      <EuiContextMenuItem
+        key="investigate"
+        icon="inspect"
+        disabled={isInvestigating}
+        onClick={handleInvestigate}
+        data-test-subj="o11yAlertActionsInvestigate"
+      >
+        {i18n.translate('xpack.observability.alertsTable.investigateTextLabel', {
+          defaultMessage: 'Investigate',
+        })}
+      </EuiContextMenuItem>
+    ),
+    [isInvestigating, handleInvestigate]
+  );
+
   const actionsMenuItems = [
+    investigateMenuItem,
     ...caseAlertActionItems,
 
     useMemo(
