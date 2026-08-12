@@ -195,4 +195,37 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
 
     expect(getByTestId('test').textContent).toContain(`User space included: ${NO_LABEL}`);
   });
+
+  it('should NOT render driver warning when dump_executed_from_driver is absent', () => {
+    const { queryByText } = render();
+
+    expect(
+      queryByText(/This kernel memory dump was collected from user mode/, { exact: false })
+    ).toBeNull();
+  });
+
+  it('should NOT render driver warning when dump_executed_from_driver is true', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.dump_executed_from_driver = true;
+
+    const { queryByText } = render();
+
+    expect(
+      queryByText(/This kernel memory dump was collected from user mode/, { exact: false })
+    ).toBeNull();
+  });
+
+  it('should render driver warning when dump_executed_from_driver is false', () => {
+    // @ts-expect-error
+    action.outputs[agentId!].content.dump_executed_from_driver = false;
+
+    const { getByText } = render();
+
+    expect(
+      getByText(
+        'This kernel memory dump was collected from user mode. It does not include user-mode memory and may be subject to OS restrictions that limit coverage on some systems. If a full process memory for forensics is needed execute a `memory-dump --raw` instead',
+        { exact: false }
+      )
+    ).toBeTruthy();
+  });
 });
