@@ -20,9 +20,7 @@ import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { initSubscribers } from '../lib/events/init_subscribers';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
-import {
-  LoggerServiceToken,
-} from '../lib/services/logger_service/logger_service';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { DISPATCHER_TASK_ID } from '../lib/dispatcher/constants';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {

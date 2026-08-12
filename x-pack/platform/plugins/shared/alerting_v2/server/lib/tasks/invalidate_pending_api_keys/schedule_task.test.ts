@@ -41,7 +41,10 @@ describe('scheduleApiKeyInvalidationTask', () => {
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('scheduling failed', {
-      labels: { code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED, task_id: INVALIDATE_API_KEYS_TASK_ID },
+      labels: {
+        code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+        task_id: INVALIDATE_API_KEYS_TASK_ID,
+      },
       error: expect.objectContaining({ message: 'scheduling failed' }),
     });
   });

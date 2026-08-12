@@ -129,13 +129,7 @@ function shouldDispatch(
   if (groupingMode !== 'per_episode') {
     return (
       !policy.throttle?.interval ||
-      !isWithinInterval(
-        lastRecord.lastNotified,
-        policy.throttle.interval,
-        now,
-        logger,
-        policy.id
-      )
+      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now, logger, policy.id)
     );
   }
 
@@ -147,13 +141,7 @@ function shouldDispatch(
   if (strategy === 'per_status_interval') {
     return (
       !!policy.throttle?.interval &&
-      !isWithinInterval(
-        lastRecord.lastNotified,
-        policy.throttle.interval,
-        now,
-        logger,
-        policy.id
-      )
+      !isWithinInterval(lastRecord.lastNotified, policy.throttle.interval, now, logger, policy.id)
     );
   }
 

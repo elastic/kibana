@@ -146,9 +146,7 @@ export class EventLogService implements EventLogServiceContract {
       // normalizer.
       this.logger.warn({
         message: 'Rule execution history normalizer dropped task-run hits',
-        error: new Error(
-          'The normalizer rejected rows the ES query is supposed to have excluded'
-        ),
+        error: new Error('The normalizer rejected rows the ES query is supposed to have excluded'),
         code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_DEGRADED,
       });
     }
