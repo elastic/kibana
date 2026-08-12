@@ -34,6 +34,7 @@ export function ProfilingAppPageTemplate({
   }),
   showBetaBadge = false,
   customSearchBar,
+  suppressMenu = false,
 }: {
   children?: React.ReactElement;
   tabs?: AppHeaderTab[];
@@ -43,6 +44,7 @@ export function ProfilingAppPageTemplate({
   pageTitle?: AppHeaderTitle;
   showBetaBadge?: boolean;
   customSearchBar?: React.ReactNode;
+  suppressMenu?: boolean;
 }) {
   const {
     start: { observabilityShared },
@@ -87,38 +89,42 @@ export function ProfilingAppPageTemplate({
             spacing="largeBleed"
             title={pageTitle}
             tabs={tabs}
-            menu={{
-              items: [
-                {
-                  id: 'storage-explorer',
-                  label: 'Storage explorer',
-                  href: router.link('/storage-explorer', {
-                    query: {
-                      kuery: '',
-                      rangeFrom: 'now-15m',
-                      rangeTo: 'now',
-                      indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+            menu={
+              suppressMenu
+                ? undefined
+                : {
+                    items: [
+                      {
+                        id: 'storage-explorer',
+                        label: 'Storage explorer',
+                        href: router.link('/storage-explorer', {
+                          query: {
+                            kuery: '',
+                            rangeFrom: 'now-15m',
+                            rangeTo: 'now',
+                            indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+                          },
+                        }),
+                        iconType: 'database',
+                      },
+                      {
+                        id: 'settings',
+                        label: 'Settings',
+                        href: router.link('/settings'),
+                        iconType: 'gear',
+                        overflow: true,
+                      },
+                    ],
+                    primaryActionItem: {
+                      id: 'add-data',
+                      label: 'Add data',
+                      href: router.link('/add-data-instructions', {
+                        query: { selectedTab: AddDataTabs.Kubernetes },
+                      }),
+                      iconType: 'plusInCircle',
                     },
-                  }),
-                  iconType: 'database',
-                },
-                {
-                  id: 'settings',
-                  label: 'Settings',
-                  href: router.link('/settings'),
-                  iconType: 'gear',
-                  overflow: true,
-                },
-              ],
-              primaryActionItem: {
-                id: 'add-data',
-                label: 'Add data',
-                href: router.link('/add-data-instructions', {
-                  query: { selectedTab: AddDataTabs.Kubernetes },
-                }),
-                iconType: 'plusInCircle',
-              },
-            }}
+                  }
+            }
             badges={
               showBetaBadge
                 ? [
