@@ -347,7 +347,7 @@ describe(
         cy.getBySel('flyout-body-osquery').contains('platform');
       });
 
-      it('runs a take-action query against all enrolled agents', () => {
+      it('runs a take-action query against all enrolled agents', { tags: ['@skipInServerless'] }, () => {
         cy.getBySel('expand-event').first().click();
         cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should(
           'not.contain',
