@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
-  EuiCheckbox,
   EuiCodeBlock,
   EuiFieldPassword,
   EuiFieldText,
@@ -535,14 +534,31 @@ type HostMode = 'new_hosts' | 'existing_hosts';
 
 // Agent path — "Where to add this integration?" card, mirroring Fleet's
 // package-policy step (New hosts / Existing hosts converted from tabs to a
-// radio choice, per the flow's one-or-the-other convention).
-const AgentPolicyCard: React.FunctionComponent<{
-  servicesCount: number;
-  policyName: string;
-  onPolicyNameChange: (value: string) => void;
-}> = ({ servicesCount, policyName, onPolicyNameChange }) => {
+// radio choice, per the flow's one-or-the-other convention). "New hosts"
+// contains the entire add-agent flow inline (no separate card): install
+// commands, simulated enrollment, and per-service incoming-data tiles.
+// Enrollment in Fleet is the default (no mode choice); the "Listening for
+// agent" state confirms a few seconds after the section appears, which in
+// turn unblocks the step's Next button.
+const WhereToAddCard: React.FunctionComponent<{
+  services: AwsServiceEntry[];
+  isEnrolled: boolean;
+  onEnrolled: () => void;
+  receivedCount: number;
+}> = ({ services, isEnrolled, onEnrolled, receivedCount }) => {
   const [hostMode, setHostMode] = useState<HostMode>('new_hosts');
-  const [collectSystem, setCollectSystem] = useState(true);
+  const [platform, setPlatform] = useState('linux');
+  const enrollTimer = useRef<number | null>(null);
+  const servicesCount = services.length;
+  const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
+
+  useEffect(() => {
+    if (isEnrolled || hostMode !== 'new_hosts') return;
+    enrollTimer.current = window.setTimeout(onEnrolled, 8000);
+    return () => {
+      if (enrollTimer.current) window.clearTimeout(enrollTimer.current);
+    };
+  }, [isEnrolled, hostMode, onEnrolled]);
 
   return (
     <EuiPanel
@@ -572,179 +588,17 @@ const AgentPolicyCard: React.FunctionComponent<{
 
       {hostMode === 'new_hosts' ? (
         <>
-          <EuiTitle size="xxs">
-            <h4>Create agent policy</h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
           <EuiText size="s" color="subdued">
             <p>
-              Add this integration to a new set of hosts by creating a new agent policy. You can
-              add agent in the next step.
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFormRow label="New agent policy name" style={HALF_WIDTH} fullWidth>
-            <EuiFieldText
-              fullWidth
-              value={policyName}
-              onChange={(e) => onPolicyNameChange(e.target.value)}
-              aria-label="New agent policy name"
-              data-test-subj="awsOnboardingAgentPolicyName"
-            />
-          </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiCheckbox
-            id="awsOnboardingCollectSystemLogs"
-            checked={collectSystem}
-            onChange={(e) => setCollectSystem(e.target.checked)}
-            label={
-              <span>
-                Collect system logs and metrics{' '}
-                <EuiIconTip
-                  content="This will also add a System integration to collect system logs and metrics."
-                  position="right"
-                />
-              </span>
-            }
-          />
-        </>
-      ) : (
-        <>
-          <EuiTitle size="xxs">
-            <h4>Agent policies</h4>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>Agent policies are used to manage a group of integrations across a set of agents.</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFormRow label="Agent policies" style={HALF_WIDTH} fullWidth>
-            <EuiSelect
-              fullWidth
-              hasNoInitialSelection
-              options={[]}
-              aria-label="Select agent policies to add this integration to"
-              data-test-subj="awsOnboardingExistingAgentPolicies"
-            />
-          </EuiFormRow>
-          <EuiText size="xs" color="subdued">
-            <p>There aren&apos;t any options available</p>
-          </EuiText>
-        </>
-      )}
-    </EuiPanel>
-  );
-};
-
-type EnrollMode = 'fleet' | 'standalone';
-
-const AGENT_PLATFORM_OPTIONS = [
-  { id: 'linux', label: 'Linux aarch64' },
-  { id: 'macos', label: 'MacOS aarch64' },
-  { id: 'deb', label: 'DEB aarch64' },
-  { id: 'rpm', label: 'RPM aarch64' },
-];
-
-const AGENT_INSTALL_COMMANDS = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.5.0-linux-arm64.tar.gz
-tar xzvf elastic-agent-9.5.0-linux-arm64.tar.gz
-cd elastic-agent-9.5.0-linux-arm64
-sudo ./elastic-agent install --url=https://4fc1b088ce026fc9e70a6a0c28b0c58f.fleet.us-east-1.aws.elastic.cloud:443 --enrollment-token=RGVmYXVsdC0wNDE0YTZiLTA5OTY=`;
-
-// Agent path — "Add agent" card, mirroring Fleet's agent-enrollment flyout
-// (Enroll in Fleet / Run standalone as a radio choice). Enrollment is
-// simulated: the "Listening for agent" state confirms a few seconds after
-// the card appears, which in turn unblocks the step's Next button.
-const AddAgentCard: React.FunctionComponent<{
-  services: AwsServiceEntry[];
-  policyName: string;
-  isEnrolled: boolean;
-  onEnrolled: () => void;
-  receivedCount: number;
-}> = ({ services, policyName, isEnrolled, onEnrolled, receivedCount }) => {
-  const [enrollMode, setEnrollMode] = useState<EnrollMode>('fleet');
-  const [platform, setPlatform] = useState('linux');
-  const enrollTimer = useRef<number | null>(null);
-  const servicesCount = services.length;
-  const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
-
-  useEffect(() => {
-    if (isEnrolled) return;
-    enrollTimer.current = window.setTimeout(onEnrolled, 8000);
-    return () => {
-      if (enrollTimer.current) window.clearTimeout(enrollTimer.current);
-    };
-  }, [isEnrolled, onEnrolled]);
-
-  return (
-    <EuiPanel
-      hasBorder
-      paddingSize="l"
-      style={{ overflow: 'hidden' }}
-      data-test-subj="awsOnboardingAddAgentPanel"
-    >
-      <PanelHeader iconType="agentApp" title="Add agent" servicesCount={servicesCount} />
-      <EuiSpacer size="m" />
-      <EuiText size="s">
-        <p>Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack.</p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiRadioGroup
-        options={[
-          { id: 'fleet', label: 'Enroll in Fleet' },
-          { id: 'standalone', label: 'Run standalone' },
-        ]}
-        idSelected={enrollMode}
-        onChange={(id) => setEnrollMode(id as EnrollMode)}
-        name="awsOnboardingEnrollMode"
-        legend={{ children: 'Enrollment mode' }}
-        data-test-subj="awsOnboardingEnrollModeRadioGroup"
-      />
-      <EuiSpacer size="m" />
-
-      {enrollMode === 'standalone' ? (
-        <EuiText size="s" color="subdued">
-          <p>[Run standalone — not yet designed in this prototype.]</p>
-        </EuiText>
-      ) : (
-        <>
-          <EuiText size="s" color="subdued">
-            <p>
-              Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally
-              manage the agent.
+              Add Elastic Agents to your hosts to collect data and send it to the Elastic Stack.
+              Agents enroll in Fleet by default, so updates deploy automatically and agents are
+              centrally managed.
             </p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiSteps
             titleSize="xs"
             steps={[
-              {
-                title: 'Select enrollment token',
-                children: (
-                  <>
-                    <EuiText size="s">
-                      <p>
-                        <strong>{policyName}</strong> has been selected. Select which enrollment
-                        token to use when enrolling agents.
-                      </p>
-                    </EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiLink href="#">Authentication settings</EuiLink>
-                    <EuiSpacer size="s" />
-                    <EuiFormRow label="Enrollment token" style={HALF_WIDTH} fullWidth>
-                      <EuiSelect
-                        fullWidth
-                        options={[
-                          {
-                            value: 'default',
-                            text: 'Default (0414a6b-0996-451f-87a4-3e9c189665e8)',
-                          },
-                        ]}
-                        aria-label="Enrollment token"
-                      />
-                    </EuiFormRow>
-                  </>
-                ),
-              },
               {
                 title: 'Install Elastic Agent on your host',
                 children: (
@@ -808,37 +662,43 @@ const AddAgentCard: React.FunctionComponent<{
               {
                 title: 'Confirm agent enrollment',
                 status: isEnrolled ? 'complete' : 'loading',
-                children: isEnrolled ? (
-                  <EuiCallOut
-                    title="1 agent has been enrolled."
-                    color="success"
-                    iconType="check"
-                    data-test-subj="awsOnboardingAgentEnrolled"
-                  />
-                ) : (
+                children: (
                   <>
-                    <EuiPanel color="primary" paddingSize="m">
-                      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiLoadingSpinner size="m" />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s">Listening for agent</EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                    <EuiSpacer size="s" />
-                    <EuiText size="s" color="subdued">
-                      <p>
-                        After the agent starts up, the Elastic Stack listens for the agent and
-                        confirms the enrollment in Fleet. If you&apos;re having trouble
-                        connecting, check out the{' '}
-                        <EuiLink href="#" target="_blank" external>
-                          troubleshooting guide
-                        </EuiLink>
-                        .
-                      </p>
-                    </EuiText>
+                    <EuiFlexGrid columns={4} gutterSize="m">
+                      <EuiFlexItem style={{ minWidth: 0 }}>
+                        <EuiPanel hasBorder paddingSize="m" data-test-subj="awsOnboardingAgentEnrollmentTile">
+                          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                            <EuiFlexItem grow={false}>
+                              <ServiceStatusBadge receiving={isEnrolled} />
+                            </EuiFlexItem>
+                            <EuiFlexItem style={{ minWidth: 0 }}>
+                              <EuiText size="s" className="eui-textTruncate">
+                                <strong>Elastic Agent</strong>
+                              </EuiText>
+                              <EuiText size="xs" color="subdued">
+                                {isEnrolled ? '1 agent enrolled' : 'Listening for agent...'}
+                              </EuiText>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    </EuiFlexGrid>
+                    {!isEnrolled && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            After the agent starts up, the Elastic Stack listens for the agent
+                            and confirms the enrollment in Fleet. If you&apos;re having trouble
+                            connecting, check out the{' '}
+                            <EuiLink href="#" target="_blank" external>
+                              troubleshooting guide
+                            </EuiLink>
+                            .
+                          </p>
+                        </EuiText>
+                      </>
+                    )}
                   </>
                 ),
               },
@@ -871,10 +731,46 @@ const AddAgentCard: React.FunctionComponent<{
             ]}
           />
         </>
+      ) : (
+        <>
+          <EuiTitle size="xxs">
+            <h4>Agent policies</h4>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>Agent policies are used to manage a group of integrations across a set of agents.</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow label="Agent policies" style={HALF_WIDTH} fullWidth>
+            <EuiSelect
+              fullWidth
+              hasNoInitialSelection
+              options={[]}
+              aria-label="Select agent policies to add this integration to"
+              data-test-subj="awsOnboardingExistingAgentPolicies"
+            />
+          </EuiFormRow>
+          <EuiText size="xs" color="subdued">
+            <p>There aren&apos;t any options available</p>
+          </EuiText>
+        </>
       )}
     </EuiPanel>
   );
 };
+
+const AGENT_PLATFORM_OPTIONS = [
+  { id: 'linux', label: 'Linux aarch64' },
+  { id: 'macos', label: 'MacOS aarch64' },
+  { id: 'deb', label: 'DEB aarch64' },
+  { id: 'rpm', label: 'RPM aarch64' },
+];
+
+const AGENT_INSTALL_COMMANDS = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.5.0-linux-arm64.tar.gz
+tar xzvf elastic-agent-9.5.0-linux-arm64.tar.gz
+cd elastic-agent-9.5.0-linux-arm64
+sudo ./elastic-agent install --url=https://4fc1b088ce026fc9e70a6a0c28b0c58f.fleet.us-east-1.aws.elastic.cloud:443 --enrollment-token=RGVmYXVsdC0wNDE0YTZiLTA5OTY=`;
+
 
 export const StepAuthentication: React.FunctionComponent<{
   services: AwsServiceEntry[];
@@ -892,8 +788,6 @@ export const StepAuthentication: React.FunctionComponent<{
   onStackNameChange: (value: string) => void;
   stackVersion: string;
   onStackVersionChange: (value: string) => void;
-  agentPolicyName: string;
-  onAgentPolicyNameChange: (value: string) => void;
   isAgentEnrolled: boolean;
   onAgentEnrolled: () => void;
   isManagedDeployed: boolean;
@@ -916,8 +810,6 @@ export const StepAuthentication: React.FunctionComponent<{
   onStackNameChange,
   stackVersion,
   onStackVersionChange,
-  agentPolicyName,
-  onAgentPolicyNameChange,
   isAgentEnrolled,
   onAgentEnrolled,
   isManagedDeployed,
@@ -1011,6 +903,13 @@ export const StepAuthentication: React.FunctionComponent<{
 
       {deploymentMethod === 'agent' ? (
         <>
+        <WhereToAddCard
+          services={services}
+          isEnrolled={isAgentEnrolled}
+          onEnrolled={onAgentEnrolled}
+          receivedCount={agentReceivedCount}
+        />
+        <EuiSpacer size="m" />
         <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
           <PanelHeader iconType="rocket" title="Setup access" servicesCount={servicesCount} />
           <EuiSpacer size="m" />
@@ -1059,21 +958,6 @@ export const StepAuthentication: React.FunctionComponent<{
             />
           </EuiFormRow>
         </EuiPanel>
-
-        <EuiSpacer size="m" />
-        <AgentPolicyCard
-          servicesCount={servicesCount}
-          policyName={agentPolicyName}
-          onPolicyNameChange={onAgentPolicyNameChange}
-        />
-        <EuiSpacer size="m" />
-        <AddAgentCard
-          services={services}
-          policyName={agentPolicyName}
-          isEnrolled={isAgentEnrolled}
-          onEnrolled={onAgentEnrolled}
-          receivedCount={agentReceivedCount}
-        />
         </>
       ) : (
         <>
