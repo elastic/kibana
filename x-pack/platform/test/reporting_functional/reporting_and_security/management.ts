@@ -201,7 +201,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('does not allow user that does not have reporting privileges', async () => {
         await retry.try(async () => {
           await reportingFunctional.loginDataAnalyst();
-          await PageObjects.common.navigateToApp('reporting');
+          // Do not let a transient `/login` redirect silently re-authenticate as the superuser.
+          await PageObjects.common.navigateToApp('reporting', { shouldLoginIfPrompted: false });
         });
 
         await testSubjects.missingOrFail('reportJobListing');
