@@ -221,16 +221,25 @@ export class FieldDefinitionsService {
     );
   }
 
+  /**
+   * `options.version`, when provided, is forwarded to the SO client's optimistic-concurrency
+   * check. Callers that first read the definition to evaluate a guard (e.g. the actively-linked
+   * delete/demotion checks in the field-definitions client) should pass that read's `version` so
+   * a configure write that links this definition in the gap between the guard's read and this
+   * write surfaces as a 409 instead of silently committing past the guard.
+   */
   async updateFieldDefinition(
     id: string,
-    input: UpdateFieldDefinitionInput
+    input: UpdateFieldDefinitionInput,
+    options: { version?: string } = {}
   ): Promise<SavedObject<FieldDefinition>> {
     this.assertFieldDefinitionIsValid(input.definition);
 
     await this.dependencies.unsecuredSavedObjectsClient.update<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
       id,
-      input
+      input,
+      { version: options.version }
     );
 
     // An edit may flip `isGlobal`, rename the field, or change its type — any of
@@ -240,7 +249,25 @@ export class FieldDefinitionsService {
     return this.getFieldDefinition(id);
   }
 
-  async deleteFieldDefinition(id: string): Promise<void> {
+  /**
+   * The SO client's `delete` has no `version`/OCC option, so a version-guarded delete isn't
+   * directly available. When `options.version` is provided (the delete guard's read version),
+   * this does a version-guarded no-op update first as a compare-and-swap gate: if the definition
+   * changed since the caller's read (e.g. a concurrent configure write repaired its `legacyKey`
+   * while linking it), the update 409s and the delete is never attempted. This narrows, but does
+   * not fully close, the TOCTOU window — a concurrent link that resolves via an existing exact
+   * `legacyKey`/name match (no write to this SO) is not detected, since nothing here changes.
+   */
+  async deleteFieldDefinition(id: string, options: { version?: string } = {}): Promise<void> {
+    if (options.version !== undefined) {
+      await this.dependencies.unsecuredSavedObjectsClient.update<FieldDefinition>(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        id,
+        {},
+        { version: options.version }
+      );
+    }
+
     await this.dependencies.unsecuredSavedObjectsClient.delete(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
       id

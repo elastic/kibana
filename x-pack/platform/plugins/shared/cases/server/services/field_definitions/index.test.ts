@@ -392,10 +392,34 @@ describe('FieldDefinitionsService', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         CASE_FIELD_DEFINITION_SAVED_OBJECT,
         'fd-1',
-        expect.objectContaining({ name: 'updated_field' })
+        expect.objectContaining({ name: 'updated_field' }),
+        { version: undefined }
       );
       expect(soClient.get).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
       expect(result).toBe(so);
+    });
+
+    it('forwards options.version for optimistic concurrency', async () => {
+      const so = makeFieldDefinitionSO({ name: 'updated_field' });
+      soClient.update.mockResolvedValue(so as never);
+      soClient.get.mockResolvedValue(so);
+
+      await service.updateFieldDefinition(
+        'fd-1',
+        {
+          name: 'updated_field',
+          owner: 'securitySolution',
+          definition: 'name: updated_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        },
+        { version: 'v9' }
+      );
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        expect.objectContaining({ name: 'updated_field' }),
+        { version: 'v9' }
+      );
     });
 
     it('refreshes the analytics v2 data view after updating', async () => {
@@ -436,6 +460,35 @@ describe('FieldDefinitionsService', () => {
       await service.deleteFieldDefinition('fd-1');
 
       expect(soClient.delete).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('performs a version-guarded no-op update before deleting when options.version is provided', async () => {
+      // SO client `delete` has no version/OCC option, so a version-guarded compare-and-swap
+      // update is used as a gate: a concurrent write since the caller's read bumps the version
+      // and this 409s before the delete is attempted.
+      soClient.update.mockResolvedValue({} as never);
+      soClient.delete.mockResolvedValue({});
+
+      await service.deleteFieldDefinition('fd-1', { version: 'v4' });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        {},
+        { version: 'v4' }
+      );
+      expect(soClient.delete).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
+    });
+
+    it('does not delete when the version-guarded update conflicts', async () => {
+      soClient.update.mockRejectedValue(new Error('version conflict'));
+
+      await expect(
+        service.deleteFieldDefinition('fd-1', { version: 'stale' })
+      ).rejects.toThrow('version conflict');
+
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('refreshes the analytics v2 data view after deleting', async () => {

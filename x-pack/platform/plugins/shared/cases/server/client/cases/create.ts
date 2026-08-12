@@ -21,7 +21,8 @@ import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {
-  validateCustomFields,
+  validateCustomFieldsStructure,
+  validateRequiredCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
 } from './validators';
@@ -29,12 +30,14 @@ import type { CreateUserAction, CommonUserActionArgs } from '../../services/user
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
-import { buildExtendedFieldsDefaults } from '../../../common/utils/template_fields';
+import {
+  buildExtendedFieldsDefaults,
+  pickExtendedFieldsDifferingFromDefaults,
+} from '../../../common/utils/template_fields';
 import {
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
   throwIfMalformedFieldLinkage,
-  pickExtendedFieldsDifferingFromDefaults,
 } from '../../common/utils/mirror_custom_fields';
 import {
   buildActiveLinkMaps,
@@ -83,7 +86,9 @@ export const create = async (
       customFieldsConfiguration,
     };
 
-    validateCustomFields(customFieldsValidationParams);
+    // Structural checks only (duplicates, unknown keys, wrong types); required-ness is checked
+    // later, after pairing resolves any linked field supplied only via extended_fields.
+    validateCustomFieldsStructure(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
     if (query.assignees && query.assignees.length > 0) {
@@ -161,10 +166,14 @@ export const create = async (
     // validation so the merged map is what gets validated.
     //
     // Captured before injection: when the map exists only because defaults were injected, the
-    // validation below must run with partial (update) semantics. Full create-time validation
-    // enforces `required` on absent fields, and enforcing it here would 400 requests that
-    // succeeded before defaults injection existed — e.g. every legacy customFields-only create
-    // in a space whose required v1 custom fields are mirrored into required global definitions.
+    // final validation below (after pairing) must run with partial (update) semantics. Full
+    // create-time validation enforces `required` on absent fields, and enforcing it here would
+    // 400 requests that succeeded before defaults injection existed — e.g. every legacy
+    // customFields-only create in a space whose required v1 custom fields are mirrored into
+    // required global definitions. This must reflect the caller's original direct intent, not
+    // whether pairing later populated extended_fields from a linked customFields value —
+    // otherwise every legacy customFields-only create would flip to non-partial once pairing
+    // exists, defeating the point of this flag.
     const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
     let globalFields: InlineField[] | undefined;
     // Hoisted for create-time Activity filtering: compare persisted fields against the same
@@ -194,23 +203,11 @@ export const create = async (
       }
     }
 
-    if (query.extended_fields) {
-      globalFields =
-        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
-      await validateCaseExtendedFields({
-        extendedFields: query.extended_fields,
-        templateId: query.template?.id,
-        globalFields,
-        templatesService,
-        fieldDefinitionsService,
-        owner: query.owner,
-        // Injection-only maps get partial semantics: validate the injected values, but do not
-        // enforce `required` on fields the caller never sent — that keeps creates that
-        // succeeded before defaults injection succeeding after it (see comment above).
-        partial: !hadExtendedFieldsBeforeDefaults,
-        preResolvedTemplateFields: resolvedTemplateFields,
-      });
-    }
+    // NOTE: extended_fields is validated once, below — after pairing resolves any linked field
+    // supplied only via customFields into its extended_fields counterpart. Validating here (before
+    // pairing) would reject a request pairing would have made valid (see addendum / pair-before-
+    // validate fix): e.g. two required linked fields, one supplied via customFields and the other
+    // via extended_fields — a pre-pair check only sees the latter and rejects the former as missing.
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -270,29 +267,6 @@ export const create = async (
           paired.customFields !== undefined
       );
 
-      // Definition-aware validation of the FINAL map: the pre-pairing validation above only
-      // saw the request's extended_fields; paired entries must also be valid keys with valid
-      // values. `partial: true` — pairing never makes an absent field "required-missing".
-      if (
-        paired.extendedFields != null &&
-        paired.extendedFields !== normalizedCase.extended_fields
-      ) {
-        const postPairingGlobalFields = await resolveGlobalFields(
-          query.owner,
-          fieldDefinitionsService
-        );
-        await validateCaseExtendedFields({
-          extendedFields: paired.extendedFields as Record<string, string>,
-          templateId: query.template?.id,
-          globalFields: postPairingGlobalFields,
-          templatesService,
-          fieldDefinitionsService,
-          owner: query.owner,
-          partial: true,
-          preResolvedTemplateFields: resolvedTemplateFields,
-        });
-      }
-
       // Return type includes null when input is null; CasePostRequest.extended_fields is never null.
       normalizedCase.extended_fields =
         (paired.extendedFields as Record<string, string>) ?? undefined;
@@ -302,6 +276,31 @@ export const create = async (
         normalizedCase.customFields =
           paired.customFields as unknown as typeof normalizedCase.customFields;
       }
+    }
+
+    // Single authoritative validation pass over the FINAL, post-pairing representations — pairing
+    // above may have populated either side from the other, so validating any earlier snapshot
+    // risks rejecting a request pairing would have made valid (see addendum / pair-before-validate
+    // fix). `partial` still reflects the caller's original direct intent (see comment above), not
+    // whether pairing populated extended_fields from a linked customFields value.
+    validateRequiredCustomFields({
+      requestCustomFields: normalizedCase.customFields,
+      customFieldsConfiguration,
+    });
+
+    if (normalizedCase.extended_fields) {
+      globalFields =
+        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
+      await validateCaseExtendedFields({
+        extendedFields: normalizedCase.extended_fields,
+        templateId: query.template?.id,
+        globalFields,
+        templatesService,
+        fieldDefinitionsService,
+        owner: query.owner,
+        partial: !hadExtendedFieldsBeforeDefaults,
+        preResolvedTemplateFields: resolvedTemplateFields,
+      });
     }
 
     const attributes = transformNewCase({
@@ -337,63 +336,70 @@ export const create = async (
           severity: query.severity ?? CaseSeverity.LOW,
           assignees: query.assignees ?? [],
           category: query.category ?? null,
-          customFields: query.customFields ?? [],
+          // The persisted value, not the raw request: pairing above (line ~248) can populate
+          // customFields from a caller who only sent extended_fields, and the activity log must
+          // reflect what was actually written to the case, not what the caller happened to send.
+          customFields: normalizedCase.customFields ?? [],
         },
         owner: newCase.attributes.owner,
       },
     });
 
     // The create_case user action payload does not carry `template` or `extended_fields`
-    // (CreateCaseUserActionRt strips them), so a case created from a template would otherwise leave
-    // no trace in the activity log of which template it came from or which fields the caller
-    // changed from defaults. Emit the dedicated template user action always, and an
-    // extended_fields user action only for values that differ from resolved defaults. Gated on
-    // the flag so it only runs on the template-expansion path: flag-off creation with a
-    // caller-pinned template stays byte-for-byte as it was before this PR (no extra activity-log
-    // entries), and expansion always stamps a concrete version so the guard holds.
+    // (CreateCaseUserActionRt strips them), so dedicated entries are needed for the activity log
+    // to reflect what was actually persisted: which template (if any) the case came from, and
+    // which extended_fields values differ from resolved defaults. Pairing and default injection
+    // both run independently of the templates flag (addendum A1), so this must too — a plain
+    // create with no template can still populate extended_fields (from a linked customFields
+    // value, or a direct caller-supplied extended_fields) and must not go unrecorded.
+    const common = { caseId: newCase.id, user, owner: newCase.attributes.owner };
+    const extraUserActions: Array<
+      CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs
+    > = [];
+
+    // Template lineage: only when a template was actually applied (flag-off or a caller-pinned
+    // template with no expansion leaves no trace here, matching pre-expansion behavior).
     if (
       clientArgs.config.templates.enabled &&
       query.template?.id &&
       query.template.version !== undefined
     ) {
-      const common = { caseId: newCase.id, user, owner: newCase.attributes.owner };
-      const templateUserActions: Array<
-        CreateUserAction<'template' | 'extended_fields'> & CommonUserActionArgs
-      > = [
-        {
-          ...common,
-          type: UserActionTypes.template,
-          payload: {
-            template: {
-              id: query.template.id,
-              version: query.template.version,
-              ...(appliedTemplateName ? { name: appliedTemplateName } : {}),
-            },
+      extraUserActions.push({
+        ...common,
+        type: UserActionTypes.template,
+        payload: {
+          template: {
+            id: query.template.id,
+            version: query.template.version,
+            ...(appliedTemplateName ? { name: appliedTemplateName } : {}),
           },
         },
-      ];
+      });
+    }
 
-      // Activity records only values that differ from resolved template + global defaults — not
-      // the full persisted map (which still stamps empty/default keys on the case SO). Same
-      // baseline precedence as injection above: template defaults, then global (global wins).
-      const persistedExtendedFields = normalizedCase.extended_fields ?? {};
-      const resolvedExtendedFieldDefaults = {
-        ...buildExtendedFieldsDefaults(resolvedTemplateFields ?? []),
-        ...globalFieldsDefaults,
-      };
-      const activityExtendedFields = pickExtendedFieldsDifferingFromDefaults(
-        persistedExtendedFields,
-        resolvedExtendedFieldDefaults
-      );
-      if (Object.keys(activityExtendedFields).length > 0) {
-        templateUserActions.push({
-          ...common,
-          type: UserActionTypes.extended_fields,
-          payload: { extended_fields: activityExtendedFields },
-        });
-      }
+    // Activity records only values that differ from resolved TEMPLATE defaults — not the full
+    // persisted map (which still stamps empty/default keys on the case SO). Global-field
+    // defaults are deliberately excluded from this baseline: a global default is injected
+    // independently of any template (see the injection block above) and must always show up in
+    // the activity log, since that is the only server-side trace that it was written at all. When
+    // no template was resolved (flag off, or no template applied), the baseline is empty, so
+    // every persisted value is recorded — matching pre-filtering behavior.
+    const persistedExtendedFields = normalizedCase.extended_fields ?? {};
+    const resolvedTemplateFieldDefaults = buildExtendedFieldsDefaults(resolvedTemplateFields ?? []);
+    const activityExtendedFields = pickExtendedFieldsDifferingFromDefaults(
+      persistedExtendedFields,
+      resolvedTemplateFieldDefaults
+    );
+    if (Object.keys(activityExtendedFields).length > 0) {
+      extraUserActions.push({
+        ...common,
+        type: UserActionTypes.extended_fields,
+        payload: { extended_fields: activityExtendedFields },
+      });
+    }
 
-      await userActionService.creator.bulkCreateUserAction({ userActions: templateUserActions });
+    if (extraUserActions.length > 0) {
+      await userActionService.creator.bulkCreateUserAction({ userActions: extraUserActions });
     }
 
     if (query.assignees && query.assignees.length !== 0) {

@@ -39,6 +39,15 @@ export interface MigrationCounts {
   fieldDefsReused: number;
   templatesCreated: number;
   templatesReused: number;
+  /**
+   * The phase-completion flags as of the end of this call — either already true from a prior run,
+   * or just persisted this run, or still false (an unexpected error withheld them). The task
+   * runner merges these into its in-memory configure snapshot so the case-backfill phase (gated
+   * on both being true) can run in the SAME cycle right after a fresh migration, instead of
+   * waiting a full extra run for the next `findAllConfigurations` read to see the persisted flags.
+   */
+  legacyCustomFieldsMigrated: boolean;
+  legacyTemplatesMigrated: boolean;
 }
 
 /**

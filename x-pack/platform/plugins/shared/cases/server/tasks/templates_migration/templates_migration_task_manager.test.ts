@@ -20,6 +20,7 @@ import {
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { ConnectorTypes } from '../../../common/types/domain/connector/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
+import { getV2FieldType } from '../../../common/utils/template_fields';
 import { TemplatesMigrationTaskManager } from './templates_migration_task_manager';
 import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
@@ -95,6 +96,33 @@ const buildLegacyCustomField = (
   required: false,
   defaultValue,
 });
+
+/**
+ * A pre-friendly-name field definition SO whose `name` IS the raw legacy key — resolves via
+ * `resolveDefinitionForLegacyField`'s byExactName fallback, so backfill's resolved storage key
+ * (`${name}_as_${type}`) is byte-identical to the old raw-key derivation and every existing
+ * `<key>_as_<v2type>` assertion in the case-backfill tests below stays valid.
+ */
+const buildFieldDefinitionSOForKey = (key: string, v1Type: string = CustomFieldTypes.TEXT) => {
+  const control =
+    v1Type === CustomFieldTypes.NUMBER
+      ? 'INPUT_NUMBER'
+      : v1Type === CustomFieldTypes.TOGGLE
+      ? 'TOGGLE'
+      : 'INPUT_TEXT';
+  return {
+    id: `def-${key}`,
+    type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+    references: [],
+    attributes: {
+      fieldDefinitionId: `def-${key}`,
+      name: key,
+      owner: 'cases',
+      isGlobal: true,
+      definition: `name: ${key}\ntype: ${getV2FieldType(v1Type)}\ncontrol: ${control}\n`,
+    },
+  };
+};
 
 const buildLegacyTemplate = (
   name: string,
@@ -1165,6 +1193,14 @@ describe('TemplatesMigrationTaskManager', () => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: [configSO], total: 1 });
         }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({
+            saved_objects: [
+              buildFieldDefinitionSOForKey('cf_text'),
+              buildFieldDefinitionSOForKey('cf_num', CustomFieldTypes.NUMBER),
+            ],
+          });
+        }
         if (opts.type === CASE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
         }
@@ -1173,7 +1209,11 @@ describe('TemplatesMigrationTaskManager', () => {
     };
 
     it('backfills extended_fields on existing cases from their legacy customFields', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const caseSO = buildCaseSO('case-1', [
         { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' },
         { key: 'cf_num', type: CustomFieldTypes.NUMBER, value: 5 },
@@ -1194,7 +1234,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('does not overwrite extended_fields values already set on a case', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const caseSO = buildCaseSO(
         'case-1',
         [
@@ -1266,6 +1310,9 @@ describe('TemplatesMigrationTaskManager', () => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: [configSO], total: 1 });
         }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
         if (opts.type === CASE_SAVED_OBJECT) {
           scan++;
           if (scan === 1) {
@@ -1333,7 +1380,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('does not update cases that already have all their extended_fields', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const caseSO = buildCaseSO(
         'case-1',
         [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'x' }],
@@ -1352,6 +1403,8 @@ describe('TemplatesMigrationTaskManager', () => {
         owner: 'securitySolution',
         namespaces: ['my-space'],
         customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
       });
       mockFindByType(configSO, []);
 
@@ -1386,6 +1439,8 @@ describe('TemplatesMigrationTaskManager', () => {
         owner: 'securitySolution',
         namespaces: ['analytics-1'],
         customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
       });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
@@ -1475,7 +1530,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('skips not-found (404) case updates and still completes the space', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const caseSO = buildCaseSO('case-1', [
         { key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' },
       ]);
@@ -1532,6 +1591,9 @@ describe('TemplatesMigrationTaskManager', () => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: [configSO], total: 1 });
         }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
         if (opts.type === CASE_SAVED_OBJECT) {
           const pageResult = casePages[Math.min(caseCall, casePages.length - 1)];
           caseCall++;
@@ -1542,7 +1604,11 @@ describe('TemplatesMigrationTaskManager', () => {
     };
 
     it('pages through cases with search_after and completes when the last page is partial', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const page1 = fullPage(1);
       const page2 = {
         saved_objects: [
@@ -1583,7 +1649,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('reschedules with a resume cursor when the per-run scan budget is exhausted', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       // Always return full pages so the scan never exhausts and the budget is what stops it.
       routeConfigureAndCases(configSO, [fullPage(1)]);
 
@@ -1611,7 +1681,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('resumes from a persisted cursor without reopening a PIT', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       // Partial page ? exhausts immediately once resumed.
       routeConfigureAndCases(configSO, [{ saved_objects: [], total: 0, pit_id: 'pit-resumed' }]);
 
@@ -1640,7 +1714,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('does not mark a space complete when a bulkUpdate page reports item errors', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       routeConfigureAndCases(configSO, [
         {
           saved_objects: [
@@ -1680,7 +1758,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('reopens the PIT and rescans the space if a resumed PIT is invalid', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       let caseCall = 0;
       repo.find.mockImplementation((opts: { type: string }) => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
@@ -1722,7 +1804,11 @@ describe('TemplatesMigrationTaskManager', () => {
     it('scans without a sortField so the PIT applies the unique _shard_doc tiebreaker', async () => {
       // Guards against a search_after skip bug: sorting by a non-unique field (e.g. created_at)
       // drops the _shard_doc tiebreaker, so cases sharing the boundary value would be skipped.
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       routeConfigureAndCases(configSO, [{ saved_objects: [], total: 0, pit_id: 'pit-1' }]);
 
       const manager = await buildAndSchedule();
@@ -1758,6 +1844,9 @@ describe('TemplatesMigrationTaskManager', () => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: configSOs, total: configSOs.length });
         }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
         if (opts.type === CASE_SAVED_OBJECT) {
           const owner = Object.keys(casesByOwner).find((o) =>
             String(opts.filter).includes(`"${o}"`)
@@ -1778,11 +1867,15 @@ describe('TemplatesMigrationTaskManager', () => {
         id: 'cfgA',
         owner: 'securitySolution',
         customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
       });
       const cfgB = buildConfigureSO({
         id: 'cfgB',
         owner: 'observability',
         customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
       });
       routeByOwner([cfgA, cfgB], {
         securitySolution: [caseWithLegacyField('a1', 'securitySolution')],
@@ -1825,7 +1918,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('gives up (deletes the task) after the max consecutive failing runs', async () => {
-      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const cfg = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       routeByOwner([cfg], { cases: [caseWithLegacyField('c1')] });
       repo.bulkUpdate.mockResolvedValue({
         saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
@@ -1842,7 +1939,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('increments failedRuns and backs off the reschedule when a run has update failures', async () => {
-      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const cfg = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       routeByOwner([cfg], { cases: [caseWithLegacyField('c1')] });
       repo.bulkUpdate.mockResolvedValue({
         saved_objects: [{ id: 'c1', type: CASE_SAVED_OBJECT, error: { message: 'boom' } }],
@@ -1874,7 +1975,11 @@ describe('TemplatesMigrationTaskManager', () => {
         total: 1000,
         pit_id: 'pit-1',
       };
-      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const cfg = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       repo.find.mockImplementation((opts: { type: string }) => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: [cfg], total: 1 });
@@ -1917,7 +2022,11 @@ describe('TemplatesMigrationTaskManager', () => {
         },
       }));
 
-      const cfg = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const cfg = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       let pitCounter = 0;
       repo.openPointInTimeForType.mockImplementation(() =>
         Promise.resolve({ id: `pit-${++pitCounter}` })
@@ -1926,6 +2035,9 @@ describe('TemplatesMigrationTaskManager', () => {
         (opts: { type: string; searchAfter?: number[]; perPage: number }) => {
           if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
             return Promise.resolve({ saved_objects: [cfg], total: 1 });
+          }
+          if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+            return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
           }
           // No sortField ? order by array index (the unique `_shard_doc`-like tiebreaker).
           const after = opts.searchAfter ? opts.searchAfter[0] : -1;
@@ -2063,6 +2175,9 @@ describe('TemplatesMigrationTaskManager', () => {
         if (opts.type === CASE_CONFIGURE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: [configSO], total: 1 });
         }
+        if (opts.type === CASE_FIELD_DEFINITION_SAVED_OBJECT) {
+          return Promise.resolve({ saved_objects: [buildFieldDefinitionSOForKey('cf_text')] });
+        }
         if (opts.type === CASE_SAVED_OBJECT) {
           return Promise.resolve({ saved_objects: caseSOs, total: caseSOs.length });
         }
@@ -2085,7 +2200,11 @@ describe('TemplatesMigrationTaskManager', () => {
     };
 
     it('fires once when a completing run backfilled existing cases', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);
@@ -2103,7 +2222,11 @@ describe('TemplatesMigrationTaskManager', () => {
       // has its extended_fields - the boundary case where the completing run writes 0 cases yet the
       // migration genuinely finished outstanding work. The hook must still fire, keyed on the
       // restart-durable pending flags rather than a per-run write count.
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'x' }], {
           cf_text_as_keyword: 'x',
@@ -2152,7 +2275,11 @@ describe('TemplatesMigrationTaskManager', () => {
     it('does NOT fire while the backfill is still rescheduling (not a terminal run)', async () => {
       // Full 1000-case pages so the scan budget stops the run mid-backfill: it reschedules rather
       // than completing, so the analytics re-index must wait for the terminal run.
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       const fullPage = {
         saved_objects: Array.from({ length: 1000 }, (_, i) => ({
           id: `c-${i}`,
@@ -2180,7 +2307,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('fires on the give-up path when there was pending backfill work', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       mockFindByType(configSO, [
         buildCaseSO('c1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'v' }]),
       ]);
@@ -2200,7 +2331,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('swallows a hook rejection and still completes + deletes the task (no retry loop)', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);
@@ -2218,7 +2353,11 @@ describe('TemplatesMigrationTaskManager', () => {
     });
 
     it('does not require a hook - a completing backfill with no hook configured still deletes the task', async () => {
-      const configSO = buildConfigureSO({ customFields: [buildLegacyCustomField('cf_text')] });
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        legacyCustomFieldsMigrated: true,
+        legacyTemplatesMigrated: true,
+      });
       mockFindByType(configSO, [
         buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
       ]);

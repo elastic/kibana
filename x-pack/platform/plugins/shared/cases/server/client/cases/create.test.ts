@@ -814,7 +814,12 @@ describe('create', () => {
             assignees: [],
             category: null,
             connector: { fields: null, id: '.none', name: 'None', type: '.none' },
-            customFields: [],
+            // Persisted value (post-fill), not the raw request: the two configured optional
+            // custom fields are padded to null since the caller sent neither.
+            customFields: [
+              { key: 'first_customField_key', type: CustomFieldTypes.TEXT, value: null },
+              { key: 'second_customField_key', type: CustomFieldTypes.TOGGLE, value: null },
+            ],
             description: 'testing sir',
             owner: 'securitySolution',
             settings: { syncAlerts: true },
@@ -1323,6 +1328,50 @@ describe('create', () => {
       // count was submitted — it must still be mirrored.
       expect(createArgs.attributes.extended_fields?.count_as_integer).toBe('5');
     });
+
+    it('creates successfully when two required linked fields are split across customFields and extended_fields', async () => {
+      // FAILURE SCENARIO (before fix): pre-pair validation only saw its own representation —
+      // the customFields-required check never looked at extended_fields, and the extended_fields
+      // pre-pair check ran before pairing had mirrored `priority` over, so `count` (sent only via
+      // extended_fields) or `priority` (sent only via customFields) could be wrongly rejected as
+      // "missing" even though pairing would have produced a fully valid final map.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      adapterCasesClientMock.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: adapterCustomFieldsCfg.map((cf) => ({ ...cf, required: true })),
+        },
+      ]);
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: adapterFieldDefinitions,
+        total: adapterFieldDefinitions.length,
+      });
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(
+        {
+          ...theCase,
+          // priority supplied via customFields only; count supplied via extended_fields only.
+          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'high' }],
+          extended_fields: { count_as_integer: '5' },
+        },
+        clientArgs,
+        adapterCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '5',
+      });
+      expect(createArgs.attributes.customFields).toMatchObject(
+        expect.arrayContaining([
+          expect.objectContaining({ key: 'priority', value: 'high' }),
+          expect.objectContaining({ key: 'count', value: 5 }),
+        ])
+      );
+    });
   });
 
   describe('server-side template expansion', () => {
@@ -1708,11 +1757,18 @@ describe('create', () => {
         SECURITY_SOLUTION_OWNER,
         { isGlobal: true }
       );
-      // Parity with UI-created cases: without a template no extended_fields user action
-      // is emitted (that audit path is template-scoped).
-      expect(
-        clientArgs.services.userActionService.creator.bulkCreateUserAction
-      ).not.toHaveBeenCalled();
+      // The persisted extended_fields (from the injected default) must be recorded in the
+      // activity log even without a template — that audit trail is no longer template-scoped.
+      expect(clientArgs.services.userActionService.creator.bulkCreateUserAction).toHaveBeenCalledWith(
+        {
+          userActions: [
+            expect.objectContaining({
+              type: 'extended_fields',
+              payload: { extended_fields: { risk_score_as_keyword: 'high' } },
+            }),
+          ],
+        }
+      );
     });
 
     it('caller-sent values win over global defaults', async () => {

@@ -39,7 +39,7 @@ import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types
  * perPage: 10000 is intentionally unbounded for this one-shot scan — field-definitions per
  * owner are expected to be O(10s).
  */
-const findFieldDefinitionsForOwner = async (
+export const findFieldDefinitionsForOwner = async (
   repo: ISavedObjectsRepository,
   owner: string,
   nsOption: string | undefined
@@ -500,23 +500,68 @@ export const migrateOneConfigure = async (
   // all receive no flags and are re-evaluated cheaply on each restart. A phase that hit an
   // unexpected error stays unflagged so the next run retries it instead of leaving the failed
   // item permanently unmigrated.
+  //
+  // legacyTemplatesMigrated additionally requires !fieldDefsHadError, but only when this configure
+  // SO actually has templates to migrate: the templates phase consumes refNamesByKey/libraryDefs
+  // produced by the field-definitions phase in this SAME run, so a field that failed with an
+  // unexpected error this run leaves refNamesByKey missing its entry — a template write that
+  // itself throws nothing has then silently omitted that field's $ref, and marking the phase
+  // migrated would make that omission permanent. A configure SO with zero templates never
+  // consumes refNamesByKey at all, so a field-def error elsewhere doesn't taint anything here.
   const flagsToWrite: Partial<ConfigurationPersistedAttributes> = {};
   if (legacyCustomFields.length > 0 || legacyTemplates.length > 0) {
     if (!attributes.legacyCustomFieldsMigrated && !fieldDefsHadError) {
       flagsToWrite.legacyCustomFieldsMigrated = true;
     }
-    if (!attributes.legacyTemplatesMigrated && !templatesHadError) {
+    if (
+      !attributes.legacyTemplatesMigrated &&
+      !templatesHadError &&
+      (legacyTemplates.length === 0 || !fieldDefsHadError)
+    ) {
       flagsToWrite.legacyTemplatesMigrated = true;
     }
   }
 
+  // Tracks the TRUE final state for the caller (see MigrationCounts doc): defaults to the
+  // pre-run values, and is only promoted to `true` once the write below actually commits — a
+  // conflicted write must not be reported as done.
+  let finalLegacyCustomFieldsMigrated = attributes.legacyCustomFieldsMigrated === true;
+  let finalLegacyTemplatesMigrated = attributes.legacyTemplatesMigrated === true;
+
   if (Object.keys(flagsToWrite).length > 0) {
-    await repo.update<ConfigurationPersistedAttributes>(
-      CASE_CONFIGURE_SAVED_OBJECT,
-      configureId,
-      flagsToWrite,
-      { ...(nsOption ? { namespace: nsOption } : {}), refresh: false }
-    );
+    try {
+      await repo.update<ConfigurationPersistedAttributes>(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configureId,
+        flagsToWrite,
+        {
+          ...(nsOption ? { namespace: nsOption } : {}),
+          version: so.version,
+          refresh: false,
+        }
+      );
+      if (flagsToWrite.legacyCustomFieldsMigrated) {
+        finalLegacyCustomFieldsMigrated = true;
+      }
+      if (flagsToWrite.legacyTemplatesMigrated) {
+        finalLegacyTemplatesMigrated = true;
+      }
+    } catch (err) {
+      // A concurrent configure write (e.g. a user PATCH that added a template/custom field)
+      // landed between the read at the top of this function and this write. Writing the
+      // flags anyway would mark the *stale* snapshot as migrated and permanently skip
+      // whatever the concurrent write added. Skip the flag write — the next run re-reads
+      // the current SO and re-evaluates from scratch (already-linked fields/templates are
+      // cheap no-ops via legacyKey/name reuse).
+      if (SavedObjectsErrorHelpers.isConflictError(err as Error)) {
+        log.debug(
+          `[${executionId}] Configure SO ${configureId} changed concurrently — skipping ` +
+            `migration flag write this run; will re-evaluate on the next run`
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 
   // Per-SO detail stays at debug — the run() loop aggregates these into a single summary INFO line.
@@ -526,5 +571,12 @@ export const migrateOneConfigure = async (
       `templatesCreated=${templatesCreated}, templatesReused=${templatesReused}`
   );
 
-  return { fieldDefsCreated, fieldDefsReused, templatesCreated, templatesReused };
+  return {
+    fieldDefsCreated,
+    fieldDefsReused,
+    templatesCreated,
+    templatesReused,
+    legacyCustomFieldsMigrated: finalLegacyCustomFieldsMigrated,
+    legacyTemplatesMigrated: finalLegacyTemplatesMigrated,
+  };
 };

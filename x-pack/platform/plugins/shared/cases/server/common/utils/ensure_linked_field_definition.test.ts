@@ -91,7 +91,8 @@ describe('ensureLinkedFieldDefinition', () => {
   it('creates a definition with friendly name, deterministic id, and legacyKey', async () => {
     const result = await ensureLinkedFieldDefinition(textField, buildFieldLinkIndexes([]), deps());
 
-    const expectedId = deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' });
+    // The id is seeded by legacyKey, not the friendly name — see the concurrent-first-link fix.
+    const expectedId = deriveFieldDefinitionId({ spaceId, owner, name: textField.key });
     expect(result).toMatchObject({
       outcome: 'created',
       definition: {
@@ -122,8 +123,31 @@ describe('ensureLinkedFieldDefinition', () => {
   });
 
   it('converges on a concurrent creator of the same link after a conflict', async () => {
-    const expectedId = deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' });
+    const expectedId = deriveFieldDefinitionId({ spaceId, owner, name: textField.key });
     const winner = makeDefinition({ fieldDefinitionId: expectedId, legacyKey: 'text_key_1' });
+    createDefinition.mockRejectedValueOnce(conflictError());
+    fetchDefinitionById.mockResolvedValueOnce(winner);
+
+    const result = await ensureLinkedFieldDefinition(textField, buildFieldLinkIndexes([]), deps());
+
+    expect(result).toMatchObject({
+      outcome: 'reused',
+      definition: winner,
+      needsLegacyKeyRepair: false,
+    });
+    expect(createDefinition).toHaveBeenCalledTimes(1);
+  });
+
+  it('converges on the same id even when the winner was created from a different label snapshot', async () => {
+    // Simulates two concurrent first-time-migration calls for the same legacyKey that observed
+    // different `label` values (e.g. the label was edited mid-migration) — they must still
+    // compute the same id (seeded by legacyKey, not the label-derived name) and converge.
+    const expectedId = deriveFieldDefinitionId({ spaceId, owner, name: textField.key });
+    const winner = makeDefinition({
+      fieldDefinitionId: expectedId,
+      name: 'a_completely_different_name',
+      legacyKey: textField.key,
+    });
     createDefinition.mockRejectedValueOnce(conflictError());
     fetchDefinitionById.mockResolvedValueOnce(winner);
 

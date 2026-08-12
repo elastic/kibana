@@ -71,10 +71,17 @@ export interface EnsureLinkedFieldDefinitionDeps {
  * - Malformed linkage (duplicate `legacyKey`, type mismatch, unparseable
  *   definition) and ambiguous name matches are surfaced as `blocked` — callers
  *   fail the configuration write (A1) or count the field as unmigratable.
- * - On a create conflict (deterministic id already taken), the winner is
- *   refetched: same `(owner, legacyKey)` → reuse; otherwise the base name
- *   belongs to another field, so the deterministic legacy-key-suffixed name is
- *   used instead.
+ * - The first creation attempt's id is seeded by `legacyKey` alone (never the
+ *   label-derived name): two concurrent first-time-migration calls for the
+ *   SAME legacyKey always compute the SAME deterministic id even if they
+ *   observed different `label` snapshots (e.g. edited mid-migration), so they
+ *   collide and converge on one winner instead of each succeeding under a
+ *   different name/id and permanently duplicating the legacyKey.
+ * - On that conflict, the winner is refetched and reused when its `legacyKey`
+ *   matches (always true in practice, since the id is a pure function of
+ *   `(spaceId, owner, legacyKey)`). The legacy-key-suffixed-name fallback below
+ *   only exists to disambiguate the near-impossible case of a hash collision
+ *   between two different legacyKeys.
  *
  * The caller mutates its own name index after a create (in-loop, #282060
  * style) via the returned definition.
@@ -117,10 +124,11 @@ export const ensureLinkedFieldDefinition = async (
 const buildAttributes = (
   customField: LegacyCustomFieldInput,
   name: string,
+  idSeed: string,
   deps: EnsureLinkedFieldDefinitionDeps
 ): { attributes: FieldDefinition; id: string } => {
   const { yaml } = buildFieldDefinitionYaml(customField, { name });
-  const id = deriveFieldDefinitionId({ spaceId: deps.spaceId, owner: deps.owner, name });
+  const id = deriveFieldDefinitionId({ spaceId: deps.spaceId, owner: deps.owner, name: idSeed });
   return {
     id,
     attributes: {
@@ -140,7 +148,9 @@ const createWithConflictFallback = async (
   baseName: string,
   deps: EnsureLinkedFieldDefinitionDeps
 ): Promise<EnsureLinkedFieldDefinitionOutcome> => {
-  const base = buildAttributes(customField, baseName, deps);
+  // Seeded by legacyKey, not baseName: see the id-derivation note on ensureLinkedFieldDefinition
+  // above for why this is the fix for concurrent-first-link legacyKey duplication.
+  const base = buildAttributes(customField, baseName, customField.key, deps);
 
   try {
     await deps.createDefinition(base.attributes, base.id);
@@ -151,20 +161,21 @@ const createWithConflictFallback = async (
     }
   }
 
-  // A concurrent creator claimed the deterministic id. If it created the same
-  // link, converge on it; otherwise the base name belongs to another field and
-  // the deterministic legacy-key-suffixed name disambiguates.
+  // The id is a pure function of (spaceId, owner, legacyKey), so a conflict on it can only be a
+  // concurrent creator for this SAME legacyKey — refetch and reuse.
   const winner = await deps.fetchDefinitionById(base.id);
   if (winner && winner.owner === deps.owner && winner.legacyKey === customField.key) {
     return { outcome: 'reused', definition: winner, needsLegacyKeyRepair: false };
   }
 
+  // Defensive fallback only: reachable in practice only via a uuidv5 hash collision between two
+  // different legacyKeys. Disambiguates with a legacy-key-suffixed name/id pair.
   const suffixedName = generateFriendlyFieldName({
     label: customField.label,
     legacyKey: customField.key,
     isNameTaken: () => true,
   });
-  const suffixed = buildAttributes(customField, suffixedName, deps);
+  const suffixed = buildAttributes(customField, suffixedName, suffixedName, deps);
 
   try {
     await deps.createDefinition(suffixed.attributes, suffixed.id);

@@ -336,7 +336,28 @@ describe('createFieldDefinitionsSubClient', () => {
 
       expect(
         clientArgs.services.fieldDefinitionsService.updateFieldDefinition
-      ).toHaveBeenCalledWith('fd-1', { ...input, definition: 'not: [valid' });
+      ).toHaveBeenCalledWith(
+        'fd-1',
+        { ...input, definition: 'not: [valid' },
+        { version: undefined }
+      );
+    });
+
+    it('threads the read version through to the update for OCC against the demotion/identity guards', async () => {
+      // TOCTOU guard: a concurrent configure write that links this definition (e.g. a legacyKey
+      // repair) between this guard's read and the update below must be caught as a version
+      // conflict rather than silently committing past the guard.
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue({
+        ...so,
+        version: 'v7',
+      });
+
+      await client.updateFieldDefinition('fd-1', input);
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', input, { version: 'v7' });
     });
 
     describe('A4 demotion guard (isGlobal)', () => {
@@ -426,7 +447,22 @@ describe('createFieldDefinitionsSubClient', () => {
 
       expect(
         clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
-      ).toHaveBeenCalledWith('fd-1');
+      ).toHaveBeenCalledWith('fd-1', { version: undefined });
+    });
+
+    it('threads the read version through to the delete for OCC against the active-link guard', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue({
+        ...so,
+        version: 'v3',
+      });
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', { version: 'v3' });
     });
 
     it('throws 409 when a single template references the field', async () => {
@@ -538,7 +574,7 @@ describe('createFieldDefinitionsSubClient', () => {
 
       expect(
         clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
-      ).toHaveBeenCalledWith('fd-1');
+      ).toHaveBeenCalledWith('fd-1', { version: undefined });
     });
   });
 });

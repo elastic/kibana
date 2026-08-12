@@ -464,13 +464,44 @@ describe('customFields → extended_fields adapter utilities', () => {
   });
 
   describe('buildExtendedFieldsBackfill', () => {
+    // Most of these tests exercise value/precedence semantics independent of key derivation, so
+    // they resolve every field to its raw-key-based storage key (matching pre-friendly-name
+    // behavior) via this stub resolver. Dedicated tests below cover link-resolution itself.
+    const rawKeyBackfill = (
+      customFields: Array<{ key: string; type: string; value: unknown }> | undefined,
+      existingExtendedFields: Record<string, unknown> | null | undefined
+    ) =>
+      buildExtendedFieldsBackfill(customFields, existingExtendedFields, (cf) =>
+        getFieldSnakeKey(cf.key, getV2FieldType(cf.type))
+      );
+
     it('returns an empty object when customFields is undefined or empty', () => {
-      expect(buildExtendedFieldsBackfill(undefined, {})).toEqual({});
-      expect(buildExtendedFieldsBackfill([], {})).toEqual({});
+      expect(rawKeyBackfill(undefined, {})).toEqual({});
+      expect(rawKeyBackfill([], {})).toEqual({});
+    });
+
+    it('skips a field with no resolvable storage key rather than guessing', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'unresolved', type: 'text', value: 'x' }],
+        {},
+        () => undefined
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('uses the resolver-provided storage key, not the raw legacy key', () => {
+      const result = buildExtendedFieldsBackfill(
+        [{ key: 'raw_v1_key', type: 'text', value: 'hello' }],
+        {},
+        () => 'friendly_name_as_keyword'
+      );
+
+      expect(result).toEqual({ friendly_name_as_keyword: 'hello' });
     });
 
     it('derives storage keys using <key>_as_<v2type>', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'priority', type: 'text', value: 'high' },
           { key: 'count', type: 'number', value: 42 },
@@ -487,7 +518,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('skips null and undefined values', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'filled', type: 'text', value: 'yes' },
           { key: 'empty_null', type: 'text', value: null },
@@ -502,7 +533,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     it('never overwrites a key already present in existingExtendedFields', () => {
       // FAILURE SCENARIO: adapter called twice on same case — second call must not
       // overwrite the value set by the first (existing-wins semantics).
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [{ key: 'priority', type: 'text', value: 'low' }],
         { priority_as_keyword: 'high' }
       );
@@ -511,7 +542,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('only returns the additions, not the full merged map', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'priority', type: 'text', value: 'low' }, // already in existing — skipped
           { key: 'severity', type: 'text', value: 'medium' }, // new — added
@@ -524,7 +555,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('treats null existingExtendedFields as empty', () => {
-      const result = buildExtendedFieldsBackfill([{ key: 'x', type: 'text', value: 'v' }], null);
+      const result = rawKeyBackfill([{ key: 'x', type: 'text', value: 'v' }], null);
 
       expect(result).toEqual({ x_as_keyword: 'v' });
     });
@@ -535,7 +566,7 @@ describe('customFields → extended_fields adapter utilities', () => {
       // before a space's backfill completes, so a '' observed at backfill time may be a
       // deliberate clear. It is ambiguous, so it must never be overwritten with the stale
       // legacy value.
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [{ key: 'priority', type: 'text', value: 'low' }],
         {
           priority_as_keyword: '',
@@ -546,7 +577,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('fills a key whose existing value is null', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [{ key: 'priority', type: 'text', value: 'low' }],
         {
           priority_as_keyword: null,
@@ -557,7 +588,7 @@ describe('customFields → extended_fields adapter utilities', () => {
     });
 
     it('does not fill a key whose existing value is a non-empty string', () => {
-      const result = buildExtendedFieldsBackfill(
+      const result = rawKeyBackfill(
         [
           { key: 'kept', type: 'text', value: 'legacy' },
           { key: 'zero', type: 'number', value: 1 },

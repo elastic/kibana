@@ -93,8 +93,9 @@ describe('ensureGlobalFieldDefinitions', () => {
     });
     expect(input.definition).toContain('name: my_text');
 
+    // The id is seeded by legacyKey, not the friendly name — see the concurrent-first-link fix.
     expect(serverManaged).toEqual({
-      id: deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' }),
+      id: deriveFieldDefinitionId({ spaceId, owner, name: textField.key }),
       legacyKey: 'text_key_1',
     });
   });
@@ -264,7 +265,7 @@ describe('ensureGlobalFieldDefinitions', () => {
   });
 
   it('converges on a concurrent creator of the same link after a deterministic-id conflict', async () => {
-    const deterministicId = deriveFieldDefinitionId({ spaceId, owner, name: 'my_text' });
+    const deterministicId = deriveFieldDefinitionId({ spaceId, owner, name: textField.key });
     fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
       SavedObjectsErrorHelpers.createConflictError('cases-field-definition', deterministicId)
     );

@@ -244,7 +244,14 @@ export const createFieldDefinitionsSubClient = (
       // No per-owner name-uniqueness check on update: the identity guard above
       // guarantees the name cannot change, and the persisted name is already
       // unique for the owner.
-      return fieldDefinitionsService.updateFieldDefinition(id, input);
+      //
+      // Version-guard against the demotion check above: a concurrent configure write that
+      // links this definition (and, in doing so, writes to it — e.g. a legacyKey repair)
+      // between the isDefinitionActivelyLinked read and this write now surfaces as a 409
+      // instead of silently committing the demotion past the guard.
+      return fieldDefinitionsService.updateFieldDefinition(id, input, {
+        version: fieldDef.version,
+      });
     },
 
     deleteFieldDefinition: async (id: string) => {
@@ -278,7 +285,9 @@ export const createFieldDefinitionsSubClient = (
         );
       }
 
-      return fieldDefinitionsService.deleteFieldDefinition(id);
+      // Version-guard: see updateFieldDefinition's demotion-guard comment above. Narrows, but
+      // (per deleteFieldDefinition's doc) does not fully close, the same TOCTOU window.
+      return fieldDefinitionsService.deleteFieldDefinition(id, { version: fieldDef.version });
     },
   };
 

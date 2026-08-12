@@ -207,6 +207,11 @@ export class TemplatesMigrationTaskManager {
           totals.fieldDefsReused += counts.fieldDefsReused;
           totals.templatesCreated += counts.templatesCreated;
           totals.templatesReused += counts.templatesReused;
+          // Reflect this run's phase-1 result on the in-memory snapshot so Phase 2 (below), which
+          // reads from this same `configures` array, sees a freshly-migrated space as eligible
+          // immediately instead of waiting a full extra run for the next findAllConfigurations read.
+          so.attributes.legacyCustomFieldsMigrated = counts.legacyCustomFieldsMigrated;
+          so.attributes.legacyTemplatesMigrated = counts.legacyTemplatesMigrated;
           this.migrationUsageCounter?.incrementCounter({
             counterName: 'configureMigrationSuccess',
             incrementBy: 1,

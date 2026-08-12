@@ -26,7 +26,8 @@ import type {
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import {
-  validateCustomFields,
+  validateCustomFieldsStructure,
+  validateRequiredCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
 } from './validators';
@@ -185,6 +186,21 @@ export const bulkCreate = async (
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
 
+      // Pairing (independent of the templates flag) can populate extended_fields from a linked
+      // customFields value, or the caller can supply it directly — either way, create_case's
+      // payload strips extended_fields, so without a dedicated entry a non-empty extended_fields
+      // on the persisted case has zero record in the activity log.
+      const persistedExtendedFields = theCase.attributes.extended_fields;
+      if (persistedExtendedFields && Object.keys(persistedExtendedFields).length > 0) {
+        userActions.push({
+          type: UserActionTypes.extended_fields,
+          caseId: theCase.id,
+          user,
+          payload: { extended_fields: persistedExtendedFields },
+          owner: theCase.attributes.owner,
+        });
+      }
+
       if (theCase.attributes.assignees && theCase.attributes.assignees.length !== 0) {
         const assigneesWithoutCurrentUser = theCase.attributes.assignees.filter(
           (assignee) => assignee.uid !== user.profile_uid
@@ -260,7 +276,9 @@ const validateRequest = ({
     customFieldsConfiguration,
   };
 
-  validateCustomFields(customFieldsValidationParams);
+  // Structural checks only; required-ness is checked later, after pairing (in
+  // createBulkCreateCaseRequest), against the effective post-pair customFields array.
+  validateCustomFieldsStructure(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
 
   // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
@@ -328,24 +346,11 @@ const createBulkCreateCaseRequest = async ({
     return globalFields;
   };
 
-  // Definition-aware validation mirrors create.ts: unlike the pairing checks below (which only
-  // cover actively-linked fields), this rejects unknown extended_fields keys, wrong-typed
-  // values, and missing required fields for every case — including pure v2-native fields with
-  // no linked v1 customField. bulkCreate has no server-side template/global-defaults expansion
-  // (see below), so any extended_fields present here are entirely caller-supplied — `partial:
-  // false` enforces `required` on them, same as an explicit caller-supplied map on create.
-  if (caseWithoutId.extended_fields) {
-    const globalFields = await resolveCachedGlobalFields();
-    await validateCaseExtendedFields({
-      extendedFields: caseWithoutId.extended_fields,
-      templateId: theCase.template?.id,
-      globalFields,
-      templatesService,
-      fieldDefinitionsService,
-      owner: theCase.owner,
-      partial: false,
-    });
-  }
+  // NOTE: extended_fields is validated once, below — after pairing resolves any linked field
+  // supplied only via customFields into its extended_fields counterpart. Validating here (before
+  // pairing) would reject a request pairing would have made valid: e.g. two required linked
+  // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
+  // only sees the latter and rejects the former as missing.
 
   /**
    * Trim title, category, description and tags
@@ -384,22 +389,6 @@ const createBulkCreateCaseRequest = async ({
       paired.extendedFields !== normalizedCase.extended_fields || paired.customFields !== undefined
     );
 
-    // Definition-aware validation of the FINAL map: the pre-pairing validation above only saw
-    // the request's extended_fields; paired entries must also be valid keys with valid values.
-    // `partial: true` — pairing never makes an absent field "required-missing".
-    if (paired.extendedFields != null && paired.extendedFields !== normalizedCase.extended_fields) {
-      const globalFields = await resolveCachedGlobalFields();
-      await validateCaseExtendedFields({
-        extendedFields: paired.extendedFields as Record<string, string>,
-        templateId: theCase.template?.id,
-        globalFields,
-        templatesService,
-        fieldDefinitionsService,
-        owner: theCase.owner,
-        partial: true,
-      });
-    }
-
     normalizedCase.extended_fields = (paired.extendedFields as Record<string, string>) ?? undefined;
     if (paired.customFields !== undefined) {
       // Values were decoded through the per-type codecs, so they satisfy the
@@ -407,6 +396,30 @@ const createBulkCreateCaseRequest = async ({
       normalizedCase.customFields =
         paired.customFields as unknown as typeof normalizedCase.customFields;
     }
+  }
+
+  // Single authoritative validation pass over the FINAL, post-pairing representations — mirrors
+  // create.ts. Unlike the pairing checks above (which only cover actively-linked fields), this
+  // rejects unknown extended_fields keys, wrong-typed values, and missing required fields for
+  // every case — including pure v2-native fields with no linked v1 customField. bulkCreate has
+  // no server-side template/global-defaults expansion, so `partial: false` always applies (no
+  // defaults-injection leniency to preserve, unlike create.ts).
+  validateRequiredCustomFields({
+    requestCustomFields: normalizedCase.customFields,
+    customFieldsConfiguration,
+  });
+
+  if (normalizedCase.extended_fields) {
+    const globalFields = await resolveCachedGlobalFields();
+    await validateCaseExtendedFields({
+      extendedFields: normalizedCase.extended_fields,
+      templateId: theCase.template?.id,
+      globalFields,
+      templatesService,
+      fieldDefinitionsService,
+      owner: theCase.owner,
+      partial: false,
+    });
   }
 
   return {

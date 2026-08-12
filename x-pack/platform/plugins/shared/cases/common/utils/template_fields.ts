@@ -327,24 +327,35 @@ const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null;
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
  *
+ * `resolveStorageKey` supplies the key to write under — the linked field definition's
+ * `${name}_as_${type}` (never `${legacyKey}_as_${type}`; see `field_link_resolution.ts`'s
+ * `toResolved`, the single source of truth for this derivation). A field with no resolvable
+ * link (`undefined`) is skipped entirely rather than guessed at, matching the rest of the
+ * migration's "never guess" linkage philosophy — this file is `common/` (shared with client
+ * code) and cannot import the server-only link-resolution module directly, hence the callback.
+ *
  * Returns only the entries to write (keys missing or empty). Callers are responsible for
- * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
- * for the combined helper.
+ * spreading the result over the existing map.
  */
 export const buildExtendedFieldsBackfill = (
   customFields: LegacyCaseCustomField[] | undefined,
-  existingExtendedFields: Record<string, unknown> | null | undefined
+  existingExtendedFields: Record<string, unknown> | null | undefined,
+  resolveStorageKey: (customField: LegacyCaseCustomField) => string | undefined
 ): Record<string, string> => {
   const existing = existingExtendedFields ?? {};
   const additions: Record<string, string> = {};
 
   for (const cf of customFields ?? []) {
     const hasValue = cf.value !== null && cf.value !== undefined;
-    if (hasValue) {
-      const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-      if (isEmptyExtendedFieldValue(existing[snakeKey])) {
-        additions[snakeKey] = String(cf.value);
-      }
+    if (!hasValue) {
+      continue;
+    }
+    const storageKey = resolveStorageKey(cf);
+    if (storageKey === undefined) {
+      continue;
+    }
+    if (isEmptyExtendedFieldValue(existing[storageKey])) {
+      additions[storageKey] = String(cf.value);
     }
   }
 
