@@ -31,13 +31,7 @@ const setConversationMetadataSchema = z.object({
       ])
     )
     .describe(
-      `Key/value pairs to merge into the conversation metadata. ` +
-        `Use a string for TEXT, SELECT, DATE, and USER fields. ` +
-        `Use a number for NUMBER fields. ` +
-        `Use a boolean (true or false) for TOGGLE fields. ` +
-        `Use an array of strings for TEXT_ARRAY fields. ` +
-        `Existing keys not included here are left unchanged. ` +
-        `Pass an empty string as the value to clear a specific string key.`
+      `Key/value pairs to merge into the conversation metadata. Use a string for TEXT, SELECT, DATE, and USER fields. Use a number for NUMBER fields. Use a boolean (true or false) for TOGGLE fields. Use an array of strings for TEXT_ARRAY fields. Existing keys not included here are left unchanged. Pass an empty string as the value to clear a specific string key.`
     ),
 });
 
