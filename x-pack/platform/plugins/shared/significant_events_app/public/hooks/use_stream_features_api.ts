@@ -67,6 +67,8 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
         );
       },
       setFeatureDurability: async (feature: Feature, expiresAt: string | undefined) => {
+        // `uuid` is derived server-side and rejected by the upsert schema; send the upsert shape only.
+        const { uuid, ...featureUpsert } = feature;
         await significantEventsRepositoryClient.fetch(
           'POST /internal/streams/{name}/features/_bulk',
           {
@@ -74,7 +76,7 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
             params: {
               path: { name: streamName },
               body: {
-                operations: [{ index: { feature: { ...feature, expires_at: expiresAt } } }],
+                operations: [{ index: { feature: { ...featureUpsert, expires_at: expiresAt } } }],
               },
             },
           }
