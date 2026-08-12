@@ -111,8 +111,11 @@ export const waitForViewToBeLoaded = () => {
           return true;
         }
         if ($body.find(REFRESH_BUTTON).length === 0) {
+          cy.intercept('POST', '**/internal/search/threatIntelligenceSearchStrategy').as(
+            'tiReloadSearch'
+          );
           cy.reload();
-          cy.get(REFRESH_BUTTON, { timeout: 30000 }).should('exist');
+          cy.wait('@tiReloadSearch', { timeout: 90000 });
         } else {
           cy.get(REFRESH_BUTTON).click();
         }
