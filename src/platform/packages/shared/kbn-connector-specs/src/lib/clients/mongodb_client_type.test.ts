@@ -49,9 +49,9 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
     ensureUriAllowed: jest.fn(),
     ensureHostnameAllowed: jest.fn(),
     resolveSrvHosts: mockResolveSrvHosts,
-    getSslSettings: jest.fn(),
-    getProxySettings: jest.fn(),
-    getCustomHostSettings: jest.fn(),
+    getSslSettings: jest.fn().mockReturnValue({}),
+    getProxySettings: jest.fn().mockReturnValue(undefined),
+    getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn(),
   },
   credential: {
@@ -102,7 +102,10 @@ describe('mongodbClientType', () => {
       expect(result).toBe(mockClientInstance);
     });
 
-    it('passes the URI directly to MongoClient, including mongodb+srv:// schemes', async () => {
+    it('connects to the resolved SRV targets directly, not the original +srv URI', async () => {
+      // Regression test for a DNS-rebinding TOCTOU: handing the driver the original
+      // mongodb+srv:// URI would let it re-resolve SRV records itself, independently of the
+      // hosts just validated against the allowlist above.
       const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
       await mongodbClientType.build(ctx);
 
@@ -110,9 +113,117 @@ describe('mongodbClientType', () => {
         'cluster0.example.com'
       );
       expect(MockMongoClient).toHaveBeenCalledWith(
-        'mongodb+srv://cluster0.example.com/mydb',
+        'mongodb://shard1.example.com:27017,shard2.example.com:27017/mydb?tls=true',
         expect.objectContaining({})
       );
+    });
+
+    it('preserves other query params and an explicit tls=false when pinning an SRV connection', async () => {
+      const ctx = makeBuildContext({
+        config: { uri: 'mongodb+srv://cluster0.example.com/mydb?srvServiceName=customname' },
+      });
+      mockResolveSrvHosts.mockResolvedValue([{ name: 'shard1.example.com', port: 27017 }]);
+      await mongodbClientType.build(ctx);
+
+      expect(MockMongoClient).toHaveBeenCalledWith(
+        'mongodb://shard1.example.com:27017/mydb?srvServiceName=customname&tls=true',
+        expect.objectContaining({})
+      );
+    });
+
+    it('applies the general xpack.actions.ssl settings to the MongoClient options', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getSslSettings as jest.Mock).mockReturnValue({
+        verificationMode: 'full',
+        ca: Buffer.from('general-ca-pem'),
+      });
+      await mongodbClientType.build(ctx);
+
+      expect(MockMongoClient).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ rejectUnauthorized: true, ca: Buffer.from('general-ca-pem') })
+      );
+    });
+
+    it('prefers a per-host customHostSettings SSL override over the general settings', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getSslSettings as jest.Mock).mockReturnValue({
+        verificationMode: 'full',
+        ca: Buffer.from('general-ca-pem'),
+      });
+      (ctx.networkSettings.getCustomHostSettings as jest.Mock).mockImplementation((url: string) =>
+        url === 'https://mongo.example.com:27017'
+          ? { url, ssl: { verificationMode: 'none', certificateAuthoritiesData: 'custom-ca-pem' } }
+          : undefined
+      );
+      await mongodbClientType.build(ctx);
+
+      expect(ctx.networkSettings.getCustomHostSettings).toHaveBeenCalledWith(
+        'https://mongo.example.com:27017'
+      );
+      expect(MockMongoClient).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          rejectUnauthorized: false,
+          ca: Buffer.from('custom-ca-pem'),
+        })
+      );
+    });
+
+    it('throws instead of silently connecting when a configured proxy would apply to the host', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+        proxyUrl: 'http://proxy.example.com:8080',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+        proxySSLSettings: {},
+      });
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'MongoDB connections cannot be routed through the configured xpack.actions.proxyUrl'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
+    });
+
+    it('connects directly when the host is in proxyBypassHosts', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+        proxyUrl: 'http://proxy.example.com:8080',
+        proxyBypassHosts: new Set(['mongo.example.com']),
+        proxyOnlyHosts: undefined,
+        proxySSLSettings: {},
+      });
+
+      await mongodbClientType.build(ctx);
+      expect(MockMongoClient).toHaveBeenCalled();
+    });
+
+    it('connects directly when proxyOnlyHosts is set and does not include the connector host', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+        proxyUrl: 'http://proxy.example.com:8080',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['other.example.com']),
+        proxySSLSettings: {},
+      });
+
+      await mongodbClientType.build(ctx);
+      expect(MockMongoClient).toHaveBeenCalled();
+    });
+
+    it('throws when proxyOnlyHosts is set and does include the connector host', async () => {
+      const ctx = makeBuildContext();
+      (ctx.networkSettings.getProxySettings as jest.Mock).mockReturnValue({
+        proxyUrl: 'http://proxy.example.com:8080',
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: new Set(['mongo.example.com']),
+        proxySSLSettings: {},
+      });
+
+      await expect(mongodbClientType.build(ctx)).rejects.toThrow(
+        'MongoDB connections cannot be routed through the configured xpack.actions.proxyUrl'
+      );
+      expect(MockMongoClient).not.toHaveBeenCalled();
     });
 
     it('resolves and validates the actual SRV target hosts, not just the seed name', async () => {
@@ -370,6 +481,19 @@ describe('mongodbClientType', () => {
         isUserError(
           new Error(
             'config.uri must not contain embedded credentials — use the username and password fields instead'
+          )
+        )
+      ).toBe(true);
+    });
+
+    it('returns true for the proxy-not-supported pre-connect error', () => {
+      expect(
+        isUserError(
+          new Error(
+            'MongoDB connections cannot be routed through the configured xpack.actions.proxyUrl: ' +
+              'the MongoDB driver only supports a SOCKS5 proxy (proxyHost/proxyPort), not an ' +
+              "HTTP(S) forward proxy. Add the connector's host to xpack.actions.proxyBypassHosts " +
+              'to allow a direct connection.'
           )
         )
       ).toBe(true);

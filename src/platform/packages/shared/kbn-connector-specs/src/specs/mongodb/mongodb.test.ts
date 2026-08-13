@@ -109,9 +109,8 @@ describe('MongoDBConnector metadata and wiring', () => {
     expect(MongoDBConnector.auth?.types).toEqual(['basic']);
   });
 
-  it('supports workflows and agentBuilder', () => {
-    expect(MongoDBConnector.metadata.supportedFeatureIds).toContain('workflows');
-    expect(MongoDBConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+  it('supports agentBuilder only (workflows follows in a later PR)', () => {
+    expect(MongoDBConnector.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
   });
 
   it('is enterprise and tech preview', () => {
@@ -481,6 +480,129 @@ describe('aggregate', () => {
         },
       },
       { $limit: 25 },
+    ]);
+  });
+
+  it('appends a $limit inside a $lookup sub-pipeline, not just the outer pipeline', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $lookup: { from: 'other', pipeline: [{ $match: {} }], as: 'joined' } }],
+      limit: 10,
+    });
+
+    // Without sub-pipeline clamping, the outer $limit only bounds the outer document count —
+    // each joined document's "joined" array could still hold the entire matching set.
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 10 }], as: 'joined' } },
+      { $limit: 10 },
+    ]);
+  });
+
+  it('preserves an existing within-cap $limit inside a $lookup sub-pipeline', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [
+        { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 5 }], as: 'joined' } },
+      ],
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $lookup: { from: 'other', pipeline: [{ $match: {} }, { $limit: 5 }], as: 'joined' } },
+      { $limit: 100 },
+    ]);
+  });
+
+  it('leaves a $lookup without its own pipeline (equality-match form) untouched', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [
+        { $lookup: { from: 'other', localField: 'id', foreignField: 'id', as: 'joined' } },
+      ],
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $lookup: { from: 'other', localField: 'id', foreignField: 'id', as: 'joined' } },
+      { $limit: 100 },
+    ]);
+  });
+
+  it('appends a $limit inside a $unionWith object-form sub-pipeline', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $unionWith: { coll: 'other', pipeline: [{ $match: {} }] } }],
+      limit: 10,
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $unionWith: { coll: 'other', pipeline: [{ $match: {} }, { $limit: 10 }] } },
+      { $limit: 10 },
+    ]);
+  });
+
+  it('leaves a bare-collection-name $unionWith untouched', async () => {
+    mockAggregateToArray.mockResolvedValue([]);
+    const collectionInstance = {
+      find: jest.fn(),
+      aggregate: jest.fn().mockReturnValue({ toArray: mockAggregateToArray }),
+      countDocuments: mockCountDocuments,
+      insertOne: mockInsertOne,
+      updateOne: mockUpdateOne,
+      deleteOne: mockDeleteOne,
+    };
+    mockCollection.mockReturnValue(collectionInstance);
+
+    await MongoDBConnector.actions.aggregate.handler(mockContext, {
+      collection: 'orders',
+      pipeline: [{ $unionWith: 'other' }],
+    });
+
+    expect(collectionInstance.aggregate).toHaveBeenCalledWith([
+      { $unionWith: 'other' },
+      { $limit: 100 },
     ]);
   });
 

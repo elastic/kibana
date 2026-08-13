@@ -9,9 +9,22 @@
 
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
 import { loadConnectionString } from './load_connection_string';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
+
+interface HostTarget {
+  hostname: string;
+  port: number;
+}
+
+interface ResolvedHosts {
+  /** Every target that was checked against the allowlist. */
+  targets: HostTarget[];
+  /** Present only for mongodb+srv:// connections: the SRV-resolved connect targets. */
+  srvTargets?: HostTarget[];
+}
 
 // mongodb:// URIs may list multiple hosts (replica sets, sharded clusters) and the driver
 // connects to all of them, so every one must clear the network guard. mongodb+srv:// URIs
@@ -22,13 +35,16 @@ import { parseBasicAuthHeader } from './parse_basic_auth_header';
 const ensureHostsAllowed = async (
   ctx: BuildContext,
   connectionString: ConnectionStringType
-): Promise<void> => {
+): Promise<ResolvedHosts> => {
   if (!connectionString.isSRV) {
-    for (const hostPort of connectionString.hosts) {
-      const { hostname } = new URL(`http://${hostPort}`);
+    const targets = connectionString.hosts.map((hostPort) => {
+      const { hostname, port } = new URL(`http://${hostPort}`);
+      return { hostname, port: port ? Number(port) : 27017 };
+    });
+    for (const { hostname } of targets) {
       ctx.networkSettings.ensureHostnameAllowed(hostname);
     }
-    return;
+    return { targets };
   }
 
   const [seedHost] = connectionString.hosts;
@@ -50,7 +66,109 @@ const ensureHostsAllowed = async (
   for (const record of records) {
     ctx.networkSettings.ensureHostnameAllowed(record.name);
   }
+  const srvTargets = records.map(({ name, port }) => ({ hostname: name, port }));
+  return { targets: srvTargets, srvTargets };
 };
+
+/**
+ * Rebuild the connection string against the exact SRV targets just validated, instead of handing
+ * the driver the original mongodb+srv:// URI. The driver performs its own independent SRV
+ * resolution when connecting a +srv URI — reusing the validated hostnames here closes a
+ * DNS-rebinding window where an attacker-controlled DNS zone could answer the allowlist check
+ * with permitted hosts, then repoint the SRV records at a disallowed host before the driver's
+ * own resolution moments later.
+ *
+ * mongodb+srv:// implies TLS by default, so that default is preserved explicitly since a plain
+ * mongodb:// URI does not carry it. DNS TXT-record-provided defaults (replicaSet, authSource)
+ * are no longer consulted once the +srv scheme is dropped — the driver still auto-discovers
+ * replica-set topology from the resolved hosts without an expected replicaSet name.
+ */
+const pinToResolvedHosts = (
+  connectionString: ConnectionStringType,
+  srvTargets: HostTarget[]
+): string => {
+  const pinned = connectionString.clone();
+  pinned.protocol = 'mongodb:';
+  pinned.hosts = srvTargets.map(({ hostname, port }) => `${hostname}:${port}`);
+  if (!pinned.searchParams.has('tls') && !pinned.searchParams.has('ssl')) {
+    pinned.searchParams.set('tls', 'true');
+  }
+  return pinned.toString();
+};
+
+// xpack.actions.customHostSettings entries are keyed by a URL (scheme + hostname + port); only
+// https:/smtp: schemes pass its own config validation, so "https:" is used here purely as a
+// generic TCP+TLS placeholder scheme to look up per-host overrides for a MongoDB target — there
+// is no real HTTP request involved.
+const toCustomHostSettingsUrl = ({ hostname, port }: HostTarget): string =>
+  `https://${hostname}:${port}`;
+
+/**
+ * Apply the platform's outbound TLS settings (xpack.actions.ssl, plus any per-host override in
+ * xpack.actions.customHostSettings) the same way the Axios connector path does via
+ * getCustomAgents/configureAxiosInstanceWithSsl — otherwise an admin-configured trust store or
+ * verification mode is silently ignored and the driver connects with its own defaults.
+ */
+const resolveTlsOptions = (
+  ctx: BuildContext,
+  targets: HostTarget[]
+): ReturnType<typeof getNodeSSLOptions> => {
+  const sslSettings = ctx.networkSettings.getSslSettings();
+  const customHostSsl = targets
+    .map(
+      (target) => ctx.networkSettings.getCustomHostSettings(toCustomHostSettingsUrl(target))?.ssl
+    )
+    .find((ssl) => ssl != null);
+
+  const tlsOptions = getNodeSSLOptions(
+    ctx.logger,
+    customHostSsl?.verificationMode ?? sslSettings.verificationMode,
+    sslSettings
+  );
+  if (customHostSsl?.certificateAuthoritiesData) {
+    tlsOptions.ca = Buffer.from(customHostSsl.certificateAuthoritiesData);
+  }
+  return tlsOptions;
+};
+
+const PROXY_NOT_SUPPORTED_MESSAGE =
+  'MongoDB connections cannot be routed through the configured xpack.actions.proxyUrl: ' +
+  'the MongoDB driver only supports a SOCKS5 proxy (proxyHost/proxyPort), not an HTTP(S) forward ' +
+  "proxy. Add the connector's host to xpack.actions.proxyBypassHosts to allow a direct connection.";
+
+/**
+ * Rather than silently connecting without the platform's configured egress proxy (a silent
+ * policy downgrade), fail loudly: the MongoDB wire protocol cannot be tunnelled through the
+ * HTTP(S) CONNECT proxy that xpack.actions.proxyUrl configures for the Axios connector path.
+ */
+const ensureNoProxyRequired = (ctx: BuildContext, targets: HostTarget[]): void => {
+  const proxySettings = ctx.networkSettings.getProxySettings();
+  if (!proxySettings) return;
+
+  const isProxied = targets.some(({ hostname }) => {
+    if (proxySettings.proxyBypassHosts?.has(hostname)) return false;
+    if (proxySettings.proxyOnlyHosts && !proxySettings.proxyOnlyHosts.has(hostname)) return false;
+    return true;
+  });
+  if (isProxied) {
+    throw new Error(PROXY_NOT_SUPPORTED_MESSAGE);
+  }
+};
+
+const URI_REQUIRED_MESSAGE = 'config.uri is required';
+const CREDENTIALS_REQUIRED_MESSAGE =
+  'basic auth credentials (username and password) are required for MongoDB connections';
+const EMBEDDED_CREDENTIALS_MESSAGE =
+  'config.uri must not contain embedded credentials — use the username and password fields instead';
+// One shared set of literals for both the throw sites in build() and the classification in
+// isUserError below, so the two can't silently drift apart (a message edit in one place would
+// otherwise stop matching the other with no compile-time signal).
+const USER_ERROR_MESSAGES: ReadonlySet<string> = new Set([
+  URI_REQUIRED_MESSAGE,
+  CREDENTIALS_REQUIRED_MESSAGE,
+  EMBEDDED_CREDENTIALS_MESSAGE,
+  PROXY_NOT_SUPPORTED_MESSAGE,
+]);
 
 export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   id: 'mongodb',
@@ -58,36 +176,40 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
   async build(ctx) {
     const uri = typeof ctx.config?.uri === 'string' ? ctx.config.uri : undefined;
     if (!uri) {
-      throw new Error('config.uri is required');
+      throw new Error(URI_REQUIRED_MESSAGE);
     }
 
     const ConnectionString = await loadConnectionString();
     const connectionString = new ConnectionString(uri);
 
-    await ensureHostsAllowed(ctx, connectionString);
+    const { targets, srvTargets } = await ensureHostsAllowed(ctx, connectionString);
+    ensureNoProxyRequired(ctx, targets);
 
     // config.uri is stored as unencrypted connector config, not a secret. A URI with
     // embedded userinfo (mongodb://user:pass@host/db) would persist that password in
     // plaintext alongside the encrypted basic-auth secrets — reject it and make the
     // caller use the separate username/password fields instead.
     if (connectionString.username || connectionString.password) {
-      throw new Error(
-        'config.uri must not contain embedded credentials — use the username and password fields instead'
-      );
+      throw new Error(EMBEDDED_CREDENTIALS_MESSAGE);
     }
 
     const authHeaders = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(authHeaders.Authorization ?? '');
     if (!credentials || !credentials.username || !credentials.password) {
-      throw new Error(
-        'basic auth credentials (username and password) are required for MongoDB connections'
-      );
+      throw new Error(CREDENTIALS_REQUIRED_MESSAGE);
     }
+
+    // Connect to the already-validated SRV targets directly rather than handing the driver the
+    // original mongodb+srv:// URI, which would trigger its own independent (unvalidated) SRV
+    // resolution — see pinToResolvedHosts for why.
+    const connectUri = srvTargets ? pinToResolvedHosts(connectionString, srvTargets) : uri;
+    const tlsOptions = resolveTlsOptions(ctx, targets);
 
     const { MongoClient: MongoClientCtor } = await import(
       /* webpackChunkName: "mongodbDriver" */ 'mongodb'
     );
-    const client = new MongoClientCtor(uri, {
+    const client = new MongoClientCtor(connectUri, {
+      ...tlsOptions,
       auth: { username: credentials.username, password: credentials.password },
       // Default to admin so credentials created there work without ?authSource=admin in the URI.
       // The driver gives programmatic options precedence over the connection string, so only
@@ -110,13 +232,7 @@ export const mongodbClientType: ClientTypeSpec<MongoClient> = {
 
   isUserError(err: unknown): boolean {
     if (err instanceof Error) {
-      if (
-        err.message === 'config.uri is required' ||
-        err.message ===
-          'basic auth credentials (username and password) are required for MongoDB connections' ||
-        err.message ===
-          'config.uri must not contain embedded credentials — use the username and password fields instead'
-      ) {
+      if (USER_ERROR_MESSAGES.has(err.message)) {
         return true;
       }
       // instanceof checks can't be used here because static imports of the mongodb driver

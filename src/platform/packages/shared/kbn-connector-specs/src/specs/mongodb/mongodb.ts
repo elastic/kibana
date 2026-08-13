@@ -25,6 +25,7 @@
  * `CredentialAccessor.getAuthHeaders()` by the client type, not read directly here.
  */
 
+import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { CollectionInfo } from 'mongodb';
@@ -55,12 +56,6 @@ import {
 // find/count filter ($where directly, $function/$accumulator via $expr) — block all of them,
 // everywhere, on every agent-facing read action.
 const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulator', '$where']);
-
-// Escape regex metacharacters so a user-supplied substring is matched literally instead of
-// being evaluated as a live regex — otherwise metacharacters change matching behavior (e.g.
-// "my.log" would also match "myXlog") and pathological patterns become a ReDoS vector on the
-// server, since this reaches $regex directly from an agent-facing (isTool: true) input.
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /** Resolve the database name: action input → URI path → error. */
 const resolveDb = async (inputDatabase: string | undefined, uri: string): Promise<string> => {
@@ -113,11 +108,13 @@ const assertReadOnly = (value: unknown): void => {
 };
 
 /**
- * Enforce maxLimit on a pipeline's final result count, recursing into every `$facet` branch.
- * `$facet` emits a single document whose fields are arrays holding each branch's full results,
- * so a $limit on the outer pipeline only ever bounds that to 1 document — it does nothing to
- * bound the data volume hidden inside the branch arrays. Clamping each branch the same way the
- * outer pipeline is clamped closes that gap.
+ * Enforce maxLimit on a pipeline's final result count, recursing into every `$facet` branch and
+ * every `$lookup`/`$unionWith` sub-pipeline. Each of these emits its "joined"/"unioned" data
+ * nested inside a field of the outer documents (a `$facet` document's branch arrays, or the
+ * `as` field a `$lookup` writes into), so a $limit on the outer pipeline only ever bounds the
+ * outer document count — it does nothing to bound the data volume hidden inside those nested
+ * results. Clamping each nested sub-pipeline the same way the outer pipeline is clamped closes
+ * that gap.
  */
 const clampPipelineLimit = (
   pipeline: Record<string, unknown>[],
@@ -135,17 +132,45 @@ const clampPipelineLimit = (
       : [...pipeline.slice(0, -1), { $limit: maxLimit }];
 
   return limited.map((stage) => {
-    if (!('$facet' in stage)) return stage;
-    const facet = stage.$facet as Record<string, unknown>;
-    const clampedFacet = Object.fromEntries(
-      Object.entries(facet).map(([branchName, branchPipeline]) => [
-        branchName,
-        Array.isArray(branchPipeline)
-          ? clampPipelineLimit(branchPipeline, maxLimit)
-          : branchPipeline,
-      ])
-    );
-    return { ...stage, $facet: clampedFacet };
+    if ('$facet' in stage) {
+      const facet = stage.$facet as Record<string, unknown>;
+      const clampedFacet = Object.fromEntries(
+        Object.entries(facet).map(([branchName, branchPipeline]) => [
+          branchName,
+          Array.isArray(branchPipeline)
+            ? clampPipelineLimit(branchPipeline, maxLimit)
+            : branchPipeline,
+        ])
+      );
+      return { ...stage, $facet: clampedFacet };
+    }
+    if ('$lookup' in stage) {
+      const lookup = stage.$lookup as Record<string, unknown>;
+      if (!Array.isArray(lookup.pipeline)) return stage;
+      return {
+        ...stage,
+        $lookup: { ...lookup, pipeline: clampPipelineLimit(lookup.pipeline, maxLimit) },
+      };
+    }
+    if ('$unionWith' in stage) {
+      const unionWith = stage.$unionWith;
+      // $unionWith accepts either a bare collection-name string or { coll, pipeline }.
+      if (
+        typeof unionWith === 'string' ||
+        !Array.isArray((unionWith as { pipeline?: unknown })?.pipeline)
+      ) {
+        return stage;
+      }
+      const unionWithObj = unionWith as { pipeline: Record<string, unknown>[] };
+      return {
+        ...stage,
+        $unionWith: {
+          ...unionWithObj,
+          pipeline: clampPipelineLimit(unionWithObj.pipeline, maxLimit),
+        },
+      };
+    }
+    return stage;
   });
 };
 
@@ -160,7 +185,10 @@ export const MongoDBConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    // New connector types can only declare 'agentBuilder' in their introducing PR;
+    // 'workflows' follows in a later PR once this connector is registered in every
+    // Production-NonCanary version (see kbn-connector-specs/.claude/skills/create-connector).
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   // Credentials (username/password) are stored as encrypted secrets via the
@@ -233,7 +261,8 @@ export const MongoDBConnector: ConnectorSpec = {
         'Write stages ($out, $merge) and code-execution operators ($where, $function, $accumulator) ' +
         'are rejected, at any nesting depth. ' +
         'A $limit stage is appended automatically unless the pipeline already ends with one, ' +
-        'including inside every $facet branch. Maximum 1000 results per branch.',
+        'including inside every $facet branch and every $lookup/$unionWith sub-pipeline. ' +
+        'Maximum 1000 results per branch or sub-pipeline.',
       input: AggregateInputSchema,
       handler: async (ctx, input: AggregateInput) => {
         assertReadOnly(input.pipeline);
@@ -282,6 +311,10 @@ export const MongoDBConnector: ConnectorSpec = {
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
         const { nameFilter } = input;
+        // Escape regex metacharacters so nameFilter is matched literally instead of being
+        // evaluated as a live regex — otherwise metacharacters change matching behavior (e.g.
+        // "my.log" would also match "myXlog") and pathological patterns become a ReDoS vector on
+        // the server, since this reaches $regex directly from an agent-facing (isTool: true) input.
         const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
         const collections = await client
           .db(database)

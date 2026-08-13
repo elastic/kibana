@@ -31,6 +31,9 @@ export const FindInputSchema = lazySchema(() =>
       ),
     filter: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 filter fields is allowed.',
+      })
       .optional()
       .describe(
         'MongoDB query filter (MQL). Omit or pass {} to return all documents. ' +
@@ -38,6 +41,9 @@ export const FindInputSchema = lazySchema(() =>
       ),
     projection: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 projection fields is allowed.',
+      })
       .optional()
       .describe(
         'Fields to include (1) or exclude (0). Examples: {"name": 1, "email": 1, "_id": 0}. ' +
@@ -45,6 +51,9 @@ export const FindInputSchema = lazySchema(() =>
       ),
     sort: z
       .record(z.string().max(200), z.union([z.literal(1), z.literal(-1)]))
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 sort fields is allowed.',
+      })
       .optional()
       .describe(
         'Sort order for results. 1 = ascending, -1 = descending. ' +
@@ -91,7 +100,11 @@ export const AggregateInputSchema = lazySchema(() =>
         'Database to query. Defaults to the database in the connection URI path if omitted.'
       ),
     pipeline: z
-      .array(z.record(z.string().max(200), z.unknown()))
+      .array(
+        z.record(z.string().max(200), z.unknown()).refine((obj) => Object.keys(obj).length <= 100, {
+          message: 'A maximum of 100 fields per pipeline stage is allowed.',
+        })
+      )
       .min(1)
       .max(100)
       .describe(
@@ -134,6 +147,9 @@ export const CountInputSchema = lazySchema(() =>
       ),
     filter: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 filter fields is allowed.',
+      })
       .optional()
       .describe(
         'MongoDB query filter. Omit or pass {} to count all documents in the collection. ' +
@@ -184,6 +200,9 @@ export const InsertOneInputSchema = lazySchema(() =>
       ),
     document: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 document fields is allowed.',
+      })
       .describe(
         'Document to insert. Do not include _id unless you want to set it explicitly. ' +
           'Example: {"name": "Alice", "status": "active"}.'
@@ -208,9 +227,15 @@ export const UpdateOneInputSchema = lazySchema(() =>
       ),
     filter: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 filter fields is allowed.',
+      })
       .describe('Filter to match the document to update. Example: {"_id": "abc"}.'),
     update: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 update fields is allowed.',
+      })
       .describe(
         'Update operators or replacement document. ' + 'Example: {"$set": {"status": "inactive"}}.'
       ),
@@ -238,6 +263,9 @@ export const DeleteOneInputSchema = lazySchema(() =>
       ),
     filter: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 filter fields is allowed.',
+      })
       .describe('Filter to match the document to delete. Example: {"_id": "abc"}.'),
   })
 );

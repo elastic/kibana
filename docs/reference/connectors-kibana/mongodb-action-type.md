@@ -50,11 +50,11 @@ Find
     - `skip` (optional): Number of documents to skip before returning results. Use with `limit` for pagination.
 
 Aggregate
-:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution operators (`$where`, `$function`, `$accumulator`) are rejected anywhere in the pipeline, including nested inside stage expressions (for example, `$project` or `$group`) and sub-pipelines (`$facet`, `$lookup`, `$unionWith`). A `$limit` stage is appended automatically unless the pipeline already ends with one, including separately inside every `$facet` branch, so `$facet` can't be used to return more than the limit's worth of documents per branch.
+:   Run a MongoDB aggregation pipeline on a collection. Supports all read-only pipeline stages (`$match`, `$group`, `$sort`, `$project`, `$lookup`, `$unwind`, `$limit`, `$skip`, `$count`, and others). Write stages (`$out`, `$merge`) and code-execution operators (`$where`, `$function`, `$accumulator`) are rejected anywhere in the pipeline, including nested inside stage expressions (for example, `$project` or `$group`) and sub-pipelines (`$facet`, `$lookup`, `$unionWith`). A `$limit` stage is appended automatically unless the pipeline already ends with one, including separately inside every `$facet` branch and every `$lookup`/`$unionWith` sub-pipeline, so none of them can be used to return more than the limit's worth of documents.
     - `collection` (required): Name of the collection to aggregate.
     - `database` (optional): Database to query. Defaults to the database in the connection URI path if omitted.
-    - `pipeline` (required): MongoDB aggregation pipeline — an ordered array of stage objects (maximum 100 stages). Example: `[{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]`.
-    - `limit` (optional): Maximum number of documents to return, per `$facet` branch if present (1–1000). Defaults to 100.
+    - `pipeline` (required): MongoDB aggregation pipeline — an ordered array of stage objects (maximum 100 stages, maximum 100 fields per stage). Example: `[{"$match": {"status": "active"}}, {"$group": {"_id": "$region", "count": {"$sum": 1}}}]`.
+    - `limit` (optional): Maximum number of documents to return, per `$facet` branch or `$lookup`/`$unionWith` sub-pipeline if present (1–1000). Defaults to 100.
 
 Count
 :   Count documents in a MongoDB collection matching an optional filter. Returns the total document count. Use this to understand data volume before running a find or aggregate. Code-execution operators (`$where`, `$expr` containing `$function`/`$accumulator`) are rejected in the filter.
@@ -90,7 +90,9 @@ Delete one
 
 ## Connector networking configuration [mongodb-connector-networking-configuration]
 
-The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP. Even so, every host is checked against [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) before connecting, the same allowlist enforced for HTTP-based connectors. For a `mongodb://` URI, that means every host listed (including every host in a multi-host replica-set or sharded-cluster URI). For a `mongodb+srv://` URI, the connector resolves the DNS SRV records itself and checks every resolved target host, not just the seed hostname in the URI.
+The MongoDB connector talks to MongoDB over its native wire protocol, not HTTP. Even so, every host is checked against [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) before connecting, the same allowlist enforced for HTTP-based connectors. For a `mongodb://` URI, that means every host listed (including every host in a multi-host replica-set or sharded-cluster URI). For a `mongodb+srv://` URI, the connector resolves the DNS SRV records itself, checks every resolved target host, and connects directly to those validated hosts rather than the DNS seed name — the MongoDB driver never performs a second, unvalidated SRV lookup of its own.
+
+[`xpack.actions.ssl`](/reference/configuration-reference/alerting-settings.md#action-settings) and any per-host override in `xpack.actions.customHostSettings` are applied to MongoDB connections the same way they're applied to HTTP-based connectors. [`xpack.actions.proxyUrl`](/reference/configuration-reference/alerting-settings.md#action-settings) is not supported for MongoDB connections — the MongoDB driver only supports a SOCKS5 proxy, not the HTTP(S) forward proxy that setting configures — so a MongoDB connector whose host isn't covered by `xpack.actions.proxyBypassHosts` fails to connect rather than silently bypassing the configured proxy.
 
 ## Get connection credentials [mongodb-api-credentials]
 
