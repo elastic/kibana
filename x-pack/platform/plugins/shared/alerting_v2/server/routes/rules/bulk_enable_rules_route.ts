@@ -16,6 +16,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { bulkEnableRulesOasExamples } from './bulk_enable_rules_oas_example';
 
 @injectable()
 export class BulkEnableRulesRoute extends BaseAlertingRoute {
@@ -28,6 +30,7 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Enable rules in bulk by ID',
+    oasOperationObject: bulkEnableRulesOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -40,7 +43,7 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

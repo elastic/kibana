@@ -70,22 +70,3 @@ export const findActionPoliciesResponseSchema = z
   .describe('Paginated list of action policies.');
 
 export type FindActionPoliciesResponse = z.infer<typeof findActionPoliciesResponseSchema>;
-
-export const bulkActionActionPoliciesResponseSchema = z
-  .object({
-    processed: z.number().describe('The number of action policies processed.'),
-    total: z.number().describe('The total number of action policies targeted.'),
-    errors: z
-      .array(
-        z.object({
-          id: z.string().describe('The identifier of the action policy that failed.'),
-          message: z.string().describe('The error message.'),
-        })
-      )
-      .describe('Errors encountered during the bulk operation.'),
-  })
-  .describe('Result of a bulk action policy operation.');
-
-export type BulkActionActionPoliciesResponse = z.infer<
-  typeof bulkActionActionPoliciesResponseSchema
->;

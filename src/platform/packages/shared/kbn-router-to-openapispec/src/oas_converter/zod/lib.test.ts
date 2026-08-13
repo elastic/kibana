@@ -112,6 +112,118 @@ describe('zod', () => {
       });
     });
 
+    describe('.nullable()', () => {
+      test('collapses a nullable scalar into nullable: true', () => {
+        const result = convert(
+          z.object({ createdBy: z.string().nullable().describe('Who created it.') }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            createdBy: { type: 'string', nullable: true, description: 'Who created it.' },
+          },
+        });
+      });
+
+      test('collapses .nullish() to nullable: true', () => {
+        const result = convert(z.object({ count: z.number().nullish() }) as any);
+
+        expect(result.schema).toMatchObject({
+          properties: { count: { type: 'number', nullable: true } },
+        });
+      });
+
+      test('preserves anyOf and marks nullable when multiple non-null union members remain', () => {
+        const result = convert(
+          z.object({ value: z.union([z.string(), z.number(), z.boolean()]).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            value: {
+              nullable: true,
+              anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+            },
+          },
+        });
+      });
+
+      test('collapses a nullable enum', () => {
+        const result = convert(
+          z.object({ criticality: z.enum(['low', 'high']).nullable() }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: { criticality: { type: 'string', enum: ['low', 'high'], nullable: true } },
+        });
+      });
+
+      test('collapses nullable properties inside a nullable object', () => {
+        const result = convert(
+          z.object({
+            throttle: z.object({ interval: z.string().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(result.schema).toMatchObject({
+          properties: {
+            throttle: {
+              type: 'object',
+              nullable: true,
+              properties: { interval: { type: 'string', nullable: true } },
+            },
+          },
+        });
+      });
+
+      test('wraps a nullable named component in allOf so nullable is not a $ref sibling', () => {
+        const groupingMode = z.enum(['per_episode', 'per_alert']);
+        registerZodV4Component(groupingMode, 'GroupingMode');
+
+        const result = convert(z.object({ groupingMode: groupingMode.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('GroupingMode');
+        expect(result.shared.GroupingMode).not.toHaveProperty('nullable');
+        expect(result.schema).toMatchObject({
+          properties: {
+            groupingMode: {
+              allOf: [{ $ref: '#/components/schemas/GroupingMode' }],
+              nullable: true,
+            },
+          },
+        });
+      });
+
+      test('wraps a nullable recursive $ref in allOf', () => {
+        const condition: z.ZodType = z.lazy(() =>
+          z.object({ field: z.string(), and: z.array(condition).optional() })
+        );
+        registerZodV4Component(condition, 'Condition');
+
+        const result = convert(z.object({ condition: condition.nullable() }) as any);
+
+        expect(result.shared).toHaveProperty('Condition');
+        expect(result.shared.Condition).not.toHaveProperty('nullable');
+        expect(result.schema).toMatchObject({
+          properties: {
+            condition: { allOf: [{ $ref: '#/components/schemas/Condition' }], nullable: true },
+          },
+        });
+      });
+
+      test('fully collapses nullable across scalars, arrays, and nested objects', () => {
+        const result = convert(
+          z.object({
+            a: z.string().nullable(),
+            b: z.array(z.string()).nullable(),
+            c: z.object({ d: z.number().nullable() }).nullable(),
+          }) as any
+        );
+
+        expect(JSON.stringify(result)).not.toContain('{"nullable":true}');
+      });
+    });
+
     test('convert handles DeepStrict-wrapped body schema', () => {
       const bodySchema = z.object({
         name: z.string(),
@@ -327,6 +439,82 @@ describe('zod', () => {
         ],
         shared: {},
       });
+    });
+
+    test.each([
+      [
+        'schema > optional > meta',
+        z
+          .string()
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .optional(),
+      ],
+      [
+        'schema > default > meta',
+        z
+          .string()
+          .default('foo')
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo'),
+      ],
+      [
+        'schema > default > optional > meta',
+        z
+          .string()
+          .default('foo')
+          .optional()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+      ],
+      [
+        'schema > meta > default > optional',
+        z
+          .string()
+          .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } })
+          .default('foo')
+          .optional(),
+      ],
+    ])('applies openapi availability x-state regardless of modifier order (%s)', (_name, tags) => {
+      const result = convertQuery(z.object({ tags }));
+      expect(result.query.at(0)?.schema).toHaveProperty(
+        'x-state',
+        'Generally available; added in 9.5.0'
+      );
+    });
+
+    test('omits availability since from query param x-state in serverless mode', () => {
+      const result = convertQuery(
+        z.object({
+          tags: z
+            .string()
+            .optional()
+            .meta({ openapi: { availability: { stability: 'stable', since: '9.5.0' } } }),
+        }),
+        { env: { serverless: true } }
+      );
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'tags',
+          required: false,
+          schema: {
+            type: 'string',
+            'x-state': 'Generally available',
+          },
+        },
+      ]);
     });
 
     test('handles transform schemas (like dateFromString)', () => {

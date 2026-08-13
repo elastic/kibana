@@ -60,6 +60,7 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
       return (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ingestHub.deploySettingsStep.iamPermissionsError.title"

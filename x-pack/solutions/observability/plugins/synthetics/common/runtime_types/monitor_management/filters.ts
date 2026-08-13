@@ -23,3 +23,12 @@ export const MonitorFiltersResultCodec = t.interface({
 });
 
 export type MonitorFiltersResult = t.TypeOf<typeof MonitorFiltersResultCodec>;
+
+// Type-ahead values for bulk edit fields that are not indexed on the monitor
+// saved objects (service.name and label keys), sourced from ping documents.
+export const FieldSuggestionsResultCodec = t.interface({
+  serviceNames: t.array(t.string),
+  labelKeys: t.array(t.string),
+});
+
+export type FieldSuggestionsResult = t.TypeOf<typeof FieldSuggestionsResultCodec>;

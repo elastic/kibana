@@ -33,6 +33,7 @@ import {
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -146,6 +147,17 @@ async function runTask({
     throw new Error('Namespace is required for status report task');
   }
 
+  const [coreStart] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart,
+      namespace,
+      logger,
+    })
+  ) {
+    return { state: { namespace }, shouldDeleteTask: true };
+  }
+
   if (!fakeRequest) {
     logger.error('No fake request found, skipping status report task');
     return { state: { namespace } };
@@ -243,7 +255,13 @@ export function registerStatusReportTask({
       [config.type]: {
         title: config.title,
         timeout: config.timeout,
-        createTaskRunner: ({ taskInstance, fakeRequest, signal, executionUuid }) => ({
+        createTaskRunner: ({
+          taskInstance,
+          fakeRequest,
+          signal,
+          executionUuid,
+          setCustomTaskRunEventFields,
+        }) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.status_report.run',
@@ -257,6 +275,7 @@ export function registerStatusReportTask({
                   fakeRequest,
                   signal,
                   executionUuid,
+                  setCustomTaskRunEventFields,
                   logger: logger.get(taskInstance.id),
                   core,
                   telemetryReporter,

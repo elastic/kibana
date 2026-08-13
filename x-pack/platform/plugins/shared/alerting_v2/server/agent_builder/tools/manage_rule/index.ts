@@ -6,3 +6,4 @@
  */
 
 export { manageRuleTool } from './manage_rule';
+export type { ManageRuleToolDeps } from './manage_rule';

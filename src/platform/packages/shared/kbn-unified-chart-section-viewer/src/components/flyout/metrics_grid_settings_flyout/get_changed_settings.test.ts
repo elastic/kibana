@@ -8,7 +8,7 @@
  */
 
 import { getChangedSettings } from './get_changed_settings';
-import type { MetricsGridSettings } from '../../../types';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 
 const applied: MetricsGridSettings = {
   counterAggregation: 'sum',

@@ -3,7 +3,7 @@ navigation_title: "Sublime Security"
 type: reference
 description: "Use the Sublime Security connector to search flagged email, get verdicts, and quarantine, trash, or restore message groups."
 applies_to:
-  stack: preview 9.6
+  stack: preview 9.5
   serverless: preview
 ---
 

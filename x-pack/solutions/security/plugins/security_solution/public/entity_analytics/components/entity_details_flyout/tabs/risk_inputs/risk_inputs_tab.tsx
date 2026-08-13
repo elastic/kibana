@@ -62,6 +62,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
+import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
+import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -142,6 +144,7 @@ export const RiskInputsTab = <T extends EntityType>({
   );
 
   const { data: watchlists } = useGetWatchlists();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const entityFilterQuery = useMemo(
     () =>
@@ -223,6 +226,10 @@ export const RiskInputsTab = <T extends EntityType>({
     });
     return map;
   }, [watchlists]);
+
+  if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
+    return <RiskEnginePrivilegesCallOut privileges={privileges} />;
+  }
 
   if (riskScoreError) {
     return (
@@ -406,6 +413,7 @@ const RiskInputsTabContent = <T extends EntityType>({
   });
 
   const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+  const { hasAlertsRead } = alerts;
 
   const entityNameByEuid = useMemo(() => {
     const map = new Map<string, string>();
@@ -453,7 +461,7 @@ const RiskInputsTabContent = <T extends EntityType>({
             disableScreenReaderOutput
           >
             <EuiButtonIcon
-              iconType="expand"
+              iconType="maximize"
               data-test-subj={EXPAND_ALERT_TEST_ID}
               onClick={() => onShowAlert(data._id, data.input.index)}
               aria-label={i18n.translate(
@@ -663,7 +671,7 @@ const RiskInputsTabContent = <T extends EntityType>({
         watchlistNamesById={watchlistNamesById}
       />
       <EuiSpacer size="m" />
-      {riskInputsAlertSection}
+      {hasAlertsRead && riskInputsAlertSection}
     </>
   );
 };

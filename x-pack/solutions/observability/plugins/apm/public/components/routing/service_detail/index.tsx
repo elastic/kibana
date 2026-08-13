@@ -40,8 +40,7 @@ import type { SearchBar } from '../../shared/search_bar/search_bar';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';
-import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
-import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
+import { RedirectFocusedServiceMapToGlobal } from './redirect_focused_service_map_to_global';
 
 const ErrorGroupOverview = dynamic(() =>
   import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
@@ -58,9 +57,6 @@ const MetricsDetails = dynamic(() =>
 
 const ServiceLogs = dynamic(() =>
   import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
-);
-const ServiceMapServiceDetail = dynamic(() =>
-  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
 );
 const ServiceOverview = dynamic(() =>
   import('../../app/service_overview').then((mod) => ({ default: mod.ServiceOverview }))
@@ -366,19 +362,9 @@ export const serviceDetailRoute = {
           },
         },
       },
-      '/services/{serviceName}/service-map': page({
-        tab: 'service-map',
-        title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service map',
-        }),
-        element: <ServiceMapServiceDetail />,
-        customSearchBar: <ServiceMapSearchBar />,
-        contextWrapper: ServiceMapSearchProvider,
-        searchBarOptions: {
-          showTimeComparison: true,
-          showFilterBar: true,
-        },
-      }),
+      '/services/{serviceName}/service-map': {
+        element: <RedirectFocusedServiceMapToGlobal />,
+      },
       '/services/{serviceName}/logs': page({
         tab: 'logs',
         title: i18n.translate('xpack.apm.views.logs.title', {

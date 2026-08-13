@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/maps-plugin'
   - '@kbn/developer-examples-plugin'
   - '@kbn/data-plugin'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

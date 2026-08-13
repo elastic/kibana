@@ -6,7 +6,9 @@
  */
 
 import { useCallback } from 'react';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { useKibana } from '../../../common/lib/kibana';
+import type { TelemetryServiceStart } from '../../../common/lib/telemetry/telemetry_service';
 import type {
   FlyoutActionType,
   FlyoutHeaderItem,
@@ -68,6 +70,56 @@ export interface UseFlyoutTelemetryResult {
   reportHeaderItemClicked: (params: ReportHeaderItemClickedParams) => void;
 }
 
+const reportFlyoutOpened = (telemetry: TelemetryServiceStart, meta: FlyoutTelemetryMeta): void => {
+  telemetry.reportEvent(FlyoutV2EventTypes.FlyoutOpened, {
+    surface: meta.surface,
+    flyoutType: meta.flyoutType,
+    tool: meta.surface === 'tool' ? meta.tool : undefined,
+    session: meta.session,
+    origin: meta.origin,
+  });
+};
+
+const reportFlyoutClosed = (
+  telemetry: TelemetryServiceStart,
+  meta: FlyoutTelemetryMeta,
+  durationMs: number
+): void => {
+  telemetry.reportEvent(FlyoutV2EventTypes.FlyoutClosed, {
+    flyoutType: meta.flyoutType,
+    tool: meta.surface === 'tool' ? meta.tool : undefined,
+    session: meta.session,
+    durationMs,
+  });
+};
+
+/**
+ * Reports an opened event immediately and returns a callback that reports the matching closed
+ * event. Use this for flyouts whose lifecycle is represented by a React component mount rather
+ * than an `OverlayRef`.
+ */
+export const trackFlyoutMounted = (
+  telemetry: TelemetryServiceStart,
+  meta: FlyoutTelemetryMeta
+): (() => void) => {
+  const openedAt = Date.now();
+  reportFlyoutOpened(telemetry, meta);
+  return () => reportFlyoutClosed(telemetry, meta, Date.now() - openedAt);
+};
+
+/**
+ * Reports a matching opened/closed event pair for direct system-flyout callers that cannot use
+ * `useOpenFlyout` because they render outside the Security Solution React provider tree.
+ */
+export const trackFlyoutOpen = (
+  telemetry: TelemetryServiceStart,
+  ref: OverlayRef,
+  meta: FlyoutTelemetryMeta
+): void => {
+  const reportClosed = trackFlyoutMounted(telemetry, meta);
+  ref.onClose.then(reportClosed).catch(() => {});
+};
+
 /**
  * Reports v2 flyout telemetry (`FlyoutV2EventTypes`) through the Security Solution EBT telemetry
  * service. This is the single place that translates an open/close/tab-click into the right event
@@ -82,25 +134,14 @@ export const useFlyoutTelemetry = (): UseFlyoutTelemetryResult => {
 
   const reportOpened = useCallback(
     (meta: FlyoutTelemetryMeta) => {
-      telemetry.reportEvent(FlyoutV2EventTypes.FlyoutOpened, {
-        surface: meta.surface,
-        flyoutType: meta.flyoutType,
-        tool: meta.surface === 'tool' ? meta.tool : undefined,
-        session: meta.session,
-        origin: meta.origin,
-      });
+      reportFlyoutOpened(telemetry, meta);
     },
     [telemetry]
   );
 
   const reportClosed = useCallback(
     (meta: FlyoutTelemetryMeta, durationMs: number) => {
-      telemetry.reportEvent(FlyoutV2EventTypes.FlyoutClosed, {
-        flyoutType: meta.flyoutType,
-        tool: meta.surface === 'tool' ? meta.tool : undefined,
-        session: meta.session,
-        durationMs,
-      });
+      reportFlyoutClosed(telemetry, meta, durationMs);
     },
     [telemetry]
   );

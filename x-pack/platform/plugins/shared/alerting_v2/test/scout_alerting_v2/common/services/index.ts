@@ -8,6 +8,12 @@
 export type { RulesApiService } from './rules_api_service';
 export { getRulesApiService } from './rules_api_service';
 
+export type {
+  RuleChangesHistoryApiService,
+  RuleChangesHistoryFilter,
+} from './rule_changes_history_service';
+export { getRuleChangesHistoryApiService } from './rule_changes_history_service';
+
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
@@ -37,3 +43,6 @@ export { getTaskManagerService } from './task_manager_service';
 
 export type { TelemetryService } from './telemetry_service';
 export { getTelemetryService } from './telemetry_service';
+
+export type { WorkflowsApiService, WorkflowSummary } from './workflows_api_service';
+export { getWorkflowsApiService } from './workflows_api_service';

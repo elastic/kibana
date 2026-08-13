@@ -1,7 +1,23 @@
 # Security Solution — Exploratory Testing Knowledge
 
-**Last updated:** 2026-05-27  
+**Last updated:** 2026-07-29
 **Sessions:** ECH, editor+t2_analyst role, PR #238549 (remove newDataViewPickerEnabled flag), 12 flows across 2 sessions
+
+---
+
+## Known non-bugs
+
+`phases/3-report.md` Step 3b's automatic suppression matching reads **only**
+this section — never `## Tracked open issues (not for suppression)` below,
+which tracks currently-open, unresolved bugs that must never be silently
+treated as noise.
+
+- `Executing inline script violates Content Security Policy` on every page — ECH infrastructure, explicitly expected.
+- `Failed to load resource: 404 @ /internal/cloud/solution` on every page — ECH-specific missing route, not a product bug.
+- `GET /internal/cloud/solution` → 404 on ECH — known noise, ignorable.
+- Entity store disabled → `/internal/risk_score/engine/settings` → 500 — expected behavior when EA is off, not a bug.
+- `/internal/alerting/rules/gaps/auto_fill_scheduler/...` → 404 — may be missing in some builds, not a bug.
+- `/internal/osquery/fleet_wrapper/agents` → 404 — Osquery integration not installed on ECH, not a bug.
 
 ---
 
@@ -57,11 +73,6 @@
 
 **Known inconsistency (open)**: Alerts page picker disabled for non-admin but Overview dashboard (same scope) is enabled.
 
-## Known console errors on ECH (not product bugs)
-
-- `Executing inline script violates Content Security Policy` — every page, ECH infrastructure
-- `Failed to load resource: 404 @ /internal/cloud/solution` — every page, ECH-specific missing route
-
 ## Managed Security Solution data views (PR #238549+)
 
 - `Security solution default` — alerts scope (Alerts page, Overview dashboard)
@@ -86,17 +97,16 @@
 - After navigating away and back without the `sourcerer=` URL param, the page resets to its default data view for that scope
 - The Alerts page picker is disabled for `editor+t2_analyst` role — you cannot test interactive Alerts scope changes with this role
 
-## Known issues observed this session
+## Tracked open issues (not for suppression)
 
-### Open / needs investigation
+These are currently-open, unresolved observations — never match them during
+`phases/3-report.md` Step 3b suppression. A future session that reproduces
+one of these should report it as "known open / reproduced", citing the
+observation below, not silently suppress it as noise.
+
 - **Lens KPI metric "field can not be used for filtering" TypeErrors** (F-L1-01): Observed in Session 1 across all Explore pages. **Not reproducible in Session 2** (41/41 KPI panels rendered cleanly). Intermittent or data-dependent. Check if it reproduces with a cold cache or different date range.
 - **`/api/security_solution/initialize` called multiple times per navigation**: 4× on Alerts page, 2× on Hosts page. Duplicate `data_views/fields` fetches (3×) on both pages. Possible React component re-mount issue from Data View Manager initialization.
 - **ES|QL tab in Timeline auto-executes empty query on mount**: Shows "1 error" immediately before user types anything. Error: `action_request_validation_exception: [query] is required`.
-
-### Pre-existing (do not re-log)
-- Entity store disabled → `/internal/risk_score/engine/settings` → 500 (expected behavior when EA is off)
-- `/internal/alerting/rules/gaps/auto_fill_scheduler/...` → 404 (may be missing in some builds)
-- `/internal/osquery/fleet_wrapper/agents` → 404 (Osquery integration not installed on ECH)
 
 ## Timeline interaction notes
 

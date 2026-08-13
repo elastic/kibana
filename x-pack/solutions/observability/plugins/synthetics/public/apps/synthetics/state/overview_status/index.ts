@@ -36,6 +36,14 @@ export interface OverviewStatusStateReducer {
   // instead of flickering grey→amber until the lookup re-resolves.
   staleBeforeWindowRuns?: OverviewStalePriorRun[];
   error: IHttpSerializedFetchError | null;
+  // True once the overview status request has completed at least once, whether it
+  // succeeded or failed. Unlike `loaded` (success-only) and `error` (transient —
+  // cleared by the OverviewStatus toast effect), this stays true across refreshes,
+  // so consumers can tell "we have a definitive answer" apart from "still pending".
+  // Needed by the Getting Started redirect: a truly empty deployment whose status
+  // request fails must still be recognized as settled instead of hanging on an
+  // empty overview.
+  settled: boolean;
   isInitialLoad: boolean;
 }
 
@@ -44,6 +52,7 @@ const initialState: OverviewStatusStateReducer = {
   loaded: false,
   status: null,
   error: null,
+  settled: false,
   isInitialLoad: true,
 };
 
@@ -149,6 +158,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
       state.disabledConfigs = state.allConfigs.filter((monitor) => !monitor.isEnabled);
       state.loaded = true;
       state.loading = false;
+      state.settled = true;
       // Re-apply any resolved stale-before-window promotions so a background
       // refresh (which just replaced `status`) doesn't flicker them back to
       // `pending` until the supplementary lookup re-resolves.
@@ -157,6 +167,7 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
       state.error = action.payload;
       state.loading = false;
+      state.settled = true;
     })
     .addCase(fetchStaleStatusAction.success, (state, action) => {
       // Store the latest prior-run facts and promote the genuinely stale

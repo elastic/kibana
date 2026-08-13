@@ -48,7 +48,7 @@ export const OtelLogsVisualizeStep: React.FC<OtelLogsVisualizeStepProps> = ({
                   defaultMessage: 'Waiting for data to be shipped',
                 })
           }
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
           isLoading={!hasData}
           css={css`
             max-width: 40%;

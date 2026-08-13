@@ -33,7 +33,7 @@ jest.mock('./persistence', () => ({
 
 const conflictError = () =>
   Object.assign(new Error('version conflict'), {
-    meta: { statusCode: 409 },
+    statusCode: 409,
   });
 
 // Mock execution_runner module
@@ -157,7 +157,7 @@ describe('AgentExecutionService', () => {
           params: { executionId: result.executionId },
           scope: ['agent-builder'],
         }),
-        { request }
+        { request, cloneApiKey: true }
       );
     });
   });

@@ -6,7 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { trackFlyoutOpen, useFlyoutTelemetry } from './use_flyout_telemetry';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   FlyoutV2EventTypes,
@@ -145,6 +146,45 @@ describe('useFlyoutTelemetry', () => {
         session: FLYOUT_SESSION_KIND.START,
         durationMs: 42,
       });
+    });
+  });
+
+  describe('trackFlyoutOpen', () => {
+    it('reports matching opened and closed events for a direct system flyout', async () => {
+      let resolveClose: () => void = () => {};
+      const onClose = new Promise<void>((resolve) => {
+        resolveClose = resolve;
+      });
+      const meta = {
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.HOST,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+      } as const;
+
+      trackFlyoutOpen({ reportEvent: mockReportEvent }, { onClose } as unknown as OverlayRef, meta);
+
+      expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.HOST,
+        tool: undefined,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+      });
+
+      resolveClose();
+      await onClose;
+      await Promise.resolve();
+
+      expect(mockReportEvent).toHaveBeenCalledWith(
+        FlyoutV2EventTypes.FlyoutClosed,
+        expect.objectContaining({
+          flyoutType: FLYOUT_TYPE.HOST,
+          tool: undefined,
+          session: FLYOUT_SESSION_KIND.START,
+          durationMs: expect.any(Number),
+        })
+      );
     });
   });
 

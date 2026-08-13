@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/ebt-click'
   - '@kbn/apm-shared'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

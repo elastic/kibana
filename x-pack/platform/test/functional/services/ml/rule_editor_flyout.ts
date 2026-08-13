@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   return {
     async assertExists() {
@@ -17,6 +18,10 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
 
     async assertNotExists() {
       await testSubjects.missingOrFail('mlRuleEditorFlyout');
+    },
+
+    async dismissToasts() {
+      await toasts.dismissAllWithChecks();
     },
 
     async enableScope() {
@@ -37,13 +42,6 @@ export function MachineLearningRuleEditorFlyoutProvider({ getService }: FtrProvi
 
     async save() {
       await testSubjects.click('mlRuleEditorSaveButton');
-    },
-
-    async closeIfOpen() {
-      if (await testSubjects.exists('euiFlyoutCloseButton')) {
-        await testSubjects.click('euiFlyoutCloseButton');
-        await testSubjects.missingOrFail('mlRuleEditorFlyout');
-      }
     },
 
     async selectFilter(scopeFieldName: string) {
