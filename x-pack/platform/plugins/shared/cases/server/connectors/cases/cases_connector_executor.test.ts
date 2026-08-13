@@ -46,6 +46,7 @@ import {
 } from './test_helpers';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { CasesConnectorRunParams } from './types';
 import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
@@ -68,6 +69,7 @@ describe('CasesConnectorExecutor', () => {
   const getCasesClient = jest.fn();
   const casesClientMock = createCasesClientMock();
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const actionsClient = actionsClientMock.create();
 
   let connectorExecutor: CasesConnectorExecutor;
   let oracleIdCounter = 0;
@@ -133,12 +135,14 @@ describe('CasesConnectorExecutor', () => {
     });
 
     getCasesClient.mockReturnValue(casesClientMock);
+    actionsClient.get.mockRejectedValue(new Error('not found'));
 
     connectorExecutor = new CasesConnectorExecutor({
       logger: mockLogger,
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
+      actionsClient,
       spaceId: 'default',
       isTemplatesEnabled: true,
     });
@@ -1286,7 +1290,194 @@ fields: []
             expect(createdCase.severity).toBe('medium');
             expect(createdCase.category).toBe('Phishing');
             expect(createdCase.connector.type).toBe('.none');
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toBeUndefined();
             expect(createdCase.customFields).toEqual([]);
+          });
+
+          it('applies the template connector, settings, and assignees from the v2 definition', async () => {
+            const v2TemplateWithConnectorSettingsAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+connector:
+  type: .jira
+  id: jira-1
+  fields:
+    issueType: "10001"
+    priority: "High"
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: true
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithConnectorSettingsAssignees);
+            actionsClient.get.mockResolvedValue({ name: 'My Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+            expect(createdCase.connector).toEqual({
+              id: 'jira-1',
+              type: '.jira',
+              name: 'My Jira',
+              fields: {
+                issueType: '10001',
+                priority: 'High',
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+            expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
+          });
+
+          it('falls back to .none when the template connector cannot be resolved', async () => {
+            const v2TemplateWithDeletedConnector = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+connector:
+  type: .jira
+  id: deleted-connector
+  fields: null
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithDeletedConnector);
+            // actionsClient.get rejects by default (see beforeEach).
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            });
+            expect(mockLogger.warn).toHaveBeenCalledWith(
+              expect.stringContaining('Dropping template connector default "deleted-connector"')
+            );
+          });
+
+          it('applies connector, settings, and assignees when bridging a legacy template key to v2', async () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'Migrated Template',
+              owner: params.owner,
+              legacyKey: 'legacy-template-key',
+              templateVersion: 2,
+              definition: `
+name: "Migrated Template"
+connector:
+  type: .jira
+  id: jira-legacy-1
+  fields:
+    issueType: "10001"
+    priority: null
+    parent: null
+settings:
+  syncAlerts: true
+  extractObservables: false
+assignees:
+  - uid: legacy-assignee
+fields: []
+`,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+            };
+            casesClientMock.templates.getAllTemplates.mockResolvedValue({
+              templates: [migratedV2Template],
+              page: 1,
+              perPage: 10000,
+              total: 1,
+            });
+            actionsClient.get.mockResolvedValue({ name: 'Legacy Jira' } as Awaited<
+              ReturnType<typeof actionsClient.get>
+            >);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'legacy-template-key',
+              templateVersion: null,
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.connector).toEqual({
+              id: 'jira-legacy-1',
+              type: '.jira',
+              name: 'Legacy Jira',
+              fields: {
+                issueType: '10001',
+                priority: null,
+                parent: null,
+              },
+            });
+            expect(createdCase.settings).toEqual({
+              syncAlerts: true,
+              extractObservables: false,
+            });
+            expect(createdCase.assignees).toEqual([{ uid: 'legacy-assignee' }]);
+            expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 2 });
           });
 
           it('does not use the v2 template name as the title, letting the Oracle-generated title win', async () => {
@@ -1355,6 +1546,7 @@ fields: []
               casesOracleService: new CasesOracleServiceMock(),
               casesService: new CasesServiceMock(),
               casesClient: casesClientMock,
+              actionsClient,
               spaceId: 'default',
               isTemplatesEnabled: false,
             });
@@ -1392,6 +1584,7 @@ fields: []
               casesOracleService: new CasesOracleServiceMock(),
               casesService: new CasesServiceMock(),
               casesClient: casesClientMock,
+              actionsClient,
               spaceId: 'default',
               isTemplatesEnabled: false,
             });
@@ -2570,6 +2763,7 @@ fields: []
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
+        actionsClient,
         spaceId: 'default',
       });
     });
@@ -4074,6 +4268,7 @@ fields: []
             casesOracleService: new CasesOracleServiceMock(),
             casesService: new CasesServiceMock(),
             casesClient: casesClientMock,
+            actionsClient,
             spaceId: 'default',
             isCasesAttachmentsEnabled: true,
           });
