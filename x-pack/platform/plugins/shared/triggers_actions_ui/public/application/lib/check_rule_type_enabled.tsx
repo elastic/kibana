@@ -17,12 +17,9 @@ export interface IsDisabledResult {
   message: string;
 }
 
-const getLicenseArticle = (licenseName: string) =>
-  /^[aeiou]/i.test(licenseName) ? 'an' : 'a';
-
 const getLicenseCheckResult = (ruleType: RuleType) => {
-  const minimumLicenseRequired = upperFirst(ruleType.minimumLicenseRequired);
-  const licenseArticle = getLicenseArticle(minimumLicenseRequired);
+  const license = ruleType.minimumLicenseRequired;
+  const minimumLicenseRequired = upperFirst(license);
 
   return {
     isEnabled: false,
@@ -30,9 +27,9 @@ const getLicenseCheckResult = (ruleType: RuleType) => {
       'xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage',
       {
         defaultMessage:
-          'This rule type requires {licenseArticle} {minimumLicenseRequired} license.',
+          'This rule type requires {license, select, enterprise {an Enterprise} other {a {minimumLicenseRequired}}} license.',
         values: {
-          licenseArticle,
+          license,
           minimumLicenseRequired,
         },
       }
