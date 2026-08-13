@@ -60,7 +60,7 @@ describe('SeverityField', () => {
     );
   });
 
-  it('does not call onSeverityChange until the change is confirmed', async () => {
+  it('persists the change immediately, with no confirm step', async () => {
     render(
       <SeverityField
         selectedSeverity={CaseSeverity.MEDIUM}
@@ -73,33 +73,9 @@ describe('SeverityField', () => {
     await userEvent.click(screen.getByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('case-severity-selection-high'));
-
-    expect(onSeverityChange).not.toHaveBeenCalled();
-    expect(screen.getByTestId('template-field-confirm-severity')).toBeInTheDocument();
-    expect(screen.getByTestId('template-field-cancel-severity')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('template-field-confirm-severity'));
 
     expect(onSeverityChange).toHaveBeenCalledWith(CaseSeverity.HIGH);
-  });
-
-  it('reverts the pending change when cancel is clicked', async () => {
-    render(
-      <SeverityField
-        selectedSeverity={CaseSeverity.MEDIUM}
-        onSeverityChange={onSeverityChange}
-        isLoading={false}
-        isDisabled={false}
-      />
-    );
-
-    await userEvent.click(screen.getByTestId('case-severity-selection'));
-    await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('case-severity-selection-high'));
-    await userEvent.click(screen.getByTestId('template-field-cancel-severity'));
-
-    expect(onSeverityChange).not.toHaveBeenCalled();
-    expect(screen.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
     expect(screen.queryByTestId('template-field-confirm-severity')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('template-field-cancel-severity')).not.toBeInTheDocument();
   });
 });

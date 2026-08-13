@@ -308,8 +308,6 @@ describe('Cases Plugin', () => {
             },
           },
           "getCasesClientWithRequest": [Function],
-          "getExternalReferenceAttachmentTypeRegistry": [Function],
-          "getPersistableStateAttachmentTypeRegistry": [Function],
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);

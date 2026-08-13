@@ -6,12 +6,6 @@
  */
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-
-// The `inference` flag isn't yet in the Elasticsearch package types.
-type FieldCapability = FieldCapsFieldCapability & {
-  inference?: boolean;
-};
 
 interface MeteringIndexStat {
   name: string;
@@ -24,103 +18,82 @@ interface MeteringStatsResponse {
   indices: MeteringIndexStat[];
 }
 
+interface VectorStats {
+  value_count?: number;
+}
+
+interface IndexStatsWithVectors {
+  dense_vector?: VectorStats;
+  sparse_vector?: VectorStats;
+}
+
 interface IndexStats {
   indicesCount: number | null;
   storeSizeBytes: number | null;
-  vectorDocsCount: number | null;
+  vectorCount: number | null;
 }
 
-const INDEX_STATS_UNAVAILABLE: IndexStats = {
+export const INDEX_STATS_UNAVAILABLE: IndexStats = {
   indicesCount: null,
   storeSizeBytes: null,
-  vectorDocsCount: null,
+  vectorCount: null,
 };
 
-const VECTOR_FIELD_TYPES = new Set(['dense_vector', 'sparse_vector', 'semantic_text', 'semantic']);
-
-// `semantic_text` fields may be reported by field caps as `text` with `inference: true`, so `text`
-// must be requested alongside the vector types.
-const FIELD_CAPS_TYPES = [...VECTOR_FIELD_TYPES, 'text'];
+const USER_INDICES_PATTERN = ['*', '-.*'];
 
 /**
- * Returns which of the given indices contain a vector field. Uses `_field_caps` rather than full
- * mappings as it's far lighter and flattens nested/multi-fields for free.
+ * Whether the caller may see cluster-wide totals. Every source behind `fetchIndexStats` runs with
+ * elevated privileges, so Elasticsearch will not reject an unprivileged caller on its own and the
+ * route has to ask on their behalf. Errors deny access rather than granting it.
  */
-const getVectorIndexNames = async (
+export const hasIndexManagePrivilege = async (
   client: IScopedClusterClient,
-  indexNames: string[]
-): Promise<string[]> => {
-  const fieldCaps = await client.asCurrentUser.fieldCaps({
-    index: indexNames,
-    fields: '*',
-    types: FIELD_CAPS_TYPES,
-    filters: '-metadata',
-    // Forces partially-mapped fields to carry an explicit `indices` list. Without it a field mapped
-    // in a subset of indices looks identical to one mapped everywhere, misclassifying all indices.
-    include_unmapped: true,
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    const { has_all_requested: hasAllRequested } =
+      await client.asCurrentUser.security.hasPrivileges({
+        index: [{ names: USER_INDICES_PATTERN, privileges: ['manage'] }],
+      });
+
+    return hasAllRequested;
+  } catch (error) {
+    logger.warn(
+      `Failed to check index privileges for vectordb deployment stats. Denying access: ${error.message}`
+    );
+    return false;
+  }
+};
+
+/**
+ * Counts indexed dense + sparse vectors via `_stats` (operator-only in serverless), aggregated at
+ * the cluster level so no per-index breakdown is returned. Excluding dot indices keeps the total
+ * scoped to the same indices as the metering-derived index and size counts. `open` is already the
+ * default for `expand_wildcards`, but is pinned so hidden indices can't be pulled in by a later
+ * edit.
+ */
+const countVectors = async (client: IScopedClusterClient): Promise<number> => {
+  const stats = await client.asInternalUser.indices.stats({
+    index: USER_INDICES_PATTERN,
+    expand_wildcards: ['open'],
+    level: 'cluster',
+    metric: ['dense_vector', 'sparse_vector'],
   });
 
-  const vectorIndexNames = new Set<string>();
-
-  for (const capabilitiesByType of Object.values(fieldCaps.fields)) {
-    for (const capability of Object.values(capabilitiesByType) as FieldCapability[]) {
-      // `include_unmapped: true` adds pseudo-entries listing indices where the field is absent.
-      if (capability.type === 'unmapped') continue;
-
-      const isVectorField =
-        VECTOR_FIELD_TYPES.has(capability.type) || capability.inference === true;
-      if (!isVectorField) continue;
-
-      // Absent `indices` means the field is mapped in every requested index.
-      if (capability.indices === undefined) return indexNames;
-
-      const capabilityIndices = Array.isArray(capability.indices)
-        ? capability.indices
-        : [capability.indices];
-      capabilityIndices.forEach((name) => vectorIndexNames.add(name));
-
-      if (vectorIndexNames.size === indexNames.length) return indexNames;
-    }
-  }
-
-  return [...vectorIndexNames];
-};
-
-// Caps indices per ES|QL query so the `FROM` clause can't grow unbounded.
-const ESQL_INDICES_PER_QUERY = 500;
-
-const countTopLevelDocs = async (
-  client: IScopedClusterClient,
-  indexNames: string[]
-): Promise<number> => {
-  let total = 0;
-
-  for (let i = 0; i < indexNames.length; i += ESQL_INDICES_PER_QUERY) {
-    const batch = indexNames.slice(i, i + ESQL_INDICES_PER_QUERY);
-    const esqlResult = await client.asCurrentUser.esql.query({
-      query: `FROM ${batch.map((name) => `"${name}"`).join(',')} | STATS doc_count = COUNT(*)`,
-      allow_partial_results: true,
-    });
-
-    const countColumnIndex = esqlResult.columns.findIndex((col) => col.name === 'doc_count');
-    const [row] = esqlResult.values ?? [];
-    total += (row?.[countColumnIndex] as number) ?? 0;
-  }
-
-  return total;
+  const primaries = stats._all?.primaries as IndexStatsWithVectors | undefined;
+  return (primaries?.dense_vector?.value_count ?? 0) + (primaries?.sparse_vector?.value_count ?? 0);
 };
 
 /**
- * Fetches index-level stats: user index count, aggregate store size, and doc count across indices
- * with a vector field. Failures are logged and surfaced as `null` so callers can
- * distinguish "unavailable" from a genuine `0`.
+ * Fetches index-level stats: user index count, aggregate store size, and indexed dense/sparse
+ * vector count. Failures are logged and surfaced as `null` so callers can distinguish
+ * "unavailable" from a genuine `0`.
  */
 export const fetchIndexStats = async (
   client: IScopedClusterClient,
   logger: Logger
 ): Promise<IndexStats> => {
   try {
-    // Serverless-only `_metering/stats` requires asSecondaryAuthUser.
     const meteringStats = await client.asSecondaryAuthUser.transport.request<MeteringStatsResponse>(
       {
         method: 'GET',
@@ -135,29 +108,21 @@ export const fetchIndexStats = async (
     const indicesCount = userIndices.length;
     const storeSizeBytes = userIndices.reduce((sum, index) => sum + (index.size_in_bytes ?? 0), 0);
 
-    let vectorDocsCount: number | null = 0;
+    let vectorCount: number | null = 0;
+
     if (indicesCount > 0) {
-      const indexNames = userIndices.map((i) => i.name);
-
       try {
-        const vectorIndexNames = await getVectorIndexNames(client, indexNames);
-
-        if (vectorIndexNames.length > 0) {
-          // `_metering/stats` num_docs counts Lucene documents, which includes the nested chunk
-          // documents that `semantic_text` fields generate, inflating the count. Count top-level
-          // documents with ES|QL instead, matching the index management plugin's workaround.
-          vectorDocsCount = await countTopLevelDocs(client, vectorIndexNames);
-        }
+        vectorCount = await countVectors(client);
       } catch (error) {
-        // Index/size counts are still valid; only the vector doc count is unavailable.
+        // Index/size counts are still valid; only the vector count is unavailable.
         logger.warn(
-          `Failed to compute vector doc count for vectordb deployment stats. Returning partial stats: ${error.message}`
+          `Failed to compute vector count for vectordb deployment stats. Returning partial stats: ${error.message}`
         );
-        vectorDocsCount = null;
+        vectorCount = null;
       }
     }
 
-    return { indicesCount, storeSizeBytes, vectorDocsCount };
+    return { indicesCount, storeSizeBytes, vectorCount };
   } catch (error) {
     logger.warn(`Failed to fetch index stats for vectordb deployment stats: ${error.message}`);
     return INDEX_STATS_UNAVAILABLE;
