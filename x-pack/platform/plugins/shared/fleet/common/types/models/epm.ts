@@ -436,6 +436,7 @@ export type RegistrySearchResult = Pick<
   | 'categories'
   | 'discovery'
   | 'deprecated'
+  | 'group'
 >;
 
 // from /categories
