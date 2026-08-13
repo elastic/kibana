@@ -474,7 +474,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=60-high (or higher) because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
+          text: 'Sets severity=60-high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
           score: 3,
         },
         {

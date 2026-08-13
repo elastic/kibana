@@ -202,7 +202,7 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     1. "80-critical" when ANY of these hold:
       - a site-wide/global outage affecting all or most customers;
       - multiple current rows confirming blocked paths for distinct core operations (for example balance, history, and payment together);
-      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology;
+      - a confirmed failure that fully blocks a mandatory service, job, or platform-critical operation end-to-end so the component can no longer perform its primary function, even when no downstream customer journey is mapped in topology — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "60-high";
       - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, or tokens.
     2. "60-high" when grounding confirms the rule's target operation fails or is blocked on the verified path, or is broadly degraded / intermittent / partially failing for a significant subset — and no "80-critical" criterion above holds. A single endpoint or lookup path that blocks only that operation (even for every caller who reaches it) stays here.
     3. "40-medium" when grounding shows only minor confirmed degradation with limited reach, or has not confirmed whether the affected operation fails versus only slows.

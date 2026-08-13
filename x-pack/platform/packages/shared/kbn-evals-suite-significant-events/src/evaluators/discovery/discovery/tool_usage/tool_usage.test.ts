@@ -217,7 +217,7 @@ describe('scoreToolUsageContinuation', () => {
     expect(result.score).toBe(1);
   });
 
-  it('skips missing-topology-search when expectReuse is false (new event after closed seed)', () => {
+  it('still flags missing-topology-search when expectReuse is false (new event after closed seed)', () => {
     const stepsWithTopologyWrite = [
       toolCall(
         TOOL_ID_EVENT_SEARCH,
@@ -243,7 +243,7 @@ describe('scoreToolUsageContinuation', () => {
       },
     ]);
 
-    expect(result.score).toBe(1);
-    expect(result.explanation).toContain('cycle 1: correct (1)');
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('cycle 1: missing-topology-search (0)');
   });
 });
