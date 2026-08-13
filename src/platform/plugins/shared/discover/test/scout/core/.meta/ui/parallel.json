@@ -1,5 +1,5 @@
 {
-  "sha1": "62a0452431b21f1e90100e19c9c2b129b17369a8",
+  "sha1": "0c9d9dd80001063caa774410edd0b9d73e19b2c0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 39,
-        "column": 26
+        "line": 42,
+        "column": 27
       }
     },
     {
@@ -203,8 +203,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/adhoc_data_views.spec.ts",
-        "line": 218,
-        "column": 26
+        "line": 223,
+        "column": 13
       }
     },
     {
@@ -1119,6 +1119,71 @@
       }
     },
     {
+      "id": "f501e176fe8675e-c89219305126537",
+      "title": "Discover panels toggle - data view mode panels can be toggled in a time-based data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_data_view.spec.ts",
+        "line": 35,
+        "column": 25
+      }
+    },
+    {
+      "id": "665d2b2cb718277-7417e33d6ca8583",
+      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with a histogram chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
+        "line": 41,
+        "column": 25
+      }
+    },
+    {
+      "id": "665d2b2cb718277-11a2688beae6a2d",
+      "title": "Discover panels toggle - ES|QL mode panels can be toggled in ES|QL mode with an aggs chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_esql.spec.ts",
+        "line": 88,
+        "column": 11
+      }
+    },
+    {
+      "id": "368c4713a048546-06d11166ed91f94",
+      "title": "Discover panels toggle - no time field only the sidebar can be toggled in a data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
+        "line": 40,
+        "column": 25
+      }
+    },
+    {
+      "id": "368c4713a048546-7bcaa5245c3fb17",
+      "title": "Discover panels toggle - no time field only the sidebar can be toggled in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/panels_toggle_no_time_field.spec.ts",
+        "line": 56,
+        "column": 9
+      }
+    },
+    {
       "id": "b9d2cfb478c121f-3b92bd636ef1c43",
       "title": "preserve url goes back to last opened url",
       "expectedStatus": "passed",
@@ -1517,8 +1582,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 24,
-        "column": 29
+        "line": 27,
+        "column": 49
       }
     },
     {
@@ -1530,8 +1595,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 34,
-        "column": 18
+        "line": 37,
+        "column": 63
       }
     },
     {
@@ -1543,8 +1608,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 44,
-        "column": 20
+        "line": 48,
+        "column": 28
       }
     },
     {
@@ -1556,8 +1621,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/runtime_field_crud.spec.ts",
-        "line": 52,
-        "column": 86
+        "line": 55,
+        "column": 29
       }
     },
     {
