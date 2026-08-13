@@ -127,6 +127,7 @@ export async function updateScoutConfigManifests(
     );
     for (const configPath of failedConfigPaths) {
       await generateScoutConfigManifest(configPath, log);
+      updatedConfigPaths.push(configPath);
     }
   }
 
