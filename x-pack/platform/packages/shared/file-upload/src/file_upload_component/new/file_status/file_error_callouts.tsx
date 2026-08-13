@@ -9,7 +9,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { FindFileStructureErrorResponse } from '@kbn/file-upload-common';
 import type { FileAnalysis } from '../../../../file_upload_manager';
@@ -27,48 +28,41 @@ export const FileTooLarge: FC<Props> = ({ fileStatus }) => {
   let errorText;
   if (fileSizeFormatted !== maxFileSizeFormatted) {
     errorText = (
-      <p>
-        <FormattedMessage
-          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
-          defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
+      <FormattedMessage
+        id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage"
+        defaultMessage="The size of the file you selected for upload is {fileSizeFormatted} which
           exceeds the maximum permitted size of {maxFileSizeFormatted}"
-          values={{
-            fileSizeFormatted,
-            maxFileSizeFormatted,
-          }}
-        />
-      </p>
+        values={{
+          fileSizeFormatted,
+          maxFileSizeFormatted,
+        }}
+      />
     );
   } else {
     errorText = (
-      <p>
-        <FormattedMessage
-          id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
-          defaultMessage="The size of the file you selected for upload exceeds the maximum
+      <FormattedMessage
+        id="xpack.fileUpload.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage"
+        defaultMessage="The size of the file you selected for upload exceeds the maximum
           permitted size of {maxFileSizeFormatted} by {diffFormatted}"
-          values={{
-            maxFileSizeFormatted,
-            diffFormatted,
-          }}
-        />
-      </p>
+        values={{
+          maxFileSizeFormatted,
+          diffFormatted,
+        }}
+      />
     );
   }
 
   return (
-    <EuiCallOut
+    <KbnDangerCallout
       title={
         <FormattedMessage
           id="xpack.fileUpload.fileErrorCallouts.fileSizeTooLargeTitle"
           defaultMessage="File size is too large"
         />
       }
-      color="danger"
-      iconType="cross"
+      text={errorText}
       data-test-subj="dataVisualizerFileUploadErrorCallout fileTooLarge"
-    >
-      {errorText}
-    </EuiCallOut>
+    />
   );
 };
 
@@ -86,15 +80,13 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
   const message = error?.body?.message || '';
   return (
     <>
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.fileUpload.fileErrorCallouts.fileCouldNotBeReadTitle"
             defaultMessage="File structure cannot be determined"
           />
         }
-        color="danger"
-        iconType="cross"
         data-test-subj="dataVisualizerFileUploadErrorCallout fileCouldNotBeRead"
       >
         {loaded === false && (
@@ -124,7 +116,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
             />
           </>
         )}
-      </EuiCallOut>
+      </KbnDangerCallout>
     </>
   );
 };
@@ -147,22 +139,21 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
 export const FindFileStructurePermissionDenied: FC = () => {
   return (
     <>
-      <EuiCallOut
+      <KbnDangerCallout
         title={
           <FormattedMessage
             id="xpack.fileUpload.fileErrorCallouts.findFileStructurePermissionDenied.title"
             defaultMessage="Permission denied"
           />
         }
-        color="danger"
-        iconType="cross"
+        text={
+          <FormattedMessage
+            id="xpack.fileUpload.fileErrorCallouts.findFileStructurePermissionDenied.description"
+            defaultMessage="You do not have sufficient privileges to analyze files."
+          />
+        }
         data-test-subj="dataVisualizerFileStructurePermissionDeniedErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.fileUpload.fileErrorCallouts.findFileStructurePermissionDenied.description"
-          defaultMessage="You do not have sufficient privileges to analyze files."
-        />
-      </EuiCallOut>
+      />
     </>
   );
 };

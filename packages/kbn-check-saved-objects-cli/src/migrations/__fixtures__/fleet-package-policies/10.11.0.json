@@ -1,0 +1,31 @@
+{
+  "10.10.0": [
+    {
+      "name": "symbolizer-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "profiler_symbolizer", "version": "1.0.0" }
+    },
+    {
+      "name": "collector-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "profiler_collector", "version": "1.0.0" }
+    }
+  ],
+  "10.11.0": [
+    {
+      "name": "symbolizer-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "profiler_symbolizer", "version": "1.0.0" },
+      "bump_agent_policy_revision": true
+    },
+    {
+      "name": "collector-policy",
+      "enabled": true,
+      "inputs": [],
+      "package": { "name": "profiler_collector", "version": "1.0.0" }
+    }
+  ]
+}
