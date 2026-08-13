@@ -8,7 +8,6 @@
 import type { QueryOperator } from '../../../../../common/types';
 
 export interface ParsedField {
-  icon?: string;
   name: string;
   operator: QueryOperator;
   value?: string | number;

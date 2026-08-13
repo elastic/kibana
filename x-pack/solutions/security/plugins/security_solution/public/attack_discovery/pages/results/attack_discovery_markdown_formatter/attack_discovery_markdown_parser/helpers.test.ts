@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { getIconFromFieldName } from './helpers';
+import { parseFieldToken } from './helpers';
 
 describe('helpers', () => {
-  describe('getIconFromFieldName', () => {
-    it('returns the expected icon for a known field name', () => {
-      const fieldName = 'host.name';
-      const expectedIcon = 'display';
-
-      const icon = getIconFromFieldName(fieldName);
-
-      expect(icon).toEqual(expectedIcon);
-    });
-
-    it('returns an empty string for an unknown field name', () => {
-      const fieldName = 'unknown.field';
-      const emptyIcon = '';
-
-      const icon = getIconFromFieldName(fieldName);
-
-      expect(icon).toEqual(emptyIcon);
+  describe('parseFieldToken', () => {
+    it('returns a parsed field from the token values', () => {
+      expect(parseFieldToken('host.name', 'my-host')).toEqual({
+        name: 'host.name',
+        operator: ':',
+        value: 'my-host',
+      });
     });
   });
 });

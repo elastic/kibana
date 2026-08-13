@@ -52,7 +52,7 @@ export const getSummaryPlainText = (markdown: string): string =>
 
 /**
  * Constrains the entity summary to a single truncated line.
- * The gradient fade on the right edge prevents any chip from being hard-clipped.
+ * The gradient fade on the right edge prevents any field value from being hard-clipped.
  */
 const summaryCss = css`
   min-width: 0;

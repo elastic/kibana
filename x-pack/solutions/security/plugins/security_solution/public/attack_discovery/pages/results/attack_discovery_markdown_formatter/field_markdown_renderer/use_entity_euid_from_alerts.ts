@@ -17,7 +17,7 @@ interface Params {
   alertIds: string[]; // original (de-anonymized) alert document IDs
   fieldName: string; // e.g. 'host.name' or 'user.name'
   fieldValue: string; // e.g. 'SRVWIN01'
-  enabled: boolean; // only fetch when the badge is actually clickable
+  enabled: boolean; // only fetch when the value is actually clickable
 }
 
 interface Result {
@@ -77,7 +77,7 @@ export const useEntityEuidFromAlerts = ({
           (response?.rawResponse?.hits?.hits as Array<{
             fields?: { entity_id?: string[]; [key: string]: unknown };
           }>) ?? [];
-        // Find the first alert where the clicked field matches the badge value
+        // Find the first alert where the clicked field matches the rendered value
         const matchingHit = hits.find((hit) => {
           const val = hit.fields?.[fieldName];
           return val === fieldValue || (Array.isArray(val) && val.includes(fieldValue));

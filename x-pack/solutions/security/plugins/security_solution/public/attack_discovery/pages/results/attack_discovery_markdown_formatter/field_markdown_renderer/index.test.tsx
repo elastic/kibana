@@ -43,39 +43,48 @@ describe('FieldMarkdownRenderer', () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
   });
 
-  it('renders the field value', () => {
-    const icon = '';
+  it('renders the field value as bold text that underlines on hover', () => {
     const name = 'some.field';
     const value = 'some.value';
 
-    render(
+    const { container } = render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
-    const fieldValue = screen.getByText(value);
+    const fieldValue = screen.getByTestId('fieldMarkdownRendererValue');
 
-    expect(fieldValue).toBeInTheDocument();
+    expect(fieldValue).toHaveTextContent(value);
+    expect(fieldValue).toHaveStyleRule('color', expect.any(String));
+    expect(fieldValue).toHaveStyleRule('font-weight', 'bold');
+    expect(fieldValue).toHaveStyleRule('text-decoration', 'underline', { target: ':hover' });
+    expect(fieldValue).toHaveStyleRule('vertical-align', 'text-bottom');
+    const inlineWrapper = screen.getByTestId('fieldMarkdownRendererInlineWrapper');
+    expect(inlineWrapper).toHaveStyleRule('display', 'inline-flex');
+    expect(inlineWrapper).toHaveStyleRule('align-items', 'baseline');
+    expect(inlineWrapper).toHaveStyleRule('vertical-align', 'baseline');
+    expect(container.querySelector('.euiBadge')).not.toBeInTheDocument();
   });
 
   it('opens the right panel when the entity button is clicked', () => {
-    const icon = 'user';
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
     const entityButton = screen.getByTestId('entityButton');
 
+    expect(entityButton).toHaveStyleRule('color', expect.any(String));
+    expect(entityButton).not.toHaveStyleRule('color', 'inherit');
     fireEvent.click(entityButton);
 
     expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
@@ -86,14 +95,13 @@ describe('FieldMarkdownRenderer', () => {
   it('opens the entity flyout API when the new flyout is enabled', async () => {
     jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
 
-    const icon = 'user';
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
@@ -110,14 +118,13 @@ describe('FieldMarkdownRenderer', () => {
   });
 
   it('does NOT render the entity button when flyoutPanelProps is null', () => {
-    const icon = '';
     const name = 'some.field';
     const value = 'some.value';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
@@ -127,52 +134,52 @@ describe('FieldMarkdownRenderer', () => {
     expect(entityButton).not.toBeInTheDocument();
   });
 
-  it('renders disabled actions badge when disableActions is true', () => {
-    const icon = 'user';
+  it('renders disabled actions text when disableActions is true', () => {
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
-    const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
+    const disabledActionsText = screen.getByTestId('disabledActionsText');
 
-    expect(disabledActionsBadge).toBeInTheDocument();
+    expect(disabledActionsText).toHaveStyleRule('font-weight', 'bold');
+    expect(disabledActionsText).toHaveStyleRule('text-decoration', 'underline', {
+      target: ':hover',
+    });
   });
 
-  it('renders the field tooltip on the badge when disableActions is true', () => {
-    const icon = 'user';
+  it('renders the field tooltip on the text when disableActions is true', () => {
     const name = 'user.name';
     const value = 'some.user';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
 
-    const disabledActionsBadge = screen.getByTestId('disabledActionsBadge');
+    const disabledActionsText = screen.getByTestId('disabledActionsText');
 
-    expect(disabledActionsBadge.closest('.euiToolTipAnchor')).toBeInTheDocument();
+    expect(disabledActionsText.closest('.euiToolTipAnchor')).toBeInTheDocument();
     expect(screen.queryByTestId(`render-content-${name}`)).not.toBeInTheDocument();
   });
 
   it('renders the field tooltip via cell actions when disableActions is false', () => {
-    const icon = '';
     const name = 'process.name';
     const value = 'explorer.exe';
 
     render(
       <TestProviders>
         <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
-          <FieldMarkdownRenderer icon={icon} name={name} operator={':'} value={value} />
+          <FieldMarkdownRenderer name={name} operator={':'} value={value} />
         </MarkdownFormatterContext.Provider>
       </TestProviders>
     );
@@ -181,11 +188,11 @@ describe('FieldMarkdownRenderer', () => {
 
     expect(screen.queryByTestId('fieldMarkdownRendererToolTip')).not.toBeInTheDocument();
     expect(cellActionsContent.querySelector('.euiToolTipAnchor')).toBeInTheDocument();
-    expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('disabledActionsText')).not.toBeInTheDocument();
     expect(screen.getByTestId('fieldMarkdownRendererInlineWrapper')).toBeInTheDocument();
   });
 
-  describe('alert-id chip', () => {
+  describe('alert-id value', () => {
     // Note: JSDOM always reports scrollWidth === clientWidth === 0, so isValueTruncated is
     // always false in tests. Tooltip content differences (field name vs "field: value") are
     // not covered here; they require a real browser layout engine to observe.
@@ -195,26 +202,21 @@ describe('FieldMarkdownRenderer', () => {
       render(
         <TestProviders>
           <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
 
       expect(screen.getByTestId('alertIdButton')).toBeInTheDocument();
       expect(screen.queryByTestId('entityButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('disabledActionsBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disabledActionsText')).not.toBeInTheDocument();
     });
 
     it('renders an alertIdButton for kibana.alert.uuid when the value is in alertIds', () => {
       render(
         <TestProviders>
           <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
-            <FieldMarkdownRenderer
-              icon="warning"
-              name="kibana.alert.uuid"
-              operator={':'}
-              value={alertId}
-            />
+            <FieldMarkdownRenderer name="kibana.alert.uuid" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
@@ -228,7 +230,7 @@ describe('FieldMarkdownRenderer', () => {
           <MarkdownFormatterContext.Provider
             value={{ disableActions: false, alertIds: ['some-other-alert-id'] }}
           >
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
@@ -240,7 +242,7 @@ describe('FieldMarkdownRenderer', () => {
       render(
         <TestProviders>
           <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [] }}>
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
@@ -252,13 +254,13 @@ describe('FieldMarkdownRenderer', () => {
       render(
         <TestProviders>
           <MarkdownFormatterContext.Provider value={{ disableActions: true, alertIds: [alertId] }}>
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
 
       expect(screen.queryByTestId('alertIdButton')).not.toBeInTheDocument();
-      expect(screen.getByTestId('disabledActionsBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('disabledActionsText')).toBeInTheDocument();
     });
 
     it('calls openFlyout (legacy) when alertIdButton is clicked with new flyout disabled', () => {
@@ -274,7 +276,7 @@ describe('FieldMarkdownRenderer', () => {
           <MarkdownFormatterContext.Provider
             value={{ disableActions: false, alertIds: [alertId], scopeId: 'test-scope' }}
           >
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
@@ -297,7 +299,7 @@ describe('FieldMarkdownRenderer', () => {
       render(
         <TestProviders>
           <MarkdownFormatterContext.Provider value={{ disableActions: false, alertIds: [alertId] }}>
-            <FieldMarkdownRenderer icon="warning" name="_id" operator={':'} value={alertId} />
+            <FieldMarkdownRenderer name="_id" operator={':'} value={alertId} />
           </MarkdownFormatterContext.Provider>
         </TestProviders>
       );
