@@ -10,10 +10,12 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import type { ServerlessProjectType } from '../../../common/constants/types';
 import { CasesConnector } from './cases_connector';
@@ -43,6 +45,7 @@ import { ATTACK_DISCOVERY_MAX_OPEN_CASES, groupAttackDiscoveryAlerts } from './a
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getUnsecuredSavedObjectsClient: (
     request: KibanaRequest,
     savedObjectTypes: string[]
@@ -56,6 +59,7 @@ interface GetCasesConnectorTypeArgs {
 
 export const getCasesConnectorType = ({
   getCasesClient,
+  getActionsClient,
   getSpaceId,
   getUnsecuredSavedObjectsClient,
   getUiSettingsClient,
@@ -72,6 +76,7 @@ export const getCasesConnectorType = ({
     new CasesConnector({
       casesParams: {
         getCasesClient,
+        getActionsClient,
         getSpaceId,
         getUnsecuredSavedObjectsClient,
         getUiSettingsClient,

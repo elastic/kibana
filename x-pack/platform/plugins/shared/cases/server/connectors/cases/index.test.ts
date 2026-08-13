@@ -36,6 +36,7 @@ describe('getCasesConnectorType', () => {
 
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
@@ -58,6 +59,7 @@ describe('getCasesConnectorType', () => {
   it('threads isTemplatesEnabled: true through to the CasesConnector when enabled', () => {
     const caseConnectorTypeWithTemplatesEnabled = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),

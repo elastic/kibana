@@ -11,6 +11,8 @@ import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getFlattenedObject, stableStringify } from '@kbn/std';
 import type {
   CustomFieldsConfiguration,
@@ -61,12 +63,14 @@ import {
   resolveV2TemplateForLegacyKey,
 } from './v2_template_utils';
 import type { ParsedTemplateDefinition } from './v2_template_utils';
+import { resolveTemplateConnector } from '../../client/cases/resolve_template_connector';
 
 interface CasesConnectorExecutorParams {
   logger: Logger;
   casesOracleService: CasesOracleService;
   casesService: CasesService;
   casesClient: CasesClient;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   spaceId: string;
   isCasesAttachmentsEnabled?: boolean;
   isTemplatesEnabled?: boolean;
@@ -77,11 +81,24 @@ type GroupedAlertsWithOracleRecords = GroupedAlertsWithOracleKey & { oracleRecor
 type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string };
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
 
+const NONE_CASE_CONNECTOR = {
+  id: 'none',
+  name: 'none',
+  type: ConnectorTypes.none,
+  fields: null,
+} as const;
+
+const DEFAULT_CASE_SETTINGS = {
+  syncAlerts: false,
+  extractObservables: false,
+} as const;
+
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
+  private readonly actionsClient: PublicMethodsOf<ActionsClient>;
   private readonly spaceId: string;
   private readonly isCasesAttachmentsEnabled: boolean;
   private readonly isTemplatesEnabled: boolean;
@@ -91,6 +108,7 @@ export class CasesConnectorExecutor {
     casesOracleService,
     casesService,
     casesClient,
+    actionsClient,
     spaceId,
     isCasesAttachmentsEnabled = false,
     isTemplatesEnabled = false,
@@ -99,6 +117,7 @@ export class CasesConnectorExecutor {
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
+    this.actionsClient = actionsClient;
     this.spaceId = spaceId;
     this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
     this.isTemplatesEnabled = isTemplatesEnabled;
@@ -754,10 +773,8 @@ export class CasesConnectorExecutor {
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
-    const { v2Template, extendedFields, templateRef } = await this.resolveV2TemplateWithFields(
-      params,
-      templatesConfigurationMap.get(params.owner)
-    );
+    const { v2Template, extendedFields, templateRef, resolvedConnector } =
+      await this.resolveV2TemplateWithFields(params, templatesConfigurationMap.get(params.owner));
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -771,7 +788,8 @@ export class CasesConnectorExecutor {
             templatesConfigurationMap.get(params.owner),
             v2Template ?? undefined,
             extendedFields,
-            templateRef
+            templateRef,
+            resolvedConnector
           )
         );
       }
@@ -817,7 +835,8 @@ export class CasesConnectorExecutor {
     v2Template: ParsedTemplateDefinition,
     customFieldsConfigurations?: CustomFieldsConfiguration,
     extendedFields?: Record<string, string>,
-    templateRef?: { id: string; version: number }
+    templateRef?: { id: string; version: number },
+    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector']
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -829,16 +848,9 @@ export class CasesConnectorExecutor {
       description: v2Template.description ?? this.getCaseDescription(params, flattenGrouping),
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
-      connector: {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      },
-      settings: {
-        syncAlerts: false,
-        extractObservables: false,
-      },
+      connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
+      settings: v2Template.settings ?? { ...DEFAULT_CASE_SETTINGS },
+      ...(v2Template.assignees ? { assignees: v2Template.assignees } : {}),
       owner: params.owner,
       customFields: builtCustomFields,
     };
@@ -872,7 +884,8 @@ export class CasesConnectorExecutor {
     templatesConfigurations?: TemplatesConfiguration,
     v2Template?: ParsedTemplateDefinition,
     extendedFields?: Record<string, string>,
-    templateRef?: { id: string; version: number }
+    templateRef?: { id: string; version: number },
+    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector']
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -884,7 +897,8 @@ export class CasesConnectorExecutor {
         v2Template,
         customFieldsConfigurations,
         extendedFields,
-        templateRef
+        templateRef,
+        resolvedConnector
       );
     }
 
@@ -918,19 +932,11 @@ export class CasesConnectorExecutor {
         title ??
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
-      connector: caseFieldsFromTemplate?.connector ?? {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      },
+      connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
       /**
        * TODO: Turn on for Security solution
        */
-      settings: caseFieldsFromTemplate?.settings ?? {
-        syncAlerts: false,
-        extractObservables: false,
-      },
+      settings: caseFieldsFromTemplate?.settings ?? { ...DEFAULT_CASE_SETTINGS },
       ...(caseFieldsFromTemplate?.assignees
         ? { assignees: caseFieldsFromTemplate?.assignees }
         : {}),
@@ -1193,6 +1199,7 @@ export class CasesConnectorExecutor {
       v2Template: v2TemplateForReopened,
       extendedFields: extendedFieldsForReopened,
       templateRef: templateRefForReopened,
+      resolvedConnector: resolvedConnectorForReopened,
     } = await this.resolveV2TemplateWithFields(
       params,
       templatesConfigurationMapForReopened.get(params.owner)
@@ -1206,7 +1213,8 @@ export class CasesConnectorExecutor {
         templatesConfigurationMapForReopened.get(params.owner),
         v2TemplateForReopened ?? undefined,
         extendedFieldsForReopened,
-        templateRefForReopened
+        templateRefForReopened,
+        resolvedConnectorForReopened
       )
     );
 
@@ -1417,9 +1425,15 @@ export class CasesConnectorExecutor {
     v2Template: ParsedTemplateDefinition | null;
     extendedFields: Record<string, string> | undefined;
     templateRef: { id: string; version: number } | undefined;
+    resolvedConnector: BulkCreateCasesRequest['cases'][number]['connector'] | undefined;
   }> {
     if (!this.isTemplatesEnabled || !params.templateId) {
-      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+      return {
+        v2Template: null,
+        extendedFields: undefined,
+        templateRef: undefined,
+        resolvedConnector: undefined,
+      };
     }
 
     // A rule authored in the v2 UI stores the v2 templateId and its version — resolve it directly.
@@ -1433,19 +1447,24 @@ export class CasesConnectorExecutor {
       );
 
       if (!v2Template) {
-        return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+        return {
+          v2Template: null,
+          extendedFields: undefined,
+          templateRef: undefined,
+          resolvedConnector: undefined,
+        };
       }
 
-      const extendedFields = await buildExtendedFieldsFromTemplate(
-        this.casesClient,
-        v2Template,
-        params.owner
-      );
+      const [extendedFields, resolvedConnector] = await Promise.all([
+        buildExtendedFieldsFromTemplate(this.casesClient, v2Template, params.owner),
+        resolveTemplateConnector(v2Template.connector, this.actionsClient, this.logger),
+      ]);
 
       return {
         v2Template,
         extendedFields,
         templateRef: { id: params.templateId, version: Number(params.templateVersion) },
+        resolvedConnector,
       };
     }
 
@@ -1467,19 +1486,24 @@ export class CasesConnectorExecutor {
     );
 
     if (!resolved) {
-      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+      return {
+        v2Template: null,
+        extendedFields: undefined,
+        templateRef: undefined,
+        resolvedConnector: undefined,
+      };
     }
 
-    const extendedFields = await buildExtendedFieldsFromTemplate(
-      this.casesClient,
-      resolved.definition,
-      params.owner
-    );
+    const [extendedFields, resolvedConnector] = await Promise.all([
+      buildExtendedFieldsFromTemplate(this.casesClient, resolved.definition, params.owner),
+      resolveTemplateConnector(resolved.definition.connector, this.actionsClient, this.logger),
+    ]);
 
     return {
       v2Template: resolved.definition,
       extendedFields,
       templateRef: { id: resolved.templateId, version: resolved.templateVersion },
+      resolvedConnector,
     };
   }
 

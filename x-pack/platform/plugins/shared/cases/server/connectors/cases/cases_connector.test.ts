@@ -70,6 +70,7 @@ describe('CasesConnector', () => {
 
   const casesParams = {
     getCasesClient,
+    getActionsClient: jest.fn().mockResolvedValue({}),
     getSpaceId,
     getUnsecuredSavedObjectsClient,
     getUiSettingsClient,
@@ -128,6 +129,7 @@ describe('CasesConnector', () => {
     expect(CasesConnectorExecutorMock).toBeCalledWith({
       logger,
       casesClient: { foo: 'bar' },
+      actionsClient: {},
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
