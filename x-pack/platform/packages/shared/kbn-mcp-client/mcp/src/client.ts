@@ -141,6 +141,14 @@ export class McpClient {
   async disconnect(): Promise<void> {
     if (this.connected) {
       this.logger.debug(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
+      try {
+        await this.transport.terminateSession();
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.debug(
+          `Error terminating MCP session ${this.name}, ${this.version}: ${errorMessage}`
+        );
+      }
       await this.client.close();
       this.connected = false;
       this.logger.debug(`Disconnected from MCP client ${this.name}, ${this.version}`);

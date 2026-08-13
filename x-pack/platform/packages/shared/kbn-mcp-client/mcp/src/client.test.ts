@@ -135,7 +135,9 @@ describe('McpClient', () => {
       getServerCapabilities: jest.fn(),
     };
 
-    mockTransport = {} as StreamableHTTPClientTransport;
+    mockTransport = {
+      terminateSession: jest.fn().mockResolvedValue(undefined),
+    } as unknown as StreamableHTTPClientTransport;
 
     (Client as jest.MockedClass<typeof Client>).mockImplementation(
       () => mockClient as unknown as Client
@@ -393,6 +395,33 @@ describe('McpClient', () => {
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Disconnected from MCP client test-client, 1.0.0'
+      );
+    });
+
+    it('terminates the MCP session before closing the client', async () => {
+      const client = await createConnectedClient();
+      mockClient.close.mockResolvedValue(undefined);
+
+      await client.disconnect();
+
+      const terminateCall = (mockTransport.terminateSession as jest.Mock).mock
+        .invocationCallOrder[0];
+      const closeCall = mockClient.close.mock.invocationCallOrder[0];
+      expect(terminateCall).toBeLessThan(closeCall);
+    });
+
+    it('closes the client when session termination fails', async () => {
+      const client = await createConnectedClient();
+      const terminateError = new Error('Method not allowed');
+      (mockTransport.terminateSession as jest.Mock).mockRejectedValue(terminateError);
+      mockClient.close.mockResolvedValue(undefined);
+
+      await client.disconnect();
+
+      expect(mockClient.close).toHaveBeenCalled();
+      expect(client.isConnected()).toBe(false);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Error terminating MCP session test-client, 1.0.0: Method not allowed'
       );
     });
 

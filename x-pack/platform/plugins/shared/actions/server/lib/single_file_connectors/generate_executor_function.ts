@@ -70,9 +70,27 @@ const getErrorMeta = ({
   return Object.keys(errorMeta).length > 0 ? errorMeta : undefined;
 };
 
+const isAllowlistDeniedError = (error: unknown): boolean => {
+  let current: unknown = error;
+
+  for (let hop = 0; hop < 5; hop++) {
+    if (current instanceof AllowlistDeniedError) {
+      return true;
+    }
+
+    if (!(current instanceof Error)) {
+      return false;
+    }
+
+    current = current.cause;
+  }
+
+  return false;
+};
+
 const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>): boolean => {
   return (
-    error instanceof AllowlistDeniedError ||
+    isAllowlistDeniedError(error) ||
     (error instanceof Error && isUserError(error)) ||
     (clientType.isUserError?.(error) ?? false)
   );
