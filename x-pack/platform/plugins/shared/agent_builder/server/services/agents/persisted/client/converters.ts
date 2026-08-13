@@ -6,12 +6,12 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   chatAgentTypeId,
   getDefaultAgentAccessControl,
 } from '@kbn/agent-builder-common';
-import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -20,6 +20,9 @@ import { isAgentOwner, normalizeAccessControl } from '../../access_control';
 export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
 const defaultAgentType = chatAgentTypeId;
+
+const readOwner = (id?: string, name?: string): UserIdAndName | undefined =>
+  id || name ? { id, username: name ?? 'unknown' } : undefined;
 
 export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
@@ -41,13 +44,10 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     access_control: normalizeAccessControl(document._source),
-    created_by:
-      document._source.created_by_id || document._source.created_by_name
-        ? {
-            id: document._source.created_by_id,
-            username: document._source.created_by_name ?? 'unknown',
-          }
-        : undefined,
+    created_by: readOwner(document._source.created_by_id, document._source.created_by_name),
+    created_at: document._source.created_at,
+    updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
+    updated_at: document._source.updated_at,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -58,6 +58,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
       workflow_ids: configuration.workflow_ids,
       plugin_ids: configuration.plugin_ids,
       connector_ids: configuration.connector_ids,
+      ai_indices: configuration.ai_indices,
     },
   };
 };
@@ -95,8 +96,11 @@ export const createRequestToEs = ({
       workflow_ids: profile.configuration.workflow_ids,
       plugin_ids: profile.configuration.plugin_ids,
       connector_ids: profile.configuration.connector_ids,
+      ai_indices: profile.configuration.ai_indices,
     },
     created_at: creationDate.toISOString(),
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: creationDate.toISOString(),
   };
 };
@@ -138,6 +142,7 @@ export const updateRequestToEs = ({
       ...currentConfig,
       ...configuration,
     },
+    ...(user && { updated_by_id: user.id, updated_by_name: user.username }),
     updated_at: updateDate.toISOString(),
   };
 
@@ -160,14 +165,18 @@ export const accessControlUpdateToEs = ({
   currentProps,
   access_control,
   updateDate,
+  user,
 }: {
   currentProps: AgentProperties;
   access_control: AgentAccessControl;
   updateDate: Date;
+  user: UserIdAndName;
 }): AgentProperties => {
   return {
     ...currentProps,
     access_control,
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: updateDate.toISOString(),
   };
 };

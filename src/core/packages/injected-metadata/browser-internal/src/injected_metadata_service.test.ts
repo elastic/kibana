@@ -200,11 +200,15 @@ describe('setup.getUserStorage()', () => {
   it('returns injectedMetadata.userStorage', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        userStorage: { values: { 'navigation:layout': { hidden: ['discover'] } } },
+        userStorage: {
+          available: true,
+          values: { 'navigation:layout': { hidden: ['discover'] } },
+        },
       },
     } as unknown as InjectedMetadataParams);
 
     expect(injectedMetadata.setup().getUserStorage()).toEqual({
+      available: true,
       values: { 'navigation:layout': { hidden: ['discover'] } },
     });
   });

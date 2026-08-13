@@ -184,7 +184,7 @@ export function EventFlyoutChatFooter({
               css={css`
                 margin-left: ${euiTheme.size.m};
               `}
-              type="arrowDown"
+              type="chevronSingleDown"
               size="s"
               aria-hidden="true"
             />

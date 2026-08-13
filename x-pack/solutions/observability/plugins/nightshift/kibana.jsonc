@@ -16,10 +16,10 @@
       "lens",
       "observabilityShared",
       "share",
-      "streams",
+      "significantEvents",
       "unifiedSearch"
     ],
     "optionalPlugins": ["agentBuilder", "serverless", "spaces"],
-    "requiredBundles": ["kibanaReact", "significantEvents"]
+    "requiredBundles": ["kibanaReact"]
   }
 }

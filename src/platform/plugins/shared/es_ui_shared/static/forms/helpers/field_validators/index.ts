@@ -13,6 +13,7 @@ export * from './min_length';
 export * from './min_selectable_selection';
 export * from './url';
 export * from './index_name';
+export * from './index_template_name';
 export * from './contains_char';
 export * from './starts_with';
 export * from './index_pattern_field';
