@@ -244,7 +244,7 @@ timeout-minutes: 90
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
-- you cannot identify a credible fix; or
+- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
@@ -263,7 +263,7 @@ Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed an
 2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check` (and, for a Jest test, run it with `node scripts/jest`). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+5. Verify the patch: lint and type check it with `node scripts/eslint` and `node scripts/type_check`. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 6. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 7. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 8. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -286,6 +286,27 @@ To re-investigate, follow the `flaky-test-investigator` skill at `.agents/skills
 
 - Where your fresh conclusion **departs** from the prior comment, say so and why in the PR's Context section.
 
+## Verifying a Jest fix
+
+Run this loop twice: once on the unpatched test, once with the fix applied.
+
+```bash
+: > /tmp/gh-aw/agent/jest-durations
+fails=0
+for i in $(seq 1 25); do
+  node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
+  node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
+done
+echo "$fails/25 runs failed"
+awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
+```
+
+- **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
+- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
+- **Read the timings, not only the counts.** An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing.
+- **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
+- **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
+
 ## PR format
 
 Write the body so a developer can grasp the fix and its root cause at a glance, from the PR alone — without needing to open links or leave the page (links are still welcome for anyone who wants to dig deeper).
@@ -299,6 +320,15 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
   ### Summary
   <a few bullet points: what was failing, and what this patch changes - keep it very concise, every bullet point must be earned>
 
+  <only when the test failed by running past its time budget, add this table right below the Summary, so the numbers are visible without opening Verification. Fill it from the two loops in "Verifying a Jest fix", and name the budget the test failed against (5s unless the file raises it with `jest.setTimeout`):
+
+  | Runtime vs. 5s budget | Failed | Avg | Max |
+  | --- | --- | --- | --- |
+  | Before fix | 4/25 | 4.6s | 5.0s |
+  | After fix | 0/25 | 0.9s | 1.1s |
+
+  Omit the table for every other kind of flake.>
+
   ### Context
   <a few bullet points of history around this flake, in the same concise, high-value style as the Summary — every bullet earned, and omit any you cannot back with real evidence (never guess a PR or attribution). Cover, where known:
   - a link to the failed test investigator's comment on the issue, flagging whether this patch follows or departs from their proposed fix — and, if you re-investigated because that comment was stale (see "Validate the investigation is current"), say so and summarize what your fresh analysis concluded
@@ -309,10 +339,11 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command; on a `⚠️` line, add a short note after the command explaining what failed, e.g.
-  `✅ Passed: node scripts/eslint <files>`
-  `✅ Passed: node scripts/type_check --project <tsconfig>`
-  `⚠️ node scripts/jest <test> — 1 assertion still failing (<one-line reason>)`>
+  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
+  ✅ Passed: `node scripts/eslint <files>`
+  ✅ Passed: `node scripts/type_check --project <tsconfig>`
+  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
+  ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
 
