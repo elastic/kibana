@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { MemoryCategory } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
@@ -57,9 +58,11 @@ const DEFAULT_LIMIT = 10;
 export const recallMemory = async ({
   storage,
   params,
+  logger,
 }: {
   storage: MemoryStorage;
   params: RecallMemoryParams;
+  logger?: Logger;
 }): Promise<RecallMemoryResult> => {
   const { query, category, entities, space_id, identity } = params;
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
@@ -104,8 +107,9 @@ export const recallMemory = async ({
       .filter((m): m is RecalledMemory => m !== null);
 
     return { memories };
-  } catch {
+  } catch (err) {
     // Fail open: an unreachable memory service must never stop the agent (G5, D-security).
+    logger?.warn(`recall_memory failed (returning empty): ${(err as Error).message}`);
     return { memories: [] };
   }
 };

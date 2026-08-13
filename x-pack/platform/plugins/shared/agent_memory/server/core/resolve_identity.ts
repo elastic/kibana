@@ -32,7 +32,12 @@ export interface ResolvedIdentity {
  */
 export interface MinimalAuthService {
   authc: {
-    getCurrentUser(request: KibanaRequest): { profile_uid?: string; username?: string } | null;
+    getCurrentUser(request: KibanaRequest): {
+      profile_uid?: string;
+      username?: string;
+      /** Present on AuthenticatedUser; used to scope username keys per realm. */
+      authentication_realm?: { name: string };
+    } | null;
   };
 }
 
@@ -41,7 +46,9 @@ export interface MinimalAuthService {
  *
  * Preference order:
  *  1. `profile_uid` — stable across realms; preferred.
- *  2. `username`    — accepted as fallback for API-key callers that have no profile.
+ *  2. `realm:username` — when no profile is available (e.g. API-key callers).
+ *     The realm name is included to prevent cross-realm collisions: a native
+ *     `admin` and an LDAP `admin` would otherwise share a memory partition.
  *
  * Returns `undefined` when neither is available (e.g. anonymous or internal
  * requests without user context). Callers must reject the `remember` operation
@@ -61,7 +68,9 @@ export const resolveIdentity = ({
   }
 
   if (authUser?.username) {
-    return { author: authUser.username, author_kind: 'username' };
+    const realm = authUser.authentication_realm?.name;
+    const author = realm ? `${realm}:${authUser.username}` : authUser.username;
+    return { author, author_kind: 'username' };
   }
 
   return undefined;

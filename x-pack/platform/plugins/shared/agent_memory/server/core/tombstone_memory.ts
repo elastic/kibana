@@ -49,6 +49,8 @@ export const tombstoneMemory = async ({
 
   // Fetch the doc to confirm ownership before mutating it.
   let existing: MemoryDocument | undefined;
+  let seqNo: number | undefined;
+  let primaryTerm: number | undefined;
   try {
     const hit = await client.get({ id, _source: true });
     if (!hit.found) {
@@ -56,6 +58,8 @@ export const tombstoneMemory = async ({
     }
     // The storage adapter returns the _source as the mapped document type.
     existing = hit._source as MemoryDocument;
+    seqNo = hit._seq_no;
+    primaryTerm = hit._primary_term;
   } catch {
     return { result: 'not_found' };
   }
@@ -77,7 +81,15 @@ export const tombstoneMemory = async ({
     deleted: true,
   };
 
-  await client.index({ id, document: updated });
+  // OCC guard: reject if a concurrent write landed between our get and
+  // this index. Let the error propagate; the caller can surface it.
+  await client.index({
+    id,
+    document: updated,
+    ...(seqNo !== undefined && primaryTerm !== undefined
+      ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+      : {}),
+  });
 
   try {
     await historyClient.create({

@@ -137,6 +137,7 @@ export const registerMemoryHook = ({
             const result = await recallMemory({
               storage: getStorage(),
               params: { query, limit: HOOK_RECALL_LIMIT, space_id: spaceId, identity },
+              logger,
             });
             if (!result.memories.length) return {};
             block = renderUntrustedBlock(result.memories);
