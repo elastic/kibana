@@ -20,6 +20,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { updateApiKeyByQueryOasExamples } from './update_api_key_by_query_oas_example';
 
 @injectable()
 export class UpdateApiKeyByQueryRoute extends BaseAlertingRoute {
@@ -34,6 +35,7 @@ export class UpdateApiKeyByQueryRoute extends BaseAlertingRoute {
     summary: 'Update the API key of rules matching a query (dry-run by default)',
     description:
       'Rotates each matching rule executor task API key to one derived from the current user’s credentials.',
+    oasOperationObject: updateApiKeyByQueryOasExamples,
   } as const;
   static schemas = {
     request: {

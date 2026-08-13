@@ -7,7 +7,10 @@
 
 import type { RuleChangeHistoryDetail } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
-import { RULE_RESPONSE } from '../rules/rule_oas_shared_examples';
+import {
+  INVALID_QUERY_PARAMETERS_RESPONSE,
+  RULE_RESPONSE,
+} from '../rules/rule_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
 import type { AlertingOasOperationObject, OasExampleEntry } from '../oas_types';
 import { RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE } from './list_rule_change_history_oas_example';
@@ -54,6 +57,7 @@ export const getRuleChangeHistoryEventOasExamples = (): AlertingOasOperationObje
         summary: 'Retrieved rule change-history event with snapshot',
         value: GET_RULE_CHANGE_HISTORY_EVENT_RESPONSE,
       },
+      400: INVALID_QUERY_PARAMETERS_RESPONSE,
       404: RULE_CHANGE_NOT_FOUND_RESPONSE,
       503: RULE_CHANGE_HISTORY_UNAVAILABLE_RESPONSE,
     },

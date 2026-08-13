@@ -16,6 +16,7 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { bulkUpdateApiKeyOasExamples } from './bulk_update_api_key_oas_example';
 
 @injectable()
 export class BulkUpdateApiKeyRoute extends BaseAlertingRoute {
@@ -30,6 +31,7 @@ export class BulkUpdateApiKeyRoute extends BaseAlertingRoute {
     summary: 'Update the API key of rules in bulk by ID',
     description:
       'Rotates each rule executor task API key to one derived from the current user’s credentials.',
+    oasOperationObject: bulkUpdateApiKeyOasExamples,
   } as const;
   static schemas = {
     request: {
