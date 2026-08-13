@@ -32,11 +32,11 @@ const directionLegend = i18n.translate('metricsExperience.sortSelector.direction
 });
 
 const ascendingLabel = i18n.translate('metricsExperience.sortSelector.ascending', {
-  defaultMessage: 'Ascending',
+  defaultMessage: 'Sort ascending',
 });
 
 const descendingLabel = i18n.translate('metricsExperience.sortSelector.descending', {
-  defaultMessage: 'Descending',
+  defaultMessage: 'Sort descending',
 });
 
 const directionOptions = [
