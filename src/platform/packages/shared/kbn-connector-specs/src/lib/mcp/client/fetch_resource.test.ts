@@ -40,8 +40,15 @@ describe('createFetchResource', () => {
   const createResource = (opts: {
     targetUrl: string;
     headers?: Record<string, string>;
+    getAuthHeaders?: () => Promise<Record<string, string>>;
     userAgent?: string;
-  }) => createFetchResource({ networkSettings, logger, ...opts });
+  }) =>
+    createFetchResource({
+      networkSettings,
+      logger,
+      getAuthHeaders: async () => ({}),
+      ...opts,
+    });
 
   const mockRedirectResponse = (status: number, location: string | null): Response => {
     const headers = new Headers();
@@ -277,6 +284,58 @@ describe('createFetchResource', () => {
     });
   });
 
+  describe('authentication headers', () => {
+    it('reads fresh authentication headers for each fetch', async () => {
+      const getAuthHeaders = jest
+        .fn<Promise<Record<string, string>>, []>()
+        .mockResolvedValueOnce({ Authorization: 'Bearer a' })
+        .mockResolvedValueOnce({ Authorization: 'Bearer b' });
+      const resource = createResource({ targetUrl, getAuthHeaders });
+      undiciFetchMock.mockResolvedValue(new Response('ok', { status: 200 }));
+
+      await resource.fetch(targetUrl);
+      await resource.fetch(targetUrl);
+
+      expect(getAuthHeaders).toHaveBeenCalledTimes(2);
+      expect((undiciFetchMock.mock.calls[0][1].headers as Headers).get('authorization')).toBe(
+        'Bearer a'
+      );
+      expect((undiciFetchMock.mock.calls[1][1].headers as Headers).get('authorization')).toBe(
+        'Bearer b'
+      );
+    });
+
+    it('overwrites SDK init authentication headers with current credentials', async () => {
+      const resource = createResource({
+        targetUrl,
+        getAuthHeaders: async () => ({ Authorization: 'Bearer current' }),
+      });
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+
+      await resource.fetch(targetUrl, {
+        headers: { Authorization: 'Bearer sdk-init' },
+      });
+
+      expect((undiciFetchMock.mock.calls[0][1].headers as Headers).get('authorization')).toBe(
+        'Bearer current'
+      );
+    });
+
+    it('rejects only the fetch when authentication headers fail', async () => {
+      const authError = new Error('token client failed');
+      const getAuthHeaders = jest
+        .fn<Promise<Record<string, string>>, []>()
+        .mockRejectedValueOnce(authError)
+        .mockResolvedValueOnce({});
+      const resource = createResource({ targetUrl, getAuthHeaders });
+      undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+
+      await expect(resource.fetch(targetUrl)).rejects.toBe(authError);
+      await expect(resource.fetch(targetUrl)).resolves.toEqual(expect.any(Response));
+      expect(undiciFetchMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('redirect behaviour', () => {
     it.each([
       [301, 'GET', undefined],
@@ -303,8 +362,10 @@ describe('createFetchResource', () => {
         networkSettings,
         logger,
         targetUrl,
-        headers: { 'X-API-Key': 'secret-key', Authorization: 'Bearer secret' },
-        credentialHeaderNames: ['x-api-key'],
+        getAuthHeaders: async () => ({
+          'X-API-Key': 'secret-key',
+          Authorization: 'Bearer secret',
+        }),
       });
 
       undiciFetchMock
@@ -327,8 +388,10 @@ describe('createFetchResource', () => {
         networkSettings,
         logger,
         targetUrl,
-        headers: { Authorization: 'Bearer secret', 'X-API-Key': 'secret-key' },
-        credentialHeaderNames: ['X-API-Key'],
+        getAuthHeaders: async () => ({
+          Authorization: 'Bearer secret',
+          'X-API-Key': 'secret-key',
+        }),
       });
 
       undiciFetchMock
@@ -352,7 +415,10 @@ describe('createFetchResource', () => {
         networkSettings,
         logger,
         targetUrl,
-        credentialHeaderNames: ['X-API-Key'],
+        getAuthHeaders: async () => ({
+          Authorization: 'Bearer secret',
+          'X-API-Key': 'secret-key',
+        }),
       });
 
       undiciFetchMock
@@ -377,6 +443,29 @@ describe('createFetchResource', () => {
       expect(headers).toHaveProperty('authorization', 'Bearer secret');
       expect(headers).toHaveProperty('x-api-key', 'secret-key');
       expect(headers).toHaveProperty('mcp-session-id', 'session-1');
+    });
+
+    it('strips the current authentication header names on cross-origin redirects', async () => {
+      const getAuthHeaders = jest
+        .fn<Promise<Record<string, string>>, []>()
+        .mockResolvedValueOnce({ 'X-API-Key': 'secret-key' })
+        .mockResolvedValueOnce({ Authorization: 'Bearer secret' });
+      const resource = createResource({ targetUrl, getAuthHeaders });
+
+      undiciFetchMock
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
+        .mockResolvedValueOnce(new Response('first', { status: 200 }))
+        .mockResolvedValueOnce(mockRedirectResponse(307, 'https://allowed.example.com/v1'))
+        .mockResolvedValueOnce(new Response('second', { status: 200 }));
+
+      await resource.fetch(targetUrl, { method: 'POST' });
+      await resource.fetch(targetUrl, { method: 'POST' });
+
+      const firstRedirectHeaders = undiciFetchMock.mock.calls[1][1].headers as Headers;
+      expect(firstRedirectHeaders.has('x-api-key')).toBe(false);
+
+      const secondRedirectHeaders = undiciFetchMock.mock.calls[3][1].headers as Headers;
+      expect(secondRedirectHeaders.has('authorization')).toBe(false);
     });
 
     it('keeps a POST→GET redirect classified as finite', async () => {

@@ -43,8 +43,7 @@ export interface CreateFetchResourceOpts {
   logger: Logger;
   targetUrl: string;
   headers?: Readonly<Record<string, string>>;
-  /** Header names from credential.getAuthHeaders(); stripped on cross-origin redirects. */
-  credentialHeaderNames?: readonly string[];
+  getAuthHeaders: () => Promise<Record<string, string>>;
   userAgent?: string;
 }
 
@@ -155,14 +154,11 @@ function buildDispatcherForUrl(
   return new Agent({ connect: tlsOptions, ...timeoutOptions, ...sizeOptions });
 }
 
-function stripCrossOriginHeaders(
-  headers: Headers,
-  credentialHeaderNames: readonly string[]
-): Headers {
+function stripCrossOriginHeaders(headers: Headers, authHeaderNames: readonly string[]): Headers {
   const sanitized = new Headers(headers);
   sanitized.delete('authorization');
   sanitized.delete(MCP_SESSION_HEADER);
-  for (const name of credentialHeaderNames) {
+  for (const name of authHeaderNames) {
     sanitized.delete(name);
   }
   return sanitized;
@@ -197,7 +193,7 @@ export function createFetchResource({
   logger,
   targetUrl,
   headers: defaultHeaders,
-  credentialHeaderNames = [],
+  getAuthHeaders,
   userAgent = DEFAULT_USER_AGENT,
 }: CreateFetchResourceOpts): McpFetchResource {
   networkSettings.ensureUriAllowed(targetUrl);
@@ -221,6 +217,7 @@ export function createFetchResource({
     url: string | URL,
     init: RequestInit | undefined,
     requestClass: RequestClass,
+    authHeaderNames: readonly string[],
     redirectCount = 0
   ): Promise<Response> => {
     if (closed) {
@@ -293,20 +290,28 @@ export function createFetchResource({
     if (requestOrigin !== redirectOrigin) {
       redirectInit.headers = stripCrossOriginHeaders(
         new Headers(redirectInit.headers),
-        credentialHeaderNames
+        authHeaderNames
       );
     }
 
-    return followRedirects(resolvedUrl, redirectInit, requestClass, redirectCount + 1);
+    return followRedirects(
+      resolvedUrl,
+      redirectInit,
+      requestClass,
+      authHeaderNames,
+      redirectCount + 1
+    );
   };
 
   const fetchFn: FetchLike = async (url, init) => {
     const urlString = typeof url === 'string' ? url : url.toString();
     networkSettings.ensureUriAllowed(urlString);
+    const authHeaders = await getAuthHeaders();
     const method = (init?.method ?? 'GET').toUpperCase();
     const requestClass = classifyRequest(method);
     const headers = new Headers(defaultHeaders);
     new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
+    new Headers(authHeaders).forEach((value, key) => headers.set(key, value));
 
     const callerSignal = init?.signal as AbortSignal | undefined;
     let finiteController: AbortController | undefined;
@@ -328,7 +333,8 @@ export function createFetchResource({
       return await followRedirects(
         urlString,
         { ...init, headers, ...(signal ? { signal } : {}) },
-        requestClass
+        requestClass,
+        Object.keys(authHeaders)
       );
     } finally {
       if (timeoutHandle !== undefined) {

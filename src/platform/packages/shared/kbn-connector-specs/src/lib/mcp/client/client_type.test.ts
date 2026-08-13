@@ -111,7 +111,7 @@ describe('createMcpClientType', () => {
       expect(createSseGatedFetch).toHaveBeenCalledWith(mockResource);
     });
 
-    it('passes defaultHeaders to the fetch resource and McpClient constructor', async () => {
+    it('passes defaultHeaders to the fetch resource only', async () => {
       const { createFetchResource } = jest.requireMock('./fetch_resource') as {
         createFetchResource: jest.Mock;
       };
@@ -123,59 +123,52 @@ describe('createMcpClientType', () => {
       expect(createFetchResource).toHaveBeenCalledWith(
         expect.objectContaining({ headers: defaultHeaders })
       );
-      expect(McpClient).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.objectContaining({ headers: defaultHeaders })
-      );
+      expect(McpClient).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        fetch: expect.any(Function),
+      });
     });
 
-    it('merges credential auth headers into the fetch resource and McpClient headers', async () => {
+    it('passes an auth header factory to the fetch resource without reading it during build', async () => {
       const { createFetchResource } = jest.requireMock('./fetch_resource') as {
         createFetchResource: jest.Mock;
       };
       const authHeaders = { Authorization: 'Bearer tok', 'X-API-Key': 'secret' };
+      const getAuthHeaders = jest.fn().mockResolvedValue(authHeaders);
       const ctx = makeBuildContext({
-        credential: { getAuthHeaders: jest.fn().mockResolvedValue(authHeaders) },
+        credential: { getAuthHeaders },
       });
 
       await createMcpClientType().build(ctx);
 
+      const resourceOptions = createFetchResource.mock.calls[0][0];
       expect(createFetchResource).toHaveBeenCalledWith(
         expect.objectContaining({
-          headers: expect.objectContaining(authHeaders),
-          credentialHeaderNames: ['Authorization', 'X-API-Key'],
+          getAuthHeaders: expect.any(Function),
         })
       );
-      expect(McpClient).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.objectContaining({ headers: expect.objectContaining(authHeaders) })
-      );
+      expect(resourceOptions).not.toHaveProperty('credentialHeaderNames');
+      expect(resourceOptions).not.toHaveProperty('headers');
+      expect(getAuthHeaders).not.toHaveBeenCalled();
+      await expect(resourceOptions.getAuthHeaders()).resolves.toEqual(authHeaders);
+      expect(McpClient).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        fetch: expect.any(Function),
+      });
     });
 
-    it('builds without auth headers when getAuthHeaders returns an empty object', async () => {
+    it('passes no auth headers to the McpClient constructor', async () => {
       const { createFetchResource } = jest.requireMock('./fetch_resource') as {
         createFetchResource: jest.Mock;
       };
-      const ctx = makeBuildContext({
-        credential: { getAuthHeaders: jest.fn().mockResolvedValue({}) },
-      });
+      const ctx = makeBuildContext();
 
       await createMcpClientType().build(ctx);
 
       expect(createFetchResource).toHaveBeenCalledWith(
-        expect.not.objectContaining({ headers: expect.anything() })
+        expect.not.objectContaining({ credentialHeaderNames: expect.anything() })
       );
-    });
-
-    it('propagates getAuthHeaders failures', async () => {
-      const authError = new Error('token client failed');
-      const ctx = makeBuildContext({
-        credential: { getAuthHeaders: jest.fn().mockRejectedValue(authError) },
+      expect(McpClient).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        fetch: expect.any(Function),
       });
-
-      await expect(createMcpClientType().build(ctx)).rejects.toBe(authError);
     });
 
     it('closes the fetch resource and preserves the original error when connect fails', async () => {

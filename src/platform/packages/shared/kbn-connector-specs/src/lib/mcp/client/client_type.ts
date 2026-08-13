@@ -78,20 +78,12 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       throw new Error('config.serverUrl is required');
     }
 
-    // Auth headers come from the connector's configured auth type via the framework credential.
-    // `none` implements getAuthHeaders as `{}`; other failures must propagate.
-    const authHeaders = await ctx.credential.getAuthHeaders();
-
-    const credentialHeaderNames = Object.keys(authHeaders);
-    const headers: Record<string, string> = { ...(deps.defaultHeaders ?? {}), ...authHeaders };
-    const hasHeaders = Object.keys(headers).length > 0;
-
     const resource = createFetchResource({
       networkSettings: ctx.networkSettings,
       logger: ctx.logger,
       targetUrl: serverUrl,
-      ...(hasHeaders ? { headers } : {}),
-      ...(credentialHeaderNames.length > 0 ? { credentialHeaderNames } : {}),
+      ...(deps.defaultHeaders ? { headers: deps.defaultHeaders } : {}),
+      getAuthHeaders: () => ctx.credential.getAuthHeaders(),
       ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
     });
     const customFetch = createSseGatedFetch(resource);
@@ -106,7 +98,6 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
           url: serverUrl,
         },
         {
-          ...(hasHeaders ? { headers: { ...headers } } : {}),
           fetch: customFetch,
         }
       );
