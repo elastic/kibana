@@ -517,7 +517,7 @@ export class UiamService implements UiamServicePublic {
             Authorization: `Bearer ${accessToken}`,
           },
           // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#getDispatcherWithoutClientCertificate(),
+          dispatcher: this.#dispatcher,
         })
       );
 
