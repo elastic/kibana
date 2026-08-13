@@ -13,7 +13,11 @@ import type {
   SearchKnowledgeIndicatorsInput,
 } from '@kbn/streams-ai';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
-import { COMPUTED_FEATURE_TYPES, INFERRED_FEATURE_TYPES } from '@kbn/significant-events-schema';
+import {
+  COMPUTED_FEATURE_TYPES,
+  INFERRED_FEATURE_TYPES,
+  MAX_FEATURE_ARRAY_ITEMS,
+} from '@kbn/significant-events-schema';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 import type {
@@ -34,7 +38,12 @@ export type StrippedFeatureKeys = keyof Pick<
   'uuid' | 'run_id' | 'updated_at' | 'expires_at' | 'confidence' | 'evidence_doc_ids'
 >;
 
-export type CompactFeature = Omit<Feature, StrippedFeatureKeys>;
+export type CompactFeature = Omit<Feature, StrippedFeatureKeys> & {
+  evidence_count?: number;
+  tags_count?: number;
+  meta_keys_omitted?: number;
+  meta_array_items_omitted?: Record<string, number>;
+};
 
 export type CompactQuery = StreamQuery;
 
@@ -75,6 +84,61 @@ function isComputedFeatureType(type: string): type is ComputedFeatureType {
 const MAX_DATASET_ANALYSIS_FIELDS = 10;
 const MAX_LOG_SAMPLES = 1;
 const MAX_LOG_PATTERNS = 1;
+export const MAX_COMPACT_META_ARRAY_SAMPLE = 3;
+export const MAX_COMPACT_META_KEYS = 10;
+export const MAX_COMPACT_META_DEPTH = 2;
+
+// Feature meta is free-form model output merged across runs; large features accumulate
+// dozens of near-synonym keys. Keep the first MAX_COMPACT_META_KEYS keys with array
+// values sampled to MAX_COMPACT_META_ARRAY_SAMPLE — dropped keys are surfaced via
+// meta_keys_omitted.
+function truncateMeta(meta: Record<string, unknown>): {
+  meta: Record<string, unknown>;
+  omittedKeys: number;
+  arrayItemsOmitted: Record<string, number>;
+} {
+  const entries = Object.entries(meta);
+  const arrayItemsOmitted: Record<string, number> = {};
+  const kept = entries.slice(0, MAX_COMPACT_META_KEYS).map(([key, value]) => {
+    if (!Array.isArray(value)) {
+      return [key, value];
+    }
+
+    if (value.length > MAX_COMPACT_META_ARRAY_SAMPLE) {
+      arrayItemsOmitted[key] = value.length - MAX_COMPACT_META_ARRAY_SAMPLE;
+    }
+
+    return [key, truncateMetaValue(value, 1)];
+  });
+
+  return {
+    meta: Object.fromEntries(kept),
+    omittedKeys: Math.max(0, entries.length - MAX_COMPACT_META_KEYS),
+    arrayItemsOmitted,
+  };
+}
+
+function truncateMetaValue(value: unknown, depth: number): unknown {
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, MAX_COMPACT_META_ARRAY_SAMPLE)
+      .map((item) => truncateMetaValue(item, depth + 1));
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    if (depth >= MAX_COMPACT_META_DEPTH) {
+      return '[nested metadata truncated]';
+    }
+
+    return Object.fromEntries(
+      Object.entries(value)
+        .slice(0, MAX_COMPACT_META_KEYS)
+        .map(([key, nestedValue]) => [key, truncateMetaValue(nestedValue, depth + 1)])
+    );
+  }
+
+  return value;
+}
 
 function truncateComputedProperties(
   type: ComputedFeatureType,
@@ -126,11 +190,37 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
     ? truncateComputedProperties(rest.type, rest.properties)
     : rest.properties;
 
+  const evidenceOriginalLength = rest.evidence?.length;
+  const evidenceTruncated =
+    evidenceOriginalLength !== undefined && evidenceOriginalLength > MAX_FEATURE_ARRAY_ITEMS;
+  const evidence =
+    evidenceTruncated && rest.evidence
+      ? rest.evidence.slice(0, MAX_FEATURE_ARRAY_ITEMS)
+      : rest.evidence;
+
+  const tagsOriginalLength = rest.tags?.length;
+  const tagsTruncated =
+    tagsOriginalLength !== undefined && tagsOriginalLength > MAX_FEATURE_ARRAY_ITEMS;
+  const tags = tagsTruncated && rest.tags ? rest.tags.slice(0, MAX_FEATURE_ARRAY_ITEMS) : rest.tags;
+
+  const metaResult = rest.meta ? truncateMeta(rest.meta) : undefined;
+
   return {
     kind: 'feature',
     feature: {
       ...rest,
       properties,
+      evidence,
+      tags,
+      meta: metaResult?.meta,
+      ...(evidenceTruncated ? { evidence_count: evidenceOriginalLength } : {}),
+      ...(tagsTruncated ? { tags_count: tagsOriginalLength } : {}),
+      ...(metaResult && metaResult.omittedKeys > 0
+        ? { meta_keys_omitted: metaResult.omittedKeys }
+        : {}),
+      ...(metaResult && Object.keys(metaResult.arrayItemsOmitted).length > 0
+        ? { meta_array_items_omitted: metaResult.arrayItemsOmitted }
+        : {}),
       // filter is omitted for entity features; restored for all other inferred types
       ...(rest.type !== 'entity' && filter !== undefined ? { filter } : {}),
     },
