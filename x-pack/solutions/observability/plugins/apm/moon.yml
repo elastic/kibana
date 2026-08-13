@@ -177,6 +177,8 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/apm-shared'
   - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-browser-hooks'
 tags:
   - plugin
   - prod
