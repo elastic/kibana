@@ -79,6 +79,13 @@ export const createSmlSearchTool = ({
     'To bring a result into the conversation as an attachment, pass its entry_id to sml_attach.',
   schema: smlSearchSchema,
   tags: ['sml', 'search'],
+  annotations: {
+    title: 'Search SML',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'global',
     // SML lives inside Agent Builder, so it requires only the Agent Builder

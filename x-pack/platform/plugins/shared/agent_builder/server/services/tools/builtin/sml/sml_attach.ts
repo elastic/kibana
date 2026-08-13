@@ -42,6 +42,13 @@ export const createSmlAttachTool = ({
     'Entries that cannot be resolved return individual errors without failing the entire call.',
   schema: smlAttachSchema,
   tags: ['sml', 'attachment'],
+  annotations: {
+    title: 'Attach SML Item',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   availability: {
     cacheMode: 'global',
     // SML lives inside Agent Builder, so it requires only the Agent Builder

@@ -66,6 +66,13 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
 The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
 You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
 Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.`,
+    annotations: {
+      title: 'Execute ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: executeEsqlToolSchema,
     handler: async (
       { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },

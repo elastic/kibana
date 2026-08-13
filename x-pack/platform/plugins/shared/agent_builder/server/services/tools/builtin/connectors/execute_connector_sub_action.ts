@@ -68,6 +68,13 @@ export const createExecuteConnectorSubActionTool = ({
     'Do not invent names or parameters.',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
+  },
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {

@@ -79,6 +79,13 @@ If set to false, or if the workflow does not complete within the timeout, the to
 - If the status is not terminal (still running), call \`${platformCoreTools.getWorkflowExecutionStatus}\` later to get the final outcome.
 `),
     schema: executeWorkflowSchema,
+    annotations: {
+      title: 'Execute Workflow',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async ({ workflowId, yaml, attachmentId, inputs, waitForCompletion }, toolContext) => {
       const providedModes = [workflowId, yaml, attachmentId].filter((v) => v !== undefined).length;
       if (providedModes !== 1) {
