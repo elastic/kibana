@@ -32,6 +32,7 @@ import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import { sanitizeDataIdInput } from '../../../../common/security_integrations/cribl/sanitize';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
@@ -207,7 +208,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       const newValues = [...routeEntries];
       newValues[index] = {
         ...routeEntries[index],
-        dataId: value,
+        dataId: sanitizeDataIdInput(value),
       };
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
