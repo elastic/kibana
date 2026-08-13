@@ -1,5 +1,5 @@
 {
-  "sha1": "a8aab9554d1a2eabe0c1b1871b1eb3fb18a63699",
+  "sha1": "2f520f8c61965e6157406c076755109ec4d5fb7d",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -353,6 +353,34 @@
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
         "line": 85,
         "column": 5
+      }
+    },
+    {
+      "id": "987d8f3ed53a350-aabe85f3646586c",
+      "title": "Onboarding — downstream step invalidation path 1 — service-settings indicator loses checkmark when selection changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
+        "line": 64,
+        "column": 8
+      }
+    },
+    {
+      "id": "987d8f3ed53a350-fdcceb3f9769da6",
+      "title": "Onboarding — downstream step invalidation path 2 — deploy-settings indicator loses checkmark when agentless service is added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
+        "line": 88,
+        "column": 9
       }
     },
     {

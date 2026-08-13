@@ -80,6 +80,20 @@ jest.mock('../hooks/use_ai_index_ki_summary', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_signal_groups', () => ({
+  useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
+}));
+
+jest.mock('../hooks/use_signals', () => ({
+  useSignals: () => ({
+    signals: [],
+    total: 0,
+    isLoading: false,
+    error: undefined,
+    refetch: jest.fn(),
+  }),
+}));
+
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,

@@ -17,10 +17,12 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
- * Throughline UI-facing autonomy level (1 Suggest only through 5 Acts · trusted)
+ * Release maturity shown as a badge next to a watch, worker, or skill
  */
-export const AutonomyLevel = lazySchema(() => z.number().int().min(1).max(5));
-export type AutonomyLevel = z.infer<typeof AutonomyLevel>;
+export const Lifecycle = lazySchema(() => z.enum(['ga', 'beta', 'pilot']));
+export type Lifecycle = z.infer<typeof Lifecycle>;
+export type LifecycleEnum = typeof Lifecycle.enum;
+export const LifecycleEnum = Lifecycle.enum;
 
 export const ScheduleMode = lazySchema(() => z.enum(['always', 'window', 'demand']));
 export type ScheduleMode = z.infer<typeof ScheduleMode>;
@@ -194,6 +196,10 @@ export const Watch = lazySchema(() =>
      */
     mandate: z.string(),
     description: z.string(),
+    /**
+     * Omitted for generally available watches; badge shown otherwise
+     */
+    lifecycle: Lifecycle.optional(),
     schedule: WatchSchedule,
     triggers: z.array(WatchTriggerProjection),
     /**
@@ -203,7 +209,6 @@ export const Watch = lazySchema(() =>
     scopeSummary: z.string(),
     scopes: z.array(WatchScope),
     callables: z.array(WatchCallableRef),
-    autonomyLevel: AutonomyLevel,
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
   })
