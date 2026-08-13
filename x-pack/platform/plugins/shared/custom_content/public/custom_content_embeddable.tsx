@@ -12,6 +12,7 @@ import type {
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
+  PublishesDataViews,
   PublishesEsqlUsage,
 } from '@kbn/presentation-publishing';
 import {
@@ -26,11 +27,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  from,
+  map,
+  merge,
+  of,
+  skip,
+  switchMap,
+} from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -48,6 +62,7 @@ const EditCustomContentFlyout = lazy(() =>
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
+  PublishesDataViews &
   PublishesEsqlUsage;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -66,6 +81,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -117,6 +133,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...titleManager.api,
       serializeState,
       usesEsql$,
+      dataViews$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
@@ -130,6 +147,20 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlUsageSubscription = esqlQuery$
       .pipe(map(Boolean), distinctUntilChanged())
       .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+
+    // Important for unified search support — KQL bar and filter builder suggestions.
+    const dataViewsSubscription = esqlQuery$
+      .pipe(
+        distinctUntilChanged(),
+        switchMap((esqlQuery) => {
+          if (!esqlQuery) return of(undefined);
+          const { core, dataViews } = getServices();
+          return from(
+            getESQLAdHocDataview({ dataViewsService: dataViews, query: esqlQuery, http: core.http })
+          ).pipe(catchError(() => of(undefined)));
+        })
+      )
+      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
 
     const fetchSubscription = fetch$(api).subscribe(
       ({ isApproximate, projectRouting, query, filters }) => {
@@ -174,6 +205,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         useEffect(() => {
           return () => {
             esqlUsageSubscription.unsubscribe();
+            dataViewsSubscription.unsubscribe();
             fetchSubscription.unsubscribe();
           };
         }, []);

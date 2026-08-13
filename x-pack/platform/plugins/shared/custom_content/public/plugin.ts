@@ -37,7 +37,7 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
   start(core: CoreStart, { data, agentBuilder }: StartDeps) {
     // Temporary kill-switch — remove once the feature is approved to ship.
     if (!core.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false)) return;
-    setServices(core, data.search.search, agentBuilder);
+    setServices(core, data.search.search, data.dataViews, agentBuilder);
 
     if (agentBuilder) {
       agentBuilder.attachments.addAttachmentType(
