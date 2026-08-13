@@ -30,7 +30,7 @@ spaceTest.describe(
       await lens.switchToVisualization('bar');
       await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
 
-      await lens.dragDimensionToExtraDropType(
+      await lens.dragDrop.dragDimensionToExtraDropType(
         'lnsXY_xDimensionPanel > lns-dimensionTrigger',
         'lnsXY_splitDimensionPanel',
         'duplicate',
@@ -39,11 +39,11 @@ spaceTest.describe(
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
       ).toHaveText('@timestamp [1]');
-      await lens.dragFieldToDimensionTrigger(
+      await lens.dragDrop.dragFieldToDimensionTrigger(
         '@message.raw',
         'lnsXY_yDimensionPanel > lns-dimensionTrigger'
       );
-      await lens.dragDimensionToExtraDropType(
+      await lens.dragDrop.dragDimensionToExtraDropType(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         'lnsXY_yDimensionPanel',
         'swap',
@@ -63,7 +63,7 @@ spaceTest.describe(
       await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
       await lens.dragFieldToWorkspace('@message.raw', testData.XY_CHART);
 
-      await lens.dragDimensionToExtraDropType(
+      await lens.dragDrop.dragDimensionToExtraDropType(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         'lnsXY_xDimensionPanel',
         'combine',
@@ -79,7 +79,7 @@ spaceTest.describe(
 
       await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
 
-      await lens.dragFieldToExtraDropType(
+      await lens.dragDrop.dragFieldToExtraDropType(
         '@message.raw',
         'lnsXY_xDimensionPanel',
         'combine',
@@ -95,24 +95,24 @@ spaceTest.describe(
 
       await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
 
-      await lens.dragFieldToExtraDropType(
+      await lens.dragDrop.dragFieldToExtraDropType(
         '@message.raw',
         'lnsXY_xDimensionPanel',
         'combine',
         testData.XY_CHART
       );
 
-      await lens.dragFieldToDimensionTrigger(
+      await lens.dragDrop.dragFieldToDimensionTrigger(
         '@message.raw',
         'lnsXY_splitDimensionPanel > lns-empty-dimension'
       );
-      await lens.dragFieldToExtraDropType(
+      await lens.dragDrop.dragFieldToExtraDropType(
         'geo.src',
         'lnsXY_splitDimensionPanel',
         'combine',
         testData.XY_CHART
       );
-      await lens.dragDimensionToExtraDropType(
+      await lens.dragDrop.dragDimensionToExtraDropType(
         'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         'lnsXY_xDimensionPanel',
         'combine',

@@ -40,7 +40,7 @@ spaceTest.describe('Lens inspector pagination', { tag: '@local-stateful-classic'
       const { lens, inspector } = pageObjects;
 
       await browserAuth.loginAsPrivilegedUser();
-      await lens.openFullEditor();
+      await lens.workspace.openFullEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

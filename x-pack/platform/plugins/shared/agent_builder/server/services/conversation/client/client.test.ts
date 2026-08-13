@@ -148,13 +148,14 @@ describe('ConversationClient', () => {
         expect.objectContaining({
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
+            entries: [],
           },
           origin,
         })
       );
     });
 
-    it('filters listed conversations to public-or-owned conversations for accessible agents', async () => {
+    it('filters listed conversations to public, owned or shared conversations for accessible agents', async () => {
       agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -194,6 +195,20 @@ describe('ConversationClient', () => {
                                   },
                                 ],
                                 minimum_should_match: 1,
+                              },
+                            },
+                            {
+                              nested: {
+                                path: 'access_control.entries',
+                                ignore_unmapped: true,
+                                query: {
+                                  bool: {
+                                    filter: [
+                                      { term: { 'access_control.entries.type': 'user' } },
+                                      { term: { 'access_control.entries.id': 'user-1' } },
+                                    ],
+                                  },
+                                },
                               },
                             },
                           ],
@@ -1073,6 +1088,7 @@ describe('ConversationClient', () => {
       expect(result.permissions).toEqual({
         rename: true,
         delete: true,
+        update_access_control: true,
       });
     });
 
@@ -1086,6 +1102,7 @@ describe('ConversationClient', () => {
       expect(result.permissions).toEqual({
         rename: false,
         delete: false,
+        update_access_control: false,
       });
     });
 
@@ -1104,11 +1121,11 @@ describe('ConversationClient', () => {
       expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
         {
           id: 'owned',
-          permissions: { rename: true, delete: true },
+          permissions: { rename: true, delete: true, update_access_control: true },
         },
         {
           id: 'participating',
-          permissions: { rename: false, delete: false },
+          permissions: { rename: false, delete: false, update_access_control: false },
         },
       ]);
     });

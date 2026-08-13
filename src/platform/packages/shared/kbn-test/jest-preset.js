@@ -69,7 +69,7 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/src/setup_node_env/polyfill.ts',
+    'core-js/stable',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/polyfills.jsdom.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme.js',
   ],
