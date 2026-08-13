@@ -7,7 +7,16 @@
 
 import { type ApiServicesFixture, type EsClient, type Locator, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { omit } from 'lodash';
+
+export const stripProcessingUpdatedAt = (
+  processing:
+    | { steps: unknown[]; updated_at?: string }
+    | { processors: Array<Record<string, unknown>>; updated_at?: string }
+) => {
+  return 'processors' in processing
+    ? { processors: processing.processors }
+    : { steps: processing.steps };
+};
 
 export const RETENTION_TEST_IDS = {
   // Entry points (lifecycle summary header actions)
@@ -118,7 +127,7 @@ export async function setStreamDslLifecycle(
   await streamsApi.updateStream(streamName, {
     ingest: {
       ...stream.ingest,
-      processing: omit(stream.ingest.processing, 'updated_at'),
+      processing: stripProcessingUpdatedAt(stream.ingest.processing),
       lifecycle: { dsl },
     },
   });

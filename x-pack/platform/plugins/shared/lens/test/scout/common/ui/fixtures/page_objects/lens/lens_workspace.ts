@@ -6,7 +6,9 @@
  */
 
 import type { DebugState } from '@elastic/charts';
+import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { LOGSTASH_IN_RANGE_DATES } from '../../constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -16,6 +18,11 @@ interface LensWorkspaceDeps {
   waitForVisualization: (chartTestSubj: string) => Promise<void>;
   getFormulaModelIndex: () => Promise<number>;
   getCodeEditorValue: (modelIndex: number) => Promise<string>;
+}
+
+export interface LensEditorTimeRange {
+  from: string;
+  to: string;
 }
 
 /**
@@ -45,6 +52,10 @@ export class LensWorkspace {
   private readonly emptyWorkspacePrompt;
   private readonly applyChangesPrompt;
   private readonly suggestionPanelToggle;
+  readonly shareButton;
+  readonly exportButton;
+  private readonly shareModal;
+  private readonly copyShareUrlButton;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
@@ -65,10 +76,34 @@ export class LensWorkspace {
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
     this.applyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
+    this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
+    this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
+    this.shareModal = this.page.testSubj.locator('shareContextModal');
+    this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
   }
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
+    await this.deps.waitForLensApp();
+  }
+
+  /**
+   * Opens a fresh empty Lens editor with global `_g` already in the hash.
+   * Landing on `#/` without `_g` lets `syncGlobalQueryStateWithUrl` `history.replace`
+   * the timefilter defaults into the URL after mount, which remounts the editor and
+   * detaches open UI (e.g. the chart switcher) under Playwright.
+   *
+   * Defaults to {@link LOGSTASH_IN_RANGE_DATES}. Suites with a different window must
+   * pass `timeRange` — an existing `_g` is not overwritten from uiSettings.
+   */
+  async openEmptyEditor(timeRange: LensEditorTimeRange = LOGSTASH_IN_RANGE_DATES) {
+    const globalState = encodeRison({
+      filters: [],
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: timeRange.from, to: timeRange.to },
+    });
+    await this.page.gotoApp('lens', { hash: `/?_g=${globalState}` });
     await this.deps.waitForLensApp();
   }
 
@@ -84,6 +119,7 @@ export class LensWorkspace {
    */
   async openEditor(id: string, chartTestSubj: string) {
     await this.page.gotoApp('lens', { hash: `/edit/${id}` });
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
     await this.deps.waitForVisualization(chartTestSubj);
   }
 
@@ -285,6 +321,55 @@ export class LensWorkspace {
   async openSettingsMenu() {
     await this.settingsButton.click();
     await this.settingsMenu.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Opens the Share modal. Waits until the share button is enabled (can lag after save).
+   * Dismisses save toasts first — they sit over the top nav and intercept the click.
+   */
+  async openShareModal() {
+    await this.page.waitForFunction(
+      () => {
+        const btn = document.querySelector(
+          '[data-test-subj="lnsApp_shareButton"]'
+        ) as HTMLButtonElement | null;
+        return Boolean(btn && !btn.disabled);
+      },
+      undefined,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+
+    await this.page.components.toast().closeAll();
+    await this.shareButton.click();
+    await this.shareModal.waitFor({ state: 'visible' });
+    await this.copyShareUrlButton.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Opens Share and returns the share URL from the copy button.
+   * Modern share modal exposes Copy link directly (no `link` tab). Closes the modal after.
+   */
+  async getSharedUrl(): Promise<string> {
+    await this.openShareModal();
+    await this.copyShareUrlButton.click();
+    await this.page.waitForFunction(() => {
+      const url = document
+        .querySelector('[data-test-subj="copyShareUrlButton"]')
+        ?.getAttribute('data-share-url');
+      return Boolean(url);
+    });
+    const url = await this.copyShareUrlButton.getAttribute('data-share-url');
+    await this.closeShareModal();
+    if (!url) {
+      throw new Error('Share URL was not available on the copy button');
+    }
+    return url;
+  }
+
+  /** Closes the share modal. Caller must have the modal open. */
+  async closeShareModal() {
+    await this.shareModal.getByLabel(/Close/).click();
+    await this.shareModal.waitFor({ state: 'hidden' });
   }
 
   /** Closes the Lens settings menu. */
