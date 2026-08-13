@@ -139,7 +139,17 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             })
           );
 
-          [shutdownEs] = await Promise.all([esPromise, kibanaPromise]);
+          const [esResult, kibanaResult] = await Promise.allSettled([esPromise, kibanaPromise]);
+
+          if (esResult.status === 'fulfilled') {
+            shutdownEs = esResult.value;
+          }
+          if (esResult.status === 'rejected') {
+            throw esResult.reason;
+          }
+          if (kibanaResult.status === 'rejected') {
+            throw kibanaResult.reason;
+          }
 
           if (abortCtrl.signal.aborted) {
             return;

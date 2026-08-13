@@ -59,7 +59,19 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           ],
     });
 
-    const [shutdownEs] = await Promise.all([esPromise, kibanaPromise]);
+    const [esResult, kibanaResult] = await Promise.allSettled([esPromise, kibanaPromise]);
+
+    if (esResult.status === 'rejected') {
+      throw esResult.reason;
+    }
+    if (kibanaResult.status === 'rejected') {
+      await esResult.value().catch((error) => {
+        log.error(`failed to shut down Elasticsearch after Kibana failed to start: ${error}`);
+      });
+      throw kibanaResult.reason;
+    }
+
+    const shutdownEs = esResult.value;
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
