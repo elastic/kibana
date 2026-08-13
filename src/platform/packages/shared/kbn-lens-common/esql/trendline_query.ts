@@ -11,6 +11,7 @@ import {
   esql,
   Parser,
   BasicPrettyPrinter,
+  Builder,
   isOptionNode,
   isFunctionExpression,
   isAssignment,
@@ -119,6 +120,17 @@ const getTbucketResultColumn = (statsCommand: ESQLCommand): string | undefined =
 
 const buildTrendlineTbucketExpression = (): string => `TBUCKET(${AUTO_TARGET_NUMBER_OF_BUCKETS})`;
 
+const preserveTimeFieldInKeepCommands = (commands: ESQLCommand[], timeField: string): void => {
+  for (const command of commands) {
+    if (
+      command.name === 'keep' &&
+      !command.args.some((arg) => isColumn(arg) && arg.name === timeField)
+    ) {
+      command.args.push(Builder.expression.column(timeField));
+    }
+  }
+};
+
 /**
  * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
  *
@@ -172,6 +184,8 @@ export const appendTimeBucketToEsqlQuery = (
     }
     return BasicPrettyPrinter.print(root);
   }
+
+  preserveTimeFieldInKeepCommands(root.commands, timeField);
 
   const statsCmd = root.commands.findLast((c): c is ESQLCommand<'stats'> => c.name === 'stats');
 

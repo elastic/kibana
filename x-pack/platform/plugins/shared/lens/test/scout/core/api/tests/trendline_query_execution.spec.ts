@@ -65,7 +65,7 @@ const QUERY_CASES: QueryCase[] = [
   {
     description: 'raw query without STATS',
     sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | KEEP bytes`,
-    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
     expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
     expectedMetricFields: ['AVG(bytes)'],
     metricFields: ['bytes'],

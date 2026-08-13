@@ -121,6 +121,22 @@ describe('appendTimeBucketToEsqlQuery', () => {
     );
   });
 
+  it('preserves the time field through KEEP commands', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index | KEEP bytes', 'order.date', ['bytes']);
+    expect(result).toBe(
+      'FROM index | KEEP bytes, `order.date` | STATS AVG(bytes) BY BUCKET(`order.date`, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('does not add a duplicate time field to KEEP commands', () => {
+    const result = appendTimeBucketToEsqlQuery('FROM index | KEEP bytes, timestamp', 'timestamp', [
+      'bytes',
+    ]);
+    expect(result).toBe(
+      'FROM index | KEEP bytes, timestamp | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
   it('ignores metricFields when query already has STATS', () => {
     const result = appendTimeBucketToEsqlQuery('FROM index | STATS SUM(bytes)', 'timestamp', [
       'bytes',
@@ -187,7 +203,7 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
     ]);
 
     expect(result.query).toBe(
-      'FROM index | KEEP bytes | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      'FROM index | KEEP bytes, timestamp | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
     expect(result.metricFieldMap.get('bytes')).toBe('AVG(bytes)');
     expect(result.timeField).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
