@@ -68,13 +68,20 @@ export class TimePickerPageObject extends FtrService {
     // of the new picker (e.g. delayed ES|QL time-field resolution after a cold
     // navigation) must not be read as "legacy", which would take a code path that
     // clicks legacy-only subjects and burns the outer retry until it times out.
-    await this.retry.waitForWithTimeout('a date picker to render', 30_000, async () => {
-      const [newRendered, legacyRendered] = await Promise.all([
-        this.testSubjects.exists('dateRangePickerControlButton', { timeout: 1000 }),
-        this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 1000 }),
-      ]);
-      return newRendered || legacyRendered;
-    });
+    // If neither picker appears within 30s (e.g. a data view without a time field
+    // renders no picker at all), let the wait expire without throwing so callers
+    // that legitimately expect no picker (like timePickerExists()) still work.
+    try {
+      await this.retry.waitForWithTimeout('a date picker to render', 30_000, async () => {
+        const [newRendered, legacyRendered] = await Promise.all([
+          this.testSubjects.exists('dateRangePickerControlButton', { timeout: 1000 }),
+          this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 1000 }),
+        ]);
+        return newRendered || legacyRendered;
+      });
+    } catch {
+      // Neither picker appeared — return false below
+    }
     const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
       timeout: 1000,
     });
@@ -131,10 +138,11 @@ export class TimePickerPageObject extends FtrService {
   }
 
   public async timePickerExists() {
-    if (await this.isNewDateRangePicker()) {
-      return await this.testSubjects.exists('dateRangePickerControlButton');
-    }
-    return await this.testSubjects.exists('superDatePickerToggleQuickMenuButton');
+    const [newExists, legacyExists] = await Promise.all([
+      this.testSubjects.exists('dateRangePickerControlButton', { timeout: 1000 }),
+      this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 1000 }),
+    ]);
+    return newExists || legacyExists;
   }
 
   /**
