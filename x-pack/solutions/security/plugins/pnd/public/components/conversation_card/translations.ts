@@ -43,6 +43,9 @@ export const WATCH_TIER_LABELS = Object.freeze({
   deep: i18n.translate('xpack.pnd.brief.watchTier.deep', {
     defaultMessage: 'Deep Watch',
   }),
+  detection: i18n.translate('xpack.pnd.brief.watchTier.detection', {
+    defaultMessage: 'Detection Watch',
+  }),
   floor: i18n.translate('xpack.pnd.brief.watchTier.floor', {
     defaultMessage: 'Watch Floor',
   }),
