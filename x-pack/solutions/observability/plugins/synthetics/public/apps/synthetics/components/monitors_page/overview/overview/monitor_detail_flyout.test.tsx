@@ -39,6 +39,19 @@ useFetcherMock.mockReturnValue({
 // `useEsSearch(...)`, so the mock must return a non-undefined result.
 const useEsSearchMock = useEsSearch as jest.Mock;
 
+interface DurationChartAttribute {
+  time: {
+    from: string;
+    to: string;
+  };
+}
+
+interface ExploratoryViewEmbeddableProps {
+  attributes: readonly [DurationChartAttribute, ...DurationChartAttribute[]];
+}
+
+const exploratoryViewEmbeddableMock = jest.fn((_props: ExploratoryViewEmbeddableProps) => null);
+
 useEsSearchMock.mockReturnValue({
   data: undefined,
   loading: false,
@@ -275,7 +288,7 @@ describe('Monitor Detail Flyout', () => {
                 unit: 'm',
               },
               tags: ['prod'],
-              config_id: 'test-id',
+              config_id: '123456',
             } as any,
           },
         },
@@ -720,6 +733,14 @@ describe('getDurationChartTimeRange', () => {
     });
   });
 
+  it('keeps the default window at the exact 12h boundary', () => {
+    const createdAt = now.clone().subtract(12, 'hours').toISOString();
+    expect(getDurationChartTimeRange(createdAt, now)).toEqual({
+      from: 'now-12h',
+      showPreviousPeriod: true,
+    });
+  });
+
   it('anchors the lower bound at creation time and hides the previous period for young monitors', () => {
     const createdAt = now.clone().subtract(2, 'hours').toISOString();
     expect(getDurationChartTimeRange(createdAt, now)).toEqual({
@@ -733,5 +754,95 @@ describe('getDurationChartTimeRange', () => {
       from: 'now-12h',
       showPreviousPeriod: true,
     });
+  });
+});
+
+describe('duration chart attributes', () => {
+  const renderDurationChart = (createdAt?: string) => {
+    exploratoryViewEmbeddableMock.mockClear();
+
+    const { getByText } = render<{
+      exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+    }>(
+      <MonitorDetailFlyout
+        configId="test-id"
+        id="test-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        core: {
+          exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+        },
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: {
+              config_id: 'test-id',
+              created_at: createdAt,
+            },
+          },
+        },
+      }
+    );
+
+    fireEvent.click(getByText('Performance'));
+    const embeddableCall = exploratoryViewEmbeddableMock.mock.calls[0];
+    if (!embeddableCall) {
+      throw new Error('Expected the duration chart embeddable to render');
+    }
+    return embeddableCall[0].attributes;
+  };
+
+  it('omits the previous-period series for a young monitor', () => {
+    const createdAt = moment().subtract(2, 'hours').toISOString();
+    const attributes = renderDurationChart(createdAt);
+
+    expect(attributes).toHaveLength(1);
+    expect(attributes[0].time.from).toBe(createdAt);
+  });
+
+  it('includes the previous-period series when the default window is used', () => {
+    const attributes = renderDurationChart();
+
+    expect(attributes).toHaveLength(2);
+    expect(attributes[0].time.from).toBe('now-12h');
+    expect(attributes[1]?.time).toEqual({ from: 'now-24h', to: 'now-12h' });
+  });
+
+  it('waits for the active monitor saved object before rendering', () => {
+    exploratoryViewEmbeddableMock.mockClear();
+
+    const { getByText } = render<{
+      exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+    }>(
+      <MonitorDetailFlyout
+        configId="active-monitor"
+        id="active-monitor"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        core: {
+          exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+        },
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: {
+              config_id: 'previous-monitor',
+              created_at: moment().subtract(2, 'hours').toISOString(),
+            },
+          },
+        },
+      }
+    );
+
+    fireEvent.click(getByText('Performance'));
+    expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
   });
 });

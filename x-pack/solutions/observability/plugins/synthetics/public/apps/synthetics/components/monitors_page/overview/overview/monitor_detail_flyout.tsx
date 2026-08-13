@@ -80,10 +80,11 @@ interface Props {
   onLocationChange: (params: FlyoutParamProps) => void;
 }
 
-const DEFAULT_DURATION_CHART_FROM = 'now-12h';
+const DURATION_CHART_LOOKBACK_HOURS = 12;
+const DEFAULT_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS}h`;
 const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
-const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
-const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
+const DEFAULT_PREVIOUS_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS * 2}h`;
+const DEFAULT_PREVIOUS_DURATION_CHART_TO = DEFAULT_DURATION_CHART_FROM;
 
 /**
  * For monitors younger than the 12h window, anchor the lower bound at creation
@@ -96,7 +97,10 @@ export const getDurationChartTimeRange = (
 ): { from: string; showPreviousPeriod: boolean } => {
   if (createdAt) {
     const created = moment(createdAt);
-    if (created.isValid() && created.isAfter(now.clone().subtract(12, 'hours'))) {
+    if (
+      created.isValid() &&
+      created.isAfter(now.clone().subtract(DURATION_CHART_LOOKBACK_HOURS, 'hours'))
+    ) {
       return { from: created.toISOString(), showPreviousPeriod: false };
     }
   }
@@ -383,6 +387,8 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
   const error = useSelector(selectSyntheticsMonitorError);
+  const currentMonitorObject =
+    monitorObject?.[ConfigKey.CONFIG_ID] === configId ? monitorObject : null;
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -412,12 +418,7 @@ export function MonitorDetailFlyout(props: Props) {
   const getColor = useMonitorHealthColor();
 
   useMonitorAttachmentConfigWithMonitor(
-    !isReadOnly && monitorObject
-      ? {
-          ...monitorObject,
-          [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
-        }
-      : null,
+    !isReadOnly && currentMonitorObject ? currentMonitorObject : null,
     isLoading
   );
 
@@ -431,7 +432,7 @@ export function MonitorDetailFlyout(props: Props) {
     });
   }, []);
 
-  const displayName = monitor?.name ?? monitorObject?.[ConfigKey.NAME] ?? configId;
+  const displayName = monitor?.name ?? currentMonitorObject?.[ConfigKey.NAME] ?? configId;
 
   const [selectedTab, setSelectedTab] = useState<FlyoutTabId>('overview');
 
@@ -578,28 +579,31 @@ export function MonitorDetailFlyout(props: Props) {
             />
           </>
         )}
-        {selectedTab === 'performance' && (
-          <DetailFlyoutDurationChart
-            id={id}
-            location={props.location}
-            allLocations={monitor?.locations ?? []}
-            remoteName={monitor?.remote?.remoteName}
-            createdAt={monitorObject?.created_at}
-          />
-        )}
+        {selectedTab === 'performance' &&
+          (isReadOnly || currentMonitorObject ? (
+            <DetailFlyoutDurationChart
+              id={id}
+              location={props.location}
+              allLocations={monitor?.locations ?? []}
+              remoteName={monitor?.remote?.remoteName}
+              createdAt={currentMonitorObject?.created_at}
+            />
+          ) : (
+            <LoadingState />
+          ))}
         {selectedTab === 'details' &&
           // Read-only monitors (remote CCS and local Heartbeat / Agent) have no
           // local saved object, so render the ping-derived details panel rather
           // than waiting on `monitorObject`, which never resolves for them.
           (isReadOnly && monitor ? (
             <ExternalMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
-          ) : monitorObject ? (
+          ) : currentMonitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
-                ...monitorObject,
+                ...currentMonitorObject,
                 id,
               }}
               loading={Boolean(isLoading)}
