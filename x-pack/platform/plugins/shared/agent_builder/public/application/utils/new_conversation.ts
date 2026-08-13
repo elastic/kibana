@@ -26,7 +26,7 @@ export const createNewConversation = ({
     created_at: now,
     updated_at: now,
     rounds: [],
-    permissions: { rename: true, delete: true },
+    permissions: { rename: true, delete: true, update_access_control: true },
   };
 };
 

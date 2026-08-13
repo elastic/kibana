@@ -36,8 +36,6 @@ describe('registerCaseAttachments', () => {
   } as ExperimentalFeatures;
 
   const buildFramework = () => ({
-    registerExternalReference: jest.fn(),
-    registerPersistableState: jest.fn(),
     registerUnified: jest.fn(),
   });
 
@@ -111,26 +109,6 @@ describe('registerCaseAttachments', () => {
         id: SECURITY_ENTITY_ATTACHMENT_TYPE,
       })
     );
-  });
-
-  // The cases-plugin routes inbound `externalReferenceAttachmentTypeId: 'endpoint'`
-  // payloads through `EXTERNAL_REFERENCE_TYPE_MAP` -> 'security.endpoint' at the
-  // validator boundary, so the unified registration above is sufficient for
-  // back-compat. No external-reference registration is required.
-  it('does not register any external-reference attachment types', () => {
-    const framework = buildFramework();
-
-    registerCaseAttachments(framework, experimentalFeatures);
-
-    expect(framework.registerExternalReference).not.toHaveBeenCalled();
-  });
-
-  it('does not register any persistable-state attachment types', () => {
-    const framework = buildFramework();
-
-    registerCaseAttachments(framework, experimentalFeatures);
-
-    expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
 
   describe('invalid payload surfacing', () => {

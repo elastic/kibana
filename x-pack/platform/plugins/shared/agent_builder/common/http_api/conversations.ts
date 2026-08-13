@@ -10,6 +10,7 @@ import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder
 export interface ConversationPermissions {
   rename: boolean;
   delete: boolean;
+  update_access_control: boolean;
 }
 
 export type ConversationWithPermissions = Conversation & {

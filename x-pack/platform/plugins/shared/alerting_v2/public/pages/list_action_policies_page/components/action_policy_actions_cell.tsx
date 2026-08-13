@@ -18,8 +18,6 @@ interface ActionPolicyActionsCellProps {
   onEdit: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
-  onSnooze: (id: string, snoozedUntil: string) => void;
-  onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isDisabled?: boolean;
 }
@@ -31,8 +29,6 @@ export const ActionPolicyActionsCell = ({
   onEdit,
   onClone,
   onDelete,
-  onSnooze,
-  onCancelSnooze,
   onUpdateApiKey,
   isDisabled = false,
 }: ActionPolicyActionsCellProps) => {
@@ -90,8 +86,6 @@ export const ActionPolicyActionsCell = ({
               onEdit={onEdit}
               onClone={onClone}
               onDelete={onDelete}
-              onSnooze={onSnooze}
-              onCancelSnooze={onCancelSnooze}
               onUpdateApiKey={onUpdateApiKey}
               isDisabled={isDisabled}
             />
