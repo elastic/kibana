@@ -92,13 +92,10 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
   /**
-   * @internal
-   * When creating a fresh conversation for a persistent sub-agent, carries the
-   * parent linkage and seeded metadata. Not exposed on public route schemas;
-   * consumed only by the conversation-creation path when
-   * `autoCreateConversationWithId` is true.
+   * Used to establish the parent linkage and add subagent-specific metadata
+   * to the newly-created child conversation.
    */
-  _subagentSeed?: {
+  subagentCreation?: {
     parentConversationId: string;
     subagentName: string;
     subagentPurpose?: string;
@@ -199,9 +196,7 @@ interface ExecuteAgentBaseParams {
    */
   useTaskManager?: boolean;
   /**
-   * Interactivity configuration for this execution. Accepts a boolean shortcut
-   * or a full config; normalized at the boundary. Defaults derive from `mode`
-   * (conversation → true, standalone → false).
+   * Interactivity configuration for this execution.
    */
   interactive?: InteractiveInput;
 }

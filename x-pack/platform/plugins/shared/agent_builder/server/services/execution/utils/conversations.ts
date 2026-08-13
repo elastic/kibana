@@ -156,7 +156,7 @@ export const getConversation = async ({
   conversationClient,
   accessControl,
   origin,
-  subagentSeed,
+  subagentCreation,
 }: {
   agentId: string;
   conversationId: string | undefined;
@@ -169,7 +169,7 @@ export const getConversation = async ({
    * parent's linkage + a pre-selected title. The parent's user + access_control
    * are looked up here and snapshotted onto the new placeholder.
    */
-  subagentSeed?: {
+  subagentCreation?: {
     parentConversationId: string;
     subagentName: string;
   };
@@ -221,10 +221,10 @@ export const getConversation = async ({
   // that case we fall through to `currentUser` via `createRequestToEs`, which
   // IS the about-to-be owner (they're creating the conversation), so
   // ownership matches by construction.
-  if (subagentSeed) {
-    const parentExists = await conversationClient.exists(subagentSeed.parentConversationId);
+  if (subagentCreation) {
+    const parentExists = await conversationClient.exists(subagentCreation.parentConversationId);
     if (parentExists) {
-      const parent = await conversationClient.get(subagentSeed.parentConversationId);
+      const parent = await conversationClient.get(subagentCreation.parentConversationId);
       return {
         ...placeholderConversation({
           conversationId,
@@ -232,9 +232,9 @@ export const getConversation = async ({
           accessControl: parent.access_control,
           origin,
         }),
-        title: subagentSeed.subagentName,
+        title: subagentCreation.subagentName,
         user: parent.user,
-        parent_conversation_id: subagentSeed.parentConversationId,
+        parent_conversation_id: subagentCreation.parentConversationId,
         parent_conversation_relation: ConversationParentRelation.subagent,
         operation: 'CREATE',
       };
@@ -246,8 +246,8 @@ export const getConversation = async ({
         accessControl,
         origin,
       }),
-      title: subagentSeed.subagentName,
-      parent_conversation_id: subagentSeed.parentConversationId,
+      title: subagentCreation.subagentName,
+      parent_conversation_id: subagentCreation.parentConversationId,
       parent_conversation_relation: ConversationParentRelation.subagent,
       operation: 'CREATE',
     };

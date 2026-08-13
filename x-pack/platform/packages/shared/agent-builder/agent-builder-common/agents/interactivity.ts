@@ -8,9 +8,9 @@
 import { AgentExecutionMode } from './execution_mode';
 
 /**
- * Canonical interactivity configuration used everywhere downstream of the
- * executeAgent entry point. The public API accepts `boolean | InteractivityConfig`
- * for ergonomics; the boundary normalizes to this shape.
+ * Interactivity configuration - defines behavior for features that require a live user.
+ *
+ * For now only supporting disabled/enabled, but more will come soon.
  */
 export interface InteractivityConfig {
   /**
@@ -21,17 +21,10 @@ export interface InteractivityConfig {
   enabled: boolean;
 }
 
-/**
- * Ergonomic input form accepted by the public API. Normalized to
- * `InteractivityConfig` at the boundary.
- */
 export type InteractiveInput = boolean | InteractivityConfig;
 
 /**
  * Normalize the ergonomic input form to the canonical config.
- * Defaults derive from execution mode when the caller omits `interactive`:
- * - `AgentExecutionMode.conversation` → { enabled: true }
- * - `AgentExecutionMode.standalone`   → { enabled: false }
  */
 export const normalizeInteractive = (
   input: InteractiveInput | undefined,

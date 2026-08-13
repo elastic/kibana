@@ -173,7 +173,7 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     accessControl,
-    _subagentSeed: subagentSeed,
+    subagentCreation,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -196,7 +196,7 @@ const handleConversationExecution = async ({
     conversationClient,
     accessControl,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
-    subagentSeed,
+    subagentCreation,
   });
 
   const author = await deps.conversationService.getConversationRoundAuthor({
@@ -238,7 +238,7 @@ const handleConversationExecution = async ({
   // shareReplay so persistence and the span attribute share one emission.
   // Persistent sub-agent creations already carry a seeded title (the subagent
   // name); skip LLM title generation for those.
-  const shouldGenerateTitle = conversation.operation === 'CREATE' && !subagentSeed;
+  const shouldGenerateTitle = conversation.operation === 'CREATE' && !subagentCreation;
   const title$ = (
     shouldGenerateTitle
       ? generateTitle({

@@ -55,7 +55,7 @@ export const createSubAgentExecutor = ({
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
           nextInput: { message: params.prompt },
-          _subagentSeed: {
+          subagentCreation: {
             parentConversationId: params.parentConversationId,
             subagentName: params.subagentName,
             subagentPurpose: params.subagentPurpose,

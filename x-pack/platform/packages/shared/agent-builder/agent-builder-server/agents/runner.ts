@@ -28,14 +28,11 @@ export interface RunAgentParams {
    **/
   executionMode?: AgentExecutionMode;
   /**
-   * Interactivity configuration for this run. Accepts a boolean shortcut or a
-   * full config; normalized at the boundary. Defaults derive from `executionMode`.
+   * Interactivity configuration for this run,
    */
   interactive?: InteractiveInput;
   /**
    * The id of the parent execution that spawned this one, when applicable.
-   * Undefined for top-level executions. Used for telemetry and available on
-   * the handler context.
    */
   parentExecutionId?: string;
   /**

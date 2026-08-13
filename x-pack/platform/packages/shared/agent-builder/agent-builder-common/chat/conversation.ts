@@ -456,9 +456,8 @@ export enum ConversationOriginType {
 }
 
 /**
- * Type of parent/child relationship between two conversations. Set on the
- * child alongside `parent_conversation_id`. Values are extensible for future
- * relation kinds (e.g. context forks).
+ * Type of parent/child relationship between two conversations.
+ * Set on the child alongside `parent_conversation_id`.
  */
 export enum ConversationParentRelation {
   /** Child conversation is a persistent sub-agent spawned from the parent. */
@@ -538,12 +537,7 @@ export interface Conversation {
    */
   workspace_id?: string;
   /**
-   * When this conversation was created as a child of another (persistent sub-agent),
-   * the id of the parent conversation. Absent for top-level conversations.
-   * Used by the UI nav filter to hide sub-agent conversations from the sidebar.
-   *
-   * Always paired with `parent_conversation_relation` — both should be set
-   * together, both absent otherwise.
+   * When this conversation was created as a child of another, the id of the parent conversation.
    */
   parent_conversation_id?: string;
   /**
@@ -589,8 +583,6 @@ export interface ConversationInternalState {
   todos?: TodoItem[];
   /**
    * Map of persistent sub-agent name → child conversation id.
-   * Authoritative source for the (parent, name) → child lookup and for the
-   * roster snapshot emitted after each creation. Set only on the parent side.
    */
   subagents?: Record<string, string>;
 }

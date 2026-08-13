@@ -69,54 +69,61 @@ export interface AgentHandlerReturn {
 }
 
 /**
+ * Result shape returned by every sub-agent execution method.
+ */
+export interface SubAgentExecutionResult {
+  executionId: string;
+  events$: Observable<ChatEvent>;
+}
+
+/** Parameters for a one-shot standalone sub-agent execution. */
+export interface ExecuteSubAgentParams {
+  agentId: string;
+  parentExecutionId: string;
+  prompt: string;
+  connectorId?: string;
+  capabilities?: AgentCapabilities;
+  abortSignal?: AbortSignal;
+}
+
+/** Parameters for creating a new persistent sub-agent (fresh child conversation). */
+export interface CreateSubAgentParams {
+  agentId: string;
+  parentConversationId: string;
+  parentExecutionId: string;
+  subagentName: string;
+  subagentPurpose?: string;
+  /** Pre-allocated id for the child conversation (assigned by the caller). */
+  conversationId: string;
+  prompt: string;
+  connectorId?: string;
+  capabilities?: AgentCapabilities;
+  abortSignal?: AbortSignal;
+}
+
+/** Parameters for sending a message to an existing persistent sub-agent. */
+export interface SendToSubAgentParams {
+  parentExecutionId: string;
+  /** Existing child conversation id */
+  conversationId: string;
+  prompt: string;
+  connectorId?: string;
+  capabilities?: AgentCapabilities;
+  abortSignal?: AbortSignal;
+}
+
+/**
  * Pre-scoped executor for spawning sub-agent executions.
- * The `request` is already bound — callers don't need to provide it.
  */
 export interface SubAgentExecutor {
-  /** Execute a one-shot standalone sub-agent (unchanged today). */
-  executeSubAgent(params: {
-    agentId: string;
-    connectorId?: string;
-    capabilities?: AgentCapabilities;
-    parentExecutionId: string;
-    prompt: string;
-    abortSignal?: AbortSignal;
-  }): Promise<{
-    executionId: string;
-    events$: Observable<ChatEvent>;
-  }>;
+  /** Execute a one-shot standalone sub-agent. */
+  executeSubAgent(params: ExecuteSubAgentParams): Promise<SubAgentExecutionResult>;
 
   /** Create a new persistent sub-agent backed by a fresh child conversation. */
-  createSubAgent(params: {
-    agentId: string;
-    parentConversationId: string;
-    parentExecutionId: string;
-    subagentName: string;
-    subagentPurpose?: string;
-    /** Pre-allocated id for the child conversation (assigned by the caller). */
-    conversationId: string;
-    prompt: string;
-    connectorId?: string;
-    capabilities?: AgentCapabilities;
-    abortSignal?: AbortSignal;
-  }): Promise<{
-    executionId: string;
-    events$: Observable<ChatEvent>;
-  }>;
+  createSubAgent(params: CreateSubAgentParams): Promise<SubAgentExecutionResult>;
 
   /** Send a message to an existing persistent sub-agent (new round in its conversation). */
-  sendToSubAgent(params: {
-    parentExecutionId: string;
-    /** Existing child conversation id (resolved from parent.state.subagents[name]). */
-    conversationId: string;
-    prompt: string;
-    connectorId?: string;
-    capabilities?: AgentCapabilities;
-    abortSignal?: AbortSignal;
-  }): Promise<{
-    executionId: string;
-    events$: Observable<ChatEvent>;
-  }>;
+  sendToSubAgent(params: SendToSubAgentParams): Promise<SubAgentExecutionResult>;
 
   /** Retrieve a sub-agent execution by ID. Returns undefined if not found. */
   getExecution(executionId: string): Promise<SubAgentExecution | undefined>;
@@ -264,18 +271,17 @@ export interface AgentHandlerContext {
    */
   experimentalFeatures: ExperimentalFeatures;
   /**
-   * The execution mode for this agent run.
-   * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
+   * The execution mode for this agent run — `conversation` for
+   * conversation-backed executions, `standalone` for one-shot runs with no
+   * conversation persistence.
    */
   executionMode: AgentExecutionMode;
   /**
-   * Canonical interactivity config for this run. When `enabled: false`,
-   * features requiring a live user (HITL, `ask_user_question`) are gated off.
+   * Interactivity config for this run (controls thinks such as HITL support)
    */
   interactivity: InteractivityConfig;
   /**
    * Id of the parent execution that spawned this one, when applicable.
-   * Undefined for top-level executions. Exposed for telemetry / tracing.
    */
   parentExecutionId?: string;
   /**
