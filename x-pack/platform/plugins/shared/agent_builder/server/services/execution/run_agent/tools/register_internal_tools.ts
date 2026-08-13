@@ -25,6 +25,7 @@ import { createAskUserQuestionTool } from './ask_user_question';
 import { createReadFileTool } from './read_file';
 import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
+import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
@@ -86,6 +87,7 @@ export const registerInternalTools = async ({
     filesystemService,
     bashService,
     todoStateManager,
+    selfClient,
   } = context;
 
   // sub-agent creation is only available for non-standalone executions
@@ -104,6 +106,13 @@ export const registerInternalTools = async ({
   // Todos — FF-gated.
   if (experimentalFeatures.todos) {
     tools.push(createTodoTool({ todoStateManager }));
+  }
+
+  // HTTP API introspection/invocation — FF-gated.
+  if (experimentalFeatures.apiTools) {
+    tools.push(createDiscoverApisTool());
+    tools.push(createDescribeApiTool());
+    tools.push(createExecuteApiTool({ selfClient }));
   }
 
   // run_subagent + send_message + sleep — experimental, and not available to sub-agents

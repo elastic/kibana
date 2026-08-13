@@ -23,7 +23,7 @@ import type {
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
@@ -162,6 +162,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
+  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
+  apiTools: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -183,6 +185,10 @@ export interface AgentHandlerContext {
    * Can be used to access ES on behalf of either the current user or the system user.
    */
   esClient: IScopedClusterClient;
+  /**
+   * Client for calling Kibana's own HTTP APIs on behalf of the current user.
+   */
+  selfClient: HttpSelfService;
   /**
    * Saved objects client scoped to the current user.
    */

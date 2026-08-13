@@ -127,16 +127,17 @@ export class LensApp {
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
 
+    // Prefer checking the radio input — label clicks race save-modal remounts.
     if (options?.addToDashboard === 'existing') {
-      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.locator('#existing-dashboard-option').check();
       await this.page.testSubj.locator('open-dashboard-picker').click();
       await this.page.testSubj
         .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
         .click();
     } else if (options?.addToDashboard === 'new') {
-      await this.page.locator('label[for="new-dashboard-option"]').click();
+      await this.page.locator('#new-dashboard-option').check();
     } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('label[for="add-to-library-option"]').click();
+      await this.page.locator('#add-to-library-option').check();
     }
 
     await this.confirmSaveButton.click();
