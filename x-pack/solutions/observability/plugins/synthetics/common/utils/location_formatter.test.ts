@@ -16,23 +16,23 @@ describe('formatLocation', () => {
     isServiceManaged: false,
   };
 
-  it('carries agentConditionSharding for a scalable private location', () => {
-    expect(formatLocation({ ...privateLocation, agentConditionSharding: true })).toEqual(
+  it('carries isAgentSharding for a scalable private location', () => {
+    expect(formatLocation({ ...privateLocation, isAgentSharding: true })).toEqual(
       expect.objectContaining({
         id: 'loc-1',
         agentPolicyId: 'ap-1',
-        agentConditionSharding: true,
+        isAgentSharding: true,
       })
     );
   });
 
-  it('does not add agentConditionSharding for a classic private location', () => {
-    expect(formatLocation(privateLocation)).not.toHaveProperty('agentConditionSharding');
+  it('does not add isAgentSharding for a classic private location', () => {
+    expect(formatLocation(privateLocation)).not.toHaveProperty('isAgentSharding');
   });
 
-  it('omits agentConditionSharding: false', () => {
+  it('omits isAgentSharding: false', () => {
     expect(
-      formatLocation({ ...privateLocation, agentConditionSharding: false })
-    ).not.toHaveProperty('agentConditionSharding');
+      formatLocation({ ...privateLocation, isAgentSharding: false })
+    ).not.toHaveProperty('isAgentSharding');
   });
 });

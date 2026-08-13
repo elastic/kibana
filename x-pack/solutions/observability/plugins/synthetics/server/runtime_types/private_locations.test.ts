@@ -15,7 +15,7 @@ const classic = {
   isServiceManaged: false,
 };
 
-describe('PrivateLocationAttributesCodec agentConditionSharding', () => {
+describe('PrivateLocationAttributesCodec isAgentSharding', () => {
   it('decodes a classic location without the flag', () => {
     expect(isRight(PrivateLocationAttributesCodec.decode(classic))).toBe(true);
   });
@@ -23,17 +23,17 @@ describe('PrivateLocationAttributesCodec agentConditionSharding', () => {
   it('decodes a scalable location with the flag', () => {
     const result = PrivateLocationAttributesCodec.decode({
       ...classic,
-      agentConditionSharding: true,
+      isAgentSharding: true,
     });
     expect(isRight(result)).toBe(true);
     if (isRight(result)) {
-      expect(result.right.agentConditionSharding).toBe(true);
+      expect(result.right.isAgentSharding).toBe(true);
     }
   });
 
   it('rejects a non-boolean flag', () => {
     expect(
-      isRight(PrivateLocationAttributesCodec.decode({ ...classic, agentConditionSharding: 'yes' }))
+      isRight(PrivateLocationAttributesCodec.decode({ ...classic, isAgentSharding: 'yes' }))
     ).toBe(false);
   });
 });

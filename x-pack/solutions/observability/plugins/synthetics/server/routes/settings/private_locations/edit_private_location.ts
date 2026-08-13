@@ -30,7 +30,7 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
-  agentConditionSharding: schema.maybe(schema.boolean()),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
@@ -63,8 +63,8 @@ const isPrivateLocationChanged = ({
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
   const isShardingChanged =
-    typeof newParams.agentConditionSharding === 'boolean' &&
-    newParams.agentConditionSharding !== Boolean(privateLocation.attributes.agentConditionSharding);
+    typeof newParams.isAgentSharding === 'boolean' &&
+    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
 
   return isLabelChanged || areTagsChanged || isShardingChanged;
 };
@@ -123,7 +123,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
     const {
       label: newLocationLabel,
       tags: newTags,
-      agentConditionSharding: newAgentConditionSharding,
+      isAgentSharding: newIsAgentSharding,
     } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
@@ -159,8 +159,8 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
-          ...(typeof newAgentConditionSharding === 'boolean'
-            ? { agentConditionSharding: newAgentConditionSharding }
+          ...(typeof newIsAgentSharding === 'boolean'
+            ? { isAgentSharding: newIsAgentSharding }
             : {}),
         });
 

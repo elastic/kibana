@@ -136,14 +136,14 @@ describe('addPrivateLocationRoute handler - space containment', () => {
     expect(create).toHaveBeenCalled();
   });
 
-  it('persists agentConditionSharding on create', async () => {
+  it('persists isAgentSharding on create', async () => {
     const { routeContext, response } = makeRouteContext({
       policySpaceIds: [ALL_SPACES_ID],
       requestSpaces: ['naims'],
     });
     routeContext.request.body = {
       ...routeContext.request.body,
-      agentConditionSharding: true,
+      isAgentSharding: true,
     };
     const create = stubDownstream();
 
@@ -151,7 +151,7 @@ describe('addPrivateLocationRoute handler - space containment', () => {
 
     expect(response.badRequest).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledWith(
-      expect.objectContaining({ agentConditionSharding: true }),
+      expect.objectContaining({ isAgentSharding: true }),
       expect.any(String)
     );
   });
@@ -192,25 +192,25 @@ describe('PrivateLocationRepository.getLocationSpaces', () => {
   });
 });
 
-describe('PrivateLocationSchema agentConditionSharding', () => {
+describe('PrivateLocationSchema isAgentSharding', () => {
   const base = { label: 'loc', agentPolicyId: 'ap' };
 
   it('accepts a boolean flag', () => {
-    expect(PrivateLocationSchema.validate({ ...base, agentConditionSharding: true })).toEqual(
-      expect.objectContaining({ agentConditionSharding: true })
+    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: true })).toEqual(
+      expect.objectContaining({ isAgentSharding: true })
     );
-    expect(PrivateLocationSchema.validate({ ...base, agentConditionSharding: false })).toEqual(
-      expect.objectContaining({ agentConditionSharding: false })
+    expect(PrivateLocationSchema.validate({ ...base, isAgentSharding: false })).toEqual(
+      expect.objectContaining({ isAgentSharding: false })
     );
   });
 
   it('allows omitting the flag so existing clients stay classic', () => {
-    expect(PrivateLocationSchema.validate(base).agentConditionSharding).toBeUndefined();
+    expect(PrivateLocationSchema.validate(base).isAgentSharding).toBeUndefined();
   });
 
   it('rejects a non-boolean flag', () => {
     expect(() =>
-      PrivateLocationSchema.validate({ ...base, agentConditionSharding: 'yes' })
+      PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })
     ).toThrow();
   });
 });

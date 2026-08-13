@@ -39,35 +39,52 @@ const makeRouteContext = (body: Record<string, unknown>) => {
   return { routeContext, response };
 };
 
-describe('editPrivateLocationRoute agentConditionSharding', () => {
+describe('editPrivateLocationRoute isAgentSharding', () => {
   afterEach(() => jest.restoreAllMocks());
 
-  const stubRepo = (updatedAttributes = {}) => {
+  const stubRepo = (updatedAttributes = {}, existingAttributes = {}) => {
+    const location = {
+      ...existingLocation,
+      attributes: { ...existingLocation.attributes, ...existingAttributes },
+    };
     jest
       .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
-      .mockResolvedValue(existingLocation as any);
+      .mockResolvedValue(location as any);
     return jest
       .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
       .mockResolvedValue({
-        ...existingLocation,
-        attributes: { ...existingLocation.attributes, ...updatedAttributes },
+        ...location,
+        attributes: { ...location.attributes, ...updatedAttributes },
       } as any);
   };
 
-  it('persists agentConditionSharding when it is the only change', async () => {
-    const edit = stubRepo({ agentConditionSharding: true });
-    const { routeContext } = makeRouteContext({ agentConditionSharding: true });
+  it('persists isAgentSharding when it is the only change', async () => {
+    const edit = stubRepo({ isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: true });
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
     expect(edit).toHaveBeenCalledWith(
       'loc-1',
-      expect.objectContaining({ agentConditionSharding: true })
+      expect.objectContaining({ isAgentSharding: true })
     );
-    expect(result).toEqual(expect.objectContaining({ agentConditionSharding: true }));
+    expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
   });
 
-  it('does not write when the body omits agentConditionSharding and other fields', async () => {
+  it('overwrites an enabled isAgentSharding flag with false', async () => {
+    const edit = stubRepo({ isAgentSharding: false }, { isAgentSharding: true });
+    const { routeContext } = makeRouteContext({ isAgentSharding: false });
+
+    const result = await editPrivateLocationRoute().handler(routeContext);
+
+    expect(edit).toHaveBeenCalledWith(
+      'loc-1',
+      expect.objectContaining({ isAgentSharding: false })
+    );
+    expect(result).not.toHaveProperty('isAgentSharding');
+  });
+
+  it('does not write when the body omits isAgentSharding and other fields', async () => {
     const edit = stubRepo();
     const { routeContext } = makeRouteContext({});
 

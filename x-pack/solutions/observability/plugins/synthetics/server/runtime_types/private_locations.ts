@@ -22,7 +22,7 @@ export const PrivateLocationAttributesCodec = t.intersection([
     }),
     namespace: t.string,
     spaces: t.array(t.string),
-    agentConditionSharding: t.boolean,
+    isAgentSharding: t.boolean,
   }),
 ]);
 

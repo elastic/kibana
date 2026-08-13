@@ -31,7 +31,7 @@ export const PrivateLocationSchema = schema.object({
     })
   ),
   spaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-  agentConditionSharding: schema.maybe(schema.boolean()),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 export type PrivateLocationObject = TypeOf<typeof PrivateLocationSchema>;

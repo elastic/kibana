@@ -14,22 +14,22 @@ const classic = {
   agentPolicyId: 'ap-1',
 };
 
-describe('PrivateLocationCodec agentConditionSharding', () => {
+describe('PrivateLocationCodec isAgentSharding', () => {
   it('decodes a classic location without the flag', () => {
     expect(isRight(PrivateLocationCodec.decode(classic))).toBe(true);
   });
 
   it('decodes a scalable location with the flag', () => {
-    const result = PrivateLocationCodec.decode({ ...classic, agentConditionSharding: true });
+    const result = PrivateLocationCodec.decode({ ...classic, isAgentSharding: true });
     expect(isRight(result)).toBe(true);
     if (isRight(result)) {
-      expect(result.right.agentConditionSharding).toBe(true);
+      expect(result.right.isAgentSharding).toBe(true);
     }
   });
 
   it('rejects a non-boolean flag', () => {
     expect(
-      isRight(PrivateLocationCodec.decode({ ...classic, agentConditionSharding: 'yes' }))
+      isRight(PrivateLocationCodec.decode({ ...classic, isAgentSharding: 'yes' }))
     ).toBe(false);
   });
 });
