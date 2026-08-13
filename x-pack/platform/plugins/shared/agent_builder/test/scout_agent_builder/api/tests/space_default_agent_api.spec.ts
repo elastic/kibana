@@ -70,6 +70,9 @@ apiTest.describe(
     // API-key-authed clients for the two Agent Builder personas in SPACE_A
     let asReadOnly: AuthedApiClient;
     let asManageAgents: AuthedApiClient;
+    // Kept at module scope so individual tests can rebuild the read-only client
+    // from their own `apiClient` fixture (see the 403 test below).
+    let readOnlyAuthHeaders: Record<string, string>;
 
     const adminApiVersionHeaders = () => ({
       'elastic-api-version': ELASTIC_API_VERSION,
@@ -107,11 +110,12 @@ apiTest.describe(
       const readOnly = await requestAuth.getApiKeyForCustomRole(
         agentBuilderRole(SPACE_A, ['minimal_read'])
       );
-      asReadOnly = withAuth(apiClient, {
+      readOnlyAuthHeaders = {
         ...COMMON_HEADERS,
         ...readOnly.apiKeyHeader,
         'elastic-api-version': ELASTIC_API_VERSION,
-      });
+      };
+      asReadOnly = withAuth(apiClient, readOnlyAuthHeaders);
 
       const manageAgents = await requestAuth.getApiKeyForCustomRole(
         agentBuilderRole(SPACE_A, ['minimal_read', 'manage_agents'])
@@ -258,9 +262,12 @@ apiTest.describe(
       expect((response.body as SpaceSettingsResponse).default_agent_id).toBeNull();
     });
 
-    apiTest('restricted users cannot mutate the space assignment (403)', async () => {
+    apiTest('restricted users cannot mutate the space assignment (403)', async ({ apiClient }) => {
       // The read-only role has no `manage_agents` privilege — PUT must fail.
-      const response = await asReadOnly.put(
+      // Rebuild the authed client from this test's `apiClient` fixture so the
+      // request is issued through the fixture rather than a module-scoped alias.
+      const asRestricted = withAuth(apiClient, readOnlyAuthHeaders);
+      const response = await asRestricted.put(
         spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, SPACE_A),
         {
           body: { default_agent_id: AGENT_IN_A_2 },
