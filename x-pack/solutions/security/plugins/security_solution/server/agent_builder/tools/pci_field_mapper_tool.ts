@@ -282,5 +282,12 @@ export const pciFieldMapperTool = (
       };
     },
     tags: ['security', 'compliance', 'pci', 'field-mapping'],
+    annotations: {
+      title: 'PCI Field Mapper',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };
