@@ -8,7 +8,12 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { isExcludedLoggingPath, LOGGER_IDIOM_PATTERNS, SOURCERER_LINES_INDEX } from './constants';
+import {
+  isExcludedLoggingPath,
+  isNonEmittingLine,
+  LOGGER_IDIOM_PATTERNS,
+  SOURCERER_LINES_INDEX,
+} from './constants';
 import type { LoggingCandidate } from './types';
 
 /** One matched source line returned by {@link codeGrep}. */
@@ -199,6 +204,12 @@ export interface DiscoverLoggingSitesOptions {
   logger: Logger;
   /** Max lines per grep pattern (defaults to 500). */
   perPatternLimit?: number;
+  /**
+   * Ceiling on distinct candidate locations across ALL patterns (defaults to
+   * 3000). `perPatternLimit` bounds one grep; this bounds the union, which is
+   * what the window fetch and the LLM classifier actually pay for.
+   */
+  maxCandidates?: number;
 }
 
 /**
@@ -222,6 +233,7 @@ export async function discoverLoggingSites({
   language,
   logger,
   perPatternLimit = 500,
+  maxCandidates = 3000,
 }: DiscoverLoggingSitesOptions): Promise<LoggingCandidate[]> {
   const { org, repo } = splitRepository(repository);
   const gitCommit = gitSha || '*';
@@ -271,6 +283,13 @@ export async function discoverLoggingSites({
   };
 
   for (const regex of LOGGER_IDIOM_PATTERNS) {
+    if (locations.size >= maxCandidates) {
+      logger.warn(
+        `logging_sites: "${repository}" @ "${root}" reached the ${maxCandidates}-candidate ceiling; ` +
+          `remaining idiom pattern(s) skipped. Discovery is biased toward the patterns that ran first.`
+      );
+      break;
+    }
     await runGrep(regex);
   }
 
@@ -294,11 +313,20 @@ export async function discoverLoggingSites({
   });
 
   const candidates: LoggingCandidate[] = [];
+  let nonEmitting = 0;
   for (const location of locations) {
     const idx = location.lastIndexOf(':');
     const path = location.slice(0, idx);
     const lineNumber = Number(location.slice(idx + 1));
     const fileLines = windows.get(path);
+    // Drop hits whose OWN line cannot emit (declaration, guard, import, error
+    // constructor). Judged on the hit line alone so a guard or declaration next
+    // to a real logger call cannot suppress that call.
+    const hitLine = fileLines?.get(lineNumber);
+    if (hitLine && isNonEmittingLine(hitLine)) {
+      nonEmitting += 1;
+      continue;
+    }
     const window = [lineNumber - 1, lineNumber, lineNumber + 1]
       .map((n) => fileLines?.get(n)?.trim())
       .filter((line): line is string => Boolean(line))
@@ -313,6 +341,7 @@ export async function discoverLoggingSites({
   logger.debug(
     `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}"` +
       (excludedPaths > 0 ? ` (${excludedPaths} test/build path hit(s) excluded)` : '') +
+      (nonEmitting > 0 ? ` (${nonEmitting} non-emitting line(s) dropped)` : '') +
       (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
   );
   return candidates;

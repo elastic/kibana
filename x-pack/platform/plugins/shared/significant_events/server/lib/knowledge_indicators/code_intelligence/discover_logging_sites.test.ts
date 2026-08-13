@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isExcludedLoggingPath, LOGGER_IDIOM_PATTERNS } from './constants';
+import { isExcludedLoggingPath, isNonEmittingLine, LOGGER_IDIOM_PATTERNS } from './constants';
 import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
 
 const COLUMNS = [
@@ -43,10 +43,20 @@ const row = (path: string, line: number, content: string) => [
 describe('logging-site patterns', () => {
   const matcher = (pattern: string) => new RegExp(`^${pattern}$`);
 
+  const matchesAnyIdiom = (line: string): boolean =>
+    LOGGER_IDIOM_PATTERNS.some((pattern) => matcher(pattern).test(line));
+  // Look patterns up by their distinguishing token rather than by index, so
+  // adding a pattern cannot silently repoint an assertion at the wrong regex.
+  const patternContaining = (token: string) => {
+    const found = LOGGER_IDIOM_PATTERNS.filter((pattern) => pattern.includes(token));
+    expect(found).toHaveLength(1);
+    return matcher(found[0]);
+  };
+
   it('matches the logger idioms without matching unrelated properties', () => {
-    const [uppercaseLogger, microsoftLogger, javaStreams] = LOGGER_IDIOM_PATTERNS.slice(-7, -4).map(
-      matcher
-    );
+    const uppercaseLogger = patternContaining('(LOG|LOGGER)');
+    const microsoftLogger = patternContaining('Log(Trace');
+    const javaStreams = patternContaining('System[.]');
     expect(uppercaseLogger.test('LOG.error("boom");')).toBe(true);
     expect(uppercaseLogger.test('catalog.info = parse(x);')).toBe(false);
     expect(microsoftLogger.test('_logger.LogError("boom");')).toBe(true);
@@ -55,21 +65,96 @@ describe('logging-site patterns', () => {
   });
 
   it('matches process-aborting emits that print their own message', () => {
-    const [goPanic, rustPanic, rustEprintln, rustExpect] =
-      LOGGER_IDIOM_PATTERNS.slice(-4).map(matcher);
-    expect(goPanic.test('panic("unable to start server")')).toBe(true);
-    expect(rustPanic.test('panic!("error when parsing uuid");')).toBe(true);
-    expect(rustEprintln.test('eprintln!("failed to bind: {}", err);')).toBe(true);
+    expect(patternContaining('panic[(]').test('panic("unable to start server")')).toBe(true);
+    expect(patternContaining('panic![(]').test('panic!("error when parsing uuid");')).toBe(true);
+    expect(patternContaining('eprintln').test('eprintln!("failed to bind: {}", err);')).toBe(true);
+    const rustExpect = patternContaining('[.]expect[(]');
     expect(rustExpect.test('let cfg = load().expect("config is required");')).toBe(true);
     expect(rustExpect.test('expect(result).toBe(true);')).toBe(false);
   });
 
   it('does not match value-returning error constructors', () => {
-    const matchesAnyIdiom = (line: string): boolean =>
-      LOGGER_IDIOM_PATTERNS.some((pattern) => matcher(pattern).test(line));
     expect(matchesAnyIdiom('return fmt.Errorf("failed to charge card: %+v", err)')).toBe(false);
     expect(matchesAnyIdiom('return errors.New("failed connecting to database")')).toBe(false);
     expect(matchesAnyIdiom('throw new RpcException("Can\'t access cart storage.")')).toBe(false);
+  });
+
+  it('matches chained builder calls where the level is not adjacent to the logger', () => {
+    expect(matchesAnyIdiom('logrus.WithField("id", id).Error("charge failed")')).toBe(true);
+    expect(matchesAnyIdiom('logger.bind(order=id).error("charge failed")')).toBe(true);
+    expect(matchesAnyIdiom('this.logger.get("billing").debug("x");')).toBe(true);
+    expect(matchesAnyIdiom('col.service.Logger().Error("boom", zap.Error(err))')).toBe(true);
+  });
+
+  it('requires `log` to start an identifier, so catalog/backlog chains do not match', () => {
+    const chained = patternContaining('[^;]*');
+    const accessor = patternContaining('[(][)][.]');
+    expect(chained.test('productCatalogService.Client.Info(ctx, req)')).toBe(false);
+    expect(chained.test('catalogService.metrics.Error(err)')).toBe(false);
+    expect(chained.test('topology.Node.Info(x)')).toBe(false);
+    expect(accessor.test('getCatalog().Error(x)')).toBe(false);
+    expect(accessor.test('backlog().Debug(x)')).toBe(false);
+    // The chain may not span a statement boundary.
+    expect(chained.test('logger = build(); other.Error(x)')).toBe(false);
+  });
+
+  it('matches go-kit, zerolog, and the Laravel facade', () => {
+    expect(matchesAnyIdiom('level.Error(logger).Log("msg", "charge failed", "err", err)')).toBe(
+      true
+    );
+    expect(matchesAnyIdiom('level.Debug(util_log.Logger).Log(')).toBe(true);
+    expect(matchesAnyIdiom('log.Error().Str("id", id).Msg("charge failed")')).toBe(true);
+    expect(matchesAnyIdiom('Log::error("charge failed");')).toBe(true);
+  });
+
+  it('matches stdout/stderr emits that have no logging facade', () => {
+    expect(matchesAnyIdiom('fprintf(stderr, "fatal: %s\\n", msg);')).toBe(true);
+    expect(matchesAnyIdiom('println("started")')).toBe(true);
+    expect(matchesAnyIdiom('println "deploy failed"')).toBe(true);
+  });
+});
+
+describe('isNonEmittingLine', () => {
+  it('drops declarations, imports, guards, and comments', () => {
+    expect(isNonEmittingLine('import org.slf4j.LoggerFactory;')).toBe(true);
+    expect(
+      isNonEmittingLine('  private static final Logger LOG = LoggerFactory.getLogger(Foo.class);')
+    ).toBe(true);
+    expect(isNonEmittingLine('    if (LOG.isDebugEnabled()) {')).toBe(true);
+    expect(isNonEmittingLine('  // System.out.println("debugging")')).toBe(true);
+    expect(isNonEmittingLine('Logger.metadata(external_id: tenant_id)')).toBe(true);
+    expect(isNonEmittingLine('#[tracing::instrument(skip_all, name = "index")]')).toBe(true);
+  });
+
+  it('keeps real emissions', () => {
+    expect(isNonEmittingLine('logger.error("charge failed", err)')).toBe(false);
+    expect(isNonEmittingLine('level.Error(logger).Log("msg", "charge failed")')).toBe(false);
+    expect(isNonEmittingLine('serverLog(LL_WARNING, "Failed to bind");')).toBe(false);
+  });
+
+  it('keeps a line that both acquires a logger and calls it', () => {
+    expect(isNonEmittingLine('LoggerFactory.getLogger(Foo.class).info("started")')).toBe(false);
+    // A filtered phrase inside the MESSAGE must not suppress the emission.
+    expect(isNonEmittingLine('log.info("cache getLogger(x) invoked")')).toBe(false);
+  });
+
+  it('does not let a commented-out logger call escape via the emitting veto', () => {
+    expect(isNonEmittingLine('  // logger.error("this call is commented out")')).toBe(true);
+    expect(isNonEmittingLine('  # logger.error("this call is commented out")')).toBe(true);
+  });
+
+  it('suppresses a bare error constructor but not one passed to a real emit', () => {
+    expect(isNonEmittingLine('  return fmt.Errorf("failed to charge card: %+v", err)')).toBe(true);
+    expect(isNonEmittingLine('  return nil, status.Errorf(codes.Unimplemented, "nope")')).toBe(
+      true
+    );
+    // The error value is an ARGUMENT here; the line still emits.
+    expect(isNonEmittingLine('logger.Error(kverrors.New("flag requires TLS"), "")')).toBe(false);
+    expect(isNonEmittingLine('panic(fmt.Errorf("error creating overrides file: %w", err))')).toBe(
+      false
+    );
+    // Accessor-call idiom carrying an error constructor argument.
+    expect(isNonEmittingLine('svc.Logger().Error(errors.New("connection refused"))')).toBe(false);
   });
 });
 
@@ -359,6 +444,69 @@ describe('discoverLoggingSites', () => {
         language: undefined,
       },
     ]);
+  });
+
+  it('stops issuing greps once the aggregate candidate ceiling is reached', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const logger = loggerMock.create();
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[1, 'logger.info("hi")']] };
+      }
+      return {
+        columns: COLUMNS,
+        values: [row('src/a.ts', 1, 'logger.info("hi")'), row('src/b.ts', 2, 'logger.warn("hi")')],
+      };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger,
+      maxCandidates: 2,
+    });
+
+    // First grep alone fills the ceiling, so only that one plus the window runs.
+    const grepCalls = esClient.esql.query.mock.calls.filter(([{ query }]) => !isWindowQuery(query));
+    expect(grepCalls).toHaveLength(1);
+    expect(candidates).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('2-candidate ceiling'));
+  });
+
+  it('drops hits whose own line cannot emit', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return {
+          columns: WINDOW_COLUMNS,
+          values: [
+            [10, 'import org.slf4j.LoggerFactory;'],
+            [20, '    if (LOG.isDebugEnabled()) {'],
+            [30, '    LOG.error("charge failed", e);'],
+          ],
+        };
+      }
+      return {
+        columns: COLUMNS,
+        values: [
+          row('src/Main.java', 10, 'import org.slf4j.LoggerFactory;'),
+          row('src/Main.java', 20, 'if (LOG.isDebugEnabled()) {'),
+          row('src/Main.java', 30, 'LOG.error("charge failed", e);'),
+        ],
+      };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+    });
+
+    expect(candidates.map(({ location }) => location)).toEqual(['src/Main.java:30']);
   });
 
   it('greps the whole repo (**) when the service root is empty', async () => {

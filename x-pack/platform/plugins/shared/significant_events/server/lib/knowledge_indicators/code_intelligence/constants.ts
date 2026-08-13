@@ -219,12 +219,15 @@ export const isExcludedLoggingPath = (filePath: string): boolean => {
  * - a literal dot is written `[.]` (a bare `\.` is rejected by the ES|QL string
  *   literal parser).
  *
- * Recall boundary (Tier-1): convention-named loggers, standard stream calls, and
- * process-aborting emits that write their message to stderr (`panic`,
- * `.expect`). Misses custom-named wrapper instances (`audit = createLogger();
- * audit.write(...)`) and non-severity SDK emit methods. Closing that tail
- * (per-language tree-sitter, as in elastic/semantic-code-search#168) is a later
- * refinement.
+ * Recall boundary (Tier-1): convention-named loggers, chained builder calls,
+ * standard stream calls, and process-aborting emits that write their message to
+ * stderr (`panic`, `.expect`). Misses PROJECT-LOCAL WRAPPERS — a repo's own
+ * `log_error(...)` / `serverLog(...)` helper that calls a real logger inside.
+ * The wrapper name is per-repo, so no fixed pattern can cover it; that tail needs
+ * a second discovery pass, not another regex here.
+ *
+ * Measured recall against a 14-repo / 18.3M-line corpus is recorded in the vault
+ * (`logger-idiom-recall-survey-results`); re-score there before adding a pattern.
  *
  * Deliberately NOT covered: value-returning error constructors such as Go
  * `fmt.Errorf("...")`. They are not log emissions — the returned error is
@@ -265,7 +268,109 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   '.*eprintln![(].*',
   // .expect("...") — Rust unwrap-with-message; aborts and prints the message.
   '.*[.]expect[(].*',
+  // logger.WithField(...).Error(...) / logger.bind(...).error(...) /
+  // logger.atError()...log(...) — the CHAINED BUILDER family: the level call is
+  // separated from the logger by a builder chain, so the adjacent-token patterns
+  // above cannot see it. Covers logrus, structlog, loguru, slf4j 2.x fluent, and
+  // `this.logger.get("scope").debug(...)`.
+  // The `(.*[^A-Za-z])?` prefix forces `log` to start an identifier (Lucene RLIKE
+  // has no `\b`), so `catalogService.metrics.Error(...)` cannot match; the
+  // interior is bounded to one statement so the chain cannot span a `;`.
+  '(.*[^A-Za-z])?[lL]og[A-Za-z_]*[.][^;]*[.]([iI]nfo|[eE]rror|[wW]arn|[wW]arning|[dD]ebug|[fF]atal|[cC]ritical)[(].*',
+  // svc.Logger().Error(...) — accessor-call form; `()` breaks token adjacency.
+  '(.*[^A-Za-z])?[lL]og(ger)?[(][)][.]([iI]nfo|[eE]rror|[wW]arn|[wW]arning|[dD]ebug|[fF]atal).*',
+  // level.Error(logger).Log("msg", ...) — go-kit inverts the receiver: the LEVEL
+  // wraps the logger. Dominant idiom in the Grafana/Cortex Go ecosystem.
+  '.*level[.](Error|Warn|Info|Debug)[(].*',
+  // log.Error().Str(...).Msg("...") — zerolog terminates the chain with .Msg.
+  '.*[.](Error|Warn|Info|Debug|Fatal)[(][)].*[.]Msg.*',
+  // Log::error("...") — Laravel facade (PSR-3 arrow form is covered above).
+  '.*Log::(error|warning|info|debug|critical|alert|emergency|notice).*',
+  // fprintf(stderr, "...") — C/C++ diagnostic output; no logging facade exists.
+  '.*fprintf[(]stderr.*',
+  // println("...") / println "..." — Groovy/Scala/Kotlin stdout (Java's
+  // System.out.println is covered above).
+  '.*println[ (].*',
 ] as const;
+
+/**
+ * JS regex sources (NOT Lucene — these run in-process on the grep hit line, not
+ * in ES) matching lines that a logger idiom legitimately matches but that emit
+ * NOTHING at runtime. Applied to the hit line only, never the surrounding
+ * window, so a guard or declaration next to a real emission cannot suppress it.
+ *
+ * Every rule is a language construct, not a heuristic about wording:
+ * a value-returning error constructor hands its text to a caller; an import,
+ * annotation, declaration, or level guard names a logger without calling it.
+ *
+ * This is a COST filter as much as a correctness one — each suppressed line is a
+ * classifier payload not sent. Measured on a 14-repo corpus, logger declarations
+ * and `isDebugEnabled()` guards were the dominant false positive in JVM repos.
+ */
+export const NON_EMITTING_LINE_PATTERNS: readonly string[] = [
+  // Import / use / include lines.
+  '^[ \t]*(import|use|require|from|#include)[ (]',
+  // Comment-only lines. Unconditional: a commented-out logger call is still a
+  // comment, so the emitting-call veto below must NOT rescue it.
+  '^[ \t]*(//|#|\\*|/\\*|--)',
+] as const;
+
+/**
+ * Constructs that name or configure a logger, or build an error value, without
+ * emitting. Each is suppressed ONLY when the line performs no emission of its
+ * own — the same line may both acquire a logger and call it
+ * (`LoggerFactory.getLogger(Foo.class).info("started")`), or pass an error value
+ * INTO a real emit (`logger.Error(kverrors.New("..."))`,
+ * `panic(fmt.Errorf("..."))`). See {@link EMITTING_CALL_PATTERN}.
+ */
+export const NON_EMITTING_UNLESS_CALLED_PATTERNS: readonly string[] = [
+  // Level guards: `if (LOG.isDebugEnabled())`, `Core().Enabled(...)`.
+  'is(Debug|Info|Warn|Trace|Error)Enabled|IsEnabled[(]|LevelEnabled|isHandling[(]',
+  // Annotations / attributes that declare logging rather than perform it.
+  '#\\[tracing::instrument|@Slf4j|@Log[( ]|\\[LoggerMessage',
+  // Span constructs — tracing, not logging.
+  '(info|debug|error|warn)_span!|[.]instrument[(]|tracing::Span',
+  // Logger construction / acquisition.
+  'LoggerFactory[.]getLogger[(]|[ .]getLogger[(]|NewNopLogger|new Logger[(]|Logger[.]new|slog[.]New|zap[.]New|promslog[.]New',
+  // Logger metadata / level configuration.
+  'Logger[.]metadata[(]|[.]setLevel[(]|Logger[.]configure|put_process_level',
+  // Value-returning error constructors: the text is recomposed by whoever logs
+  // the returned error, so this literal never reaches a log verbatim.
+  'fmt[.]Errorf[(]|errors[.]New[(]|status[.]Errorf[(]|httpgrpc[.]Errorf[(]|xerrors[.]',
+] as const;
+
+/**
+ * Proof the line itself emits, used to veto every
+ * {@link NON_EMITTING_UNLESS_CALLED_PATTERNS} rule.
+ *
+ * A dot-prefixed severity call WITH an open paren is the discriminator: it
+ * matches `.info(` / `.Error(` / `.Msg(` on any receiver (including the accessor
+ * and chained-builder idioms) while missing `.isDebugEnabled(`, `.getLogger(`,
+ * and `.metadata(`, whose severity token is not a call of its own.
+ */
+export const EMITTING_CALL_PATTERN =
+  '[.](info|Info|error|Error|warn|Warn|warning|Warning|debug|Debug|fatal|Fatal|critical|Critical|log|Log|Msg|Msgf|print|Print|println|Println)[(]|panic[!(]|[ (]println[ (]|fprintf[(]stderr|eprintln';
+
+const NON_EMITTING_LINE_REGEXPS = NON_EMITTING_LINE_PATTERNS.map((source) => new RegExp(source));
+const NON_EMITTING_UNLESS_CALLED_REGEXPS = NON_EMITTING_UNLESS_CALLED_PATTERNS.map(
+  (source) => new RegExp(source)
+);
+const EMITTING_CALL_REGEXP = new RegExp(EMITTING_CALL_PATTERN);
+
+/**
+ * True when `line` matches a logger idiom but cannot put a message into a log
+ * record at runtime. See {@link NON_EMITTING_LINE_PATTERNS} and
+ * {@link NON_EMITTING_UNLESS_CALLED_PATTERNS}.
+ */
+export const isNonEmittingLine = (line: string): boolean => {
+  if (NON_EMITTING_LINE_REGEXPS.some((regexp) => regexp.test(line))) {
+    return true;
+  }
+  if (EMITTING_CALL_REGEXP.test(line)) {
+    return false;
+  }
+  return NON_EMITTING_UNLESS_CALLED_REGEXPS.some((regexp) => regexp.test(line));
+};
 
 /**
  * Elasticsearch index written by Sourcerer's ref indexer — one document per
