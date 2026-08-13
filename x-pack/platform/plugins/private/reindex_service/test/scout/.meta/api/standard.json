@@ -1,5 +1,5 @@
 {
-  "sha1": "d1a5874615123a3cc43d267074a66a6245447167",
+  "sha1": "c234945a8494ae4c78ccd8addb100f6bfe141cb9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/batch_reindexing.spec.ts",
-        "line": 72,
-        "column": 10
+        "line": 67,
+        "column": 11
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 43,
+        "column": 11
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 95,
-        "column": 10
+        "line": 79,
+        "column": 39
       }
     },
     {
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 133,
-        "column": 10
+        "line": 109,
+        "column": 16
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 164,
-        "column": 10
+        "line": 138,
+        "column": 21
       }
     },
     {
@@ -85,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 202,
-        "column": 10
+        "line": 179,
+        "column": 45
       }
     },
     {
@@ -99,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/reindex_service/test/scout/api/tests/reindexing.spec.ts",
-        "line": 245,
-        "column": 10
+        "line": 214,
+        "column": 19
       }
     }
   ]

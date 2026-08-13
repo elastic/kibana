@@ -55,7 +55,7 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
       {backTo ? (
         <>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             flush="left"
             onClick={() => history.push(backTo.path)}
             data-test-subj="pndPageHeaderBack"

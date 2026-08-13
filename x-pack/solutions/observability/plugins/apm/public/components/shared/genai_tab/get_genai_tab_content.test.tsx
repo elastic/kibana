@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { GENAI_EBT_CLICK_ACTIONS, type GenAiFields } from '@kbn/apm-ui-shared';
+import React from 'react';
+import { render } from '@testing-library/react';
+import {
+  GENAI_EBT_CLICK_ACTIONS,
+  GENAI_TAB_IMPRESSION_EVENT_TYPE,
+  type GenAiFields,
+} from '@kbn/apm-ui-shared';
 import { getGenAiTabContent } from './get_genai_tab_content';
 
 const genAi: GenAiFields = {
@@ -21,7 +27,12 @@ const genAi: GenAiFields = {
 describe('getGenAiTabContent', () => {
   it('returns undefined when the event has no gen_ai data', () => {
     expect(
-      getGenAiTabContent({ isGenAiSpan: false, genAi: undefined, ebt: { element: 'someTabs' } })
+      getGenAiTabContent({
+        isGenAiSpan: false,
+        genAi: undefined,
+        ebt: { element: 'someTabs' },
+        reportEvent: jest.fn(),
+      })
     ).toBeUndefined();
   });
 
@@ -30,6 +41,7 @@ describe('getGenAiTabContent', () => {
       isGenAiSpan: true,
       genAi,
       ebt: { element: 'spanFlyoutTabs' },
+      reportEvent: jest.fn(),
     });
 
     expect(tab).toMatchObject({
@@ -37,6 +49,24 @@ describe('getGenAiTabContent', () => {
       'data-test-subj': 'genAiTab',
       'data-ebt-action': GENAI_EBT_CLICK_ACTIONS.VIEW_GENAI,
       'data-ebt-element': 'spanFlyoutTabs',
+    });
+  });
+
+  it('reports an impression for the provided surface element when the tab prepend renders', () => {
+    const reportEvent = jest.fn();
+
+    const tab = getGenAiTabContent({
+      isGenAiSpan: true,
+      genAi,
+      ebt: { element: 'spanFlyoutTabs' },
+      reportEvent,
+      resourceId: 'span-1',
+    });
+
+    render(<>{tab?.prepend}</>);
+
+    expect(reportEvent).toHaveBeenCalledWith(GENAI_TAB_IMPRESSION_EVENT_TYPE, {
+      element: 'spanFlyoutTabs',
     });
   });
 });

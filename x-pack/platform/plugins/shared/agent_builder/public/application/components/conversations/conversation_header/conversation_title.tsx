@@ -132,7 +132,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const titleButton = (
     <EuiButtonEmpty
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       flush="left"
       onClick={() => setIsPopoverOpen((open) => !open)}

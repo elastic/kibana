@@ -158,7 +158,7 @@ export const WorkflowExecuteEventForm = ({
           }
         )}
         color="warning"
-        iconType="alert"
+        iconType="warning"
         size="s"
       >
         <EuiText size="s">

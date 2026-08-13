@@ -90,14 +90,14 @@ spaceTest.describe('TSVB Metric - Open in Lens', { tag: tags.deploymentAgnostic 
     // Open the metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanelFlyout();
-    const colorStops = await lens.getPaletteColorStops(2);
+    const colorStops = await lens.style.getPaletteColorStops(2);
     // Converted color rule from TSVB background_color_rules
     expect(colorStops).toStrictEqual([
       { stop: '10', color: 'rgba(84, 179, 153, 1)' },
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(

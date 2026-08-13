@@ -58,7 +58,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
       });
 
       await spaceTest.step('remove all auto-loaded columns and add bytes', async () => {
-        await lens.removeAllDimensions('lnsDatatable_metrics');
+        await lens.workspace.removeAllDimensions('lnsDatatable_metrics');
 
         await page.testSubj
           .locator('lnsDatatable_metrics')
@@ -128,7 +128,7 @@ spaceTest.describe('Lens ESQL dashboard inline editing', { tag: '@local-stateful
         'add limit and verify line chart type and red color persist',
         async () => {
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          await expect(lens.inlineEditor).toBeVisible();
+          await expect(lens.workspace.inlineEditor).toBeVisible();
 
           await setEsqlQueryAndRun(
             dashboard,

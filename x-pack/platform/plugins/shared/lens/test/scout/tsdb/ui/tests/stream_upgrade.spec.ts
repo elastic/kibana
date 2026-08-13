@@ -39,7 +39,7 @@ const runScenario = async (
 
   const incompatibleAverageCount =
     await test.step('check counter field compatibility', async () => {
-      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.workspace.openFullEditor();
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -62,7 +62,7 @@ const runScenario = async (
   const { counterBars, countBars } =
     await test.step('visualize counter data before and after the upgrade', async () => {
       // Each step needs an empty editor, so reload Lens to clear prior dimensions.
-      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.workspace.openFullEditor();
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -72,7 +72,7 @@ const runScenario = async (
 
       // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars
       // cover the complete range before and after the stream rollover.
-      await pageObjects.lens.enableIncludeEmptyRows();
+      await pageObjects.lens.dimensions.enableIncludeEmptyRows();
       await pageObjects.lens.closeDimensionEditor();
 
       await pageObjects.lens.configureDimension({
@@ -86,7 +86,7 @@ const runScenario = async (
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
-      const chartData = await pageObjects.lens.getCurrentChartDebugState('xyVisChart');
+      const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
       const counterSeries = chartData.bars?.[0]?.bars ?? [];
       const countSeries = chartData.bars?.[1]?.bars ?? [];
       expect(counterSeries.length).toBeGreaterThan(0);

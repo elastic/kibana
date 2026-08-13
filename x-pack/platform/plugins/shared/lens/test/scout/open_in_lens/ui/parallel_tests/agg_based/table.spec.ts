@@ -46,10 +46,10 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Agg with params');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(1);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(1);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
   });
 
@@ -58,13 +58,13 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Summary row');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(1);
-    const dimensions = await lens.getDimensionTriggers();
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(1);
+    const dimensions = await lens.dimensions.getDimensionTriggers();
     await expect(dimensions[0]).toHaveText('Average machine.ram');
 
-    await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+    await lens.dimensions.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
     expect(
       await getDimensionFlyoutComboBoxSelectedOptions(page, 'lnsDatatable_summaryrow_function')
     ).toStrictEqual(['Sum']);
@@ -75,12 +75,12 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Sibling pipeline agg');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
-    const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
+    const metricText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_metrics', 0);
+    const splitRowText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_rows', 0);
     expect(metricText).toBe('Overall Max of Count');
     expect(splitRowText).toBe('@timestamp');
   });
@@ -90,12 +90,12 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Parent pipeline agg');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
-    const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
+    const metricText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_metrics', 0);
+    const splitRowText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_rows', 0);
     expect(metricText).toBe('Cumulative Sum of Count');
     expect(splitRowText).toBe('@timestamp');
   });
@@ -107,13 +107,13 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
       await convertToLensByTitle({ dashboard }, 'Table - Split rows and tables');
       await lens.waitForVisualization('lnsDataTable');
-      expect(await lens.getLayerCount()).toBe(1);
+      expect(await lens.layers.getLayerCount()).toBe(1);
 
-      await expect(lens.dimensionTriggerLocator).toHaveCount(3);
+      await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(3);
 
-      const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
-      const splitRowText1 = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
-      const splitRowText2 = await lens.getDimensionTriggerText('lnsDatatable_rows', 1);
+      const metricText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_metrics', 0);
+      const splitRowText1 = await lens.dimensions.getDimensionTriggerText('lnsDatatable_rows', 0);
+      const splitRowText2 = await lens.dimensions.getDimensionTriggerText('lnsDatatable_rows', 1);
       expect(metricText).toBe('Count');
       expect(splitRowText1).toBe('@timestamp');
       expect(splitRowText2).toBe('bytes: Descending');
@@ -125,14 +125,17 @@ spaceTest.describe('Lens open in Lens — agg-based Table', { tag: tags.deployme
 
     await convertToLensByTitle({ dashboard }, 'Table - Percentage Column');
     await lens.waitForVisualization('lnsDataTable');
-    expect(await lens.getLayerCount()).toBe(1);
+    expect(await lens.layers.getLayerCount()).toBe(1);
 
-    await expect(lens.dimensionTriggerLocator).toHaveCount(2);
+    await expect(lens.dimensions.dimensionTriggerLocator).toHaveCount(2);
 
-    const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
-    const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
+    const metricText = await lens.dimensions.getDimensionTriggerText('lnsDatatable_metrics', 0);
+    const percentageColumnText = await lens.dimensions.getDimensionTriggerText(
+      'lnsDatatable_metrics',
+      1
+    );
 
-    await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
+    await lens.dimensions.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
     expect(
       await getDimensionFlyoutComboBoxSelectedOptions(page, 'indexPattern-dimension-format')
     ).toStrictEqual(['Percent']);

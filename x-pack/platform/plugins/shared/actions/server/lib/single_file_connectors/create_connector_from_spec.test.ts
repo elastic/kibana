@@ -10,6 +10,7 @@ import { TEST_CONNECTOR_SUB_ACTION } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { z as z4 } from '@kbn/zod/v4';
 import { createConnectorTypeFromSpec } from './create_connector_from_spec';
+import * as createConnectorNetworkSettingsModule from './create_connector_network_settings';
 import { WorkflowsConnectorFeatureId } from '../../../common';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -21,6 +22,8 @@ describe('createConnectorTypeFromSpec', () => {
   const mockActionsPlugin: ActionsPluginSetupContract = {
     getActionsConfigurationUtilities: () => mockActionsConfigUtils,
     getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+    getCredential: jest.fn().mockReturnValue({ getAuthHeaders: jest.fn() }),
+    getClientLeasePool: jest.fn().mockReturnValue({ lease: jest.fn() }),
   } as unknown as ActionsPluginSetupContract;
 
   const createMockSpec = (overrides: Partial<ConnectorSpec> = {}): ConnectorSpec =>
@@ -72,6 +75,18 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.validate.params).toBeDefined();
     expect(connectorType.source).toBe(ACTION_TYPE_SOURCES.spec);
     expect(connectorType.isExperimental).toBeUndefined();
+  });
+
+  it('builds the connector network from the actions configuration utilities', () => {
+    const createConnectorNetworkSettingsSpy = jest.spyOn(
+      createConnectorNetworkSettingsModule,
+      'createConnectorNetworkSettings'
+    );
+
+    createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
+
+    expect(createConnectorNetworkSettingsSpy).toHaveBeenCalledWith(mockActionsConfigUtils);
+    createConnectorNetworkSettingsSpy.mockRestore();
   });
 
   it('sets isExperimental from metadata.isTechnicalPreview', () => {

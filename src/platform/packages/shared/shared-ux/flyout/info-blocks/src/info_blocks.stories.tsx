@@ -68,7 +68,7 @@ const RESOURCE_LINK = (
     <EuiFlexItem grow={false}>
       <EuiToolTip content="Copy resource identifier" disableScreenReaderOutput>
         <EuiButtonIcon
-          iconType="copyClipboard"
+          iconType="copy"
           color="text"
           size="xs"
           aria-label="Copy resource identifier"
@@ -93,7 +93,7 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
     value: (
       <EuiToolTip content="Assign" disableScreenReaderOutput>
         <EuiButtonIcon
-          iconType="plusInCircle"
+          iconType="plusCircle"
           display="base"
           size="xs"
           aria-label="Assign"
@@ -112,7 +112,7 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
         <EuiFlexItem grow={false}>
           <EuiToolTip content="Assign another" disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType="plusInCircle"
+              iconType="plusCircle"
               display="base"
               size="xs"
               aria-label="Assign another"
@@ -127,7 +127,7 @@ const SAMPLE_ITEMS: InfoBlockItem[] = [
     title: 'Notes',
     value: (
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         size="s"
         flush="left"
         onClick={action('Add note clicked')}

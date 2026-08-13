@@ -241,7 +241,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         : []),
       <EuiContextMenuItem
         key="read-status"
-        icon={isUnread ? 'eyeClosed' : 'eye'}
+        icon={isUnread ? 'eyeSlash' : 'eye'}
         onClick={() => {
           closePopover();
           if (isUnread) {
