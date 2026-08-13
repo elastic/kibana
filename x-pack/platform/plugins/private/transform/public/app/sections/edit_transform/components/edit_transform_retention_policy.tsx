@@ -17,6 +17,7 @@ import { getErrorMessage } from '../../../../../common/utils/errors';
 
 import { useToastNotifications } from '../../../app_dependencies';
 import { useGetTransformsPreview } from '../../../hooks';
+import { isProjectScopedSourceIndexUnavailableError } from '../../../hooks/transform_preview_errors';
 import { useToastNotificationText } from '../../../components';
 
 import {
@@ -61,7 +62,13 @@ export const EditTransformRetentionPolicy: FC = () => {
   }, [transformPreview]);
 
   useEffect(() => {
-    if (transformsPreviewError !== null) {
+    if (
+      transformsPreviewError !== null &&
+      !isProjectScopedSourceIndexUnavailableError(
+        transformsPreviewError,
+        config.source.project_routing
+      )
+    ) {
       toastNotifications.addDanger({
         title: i18n.translate('xpack.transform.transformList.errorGettingTransformPreview', {
           defaultMessage: 'An error occurred fetching the transform preview',
