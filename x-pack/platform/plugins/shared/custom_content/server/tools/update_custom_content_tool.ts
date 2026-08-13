@@ -42,6 +42,13 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 > => ({
   id: 'custom_content_update_panel',
   type: ToolType.builtin,
+  annotations: {
+    title: 'Update Custom Content Panel',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   tags: ['custom_content'],
   description:
     'Update the custom content panel. Set `template` to modify the HTML/CSS (LiquidJS, no JavaScript allowed). Set `esqlQuery` to change the data source. Set both to change both at once. Returns an error if the template contains script tags.',
