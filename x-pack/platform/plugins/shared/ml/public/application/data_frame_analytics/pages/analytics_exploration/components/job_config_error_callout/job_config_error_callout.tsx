@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
@@ -60,18 +60,15 @@ export const JobConfigErrorCallout: FC<Props> = ({
       <KbnDangerCallout
         title={jobConfigErrorMessage ? jobConfigErrorTitle : jobCapsErrorTitle}
         text={!containsDataViewLink && message}
-        actionProps={
-          containsDataViewLink
-            ? {
-                primary: {
-                  href: newDataViewUrl,
-                  target: '_blank',
-                  children: message,
-                },
-              }
-            : undefined
-        }
-      />
+      >
+        {containsDataViewLink && (
+          // Keeps using a link as custom content due to potentially long error message content
+          // that can't be passed to actionProps
+          <EuiLink href={newDataViewUrl} target="_blank">
+            {message}
+          </EuiLink>
+        )}
+      </KbnDangerCallout>
     </EuiPanel>
   );
 };
