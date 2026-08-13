@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getAlertEventESQLResponse, getEmptyESQLResponse } from '../fixtures/query_responses';
 import {
   bulkLoadLatestAlertEvents,
@@ -138,7 +138,7 @@ describe('loadLastAlertEventOrThrow', () => {
         isBoom: true,
         output: { statusCode: 404 },
         data: {
-          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
           details: {
             group_hash: GROUP_HASH,
             episode_id: 'missing-episode',
@@ -170,7 +170,7 @@ describe('loadLastAlertEventOrThrow', () => {
       expect(Boom.isBoom(captured)).toBe(true);
       const boomErr = captured as Boom.Boom;
       expect(boomErr.data).toEqual({
-        code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+        code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
         details: { group_hash: GROUP_HASH },
       });
       expect(boomErr.data.details).not.toHaveProperty('episode_id');

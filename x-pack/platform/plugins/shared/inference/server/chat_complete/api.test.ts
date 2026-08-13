@@ -526,6 +526,12 @@ describe('createChatCompleteApi', () => {
         esClient: mockEsClient,
       });
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executor: mockEndpointExecutor,
+          endpointModelId: 'gpt-4o',
+        })
+      );
       expect(getInferenceAdapterMock).not.toHaveBeenCalled();
     });
 
@@ -617,6 +623,7 @@ describe('createChatCompleteApi', () => {
           executor: mockEndpointExecutor,
           temperature: 0.5,
           modelName: 'gpt-4o-mini',
+          endpointModelId: 'gpt-4o',
           logger,
         })
       );
