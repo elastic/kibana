@@ -88,6 +88,30 @@ export const DEPLOYMENT_METHOD_META: Record<
   },
 };
 
+// Fades its content in on mount instead of snapping into view — used for
+// the "Done" badge so completion reads as a subtle acknowledgement rather
+// than an instant pop.
+const FadeIn: React.FunctionComponent<{ children: React.ReactNode }> = ({ children }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  useEffect(() => {
+    // A rAF-driven flip can get fully suspended when the tab isn't visible/
+    // focused, so the fade never triggers — a short timeout runs regardless.
+    const timer = window.setTimeout(() => setIsVisible(true), 10);
+    return () => window.clearTimeout(timer);
+  }, []);
+  return (
+    <div
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'scale(1)' : 'scale(0.85)',
+        transition: 'opacity 500ms ease, transform 500ms ease',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 // A real EuiAccordion driving each card: chevron on the left (before the
 // feature icon and title), shaded header band bled to the panel's edges via
 // negative margins on the trigger button (parent EuiPanel keeps its normal
@@ -150,9 +174,11 @@ const AccordionCard: React.FunctionComponent<{
             </EuiFlexItem>
             {isComplete && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="success" iconType="check">
-                  Done
-                </EuiBadge>
+                <FadeIn>
+                  <EuiBadge color="success" iconType="check">
+                    Done
+                  </EuiBadge>
+                </FadeIn>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
@@ -765,6 +791,7 @@ const WhereToAddCard: React.FunctionComponent<{
   const servicesCount = services.length;
   const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
   const isComplete = hostMode === 'new_hosts' && isEnrolled && allReceived;
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     onCompleteChange(isComplete);
@@ -795,7 +822,7 @@ const WhereToAddCard: React.FunctionComponent<{
     >
       <EuiRadioGroup
         options={[
-          { id: 'new_hosts', label: 'New hosts' },
+          { id: 'new_hosts', label: 'New host' },
           { id: 'existing_hosts', label: 'Existing hosts' },
         ]}
         idSelected={hostMode}
@@ -981,11 +1008,15 @@ const WhereToAddCard: React.FunctionComponent<{
           <EuiFormRow label="Agent policies" style={HALF_WIDTH} fullWidth>
             <EuiSelect
               fullWidth
-              options={[{ value: '', text: 'Select an agent policy' }]}
+              options={[{ value: '', text: 'No agent policies available' }]}
               value={existingPolicyId}
               onChange={(e) => setExistingPolicyId(e.target.value)}
               aria-label="Select agent policies to add this integration to"
               data-test-subj="awsOnboardingExistingAgentPolicies"
+              // No real option to select yet — render the "no policies" text
+              // in the same subdued tone as a placeholder, not as if it were
+              // an active, selectable choice.
+              style={!existingPolicyId ? { color: euiTheme.colors.subduedText } : undefined}
             />
           </EuiFormRow>
           <EuiText size="xs" color="subdued">
