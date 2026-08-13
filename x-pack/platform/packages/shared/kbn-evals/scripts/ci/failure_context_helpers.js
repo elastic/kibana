@@ -12,8 +12,8 @@ const { parseMaybeBase64Json, buildOpenrouterConnectorFromVault } = require('./a
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
-// Triage/summary text is always generated with a small, low-cost LiteLLM model.
-const DEFAULT_TRIAGE_MODEL_ID = 'litellm-llm-gateway-claude-haiku-4-5';
+// Triage/summary text is always generated with a small, low-cost OpenRouter model.
+const DEFAULT_TRIAGE_MODEL_ID = 'openrouter-anthropic-claude-haiku-4-5';
 
 const TRIAGE_SYSTEM_PROMPT =
   'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise and factual, and base every statement on the provided context.';
@@ -233,7 +233,7 @@ function buildWeeklyRollupUserPrompt(suites, meta = {}) {
   return lines.join('\n');
 }
 
-function buildLitellmChatRequest(connector, messages) {
+function buildOpenrouterChatRequest(connector, messages) {
   const config = connector.config && typeof connector.config === 'object' ? connector.config : {};
   const secrets =
     connector.secrets && typeof connector.secrets === 'object' ? connector.secrets : {};
@@ -243,7 +243,7 @@ function buildLitellmChatRequest(connector, messages) {
   const apiKey = typeof secrets.apiKey === 'string' ? secrets.apiKey : '';
 
   if (!apiUrl || !defaultModel || !apiKey) {
-    throw new Error('LiteLLM connector is missing apiUrl, defaultModel, or apiKey');
+    throw new Error('OpenRouter connector is missing apiUrl, defaultModel, or apiKey');
   }
 
   return {
@@ -262,16 +262,16 @@ function buildLitellmChatRequest(connector, messages) {
 }
 
 /**
- * Resolve the LiteLLM model used to generate Slack/GitHub triage text.
+ * Resolve the OpenRouter model used to generate Slack/GitHub triage text.
  * override with `EVAL_TRIAGE_MODEL_ID`.
  */
 function resolveTriageModelId() {
   return process.env.EVAL_TRIAGE_MODEL_ID || DEFAULT_TRIAGE_MODEL_ID;
 }
 
-function parseLitellmChatContent(responseJson) {
+function parseOpenrouterChatContent(responseJson) {
   if (!responseJson || typeof responseJson !== 'object') {
-    throw new Error('LiteLLM response was not JSON');
+    throw new Error('OpenRouter response was not JSON');
   }
 
   const choices = /** @type {{ choices?: Array<{ message?: { content?: string } }> }} */ (
@@ -280,16 +280,16 @@ function parseLitellmChatContent(responseJson) {
 
   const content = choices?.[0]?.message?.content;
   if (typeof content !== 'string' || !content.trim()) {
-    throw new Error('LiteLLM response did not include message content');
+    throw new Error('OpenRouter response did not include message content');
   }
 
   return content.trim();
 }
 
 /**
- * POST a built LiteLLM chat request and return the message content.
+ * POST a built OpenRouter chat request and return the message content.
  */
-async function postLitellmChatRequest({ url, headers, body }) {
+async function postOpenrouterChatRequest({ url, headers, body }) {
   const response = await fetch(url, {
     method: 'POST',
     headers,
@@ -317,18 +317,18 @@ async function postLitellmChatRequest({ url, headers, body }) {
     throw new Error('Inference response was not JSON');
   }
 
-  return parseLitellmChatContent(json);
+  return parseOpenrouterChatContent(json);
 }
 
 /**
  * Resolve the triage connector and its model id (shared by the text and
- * structured triage paths). Enforces the `litellm-` guard and falls back to the
+ * structured triage paths). Enforces the `openrouter-` guard and falls back to the
  * vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
  */
 function resolveTriageConnector() {
   const modelId = resolveTriageModelId();
-  if (!modelId.startsWith('litellm-')) {
-    throw new Error(`Unsupported triage model connector id (expected litellm-): ${modelId}`);
+  if (!modelId.startsWith('openrouter-')) {
+    throw new Error(`Unsupported triage model connector id (expected openrouter-): ${modelId}`);
   }
 
   const connector =
@@ -374,7 +374,7 @@ function parseTriageGroups(rawText) {
 }
 
 /**
- * Resolve the LiteLLM connector, send the shared system prompt + the given user
+ * Resolve the OpenRouter connector, send the shared system prompt + the given user
  * prompt, and return the trimmed summary and the model id used. This is the
  * shared core behind the weekly text summary.
  */
@@ -386,7 +386,7 @@ async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
     { role: 'user', content: userPrompt },
   ];
 
-  let summary = await postLitellmChatRequest(buildLitellmChatRequest(connector, messages));
+  let summary = await postOpenrouterChatRequest(buildOpenrouterChatRequest(connector, messages));
   if (summary.length > maxChars) {
     summary = `${summary.slice(0, maxChars - 1)}…`;
   }
@@ -395,7 +395,7 @@ async function runTriageModel(userPrompt, { maxChars = 1500 } = {}) {
 }
 
 /**
- * Resolve the LiteLLM connector, send the shared system prompt + the given user
+ * Resolve the OpenRouter connector, send the shared system prompt + the given user
  * prompt, and return the parsed structured triage groups and the model id used.
  * Used by the per-suite triage, which renders the message deterministically.
  */
@@ -407,7 +407,7 @@ async function runTriageModelStructured(userPrompt) {
     { role: 'user', content: userPrompt },
   ];
 
-  const raw = await postLitellmChatRequest(buildLitellmChatRequest(connector, messages));
+  const raw = await postOpenrouterChatRequest(buildOpenrouterChatRequest(connector, messages));
 
   return { groups: parseTriageGroups(raw), modelId };
 }
@@ -425,9 +425,9 @@ module.exports = {
   buildTriageUserPrompt,
   buildWeeklyRollupUserPrompt,
   extractSuiteRootCauseLine,
-  buildLitellmChatRequest,
-  parseLitellmChatContent,
-  postLitellmChatRequest,
+  buildOpenrouterChatRequest,
+  parseOpenrouterChatContent,
+  postOpenrouterChatRequest,
   resolveTriageConnector,
   parseTriageGroups,
   runTriageModel,
