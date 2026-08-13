@@ -105,9 +105,9 @@ describe('createRuleChangeHistoryAdapter', () => {
       api.getRuleChangeEvent.mockResolvedValueOnce(detail);
       const adapter = createRuleChangeHistoryAdapter(api);
 
-      await expect(
-        adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })
-      ).resolves.toEqual(detail);
+      await expect(adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })).resolves.toEqual(
+        detail
+      );
     });
 
     it('propagates errors', async () => {
@@ -115,9 +115,9 @@ describe('createRuleChangeHistoryAdapter', () => {
       api.getRuleChangeEvent.mockRejectedValueOnce(new Error('nope'));
       const adapter = createRuleChangeHistoryAdapter(api);
 
-      await expect(
-        adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })
-      ).rejects.toThrow('nope');
+      await expect(adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1' })).rejects.toThrow(
+        'nope'
+      );
     });
   });
 });

@@ -342,9 +342,7 @@ describe('RuleDetailPage', () => {
       renderPage(baseRule);
       await openAppMenuOverflow();
 
-      expect(
-        await screen.findByTestId('ruleDetailsViewChangeHistoryButton')
-      ).toBeInTheDocument();
+      expect(await screen.findByTestId('ruleDetailsViewChangeHistoryButton')).toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsRunButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();

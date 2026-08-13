@@ -44,119 +44,125 @@ export const RuleActionsMenu = ({
 
   const viewChangeHistoryItems = onViewChangeHistory
     ? [
-      <EuiContextMenuItem
-        key="viewChangeHistory"
-        icon={<EuiIcon type="clockCounter" size="m" aria-hidden={true} />}
-        onClick={() => {
-          setIsOpen(false);
-          onViewChangeHistory(rule);
-        }}
-        data-test-subj={`viewChangeHistoryRule-${rule.id}`}
-      >
-        {i18n.translate('xpack.alertingV2.rulesList.action.viewChangeHistory', {
-          defaultMessage: 'View change history',
-        })}
-      </EuiContextMenuItem>,
-    ]
+        <EuiContextMenuItem
+          key="viewChangeHistory"
+          icon={<EuiIcon type="clockCounter" size="m" aria-hidden={true} />}
+          onClick={() => {
+            setIsOpen(false);
+            onViewChangeHistory(rule);
+          }}
+          data-test-subj={`viewChangeHistoryRule-${rule.id}`}
+        >
+          {i18n.translate('xpack.alertingV2.rulesList.action.viewChangeHistory', {
+            defaultMessage: 'View change history',
+          })}
+        </EuiContextMenuItem>,
+      ]
     : [];
 
   const menuItems = [
     ...(canWrite
       ? [
-        // Run
-        ...(onRun
-          ? [
-            <EuiContextMenuItem
-              key="run"
-              icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
-              disabled={!rule.enabled}
-              toolTipContent={
-                rule.enabled
-                  ? undefined
-                  : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
-                    defaultMessage: 'Enable the rule to run it',
-                  })
-              }
-              onClick={() => {
-                setIsOpen(false);
-                onRun(rule);
-              }}
-              data-test-subj={`runRule-${rule.id}`}
-            >
-              {i18n.translate('xpack.alertingV2.rulesList.action.run', { defaultMessage: 'Run' })}
-            </EuiContextMenuItem>,
-          ]
-          : []),
-        // Edit
-        <EuiContextMenuItem
-          key="edit"
-          icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-          onClick={() => {
-            setIsOpen(false);
-            onEdit(rule);
-          }}
-          data-test-subj={`editRule-${rule.id}`}
-        >
-          {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
-        </EuiContextMenuItem>,
-        // Clone
-        <EuiContextMenuItem
-          key="clone"
-          icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
-          onClick={() => {
-            setIsOpen(false);
-            onClone(rule);
-          }}
-          data-test-subj={`cloneRule-${rule.id}`}
-        >
-          {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
-        </EuiContextMenuItem>,
-        // View change history
-        ...viewChangeHistoryItems,
-        // Enable/disable
-        ...(onToggleEnabled
-          ? [
-            <EuiContextMenuItem
-              key="toggleEnabled"
-              icon={
-                <EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />
-              }
-              onClick={() => {
-                setIsOpen(false);
-                onToggleEnabled(rule);
-              }}
-              data-test-subj={`toggleEnabledRule-${rule.id}`}
-            >
-              {rule.enabled
-                ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
-                  defaultMessage: 'Disable',
-                })
-                : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
-                  defaultMessage: 'Enable',
-                })}
-            </EuiContextMenuItem>,
-          ]
-          : []),
+          // Run
+          ...(onRun
+            ? [
+                <EuiContextMenuItem
+                  key="run"
+                  icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
+                  disabled={!rule.enabled}
+                  toolTipContent={
+                    rule.enabled
+                      ? undefined
+                      : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
+                          defaultMessage: 'Enable the rule to run it',
+                        })
+                  }
+                  onClick={() => {
+                    setIsOpen(false);
+                    onRun(rule);
+                  }}
+                  data-test-subj={`runRule-${rule.id}`}
+                >
+                  {i18n.translate('xpack.alertingV2.rulesList.action.run', {
+                    defaultMessage: 'Run',
+                  })}
+                </EuiContextMenuItem>,
+              ]
+            : []),
+          // Edit
+          <EuiContextMenuItem
+            key="edit"
+            icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
+            onClick={() => {
+              setIsOpen(false);
+              onEdit(rule);
+            }}
+            data-test-subj={`editRule-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
+          </EuiContextMenuItem>,
+          // Clone
+          <EuiContextMenuItem
+            key="clone"
+            icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
+            onClick={() => {
+              setIsOpen(false);
+              onClone(rule);
+            }}
+            data-test-subj={`cloneRule-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
+          </EuiContextMenuItem>,
+          // View change history
+          ...viewChangeHistoryItems,
+          // Enable/disable
+          ...(onToggleEnabled
+            ? [
+                <EuiContextMenuItem
+                  key="toggleEnabled"
+                  icon={
+                    <EuiIcon
+                      type={rule.enabled ? 'bellSlash' : 'bell'}
+                      size="m"
+                      aria-hidden={true}
+                    />
+                  }
+                  onClick={() => {
+                    setIsOpen(false);
+                    onToggleEnabled(rule);
+                  }}
+                  data-test-subj={`toggleEnabledRule-${rule.id}`}
+                >
+                  {rule.enabled
+                    ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
+                        defaultMessage: 'Disable',
+                      })
+                    : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
+                        defaultMessage: 'Enable',
+                      })}
+                </EuiContextMenuItem>,
+              ]
+            : []),
 
-        // Delete
-        <EuiContextMenuItem
-          key="delete"
-          icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-          onClick={() => {
-            setIsOpen(false);
-            onDelete(rule);
-          }}
-          data-test-subj={`deleteRule-${rule.id}`}
-        >
-          {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-            defaultMessage: 'Delete',
-          })}
-        </EuiContextMenuItem>,
-      ]
+          // Delete
+          <EuiContextMenuItem
+            key="delete"
+            icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
+            onClick={() => {
+              setIsOpen(false);
+              onDelete(rule);
+            }}
+            data-test-subj={`deleteRule-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
+              defaultMessage: 'Delete',
+            })}
+          </EuiContextMenuItem>,
+        ]
       : [
-        // View change history
-        ...viewChangeHistoryItems,
-      ]),
+          // View change history
+          ...viewChangeHistoryItems,
+        ]),
   ];
 
   if (menuItems.length === 0) {

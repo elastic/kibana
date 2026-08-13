@@ -171,13 +171,12 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageSizeOptions,
   };
 
-  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
-    () => {
-      const showActionsColumn = canWrite || onViewChangeHistory;
+  const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
+    const showActionsColumn = canWrite || onViewChangeHistory;
 
-      return [
-        ...(canWrite
-          ? ([
+    return [
+      ...(canWrite
+        ? ([
             {
               field: 'id',
               name: (
@@ -205,176 +204,176 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               ),
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-          : []),
-        {
-          name: '',
-          width: '32px',
-          render: (rule: RuleApiResponse) => (
-            <EuiToolTip
-              content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+        : []),
+      {
+        name: '',
+        width: '32px',
+        render: (rule: RuleApiResponse) => (
+          <EuiToolTip
+            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+              defaultMessage: 'Open rule summary',
+            })}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              color="text"
+              onClick={() => onExpand(rule)}
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
                 defaultMessage: 'Open rule summary',
               })}
-              disableScreenReaderOutput
+              data-test-subj={`expandRule-${rule.id}`}
+            />
+          </EuiToolTip>
+        ),
+      },
+      {
+        field: 'metadata',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
+        ),
+        truncateText: true,
+        sortable: true,
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+          <div>
+            <EuiLink
+              onClick={() => onNavigateToDetails(rule)}
+              data-test-subj={`ruleNameLink-${rule.id}`}
             >
-              <EuiButtonIcon
-                iconType="maximize"
-                color="text"
-                onClick={() => onExpand(rule)}
-                aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                  defaultMessage: 'Open rule summary',
-                })}
-                data-test-subj={`expandRule-${rule.id}`}
-              />
-            </EuiToolTip>
-          ),
+              {metadata?.name ?? rule.id}
+            </EuiLink>
+            {metadata?.description && (
+              <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
+                {metadata.description}
+              </EuiText>
+            )}
+          </div>
+        ),
+      },
+      {
+        field: 'query',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
+        ),
+        width: '18%',
+        truncateText: true,
+        render: (query: RuleApiResponse['query']) => {
+          const source = query
+            ? getIndexPatternFromESQLQuery(getRootEsqlQuery(query)) || undefined
+            : undefined;
+          return source ? (
+            <EuiBadge color="hollow">{source}</EuiBadge>
+          ) : (
+            <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
+          );
         },
-        {
-          field: 'metadata',
-          name: (
-            <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
-          ),
-          truncateText: true,
-          sortable: true,
-          render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
-            <div>
-              <EuiLink
-                onClick={() => onNavigateToDetails(rule)}
-                data-test-subj={`ruleNameLink-${rule.id}`}
-              >
-                {metadata?.name ?? rule.id}
-              </EuiLink>
-              {metadata?.description && (
-                <EuiText size="xs" color="subdued" css={descriptionTextStyle}>
-                  {metadata.description}
-                </EuiText>
-              )}
-            </div>
-          ),
-        },
-        {
-          field: 'query',
-          name: (
-            <FormattedMessage id="xpack.alertingV2.rulesList.column.source" defaultMessage="Source" />
-          ),
-          width: '18%',
-          truncateText: true,
-          render: (query: RuleApiResponse['query']) => {
-            const source = query
-              ? getIndexPatternFromESQLQuery(getRootEsqlQuery(query)) || undefined
-              : undefined;
-            return source ? (
-              <EuiBadge color="hollow">{source}</EuiBadge>
-            ) : (
+      },
+      {
+        field: 'metadata',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
+        ),
+        width: '20%',
+        render: (_metadata: RuleApiResponse['metadata']) => {
+          const tags = _metadata?.tags;
+          if (!tags || tags.length === 0) {
+            return (
               <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
             );
-          },
+          }
+          const overflowCount = tags.length - 1;
+          return (
+            <EuiBadgeGroup
+              gutterSize="xs"
+              css={labelsContainerStyle}
+              data-test-subj="tagsContainer"
+            >
+              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
+                {tags[0]}
+              </EuiBadge>
+              {overflowCount > 0 && (
+                <span css={overflowTooltipStyle}>
+                  <EuiToolTip content={tags.slice(1).join(', ')}>
+                    <EuiBadge
+                      tabIndex={0}
+                      color="hollow"
+                      data-test-subj="overflowTagsBadge"
+                      iconType="tag"
+                      title=""
+                    >
+                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: overflowCount },
+                      })}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </span>
+              )}
+            </EuiBadgeGroup>
+          );
         },
-        {
-          field: 'metadata',
-          name: (
-            <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
-          ),
-          width: '20%',
-          render: (_metadata: RuleApiResponse['metadata']) => {
-            const tags = _metadata?.tags;
-            if (!tags || tags.length === 0) {
-              return (
-                <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-              );
-            }
-            const overflowCount = tags.length - 1;
+      },
+      {
+        field: 'kind',
+        name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+        ),
+        width: '10%',
+        sortable: true,
+        render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
+      },
+      {
+        field: 'enabled',
+        name: (
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.enabled"
+            defaultMessage="Enabled"
+          />
+        ),
+        width: '8%',
+        sortable: true,
+        render: (enabled: boolean, rule: RuleApiResponse) => {
+          if (!canWrite) {
             return (
-              <EuiBadgeGroup
-                gutterSize="xs"
-                css={labelsContainerStyle}
-                data-test-subj="tagsContainer"
+              <EuiBadge
+                color={enabled ? 'success' : 'default'}
+                data-test-subj={`ruleEnabledBadge-${rule.id}`}
               >
-                <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                  {tags[0]}
-                </EuiBadge>
-                {overflowCount > 0 && (
-                  <span css={overflowTooltipStyle}>
-                    <EuiToolTip content={tags.slice(1).join(', ')}>
-                      <EuiBadge
-                        tabIndex={0}
-                        color="hollow"
-                        data-test-subj="overflowTagsBadge"
-                        iconType="tag"
-                        title=""
-                      >
-                        {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                          defaultMessage: '+{count}',
-                          values: { count: overflowCount },
-                        })}
-                      </EuiBadge>
-                    </EuiToolTip>
-                  </span>
+                {enabled ? (
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.column.enabled.enabledBadge"
+                    defaultMessage="Enabled"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.column.enabled.disabledBadge"
+                    defaultMessage="Disabled"
+                  />
                 )}
-              </EuiBadgeGroup>
+              </EuiBadge>
             );
-          },
-        },
-        {
-          field: 'kind',
-          name: (
-            <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
-          ),
-          width: '10%',
-          sortable: true,
-          render: (kind: RuleKind) => <RuleKindBadge kind={kind} />,
-        },
-        {
-          field: 'enabled',
-          name: (
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.column.enabled"
-              defaultMessage="Enabled"
-            />
-          ),
-          width: '8%',
-          sortable: true,
-          render: (enabled: boolean, rule: RuleApiResponse) => {
-            if (!canWrite) {
-              return (
-                <EuiBadge
-                  color={enabled ? 'success' : 'default'}
-                  data-test-subj={`ruleEnabledBadge-${rule.id}`}
-                >
-                  {enabled ? (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.column.enabled.enabledBadge"
-                      defaultMessage="Enabled"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.column.enabled.disabledBadge"
-                      defaultMessage="Disabled"
-                    />
-                  )}
-                </EuiBadge>
-              );
-            }
+          }
 
-            return togglingRuleId === rule.id ? (
-              <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
-            ) : (
-              <EuiSwitch
-                compressed
-                showLabel={false}
-                label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
-                  defaultMessage: 'Enabled: {ruleName}',
-                  values: { ruleName: rule.metadata?.name ?? rule.id },
-                })}
-                checked={enabled}
-                disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
-                onChange={() => onToggleEnabled(rule)}
-                data-test-subj={`ruleEnabledSwitch-${rule.id}`}
-              />
-            );
-          },
+          return togglingRuleId === rule.id ? (
+            <EuiLoadingSpinner data-test-subj={`ruleEnabledSpinner-${rule.id}`} size="m" />
+          ) : (
+            <EuiSwitch
+              compressed
+              showLabel={false}
+              label={i18n.translate('xpack.alertingV2.rulesList.column.enabled.switchLabel', {
+                defaultMessage: 'Enabled: {ruleName}',
+                values: { ruleName: rule.metadata?.name ?? rule.id },
+              })}
+              checked={enabled}
+              disabled={Boolean(togglingRuleId) || Boolean(isBulkTogglingEnabled)}
+              onChange={() => onToggleEnabled(rule)}
+              data-test-subj={`ruleEnabledSwitch-${rule.id}`}
+            />
+          );
         },
-        ...(showActionsColumn
-          ? ([
+      },
+      ...(showActionsColumn
+        ? ([
             {
               name: (
                 <FormattedMessage
@@ -403,9 +402,12 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                           iconType="pencil"
                           color="text"
                           onClick={() => onQuickEdit(rule)}
-                          aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                            defaultMessage: 'Quick edit rule',
-                          })}
+                          aria-label={i18n.translate(
+                            'xpack.alertingV2.rulesList.action.quickEdit',
+                            {
+                              defaultMessage: 'Quick edit rule',
+                            }
+                          )}
                           data-test-subj={`quickEditRule-${rule.id}`}
                         />
                       </EuiToolTip>
@@ -426,37 +428,35 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
               ),
             },
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-          : []),
-      ];
-    },
-    [
-      canWrite,
-      isPageSelected,
-      isRowSelected,
-      onSelectPage,
-      onSelectRow,
-      onNavigateToDetails,
-      onExpand,
-      onQuickEdit,
-      onEdit,
-      onClone,
-      onDelete,
-      onToggleEnabled,
-      onRun,
-      onViewChangeHistory,
-      togglingRuleId,
-      isBulkTogglingEnabled,
-    ]
-  );
+        : []),
+    ];
+  }, [
+    canWrite,
+    isPageSelected,
+    isRowSelected,
+    onSelectPage,
+    onSelectRow,
+    onNavigateToDetails,
+    onExpand,
+    onQuickEdit,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onRun,
+    onViewChangeHistory,
+    togglingRuleId,
+    isBulkTogglingEnabled,
+  ]);
 
   const noItemsMessage =
     search || hasActiveFilters
       ? i18n.translate('xpack.alertingV2.rulesList.noSearchResults', {
-        defaultMessage: 'No rules match your search or filters.',
-      })
+          defaultMessage: 'No rules match your search or filters.',
+        })
       : i18n.translate('xpack.alertingV2.rulesList.noRules', {
-        defaultMessage: 'No rules found.',
-      });
+          defaultMessage: 'No rules found.',
+        });
 
   return (
     <>
