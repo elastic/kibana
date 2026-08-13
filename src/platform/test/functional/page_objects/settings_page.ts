@@ -357,7 +357,10 @@ export class SettingsPageObject extends FtrService {
 
     expect(await this.isOptionChecked(option)).to.be(true);
     await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(false);
+    await this.retry.waitFor(
+      'option to be unchecked',
+      async () => !(await this.isOptionChecked(option))
+    );
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -369,7 +372,7 @@ export class SettingsPageObject extends FtrService {
 
     expect(await this.isOptionChecked(option)).to.be(false);
     await this.testSubjects.click(`selectable-option-${option}`);
-    expect(await this.isOptionChecked(option)).to.be(true);
+    await this.retry.waitFor('option to be checked', async () => this.isOptionChecked(option));
 
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }

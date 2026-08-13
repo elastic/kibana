@@ -250,6 +250,25 @@ describe('UrlFormat', () => {
       expect(url.convertToReact('url')).toBe('url');
     });
 
+    test('risonValue escapes rison delimiters so values survive Kibana app URL templates', () => {
+      const url = new UrlFormat({
+        urlTemplate: "http://elastic.co/app/kibana#/dashboard?_a=(query:'{{risonValue}}')",
+      });
+
+      // identical to how Kibana itself encodes this value in its own URLs
+      expect(url.convertToText("Roady's Jump (Start) *Travel!* Center")).toBe(
+        "http://elastic.co/app/kibana#/dashboard?_a=(query:'Roady!'s%20Jump%20(Start)%20*Travel!!*%20Center')"
+      );
+    });
+
+    test('value stays plain encodeURIComponent-encoded', () => {
+      const url = new UrlFormat({
+        urlTemplate: 'http://elastic.co/?q={{value}}',
+      });
+
+      expect(url.convertToText("Roady's Travel!")).toBe("http://elastic.co/?q=Roady's%20Travel!");
+    });
+
     test('rawValue in url template is not URL-encoded (unlike value)', () => {
       const url = new UrlFormat({
         urlTemplate: 'http://elastic.co/?raw={{rawValue}}&encoded={{value}}',

@@ -69,8 +69,8 @@ steps:
     aggregate-by: 'significant_events'
     create-conversation: true
     public-conversation: true
+    timeout: 1800s
     with:
-      timeout: 1800s
       # Tag the agent execution with the workflow execution id so callers that already know
       # it (e.g. the UI, or the significant event this investigation is attached to) can look
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
@@ -154,6 +154,43 @@ steps:
                         required:
                           - from
                           - to
+                      code:
+                        type: object
+                        description: The source file backing this evidence, when you read code.
+                        properties:
+                          source:
+                            type: string
+                            enum: [github_connector, code_search]
+                            description: >
+                              How YOU read this file — not where the code appears to be hosted.
+                              "code_search" if you read it through Semantic Code Search;
+                              "github_connector" if you called a GitHub connector. A repository
+                              named like a GitHub project is not evidence of either.
+                          repo:
+                            type: string
+                            maxLength: 255
+                            description: Repository in owner/name form, e.g. elastic/kibana.
+                          path:
+                            type: string
+                            maxLength: 512
+                            description: Repository-relative file path.
+                          host:
+                            type: string
+                            maxLength: 255
+                            description: >
+                              Hostname the code can be browsed on, copied from the origin of a URL
+                              the tool returned (e.g. "github.com"). Never guess it from the
+                              repository name — omit it if the tool reported no URL.
+                          ref:
+                            type: string
+                            maxLength: 255
+                            description: >
+                              Commit SHA the file was read at, copied from the tool response. Omit
+                              it rather than substituting a branch name.
+                        required:
+                          - source
+                          - repo
+                          - path
                     required:
                       - description
               required:
@@ -238,6 +275,43 @@ steps:
                             required:
                               - from
                               - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -295,6 +369,43 @@ steps:
                             required:
                               - from
                               - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -355,6 +466,43 @@ steps:
                             required:
                               - from
                               - to
+                          code:
+                            type: object
+                            description: The source file backing this evidence, when you read code.
+                            properties:
+                              source:
+                                type: string
+                                enum: [github_connector, code_search]
+                                description: >
+                                  How YOU read this file — not where the code appears to be hosted.
+                                  "code_search" if you read it through Semantic Code Search;
+                                  "github_connector" if you called a GitHub connector. A repository
+                                  named like a GitHub project is not evidence of either.
+                              repo:
+                                type: string
+                                maxLength: 255
+                                description: Repository in owner/name form, e.g. elastic/kibana.
+                              path:
+                                type: string
+                                maxLength: 512
+                                description: Repository-relative file path.
+                              host:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Hostname the code can be browsed on, copied from the origin of a
+                                  URL the tool returned (e.g. "github.com"). Never guess it from the
+                                  repository name — omit it if the tool reported no URL.
+                              ref:
+                                type: string
+                                maxLength: 255
+                                description: >
+                                  Commit SHA the file was read at, copied from the tool response.
+                                  Omit it rather than substituting a branch name.
+                            required:
+                              - source
+                              - repo
+                              - path
                         required:
                           - description
                   required:
@@ -412,8 +560,8 @@ steps:
     plugin-id: 'significant_events_memory_investigation_gaps'
     aggregate-by: 'significant_events'
     create-conversation: false
+    timeout: 120s
     with:
-      timeout: 120s
       message: |
         Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
 

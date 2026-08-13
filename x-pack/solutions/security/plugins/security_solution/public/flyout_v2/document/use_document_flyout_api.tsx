@@ -21,6 +21,7 @@ import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { cellActionRenderer } from '../shared/components/cell_actions';
 import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link';
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../shared/components/test_ids';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
   useDefaultDocumentFlyoutProperties,
@@ -285,17 +286,21 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   // and child open methods. Only the `session` differs between them, so it is kept private here and
   // callers pick `openDocumentFlyoutFromIndex` (main) or `openDocumentFlyoutFromIndexAsChild` (child).
   const buildFromIndexContent = useCallback(
-    ({
-      documentId,
-      indexName,
-      renderCellActions = cellActionRenderer,
-      onAlertUpdated = noop,
-    }: OpenDocumentFlyoutParams) => (
+    (
+      {
+        documentId,
+        indexName,
+        renderCellActions = cellActionRenderer,
+        onAlertUpdated = noop,
+      }: OpenDocumentFlyoutParams,
+      dataTestSubj?: string
+    ) => (
       <DocumentFlyoutWrapper
         documentId={documentId}
         indexName={indexName}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        dataTestSubj={dataTestSubj}
       />
     ),
     []
@@ -352,7 +357,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
       const onClose = buildOnClose(parentDescriptor);
       open(
-        buildFromIndexContent(params),
+        buildFromIndexContent(params, CHILD_DOCUMENT_FLYOUT_TEST_ID),
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,

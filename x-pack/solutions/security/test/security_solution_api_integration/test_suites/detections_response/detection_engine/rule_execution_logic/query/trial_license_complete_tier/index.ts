@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./custom_query'));
     loadTestFile(require.resolve('./saved_query'));
     loadTestFile(require.resolve('./custom_query_metrics'));
+    loadTestFile(require.resolve('./date_nanos_pagination'));
   });
 }
