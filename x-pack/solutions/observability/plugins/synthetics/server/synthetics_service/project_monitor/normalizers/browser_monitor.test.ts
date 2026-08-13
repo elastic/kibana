@@ -7,6 +7,7 @@
 
 import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
+  ConfigKey,
   MonitorTypeEnum,
   ScreenshotOption,
   LocationStatus,
@@ -17,6 +18,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
+import { getNormalizeBrowserFields } from './browser_monitor';
 import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
@@ -447,35 +449,35 @@ describe('browser normalizers', () => {
     ])(
       'normalizes certificateErrorSpkiAllowlist from $title',
       ({ certificateErrorSpkiAllowlist, expected }) => {
-        const actual = normalizeProjectMonitors({
+        const actual = getNormalizeBrowserFields({
           locations,
           privateLocations,
-          monitors: [
-            {
-              ...monitors[0],
-              certificateErrorSpkiAllowlist,
-            },
-          ],
+          monitor: {
+            ...monitors[0],
+            certificateErrorSpkiAllowlist,
+          },
           projectId,
           namespace: 'test-space',
           version: '8.5.0',
         });
 
-        expect(actual[0].normalizedFields.certificate_error_spki_allowlist).toEqual(expected);
+        expect(actual.normalizedFields[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]).toEqual(
+          expected
+        );
       }
     );
 
     it('defaults certificateErrorSpkiAllowlist when omitted', () => {
-      const actual = normalizeProjectMonitors({
+      const actual = getNormalizeBrowserFields({
         locations,
         privateLocations,
-        monitors: [monitors[1]],
+        monitor: monitors[1],
         projectId,
         namespace: 'test-space',
         version: '8.5.0',
       });
 
-      expect(actual[0].normalizedFields.certificate_error_spki_allowlist).toEqual([]);
+      expect(actual.normalizedFields[ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]).toEqual([]);
     });
   });
 });

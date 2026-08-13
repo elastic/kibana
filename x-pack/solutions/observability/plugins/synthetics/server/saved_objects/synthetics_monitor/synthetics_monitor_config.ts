@@ -39,7 +39,6 @@ export const attributesToIncludeInAAD = new Set([
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.HOSTS,
   ConfigKey.IGNORE_HTTPS_ERRORS,
-  ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
   ConfigKey.MONITOR_SOURCE_TYPE,
   ConfigKey.JOURNEY_FILTERS_MATCH,
   ConfigKey.JOURNEY_FILTERS_TAGS,
