@@ -10,16 +10,17 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { DocumentVersionManager } from './document_version_manager';
 import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
-import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
+
 import type { SharedBulkItem } from '../../lib/shared_bulk';
 import { sharedBulk } from '../../lib/shared_bulk';
 import type {
   BulkItem,
+  BulkItemResponse,
   BulkRequestOptions,
   BulkResponse,
   DataClient,
-  DocumentVersionFields,
   ExecutionsCountRequest,
   ExecutionsDeleteByQueryRequest,
   ExecutionsSearchRequest,
@@ -37,7 +38,7 @@ const notImplemented = (method: string): never => {
 export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
-  versionsCollector?: Map<string, Required<DocumentVersionFields>>;
+  versionManager: DocumentVersionManager;
   additionalIndexesToQuery?: string[];
   dateField: keyof TExecution;
   logger: Logger;
@@ -47,11 +48,9 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   implements DataClient<TExecution>
 {
   private additionalIndexesToQuery: string[];
-  private versionsCollector: Map<string, Required<DocumentVersionFields>> | undefined;
 
   constructor(private readonly deps: DataStreamExecutionsDataAccessDeps<TExecution>) {
     this.additionalIndexesToQuery = deps.additionalIndexesToQuery ?? [];
-    this.versionsCollector = deps.versionsCollector;
   }
 
   public async search(
@@ -69,7 +68,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
 
     searchResponse.hits.hits.forEach((hit) => {
       if (hit._id && hit?._source && hit._seq_no !== undefined && hit._primary_term !== undefined) {
-        this.versionsCollector?.set(hit._id, {
+        this.deps.versionManager.setVersion(hit._id, {
           index: hit._index,
           seqNo: hit._seq_no,
           primaryTerm: hit._primary_term,
@@ -94,62 +93,190 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     ids: (string | { id: string; index: string })[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
-    const resolved = ids.map((id) => {
-      if (typeof id === 'string') {
-        const version = this.versionsCollector?.get(id);
+    if (ids.length === 0) {
+      return { items: [], missing: [] };
+    }
 
+    const stringIds = ids.filter((id): id is string => typeof id === 'string');
+    const cachedVersions =
+      stringIds.length > 0 ? this.deps.versionManager.bulkGetCachedVersions(stringIds) : {};
+    const uncachedStringIds = stringIds.filter((id) => !cachedVersions[id]);
+
+    let backingIndexesForFallback: string[] = [];
+    if (uncachedStringIds.length > 0) {
+      const { backingIndexes } = await this.deps.versionManager.getMeta();
+      backingIndexesForFallback = backingIndexes.slice(-2);
+    }
+
+    // For uncached string ids, add one mget entry per backing index (last two) and
+    // dedup by id taking the first found result — docs may have rolled to older indices.
+    const mgetDocs: Array<{ _index: string; _id: string }> = [];
+    for (const id of ids) {
+      if (typeof id !== 'string') {
+        mgetDocs.push({ _index: id.index, _id: id.id });
+      } else {
+        const version = cachedVersions[id];
         if (version) {
-          return { id, index: version.index };
+          mgetDocs.push({ _index: version.index, _id: id });
+        } else {
+          for (const index of backingIndexesForFallback) {
+            mgetDocs.push({ _index: index, _id: id });
+          }
         }
-
-        return id;
       }
+    }
 
-      return { id: id.id, index: id.index };
-    });
-    const getByIdsResponse = await this.getByIdsInternal(resolved, options);
-    getByIdsResponse.items.forEach((item) => {
-      if (item.seqNo === undefined || item.primaryTerm === undefined) {
-        return;
+    const mgetResponse = await retryTransientEsErrors(
+      () =>
+        this.deps.esClient.mget<TExecution>({
+          docs: mgetDocs,
+          ...(options?.sourceIncludes?.length ? { _source_includes: options.sourceIncludes } : {}),
+          ...(options?.sourceExcludes?.length ? { _source_excludes: options.sourceExcludes } : {}),
+        }),
+      { logger: this.deps.logger }
+    );
+
+    const items: Array<GetExecutionByIdsItem<TExecution>> = [];
+    const foundIds = new Set<string>();
+
+    for (const doc of mgetResponse.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        const docId = doc._id;
+        if (!foundIds.has(docId)) {
+          foundIds.add(docId);
+          items.push({
+            document: doc._source as TExecution,
+            index: doc._index,
+            seqNo: doc._seq_no,
+            primaryTerm: doc._primary_term,
+          });
+          if (doc._seq_no !== undefined && doc._primary_term !== undefined) {
+            this.deps.versionManager.setVersion(docId, {
+              index: doc._index,
+              seqNo: doc._seq_no,
+              primaryTerm: doc._primary_term,
+            });
+          }
+        }
       }
+    }
 
-      this.versionsCollector?.set(item.document.id, {
-        index: item.index,
-        seqNo: item.seqNo,
-        primaryTerm: item.primaryTerm,
+    const allIds = ids.map((id) => (typeof id === 'string' ? id : id.id));
+    const mgetMissing = allIds.filter((id) => !foundIds.has(id));
+
+    if (mgetMissing.length > 0) {
+      const searchResponse = await this.search({
+        query: { ids: { values: mgetMissing } },
+        size: mgetMissing.length,
+        _source_includes: options?.sourceIncludes,
+        _source_excludes: options?.sourceExcludes,
       });
-    });
-    return getByIdsResponse;
+
+      for (const hit of searchResponse.hits.hits) {
+        if (hit._id && hit._source) {
+          foundIds.add(hit._id);
+          items.push({
+            document: hit._source as TExecution,
+            index: hit._index,
+            seqNo: hit._seq_no,
+            primaryTerm: hit._primary_term,
+          });
+        }
+      }
+    }
+
+    return { items, missing: allIds.filter((id) => !foundIds.has(id)) };
   }
 
   public async bulk(request: BulkRequestOptions<TExecution>): Promise<BulkResponse> {
-    // Datastream requires a timestamp field to be present in the document, so we need to assign it before sending the bulk request.
-    // We take it from the document's dateField, which is specified in the deps. If the dateField is not present, we don't assign a timestamp.
-    // startedAt for StepExeucutions and createdAt for WorkflowExecutions are the dateFields that are used to assign the timestamp.
+    if (request.items.length === 0) {
+      return { items: [], errors: false };
+    }
+
+    // Data streams require @timestamp on every document. Derive it from the item's
+    // dateField (createdAt for workflow executions, startedAt for step executions).
     const itemsWithTimestamp = await this.assignTimestampToItems(request.items);
-    const itemsWithVersion = await this.resolveBulkItemVersions(itemsWithTimestamp);
 
-    const bulkResponse = await sharedBulk(
-      this.deps.esClient,
-      {
-        ...request,
-        items: itemsWithVersion,
-      },
-      this.deps.logger
-    );
+    // Tracks an item through retries. originalIndex is its position in request.items
+    // so results can be written back to the correct slot regardless of retries.
+    // remainingRetries mirrors the caller's retryOnConflict budget per item.
+    interface RetryableItem {
+      item: SharedBulkItem<TExecution>;
+      originalIndex: number;
+      remainingRetries: number;
+    }
 
-    bulkResponse.items.forEach((item) => {
-      if (item.error || item.seqNo === undefined || item.primaryTerm === undefined) {
-        return;
+    const result = new Array<BulkItemResponse>(request.items.length);
+    let hasErrors = false;
+
+    const queue: RetryableItem[] = itemsWithTimestamp.map((item, index) => ({
+      item,
+      originalIndex: index,
+      remainingRetries: item.retryOnConflict ?? 0,
+    }));
+
+    // On the first pass use the version cache; on retries bypass the cache so we
+    // always send the seqNo/primaryTerm that ES just wrote.
+    let fetchFreshVersions = false;
+
+    while (queue.length > 0) {
+      // Drain the queue into an immutable batch for this iteration. Any items that
+      // need retrying are pushed back to queue at the end of the loop.
+      const batch = queue.splice(0);
+
+      // resolveBulkItemVersions attaches the backing-index + seqNo + primaryTerm
+      // required by data streams for update/upsert operations. Items whose version
+      // cannot be found become preFailed (update) or are converted to create (upsert).
+      const { sendable, preFailed } = await this.resolveBulkItemVersions(
+        batch.map(({ item }) => item),
+        fetchFreshVersions
+      );
+
+      const esResponse = await sharedBulk(
+        this.deps.esClient,
+        { ...request, items: sendable.map(({ item }) => item) },
+        this.deps.logger
+      );
+
+      const conflicting: RetryableItem[] = [];
+
+      // esResponse.items maps 1:1 to sendable (not to batch). Use sendable[idx].originalIndex
+      // to get the correct batch entry — they diverge when preFailed items are present.
+      esResponse.items.forEach((responseItem, idx) => {
+        const pending = batch[sendable[idx].originalIndex];
+        const isConflict = responseItem.error?.type === 'version_conflict_engine_exception';
+
+        if (isConflict && pending.remainingRetries > 0) {
+          // Re-queue with a decremented budget. The next iteration will fetch a
+          // fresh seqNo/primaryTerm before retrying.
+          conflicting.push({ ...pending, remainingRetries: pending.remainingRetries - 1 });
+        } else {
+          if (responseItem.seqNo !== undefined && responseItem.primaryTerm !== undefined) {
+            this.deps.versionManager.setVersion(responseItem.id, {
+              index: responseItem.index,
+              seqNo: responseItem.seqNo,
+              primaryTerm: responseItem.primaryTerm,
+            });
+          }
+          result[pending.originalIndex] = responseItem;
+          hasErrors = hasErrors || !!responseItem.error;
+        }
+      });
+
+      // preFailed.originalIndex is batch-relative; batch[originalIndex].originalIndex
+      // maps it back to the original request position.
+      preFailed.forEach(({ id, originalIndex, error }) => {
+        result[batch[originalIndex].originalIndex] = { id, error, index: '' };
+      });
+
+      if (conflicting.length > 0) {
+        queue.push(...conflicting);
       }
 
-      this.versionsCollector?.set(item.id, {
-        index: item.index,
-        seqNo: item.seqNo,
-        primaryTerm: item.primaryTerm,
-      });
-    });
-    return bulkResponse;
+      fetchFreshVersions = true;
+    }
+
+    return { items: result, errors: hasErrors };
   }
 
   public async scriptUpdate(_request: ScriptUpdateRequest): Promise<ScriptUpdateResponse> {
@@ -186,176 +313,81 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
     });
   }
 
+  // Classifies each item into sendable or preFailed and attaches the version info
+  // (backing index + seqNo + primaryTerm) required by data streams for CAS writes.
+  //
+  // originalIndex in both output arrays is the position of the item within `items`,
+  // NOT a position in request.items — callers must map through batch[] to get the
+  // true request position.
+  //
+  // `fresh` controls whether version resolution bypasses the in-memory cache:
+  //   false — first pass, use cache then fall back to ES on misses (bulkGetVersions)
+  //   true  — retry pass, always fetch from ES to get the latest seqNo (bulkGetFreshVersions)
   private async resolveBulkItemVersions(
-    items: BulkItem<TExecution>[]
-  ): Promise<SharedBulkItem<TExecution>[]> {
-    const resolved = new Array<SharedBulkItem<TExecution>>(items.length);
+    items: BulkItem<TExecution>[],
+    fresh: boolean
+  ): Promise<{
+    sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }>;
+    preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }>;
+  }> {
+    const sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }> = [];
+    const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
     const pendingIds = new Map<string, number>();
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      const cached = this.versionsCollector?.get(item.document.id);
 
       if (item.operation === 'create') {
-        resolved[i] = { ...item, index: this.deps.dataStreamName };
+        // Creates always target the write index; no version needed.
+        sendable.push({ item: { ...item, index: this.deps.dataStreamName }, originalIndex: i });
       } else if (item.index && item.seqNo !== undefined && item.primaryTerm !== undefined) {
-        resolved[i] = { ...item, index: item.index };
-      } else if (cached) {
-        resolved[i] = { ...item, ...cached };
+        // Caller already supplied explicit version info — send as-is.
+        sendable.push({ item: { ...item }, originalIndex: i });
       } else {
+        // Version must be resolved from cache or ES before this item can be sent.
         pendingIds.set(item.document.id, i);
       }
     }
 
     if (pendingIds.size > 0) {
-      const writeIndex = await this.resolveWriteIndex();
-      const getByIdsResponse = await this.getByIdsInternal(
-        Array.from(pendingIds.keys()),
-        {
-          sourceIncludes: [],
-        },
-        writeIndex
-      );
-      getByIdsResponse.items.forEach((item) => {
-        const i = pendingIds.get(item.document.id);
+      const versions = fresh
+        ? await this.deps.versionManager.bulkGetFreshVersions(Array.from(pendingIds.keys()))
+        : await this.deps.versionManager.bulkGetVersions(Array.from(pendingIds.keys()));
 
-        if (i !== undefined) {
-          resolved[i] = {
-            ...items[i],
-            index: item.index,
-            seqNo: item.seqNo,
-            primaryTerm: item.primaryTerm,
-          };
+      for (const [id, i] of pendingIds) {
+        const version = versions[id];
+
+        if (version) {
+          // upsert with a known version becomes an update (document exists).
+          const operation = items[i].operation === 'upsert' ? 'update' : items[i].operation;
+          sendable.push({
+            item: { ...items[i], operation, ...version },
+            originalIndex: i,
+          });
+        } else {
+          // No version found — document does not exist in the data stream.
+          // upsert without a version becomes a create; plain update has nothing to update.
+          const item = items[i];
+
+          if (item.operation === 'upsert') {
+            sendable.push({
+              item: { ...item, operation: 'create', index: this.deps.dataStreamName },
+              originalIndex: i,
+            });
+          } else {
+            preFailed.push({
+              id,
+              originalIndex: i,
+              error: {
+                type: 'document_missing_exception',
+                reason: `[_doc][${id}]: document missing`,
+              },
+            });
+          }
         }
-      });
-
-      getByIdsResponse.missing.forEach((id) => {
-        const idx = pendingIds.get(id);
-
-        if (idx === undefined) {
-          return;
-        }
-
-        if (items[idx]?.operation === 'upsert') {
-          resolved[idx] = {
-            ...items[idx],
-            operation: 'create',
-            index: this.deps.dataStreamName,
-          };
-        } else if (items[idx]?.operation === 'update') {
-          resolved[idx] = {
-            ...items[idx],
-            index: writeIndex,
-          };
-        }
-      });
-    }
-
-    return resolved;
-  }
-
-  private async resolveWriteIndex(): Promise<string> {
-    const { data_streams: dataStreams } = await retryTransientEsErrors(
-      () =>
-        this.deps.esClient.indices.getDataStream({
-          name: this.deps.dataStreamName,
-        }),
-      { logger: this.deps.logger }
-    );
-
-    const writeIndex = dataStreams[0]?.indices.at(-1)?.index_name;
-    if (!writeIndex) {
-      throw new Error(`No write backing index found for data stream ${this.deps.dataStreamName}`);
-    }
-    return writeIndex;
-  }
-
-  private async getByIdsInternal(
-    ids: (string | { id: string; index: string })[],
-    options?: GetExecutionsByIdsOptions<TExecution>,
-    writeIndex?: string
-  ): Promise<GetExecutionsByIdsResponse<TExecution>> {
-    if (ids.length === 0) {
-      return { items: [], missing: [] };
-    }
-    const idsWithResolvedIndexes: { id: string; index: string }[] = [];
-
-    const map: Map<string, GetExecutionByIdsItem<TExecution> | undefined> = ids.reduce(
-      (acc, id) => {
-        acc.set(typeof id === 'string' ? id : id.id, undefined);
-        return acc;
-      },
-      new Map()
-    );
-
-    let resolvedWriteIndex = writeIndex;
-
-    for (let i = 0; i < ids.length; i++) {
-      const item = ids[i];
-
-      if (typeof item === 'string') {
-        if (!resolvedWriteIndex) {
-          resolvedWriteIndex = await this.resolveWriteIndex();
-        }
-        idsWithResolvedIndexes.push({ id: item, index: resolvedWriteIndex });
-      } else if (item.id && item.index) {
-        idsWithResolvedIndexes.push({ id: item.id, index: item.index });
       }
     }
 
-    const getByIdsResponse = await getExecutionsByIds({
-      esClient: this.deps.esClient,
-      ids: idsWithResolvedIndexes,
-      defaultIndex: this.deps.dataStreamName,
-      options,
-      logger: this.deps.logger,
-    });
-
-    getByIdsResponse.items.forEach((item) => {
-      map.set(item.document.id, item);
-    });
-
-    if (getByIdsResponse.missing.length) {
-      const searchResponse = await this.search({
-        size: getByIdsResponse.missing.length,
-        query: {
-          ids: {
-            values: getByIdsResponse.missing,
-          },
-        },
-        _source_includes: options?.sourceIncludes,
-        _source_excludes: options?.sourceExcludes,
-      });
-
-      searchResponse.hits.hits
-        .filter((hit) => hit?._source)
-        .forEach((hit) => {
-          if (hit._id && hit?._source) {
-            map.set(hit._id, {
-              document: hit._source as TExecution,
-              index: hit._index,
-              seqNo: hit._seq_no,
-              primaryTerm: hit._primary_term,
-            });
-          }
-        });
-    }
-
-    return ids.reduce(
-      (acc, current) => {
-        const id = typeof current === 'string' ? current : current.id;
-        const item = map.get(id);
-        if (item) {
-          acc.items.push(item);
-        } else {
-          acc.missing.push(id);
-        }
-        return acc;
-      },
-      {
-        items: [],
-        missing: [],
-      } as GetExecutionsByIdsResponse<TExecution>
-    );
+    return { sendable, preFailed };
   }
 }

@@ -14,6 +14,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
 } from './constants';
 import { DataStreamExecutionsDataAccess } from './data_stream_executions_data_access';
+import { DocumentVersionManager } from './document_version_manager';
 import {
   DATASTREAM_WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
@@ -21,7 +22,6 @@ import {
 import type {
   CreateDataClientDeps,
   DataClientBundle,
-  DocumentVersionFields,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
@@ -72,7 +72,11 @@ export class DataStreamDataClientBundle implements DataClientBundle {
           new DataStreamExecutionsDataAccess<EsWorkflowExecution>({
             esClient,
             dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
-            versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
+            versionManager: new DocumentVersionManager({
+              esClient,
+              dataStreamName: WORKFLOWS_EXECUTIONS_DATA_STREAM,
+              logger: this.deps.logger,
+            }),
             additionalIndexesToQuery: ['.workflows-executions'],
             logger: this.deps.logger,
             dateField: 'createdAt',
@@ -91,7 +95,11 @@ export class DataStreamDataClientBundle implements DataClientBundle {
           new DataStreamExecutionsDataAccess<EsWorkflowStepExecution>({
             esClient,
             dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-            versionsCollector: new Map<string, Required<DocumentVersionFields>>(),
+            versionManager: new DocumentVersionManager({
+              esClient,
+              dataStreamName: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
+              logger: this.deps.logger,
+            }),
             additionalIndexesToQuery: ['.workflows-step-executions'],
             logger: this.deps.logger,
             dateField: 'startedAt',
