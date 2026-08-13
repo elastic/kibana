@@ -355,4 +355,44 @@ describe('lens document equality', () => {
       )
     ).toBeTruthy();
   });
+
+  it('should consider undefined annotation group props equivalent to non-existant props', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/264301
+    // Undefined properties in annotation groups should be considered equivalent to non-existant properties
+    isLensEqual(
+      defaultDoc,
+      defaultDoc,
+      mockInjectFilterReferences,
+      mockDatasourceMap,
+      mockVisualizationMap,
+      {
+        'group-1': {
+          title: 'title',
+          description: '',
+          tags: [],
+          annotations: [],
+          indexPatternId: 'idx-1',
+          ignoreGlobalFilters: true,
+          dataViewSpec: undefined,
+        },
+      }
+    );
+
+    expect(mockVisualizationMap[visualizationType].isEqual).toHaveBeenCalledWith(
+      defaultDoc.state.visualization,
+      defaultDoc.references,
+      defaultDoc.state.visualization,
+      defaultDoc.references,
+      {
+        'group-1': {
+          title: 'title',
+          description: '',
+          tags: [],
+          annotations: [],
+          indexPatternId: 'idx-1',
+          ignoreGlobalFilters: true,
+        },
+      }
+    );
+  });
 });

@@ -149,7 +149,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   }) => {
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
-    await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
+    await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
 
     // Open the row action menu and swap it for the inline snooze panel.
     await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
@@ -172,7 +172,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   }) => {
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
-    await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
+    await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
 
     await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
@@ -194,7 +194,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   }) => {
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
-    await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
+    await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
 
     await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
@@ -220,7 +220,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
   }) => {
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
-    await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
+    await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
 
     await pageObjects.ruleDetailsPage.openAlertSnoozePanel();
     await expect(page.testSubj.locator('alertSnoozePanel')).toBeVisible();
@@ -256,7 +256,7 @@ test.describe('Per-alert snooze (rule details alerts tab)', { tag: tags.stateful
 
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
     await pageObjects.ruleDetailsPage.expectAlertsTabLoaded();
-    await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
+    await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
 
     // The badge should already be visible because the rule SO has a snoozed instance.
     await expect(page.testSubj.locator('alertSnoozedBadge')).toBeVisible();
